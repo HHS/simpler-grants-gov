@@ -1,0 +1,53 @@
+{
+  "name": "Quad Deliverables",
+  "display": "table",
+  "visualization_settings": {
+    "table.pivot_column": "quad_id",
+    "table.cell_column": "d_effective"
+  },
+  "template_tags": {
+    "quad": {
+      "widget-type": "string/=",
+      "default": [
+        "Quad 3"
+      ],
+      "name": "quad",
+      "type": "dimension",
+      "id": "62e5d725-f378-498f-90a0-5afba9eee4f3",
+      "dimension": [
+        "field",
+        310,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Quad",
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_quad",
+        "column": "name"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "id": "62e5d725-f378-498f-90a0-5afba9eee4f3",
+      "type": "string/=",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "quad"
+        ]
+      ],
+      "name": "Quad",
+      "slug": "quad",
+      "default": [
+        "Quad 3"
+      ],
+      "required": true
+    }
+  ]
+}

@@ -5,16 +5,15 @@ const makeAttachment = (
   file_name: string,
   file_size_bytes: number,
   updated_at: string,
-): Attachment =>
-  ({
-    application_attachment_id: `id-${file_name}`,
-    created_at: "2024-01-01T00:00:00Z",
-    file_name,
-    file_size_bytes,
-    mime_type: "application/pdf",
-    updated_at,
-    download_path: `/download/${file_name}`,
-  }) as Attachment;
+): Attachment => ({
+  application_attachment_id: `id-${file_name}`,
+  created_at: "2024-01-01T00:00:00Z",
+  file_name,
+  file_size_bytes,
+  mime_type: "application/pdf",
+  updated_at,
+  download_path: `/download/${file_name}`,
+});
 
 const fixtures: Attachment[] = [
   makeAttachment("c.pdf", 1024, "2024-03-01T00:00:00Z"),

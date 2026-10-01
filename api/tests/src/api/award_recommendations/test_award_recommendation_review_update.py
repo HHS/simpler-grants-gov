@@ -43,8 +43,6 @@ def award_recommendation(opportunity):
         award_recommendation_status=AwardRecommendationStatus.DRAFT,
         award_selection_method=AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY,
         is_deleted=False,
-        review_workflow=None,
-        review_workflow_id=None,
     )
 
 
@@ -98,8 +96,6 @@ class TestUpdateAwardRecommendationReview200:
         ar = AwardRecommendationFactory.create(
             opportunity=opportunity,
             is_deleted=False,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         rev = AwardRecommendationReviewFactory.create(
             award_recommendation=ar,
@@ -210,8 +206,6 @@ class TestUpdateAwardRecommendationReview404:
         ar = AwardRecommendationFactory.create(
             opportunity=opportunity,
             is_deleted=True,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         rev = AwardRecommendationReviewFactory.create(award_recommendation=ar)
 

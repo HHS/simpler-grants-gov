@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 
 import flask
 import jwt
-from grants_shared.adapters.oauth.oauth_client_models import OauthTokenResponse
 
+from src.adapters.oauth.oauth_client_models import OauthTokenResponse
 from src.auth.login_gov_jwt_auth import get_config
 
 
@@ -119,6 +119,35 @@ def mock_oauth_endpoint(app, monkeypatch, private_key, mock_oauth_client):
         return mock_oauth_client
 
     monkeypatch.setattr(
-        "grants_shared.services.users.login_gov_callback_handler.get_login_gov_client",
+        "src.services.users.login_gov_callback_handler_base.get_login_gov_client",
         override_get_client,
     )
+
+
+def mock_oauth_logout_endpoint(app):
+    """
+    Mock out the logout endpoint for oauth for unit tests.
+
+    Primarily just redirects back to our callback endpoint
+    as there's no actual state checked on the other side.
+    """
+
+    @app.get("/test-endpoint/oauth-logout")
+    def oauth_logout():
+        # This endpoint represents a mocked version of
+        # https://developers.login.gov/oidc/logout/
+        # and needs to return the state value back.
+        query_args = flask.request.args
+        params = {"state": query_args.get("state")}
+
+        encoded_params = urllib.parse.urlencode(params)
+        redirect_uri = f"{query_args['post_logout_redirect_uri']}?{encoded_params}"
+
+        return flask.redirect(redirect_uri)
+
+    @app.get("/test-endpoint/oauth-logout-result")
+    def logout_result() -> flask.Response:
+        """Dummy endpoint for easily displaying the results of the logout flow"""
+
+        # Echo back the query args as JSON
+        return flask.jsonify(flask.request.args)

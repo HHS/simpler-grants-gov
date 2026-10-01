@@ -20,6 +20,9 @@ module "dms_networking" {
   our_vpc_id                   = module.network.vpc_id
   our_cidr_block               = module.network.vpc_cidr
   grants_gov_oracle_cidr_block = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
+
+  # When set, the Oracle CIDR routes via this transit gateway instead of the VPC peering.
+  transit_gateway_id = try(module.project_config.network_configs[var.environment_name].dms_transit_gateway_id, null)
 }
 
 # Adding count above turns module.dms_networking into module.dms_networking[0]. This

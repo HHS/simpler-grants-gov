@@ -2,11 +2,9 @@ import logging
 import uuid
 from collections.abc import Sequence
 
-from grants_shared.adapters.aws import S3Config
-from grants_shared.util import file_util
-
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
+from src.adapters.aws import S3Config
 from src.data_migration.transformation.subtask.abstract_transform_subtask import (
     AbstractTransformSubTask,
 )
@@ -16,6 +14,7 @@ from src.services.competition_alpha.competition_instruction_util import (
     get_s3_competition_instruction_path,
 )
 from src.task.task import Task
+from src.util import file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -139,7 +138,7 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
 
         The following scenarios are accounted for (order matters / mutually exclusive)
         1. Deleting an instruction record - includes cleaning up s3
-        2. Erroring if the competition does not exist
+        2. Flagging the instruction as orphaned if the competition does not exist
         3. Skipping instructions missing legacy_package_id or extension (required for generating a filename)
         4. Handling inserts / updates
 
@@ -171,10 +170,21 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
         # Null Competition
         ##########
         elif competition is None:
-            # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
-            # we'll make sure the opportunity actually exists
-            raise ValueError(
-                "Opportunity instruction cannot be processed as the competition for it does not exist"
+            # Competition, like assistance listing, has bad foreign keys in the legacy data -
+            # there's no real FK from tinstructions.comp_id to tcompetition. When the competition
+            # doesn't exist we flag the instruction as orphaned (mirroring transform_competition)
+            # rather than erroring, so transformed_at is still set and we don't re-error forever.
+            self.increment(
+                transform_constants.Metrics.TOTAL_RECORDS_ORPHANED,
+                prefix=transform_constants.COMPETITION_INSTRUCTION,
+            )
+            logger.info(
+                "Competition instruction is orphaned and does not connect to any competition",
+                extra=extra,
+            )
+            # transformed_at is added after the else below
+            source_instruction.transformation_notes = (
+                transform_constants.ORPHANED_COMPETITION_INSTRUCTION
             )
 
         ##########

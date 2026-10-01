@@ -141,9 +141,9 @@ To enable this auth for a given endpoint, add `api_jwt_auth` to the auth require
 of your endpoint. Additionally, you can fetch the user token session object from the auth.
 
 ```py
-from grants_shared.adapters import db
-from grants_shared.adapters.db import flask_db
-from grants_shared.api import response
+from src.adapters import db
+from src.adapters.db import flask_db
+from src.api import response
 from src.auth.api_jwt_auth import api_jwt_auth
 
 @example_blueprint.post("/my-example")
@@ -175,9 +175,9 @@ If you want to add JWT + User API Key auth to your endpoint simply do:
 ```python
 from typing import cast
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-import grants_shared.api.response as response
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
+import src.api.response as response
 
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 
@@ -200,3 +200,42 @@ def my_example_endpoint(db_session: db.Session) -> response.ApiResponse:
     return response.ApiResponse(message="Success", data=result)
 ```
 
+## Logout
+
+Logout will log you out of both our system by invalidating your
+JWT token obtained during login, as well as logging you out of
+login.gov. Our logout process works even if you provide no
+token, or your current token is invalid in order to ensure that
+if you want to logout, we'll always try to do as much as we can
+and log you out of login.gov.
+
+If a user is already fully logged out of both systems, logout
+will still work, and a user will be redirected through the flow
+although nothing will happen.
+
+### Logout Flow
+```mermaid
+sequenceDiagram
+    autonumber
+    participant frontend
+    participant api
+    participant login.gov
+
+    frontend->>+api: user clicks logout
+    Note over api: /users/logout
+
+    opt If token provided
+        Note over api: Invalidate JWT token
+    end
+
+    api->>-login.gov: redirect
+    activate login.gov
+    Note over login.gov: /logout
+    login.gov->>+api: redirect
+    deactivate login.gov
+
+    Note over api: /users/logout/callback
+
+    api->>-frontend: redirect
+    Note over frontend: /logout
+  ```

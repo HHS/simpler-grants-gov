@@ -21,6 +21,7 @@ from src.form_schema.forms import (
     SF424b_v1_1,
     SF424c_v2_0,
     SF424d_v1_1,
+    SF424Short_v3_0,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
 )
@@ -67,6 +68,11 @@ def validate_max_length(data, expected_fields_to_error: list[str], form: Form):
 @pytest.fixture(scope="session")
 def sf424_v4_0():
     return setup_resolved_form(SF424_v4_0)
+
+
+@pytest.fixture(scope="session")
+def sf424_short_v3_0():
+    return setup_resolved_form(SF424Short_v3_0)
 
 
 @pytest.fixture(scope="session")

@@ -37,15 +37,12 @@ type NextResponseModuleMock = {
   };
 };
 
-jest.mock(
-  "next/server",
-  (): NextResponseModuleMock => ({
-    NextResponse: {
-      json: (body: unknown, init?: JsonResponseInit) =>
-        nextResponseJsonMock(body, init),
-    },
-  }),
-);
+jest.mock("next/server", (): NextResponseModuleMock => ({
+  NextResponse: {
+    json: (body: unknown, init?: JsonResponseInit) =>
+      nextResponseJsonMock(body, init),
+  },
+}));
 
 jest.mock("src/services/fetch/fetchers/addOrganizationToApplication", () => ({
   addOrganizationToApplication: (args: {

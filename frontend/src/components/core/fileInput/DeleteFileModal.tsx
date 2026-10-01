@@ -38,9 +38,12 @@ export const DeleteFileModal = ({
           ? `${t("titleText")} ${pendingDeleteName}?`
           : t("cautionDeletingAttachment")
       }
+      descriptionId={`${modalId}-description`}
       className="text-wrap"
     >
-      <p className="font-sans-2xs margin-y-4">{t("descriptionText")}</p>
+      <p id={`${modalId}-description`} className="font-sans-2xs margin-y-4">
+        {t("descriptionText")}
+      </p>
       <ModalFooter>
         <ButtonGroup>
           <Button

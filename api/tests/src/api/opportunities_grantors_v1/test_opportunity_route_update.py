@@ -1,8 +1,10 @@
 import uuid
 
 import pytest
+from sqlalchemy import select
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
+from src.db.models.opportunity_models import OpportunityAudit
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import OpportunityFactory
 
@@ -26,7 +28,9 @@ def existing_opportunity(grantor_auth_data, enable_factory_create):
     )
 
 
-def test_opportunity_update_200_full_update(client, grantor_auth_data, existing_opportunity):
+def test_opportunity_update_200_full_update(
+    client, db_session, grantor_auth_data, existing_opportunity
+):
     """Test updating all updatable fields"""
     _, _, token, _ = grantor_auth_data
 
@@ -46,6 +50,19 @@ def test_opportunity_update_200_full_update(client, grantor_auth_data, existing_
     assert data["data"]["opportunity_title"] == "Updated Title"
     assert data["data"]["category"] == "discretionary"
     assert data["data"]["category_explanation"] == "Updated explanation"
+
+    audit_rows = (
+        db_session.execute(
+            select(OpportunityAudit).where(
+                OpportunityAudit.opportunity_id == existing_opportunity.opportunity_id
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(audit_rows) == 1
+    assert audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.OPPORTUNITY_UPDATED
+    assert audit_rows[0].opportunity_data is not None
 
 
 def test_opportunity_update_200_api_key_auth(client, grantor_auth_data, existing_opportunity):

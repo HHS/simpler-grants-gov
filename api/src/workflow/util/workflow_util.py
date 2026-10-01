@@ -6,8 +6,7 @@ workflow logic.
 import logging
 import uuid
 
-from grants_shared.adapters.aws.ses_adapter import send_email
-
+from src.adapters.aws.local_email_adapter import send_email_to_address
 from src.db.models.user_models import User
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
@@ -43,10 +42,11 @@ def send_workflow_email(
 
     try:
         logger.info("Sending email for workflow", extra=log_extra)
-        send_email(
+        send_email_to_address(
             to_address=user.email,
             subject=subject,
             message=message,
+            trace_id=trace_id,
         )
 
     except Exception:

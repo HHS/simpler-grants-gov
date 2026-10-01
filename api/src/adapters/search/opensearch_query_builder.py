@@ -1,7 +1,7 @@
 import datetime
 import typing
 
-from grants_shared.pagination.pagination_models import SortDirection
+from src.pagination.pagination_models import SortDirection
 
 
 class SearchQueryBuilder:
@@ -169,6 +169,34 @@ class SearchQueryBuilder:
                     "query": query,
                     "fields": fields,
                     "default_operator": query_operator,
+                }
+            }
+        )
+
+        return self
+
+    def filter_match_bool_prefix(
+        self, query: str, fields: list[str], query_operator: str
+    ) -> typing.Self:
+        """
+        Adds a multi_match bool_prefix query which queries against the provided fields.
+
+        Every term is analyzed the same way the index was, and the final term is matched
+        as a prefix, which makes this a good fit for search-as-you-type.
+
+        This goes in the filter block, so it acts as a binary filter and does not affect
+        scoring. Use it when results are sorted by a field rather than by relevancy.
+
+        See: https://docs.opensearch.org/latest/query-dsl/full-text/match-bool-prefix/
+        and: https://docs.opensearch.org/latest/query-dsl/full-text/multi-match/
+        """
+        self.filters.append(
+            {
+                "multi_match": {
+                    "query": query,
+                    "fields": fields,
+                    "type": "bool_prefix",
+                    "operator": query_operator,
                 }
             }
         )

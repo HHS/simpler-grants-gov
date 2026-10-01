@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import SearchPagination from "src/app/[locale]/(base)/search/_components/SearchPagination";
 import {
@@ -6,8 +7,6 @@ import {
   mockUpdateTotalPages,
   mockUpdateTotalResults,
 } from "src/utils/testing/providerMocks";
-
-import React from "react";
 
 const mockUpdateQueryParams = jest.fn();
 
@@ -53,7 +52,6 @@ describe("SearchPagination", () => {
     expect(screen.getByRole("navigation")).toBeInTheDocument();
   });
   it("Does not render Pagination component when pages <= 0", () => {
-    // fakeTotalPages = "0";
     render(
       <FakeQueryProvider totalPages="0">
         <SearchPagination page={1} query={"test"} totalPages={0} />
@@ -215,7 +213,7 @@ describe("SearchPagination", () => {
     expect(mockUpdateTotalResults).not.toHaveBeenCalled();
   });
 
-  it("updates page state on clicks as expected", () => {
+  it("updates page state on clicks as expected", async () => {
     const { rerender } = render(
       <FakeQueryProvider>
         <SearchPagination
@@ -226,9 +224,14 @@ describe("SearchPagination", () => {
         />
       </FakeQueryProvider>,
     );
-    const pageNumberButton = screen.queryByLabelText("Page 2");
-    pageNumberButton?.click();
-    expect(mockUpdateQueryParams).toHaveBeenCalledTimes(1);
+    const pageNumberButton = screen.getByRole("button", {
+      name: "Last page, page 2",
+    });
+    expect(pageNumberButton).toBeInTheDocument();
+    await userEvent.click(pageNumberButton);
+    await waitFor(() => {
+      expect(mockUpdateQueryParams).toHaveBeenCalledTimes(1);
+    });
     expect(mockUpdateQueryParams).toHaveBeenCalledWith(
       "2",
       "page",
@@ -246,7 +249,7 @@ describe("SearchPagination", () => {
         />
       </FakeQueryProvider>,
     );
-    const previousButton = screen.queryByLabelText("Previous page");
+    const previousButton = screen.getByLabelText("Previous page");
     previousButton?.click();
 
     expect(mockUpdateQueryParams).toHaveBeenCalledTimes(2);

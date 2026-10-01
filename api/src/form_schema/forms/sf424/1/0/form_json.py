@@ -561,7 +561,7 @@ FORM_UI_SCHEMA = [
         "children": [
             {"type": "field", "definition": "/properties/organization_name"},
             {"type": "field", "definition": "/properties/employer_taxpayer_identification_number"},
-            {"type": "field", "definition": "/properties/sam_uei"},
+            {"type": "null", "definition": "/properties/sam_uei"},
             {"type": "field", "definition": "/properties/applicant/properties/street1"},
             {"type": "field", "definition": "/properties/applicant/properties/street2"},
             {"type": "field", "definition": "/properties/applicant/properties/city"},
@@ -616,15 +616,15 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "name": "federal_agency",
         "label": "10. Name of Federal Agency",
-        "children": [{"type": "field", "definition": "/properties/agency_name"}],
+        "children": [{"type": "null", "definition": "/properties/agency_name"}],
     },
     {
         "type": "section",
         "name": "assistance_listing",
         "label": "11. Assistance Listing Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/assistance_listing_number"},
-            {"type": "field", "definition": "/properties/assistance_listing_program_title"},
+            {"type": "null", "definition": "/properties/assistance_listing_number"},
+            {"type": "null", "definition": "/properties/assistance_listing_program_title"},
         ],
     },
     {
@@ -632,8 +632,8 @@ FORM_UI_SCHEMA = [
         "name": "funding_opportunity",
         "label": "12. Funding Opportunity Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/funding_opportunity_number"},
-            {"type": "field", "definition": "/properties/funding_opportunity_title"},
+            {"type": "null", "definition": "/properties/funding_opportunity_number"},
+            {"type": "null", "definition": "/properties/funding_opportunity_title"},
         ],
     },
     {
@@ -641,8 +641,8 @@ FORM_UI_SCHEMA = [
         "name": "competition_identification",
         "label": "13. Competition Identification Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/competition_identification_number"},
-            {"type": "field", "definition": "/properties/competition_identification_title"},
+            {"type": "null", "definition": "/properties/competition_identification_number"},
+            {"type": "null", "definition": "/properties/competition_identification_title"},
         ],
     },
     {
@@ -918,6 +918,18 @@ FORM_XML_TRANSFORM_RULES = {
                 "source_field": "applicant_type_code",
                 "target_pattern": "ApplicantTypeCode{index}",
                 "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+                # Normalize legacy casing: option H was stored with lowercase "state"
+                # but the XSD requires capital "State".
+                # passthrough_unknown=True leaves all other option codes unchanged.
+                "item_value_transform": {
+                    "type": "map_values",
+                    "params": {
+                        "mappings": {
+                            "H: Public/state Controlled Institution of Higher Education": "H: Public/State Controlled Institution of Higher Education",
+                        },
+                        "passthrough_unknown": True,
+                    },
+                },
             },
         }
     },
@@ -934,13 +946,20 @@ FORM_XML_TRANSFORM_RULES = {
     "competition_identification_title": {
         "xml_transform": {"target": "CompetitionIdentificationTitle"}
     },
+    # Attachment placeholders below map a field to itself only to reserve its XSD
+    # sequence position; the attachment transformer emits the actual element.
+    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
     # Project information - direct field mappings
     "project_title": {"xml_transform": {"target": "ProjectTitle"}},
+    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
     "congressional_district_applicant": {
         "xml_transform": {"target": "CongressionalDistrictApplicant"}
     },
     "congressional_district_program_project": {
         "xml_transform": {"target": "CongressionalDistrictProgramProject"}
+    },
+    "additional_congressional_districts": {
+        "xml_transform": {"target": "additional_congressional_districts"}
     },
     "project_start_date": {"xml_transform": {"target": "ProjectStartDate"}},
     "project_end_date": {"xml_transform": {"target": "ProjectEndDate"}},
@@ -993,6 +1012,19 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "StateReview",
             "null_handling": "default_value",
             "default_value": NO_VALUE,  # Use constant from value_transformers
+            # Normalize legacy casing: form enum and stored values use lowercase "state",
+            # but the XSD requires capital "State" in options a and b.
+            # passthrough_unknown=True ensures option c (and any future values) pass through unchanged.
+            "value_transform": {
+                "type": "map_values",
+                "params": {
+                    "mappings": {
+                        "a. This application was made available to the state under the Executive Order 12372 Process for review on": "a. This application was made available to the State under the Executive Order 12372 Process for review on",
+                        "b. Program is subject to E.O. 12372 but has not been selected by the state for review.": "b. Program is subject to E.O. 12372 but has not been selected by the State for review.",
+                    },
+                    "passthrough_unknown": True,
+                },
+            },
         }
     },
     "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
@@ -1002,13 +1034,7 @@ FORM_XML_TRANSFORM_RULES = {
             "value_transform": {"type": "boolean_to_yes_no"},
         }
     },
-    # Attachment fields - pass through as-is for attachment transformer
     "debt_explanation": {"xml_transform": {"target": "debt_explanation"}},
-    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
-    "additional_congressional_districts": {
-        "xml_transform": {"target": "additional_congressional_districts"}
-    },
-    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
     "certification_agree": {
         "xml_transform": {
             "target": "CertificationAgree",

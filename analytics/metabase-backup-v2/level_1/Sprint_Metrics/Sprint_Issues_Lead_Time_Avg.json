@@ -1,0 +1,125 @@
+{
+  "name": "Sprint Issues Lead Time Avg",
+  "display": "scalar",
+  "visualization_settings": {
+    "scalar.segments": [],
+    "column_settings": {
+      "[\"name\",\"average_lead_time_days\"]": {
+        "suffix": " days"
+      }
+    }
+  },
+  "template_tags": {
+    "sprint_name": {
+      "widget-type": "string/contains",
+      "default": null,
+      "name": "sprint_name",
+      "type": "dimension",
+      "id": "eec84556-0c51-4204-a5d9-6b309de3e68f",
+      "dimension": [
+        "field",
+        318,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Sprint Name",
+      "options": {
+        "case-sensitive": false
+      },
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_sprint",
+        "column": "name"
+      }
+    },
+    "project_ghid": {
+      "widget-type": "string/=",
+      "default": null,
+      "name": "project_ghid",
+      "type": "dimension",
+      "id": "d392fb0d-3031-46b8-910b-68acfd68a5e9",
+      "dimension": [
+        "field",
+        302,
+        {
+          "base-type": "type/Integer",
+          "effective-type": "type/Integer"
+        }
+      ],
+      "display-name": "Project",
+      "options": null,
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_project",
+        "column": "ghid"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "slug": "sprint_name",
+      "values_query_type": "list",
+      "default": null,
+      "name": "Sprint Name",
+      "isMultiSelect": true,
+      "type": "string/contains",
+      "values_source_type": "card",
+      "id": "eec84556-0c51-4204-a5d9-6b309de3e68f",
+      "options": {
+        "case-sensitive": false
+      },
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "sprint_name"
+        ]
+      ],
+      "values_source_config": {
+        "card_id": 152,
+        "value_field": [
+          "field",
+          "sprint_name",
+          {
+            "base-type": "type/Text"
+          }
+        ]
+      },
+      "required": true
+    },
+    {
+      "slug": "project_ghid",
+      "default": null,
+      "name": "Project",
+      "isMultiSelect": true,
+      "type": "string/=",
+      "values_source_type": "static-list",
+      "id": "d392fb0d-3031-46b8-910b-68acfd68a5e9",
+      "options": null,
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "project_ghid"
+        ]
+      ],
+      "values_source_config": {
+        "values": [
+          [
+            "17",
+            "Product & Delivery"
+          ],
+          [
+            "13",
+            "Simpler.Grants.gov"
+          ]
+        ]
+      },
+      "required": true
+    }
+  ]
+}

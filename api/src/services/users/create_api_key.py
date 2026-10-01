@@ -1,7 +1,6 @@
 from uuid import UUID
 
-from grants_shared.adapters import db
-
+from src.adapters import db
 from src.auth.api_key_handler import SimplerApiKeyHandler
 from src.db.models.user_models import UserApiKey
 

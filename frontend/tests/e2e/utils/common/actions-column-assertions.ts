@@ -48,7 +48,7 @@ export const assertActionsColumnLinksByStatus = async (
   );
 
   const statusCell = row
-    .locator('td [data-testid^="responsive-data-"][data-testid$="-2"]')
+    .locator('td [data-testid^="responsive-data-"][data-testid$="-4"]')
     .first();
 
   if ((await statusCell.count()) > 0) {

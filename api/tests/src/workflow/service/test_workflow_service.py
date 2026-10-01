@@ -112,7 +112,7 @@ def test_is_event_valid_for_workflow(event, state_machine_cls, expected_is_valid
 
 
 def test_get_workflow(db_session, enable_factory_create):
-    workflow = WorkflowFactory.create()
+    workflow = WorkflowFactory.create(workflow_type=WorkflowType.BASIC_TEST_WORKFLOW)
 
     fetched_workflow = get_and_validate_workflow(db_session, workflow.workflow_id)
     assert fetched_workflow.workflow_id == workflow.workflow_id
@@ -124,7 +124,9 @@ def test_get_workflow_not_found(db_session):
 
 
 def test_get_workflow_is_not_active(db_session, enable_factory_create):
-    workflow = WorkflowFactory.create(is_active=False)
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, is_active=False
+    )
 
     with pytest.raises(InactiveWorkflowError, match="Workflow is not active"):
         get_and_validate_workflow(db_session, workflow.workflow_id)

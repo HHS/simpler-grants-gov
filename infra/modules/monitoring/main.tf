@@ -86,8 +86,8 @@ resource "aws_cloudwatch_metric_alarm" "service_errors" {
 resource "aws_cloudwatch_log_metric_filter" "service_error_filter" {
 
   name           = "service-error-filter"
-  pattern        = "%ERROR | Exception%"         # pattern can find events in unstructured logs
-  log_group_name = "service/${var.service_name}" # cloudwatch log group for the ecs service
+  pattern        = "%ERROR | Exception%"
+  log_group_name = var.application_log_group
 
   metric_transformation {
     name      = "ErrorCount"
@@ -115,4 +115,3 @@ resource "aws_sns_topic_subscription" "incident_management_service_integration" 
   protocol               = "https"
   topic_arn              = aws_sns_topic.this.arn
 }
-

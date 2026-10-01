@@ -2,24 +2,28 @@ import logging
 from enum import StrEnum
 from typing import cast
 
-from grants_shared.adapters.aws import S3Config
-from grants_shared.util import file_util
 from sqlalchemy import select
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
+from src.adapters.aws import S3Config
 from src.data_migration.transformation.subtask.abstract_transform_subtask import (
     AbstractTransformSubTask,
 )
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
+from src.db.models.opportunity_models import (
+    Opportunity,
+    OpportunityAttachment,
+    OpportunityIndexDeleteQueue,
+)
 from src.db.models.staging.opportunity import Topportunity
 from src.services.competition_alpha.competition_instruction_util import (
     get_s3_competition_instruction_path,
 )
 from src.services.opportunity_attachments import attachment_util
 from src.task.task import Task
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +77,14 @@ class TransformOpportunity(AbstractTransformSubTask):
         logger.info("Processing opportunity", extra=extra)
 
         if source_opportunity.is_deleted:
+            # Queue the opportunity for removal from the search index before the DB row
+            # is deleted.
+            if target_opportunity is not None:
+                logger.info("Queuing opportunity for search index removal", extra=extra)
+                self.db_session.add(
+                    OpportunityIndexDeleteQueue(opportunity_id=target_opportunity.opportunity_id)
+                )
+
             self._handle_delete(
                 source_opportunity,
                 target_opportunity,

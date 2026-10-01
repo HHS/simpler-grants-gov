@@ -123,6 +123,64 @@ class TestApplyConditionalTransform:
         result = apply_conditional_transform(transform_config, source_data, field_path)
         assert result is None
 
+    def test_one_to_many_item_value_transform(self):
+        """Test that item_value_transform is applied to each array item.
+
+        This is used to normalize legacy casing bugs in stored enum values
+        (e.g. 'Public/state' → 'Public/State') without a data migration.
+        """
+        transform_config = {
+            "type": "one_to_many",
+            "source_field": "applicant_type_code",
+            "target_pattern": "ApplicantTypeCode{index}",
+            "max_count": 3,
+            "item_value_transform": {
+                "type": "map_values",
+                "params": {
+                    "mappings": {
+                        "H: Public/state Controlled Institution of Higher Education": "H: Public/State Controlled Institution of Higher Education",
+                    },
+                    "passthrough_unknown": True,
+                },
+            },
+        }
+        source_data = {
+            "applicant_type_code": [
+                "H: Public/state Controlled Institution of Higher Education",
+                "A: State Government",
+            ]
+        }
+        field_path = ["applicant_type_code_mapping"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+        assert result == {
+            # Option H: legacy lowercase normalized to XSD-required uppercase
+            "ApplicantTypeCode1": "H: Public/State Controlled Institution of Higher Education",
+            # Option A: not in mappings, passed through unchanged
+            "ApplicantTypeCode2": "A: State Government",
+        }
+
+    def test_one_to_many_item_value_transform_single_value(self):
+        """Test item_value_transform is applied to single (non-array) source value."""
+        transform_config = {
+            "type": "one_to_many",
+            "source_field": "applicant_type_code",
+            "target_pattern": "ApplicantTypeCode{index}",
+            "max_count": 3,
+            "item_value_transform": {
+                "type": "map_values",
+                "params": {
+                    "mappings": {"old": "new"},
+                    "passthrough_unknown": True,
+                },
+            },
+        }
+        source_data = {"applicant_type_code": "old"}
+        field_path = ["applicant_type_code_mapping"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+        assert result == {"ApplicantTypeCode1": "new"}
+
     def test_unknown_transform_type(self):
         """Test that unknown transform types raise ConditionalTransformationError."""
         transform_config = {"type": "unknown_transform"}

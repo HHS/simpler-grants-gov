@@ -5,7 +5,18 @@ import {
   fetchGrantorOpportunityWithMethod,
 } from "src/services/fetch/fetchers/fetchers";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+import {
+  CompetitionInstructionsApiResponse,
+  CompetitionSaveApiResponse,
+  CompetitionSaveRequest,
+} from "src/types/competitionsResponseTypes";
 import { CreateOpportunityRecord } from "src/types/grantor/createOpportunityTypes";
+import {
+  GrantorOpportunityApiResponse,
+  OpportunitySummaryCreateRequest,
+  OpportunitySummaryDetailApiResponse,
+  OpportunitySummaryUpdateRequest,
+} from "src/types/opportunity/opportunityResponseTypes";
 import {
   PaginationRequestBody,
   SearchAPIResponse,
@@ -14,6 +25,17 @@ import {
 
 type PaginationBody = {
   pagination: PaginationRequestBody;
+};
+
+type UpdateOpportunitySummaryForGrantorParams = {
+  opportunityId: string;
+  opportunitySummaryId: string;
+  body: OpportunitySummaryUpdateRequest;
+};
+
+type CreateOpportunitySummaryForGrantorParams = {
+  opportunityId: string;
+  body: OpportunitySummaryCreateRequest;
 };
 
 export const searchOpportunitiesByAgency = async (
@@ -30,16 +52,6 @@ export const searchOpportunitiesByAgency = async (
   return (await response.json()) as SearchAPIResponse;
 };
 
-export const createOpportunity = async (
-  createOppSchema: Record<string, string>,
-): Promise<CreateOpportunityRecord> => {
-  const response = await fetchGrantorOpportunityWithMethod("POST")({
-    body: createOppSchema,
-  });
-  const json = (await response.json()) as { data: CreateOpportunityRecord };
-  return json.data;
-};
-
 export const searchAccessibleOpportunities = async (
   pageInputs: PaginationRequestBody,
 ): Promise<{ data: SearchResponseData; pagination_info: PaginationInfo }> => {
@@ -50,3 +62,96 @@ export const searchAccessibleOpportunities = async (
 
   return (await response.json()) as SearchAPIResponse;
 };
+
+export async function getOpportunityForGrantor(
+  opportunityId: string,
+): Promise<GrantorOpportunityApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("GET")({
+    subPath: opportunityId,
+  });
+  return (await response.json()) as GrantorOpportunityApiResponse;
+}
+
+export const createOpportunity = async (
+  createOppSchema: Record<string, string>,
+): Promise<CreateOpportunityRecord> => {
+  const response = await fetchGrantorOpportunityWithMethod("POST")({
+    body: createOppSchema,
+  });
+  const json = (await response.json()) as { data: CreateOpportunityRecord };
+  return json.data;
+};
+
+export async function createOpportunitySummaryForGrantor({
+  opportunityId,
+  body,
+}: CreateOpportunitySummaryForGrantorParams): Promise<OpportunitySummaryDetailApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("POST")({
+    subPath: `${opportunityId}/summaries`,
+    body,
+    // want to allow responses with failed validations through so we can properly handle displaying validation errors
+    allowedErrorStatuses: [422],
+  });
+
+  return (await response.json()) as OpportunitySummaryDetailApiResponse;
+}
+
+export async function updateOpportunitySummaryForGrantor({
+  opportunityId,
+  opportunitySummaryId,
+  body,
+}: UpdateOpportunitySummaryForGrantorParams): Promise<OpportunitySummaryDetailApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("PUT")({
+    subPath: `${opportunityId}/summaries/${opportunitySummaryId}`,
+    body,
+    // want to allow responses with failed validations through so we can properly handle displaying validation errors
+    allowedErrorStatuses: [422],
+  });
+
+  return (await response.json()) as OpportunitySummaryDetailApiResponse;
+}
+
+export async function publishOpportunityForGrantor(
+  opportunityId: string,
+): Promise<GrantorOpportunityApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("POST")({
+    subPath: `${opportunityId}/publish`,
+  });
+
+  return (await response.json()) as GrantorOpportunityApiResponse;
+}
+
+export async function createCompetitionForGrantor(
+  opportunityId: string,
+  data: CompetitionSaveRequest,
+): Promise<CompetitionSaveApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("POST")({
+    subPath: `${opportunityId}/competitions`,
+    body: data,
+  });
+  return (await response.json()) as CompetitionSaveApiResponse;
+}
+
+export async function updateCompetitionForGrantor(
+  opportunityId: string,
+  competitionId: string,
+  data: CompetitionSaveRequest,
+): Promise<CompetitionSaveApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("PUT")({
+    subPath: `${opportunityId}/competitions/${competitionId}`,
+    body: data,
+  });
+  return (await response.json()) as CompetitionSaveApiResponse;
+}
+
+export async function saveCompetitionInstructions(
+  opportunityId: string,
+  competitionId: string,
+  pendingFileId: string,
+): Promise<CompetitionInstructionsApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("POST")({
+    subPath: `${opportunityId}/competitions/${competitionId}/instructions`,
+    body: { pending_file_id: pendingFileId },
+  });
+  return (await response.json()) as CompetitionInstructionsApiResponse;
+}

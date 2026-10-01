@@ -21,6 +21,11 @@ ECS_SERVICE_NAME = os.environ.get("ECS_SERVICE_NAME", "")
 ECS_CLUSTER_NAME = os.environ.get("ECS_CLUSTER_NAME", "")
 NR_ENTITY_GUID = os.environ.get("NR_ENTITY_GUID", "")
 
+# New Relic reporting name. Differs from ECS_SERVICE_NAME when an environment stands in
+# for another (e.g. infra-staging reports as frontend-staging so it lands on the same
+# entity as the environment it replaces). The aws.ecs.* attributes stay truthful.
+NR_ENTITY_NAME = os.environ.get("NR_ENTITY_NAME", "") or ECS_SERVICE_NAME
+
 # Max log entries per New Relic Logs API request
 BATCH_SIZE = 1000
 
@@ -144,7 +149,7 @@ def lift_attributes(parsed, reserved_keys):
     """
     attributes = {}
     for key, value in parsed.items():
-        if key in reserved_keys:
+        if key in reserved_keys or value is None:
             continue
         if key in TRUNCATE_FIELDS:
             attr_value = sanitize_field(value)
@@ -152,7 +157,7 @@ def lift_attributes(parsed, reserved_keys):
                 attr_value = json.dumps(attr_value, default=str)
                 if len(attr_value) > MAX_FIELD_LENGTH:
                     attr_value = attr_value[:MAX_FIELD_LENGTH]
-        elif value is None or isinstance(value, (str, int, float, bool)):
+        elif isinstance(value, (str, int, float, bool)):
             attr_value = value
             if isinstance(attr_value, str) and len(attr_value) > MAX_FIELD_LENGTH:
                 attr_value = attr_value[:MAX_FIELD_LENGTH]
@@ -240,8 +245,8 @@ def handler(event, context):
         "aws.region": AWS_REGION,
         "aws.ecs.serviceName": ECS_SERVICE_NAME,
         "aws.ecs.clusterName": ECS_CLUSTER_NAME,
-        "hostname": ECS_SERVICE_NAME,
-        "entity.name": ECS_SERVICE_NAME,
+        "hostname": NR_ENTITY_NAME,
+        "entity.name": NR_ENTITY_NAME,
         "entity.type": "AWSECSSERVICE",
         "provider": "EcsService",
     }

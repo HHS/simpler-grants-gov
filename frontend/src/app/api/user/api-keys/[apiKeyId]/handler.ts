@@ -63,7 +63,7 @@ export const renameApiKeyHandler = async (
 };
 
 export const deleteApiKeyHandler = async (
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ apiKeyId: string }> },
 ) => {
   try {

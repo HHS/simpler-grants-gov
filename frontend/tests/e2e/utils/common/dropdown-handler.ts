@@ -25,7 +25,11 @@ export const dropdownHandler: FieldHandler = async (
   }
   if (field.testId) {
     const locator = page.getByTestId(`${field.testId}${data}`);
+    // Use longer timeout (10s) for field attachment to handle lazy-loaded
+    // fields on mobile where form rendering may be progressive/async.
+    await locator.waitFor({ state: "attached", timeout: 10000 });
     await locator.waitFor({ state: "visible", timeout: 5000 });
+    await locator.scrollIntoViewIfNeeded();
     await locator.click();
     return;
   }
@@ -33,8 +37,11 @@ export const dropdownHandler: FieldHandler = async (
     const control = page
       .getByLabel(field.label, { exact: field.labelExact })
       .first();
+    // Use longer timeout (10s) for field attachment to handle lazy-loaded
+    // fields on mobile where form rendering may be progressive/async.
+    await control.waitFor({ state: "attached", timeout: 10000 });
     await control.waitFor({ state: "visible", timeout: 5000 });
-
+    await control.scrollIntoViewIfNeeded();
     const tagName = await control.evaluate((node) =>
       node.tagName.toLowerCase(),
     );

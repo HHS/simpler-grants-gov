@@ -3,11 +3,10 @@ import logging
 import uuid
 from typing import Self
 
-import grants_shared.adapters.db as db
-from grants_shared.auth.api_jwt_auth import ApiJwtConfig
-
+import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.auth.api_jwt_auth import create_jwt_for_user
+from src.auth.jwt import ApiJwtConfig
 from src.constants.static_role_values import E2E_TEST_USER_ROLE
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, Form

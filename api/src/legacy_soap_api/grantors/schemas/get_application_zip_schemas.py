@@ -1,11 +1,10 @@
-from typing import Any, Self
+from typing import Any
 
-from pydantic import BaseModel, Field, PrivateAttr, model_validator
+from pydantic import BaseModel, Field, PrivateAttr
 
-from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
-from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
-
-GET_APPLICATION_ZIP_REQUEST_ERR = "No grants_gov_tracking_number provided."
+from src.legacy_soap_api.grantors.schemas.grants_gov_tracking_number_schema import (
+    GrantsGovTrackingNumberRequiredSchema,
+)
 
 
 class XOPIncludeData(BaseModel):
@@ -42,14 +41,5 @@ class GetApplicationZipResponseSOAPEnvelope(BaseModel):
         return envelope_dict
 
 
-class GetApplicationZipRequest(BaseModel):
-    grants_gov_tracking_number: str | None = Field(default=None, alias="GrantsGovTrackingNumber")
-
-    @model_validator(mode="after")
-    def validate_required_properties(self) -> Self:
-        if not self.grants_gov_tracking_number:
-            raise SOAPFaultException(
-                GET_APPLICATION_ZIP_REQUEST_ERR,
-                fault=OpportunityListRequestInvalidParams,
-            )
-        return self
+class GetApplicationZipRequest(GrantsGovTrackingNumberRequiredSchema):
+    pass

@@ -34,9 +34,7 @@ function Budget424aSectionB<
   formContext,
   disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
-  const rootFormDataFromContext = (
-    formContext as { rootFormData?: unknown } | undefined
-  )?.rootFormData;
+  const rootFormDataFromContext = formContext?.rootFormData;
 
   const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const errors = (rawErrors as FormValidationWarning[]) || [];
@@ -57,7 +55,7 @@ function Budget424aSectionB<
 
   const totals: BudgetCategories | undefined =
     typeof totalsUnknown === "object" && totalsUnknown !== null
-      ? (totalsUnknown as BudgetCategories)
+      ? totalsUnknown
       : undefined;
 
   // Section B rows (A-K)

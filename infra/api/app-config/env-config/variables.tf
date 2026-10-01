@@ -36,6 +36,32 @@ variable "mtls_domain_name" {
   default     = null
 }
 
+variable "enable_cdn_alias" {
+  type        = bool
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  default     = true
+}
+
+variable "enable_api_gateway_domain_name" {
+  type        = bool
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  default     = true
+}
+
+variable "enable_secure_alb" {
+  type        = bool
+  description = <<EOT
+    API Gateway reaches the ALB over a private VPC Link,
+    and the ALB drops its 0.0.0.0/0 ingress in favour of the VPC Link.
+  EOT
+  default     = false
+}
+
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
@@ -63,6 +89,12 @@ variable "enable_notifications" {
 variable "environment" {
   description = "name of the application environment (e.g. dev, staging, prod)"
   type        = string
+}
+
+variable "app_environment_name" {
+  description = "environment name the app sees in its ENVIRONMENT variable; defaults to var.environment"
+  type        = string
+  default     = null
 }
 
 variable "extra_identity_provider_callback_urls" {
@@ -93,6 +125,20 @@ variable "search_master_instance_type" {
 
 variable "search_engine_version" {
   type = string
+}
+
+variable "search_sso_admin_role_name" {
+  type        = string
+  description = <<EOT
+    Name of the AWS IAM Identity Center (SSO) reserved role granted admin access to
+    the OpenSearch domain and its KMS key. The reserved-SSO role suffix
+    (AWSReservedSSO_<PermissionSet>_<suffix>) is generated per AWS account, so
+    environments in different accounts must override this with their account's own role.
+    The account id itself is applied dynamically in the database layer. Set to null to
+    fall back to the account root principal (no dedicated SSO-admin grant).
+  EOT
+  # Default matches the shared account (315341936575) that hosts dev/staging/prod/etc.
+  default = "AWSReservedSSO_AWSAdministratorAccess_7531ec3bb3ba9352"
 }
 
 variable "search_data_instance_count" {
@@ -223,6 +269,12 @@ variable "secondary_domain_names" {
   default     = []
 }
 
+variable "scanner_callback_domain_name" {
+  type        = string
+  description = "Host the ClamAV scanner posts scan results to."
+  default     = null
+}
+
 variable "sqs_visibility_timeout_seconds" {
   description = "The visibility timeout for the SQS queue in seconds"
   type        = number
@@ -263,6 +315,36 @@ variable "workflow_service_desired_count" {
   description = "Workflow services counter count"
   type        = number
   default     = 1
+}
+
+variable "enable_processor_service" {
+  description = "Enable the always-on notification queue processor service"
+  type        = bool
+  default     = false
+}
+
+variable "processor_service_cpu" {
+  description = "CPU units for the processor ECS task"
+  type        = number
+  default     = 1024
+}
+
+variable "processor_service_memory" {
+  description = "Memory in MiB for the processor ECS task"
+  type        = number
+  default     = 2048
+}
+
+variable "processor_service_desired_count" {
+  description = "Number of processor tasks to keep running"
+  type        = number
+  default     = 1
+}
+
+variable "processor_service_command" {
+  description = "Container command the processor service runs"
+  type        = list(string)
+  default     = ["flask", "task", "process-notification-queue"]
 }
 
 variable "scanner_provisioned_concurrency" {

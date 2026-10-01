@@ -6,6 +6,7 @@ module "staging_config" {
   environment                     = "staging"
   network_name                    = "staging"
   domain_name                     = "staging.simpler.grants.gov"
+  enable_cdn_alias                = false # released so infra-staging's CDN can claim this alias
   enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service

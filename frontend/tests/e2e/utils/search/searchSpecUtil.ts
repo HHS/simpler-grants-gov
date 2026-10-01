@@ -12,7 +12,7 @@ import {
 
 const { targetEnv } = playwrightEnv;
 
-const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 30000 : 10000;
+const FILTER_OPTIONS_TIMEOUT = targetEnv !== "local" ? 30000 : 10000;
 
 const getBrowserType = (page: Page, projectName?: string) => {
   if (projectName) {
@@ -151,7 +151,7 @@ export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBoxLabel = page
     .locator(`label[for="${idWithoutHash}"]:visible`)
     .first();
-  const timeout = targetEnv === "staging" ? 120000 : 30000;
+  const timeout = targetEnv !== "local" ? 120000 : 30000;
   await checkBox.waitFor({ state: "attached", timeout });
   await checkBoxLabel.waitFor({ state: "visible", timeout });
   await checkBoxLabel.scrollIntoViewIfNeeded();
@@ -179,6 +179,9 @@ export async function toggleCheckboxGroup(
     await toggleCheckbox(page, checkboxID);
     await page.waitForTimeout(500);
   }
+  // Additional wait after all checkboxes toggled to allow filter state to propagate
+  // and React's debounce to fire before URL checks happen
+  await page.waitForTimeout(300);
 }
 
 export async function expectCheckboxesChecked(
@@ -223,7 +226,7 @@ export async function selectSortBy(
   projectName?: string,
 ) {
   const timeoutOption =
-    targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
+    targetEnv !== "local" ? { timeout: 60000 } : { timeout: 10000 };
   const sortSelectElement = drawer
     ? page.locator("#search-sort-by-select-drawer")
     : page.locator("#search-sort-by-select").first();
@@ -238,7 +241,7 @@ export async function selectSortBy(
   await sortSelectElement.selectOption(sortByValue);
 
   // For mobile drawer on staging, wait longer as it can be very slow
-  if (drawer && targetEnv === "staging") {
+  if (drawer && targetEnv !== "local") {
     await page.waitForTimeout(5000);
   }
 
@@ -247,7 +250,7 @@ export async function selectSortBy(
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
   const timeoutOption =
-    targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
+    targetEnv !== "local" ? { timeout: 60000 } : { timeout: 10000 };
   const sortSelectElement = drawer
     ? page.locator("#search-sort-by-select-drawer")
     : page.locator("#search-sort-by-select").first();
@@ -258,7 +261,7 @@ export async function waitForSearchResultsInitialLoad(
   page: Page,
   timeoutOverride?: number,
 ) {
-  let timeout = targetEnv === "staging" ? 180000 : 60000;
+  let timeout = targetEnv !== "local" ? 180000 : 60000;
   if (timeoutOverride) {
     timeout = timeoutOverride;
   }
@@ -335,6 +338,35 @@ export async function clickLastPaginationPage(page: Page) {
   }
 }
 
+/**
+ * Clicks the specified pagination page when available; otherwise no-ops.
+ */
+export async function clickPaginationPageIfPresent(
+  page: Page,
+  pageNumber: number,
+  callerLabel?: string,
+): Promise<boolean> {
+  const paginationButton = page.locator(
+    `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
+  );
+  const isPresent = await paginationButton
+    .first()
+    .isVisible()
+    .catch(() => false);
+
+  if (isPresent) {
+    await clickPaginationPageNumber(page, pageNumber);
+    return true;
+  }
+
+  // eslint-disable-next-line no-console
+  console.warn(
+    `${callerLabel ?? "clickPaginationPageIfPresent"}: only one page of results ` +
+      `for this criteria set; skipping navigation to page ${pageNumber}`,
+  );
+  return false;
+}
+
 export async function getFirstSearchResultTitle(page: Page) {
   const firstResultSelector = page.locator(
     ".simpler-responsive-table tr:first-child a",
@@ -384,7 +416,7 @@ export async function ensureAccordionExpanded(
   const button = page.locator(
     `button.usa-accordion__button:has-text("${accordionTitle}"):visible`,
   );
-  const timeout = targetEnv === "staging" ? 120000 : 30000;
+  const timeout = targetEnv !== "local" ? 120000 : 30000;
   await button.waitFor({ state: "visible", timeout });
   await button.scrollIntoViewIfNeeded();
   await page.waitForTimeout(100);

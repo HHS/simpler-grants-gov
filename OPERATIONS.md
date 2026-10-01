@@ -45,7 +45,7 @@ You can fix them on CLI by:
 1. Finding the job (via Github Action or otherwise) where the deployment failed. If you aren't sure, then it was probably in a Github Action. You can find a list of failing actions here: https://github.com/HHS/simpler-grants-gov/actions
 2. Wait for the deployment that caused the state lock to finish. If you can't find it, just wait 30 minutes.
 3. Identify the folder in which the state lock is happening. The `Path` attribute on the `Lock Info` block will identify this.
-4. Open up your terminal, [setup AWS](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`), and cd into the folder identified above
+4. Open up your terminal, [set up AWS](documentation/infra/set-up-infrastructure-tools.md#aws-authentication) (eg. `aws sso login --sso-session grants-sso` && `export AWS_PROFILE=staging`, using the profile for the account that holds the environment), and cd into the folder identified above
 5. Run `terraform init -backend-config=<ENVIRONMENT>.s3.tfbackend`, where `<ENVIRONMENT>` can be identified by the `Path` above.
 6. Run `terraform force-unlock -force <LOCK_ID>` where `<LOCK_ID>` is the value of `ID` in your state lock message.
 7. Re-run your deploy job
@@ -65,6 +65,59 @@ When that happens, you need to unlock it via DynamoDB in the AWS console.
 6. Find the item that corresponds to the currently locked state, you can get that by again looking at the `Path` attribute in your locked job.
 7. Remove the `Digest` key, `Save and close`
 8. Re-run your deploy job
+
+## Running Application Commands Manually
+
+`bin/run-command` runs a one-off application command as an ECS task, reusing the service's cluster,
+task definition, and network configuration.
+
+```bash
+export AWS_PROFILE=staging   # the account holding the environment — see below
+./bin/run-command api infra-staging '["flask", "some-command"]'
+```
+
+The script passes no `--profile` and does not verify the account, so
+[export the right profile first](documentation/infra/set-up-infrastructure-tools.md#aws-authentication)
+and confirm with `aws sts get-caller-identity`.
+
+### Jobs that need a non-default task role
+
+By default the task runs with the service's task role (`<service_name>-app`), which has **read-only**
+OpenSearch access. Some scheduled jobs declare a `role_override` in
+[`infra/api/app-config/env-config/scheduled_jobs.tf`](infra/api/app-config/env-config/scheduled_jobs.tf),
+and the scheduler applies it as a Step Functions `TaskRoleArn` override. `bin/run-command` does
+**not** pick that up — you have to pass it yourself with `--task-role-arn`.
+
+Without it, an OpenSearch sync job fails with a 403 from the security plugin rather than a
+permissions error you can act on:
+
+```
+AuthorizationException(403, 'security_exception', 'no permissions for [indices:admin/aliases/get]
+and User [name=arn:aws:iam::<account_id>:role/api-<env>-app, ...]')
+```
+
+The two jobs affected today are `load-search-opportunity-data` and `load-search-agency-data`, both of
+which need the `<service_name>-opensearch-write` role:
+
+```bash
+export AWS_PROFILE=staging
+account_id=$(aws sts get-caller-identity --query Account --output text)
+
+./bin/run-command \
+  --task-role-arn "arn:aws:iam::${account_id}:role/api-infra-staging-opensearch-write" \
+  api infra-staging \
+  '["flask", "load-search-data", "load-opportunity-data", "--no-full-refresh"]'
+```
+
+Deriving `account_id` from the active profile rather than hardcoding it means a wrong `AWS_PROFILE`
+produces an ARN that fails loudly instead of quietly pointing at another account.
+
+Two gotchas:
+
+- The flag is `--task-role-arn` (hyphens) and must come **before** the positional arguments.
+- `--no-full-refresh` only syncs opportunities changed since the last run, so `records_loaded: 0`
+  right after the hourly scheduled job is expected, not a failure. Omit the flag to rebuild the whole
+  index.
 
 ## Scaling
 
@@ -208,7 +261,7 @@ In summary, Inspect which certs are binary, which are plain text, and decrypt th
 See https://github.com/HHS/simpler-grants-gov/pull/5261 for an example of committing this change
 
 ##### 2. Via Terraform
-[Set up your console for AWS Credentials](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up)
+[Set up your console for AWS Credentials](documentation/infra/set-up-infrastructure-tools.md#aws-authentication)
 ```bash
 cd infra/<app name>/service
 terraform init -backend-config <env name>.s3.tfbackend
@@ -282,6 +335,33 @@ To sign the JWTs the API uses to track authentication with requests from the FE 
 1. Generate a new public/private key pair
 2. Set them in the /api/<env>/api-jwt-private-key and /api/<env>/api-jwt-public-key parameters in the Parameter Store.
 3. Force redeploy the API Service to pick up the new values.
+
+## API Key Pepper
+
+User API keys are stored as an HMAC-SHA256 hash rather than plaintext. The key for that HMAC (the pepper) is held in Parameter Store, outside the database, so that read access to the database alone isn't enough to brute force the stored hashes.
+
+This is the one secret we deliberately never rotate. Changing a pepper invalidates every hash already stored in that environment, and those hashes cannot be re-derived because the plaintext key is no longer kept anywhere. Treat `/api/<env>/api-key-pepper` as write-once per environment.
+
+To provision it in a new environment:
+
+1. Generate a value: `openssl rand -hex 32`.
+2. Store it as a `SecureString`: `aws ssm put-parameter --name "/api/<env>/api-key-pepper" --type SecureString --value "<value>"`.
+3. Force redeploy the API Service to pick up the value.
+
+Because the parameter is referenced with `manage_method = "manual"`, Terraform reads it through a `data` source — `terraform apply` fails outright in any environment where the parameter does not yet exist, so create it before the next API deploy. The ten environments that are stood up today each need one:
+
+| AWS account | Environments |
+| --- | --- |
+| `simpler-grants-gov` | `dev`, `staging`, `prod`, `training`, `grantee1`, `grantee2`, `grantor1` |
+| dev (`061664787759`) | `infra-dev` |
+| staging (`317380566348`) | `infra-staging` |
+| training (`049145893907`) | `infra-training` |
+
+`infra-sgg2`, `infra-sgg3`, and `infra-sgg1` are configured in `infra/api/app-config/` but not serving traffic, so they are skipped here. Whoever stands one up provisions the whole `secrets` block for it, this parameter included.
+
+`grantee1`, `grantee2`, and `grantor1` must be set to staging's pepper, not their own. Those environments restore their database from the staging snapshot, so a distinct pepper would leave every restored key hash unresolvable. `.github/scripts/copy-ssm-params.sh` keeps them in sync on each run (`api-key-pepper` is intentionally not in its `SKIP_PARAMS` list), but that sync happens after the API deploy in the team-environment flow, so the parameter still has to pre-exist.
+
+Locally and in tests the pepper comes from `API_KEY_PEPPER` in `api/local.env`, which is a fixed placeholder, not a real secret.
 
 ## New Relic
 

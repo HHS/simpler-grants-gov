@@ -109,7 +109,7 @@ class SearchResponse:
 
 
 def _parse_aggregations(
-    raw_aggs: dict[str, dict[str, typing.Any]] | None
+    raw_aggs: dict[str, dict[str, typing.Any]] | None,
 ) -> dict[str, dict[str, int]]:
     # Note that this is assuming the response from a terms aggregation
     # https://opensearch.org/docs/latest/aggregations/bucket/terms/

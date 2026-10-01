@@ -29,27 +29,6 @@ ignore:
   # Last checked: 05/13/2026
   - vulnerability: CVE-2025-15367
 
-  # Not fixed in GA Python yet
-  # Last checked 05/13/2026
-  - vulnerability: CVE-2026-7210
-
-  # unicodedata DoS (excessive CPU consumption). Fix only in pre-release
-  # Python 3.15 (3.15.0b2); no fix in any GA 3.14.x release yet.
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 06/08/2026
-  - vulnerability: CVE-2026-3276
-
-  # base64 altchars input-validation flaw. Marked "will not fix" in 3.14
-  # (deprecation warning only); real fix deferred to a future Python release.
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 06/08/2026
-  - vulnerability: CVE-2025-12781
-
-  # Fix only in pre-release Python 3.15 (3.15.0b2); no fix in any GA 3.14.x yet.
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 06/08/2026
-  - vulnerability: CVE-2026-7774
-
   # Fix only in pre-release Python 3.15 (3.15.0b3); no fix in any GA 3.14.x yet.
   # https://github.com/HHS/simpler-grants-gov/issues/8109
   # Last checked: 07/01/2026
@@ -60,3 +39,41 @@ ignore:
   # https://github.com/HHS/simpler-grants-gov/issues/8109
   # Last checked: 07/13/2026
   - vulnerability: CVE-2026-15308
+
+  # Fix only in pre-release Python 3.15 (3.15.0b4); no fix in any GA 3.14.x yet.
+  # Last checked: 07/30/2026
+  - vulnerability: CVE-2026-11940
+
+  # Fix only in pre-release Python 3.15 (3.15.0b4); no fix in any GA 3.14.x yet.
+  # Last checked: 07/30/2026
+  - vulnerability: CVE-2026-11972
+
+  # Fix only in pre-release Python 3.15 (3.15.0b4); no fix in any GA 3.14.x yet.
+  # Last checked: 07/30/2026
+  - vulnerability: CVE-2026-0864
+
+  # stringprep / idna codec: RFC 3454 tables B.2 and B.3 matched against current
+  # Unicode attributes instead of Unicode 3.2.0
+  # Fix only in pre-release Python 3.15 (3.15.0rc2); no fix in any GA 3.14.x yet.
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 09/10/2026
+  - vulnerability: CVE-2026-17084
+
+  # urllib.request.HTTPPasswordMgr: stored credentials matched without regard to
+  # URL scheme, so https:// credentials were reused over http://
+  # Fix only in pre-release Python 3.15 (3.15.0rc2); no fix in any GA 3.14.x yet.
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 09/10/2026
+  - vulnerability: CVE-2026-15806
+
+  # zipfile: bzip2/LZMA/Zstandard members pre-allocate memory from an
+  # attacker-controlled size
+  # Fix only in pre-release Python 3.15 (3.15.0rc2); no fix in any GA 3.14.x yet.
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 09/10/2026
+  - vulnerability: CVE-2026-15310
+
+  # dompurify via isomorphic-dompurify
+  # Major version upgrade required, will do after 8/12 release
+  # Last checked: 08/11/2026
+  - vulnerability: GHSA-55q2-fjhq-7xh7

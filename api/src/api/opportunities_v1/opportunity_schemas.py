@@ -1,21 +1,20 @@
 from enum import StrEnum
 
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import (
+from marshmallow import RAISE
+
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import (
     AbstractResponseSchema,
     FileResponseSchema,
     PaginationMixinSchema,
 )
-from grants_shared.api.schemas.search_schema import (
+from src.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     DateSearchSchemaBuilder,
     IntegerSearchSchemaBuilder,
     StrSearchSchemaBuilder,
 )
-from grants_shared.pagination.pagination_schema import generate_pagination_schema
-from marshmallow import RAISE
-
-from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -24,6 +23,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityStatus,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 from src.services.opportunities_v1.experimental_constant import ScoringRule
 
 
@@ -240,6 +240,21 @@ class OpportunityV1Schema(Schema):
         metadata={
             "description": "The title of the opportunity",
             "example": "Research into conservation techniques",
+        },
+    )
+    tagline = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "A short tagline for the opportunity",
+            "example": "Accelerating climate innovation",
+        },
+    )
+
+    purpose_statement = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "A brief statement describing the purpose of the opportunity",
+            "example": "Support research that advances innovative climate technologies.",
         },
     )
     # TODO - we'll want to remove this field in the future

@@ -38,13 +38,8 @@ class XMLGenerationService:
             XML generation response with generated XML or error information
         """
         try:
-            # Validate input data
-            if not request.application_data:
-                return XMLGenerationResponse(
-                    success=False, error_message="No application data provided"
-                )
-
-            # Transform the data using recursive transformer
+            # An empty application_data dict is valid (a form with only optional elements)
+            # and is intentionally not rejected here.
             transformer = RecursiveXMLTransformer(request.transform_config)
             transformed_data = transformer.transform(request.application_data)
 
@@ -195,7 +190,15 @@ class XMLGenerationService:
         attachment_field_config = xml_config.get("attachment_fields", {})
         attachment_field_names = set(attachment_field_config.keys())
 
-        # Add regular form elements (excluding attachments)
+        # Built up front so attachments can be placed in XSD sequence position while the
+        # ordered elements are emitted. Attachments use UUIDs from original_data.
+        attachment_transformer = None
+        if original_data is not None:
+            attachment_transformer = AttachmentTransformer(
+                attachment_mapping=attachment_mapping or {},
+                attachment_field_config=attachment_field_config,
+            )
+
         self._add_ordered_form_elements(
             root,
             data,
@@ -205,15 +208,12 @@ class XMLGenerationService:
             xsd_url,
             attachment_field_names,
             root_namespace_prefix,  # Use namespace prefix for lookups in nsmap
+            attachment_transformer,
+            original_data,
         )
 
-        # Add attachment elements if present in data
-        # Only process attachments if we have original_data (attachments use UUIDs from original data)
-        if original_data is not None:
-            attachment_transformer = AttachmentTransformer(
-                attachment_mapping=attachment_mapping or {},
-                attachment_field_config=attachment_field_config,
-            )
+        # Flush attachments not placed in sequence order (forms with no ordering entry).
+        if attachment_transformer is not None and original_data is not None:
             attachment_transformer.add_attachment_elements(root, original_data, nsmap)
 
         # Generate XML string
@@ -434,12 +434,31 @@ class XMLGenerationService:
             if value_attributes and not attributes:
                 attributes = value_attributes
 
-            # Create nested element for dictionary values
-            if field_name in namespace_fields:
-                # Use configured namespace
+            # Create nested element for dictionary values.
+            # Check __namespace__ first — the transformer embeds this on nested objects so that
+            # the same element name (e.g. "Address") can appear in different namespaces at
+            # different nesting levels, without the flat namespace_fields dict causing collisions.
+            explicit_ns = value.get("__namespace__")
+            if explicit_ns is not None:
+                if explicit_ns == "default":
+                    namespace_uri = (
+                        nsmap.get(root_element_name or "", "") if root_element_name else ""
+                    )
+                else:
+                    namespace_uri = nsmap.get(explicit_ns, "")
+                element_name = f"{{{namespace_uri}}}{field_name}" if namespace_uri else field_name
+                nested_element = lxml_etree.SubElement(parent, element_name)
+            elif field_name in namespace_fields:
+                # Fall back to the flat namespace_fields dict for elements that don't carry
+                # __namespace__ (simple values, legacy nested objects without a namespace key)
                 namespace_prefix = namespace_fields[field_name]
-                namespace_uri = nsmap.get(namespace_prefix, "")
-                element_name = f"{{{namespace_uri}}}{field_name}"
+                if namespace_prefix == "default":
+                    namespace_uri = (
+                        nsmap.get(root_element_name or "", "") if root_element_name else ""
+                    )
+                else:
+                    namespace_uri = nsmap.get(namespace_prefix, "")
+                element_name = f"{{{namespace_uri}}}{field_name}" if namespace_uri else field_name
                 nested_element = lxml_etree.SubElement(parent, element_name)
             else:
                 # Use default namespace (derived from root element name)
@@ -622,6 +641,8 @@ class XMLGenerationService:
         xsd_url: str,
         attachment_fields: set[str] | None = None,
         root_element_name: str | None = None,
+        attachment_transformer: AttachmentTransformer | None = None,
+        original_data: dict | None = None,
     ) -> None:
         """Add form elements in the correct sequence order.
 
@@ -637,6 +658,9 @@ class XMLGenerationService:
             xsd_url: URL to XSD schema (kept for backward compatibility, not used)
             attachment_fields: Set of field names that are attachments (handled separately)
             root_element_name: Root element name (used as default namespace key)
+            attachment_transformer: Transformer used to emit attachment elements in
+                their sequence position; when None, attachments are handled by the caller.
+            original_data: Untransformed application data holding attachment UUIDs.
         """
         # Default attachment fields if not provided (for backward compatibility)
         if attachment_fields is None:
@@ -651,7 +675,15 @@ class XMLGenerationService:
             if field_name.startswith("__"):
                 continue
 
-            if field_name in data and field_name not in attachment_fields:
+            # Emit attachment elements at their reserved sequence position.
+            if field_name in attachment_fields:
+                if attachment_transformer is not None and original_data is not None:
+                    attachment_transformer.add_attachment_field(
+                        root, field_name, original_data, nsmap
+                    )
+                continue
+
+            if field_name in data:
                 field_value = data[field_name]
                 if field_value is not None:
                     # Check for attributes stored with special key

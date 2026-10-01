@@ -1,10 +1,5 @@
 from datetime import timedelta
 
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder
-from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import ValidationError, validates_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
@@ -13,13 +8,20 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySummaryV1Schema,
     OpportunityV1Schema,
 )
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
+from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,
     FundingCategory,
     FundingInstrument,
+    OpportunityAuditEvent,
     OpportunityCategory,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 from src.validation.validation_constants import ValidationErrorType
 
 
@@ -58,6 +60,22 @@ class OpportunityCreateRequestSchema(Schema):
         metadata={
             "description": "The title of the opportunity",
             "example": "Research Grant for Climate Innovation",
+        },
+    )
+    tagline = fields.String(
+        required=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "A short tagline for the opportunity",
+            "example": "Accelerating climate innovation",
+        },
+    )
+    purpose_statement = fields.String(
+        required=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "A brief statement describing the purpose of the opportunity",
+            "example": "Support research that advances innovative climate technologies.",
         },
     )
     agency_id = fields.UUID(
@@ -221,6 +239,8 @@ class OpportunityGetResponseSchema(AbstractResponseSchema):
       "data": {
         "opportunity_number": "ABC-2026-001",
         "opportunity_title": "Research Grant for Climate Innovation",
+        "tagline": "Accelerating climate innovation",
+        "purpose_statement": "Support research that advances innovative climate technologies.",
         "agency_id": "550e8400-e29b-41d4-a716-446655440000",
         "category": "discretionary",
         "category_explanation": "Competitive research grant",
@@ -290,7 +310,7 @@ class OpportunitySummaryBaseRequestSchema(Schema):
     summary_description = fields.String(
         required=True,
         allow_none=True,
-        validate=validators.Length(max=18000),
+        validate=validators.WordLimit(max=500),
         metadata={"description": "Opportunity summary", "example": "This opportunity..."},
     )
 
@@ -593,40 +613,29 @@ class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryDetailSchema())
 
 
-class OpportunityUploadAttachmentRequestV1Schema(Schema):
-    file_attachment = fields.File(
-        required=True,
-        allow_none=False,
-        metadata={"description": "The file attachment to upload"},
-    )
-    file_description = fields.String(
-        required=False,
-        allow_none=True,
-        metadata={"description": "Description of the file attachment"},
-    )
-
-
-class OpportunityAttachmentResponseV1Schema(Schema):
-    opportunity_attachment_id = fields.String(required=True)
-    file_description = fields.String(required=False, allow_none=True)
-
-
 class ResponseWithErrorsSchema(Schema):
     message = fields.String(required=True)
     status_code = fields.Integer(required=True, dump_default=200)
     errors = fields.List(fields.String(), required=False)
 
 
-class OpportunityUploadAttachmentResponseV1Schema(ResponseWithErrorsSchema):
-    """Response Schema for Upload Attachments Endpoint"""
-
-    data = fields.Nested(OpportunityAttachmentResponseV1Schema())
-
-
 class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
     """Response Schema for Delete Attachment Endpoint"""
 
     pass
+
+
+class OpportunityAttachmentCreateFromPendingFileRequestV1Schema(Schema):
+    pending_file_id = fields.UUID(
+        required=True,
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
+    )
+
+
+class OpportunityAttachmentCreateFromPendingFileResponseV1Schema(AbstractResponseSchema):
+    """Response Schema for the Create Opportunity Attachment Endpoint"""
+
+    data = fields.Nested(OpportunityAttachmentV1Schema())
 
 
 class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
@@ -641,6 +650,23 @@ class CompetitionRequestBaseSchema(Schema):
         metadata={
             "description": "The title of the competition",
             "example": "Proposal for Advanced Research",
+        },
+    )
+    public_competition_id = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "The public-facing identifier of the competition",
+            "example": "ABC-123-456",
+        },
+    )
+    grace_period = fields.Integer(
+        required=False,
+        allow_none=True,
+        validate=validators.Range(min=0),
+        metadata={
+            "description": "The number of days after the closing date that applications are still accepted",
+            "example": 5,
         },
     )
     opening_date = fields.Date(
@@ -716,19 +742,27 @@ class CompetitionUpdateResponseSchema(AbstractResponseSchema):
 class CompetitionInstructionUploadRequestV1Schema(Schema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions request"""
 
-    file_attachment = fields.File(
+    pending_file_id = fields.UUID(
         required=True,
-        allow_none=False,
-        metadata={"description": "The instruction file to upload"},
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
     )
 
 
 class CompetitionInstructionUploadResponseDataV1Schema(Schema):
     """Data schema for competition instruction upload response"""
 
-    competition_instruction_id = fields.String(
+    competition_instruction_id = fields.UUID(
         required=True,
         metadata={"description": "The created competition instruction ID"},
+    )
+    file_name = fields.String(
+        metadata={"description": "The name of the uploaded instruction file"},
+    )
+    created_at = fields.DateTime(
+        metadata={"description": "Timestamp when the instruction was created"},
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "Timestamp when the instruction was last updated"},
     )
 
 
@@ -736,3 +770,78 @@ class CompetitionInstructionUploadResponseV1Schema(ResponseWithErrorsSchema):
     """Response Schema for Upload Competition Instructions Endpoint"""
 
     data = fields.Nested(CompetitionInstructionUploadResponseDataV1Schema())
+
+
+class DeleteCompetitionInstructionResponseV1Schema(ResponseWithErrorsSchema):
+    """Response Schema for Delete Competition Instruction Endpoint"""
+
+    pass
+
+
+####################################
+# Opportunity Audit History
+####################################
+
+
+class OpportunityAuditFilterSchema(Schema):
+    """Schema for the opportunity audit history filters"""
+
+    opportunity_audit_event = fields.Nested(
+        StrSearchSchemaBuilder("OppAuditEventFilterSchema")
+        .with_one_of(
+            allowed_values=OpportunityAuditEvent,
+            example=OpportunityAuditEvent.OPPORTUNITY_CREATED,
+        )
+        .build()
+    )
+
+
+class OpportunityAuditRequestSchema(Schema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/audit_history request"""
+
+    filters = fields.Nested(OpportunityAuditFilterSchema(), required=False, allow_none=True)
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "OppAuditPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
+class OpportunityAuditDataSchema(Schema):
+    """Schema for a single audit event in the response"""
+
+    opportunity_audit_id = fields.UUID(metadata={"description": "The ID of the audit event"})
+    opportunity_audit_event = fields.Enum(
+        OpportunityAuditEvent,
+        metadata={"description": "The type of audit event recorded"},
+    )
+    user = fields.Nested(
+        SimpleUserSchema(),
+        metadata={"description": "The user who performed the audited action"},
+    )
+    # These three columns are raw JSONB snapshots of the entity at audit time, not FK-linked
+    # objects, so fields.Dict is correct rather than fields.Nested typed schemas.
+    # Exactly one of the three will be non-None per row depending on the event type.
+    opportunity = fields.Dict(
+        allow_none=True,
+        metadata={"description": "Opportunity data snapshot (populated for opportunity events)"},
+    )
+    nonforecast_opportunity_summary = fields.Dict(
+        allow_none=True,
+        metadata={"description": "Summary data snapshot (populated for summary events)"},
+    )
+    competition = fields.Dict(
+        allow_none=True,
+        metadata={"description": "Competition data snapshot (populated for competition events)"},
+    )
+    created_at = fields.DateTime(metadata={"description": "When the audit event was created"})
+
+
+class OpportunityAuditResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/audit_history response"""
+
+    data = fields.List(fields.Nested(OpportunityAuditDataSchema()))

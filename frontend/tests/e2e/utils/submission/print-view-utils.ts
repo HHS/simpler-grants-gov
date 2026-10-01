@@ -1,13 +1,24 @@
 import { expect, type Page } from "@playwright/test";
-import type { FillFormConfig } from "tests/e2e/utils/common/types";
+
+import type {
+  FilledFormEntry,
+  ResolvedPrintViewForm,
+} from "./opportunity-print-view.types";
 
 /**
  * Converts a workspace application form URL to its corresponding print view URL.
  *
  * Workspace URL format:  /workspace/applications/{applicationId}/form/{appFormId}
  * Print URL format:      /print/application/{applicationId}/form/{appFormId}
+ *
+ * @throws if formUrl does not contain the expected /workspace/applications/ segment
  */
 export function buildPrintUrl(formUrl: string): string {
+  if (!/\/workspace\/applications\//.test(formUrl)) {
+    throw new Error(
+      `buildPrintUrl: "${formUrl}" does not match the expected workspace application form URL pattern (/workspace/applications/{id}/form/{id}); cannot derive a print view URL.`,
+    );
+  }
   return formUrl.replace(/\/workspace\/applications\//, "/print/application/");
 }
 
@@ -30,6 +41,37 @@ export async function navigateToPrintView(
   await page.waitForLoadState("domcontentloaded");
   if (waitMs > 0) {
     await page.waitForTimeout(waitMs);
+  }
+  await expect(page).toHaveURL(printUrl);
+}
+
+/**
+ * Verifies that a print view page is read-only by checking for no visible enabled editable controls.
+ * This ensures the page is truly in print view mode, not edit mode.
+ *
+ * @param page - The Playwright page object
+ * @param skipCheck - Optional flag to skip the editable control check (for forms with custom table rendering)
+ *
+ * @throws if any visible input or textarea elements are enabled (not disabled/readonly)
+ */
+export async function assertPrintViewIsReadOnly(
+  page: Page,
+  skipCheck: boolean = false,
+): Promise<void> {
+  const printViewWrapper = page.locator(".apply-form-print-preview");
+  await expect(printViewWrapper).toBeVisible();
+
+  if (!skipCheck) {
+    // Check for inputs/textareas that are not disabled and not readonly
+    // This is more robust than checking for count=0 as there may be hidden UI elements on some mobile browsers
+    const visibleEditableInputs = printViewWrapper.locator(
+      "input:visible:not([disabled]):not([readonly])",
+    );
+    const visibleEditableTextareas = printViewWrapper.locator(
+      "textarea:visible:not([disabled]):not([readonly])",
+    );
+    await expect(visibleEditableInputs).toHaveCount(0);
+    await expect(visibleEditableTextareas).toHaveCount(0);
   }
 }
 
@@ -58,24 +100,28 @@ function truncateToMaxLength(value: string, maxLength: number): string {
  * Keys in the returned Record match the fill-data field keys
  * so the spec can resolve print testIds generically.
  *
- * @param builder    - The form's test data builder function.
- * @param suffix     - A numeric suffix appended to each value (e.g. Date.now()).
- * @param formConfig - The form's FillFormConfig, used for completeness + maxLength checks.
+ * @param form   - The ResolvedPrintViewForm containing buildTestData and formConfig.
+ * @param suffix - A numeric suffix appended to each value (e.g. Date.now()).
  */
 export function buildHappyPathTestData(
-  builder: (suffix: number) => Record<string, string>,
+  form: ResolvedPrintViewForm,
   suffix: number,
-  formConfig: FillFormConfig,
 ): Record<string, string> {
-  const rawData = builder(suffix);
+  const rawData = form.buildTestData(suffix);
 
-  // Completeness check: every non-attachment, non-conditional field in the form
-  // definition must have a value in the test data. This ensures the builder stays
-  // in sync with field definition changes automatically — no manual list to maintain.
-  const missingKeys = Object.entries(formConfig.fields)
+  // Completeness check: every non-attachment, non-conditional, user-entered field
+  // in the form definition must have a value in the test data. User-entered fields
+  // have either testId or selector defined; display-only fields (e.g., post-populated
+  // signature/date) have only printTestId and are skipped.
+  // This ensures the builder stays in sync with field definition changes automatically
+  // - no manual list to maintain.
+  const missingKeys = Object.entries(form.formConfig.fields)
     .filter(
       ([key, def]) =>
-        def.type !== "file" && !def.dependsOn && rawData[key] === undefined,
+        def.type !== "file" &&
+        !def.dependsOn &&
+        (def.testId || def.selector) && // Only check user-entered fields
+        rawData[key] === undefined,
     )
     .map(([key, def]) => `${key} (${def.field})`);
 
@@ -88,7 +134,7 @@ export function buildHappyPathTestData(
   // Truncate each value to its field's maxLength to prevent validation failures.
   return Object.fromEntries(
     Object.entries(rawData).map(([key, value]) => {
-      const maxLength = formConfig.fields[key]?.maxLength;
+      const maxLength = form.formConfig.fields[key]?.maxLength;
       return [
         key,
         maxLength !== undefined ? truncateToMaxLength(value, maxLength) : value,
@@ -147,4 +193,90 @@ export async function validateAttachmentPrintViewSection(
   await expect(section).toBeVisible();
   await expect(section.getByRole("listitem")).toBeVisible({ timeout: 15000 });
   await expect(section).toContainText(fileName);
+}
+
+/**
+ * Validates all forms in the filledForms array against their print views.
+ * This is the standard validation pattern used across all submission-printview specs.
+ *
+ * Validations include:
+ * 1. Print view wrapper exists (indicates read-only print layout, not editable form)
+ * 2. No visible editable controls (inputs, textareas) to ensure read-only state
+ * 3. Form title is visible in h1 heading
+ * 4. Optional: Section heading (from fieldset) if expectedSectionHeading provided
+ * 5. Pre-populated fields (API-injected from opportunity)
+ * 6. User-entered fields using their testIds/printTestIds
+ *
+ * @param page       - The Playwright page object
+ * @param filledForms - Array of FilledFormEntry objects from the spec
+ */
+export async function validateAllPrintViews(
+  page: Page,
+  filledForms: FilledFormEntry[],
+  skipEditableCheckForFormKeys?: string[],
+): Promise<void> {
+  for (const {
+    testData,
+    printUrl,
+    expectedPrepopulatedFields,
+    userEnteredFieldTestIds,
+    formName,
+    expectedSectionHeading,
+    formKey,
+  } of filledForms) {
+    await navigateToPrintView(page, printUrl);
+
+    // Verify print view is read-only before validating content
+    const shouldSkipEditableCheck =
+      skipEditableCheckForFormKeys &&
+      skipEditableCheckForFormKeys.includes(formKey);
+    await assertPrintViewIsReadOnly(page, shouldSkipEditableCheck);
+
+    // Form title heading is visible
+    await expect(page.locator("h1")).toContainText(formName);
+
+    // Optional: Section heading (e.g., from fieldset) contains expected text
+    // Use first heading within fieldset to avoid strict mode violation with multiple headings
+    // Handle case-insensitive matching for string values, exact matching for RegExp
+    if (expectedSectionHeading) {
+      const headingElement = page
+        .getByTestId("fieldset")
+        .getByRole("heading")
+        .first();
+
+      if (typeof expectedSectionHeading === "string") {
+        // Case-insensitive match for strings
+        await expect(headingElement).toContainText(
+          new RegExp(expectedSectionHeading, "i"),
+        );
+      } else {
+        // Exact RegExp match
+        await expect(headingElement).toContainText(expectedSectionHeading);
+      }
+    }
+
+    // Pre-populated fields (API-injected from opportunity record)
+    for (const [testId, expectedValue] of Object.entries(
+      expectedPrepopulatedFields,
+    )) {
+      const locator = page.getByTestId(testId);
+      await expect(locator).toBeVisible();
+
+      // For input elements, check the value attribute; for other elements, check visible text
+      const elementType = await locator.evaluate((el) =>
+        el.tagName.toLowerCase(),
+      );
+      if (elementType === "input") {
+        await expect(locator).toHaveValue(expectedValue);
+      } else {
+        await expect(locator).toContainText(expectedValue);
+      }
+    }
+
+    // User-entered fields - uses formConfig.fields (printTestId ?? testId)
+    for (const [dataKey, testId] of Object.entries(userEnteredFieldTestIds)) {
+      if (testData[dataKey] === undefined) continue;
+      await validatePrintViewField(page, testId, testData[dataKey]);
+    }
+  }
 }

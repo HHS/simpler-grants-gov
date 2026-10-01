@@ -1,0 +1,8 @@
+{
+  "name": "All Quads",
+  "display": "table",
+  "visualization_settings": {
+    "table.pivot_column": "id",
+    "table.cell_column": "duration"
+  }
+}

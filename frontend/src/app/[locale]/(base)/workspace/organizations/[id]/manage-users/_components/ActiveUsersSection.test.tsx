@@ -196,7 +196,7 @@ describe("ActiveUsersSection", () => {
     ];
 
     const activeUsers = makeResource({
-      data: users as UserDetail[],
+      data: users,
       statusCode: 200,
     });
 

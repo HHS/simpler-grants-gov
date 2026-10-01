@@ -1,5 +1,4 @@
 enum validFeatureTags {
-  GRANTOR = "@grantor",
   GRANTEE = "@grantee",
   OPPORTUNITY_SEARCH = "@opportunity-search",
   APPLY = "@apply",

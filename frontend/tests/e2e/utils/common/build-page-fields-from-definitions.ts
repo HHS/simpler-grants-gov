@@ -26,6 +26,7 @@ export const buildPageFieldsFromDefinitions = <TValueKey extends string>(
     labelExact: definition.exact,
     selector: definition.selector,
     selectFirstInGroup: definition.selectFirstInGroup,
+    skipEmailTypeCheck: definition.skipEmailTypeCheck,
     testId: definition.testId,
     optionTestIdPrefix: definition.optionTestIdPrefix,
     getByText: definition.getByText,

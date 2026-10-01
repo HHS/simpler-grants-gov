@@ -60,7 +60,7 @@ const orchestrateFileUpload = async (
   responseStreamController: ReadableStreamDefaultController,
   file: File,
 ) => {
-  responseStreamController.enqueue(JSON.stringify({ status: "queued" }));
+  responseStreamController.enqueue(JSON.stringify({ status: "starting" }));
   // call Simpler API to obtain details for S3 upload and pending file id
   const fileUploadDetails = await fetchFileUploadDetails(file.name, file.type);
   responseStreamController.enqueue(JSON.stringify({ status: "uploading" }));

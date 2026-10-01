@@ -19,10 +19,12 @@ export const PROJECT_ABSTRACT_FORM_CONFIG = {
   fields: fieldDefinitionsProjectAbstract,
 } as const;
 
-// Required field validation errors for Project Abstract form
+// Errors anchor to the visible file chooser (`attachment-visible`), not the hidden value
+// input, so the alert link focuses the control the user acts on. The empty field is now
+// genuinely absent rather than an empty File, so it reports as required.
 export const PROJECT_ABSTRACT_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
-    fieldId: "attachment",
-    message: "{} is not of type string",
+    fieldId: "attachment-visible",
+    message: "Project Abstract File is required",
   },
 ];

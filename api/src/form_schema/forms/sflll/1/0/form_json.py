@@ -555,6 +555,8 @@ FORM_XML_TRANSFORM_RULES = {
                 "if_true": {
                     "target": "MaterialChangeSupplement",
                     "type": "nested_object",
+                    "namespace": "SFLLL_2_0",
+                    "attributes": {"SFLLL_2_0:ReportType": "MaterialChange"},
                     "source_fields": {
                         "material_change_year": "MaterialChangeYear",
                         "material_change_quarter": "MaterialChangeQuarter",
@@ -642,6 +644,7 @@ FORM_XML_TRANSFORM_RULES = {
             "entity_type": {
                 "xml_transform": {
                     "target": "EntityType",
+                    "static_value": "Prime",
                 }
             },
             "organization_name": {
@@ -689,10 +692,13 @@ FORM_XML_TRANSFORM_RULES = {
         "tier": {
             "xml_transform": {
                 "target": "Tier",
-                "type": "nested_object",
+                "type": "conditional",
+                "conditional_transform": {
+                    "type": "compose_object",
+                    "field_mapping": {"TierValue": "reporting_entity.tier"},
+                    "attributes": {"ReportEntityType": "reporting_entity.entity_type"},
+                },
             },
-            # The tier value is nested under TierValue in the XSD
-            # We need to map the tier integer to TierValue
         },
     },
     "federal_agency_department": {
@@ -801,7 +807,9 @@ FORM_XML_TRANSFORM_RULES = {
             },
         },
     },
-    # Individuals performing services (array of up to 10)
+    # KNOWN LIMITATION (follow-up to #10424): this expects individual.name + nested
+    # individual.address, but the JSON schema defines a flat individual + sibling address,
+    # so schema-shaped responses drop this section. Needs a restructuring transform to fix.
     "individual_performing_service": {
         "xml_transform": {
             "target": "IndividualsPerformingServices",
@@ -816,6 +824,7 @@ FORM_XML_TRANSFORM_RULES = {
                 "xml_transform": {
                     "target": "Name",
                     "type": "nested_object",
+                    "source_path": "individual_performing_service.individual",
                 },
                 "prefix": {
                     "xml_transform": {
@@ -852,6 +861,7 @@ FORM_XML_TRANSFORM_RULES = {
                 "xml_transform": {
                     "target": "Address",
                     "type": "nested_object",
+                    "source_path": "individual_performing_service.address",
                 },
                 "street1": {
                     "xml_transform": {

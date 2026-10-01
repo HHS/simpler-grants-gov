@@ -24,6 +24,8 @@ export const createOpportunityAction = async (
     agency_id: formData.get("agencyId") as string,
     opportunity_number: formData.get("opportunityNumber") as string,
     opportunity_title: formData.get("opportunityTitle") as string,
+    tagline: formData.get("tagline") as string,
+    purpose_statement: formData.get("purposeStatement") as string,
     category: formData.get("category") as string,
     category_explanation: formData.get("categoryExplanation") as string,
     assistance_listing_number: formData.get(

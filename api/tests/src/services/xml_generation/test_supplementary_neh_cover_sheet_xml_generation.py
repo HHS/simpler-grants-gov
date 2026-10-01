@@ -217,9 +217,9 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         # Verify application info structure
         assert "ApplicationInfoGroup>" in xml_data
         assert "AdditionalFunding>Yes<" in xml_data  # Boolean converted to Yes
-        assert "AdditionalFundingExplanation>State humanities council<" in xml_data
+        assert "AddFundingExplanation>State humanities council<" in xml_data
         assert "TypeofApplication>Supplement<" in xml_data
-        assert "SupplementalGrantNumber>NEH-12345-20<" in xml_data
+        assert "SupGrantNumber>NEH-12345-20<" in xml_data
 
     def test_generate_neh_cover_sheet_xml_additional_funding_false(self):
         """Test NEH Cover Sheet XML generation with additional_funding=False."""
@@ -284,8 +284,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
         # Verify all three disciplines
         assert "ProjFieldCode>76<" in xml_data  # "Interdisciplinary: American Studies" -> "76"
-        assert "SecondaryProjFieldCode>4<" in xml_data  # "History: U.S. History" -> "4"
-        assert "TertiaryProjFieldCode>55<" in xml_data  # "Literature: American Literature" -> "55"
+        assert "ProjFieldCode2>4<" in xml_data  # "History: U.S. History" -> "4"
+        assert "ProjFieldCode3>55<" in xml_data  # "Literature: American Literature" -> "55"
 
     def test_generate_neh_cover_sheet_xml_without_optional_disciplines(self):
         """Test NEH Cover Sheet XML generation without optional secondary/tertiary disciplines."""
@@ -317,8 +317,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
         # Verify primary is present, secondary/tertiary are not
         assert "ProjFieldCode>40<" in xml_data  # "Languages: English" -> "40"
-        assert "SecondaryProjFieldCode" not in xml_data
-        assert "TertiaryProjFieldCode" not in xml_data
+        assert "ProjFieldCode2" not in xml_data
+        assert "ProjFieldCode3" not in xml_data
 
     def test_generate_neh_cover_sheet_xml_namespace_and_version(self):
         """Test that NEH Cover Sheet XML includes proper namespace and version attribute."""
@@ -553,7 +553,6 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
 
         return application
 
-    @pytest.mark.skip(reason="Fix existing skipped XSD validation tests #10424")
     def test_neh_cover_sheet_submission_xml_validates_against_xsd(
         self, neh_cover_sheet_application, xsd_validator
     ):

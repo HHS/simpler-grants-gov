@@ -1,0 +1,85 @@
+{
+  "name": "All Deliverables - Percent Pointed",
+  "display": "row",
+  "visualization_settings": {
+    "graph.show_goal": true,
+    "graph.y_axis.title_text": "% of issues with story points",
+    "graph.show_values": true,
+    "table.cell_column": "total_issues",
+    "graph.goal_label": "100%",
+    "graph.series_order_dimension": null,
+    "graph.x_axis.title_text": "deliverable",
+    "graph.goal_value": 100,
+    "graph.metrics": [
+      "percent_pointed"
+    ],
+    "graph.label_value_formatting": "compact",
+    "graph.series_order": null,
+    "table.pivot_column": "issues_with_points",
+    "column_settings": {
+      "[\"name\",\"percent_pointed\"]": {
+        "suffix": "%",
+        "number_style": "decimal"
+      }
+    },
+    "series_settings": {
+      "percent_pointed": {
+        "color": "#227FD2",
+        "title": "Pointed"
+      },
+      "percent_non_pointed": {
+        "color": "#F7C4C4",
+        "title": "Not Pointed"
+      }
+    },
+    "graph.dimensions": [
+      "deliverable_title"
+    ],
+    "stackable.stack_type": "stacked"
+  },
+  "template_tags": {
+    "quad": {
+      "widget-type": "string/=",
+      "default": [
+        "Quad 3"
+      ],
+      "name": "quad",
+      "type": "dimension",
+      "id": "bd31d27c-471b-4b04-b637-95ef91751418",
+      "dimension": [
+        "field",
+        310,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Quad",
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_quad",
+        "column": "name"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "id": "bd31d27c-471b-4b04-b637-95ef91751418",
+      "type": "string/=",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "quad"
+        ]
+      ],
+      "name": "Quad",
+      "slug": "quad",
+      "default": [
+        "Quad 3"
+      ],
+      "required": true
+    }
+  ]
+}

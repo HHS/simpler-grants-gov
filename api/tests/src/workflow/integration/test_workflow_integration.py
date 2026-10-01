@@ -215,7 +215,6 @@ def test_can_move_basic_test_workflow_start_to_requires_modification_and_then_to
     workflow = WorkflowFactory.create(
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
-        has_opportunity=True,
     )
 
     # Require modification, which will move it back to the start state
@@ -339,7 +338,6 @@ def test_basic_test_workflow_including_bad_events(
     workflow = WorkflowFactory.create(
         current_workflow_state=BasicState.MIDDLE,
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
-        has_opportunity=True,
     )
 
     # This event can go through the API as it is a real event

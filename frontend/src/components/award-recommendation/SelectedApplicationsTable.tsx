@@ -97,7 +97,7 @@ export default function SelectedApplicationsTable({
       tableCell(
         appSubmission.application_submission_number ? (
           <Link
-            href={`/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
+            href={`/grantor/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
             className="usa-link"
           >
             {appSubmission.application_submission_number}

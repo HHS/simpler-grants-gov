@@ -18,7 +18,9 @@ terraform -chdir="infra/${app_name}/app-config" init > /dev/null
 terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
 ./bin/terraform-init "infra/${app_name}/database" "${environment}"
 db_role_manager_function_name=$(terraform -chdir="infra/${app_name}/database" output -raw role_manager_function_name)
-db_config=$(terraform -chdir="infra/${app_name}/app-config" output -json environment_configs | jq -r ".${environment}.database_config")
+# Use --arg + .[$env] so environment names with a hyphen (e.g. "infra-dev") are
+# treated as a single jq key; a bare .infra-dev parses "-" as subtraction.
+db_config=$(terraform -chdir="infra/${app_name}/app-config" output -json environment_configs | jq -r --arg env "${environment}" '.[$env].database_config')
 payload="{\"action\":\"check\",\"config\":${db_config}}"
 
 echo "======================="

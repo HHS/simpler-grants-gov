@@ -1,8 +1,9 @@
 import pytest
 
+from src.constants.lookup_constants import WorkflowType
 from src.workflow.state_persistence.opportunity_persistence_model import OpportunityPersistenceModel
 from src.workflow.workflow_errors import InvalidEntityForWorkflow
-from tests.src.db.models.factories import OpportunityFactory, WorkflowFactory
+from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory, WorkflowFactory
 
 
 def test_opportunity_persistence_model(db_session, enable_factory_create):
@@ -15,10 +16,22 @@ def test_opportunity_persistence_model(db_session, enable_factory_create):
     assert model.state == "start"
 
 
-def test_opportunity_persistence_no_opportunity(db_session, enable_factory_create):
-    workflow = WorkflowFactory.create(has_application=True)
+def test_opportunity_persistence_no_opportunity(
+    db_session,
+    enable_factory_create,
+):
+    application = ApplicationFactory.create()
+
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+        application=application,
+    )
 
     with pytest.raises(
-        InvalidEntityForWorkflow, match="Expected the workflow entity to be an opportunity"
+        InvalidEntityForWorkflow,
+        match="Expected the workflow entity to be an opportunity",
     ):
-        OpportunityPersistenceModel(db_session, workflow)
+        OpportunityPersistenceModel(
+            db_session=db_session,
+            workflow=workflow,
+        )

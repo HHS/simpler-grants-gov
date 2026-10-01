@@ -17,6 +17,7 @@ locals {
     LOGIN_GOV_JWK_ENDPOINT           = "https://idp.int.identitysandbox.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT          = "https://idp.int.identitysandbox.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT         = "https://idp.int.identitysandbox.gov/api/openid_connect/token"
+    LOGIN_GOV_LOGOUT_ENDPOINT        = "https://idp.int.identitysandbox.gov/openid_connect/logout"
     LOGIN_GOV_REDIRECT_SCHEME        = var.enable_https ? "https" : "http"
     API_JWT_ISSUER                   = "simpler-grants-api-${var.environment}"
     API_JWT_AUDIENCE                 = "simpler-grants-api-${var.environment}"
@@ -76,9 +77,21 @@ locals {
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"
     }
 
+    # HMAC key used to hash user API keys before storage. Set by hand, once per
+    # environment - rotating it invalidates every hash already stored.
+    API_KEY_PEPPER = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/api-key-pepper"
+    }
+
     LOGIN_FINAL_DESTINATION = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/frontend-login-redirect-url"
+    }
+
+    LOGOUT_FINAL_DESTINATION = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/frontend-logout-redirect-url"
     }
 
     FRONTEND_BASE_URL = {

@@ -93,6 +93,8 @@ export const SaveSearchSelector = ({
   // fetch saved searches on page load, log in, or on any new saved search
   // not explicitly dependent on user changes, but fetchSavedSearches is, so will still fire
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSavedSearches()
       .then(() => setRunPostFetchActions(true))
       .catch(noop);
@@ -108,6 +110,8 @@ export const SaveSearchSelector = ({
         savedSearchQueryValue ||
         (newSavedSearches.length && newSavedSearches[0]);
       if (savedSearchToSetInSelectAfterFetch) {
+        // TODO #9633
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedSavedSearch(savedSearchToSetInSelectAfterFetch);
       }
       setRunPostFetchActions(false);
@@ -134,6 +138,8 @@ export const SaveSearchSelector = ({
       searchParams.get("savedSearch") &&
       prevSearchParams?.get("savedSearch")
     ) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSavedSearch("");
       removeQueryParam("savedSearch");
     }

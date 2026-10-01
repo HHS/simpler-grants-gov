@@ -19,7 +19,22 @@ output "service_endpoint" {
   value       = module.service.public_endpoint
 }
 
+
+output "cdn_endpoint" {
+  description = "The public-files CloudFront distribution's own *.cloudfront.net domain name."
+  value       = module.service.cdn_endpoint
+}
+
+output "cdn_distribution_id" {
+  description = "The public-files CloudFront distribution's ID."
+  value       = module.service.cdn_distribution_id
+}
+
+output "cdn_aliases" {
+  description = "Alternate domain names attached to the public-files CloudFront distribution."
+  value       = module.service.cdn_aliases
+}
+
 output "service_name" {
   value = local.service_config.service_name
 }
-

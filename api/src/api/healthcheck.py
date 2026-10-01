@@ -1,15 +1,17 @@
 import logging
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
 from apiflask import APIBlueprint
-from grants_shared.api import response
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.api.schemas.extension import Schema, fields
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
-from grants_shared.util.deploy_metadata import get_deploy_metadata_config
 from sqlalchemy import text
 from werkzeug.exceptions import ServiceUnavailable
+
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
+from src.api import response
+from src.api.maintenance_mode import is_maintenance_mode_enabled
+from src.api.route_utils import raise_flask_error
+from src.api.schemas.extension import Schema, fields
+from src.api.schemas.response_schema import AbstractResponseSchema
+from src.util.deploy_metadata import get_deploy_metadata_config
 
 logger = logging.getLogger(__name__)
 
@@ -58,14 +60,17 @@ healthcheck_blueprint = APIBlueprint("healthcheck", __name__, tag="Health")
 @healthcheck_blueprint.doc(responses=[200, ServiceUnavailable.code])
 @flask_db.with_db_session()
 def health(db_session: db.Session) -> response.ApiResponse:
-    try:
-        with db_session.begin():
-            if db_session.scalar(text("SELECT 1 AS healthy")) != 1:
-                raise Exception("Connection to Postgres DB failure")
+    # During a planned maintenance window the DB is intentionally unreachable, so skip
+    # the DB check to keep ALB/Docker healthchecks green and avoid recycling tasks.
+    if not is_maintenance_mode_enabled():
+        try:
+            with db_session.begin():
+                if db_session.scalar(text("SELECT 1 AS healthy")) != 1:
+                    raise Exception("Connection to Postgres DB failure")
 
-    except Exception:
-        logger.exception("Connection to DB failure")
-        raise_flask_error(ServiceUnavailable.code, message="Service Unavailable")
+        except Exception:
+            logger.exception("Connection to DB failure")
+            raise_flask_error(ServiceUnavailable.code, message="Service Unavailable")
 
     metadata_config = get_deploy_metadata_config()
 

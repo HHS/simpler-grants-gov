@@ -12,26 +12,22 @@ import {
 } from "@playwright/test";
 import { EPA_KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
 import { epaKeyContactsHappyPathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
+import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
-import { getOpportunityId } from "tests/e2e/utils/application/get-opportunityId-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
-const { testOrgLabel, targetEnv } = playwrightEnv;
-const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
+const { testOrgLabel } = playwrightEnv;
+const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging to avoid OTP rate-limiting
 test.beforeEach(({ page: _ }, testInfo) => {
-  if (targetEnv === "staging") {
-    test.skip(
-      testInfo.project.name !== "Chrome",
-      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-    );
-  }
+  skipNonChromeOnStaging(testInfo);
 });
 
 test(

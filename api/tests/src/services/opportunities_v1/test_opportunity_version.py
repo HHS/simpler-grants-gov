@@ -35,6 +35,8 @@ def test_save_opportunity_version(db_session, enable_factory_create):
         "legacy_opportunity_id": opp.legacy_opportunity_id,
         "opportunity_title": opp.opportunity_title,
         "opportunity_number": opp.opportunity_number,
+        "tagline": opp.tagline,
+        "purpose_statement": opp.purpose_statement,
         "opportunity_status": None,
         "category_explanation": opp.category_explanation,
         "top_level_agency_name": agency_top.agency_name,

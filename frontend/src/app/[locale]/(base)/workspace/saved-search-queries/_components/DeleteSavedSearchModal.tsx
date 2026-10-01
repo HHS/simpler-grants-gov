@@ -117,8 +117,11 @@ export function DeleteSavedSearchModal({
       <SimplerModal
         modalRef={modalRef}
         className="text-wrap"
-        modalId={"save-search"}
+        modalId={modalId}
         titleText={updated ? undefined : t("title")}
+        // The success state is a heading and a close button with nothing to
+        // describe, so it intentionally goes without a description.
+        descriptionId={updated ? undefined : `${modalId}-description`}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
@@ -132,7 +135,10 @@ export function DeleteSavedSearchModal({
           />
         ) : (
           <>
-            <p className="font-sans-2xs margin-y-4">
+            <p
+              id={`${modalId}-description`}
+              className="font-sans-2xs margin-y-4"
+            >
               {t("description")} &quot;{queryName}&quot;?
             </p>
             {apiError && (

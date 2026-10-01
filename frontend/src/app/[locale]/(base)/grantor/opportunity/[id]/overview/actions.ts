@@ -1,7 +1,7 @@
 "use server";
 
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { publishOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import { publishOpportunityForGrantor } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";

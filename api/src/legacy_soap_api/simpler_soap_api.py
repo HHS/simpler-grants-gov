@@ -1,9 +1,8 @@
 import logging
 
-import grants_shared.adapters.db as db
 from flask import request
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
+import src.adapters.db as db
 from src.legacy_soap_api.legacy_soap_api_auth import (
     ENABLE_SIMPLER_ROUTE_KEY,
     MTLS_CERT_HEADER_KEY,
@@ -39,6 +38,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     write_debug_data_to_s3,
 )
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ def get_simpler_soap_response(
                 "soap_response_operation": simpler_soap_client.operation_config.response_operation_name,
             }
         )
-    except (SOAPInvalidEnvelope, SOAPOperationNotSupported):
+    except SOAPInvalidEnvelope, SOAPOperationNotSupported:
         logger.info(
             "simpler_soap_api: Initialization failed due to invalid request",
             exc_info=True,
@@ -201,6 +201,9 @@ def process_simpler_request(
         # call legacy and don't call simpler
         is_alternate_response: bool = False
         if is_get_opportunity_list or is_legacy_only_certificate:
+            logger.info(
+                "simpler_soap_api: no legacy certificate or is an opportunity list call",
+            )
             soap_legacy_response = get_legacy_response(soap_request)
             write_debug_data_to_s3(soap_request, soap_legacy_response)
             return soap_legacy_response.to_flask_response()
@@ -224,6 +227,9 @@ def process_simpler_request(
             soap_legacy_response = get_legacy_response(soap_request)
         # Fallback: return legacy response and don't call simpler
         else:
+            logger.info(
+                "simpler_soap_api: defaulting to legacy response",
+            )
             soap_legacy_response = get_legacy_response(soap_request)
             write_debug_data_to_s3(soap_request, soap_legacy_response)
             return soap_legacy_response.to_flask_response()
@@ -241,6 +247,9 @@ def process_simpler_request(
         return error_response.to_flask_response()
     if auth and auth.certificate.legacy_certificate:
         try:
+            logger.info(
+                msg="simpler_soap_api: getting simpler response",
+            )
             simpler_soap_response = get_simpler_soap_response(
                 soap_request, soap_legacy_response, db_session
             )

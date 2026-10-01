@@ -1,0 +1,36 @@
+{
+  "name": "ETL Issue - Count Pointed vs Unpointed %",
+  "display": "pie",
+  "visualization_settings": {
+    "pie.metric": "pointed_count",
+    "pie.dimension": [
+      "pointed_count"
+    ],
+    "pie.rows": [
+      {
+        "key": "pointed",
+        "name": "Pointed",
+        "originalName": "pointed",
+        "color": "#509EE3",
+        "defaultColor": false,
+        "enabled": true,
+        "hidden": false,
+        "isOther": false
+      },
+      {
+        "key": "unpointed",
+        "name": "Not Pointed",
+        "originalName": "unpointed",
+        "color": "#EF8C8C",
+        "defaultColor": false,
+        "enabled": true,
+        "hidden": false,
+        "isOther": false
+      }
+    ],
+    "pie.show_labels": false,
+    "pie.decimal_places": 0,
+    "pie.slice_threshold": 1,
+    "pie.percent_visibility": "both"
+  }
+}

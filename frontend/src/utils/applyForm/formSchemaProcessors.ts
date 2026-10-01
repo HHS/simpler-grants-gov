@@ -1,5 +1,4 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { JSONSchema7 } from "json-schema";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 /*
@@ -90,7 +89,7 @@ export const extricateConditionalValidationRules = (
       if (isBasicallyAnObject(value)) {
         const parentPathPrefix = parentPath ? `${parentPath}/` : "";
         const nestedUpdate = extricateConditionalValidationRules(
-          value as JSONSchema7,
+          value,
           `${parentPathPrefix}${key}`,
         );
         return {
@@ -121,7 +120,7 @@ export const extricateConditionalValidationRules = (
                 conditionalValidationRules,
                 propertiesWithoutComplexConditionals,
               } = extricateConditionalValidationRules(
-                nestedEntry as JSONSchema7,
+                nestedEntry,
                 fullParentPath,
               );
               return {

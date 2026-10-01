@@ -256,10 +256,9 @@ class TestSF424BXMLGeneration:
             "{http://apply.grants.gov/forms/SF424B-V1.1}SubmittedDate",
         ]
 
-        assert child_tags == expected_order, (
-            f"Element order should match XSD schema. "
-            f"Expected: {expected_order}, Got: {child_tags}"
-        )
+        assert (
+            child_tags == expected_order
+        ), f"Element order should match XSD schema. Expected: {expected_order}, Got: {child_tags}"
 
         # Verify the generated XML contains the expected structure (string comparison)
         assert "<glob:FormVersionIdentifier>1.1</glob:FormVersionIdentifier>" in xml_data
@@ -374,7 +373,6 @@ class TestSF424BXMLGeneration:
         assert "<SF424B:SubmittedDate>2025-04-15</SF424B:SubmittedDate>" in xml_data
 
 
-@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestSF424BXSDValidation:
     """XSD validation tests for SF-424B form XML."""
 
@@ -489,7 +487,6 @@ class TestSF424BXSDValidation:
             f"Generated XML:\n{sf424b_xml[:2000]}"
         )
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sf424b_minimal_data_validates_against_xsd(
         self, enable_factory_create, xsd_validator, seed_form_registry
     ):

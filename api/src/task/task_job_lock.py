@@ -4,11 +4,11 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
-from grants_shared.adapters import db
-from grants_shared.util import datetime_util
 from sqlalchemy import select
 
+from src.adapters import db
 from src.db.models.task_models import JobLock
+from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -68,6 +68,7 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
             "job_type": self.job_type,
             "internal_lock_id": self.internal_lock_id,
             "job_lock_enabled": self.config.enable_job_lock,
+            "lock_duration_minutes": self.lock_duration_minutes,
         }
         self.lock_acquired_at: datetime | None = None
 

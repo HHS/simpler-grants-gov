@@ -189,6 +189,7 @@ export function ShareOpportunityToOrganizationsModal({
       modalId={MODAL_ID}
       className="text-wrap maxw-tablet-lg share-opportunity-modal"
       titleText="Share this opportunity with an organization"
+      descriptionId={`${MODAL_ID}-description`}
     >
       <p id={`${MODAL_ID}-description`} className="usa-sr-only">
         {t("modal.description")}

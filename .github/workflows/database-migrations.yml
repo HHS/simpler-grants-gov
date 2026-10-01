@@ -29,6 +29,9 @@ jobs:
     with:
       app_name: ${{ inputs.app_name }}
       ref: ${{ inputs.version }}
+      # Publish the image to the deploy environment's own AWS account (no-op for
+      # environments whose account is the shared account).
+      environment: ${{ inputs.environment }}
   run-migrations:
     name: Run migrations
     runs-on: ubuntu-22.04

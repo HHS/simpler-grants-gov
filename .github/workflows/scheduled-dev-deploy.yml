@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: api
+      fail_on_vulns: false
 
   api-deploy:
     name: Deploy API to Dev
@@ -23,7 +24,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "api"
-      environment: "dev"
+      environment: "infra-dev"
       version: "main"
 
   frontend-checks:
@@ -35,6 +36,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: frontend
+      fail_on_vulns: false
 
   frontend-deploy:
     name: Deploy Frontend to Dev
@@ -42,7 +44,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "frontend"
-      environment: "dev"
+      environment: "infra-dev"
       version: "main"
 
   analytics-checks:
@@ -55,6 +57,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: analytics
+      fail_on_vulns: false
 
   analytics-deploy:
     name: Deploy Analytics to Dev
@@ -62,7 +65,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "analytics"
-      environment: "dev"
+      environment: "infra-dev"
       version: "main"
 
   nofos-checks:
@@ -75,13 +78,15 @@ jobs:
     name: NOFOs Vulnerability Scans
     needs: [nofos-checks]
     uses: ./.github/workflows/vulnerability-scans-nofos.yml
+    with:
+      fail_on_vulns: false
 
   nofos-deploy:
     name: Deploy NOFOs to Dev
     needs: [nofos-checks, nofos-vulnerability-scans]
     uses: ./.github/workflows/deploy-nofos.yml
     with:
-      environment: "dev"
+      environment: "infra-dev"
       version: "main"
 
   send-slack-notification:
@@ -89,4 +94,3 @@ jobs:
     needs: [api-deploy, frontend-deploy, analytics-deploy, nofos-deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
-

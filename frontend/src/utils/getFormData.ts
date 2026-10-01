@@ -1,4 +1,5 @@
 import { RJSFSchema } from "@rjsf/utils";
+import { ErrorObject } from "ajv";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
@@ -34,6 +35,30 @@ type FormDataResult =
         updatedAt?: string;
       };
     };
+
+const MAX_LOGGED_SCHEMA_ERRORS = 5;
+
+/*
+  Condenses ajv output to a single line. Logging the whole ui schema plus every
+  error produced hundreds of lines per invalid form, which buried the rest of the
+  server and e2e output. `params` is kept because ajv puts the offending key in
+  there rather than in `message` for keywords like additionalProperties and enum.
+*/
+const summarizeUiSchemaErrors = (errors: ErrorObject[]) => {
+  const summary = errors
+    .slice(0, MAX_LOGGED_SCHEMA_ERRORS)
+    .map((error) => {
+      const params = Object.keys(error.params ?? {}).length
+        ? ` ${JSON.stringify(error.params)}`
+        : "";
+
+      return `${error.instancePath || "/"}: ${error.message ?? "invalid"}${params}`;
+    })
+    .join("; ");
+  const remaining = errors.length - MAX_LOGGED_SCHEMA_ERRORS;
+
+  return remaining > 0 ? `${summary} (+${remaining} more)` : summary;
+};
 
 /*
   fetches application form data
@@ -98,7 +123,13 @@ export default async function getFormData({
     formValidationWarnings =
       (response.warnings as unknown as FormValidationWarning[]) || null;
   } catch (e) {
-    if (parseErrorStatus(e as ApiRequestError) === 404) {
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
+
+    if (errorStatus === 401) {
+      return { error: "UnauthorizedError" };
+    }
+
+    if (errorStatus === 404) {
       console.error(
         `Error retrieving application details for applicationID (${applicationId}), appFormId ${appFormId}:`,
         e,
@@ -120,8 +151,7 @@ export default async function getFormData({
   if (schemaErrors) {
     console.error(
       `Error validating form ui schema for form id: ${formId}`,
-      formUiSchema,
-      schemaErrors,
+      summarizeUiSchemaErrors(schemaErrors),
     );
     return { error: "TopLevelError" };
   }

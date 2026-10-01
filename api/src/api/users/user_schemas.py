@@ -1,10 +1,6 @@
 from enum import StrEnum
 from typing import Any
 
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
-from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
-from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import pre_dump
 
 from src.api.opportunities_v1.opportunity_schemas import (
@@ -12,6 +8,9 @@ from src.api.opportunities_v1.opportunity_schemas import (
     SavedOpportunityResponseV1Schema,
 )
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicationStatus,
     ExternalUserType,
@@ -26,6 +25,7 @@ from src.db.models.user_models import (
     LinkExternalUser,
     OrganizationUserRole,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class ResourceSchema(StrEnum):
@@ -127,6 +127,20 @@ class UserLoginSchema(Schema):
     piv_required = fields.Boolean(
         allow_none=True,
         metadata={"description": "Whether the user is required to use a PIV to login"},
+    )
+
+
+class UserLoginGovLogoutCallbackSchema(Schema):
+    # This is defining the inputs we receive on the callback from login.gov's
+    # logout endpoint and must match:
+    # https://developers.login.gov/oidc/logout/
+    state = fields.String(
+        metadata={
+            "description": "The state value originally provided by us when calling login.gov"
+        },
+        # We don't use the state, but it can be passed, so allow it to be missing/null.
+        required=False,
+        allow_none=True,
     )
 
 
@@ -501,7 +515,22 @@ class UserApiKeyListResponseSchema(AbstractResponseSchema):
 
 
 class UserUpdateProfileRequestSchema(UserProfile):
-    pass
+    first_name = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={
+            "description": "The first name of the user",
+            "example": "John",
+        },
+    )
+    last_name = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={
+            "description": "The last name of the user",
+            "example": "Smith",
+        },
+    )
 
 
 class UserUpdateProfileResponseSchema(AbstractResponseSchema):
@@ -523,7 +552,7 @@ class RoleSchema(Schema):
         resource_role: (
             ApplicationUserRole | OrganizationUserRole | InternalUserRole | AgencyUserRole
         ),
-        **kwargs: Any
+        **kwargs: Any,
     ) -> dict:
         role = resource_role.role
         return {

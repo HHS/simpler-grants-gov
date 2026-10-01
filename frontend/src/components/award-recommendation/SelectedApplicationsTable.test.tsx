@@ -51,7 +51,7 @@ describe("SelectedApplicationsTable", () => {
     expect(screen.getByText("SUB-26-0001")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "SUB-26-0001" })).toHaveAttribute(
       "href",
-      "/award-recommendation/ar-id-123/application-submissions/63588df8-f2d1-44ed-a201-5804abba696b/edit",
+      "/grantor/award-recommendation/ar-id-123/application-submissions/63588df8-f2d1-44ed-a201-5804abba696b/edit",
     );
     expect(screen.getByText("Test project")).toBeInTheDocument();
     expect(screen.getByText("Test Org")).toBeInTheDocument();

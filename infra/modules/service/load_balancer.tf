@@ -14,10 +14,11 @@ resource "aws_lb" "alb" {
   depends_on      = [aws_s3_bucket_policy.access_logs]
   ip_address_type = "dualstack"
   # adjust name for the mtls alb that's in slot 1
-  name            = count.index == 0 ? var.service_name : format("%s-mtls", var.service_name)
-  idle_timeout    = "120"
-  internal        = false
-  security_groups = [aws_security_group.alb.id]
+  name         = count.index == 0 ? var.service_name : format("%s-mtls", var.service_name)
+  idle_timeout = "120"
+  internal     = false
+
+  security_groups = [count.index == 0 && local.enable_internal_alb ? aws_security_group.alb_restricted[0].id : aws_security_group.alb.id]
   subnets         = module.network.public_subnet_ids
 
   # Use a separate line to support automated terraform destroy commands
@@ -66,6 +67,22 @@ resource "aws_lb_listener" "alb_listener_http" {
       message_body = "Not Found"
       status_code  = "404"
     }
+  }
+}
+
+# Temporary until the mTLS cert is issued: a listener is what associates mtls_tg with the ALB.
+resource "aws_lb_listener" "mtls_listener_http" {
+  # checkov:skip=CKV_AWS_2:Plain HTTP is deliberate until the mTLS certificate exists.
+  # checkov:skip=CKV_AWS_103:TLS policy is not applicable to an HTTP listener.
+  count = var.enable_mtls_load_balancer && var.mtls_certificate_arn == null ? 1 : 0
+
+  load_balancer_arn = aws_lb.alb[1].arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.mtls_tg[0].arn
   }
 }
 

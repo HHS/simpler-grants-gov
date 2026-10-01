@@ -1,4 +1,3 @@
-import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
@@ -25,7 +24,7 @@ describe("PrintAttachmentWidget", () => {
     schema: {
       title: "Upload Documents",
       type: "array",
-    } as RJSFSchema,
+    },
     value: [],
     rawErrors: [],
     formClassName: "test-form-class",

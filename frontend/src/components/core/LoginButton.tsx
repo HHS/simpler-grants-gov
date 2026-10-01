@@ -21,7 +21,7 @@ export function LoginLink({
       key="login-link"
       className={className}
       onClick={() => {
-        storeCurrentPage();
+        storeCurrentPage(location.pathname, location.search);
       }}
     >
       {children}

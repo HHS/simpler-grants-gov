@@ -10,6 +10,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import {
   SUPP_COVER_SHEET_NEH_FORM_MATCHER,
   SUPP_COVER_SHEET_NEH_REQUIRED_FIELD_ERRORS,
@@ -18,6 +19,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import {
@@ -26,25 +28,13 @@ import {
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 
-// Environment-specific opportunity IDs
-// Staging: 39df8091-6e99-4b0f-9db7-1f3aca9cb6e5
-// Local:   c3c59562-a54f-4203-b0f6-98f2f0383481
-const OPPORTUNITY_ID =
-  targetEnv === "staging"
-    ? "39df8091-6e99-4b0f-9db7-1f3aca9cb6e5"
-    : "c3c59562-a54f-4203-b0f6-98f2f0383481";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
-  if (targetEnv === "staging") {
-    test.skip(
-      testInfo.project.name !== "Chrome",
-      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-    );
-  }
+  skipNonChromeOnStaging(testInfo);
 });
 
 test(

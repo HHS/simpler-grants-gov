@@ -107,10 +107,8 @@ export interface ApplicationHistory {
   created_at: string;
 }
 
-export interface ApplicationAttachmentUploadResponse extends APIResponse {
-  data: {
-    application_attachment_id: string;
-  };
+export interface ApplicationAttachmentCreateResponse extends APIResponse {
+  data: Attachment;
 }
 
 export interface ApplicationStartApiResponse extends APIResponse {
@@ -125,13 +123,17 @@ export interface ApplicationSubmitResponse {
   internal_request_id?: string;
 }
 
-export interface ApplicationSubmitApiResponse
-  extends Omit<APIResponse, "errors"> {
+export interface ApplicationSubmitApiResponse extends Omit<
+  APIResponse,
+  "errors"
+> {
   data: ApplicationSubmitResponse;
 }
 
-export interface ApplicationFormDetailApiResponse
-  extends Omit<APIResponse, "warnings"> {
+export interface ApplicationFormDetailApiResponse extends Omit<
+  APIResponse,
+  "warnings"
+> {
   data: ApplicationFormDetail;
   warnings: FormValidationWarnings;
 }

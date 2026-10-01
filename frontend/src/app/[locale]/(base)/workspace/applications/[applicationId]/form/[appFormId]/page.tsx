@@ -89,7 +89,8 @@ async function FormPage({ params }: formPageProps) {
     updatedAt,
   } = data;
 
-  const isBudgetForm = formName.includes("SF-424A");
+  const isBudgetForm =
+    formName.includes("SF-424A") || formName.includes("SF-424C");
 
   const warnings = isBudgetForm
     ? formValidationWarnings?.map((warning) => ({

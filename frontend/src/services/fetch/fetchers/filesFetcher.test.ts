@@ -14,18 +14,25 @@ import {
 
 const mockFetchFileUpload = jest.fn();
 const mockFetchFileUploadWithMethod = jest.fn();
-// slightly simplifies things by just asserting against the file name rather than the full file...
-const mockCreateFormData = jest.fn();
-const mockFetch = jest.fn();
+const mockAxiosPost = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchFileUploadWithMethod: (arg: unknown) =>
     mockFetchFileUploadWithMethod(arg) as unknown,
 }));
 
-jest.mock("src/utils/fileUtils/createFormData", () => ({
-  createFormData: (fileName: string) => mockCreateFormData(fileName) as unknown,
+jest.mock("axios", () => ({
+  post: (...args: unknown[]) => mockAxiosPost(...args) as unknown,
+  isAxiosError: (error: unknown): boolean =>
+    !!(error as { isAxiosError?: boolean } | null)?.isAxiosError,
 }));
+
+// the shape of an AxiosError as far as uploadFileToS3 is concerned. `response`
+// is absent when the request never got one
+const axiosError = (response?: { status: number }) => ({
+  isAxiosError: true,
+  response,
+});
 
 describe("fetchFileUploadDetails", () => {
   afterEach(() => {
@@ -51,51 +58,103 @@ describe("fetchFileUploadDetails", () => {
 });
 
 describe("uploadFileToS3", () => {
-  let originalFetch: typeof global.fetch;
+  let consoleErrorSpy: jest.SpyInstance;
+
   beforeEach(() => {
-    originalFetch = global.fetch;
-    global.fetch = mockFetch;
-    // mocking this because in the jest env File objects don't have an array buffer
-    mockCreateFormData.mockImplementation((fileName: string) => {
-      const testFormData = new FormData();
-      testFormData.append("file", fileName);
-      return testFormData;
-    });
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
   });
+
   afterEach(() => {
-    global.fetch = originalFetch;
     jest.resetAllMocks();
+    consoleErrorSpy.mockRestore();
   });
-  it("calls fetch with the expected arguments", async () => {
-    mockFetch.mockResolvedValue({ ok: true });
-    const expectedFormData = new FormData();
+
+  const postedFormDataEntries = () => {
+    const [, formData] = mockAxiosPost.mock.calls[0] as [string, FormData];
+    return Array.from(formData.entries()).map(([key, value]) => [
+      key,
+      value instanceof File ? value.name : value,
+    ]);
+  };
+
+  it("calls axios.post with the expected arguments", async () => {
+    mockAxiosPost.mockResolvedValue({ status: 204 });
     const fakeFile = new File(["hi"], "hi.txt");
     const jsonBody = { something: "else" };
-    expectedFormData.append("file", "hi.txt");
-    expectedFormData.append("something", "else");
 
     const response = await uploadFileToS3("some url", jsonBody, fakeFile);
-    expect(mockFetch).toHaveBeenCalledWith("some url", {
-      method: "POST",
-      body: expectedFormData,
-    });
+
+    expect(mockAxiosPost).toHaveBeenCalledWith(
+      "some url",
+      expect.any(FormData),
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+    expect(postedFormDataEntries()).toEqual([
+      ["something", "else"],
+      ["file", "hi.txt"],
+    ]);
     expect(response).toEqual(true);
   });
+  it("skips empty body values and does not let a body `file` key clobber the upload", async () => {
+    mockAxiosPost.mockResolvedValue({ status: 204 });
+    const fakeFile = new File(["hi"], "hi.txt");
+
+    await uploadFileToS3(
+      "some url",
+      { something: "else", empty: "", file: "not-the-real-file" },
+      fakeFile,
+    );
+
+    expect(postedFormDataEntries()).toEqual([
+      ["something", "else"],
+      ["file", "hi.txt"],
+    ]);
+  });
   it("throws on failed request", async () => {
-    mockFetch.mockResolvedValue({ ok: false });
-    const expectedFormData = new FormData();
+    // axios rejects on a non-2xx status rather than resolving
+    mockAxiosPost.mockRejectedValue(axiosError({ status: 403 }));
     const fakeFile = new File(["hi"], "hi.txt");
     const jsonBody = { something: "else" };
-    expectedFormData.append("file", "hi.txt");
-    expectedFormData.append("something", "else");
     const err = await wrapForExpectedError(async () => {
       return await uploadFileToS3("some url", jsonBody, fakeFile);
     });
-    expect(mockFetch).toHaveBeenCalledWith("some url", {
-      method: "POST",
-      body: expectedFormData,
-    });
+    expect(mockAxiosPost).toHaveBeenCalledWith(
+      "some url",
+      expect.any(FormData),
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+    expect(postedFormDataEntries()).toEqual([
+      ["something", "else"],
+      ["file", "hi.txt"],
+    ]);
     expect(err).toBeInstanceOf(ApiRequestError);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error uploading file to S3 with status: 403",
+    );
+  });
+  it("throws when the request fails without a response", async () => {
+    mockAxiosPost.mockRejectedValue(axiosError());
+    const fakeFile = new File(["hi"], "hi.txt");
+
+    const err = await wrapForExpectedError(async () => {
+      return await uploadFileToS3("some url", { something: "else" }, fakeFile);
+    });
+
+    expect(err).toBeInstanceOf(ApiRequestError);
+    expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining("with status"),
+    );
+  });
+  it("throws when the failure is not an axios error", async () => {
+    mockAxiosPost.mockRejectedValue(new Error("something else went wrong"));
+    const fakeFile = new File(["hi"], "hi.txt");
+
+    const err = await wrapForExpectedError(async () => {
+      return await uploadFileToS3("some url", { something: "else" }, fakeFile);
+    });
+
+    expect(err).toBeInstanceOf(ApiRequestError);
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Error uploading file to S3");
   });
 });
 

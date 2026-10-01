@@ -17,6 +17,24 @@ services:
       - default
       - api_grants_backend
 
+  nextjs-prod:
+    container_name: next-prod
+    platform: linux/amd64
+    build:
+      context: .
+      target: release
+    env_file:
+      - ./.env.local
+    volumes:
+      - ./src:/frontend/src
+      - ./public:/frontend/public
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - default
+      - api_grants_backend
+
   storybook:
     container_name: storybook
     platform: linux/amd64

@@ -55,7 +55,6 @@ def test_process_workflow_event(db_session, enable_factory_create):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -97,7 +96,6 @@ def test_process_workflow_event_missing_process_context(db_session, enable_facto
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -153,7 +151,6 @@ def test_process_workflow_event_missing_user(db_session, enable_factory_create):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -180,7 +177,6 @@ def test_process_workflow_event_invalid_event(db_session, enable_factory_create)
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -196,7 +192,6 @@ def test_process_workflow_event_invalid_event_for_current_state(db_session, enab
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     # start_workflow is valid, just not for the current state
@@ -213,7 +208,6 @@ def test_process_workflow_event_invalid_current_state(db_session, enable_factory
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state="not-a-valid-state",
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -229,7 +223,6 @@ def test_process_workflow_is_already_at_end(db_session, enable_factory_create):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.END,
-        has_opportunity=True,
         is_active=False,
     )
 

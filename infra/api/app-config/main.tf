@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1"]
+  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-sgg1"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -43,6 +43,10 @@ locals {
   # 2. Configures email notifications using AWS SES
   enable_notifications = true
 
+  # Whether or not the application should enable SMS notifications via AWS End User
+  # Messaging. Not yet used by this application; defaults to false until adopted.
+  enable_sms_notifications = false
+
   environment_configs = {
     dev      = module.dev_config
     staging  = module.staging_config
@@ -51,6 +55,20 @@ locals {
     grantor1 = module.grantor1_config
     prod     = module.prod_config
     training = module.training_config
+    # infra-dev is a dev-like environment in the "dev" AWS account. Its api and
+    # frontend run in the infra-dev VPC; its infra-dev-grants-management VPC holds a separate stub service
+    # (see infra/sgm/service).
+    infra-dev = module.infra_dev_config
+
+    infra-staging = module.infra_staging_config
+
+    infra-training = module.infra_training_config
+
+    # Team environments in the "dev" AWS account; all deploy only api + frontend. The
+    # infra-grantee/grantor ones mirror the shared account, infra-sgg2 has no counterpart.
+    infra-sgg2 = module.infra_sgg2_config
+    infra-sgg3 = module.infra_sgg3_config
+    infra-sgg1 = module.infra_sgg1_config
   }
 
   # Map from environment name to the account name for the AWS account that
@@ -83,13 +101,19 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared   = "simpler-grants-gov"
-    dev      = "simpler-grants-gov"
-    grantee1 = "simpler-grants-gov"
-    grantee2 = "simpler-grants-gov"
-    grantor1 = "simpler-grants-gov"
-    staging  = "simpler-grants-gov"
-    prod     = "simpler-grants-gov"
+    shared         = "simpler-grants-gov"
+    dev            = "simpler-grants-gov"
+    grantee1       = "simpler-grants-gov"
+    grantee2       = "simpler-grants-gov"
+    grantor1       = "simpler-grants-gov"
+    staging        = "simpler-grants-gov"
+    prod           = "simpler-grants-gov"
+    infra-dev      = "dev"      # infra-dev environment lives in AWS account 061664787759
+    infra-staging  = "staging"  # infra-staging environment lives in AWS account 317380566348
+    infra-training = "training" # infra-training environment lives in AWS account 049145893907
+    infra-sgg2     = "dev"      # infra-sgg2 environment lives in AWS account 061664787759, alongside infra-dev
+    infra-sgg3     = "dev"      # infra-sgg3 environment lives in AWS account 061664787759, alongside infra-dev
+    infra-sgg1     = "dev"      # infra-sgg1 environment lives in AWS account 061664787759, alongside infra-dev
   }
 
   # The name of the network that contains the resources shared across all

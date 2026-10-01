@@ -2,22 +2,15 @@ import logging
 from typing import Never
 from uuid import UUID
 
-import grants_shared.adapters.db as db
 from apiflask.exceptions import HTTPError
-from grants_shared.adapters.db import flask_db
-from grants_shared.api import response
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
+import src.adapters.db as db
+from src.adapters.db import flask_db
+from src.api import response
 from src.api.application_alpha.application_blueprint import application_blueprint
 from src.api.application_alpha.application_schemas import (
     ApplicationAddOrganizationResponseSchema,
-    ApplicationAttachmentCreateRequestSchema,
-    ApplicationAttachmentCreateResponseSchema,
-    ApplicationAttachmentDeleteResponseSchema,
     ApplicationAttachmentGetResponseSchema,
-    ApplicationAttachmentUpdateRequestSchema,
-    ApplicationAttachmentUpdateResponseSchema,
     ApplicationAuditRequestSchema,
     ApplicationAuditResponseSchema,
     ApplicationFormGetResponseSchema,
@@ -33,17 +26,17 @@ from src.api.application_alpha.application_schemas import (
     ApplicationUpdateRequestSchema,
     ApplicationUpdateResponseSchema,
 )
+from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_or_api_user_key_multi_auth
 from src.constants.lookup_constants import ApplicationAuditEvent
 from src.db.models.user_models import UserTokenSession
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.add_organization_to_application import (
     add_organization_to_application,
 )
 from src.services.applications.application_audit import add_audit_event_by_id
 from src.services.applications.create_application import create_application
-from src.services.applications.create_application_attachment import create_application_attachment
-from src.services.applications.delete_application_attachment import delete_application_attachment
 from src.services.applications.get_application import get_application_with_warnings
 from src.services.applications.get_application_attachment import (
     get_application_attachment_with_auth,
@@ -53,7 +46,6 @@ from src.services.applications.list_application_audit import list_application_au
 from src.services.applications.list_application_submissions import list_application_submissions
 from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application import update_application
-from src.services.applications.update_application_attachment import update_application_attachment
 from src.services.applications.update_application_form import update_application_form
 
 logger = logging.getLogger(__name__)
@@ -341,32 +333,6 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
     return response.ApiResponse(message="Success")
 
 
-@application_blueprint.post("/applications/<uuid:application_id>/attachments")
-@application_blueprint.input(ApplicationAttachmentCreateRequestSchema(), location="form_and_files")
-@application_blueprint.output(ApplicationAttachmentCreateResponseSchema())
-@application_blueprint.doc(responses=[200, 401, 404, 422])
-@application_blueprint.auth_required(api_jwt_auth)
-@flask_db.with_db_session()
-def application_attachment_create(
-    db_session: db.Session, application_id: UUID, form_and_files_data: dict
-) -> response.ApiResponse:
-    """Create an attachment on an application"""
-    add_extra_data_to_current_request_logs({"application_id": application_id})
-    logger.info("POST /alpha/applications/:application_id/attachments")
-
-    # Get user from token session
-    token_session = api_jwt_auth.get_user_token_session()
-    user = token_session.user
-
-    with db_session.begin():
-        db_session.add(token_session)
-        application_attachment = create_application_attachment(
-            db_session, application_id, user, form_and_files_data
-        )
-
-    return response.ApiResponse(message="Success", data=application_attachment)
-
-
 @application_blueprint.get(
     "/applications/<uuid:application_id>/attachments/<uuid:application_attachment_id>"
 )
@@ -394,66 +360,6 @@ def application_attachment_get(
         )
 
     return response.ApiResponse(message="Success", data=application_attachment)
-
-
-@application_blueprint.put(
-    "/applications/<uuid:application_id>/attachments/<uuid:application_attachment_id>"
-)
-@application_blueprint.input(ApplicationAttachmentUpdateRequestSchema(), location="form_and_files")
-@application_blueprint.output(ApplicationAttachmentUpdateResponseSchema())
-@application_blueprint.doc(responses=[200, 401, 404, 422])
-@application_blueprint.auth_required(api_jwt_auth)
-@flask_db.with_db_session()
-def application_attachment_update(
-    db_session: db.Session,
-    application_id: UUID,
-    application_attachment_id: UUID,
-    form_and_files_data: dict,
-) -> response.ApiResponse:
-    """Update an attachment on an application"""
-    add_extra_data_to_current_request_logs(
-        {"application_id": application_id, "application_attachment_id": application_attachment_id}
-    )
-    logger.info("PUT /alpha/applications/:application_id/attachments/:application_attachment_id")
-
-    # Get user from token session
-    token_session = api_jwt_auth.get_user_token_session()
-    user = token_session.user
-
-    with db_session.begin():
-        db_session.add(token_session)
-        application_attachment = update_application_attachment(
-            db_session, application_id, application_attachment_id, user, form_and_files_data
-        )
-
-    return response.ApiResponse(message="Success", data=application_attachment)
-
-
-@application_blueprint.delete(
-    "/applications/<uuid:application_id>/attachments/<uuid:application_attachment_id>"
-)
-@application_blueprint.output(ApplicationAttachmentDeleteResponseSchema())
-@application_blueprint.doc(responses=[200, 401, 404])
-@application_blueprint.auth_required(api_jwt_auth)
-@flask_db.with_db_session()
-def application_attachment_delete(
-    db_session: db.Session, application_id: UUID, application_attachment_id: UUID
-) -> response.ApiResponse:
-    """Delete an application attachment"""
-    add_extra_data_to_current_request_logs(
-        {"application_id": application_id, "application_attachment_id": application_attachment_id}
-    )
-    logger.info("DELETE /alpha/applications/:application_id/attachments/:application_attachment_id")
-
-    # Get user from token session
-    token_session = api_jwt_auth.get_user_token_session()
-    user = token_session.user
-
-    with db_session.begin():
-        db_session.add(token_session)
-        delete_application_attachment(db_session, application_id, application_attachment_id, user)
-
-    return response.ApiResponse(message="Success")
 
 
 @application_blueprint.post("/applications/<uuid:application_id>/audit_history")

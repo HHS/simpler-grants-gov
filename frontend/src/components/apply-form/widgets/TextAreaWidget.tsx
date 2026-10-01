@@ -60,7 +60,10 @@ function TextAreaWidget<
     : title
       ? `label-for-${id}`
       : undefined;
-  const inputValue = value !== undefined ? String(value as string) : "";
+  // I think the intention here is that it is a string or boolean, but no easy way to type that given
+  // the open nature of the value prop at this point. We can remove this when we make the widget value prop generic
+  // eslint-disable-next-line @typescript-eslint/no-base-to-string
+  const inputValue = value !== undefined ? String(value) : "";
 
   return (
     <FormGroup error={error} key={`form-group__text-area--${id}`}>
@@ -68,15 +71,15 @@ function TextAreaWidget<
         idFor={id}
         title={title}
         required={required}
-        description={description as string}
+        description={description}
         labelType={labelType}
       />
       {error && (
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <Textarea
-        minLength={(minLength as number) ?? undefined}
-        maxLength={(maxLength as number) ?? undefined}
+        minLength={minLength ?? undefined}
+        maxLength={maxLength ?? undefined}
         id={id}
         key={id}
         name={id}

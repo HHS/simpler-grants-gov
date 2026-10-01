@@ -8,15 +8,29 @@ resource "aws_cloudwatch_log_resource_policy" "policy" {
 
 data "aws_iam_policy_document" "policy" {
   statement {
+    sid    = "OpenSearchLogs"
     effect = "Allow"
     principals {
-      identifiers = [
-        # docs: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/createdomain-configure-slow-logs.html
-        "es.amazonaws.com",
-        # docs: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html
-        "delivery.logs.amazonaws.com"
-      ]
-      type = "Service"
+      identifiers = ["es.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "logs:PutLogEvents",
+      "logs:PutLogEventsBatch",
+      "logs:CreateLogStream",
+    ]
+    resources = ["arn:aws:logs:*"]
+  }
+
+  # Vended logs (VPC flow logs, WAF, etc.). delivery.logs.amazonaws.com presents
+  # a logs arn as aws:SourceArn.
+  # docs: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html
+  statement {
+    sid    = "VendedLogs"
+    effect = "Allow"
+    principals {
+      identifiers = ["delivery.logs.amazonaws.com"]
+      type        = "Service"
     }
     actions = [
       "logs:PutLogEvents",

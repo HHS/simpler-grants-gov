@@ -1,18 +1,20 @@
 name: Release Deploy
-run-name: Release Deploy ${{ inputs.version || github.ref_name }} to ${{ github.event_name == 'release' && 'prod + training' || inputs.environment }}
+run-name: Release Deploy ${{ inputs.version || github.ref_name }} to ${{ github.event_name == 'release' && 'prod + infra-training' || inputs.environment }}
 
 # This workflow orchestrates deployments across all services in a specific order:
 # API first, then FE and Analytics after API.
 # Skip NOFOs (at least for now).
 #
-# For releases (prod + training), all prod services deploy first, then all
-# training services. This ensures prod is fully deployed and verified before
-# training begins.
+# For releases (prod + infra-training), all prod services deploy first, then all
+# infra-training services. This ensures prod is fully deployed and verified
+# before infra-training begins.
 #
 # The git ref that is built and deployed is determined as follows:
 #   - release event: the published release's tag (github.ref)
 #   - workflow_dispatch: the optional `version` input (a tag, branch, or SHA),
 #     falling back to the branch/tag the workflow was run from (github.ref).
+#
+# Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment.
 #
 # All CI checks and vulnerability scans run in parallel for speed.
 # Only the deployment phase is serialized.
@@ -95,24 +97,13 @@ jobs:
     with:
       app_name: analytics
 
-  # trigger runs of local and staging core regression e2e tests
-  # but do not wait, or block any deployments based on results
+  # Local E2Es can run independently and do not need to wait for deployment.
   e2e-test-local:
     name: E2E Local (on Deploy)
     if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
     uses: ./.github/workflows/ci-frontend-e2e.yml
     secrets: inherit
     with:
-      playwright_tags: "@smoke|@core-regression"
-
-  e2e-test-staging:
-    name: E2E Staging (on Deploy)
-    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
-    uses: ./.github/workflows/e2e-staging.yml
-    secrets: inherit
-    with:
-      version: main
-      target: staging
       playwright_tags: "@smoke|@core-regression"
 
   # =====================================================
@@ -130,7 +121,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "api"
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
 
   # 2. Deploy Frontend after API completes successfully
@@ -140,8 +131,19 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "frontend"
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
+      
+  e2e-test-staging:
+    name: E2E Staging (on Deploy)
+    needs: [deploy-frontend]
+    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
+    uses: ./.github/workflows/e2e-staging.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version || github.ref }}
+      target: staging
+      playwright_tags: "@smoke|@core-regression"
 
   # 3. Deploy Analytics after API completes successfully
   deploy-analytics:
@@ -150,7 +152,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "analytics"
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
 
   # 3b. Deploy NOFOs (skipped - they deploy manually)
@@ -161,21 +163,21 @@ jobs:
     needs: [nofos-checks, nofos-vulnerability-scans, deploy-api]
     uses: ./.github/workflows/deploy-nofos.yml
     with:
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
 
   # =====================================================
-  # PHASE 3: Deploy to training (release only)
+  # PHASE 3: Deploy to infra-training (release only)
   #
   # Only runs for release events. Waits for ALL prod deploys to complete
   # before starting. Same order: API first, then Frontend + Analytics.
-  # If any prod deploy fails, training deploys are skipped.
+  # If any prod deploy fails, infra-training deploys are skipped.
   # =====================================================
 
-  # 4. Deploy API to training after all prod deploys complete
+  # 4. Deploy API to infra-training after all prod deploys complete
   deploy-api-training:
     if: ${{ github.event_name == 'release' }}
-    name: Deploy API (training)
+    name: Deploy API (infra-training)
     needs:
       [
         api-checks,
@@ -187,30 +189,30 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "api"
-      environment: "training"
+      environment: "infra-training"
       version: ${{ inputs.version || github.ref }}
 
-  # 5. Deploy Frontend to training after training API completes
+  # 5. Deploy Frontend to infra-training after infra-training API completes
   deploy-frontend-training:
     if: ${{ github.event_name == 'release' }}
-    name: Deploy Frontend (training)
+    name: Deploy Frontend (infra-training)
     needs: [frontend-checks, frontend-vulnerability-scans, deploy-api-training]
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "frontend"
-      environment: "training"
+      environment: "infra-training"
       version: ${{ inputs.version || github.ref }}
 
-  # 6. Deploy Analytics to training after training API completes
+  # 6. Deploy Analytics to infra-training after infra-training API completes
   deploy-analytics-training:
     if: ${{ github.event_name == 'release' }}
-    name: Deploy Analytics (training)
+    name: Deploy Analytics (infra-training)
     needs:
       [analytics-checks, analytics-vulnerability-scans, deploy-api-training]
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "analytics"
-      environment: "training"
+      environment: "infra-training"
       version: ${{ inputs.version || github.ref }}
 
   # =====================================================

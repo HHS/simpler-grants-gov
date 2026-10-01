@@ -36,21 +36,22 @@ export const newExpirationDate = () =>
   new Date(Date.now() + 12 * 60 * 60 * 1000);
 
 /*
-  encrypts an API token passed as an env var into a fake client token
+  encrypts a server session token (fetched from POST /v1/internal/e2e-token)
+  into a fake client token
 */
 export const generateSpoofedSession = async (
-  manualToken?: string,
+  serverToken: string,
 ): Promise<string> => {
   if (!clientJwtKey) {
     throw new Error("Unable to spoof login, missing auth key");
   }
 
-  if (!playwrightEnv.fakeServerToken && !manualToken) {
+  if (!serverToken) {
     throw new Error("Unable to spoof login, missing server token");
   }
 
   const fakeToken = await new SignJWT({
-    token: manualToken || playwrightEnv.fakeServerToken,
+    token: serverToken,
   })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
     .setIssuedAt()
@@ -60,19 +61,28 @@ export const generateSpoofedSession = async (
   return fakeToken;
 };
 
-// For bypassing login in LOCAL test runs
-// sets a spoofed login token on the cookie in order to allow for logging in without
-// clicking through the login process
+// For bypassing login in E2E test runs: encodes the server session token into a
+// spoofed client session cookie so tests skip the login process.
 export const createSpoofedSessionCookie = async (
   context: BrowserContext,
-  manualToken?: string,
+  serverToken: string,
 ) => {
-  const token = await generateSpoofedSession(manualToken);
+  const token = await generateSpoofedSession(serverToken);
+  // Mirror the attributes the app sets on the real session cookie
+  // (see createSession in src/services/auth/session.ts). In particular:
+  //  - sameSite "Lax": addCookies otherwise defaults to SameSite=None, which
+  //    Webkit/Firefox reject over plain HTTP.
+  //  - expires: without it the cookie is a session cookie, which Webkit will
+  //    not replay on the client-side fetch to /api/auth/session, silently
+  //    logging the spoofed user out on the client.
   await context.addCookies([
     {
       name: "session",
       value: token,
       url: playwrightEnv.baseUrl,
+      httpOnly: true,
+      sameSite: "Lax",
+      expires: Math.floor(newExpirationDate().getTime() / 1000),
     },
   ]);
 };

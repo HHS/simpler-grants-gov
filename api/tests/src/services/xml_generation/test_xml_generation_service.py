@@ -52,8 +52,8 @@ class TestXMLGenerationService:
             f"<SF424_4_0:CertificationAgree>{YES_VALUE}</SF424_4_0:CertificationAgree>" in xml_data
         )
 
-    def test_generate_xml_no_application_data(self):
-        """Test XML generation when no application data is provided."""
+    def test_generate_xml_empty_application_data(self):
+        """Empty application data still generates a valid root element (all fields optional)."""
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data={}, transform_config=FORM_XML_TRANSFORM_RULES
@@ -61,17 +61,17 @@ class TestXMLGenerationService:
 
         response = service.generate_xml(request)
 
-        # Verify error response
-        assert response.success is False
-        assert response.xml_data is None
-        assert "No application data provided" in response.error_message
+        assert response.success is True
+        assert response.xml_data is not None
+        assert "SF424_4_0" in response.xml_data
 
     def test_generate_xml_with_none_application_data(self):
         """Test XML generation when application data is None (validation error)."""
         # Pydantic should prevent None values for application_data
         with pytest.raises(ValidationError) as e:
             XMLGenerationRequest(
-                application_data=None, transform_config=FORM_XML_TRANSFORM_RULES  # type: ignore[arg-type]
+                application_data=None,
+                transform_config=FORM_XML_TRANSFORM_RULES,  # type: ignore[arg-type]
             )
 
         # Verify that Pydantic correctly validates the input

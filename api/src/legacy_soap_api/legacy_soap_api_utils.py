@@ -7,14 +7,14 @@ from collections.abc import Callable, Iterator
 from enum import StrEnum
 from typing import Any
 
-import grants_shared.adapters.db as db
+import flask
 import requests
 from defusedxml import minidom
-from grants_shared.adapters.aws import S3Config
-from grants_shared.util import file_util
 from lxml import etree
 from sqlalchemy import exists, select
 
+import src.adapters.db as db
+from src.adapters.aws import S3Config
 from src.db.models.competition_models import (
     ApplicationSubmission,
     ApplicationSubmissionRetrieved,
@@ -25,6 +25,8 @@ from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -216,16 +218,16 @@ def get_soap_error_response(
     faultstring: str = "Server error has occurred",
     headers: dict | None = None,
 ) -> SOAPResponse:
-    err = f"""
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Body>
-        <soap:Fault>
-            <faultcode>{faultcode}</faultcode>
-            <faultstring>{faultstring}</faultstring>
-        </soap:Fault>
-    </soap:Body>
-</soap:Envelope>
-""".encode()
+    err = (
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        f"<faultcode>{faultcode}</faultcode>"
+        f"<faultstring>{faultstring}</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode()
     return get_soap_response(data=err, status_code=500, headers=headers)
 
 
@@ -234,16 +236,16 @@ def get_soap_fault_error_response(
     faultstring: str = "Server error has occurred",
     headers: dict | None = None,
 ) -> SOAPResponse:
-    err = f"""
-    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-        <soap:Body>
-            <soap:Fault>
-                <faultcode>{faultcode}</faultcode>
-                <faultstring>{faultstring}</faultstring>
-            </soap:Fault>
-        </soap:Body>
-    </soap:Envelope>
-    """.strip()
+    err = (
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        f"<faultcode>{faultcode}</faultcode>"
+        f"<faultstring>{faultstring}</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    )
     boundary_id = str(uuid.uuid4())
     mtom_response = (
         f"--uuid:{boundary_id}\r\n"
@@ -251,7 +253,7 @@ def get_soap_fault_error_response(
         f"Content-Transfer-Encoding: binary\r\n"
         f"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         f"{err}\r\n"
-        f"--uuid:{boundary_id}--\r\n"
+        f"--uuid:{boundary_id}--"
     ).encode()
     response_headers = {
         "Content-Type": (
@@ -463,13 +465,21 @@ def get_gov_grants_tracking_number(xml_bytes: bytes) -> str | None:
 def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | None:
     xml_bytes = extract_soap_xml(soap_request.data.head())
     if not xml_bytes:
+        logger.info(
+            "simpler_soap_api: no xml_bytes",
+        )
         return None
     if soap_request.operation_name in AlternateSoapOperation:
         tracking_number = get_gov_grants_tracking_number(xml_bytes)
+        add_extra_data_to_current_request_logs({"grants_gov_tracking_number": tracking_number})
         is_zip = soap_request.operation_name == AlternateSoapOperation.GET_APPLICATION_ZIP
         if tracking_number and (
             tracking_number.startswith("GRANT8") or tracking_number.startswith("GRANT9")
         ):
+            logger.info(
+                "simpler_soap_api: using default response",
+                extra={"defaulting_response_operation_name": soap_request.operation_name},
+            )
             return DEFAULT_NOT_FOUND_RESPONSES[AlternateSoapOperation(soap_request.operation_name)](
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )
@@ -535,14 +545,14 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
     if get_soap_config().save_soap_messages_to_s3:
         try:
             s3_config = S3Config()
-            debug_identifier = uuid.uuid4()
+            internal_request_id = get_internal_request_id()
             base_path = file_util.join(
                 s3_config.draft_files_bucket_path,
                 # Not "soap": in virtual-hosted S3 URLs the object key becomes the URL path,
                 # and a WAF rule blocks paths starting with /soap -- which breaks both the
                 # upload here and downloading these files from the S3 console.
                 "soap-debug",
-                str(debug_identifier),
+                internal_request_id,
             )
             # Store as plain text so the debug files preview in the browser / S3 console
             # instead of downloading as binary/octet-stream.
@@ -573,11 +583,16 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
                 base_path,
                 "response.txt",
             )
-            file_util.write_to_file(
-                response_s3_path,
-                soap_response.to_bytes().decode("utf-8"),
-                content_type=text_content_type,
-            )
+            if soap_request and soap_request.operation_name == "GetApplicationZipRequest":
+                logger.info(
+                    "soap_client: response is not currently being logged to s3",
+                )
+            else:
+                file_util.write_to_file(
+                    response_s3_path,
+                    soap_response.to_bytes().decode("utf-8"),
+                    content_type=text_content_type,
+                )
             response_headers_s3_path = file_util.join(
                 base_path,
                 "response_headers.txt",
@@ -589,10 +604,15 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
             )
             logger.info(
                 "soap_client: debug info uploaded to s3",
-                extra={"debug_identifier": debug_identifier},
             )
         except Exception:
             logger.exception(
                 "soap_client: failed to upload debug info to s3",
                 extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
             )
+
+
+def get_internal_request_id() -> str:
+    if flask.has_request_context():
+        return str(getattr(flask.g, "internal_request_id", uuid.uuid4()))
+    return str(uuid.uuid4())

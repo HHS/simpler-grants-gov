@@ -7,8 +7,7 @@ import { SortOptions } from "./searchSortTypes";
 
 export type OneOfFilter = { one_of: string[] };
 export type RelativeDateRangeFilter =
-  | { end_date_relative: number }
-  | { start_date_relative: number };
+  { end_date_relative: number } | { start_date_relative: number };
 export type BooleanFilter = { one_of: boolean[] };
 
 export interface SearchFilterRequestBody {

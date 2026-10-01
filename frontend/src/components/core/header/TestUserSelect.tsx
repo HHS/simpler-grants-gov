@@ -17,7 +17,7 @@ export const TestUserSelect = ({ testUsers }: { testUsers: TestUser[] }) => {
   });
 
   const logInTestUser = (jwt: string) => {
-    storeCurrentPage();
+    storeCurrentPage(location.pathname, location.search);
     setLoggingIn(true);
     // will redirect to /login on success
     clientFetch("/api/user/local-quick-login", {
@@ -32,6 +32,7 @@ export const TestUserSelect = ({ testUsers }: { testUsers: TestUser[] }) => {
       .then(() => {
         setLoggingIn(false);
         router.refresh();
+        return;
       })
       .catch((e) => {
         console.error("unable to log in local test user", e);

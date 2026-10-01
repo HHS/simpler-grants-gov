@@ -9,6 +9,7 @@ from src.legacy_soap_api.grantors.schemas.update_application_info_schemas import
     UpdateApplicationInfoRequest,
     UpdateApplicationInfoResponse,
 )
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 
 
 class TestUpdateApplicationInfoRequestSchema(unittest.TestCase):
@@ -32,7 +33,7 @@ class TestUpdateApplicationInfoRequestSchema(unittest.TestCase):
         assert isinstance(UpdateApplicationInfoRequest(**schema_dict), UpdateApplicationInfoRequest)
 
     def test_missing_required_fields(self) -> None:
-        with pytest.raises(ValidationError):
+        with pytest.raises(SOAPFaultException):
             UpdateApplicationInfoRequest(**{})
 
     def test_invalid_agency_notes_length(self) -> None:

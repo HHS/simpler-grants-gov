@@ -11,7 +11,7 @@ jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
 }));
 
 const fetchMock = jest.fn(() => Promise.resolve({ ok: true } as Response));
-global.fetch = fetchMock as unknown as typeof global.fetch;
+global.fetch = fetchMock;
 
 const UseUserConsumer = () => {
   const { error, isLoading, user } = useUser();

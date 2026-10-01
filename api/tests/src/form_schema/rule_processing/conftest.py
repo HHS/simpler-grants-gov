@@ -10,7 +10,7 @@ def setup_context(
     do_pre_population: bool = True,
     do_post_population: bool = True,
     do_field_validation: bool = True,
-    **kwargs: dict
+    **kwargs: dict,
 ):
     application_form = setup_application_for_form_validation(
         json_data=json_data, json_schema={}, rule_schema=rule_schema, **kwargs

@@ -6,13 +6,11 @@ import uuid
 from datetime import date
 from enum import StrEnum
 
-from grants_shared.adapters import db
-from grants_shared.adapters.aws import S3Config
-from grants_shared.adapters.db import flask_db
-from grants_shared.task.ecs_background_task import ecs_background_task
-from grants_shared.util import datetime_util, file_util
 from sqlalchemy import select
 
+from src.adapters import db
+from src.adapters.aws import S3Config
+from src.adapters.db import flask_db
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,
@@ -37,6 +35,7 @@ from src.form_schema.forms import (
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
     GG_LobbyingForm_v1_1,
+    KeyContacts_v2_0,
     OtherNarrativeAttachment_v1_2,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -45,14 +44,18 @@ from src.form_schema.forms import (
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
+    SF424c_v2_0,
     SF424d_v1_1,
+    SF424Short_v3_0,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
     get_active_forms,
 )
 from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
+from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
+from src.util import datetime_util, file_util
 
 logger = logging.getLogger(__name__)
 
@@ -595,6 +598,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "552d5866-501a-40b6-b1ce-2efc7a2d3aa5",
             ),
             (
+                "E2E-KC",
+                "Key Contacts Form",
+                KeyContacts_v2_0.form_id,
+                "3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31",
+            ),
+            (
                 "E2E-ONA",
                 "Other Narrative Attachments",
                 OtherNarrativeAttachment_v1_2.form_id,
@@ -631,6 +640,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             ),
             (
+                "E2E-SF424SHORT",
+                "SF-424 Short Organizational",
+                SF424Short_v3_0.form_id,
+                "425c2ffe-6fbd-4852-ab72-b64467fe3df0",
+            ),
+            (
                 "E2E-SF424A",
                 "Budget Information for Non-Construction Programs (SF-424A)",
                 SF424a_v1_0.form_id,
@@ -641,6 +656,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Assurances for Non-Construction Programs (SF-424B)",
                 SF424b_v1_1.form_id,
                 "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6",
+            ),
+            (
+                "E2E-SF424C",
+                "Budget Information for Construction Programs (SF-424C)",
+                SF424c_v2_0.form_id,
+                "a4c8e1f2-3b6d-4e91-8a2c-7f5b9d3e6a18",
             ),
             (
                 "E2E-SF424D",

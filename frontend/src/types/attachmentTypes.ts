@@ -2,10 +2,6 @@ import { APIResponse } from "src/types/apiResponseTypes";
 
 export type UploadStatus = "uploading" | "cancelled" | "completed" | "failed";
 
-export type AttachmentUploadResponse = {
-  application_attachment_id?: string;
-};
-
 export interface BasicAttachment {
   application_attachment_id: string;
   created_at: string;

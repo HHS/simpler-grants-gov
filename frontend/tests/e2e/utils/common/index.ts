@@ -14,7 +14,6 @@
 import { formatNumberWithCommas } from "./number-formatters";
 
 // Field interaction helpers.
-export { fillEmailByLabel } from "./email-field";
 export { selectOptionByLabel } from "./select-field";
 export { fillDateByLabel } from "./date-field";
 
@@ -30,6 +29,12 @@ export {
 
 // Generic shared helpers used across page flows and fixtures.
 export { formatNumberWithCommas };
+export {
+  createAuthenticatedPageLifecycle,
+  createAuthenticatedStorageState,
+  createPageWithStorageState,
+  type AuthenticatedStorageState,
+} from "./auth-storage-state-utils";
 export { runSharedFieldFill } from "./shared-field-filling";
 export { runFieldFillBatch } from "./field-batch-filling";
 export { buildPageFieldsFromDefinitions } from "./build-page-fields-from-definitions";
@@ -50,9 +55,15 @@ export {
 // Metadata-driven validation helpers and required-field gating helpers.
 export {
   assertCharacterLimitMessageCount,
+  assertCharacterLimitValidationsFromDefinitions,
   buildOverLimitFillData,
   getCharacterLimitValidationMessage,
   getCharacterLimitedFields,
-} from "./character-limit-fill-data-utils";
+} from "./character-limit-validation-utils";
+export {
+  assertRequiredFieldValidationsFromDefinitions,
+  buildRequiredFieldErrorsFromDefinitions,
+  getRequiredValidationFields,
+} from "./required-field-validation-utils";
 export { getRequiredFields } from "./required-fields-button-state-utils";
 export { fillRequiredFieldsAndAssertButtonState } from "./required-fields-button-state-utils";

@@ -22,8 +22,8 @@ export const userRoleForOrganization = (
     : organizationPrivilegeSet.organization_user_roles[0].role_name;
 };
 
-export const storeCurrentPage = () => {
-  const startURL = `${location.pathname}${location.search}`;
+export const storeCurrentPage = (pathname: string, search: string) => {
+  const startURL = `${pathname}${search}`;
   if (startURL !== "") {
     SessionStorage.setItem("login-redirect", startURL);
   }

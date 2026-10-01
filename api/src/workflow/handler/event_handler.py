@@ -1,9 +1,9 @@
 import logging
 import uuid
 
-from grants_shared.adapters import db
 from sqlalchemy import select
 
+from src.adapters import db
 from src.constants.lookup_constants import WorkflowEventType, WorkflowType
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow
@@ -177,7 +177,7 @@ class EventHandler:
             # otherwise won't realize the StrEnum is also a string and error.
             current_workflow_state=state_machine_cls.initial_state.value,
             is_active=True,
-            **workflow_entity
+            **workflow_entity,
         )
         self.db_session.add(workflow)
 

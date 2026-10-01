@@ -2,8 +2,10 @@ import uuid
 from datetime import date
 
 import pytest
+from sqlalchemy import select
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
+from src.db.models.opportunity_models import OpportunityAudit
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.lib.opportunity_test_utils import update_opportunity_summary_request
 from tests.src.db.models.factories import (
@@ -221,6 +223,7 @@ def test_opportunity_summary_update_invalid_award_amount(
 
 def test_opportunity_summary_update_successful(
     client,
+    db_session,
     opportunity_with_summary,
     opportunity_summary_auth_data,
 ):
@@ -275,6 +278,22 @@ def test_opportunity_summary_update_successful(
     for applicant_type in update_request["applicant_types"]:
         assert applicant_type in summary_data["applicant_types"]
 
+    opportunity, _ = opportunity_with_summary
+    audit_rows = (
+        db_session.execute(
+            select(OpportunityAudit).where(
+                OpportunityAudit.opportunity_id == opportunity.opportunity_id
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(audit_rows) == 1
+    assert (
+        audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED
+    )
+    assert audit_rows[0].nonforecast_opportunity_summary is not None
+
 
 def test_opportunity_summary_update_schema_validation(
     client, opportunity_with_summary, opportunity_summary_auth_data
@@ -285,7 +304,7 @@ def test_opportunity_summary_update_schema_validation(
 
     # Create request with invalid field values
     invalid_request = {
-        "summary_description": "a" * 20000,  # Exceeds max length of 18000
+        "summary_description": "a " * 1000,  # Exceeds max length of 500 words
         "is_cost_sharing": True,
         "post_date": "2026-03-10",
         "close_date": "2027-03-10",

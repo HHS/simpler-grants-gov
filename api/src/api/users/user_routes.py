@@ -2,17 +2,16 @@ import logging
 from uuid import UUID
 
 import flask
-from grants_shared.adapters import db
-from grants_shared.adapters.db import flask_db
-from grants_shared.api import response
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.auth.api_jwt_auth import refresh_token_expiration
-from grants_shared.auth.login_gov_jwt_auth import get_final_redirect_uri
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-from grants_shared.util.dict_util import flatten_dict
 
 import src.adapters.search.flask_opensearch as flask_opensearch
-from src.adapters import search
+from src.adapters import db, search
+from src.adapters.db import flask_db
+from src.adapters.oauth.login_gov.login_gov_jwt import (
+    get_final_logout_redirect_uri,
+    get_final_redirect_uri,
+)
+from src.api import response
+from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
@@ -56,10 +55,18 @@ from src.api.users.user_schemas import (
     UserUpdateSavedSearchResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth
-from src.auth.auth_utils import with_login_redirect_error_handler
-from src.auth.login_gov_jwt_auth import get_login_gov_redirect_uri
+from src.auth.auth_utils import (
+    with_login_redirect_error_handler,
+    with_logout_redirect_error_handler,
+)
+from src.auth.jwt import refresh_token_expiration
+from src.auth.login_gov_jwt_auth import (
+    get_login_gov_logout_redirect_uri,
+    get_login_gov_redirect_uri,
+)
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import UserTokenSession
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.users.create_api_key import create_api_key
 from src.services.users.create_saved_opportunity import create_saved_opportunity
 from src.services.users.create_saved_search import create_saved_search
@@ -82,6 +89,7 @@ from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
 )
+from src.services.users.logout_user import logout_user
 from src.services.users.org_invitation_response import org_invitation_response
 from src.services.users.rename_api_key import rename_api_key
 from src.services.users.set_saved_opportunity_notification_settings import (
@@ -90,6 +98,7 @@ from src.services.users.set_saved_opportunity_notification_settings import (
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
 from src.services.users.user_can_access import check_user_can_access
+from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +109,12 @@ you to an OAuth provider where you can sign into an account.
 Do not try to use the execute option below as OpenAPI will not redirect your browser for you.
 
 The token you receive can then be set to the X-SGG-Token header for authenticating with endpoints.
+"""
+
+LOGOUT_DESCRIPTION = """
+To use this endpoint, click [this link](/v1/users/logout) which will redirect you
+to an OAuth provider where you can logout of your account in both our system and
+the OAuth system.
 """
 
 
@@ -146,6 +161,33 @@ def login_result() -> flask.Response:
 
     # Echo back the query args as JSON for some readability
     return flask.jsonify(flask.request.args)
+
+
+@user_blueprint.get("/logout")
+@user_blueprint.doc(responses=[302], description=LOGOUT_DESCRIPTION)
+@with_logout_redirect_error_handler()
+@flask_db.with_db_session()
+def user_logout(db_session: db.Session) -> flask.Response:
+    logger.info("GET /v1/users/logout")
+
+    with db_session.begin():
+        # This endpoint doesn't require any auth token, but
+        # if it's provided, we'll handle logging the user out of our system.
+        logout_user(db_session, flask.request.headers.get("X-SGG-Token", None))
+
+    return response.redirect_response(get_login_gov_logout_redirect_uri())
+
+
+@user_blueprint.get("/logout/callback")
+@with_logout_redirect_error_handler()
+@user_blueprint.doc(hide=True)
+def user_logout_callback() -> flask.Response:
+    logger.info("GET /v1/users/logout/callback")
+
+    # We don't have any logic to run here,
+    # we just redirect to the final destination
+    # in our frontend
+    return response.redirect_response(get_final_logout_redirect_uri(message="success"))
 
 
 @user_blueprint.post("/token/logout")

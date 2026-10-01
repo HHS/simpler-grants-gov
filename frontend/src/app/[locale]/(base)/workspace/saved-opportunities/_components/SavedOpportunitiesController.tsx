@@ -38,6 +38,8 @@ export function SavedOpportunitiesController({
   const hasOrganizations = organizations.length > 0 && !hasOrganizationsError;
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpportunitiesState(opportunities);
   }, [opportunities]);
 
@@ -64,6 +66,8 @@ export function SavedOpportunitiesController({
   useEffect(() => {
     if (shouldOpenModal && selectedOpportunityId) {
       modalRef.current?.toggleModal();
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShouldOpenModal(false);
     }
   }, [selectedOpportunityId, shouldOpenModal]);

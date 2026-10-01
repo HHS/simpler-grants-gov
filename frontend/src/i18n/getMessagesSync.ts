@@ -9,11 +9,11 @@ type Messages = {
 export function getMessagesSync(locale: string): Messages {
   switch (locale) {
     case "en":
-      return En as Messages;
+      return En;
     case "es":
-      return Es as Messages;
+      return Es;
     default:
-      return En as Messages;
+      return En;
   }
 }
 

@@ -95,7 +95,7 @@ def lift_attributes(parsed, reserved_keys):
     """
     attributes = {}
     for key, value in parsed.items():
-        if key in reserved_keys:
+        if key in reserved_keys or value is None:
             continue
         if key in TRUNCATE_FIELDS:
             attr_value = sanitize_field(value)
@@ -103,7 +103,7 @@ def lift_attributes(parsed, reserved_keys):
                 attr_value = json.dumps(attr_value, default=str)
                 if len(attr_value) > MAX_FIELD_LENGTH:
                     attr_value = attr_value[:MAX_FIELD_LENGTH]
-        elif value is None or isinstance(value, (str, int, float, bool)):
+        elif isinstance(value, (str, int, float, bool)):
             attr_value = value
             if isinstance(attr_value, str) and len(attr_value) > MAX_FIELD_LENGTH:
                 attr_value = attr_value[:MAX_FIELD_LENGTH]

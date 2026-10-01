@@ -49,8 +49,13 @@ terraform {
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~>5.6.0"
+      source = "hashicorp/aws"
+      # The template's upstream pin is ~>5.6.0, but this repo's network module keeps
+      # terraform-aws-modules/vpc/aws at v5.13.0 (for its IPv6/DNS64 subnet support,
+      # which older vpc module versions compatible with ~>5.6.0 may not fully support),
+      # and v5.13.0 itself requires aws >=5.46. Kept at the repo's pre-upgrade floor
+      # (unbounded above, same as before this PR) rather than adopting the upstream pin.
+      version = ">= 5.46.0"
     }
   }
 
@@ -61,6 +66,8 @@ terraform {
 
 provider "aws" {
   region = local.region
+  # Refuse to operate against the wrong account (covers plan/apply/destroy).
+  allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
   }
@@ -71,9 +78,9 @@ provider "aws" {
 # provider in addition to the default one. This alias satisfies that requirement even
 # when manage_dns = false and no us-east-1 resources are actually created.
 provider "aws" {
-  alias  = "us-east-1"
-  region = "us-east-1"
-
+  alias               = "us-east-1"
+  region              = "us-east-1"
+  allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
   }
@@ -81,6 +88,21 @@ provider "aws" {
 
 module "project_config" {
   source = "../project-config"
+}
+
+# Resolve the account this network must deploy to (used by the provider's
+# allowed_account_ids below and by the guard), then short-circuit plan/apply if
+# the active AWS credentials are for a different account.
+module "expected_account" {
+  source       = "../modules/account-id-by-name"
+  account_name = local.network_config.account_name
+  accounts_dir = "${path.module}/../accounts"
+}
+
+module "account_guard" {
+  source              = "../modules/aws-account-guard"
+  expected_account_id = module.expected_account.account_id
+  context             = "the \"${var.network_name}\" network"
 }
 
 module "analytics_config" {
@@ -100,12 +122,16 @@ module "nofos_config" {
 }
 
 module "network" {
-  source                       = "../modules/network/resources"
-  name                         = var.network_name
-  has_database                 = local.has_database
-  has_external_non_aws_service = local.has_external_non_aws_service
-  enable_command_execution     = local.enable_command_execution
-  enable_notifications         = local.enable_notifications
+  source                                  = "../modules/network/resources"
+  name                                    = var.network_name
+  second_octet                            = local.network_config.second_octet
+  aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
+  database_subnet_group_name              = var.network_name
+  has_database                            = local.has_database
+  has_external_non_aws_service            = local.has_external_non_aws_service
+  enable_command_execution                = local.enable_command_execution
+  enable_notifications                    = local.enable_notifications
+  enable_sms_notifications                = local.enable_sms_notifications
 }
 
 module "domain" {

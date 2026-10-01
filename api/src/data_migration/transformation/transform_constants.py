@@ -4,21 +4,15 @@ from typing import TypeVar
 from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.staging.forecast import (
     TapplicanttypesForecast,
-    TapplicanttypesForecastHist,
     Tforecast,
     TfundactcatForecast,
-    TfundactcatForecastHist,
     TfundinstrForecast,
-    TfundinstrForecastHist,
 )
 from src.db.models.staging.staging_base import StagingParamMixin
 from src.db.models.staging.synopsis import (
     TapplicanttypesSynopsis,
-    TapplicanttypesSynopsisHist,
     TfundactcatSynopsis,
-    TfundactcatSynopsisHist,
     TfundinstrSynopsis,
-    TfundinstrSynopsisHist,
     Tsynopsis,
 )
 
@@ -26,6 +20,7 @@ ORPHANED_CFDA = "orphaned_cfda"
 ORPHANED_HISTORICAL_RECORD = "orphaned_historical_record"
 ORPHANED_DELETE_RECORD = "orphaned_delete_record"
 ORPHANED_COMPETITION = "orphaned_competition"
+ORPHANED_COMPETITION_INSTRUCTION = "orphaned_competition_instruction"
 
 OPPORTUNITY = "opportunity"
 ASSISTANCE_LISTING = "assistance_listing"
@@ -59,19 +54,10 @@ D = TypeVar("D", bound=ApiSchemaTable)
 
 type SourceSummary = Tforecast | Tsynopsis
 
-type SourceApplicantType = (
-    TapplicanttypesForecast
-    | TapplicanttypesForecastHist
-    | TapplicanttypesSynopsis
-    | TapplicanttypesSynopsisHist
-)
+type SourceApplicantType = (TapplicanttypesForecast | TapplicanttypesSynopsis)
 
-type SourceFundingCategory = (
-    TfundactcatForecast | TfundactcatForecastHist | TfundactcatSynopsis | TfundactcatSynopsisHist
-)
+type SourceFundingCategory = (TfundactcatForecast | TfundactcatSynopsis)
 
-type SourceFundingInstrument = (
-    TfundinstrForecastHist | TfundinstrForecast | TfundinstrSynopsisHist | TfundinstrSynopsis
-)
+type SourceFundingInstrument = (TfundinstrForecast | TfundinstrSynopsis)
 
 type SourceAny = SourceApplicantType | SourceFundingCategory | SourceFundingInstrument

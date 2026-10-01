@@ -23,9 +23,7 @@ def upgrade():
 
     # Insert Organization Admin role assignments for all existing organization owners
     # who don't already have the role
-    op.execute(
-        text(
-            """
+    op.execute(text("""
         INSERT INTO api.organization_user_role (organization_user_id, role_id, created_at, updated_at)
         SELECT
             ou.organization_user_id,
@@ -40,9 +38,7 @@ def upgrade():
             WHERE our.organization_user_id = ou.organization_user_id
             AND our.role_id = :role_id
         );
-        """
-        ).params(role_id=ORG_ADMIN_ID)
-    )
+        """).params(role_id=ORG_ADMIN_ID))
 
     # ### end Alembic commands ###
 

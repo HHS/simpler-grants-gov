@@ -8,6 +8,13 @@
 import { difference, isNumber } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 
+// workaround for RegExp.escape not being fully supported yet
+declare global {
+  interface RegExpConstructor {
+    escape?(str: string): string;
+  }
+}
+
 // Refer to tests to see how this works in practice
 export const splitMarkup = (
   markupString: string,
@@ -177,4 +184,11 @@ export const printAwsHeaders = (headers: Headers): string => {
 
 export const printResponseInfo = (response: Response): string => {
   return `Ok?: ${response.ok ? "ok" : "no"}, status: ${response.status}`;
+};
+
+// polyfill for RegExp.escape found here https://stackoverflow.com/a/6969486
+export const escapeRegExpString = (regexpString: string) => {
+  return RegExp.escape
+    ? RegExp.escape(regexpString)
+    : regexpString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };

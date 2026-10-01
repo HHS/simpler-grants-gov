@@ -4,6 +4,47 @@ from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.form_schema.shared import COMMON_SHARED_V1
 
+# Section B (budget_categories) fields that a user can enter directly. The two
+# totals (total_direct_charge_amount, total_amount) are auto-calculated and always
+# pre-populated as "0.00", so they can't be used to tell whether a row has data.
+SECTION_B_USER_ENTERED_FIELDS = [
+    "personnel_amount",
+    "fringe_benefits_amount",
+    "travel_amount",
+    "equipment_amount",
+    "supplies_amount",
+    "contractual_amount",
+    "construction_amount",
+    "other_amount",
+    "total_indirect_charge_amount",
+    "program_income_amount",
+]
+
+# Section A, Column A (activity_title) is only required on rows 2-4 when the row
+# has data entered in Section A (budget_summary) or Section B (budget_categories).
+# Row 1 is always required, which is enforced separately via prefixItems below.
+ACTIVITY_TITLE_REQUIRED_WHEN_ROW_HAS_DATA = {
+    "if": {
+        "anyOf": [
+            # Section A - budget_summary is never auto-populated, so any value present
+            # means the user entered data in this row.
+            {
+                "required": ["budget_summary"],
+                "properties": {"budget_summary": {"type": "object", "minProperties": 1}},
+            },
+            # Section B - only user-entered fields count as data for this row.
+            *[
+                {
+                    "required": ["budget_categories"],
+                    "properties": {"budget_categories": {"required": [field]}},
+                }
+                for field in SECTION_B_USER_ENTERED_FIELDS
+            ],
+        ]
+    },
+    "then": {"required": ["activity_title"]},
+}
+
 FORM_JSON_SCHEMA = {
     "type": "object",
     "required": [
@@ -15,9 +56,15 @@ FORM_JSON_SCHEMA = {
             "type": "array",
             "minItems": 1,
             "maxItems": 4,
+            # Row 1 (the first line item) always requires activity_title. This lives in
+            # its own allOf subschema so it does not disable the "items" schema for index 0
+            # (prefixItems and items only interact within the same schema object).
+            "allOf": [{"prefixItems": [{"required": ["activity_title"]}]}],
             "items": {
                 "type": "object",
-                "required": ["activity_title"],
+                # activity_title is conditionally required on rows 2-4 (see the conditional).
+                # Row 1's unconditional requirement is handled by prefixItems above.
+                "allOf": [ACTIVITY_TITLE_REQUIRED_WHEN_ROW_HAS_DATA],
                 "properties": {
                     "activity_title": {
                         # Activity title appears in multiple places on the form
@@ -1001,8 +1048,9 @@ FORM_XML_TRANSFORM_RULES = {
                     "NonFederalResources": {
                         "item_field": "non_federal_resources",
                         "item_wrapper": "ResourceLineItem",
-                        # grant_program is Column A; looked up from within non_federal_resources
-                        "item_attributes": ["grant_program"],
+                        # grant_program (Column A) wins when present; activity_title is the
+                        # always-present fallback for the required activityTitle attribute.
+                        "item_attributes": ["activity_title", "grant_program"],
                         "total_field": "total_non_federal_resources",
                         "total_wrapper": "ResourceTotals",
                         # Override global field mappings for this section
@@ -1069,8 +1117,9 @@ FORM_XML_TRANSFORM_RULES = {
                     "FederalFundsNeeded": {
                         "item_field": "federal_fund_estimates",
                         "item_wrapper": "FundsLineItem",
-                        # grant_program is Column A; looked up from within federal_fund_estimates
-                        "item_attributes": ["grant_program"],
+                        # grant_program (Column A) wins when present; activity_title is the
+                        # always-present fallback for the required activityTitle attribute.
+                        "item_attributes": ["activity_title", "grant_program"],
                         "total_field": "total_federal_fund_estimates",
                         "total_wrapper": "FundsTotals",
                     },

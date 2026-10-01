@@ -7,25 +7,23 @@ from types import SimpleNamespace
 import _pytest.monkeypatch
 import boto3
 import flask.testing
-import grants_shared.adapters.db as db
-import grants_shared.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import moto
 import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from grants_shared.adapters.aws import S3Config
-from grants_shared.adapters.oauth.login_gov.mock_login_gov_oauth_client import (
-    MockLoginGovOauthClient,
-)
-from grants_shared.util.local import load_local_env_vars
 from moto.core import DEFAULT_ACCOUNT_ID
 from moto.ses.models import ses_backends
 from sqlalchemy import select, text
 
+import src.adapters.db as db
+import src.adapters.oauth.login_gov.login_gov_jwt as login_gov_jwt
 import src.app as app_entry
 import tests.src.db.models.factories as factories
 from src.adapters import search
+from src.adapters.aws import S3Config
+from src.adapters.oauth.login_gov.login_gov_jwt import LoginGovConfig
+from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.adapters.search import SearchClient
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege, RoleType
@@ -41,13 +39,15 @@ from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
+from src.search.backend.load_agencies_to_index import AGENCY_INDEX_ANALYSIS, AGENCY_INDEX_MAPPINGS
+from src.util.local import load_local_env_vars
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,
 )
 from src.workflow.workflow_background_task import _init_newrelic_app
 from tests.lib import db_testing
-from tests.lib.auth_test_utils import mock_oauth_endpoint
+from tests.lib.auth_test_utils import mock_oauth_endpoint, mock_oauth_logout_endpoint
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     InternalUserRoleFactory,
@@ -55,6 +55,10 @@ from tests.src.db.models.factories import (
     UserFactory,
     UserProfileFactory,
 )
+
+# Import the test-only models so they're attached to the metadata and get
+# created alongside the real tables in the db_client fixture below.
+import tests.lib.db_test_models.db_test_models  # ruff: ignore[unused-import] isort:skip
 
 logger = logging.getLogger(__name__)
 
@@ -141,6 +145,14 @@ def set_env_var_defaults(monkeypatch_session):
 
     # Stops the local file-scan watcher from spawning a thread per app fixture.
     monkeypatch_session.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
+
+    # Disable local email client in favor of mocks
+    monkeypatch_session.setenv("ENABLE_LOCAL_EMAIL_CAPTURE", "FALSE")
+
+    # API keys are hashed with this pepper, so it has to be the same value for
+    # every test. A developer override would leave factory-built keys hashed
+    # with one pepper and looked up with another.
+    monkeypatch_session.setenv("API_KEY_PEPPER", "unit-test-api-key-pepper-not-a-secret")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -331,7 +343,7 @@ def agency_index(search_client, monkeypatch_session):
     index_name = f"test-agency-index-{uuid.uuid4().int}"
 
     search_client.create_index(
-        index_name, mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}}
+        index_name, analysis=AGENCY_INDEX_ANALYSIS, mappings=AGENCY_INDEX_MAPPINGS
     )
 
     try:
@@ -389,6 +401,24 @@ def other_rsa_key_pair():
     return _generate_rsa_key_pair()
 
 
+@pytest.fixture
+def login_gov_config(public_rsa_key, private_rsa_key):
+    # Note this isn't session scoped so it gets remade
+    # for every test in the event of changes to it
+    return LoginGovConfig(
+        LOGIN_GOV_PUBLIC_KEY_MAP={"test-key-id": public_rsa_key},
+        LOGIN_GOV_JWK_ENDPOINT="not_used",
+        LOGIN_GOV_ENDPOINT="http://localhost:3000",
+        LOGIN_GOV_CLIENT_ID="urn:gov:unit-test",
+        LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY=private_rsa_key,
+        LOGIN_GOV_AUTH_ENDPOINT="http://localhost:3000/auth",
+        LOGIN_GOV_TOKEN_ENDPOINT="http://localhost:3000/token",
+        LOGIN_GOV_LOGOUT_ENDPOINT="http://localhost:3000/logout",
+        LOGIN_FINAL_DESTINATION="http://localhost:3000/final",
+        LOGOUT_FINAL_DESTINATION="http://localhost:3000/final-logout",
+    )
+
+
 @pytest.fixture(scope="session")
 def mock_oauth_client():
     return MockLoginGovOauthClient()
@@ -401,7 +431,7 @@ def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
     def override_method(config):
         config.public_key_map = {"test-key-id": public_rsa_key}
 
-    monkeypatch_session.setattr(login_gov_jwt_auth, "_refresh_keys", override_method)
+    monkeypatch_session.setattr(login_gov_jwt, "_refresh_keys", override_method)
 
 
 ####################
@@ -423,14 +453,21 @@ def app(
     # Override the OAuth endpoint path before creating the app which loads the config at startup
     monkeypatch_session.setenv(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
-    )
+    )  # setup in mock_oauth_endpoint
+    monkeypatch_session.setenv(
+        "LOGIN_GOV_LOGOUT_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-logout"
+    )  # setup in mock_oauth_logout_endpoint below
     monkeypatch_session.setenv(
         "LOGIN_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
     )
+    monkeypatch_session.setenv(
+        "LOGOUT_FINAL_DESTINATION", "http://localhost:8080/test-endpoint/oauth-logout-result"
+    )  # setup in mock_oauth_logout_endpoint below
     app = app_entry.create_app()
 
     # Add endpoints and mocks for handling the external OAuth logic
     mock_oauth_endpoint(app, monkeypatch_session, private_rsa_key, mock_oauth_client)
+    mock_oauth_logout_endpoint(app)
 
     return app
 
@@ -463,7 +500,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("AWS_DYNAMODB_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
-    monkeypatch.setattr("grants_shared.adapters.aws.aws_session._aws_config", None)
+    monkeypatch.setattr("src.adapters.aws.aws_session._aws_config", None)
 
 
 @pytest.fixture
@@ -591,8 +628,13 @@ def mock_dynamodb_and_s3(reset_aws_env_vars, monkeypatch):
 
 
 @pytest.fixture
-def ses_client(monkeypatch):
-    """Create a mocked SESv2 client using moto3."""
+def ses_client(monkeypatch, reset_aws_env_vars):
+    """Create a mocked SESv2 client using moto3.
+
+    We call reset_aws_env_vars so the aws_config gets remade and picks up the
+    IS_LOCAL_AWS override below - otherwise send_email takes the local path and
+    never talks to the mock.
+    """
     monkeypatch.setenv("IS_LOCAL_AWS", "0")
 
     # to access ses_backends, need to add ses to the whitelist
@@ -775,6 +817,7 @@ def create_test_form(db_session):
         form_name: str = "Test Form",
         form_json_schema: dict | None = None,
         form_rule_schema: dict | None = None,
+        form_ui_schema: dict | list | None = None,
         **kwargs,
     ) -> FormModel:
         form = FormModel(
@@ -784,7 +827,7 @@ def create_test_form(db_session):
             form_version=kwargs.get("form_version", "1.0"),
             agency_code="SGG",
             form_json_schema=form_json_schema or {"type": "object", "properties": {}},
-            form_ui_schema={},
+            form_ui_schema=form_ui_schema if form_ui_schema is not None else {},
             form_rule_schema=form_rule_schema,
             json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
         )

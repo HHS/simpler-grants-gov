@@ -1,11 +1,6 @@
 import logging
 from collections.abc import Sequence
 
-from grants_shared.pagination.pagination_models import (
-    PaginationInfo,
-    PaginationParams,
-    SortDirection,
-)
 from pydantic import BaseModel, Field
 
 from src.adapters import search
@@ -13,6 +8,7 @@ from src.adapters.search.opensearch_response import SearchResponse
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
 from src.constants.lookup_constants import OpportunityStatus
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import BoolSearchFilter, StrSearchFilter
 from src.services.agencies_v1.experimental_constant import DEFAULT
@@ -39,7 +35,7 @@ class AgencySearchParams(BaseModel):
     pagination: PaginationParams
     filters: AgencySearchFilters | None = Field(default=None)
     query: str | None = None
-    query_operator: str = Field(default=SearchQueryOperator.OR)
+    query_operator: str = Field(default=SearchQueryOperator.AND)
 
 
 def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]]:
@@ -69,13 +65,14 @@ def get_search_request(params: AgencySearchParams) -> dict:
 
     # Query
     if params.query:
-        wrapped_query = params.query
-        filter_rule = DEFAULT
-        # Don't add the prefix indicator if they searched for quoted text anywhere in the search query
-        if '"' not in wrapped_query:
-            # For now, use the prefix indicator. ~ for fuzzy could be better in the future, but is too confusing to the user for now
-            wrapped_query = f"{wrapped_query}*"
-        builder.simple_query(wrapped_query, filter_rule, SearchQueryOperator.OR)
+        # A bool prefix query analyzes every term the same way the index did, and treats
+        # the final term as a prefix so results narrow as a user types. Combined with the
+        # AND operator this means a full agency name like "Department of Energy" matches
+        # only that agency, rather than every agency sharing any one of those words.
+        #
+        # This endpoint only allows sorting by agency code or name, never by relevancy, so
+        # the query goes in the filter block to skip scoring entirely and stay cacheable.
+        builder.filter_match_bool_prefix(params.query, DEFAULT, params.query_operator)
 
     # Filters
     if params.filters:

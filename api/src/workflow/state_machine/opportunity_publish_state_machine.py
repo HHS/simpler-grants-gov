@@ -2,19 +2,25 @@ import logging
 from enum import StrEnum
 from typing import Any, cast
 
-from grants_shared.util.datetime_util import get_now_us_eastern_date
 from opensearchpy import ConnectionTimeout, TransportError
+from sqlalchemy import select
 from statemachine import Event
 from statemachine.states import States
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus, WorkflowEntityType, WorkflowType
-from src.db.models.opportunity_models import CurrentOpportunitySummary
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    OpportunityChangeAudit,
+    OpportunityIndexDeleteQueue,
+)
 from src.search.search_config import SearchConfig
 from src.services.current_opportunity.determine_current_opportunity_summary import (
     determine_current_and_status,
     is_opportunity_changed,
 )
+from src.services.opportunities_v1.opportunity_version import save_opportunity_version
+from src.util.datetime_util import get_now_us_eastern_date
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_client_registry import get_workflow_client_registry
@@ -32,6 +38,7 @@ class OpportunityPublishState(StrEnum):
     DRAFT_FLAG_FLIPPED = "draft_flag_flipped"
     CURRENT_OPPORTUNITY_SUMMARY_CALCULATED = "current_opportunity_summary_calculated"
     OPPORTUNITY_WRITTEN_TO_SEARCH = "opportunity_written_to_search"
+    OPPORTUNITY_VERSION_STORED = "opportunity_version_stored"
 
     END = "end"
 
@@ -51,6 +58,7 @@ class OpportunityPublishStateMachine(BaseStateMachine):
         OPP_PUBLISH_WRITTEN_TO_SEARCH_INDEX = "opp_publish_written_to_search_index"
         OPP_PUBLISH_NOT_WRITTEN_TO_SEARCH_INDEX = "opp_publish_not_written_to_search_index"
         OPP_PUBLISH_ERROR_WRITING_TO_SEARCH_INDEX = "opp_publish_error_writing_to_search_index"
+        OPP_PUBLISH_VERSION_STORED = "opp_publish_version_stored"
 
     ### States
     states = States.from_enum(
@@ -80,16 +88,25 @@ class OpportunityPublishStateMachine(BaseStateMachine):
     )
 
     # Write the opportunity to search and then
-    # do finish_publish
+    # do store_opportunity_version
     write_opportunity_to_search = Event(
         states.CURRENT_OPPORTUNITY_SUMMARY_CALCULATED.to(
-            states.OPPORTUNITY_WRITTEN_TO_SEARCH, after="finish_publish"
+            states.OPPORTUNITY_WRITTEN_TO_SEARCH, after="store_opportunity_version"
+        ),
+    )
+
+    # Store the opportunity's first version immediately at publish time
+    # (rather than waiting for the next hourly StoreOpportunityVersionTask
+    # run) and then do finish_publish
+    store_opportunity_version = Event(
+        states.OPPORTUNITY_WRITTEN_TO_SEARCH.to(
+            states.OPPORTUNITY_VERSION_STORED, after="finish_publish"
         ),
     )
 
     # End the publish workflow
     finish_publish = Event(
-        states.OPPORTUNITY_WRITTEN_TO_SEARCH.to(states.END),
+        states.OPPORTUNITY_VERSION_STORED.to(states.END),
     )
 
     def __init__(self, model: OpportunityPersistenceModel, **kwargs: Any):
@@ -149,13 +166,32 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             if self.opportunity.current_opportunity_summary is not None:
                 logger.info("Removing existing current opportunity summary", extra=log_extra)
                 self.db_session.delete(self.opportunity.current_opportunity_summary)
+                # Queue the opportunity for removal from the search index.
+                # Covers cases where the opportunity was previously searchable
+                # (e.g. is_draft flipped back, or post_date moved to the future).
+                logger.info("Queuing opportunity for search index removal", extra=log_extra)
+                self.db_session.add(
+                    OpportunityIndexDeleteQueue(opportunity_id=self.opportunity.opportunity_id)
+                )
 
             # Whether or not we needed to delete a record or if it was already null
             # we can safely return here as there isn't anything to do
             return
 
-        # If the current opportunity summary doesn't already exist, create it first
         if self.opportunity.current_opportunity_summary is None:
+            # Clear any stale delete queue entry before creating the new summary.
+            # no_autoflush prevents get() from triggering a premature flush of other
+            # pending ORM objects in the session.
+            with self.db_session.no_autoflush:
+                stale_delete_entry = self.db_session.get(
+                    OpportunityIndexDeleteQueue, self.opportunity.opportunity_id
+                )
+            if stale_delete_entry is not None:
+                logger.info(
+                    "Clearing stale search index delete queue entry for opportunity",
+                    extra=log_extra,
+                )
+                self.db_session.delete(stale_delete_entry)
             logger.info("Creating new current opportunity summary", extra=log_extra)
             self.opportunity.current_opportunity_summary = CurrentOpportunitySummary(
                 opportunity=self.opportunity
@@ -204,7 +240,12 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             )
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_WRITTEN_TO_SEARCH_INDEX)
 
-        except (TransportError, ConnectionTimeout):
+            # Mark the opportunity as already synced to the search index so the
+            # incremental search job doesn't redundantly re-index this freshly
+            # published opportunity on its next cycle.
+            self.mark_loaded_to_search(log_extra)
+
+        except TransportError, ConnectionTimeout:
             # These are pretty generic network blips that
             # we have retries for when loading elsewhere.
             logger.warning(
@@ -216,3 +257,47 @@ class OpportunityPublishStateMachine(BaseStateMachine):
         except Exception:
             logger.exception("Failed to write opportunity to search index", extra=log_extra)
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_ERROR_WRITING_TO_SEARCH_INDEX)
+
+    def mark_loaded_to_search(self, log_extra: dict[str, Any]) -> None:
+        """Flag the opportunity's change-audit record as already loaded to search.
+
+        This runs only after a successful search write. We catch any error here so a
+        failure to mark the record isn't misattributed as a search-index write
+        failure - the write already succeeded. Worst case the incremental job simply
+        re-indexes the opportunity on its next cycle.
+        """
+        try:
+            change_audit = self.db_session.scalars(
+                select(OpportunityChangeAudit).where(
+                    OpportunityChangeAudit.opportunity_id == self.opportunity.opportunity_id
+                )
+            ).one_or_none()
+
+            if change_audit is None:
+                logger.info("No change-audit record to mark as loaded to search", extra=log_extra)
+                return
+
+            change_audit.is_loaded_to_search = True
+            logger.info("Marked opportunity as loaded to search index", extra=log_extra)
+        except Exception:
+            logger.exception("Failed to mark opportunity as loaded to search", extra=log_extra)
+
+    @store_opportunity_version.on
+    def handle_store_opportunity_version(self, state_machine_event: StateMachineEvent) -> None:
+        """Create the opportunity's first version snapshot immediately at publish time.
+
+        Without this, a grantee who saves the opportunity before the next hourly
+        StoreOpportunityVersionTask run has no prior version to diff against, and
+        never receives an edit-notification email for that opportunity.
+        """
+        log_extra = state_machine_event.get_log_extra() | {
+            "opportunity_id": self.opportunity.opportunity_id,
+        }
+
+        version_created = save_opportunity_version(self.db_session, self.opportunity)
+
+        logger.info(
+            "Stored opportunity version during publish",
+            extra=log_extra | {"version_created": version_created},
+        )
+        state_machine_event.increment(self.Metrics.OPP_PUBLISH_VERSION_STORED)

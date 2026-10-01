@@ -1,15 +1,14 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-import grants_shared.api.response as response
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 import src.api.competition_alpha.competition_schema as competition_schema
+import src.api.response as response
 from src.api.competition_alpha.competition_blueprint import competition_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.competition_alpha.get_competition import get_competition
 from src.services.competition_alpha.put_competition_forms import set_competition_forms
 from src.services.competition_alpha.update_competition_flag import update_competition_flag
@@ -56,7 +55,7 @@ def update_competition_flag_route(
 @competition_blueprint.put("/competitions/<uuid:competition_id>/forms")
 @competition_blueprint.input(competition_schema.CompetitionFormsSetRequestSchema, location="json")
 @competition_blueprint.output(competition_schema.CompetitionResponseAlphaSchema())
-@competition_blueprint.auth_required(api_user_key_auth)
+@competition_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def put_competition_forms(
     db_session: db.Session, competition_id: uuid.UUID, json_data: dict
@@ -65,7 +64,7 @@ def put_competition_forms(
     logger.info("PUT /alpha/competitions/:competition_id/forms")
 
     with db_session.begin():
-        user = api_user_key_auth.get_user()
+        user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
         competition = set_competition_forms(db_session, user, competition_id, json_data)

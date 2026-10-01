@@ -1,15 +1,14 @@
-from grants_shared.api.schemas.extension import Schema, fields
-from grants_shared.api.schemas.extension.field_validators import Length
-from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from grants_shared.api.schemas.search_schema import (
+from marshmallow import ValidationError, validates_schema
+
+from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import Length
+from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     StrSearchSchemaBuilder,
     UuidSearchSchemaBuilder,
 )
-from grants_shared.pagination.pagination_schema import generate_pagination_schema
-from marshmallow import ValidationError, validates_schema
-
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
@@ -23,6 +22,7 @@ from src.constants.lookup_constants import (
     AwardSelectionMethod,
     OpportunityStatus,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 from src.validation.validation_constants import ValidationErrorType
 
 
@@ -568,6 +568,40 @@ class AwardRecommendationAttachmentDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 
+class AwardRecommendationAttachmentCreateRequestSchema(Schema):
+    """Schema for POST award recommendation attachment from a scanned pending file"""
+
+    pending_file_id = fields.UUID(
+        required=True,
+        metadata={
+            "description": "The ID of the pending (virus-scanned) file to attach",
+        },
+    )
+    award_recommendation_attachment_type = fields.Enum(
+        AwardRecommendationAttachmentType,
+        required=True,
+        metadata={"description": "The type of the attachment"},
+    )
+    file_name = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Optional override for the uploaded file name",
+            "example": "terms_and_conditions.pdf",
+        },
+    )
+
+
+class AwardRecommendationAttachmentCreateSchema(Schema):
+    award_recommendation_attachment_id = fields.UUID(
+        metadata={"description": "The ID of the created award recommendation attachment"}
+    )
+
+
+class AwardRecommendationAttachmentCreateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(AwardRecommendationAttachmentCreateSchema())
+
+
 class AwardRecommendationDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
@@ -696,7 +730,14 @@ class AwardRecommendationListRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "AwardRecommendationListPaginationSchema",
-            ["created_at"],
+            [
+                "award_recommendation_number",
+                "opportunity_name",
+                "opportunity_number",
+                "total_received_count",
+                "award_recommendation_status",
+                "created_at",
+            ],
             default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
@@ -1044,4 +1085,24 @@ class BulkUpdateSubmissionDetailsResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(BulkUpdateSubmissionDetailsResponseDataSchema),
         metadata={"description": "The updated award recommendation submission details"},
+    )
+
+
+class AwardRecommendationStartReviewRequestSchema(Schema):
+    """Schema for starting the award recommendation review."""
+
+    comment = fields.String(
+        required=True,
+        metadata={
+            "description": "Comment provided by the submitter.",
+            "example": "Ready for review.",
+        },
+    )
+
+    internal_comment = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Internal comment visible only to reviewers.",
+            "example": "Budget issue resolved with program office.",
+        },
     )

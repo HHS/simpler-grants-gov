@@ -1,9 +1,8 @@
 import logging
 from uuid import UUID
 
-from grants_shared.adapters import db
-from grants_shared.api.route_utils import raise_flask_error
-
+from src.adapters import db
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Competition, CompetitionForm, Form
@@ -68,7 +67,11 @@ def set_competition_forms(
     competition = get_competition(db_session, competition_id)
 
     # Check user access
-    verify_access(user, {Privilege.MANAGE_COMPETITION}, competition.opportunity.agency_record)
+    verify_access(
+        user,
+        {Privilege.UPDATE_OPPORTUNITY, Privilege.MANAGE_COMPETITION},
+        competition.opportunity.agency_record,
+    )
 
     requested_forms = json_data["forms"]
     requested_form_ids = [f["form_id"] for f in requested_forms]

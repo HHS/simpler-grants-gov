@@ -41,23 +41,6 @@
       ]
     },
     {
-      "description": "Group all dependencies from the grants_shared directory",
-      "matchFileNames": [
-        "backend/grants_shared/**"
-      ],
-      "groupName": "Grants Shared",
-      "reviewers": [
-        "chouinar",
-        "mdragon",
-        "joshtonava",
-        "jakobpederson",
-        "chay-REIsys",
-        "hao10282025-sudo",
-        "kkrug",
-        "dghazvini"
-      ]
-    },
-    {
       "description": "Group all dependencies from the frontend directory",
       "matchFileNames": [
         "frontend/**"
@@ -236,7 +219,6 @@
       "matchFileNames": [
         "analytics/pyproject.toml",
         "api/pyproject.toml",
-        "backend/grants_shared/pyproject.toml",
         "api/docker-python-base"
       ],
       "matchPackagePatterns": ["python"]

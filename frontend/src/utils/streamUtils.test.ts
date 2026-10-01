@@ -17,4 +17,19 @@ describe("unbatchStreamChunkJson", () => {
       "{key: 'value2'}",
     ]);
   });
+  it("splits chunks of more than two batched json strings", () => {
+    expect(
+      unbatchStreamChunkJSON(
+        '{"status":"uploading"}{"status":"starting-scan"}{"status":"pending"}',
+      ),
+    ).toEqual([
+      '{"status":"uploading"}',
+      '{"status":"starting-scan"}',
+      '{"status":"pending"}',
+    ]);
+  });
+  it("does not split on object boundaries within a json string", () => {
+    const chunk = '{"outer": {"inner": "value"}}';
+    expect(unbatchStreamChunkJSON(chunk)).toEqual([chunk]);
+  });
 });

@@ -1,5 +1,7 @@
 from uuid import uuid4
 
+import pytest
+
 from src.db.models.user_models import UserProfile
 from tests.src.db.models.factories import UserProfileFactory
 
@@ -48,7 +50,7 @@ def test_user_update_profile_unauthorized(client, db_session, user_auth_token, u
     response = client.put(
         f"/v1/users/{user_id}/profile",
         headers={"X-SGG-Token": user_auth_token},
-        json={"first_name": "Henry"},
+        json={"first_name": "Henry", "last_name": "Ford"},
     )
 
     assert response.status_code == 403
@@ -56,4 +58,33 @@ def test_user_update_profile_unauthorized(client, db_session, user_auth_token, u
 
     # Verify no record created
     res = db_session.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+    assert not res
+
+
+@pytest.mark.parametrize(
+    "request_json,expected_missing_fields",
+    [
+        ({}, {"first_name", "last_name"}),
+        ({"last_name": "Ford"}, {"first_name"}),
+        ({"first_name": "Henry"}, {"last_name"}),
+        ({"middle_name": "Jane"}, {"first_name", "last_name"}),
+    ],
+)
+def test_user_update_profile_missing_required_fields(
+    client, db_session, user_auth_token, user, request_json, expected_missing_fields
+):
+    response = client.put(
+        f"/v1/users/{user.user_id}/profile",
+        headers={"X-SGG-Token": user_auth_token},
+        json=request_json,
+    )
+
+    assert response.status_code == 422
+
+    errors = response.json["errors"]
+    assert {error["field"] for error in errors} == expected_missing_fields
+    for error in errors:
+        assert error["type"] == "required"
+
+    res = db_session.query(UserProfile).filter(UserProfile.user_id == user.user_id).first()
     assert not res

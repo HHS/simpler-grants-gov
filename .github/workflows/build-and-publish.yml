@@ -12,6 +12,11 @@ on:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
         type: string
+      environment:
+        description: "Deploy environment whose AWS account the image is published to. Defaults to 'shared' (the shared account), which is where every environment except separate-account ones like infra-dev publishes."
+        required: false
+        default: "shared"
+        type: string
     outputs:
       commit_hash:
         description: The SHA that was built
@@ -25,6 +30,11 @@ on:
       ref:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
+        type: string
+      environment:
+        description: "Deploy environment whose AWS account the image is published to. Defaults to 'shared' (the shared account)."
+        required: false
+        default: "shared"
         type: string
 
 jobs:
@@ -68,7 +78,12 @@ jobs:
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: ${{ inputs.app_name }}
-          environment: shared
+          # Publish to the deploy environment's own AWS account. For every
+          # existing environment this resolves to the shared account (their
+          # network account IS the shared account), so behavior is unchanged;
+          # for a separate-account environment like infra-dev it publishes to
+          # that account's ECR, matching where the service pulls from.
+          environment: ${{ inputs.environment }}
 
       - name: Check if image is already published
         id: check-image-published

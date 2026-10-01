@@ -1,11 +1,12 @@
 import {
   fetchApplicationWithMethod,
+  fetchApplicationWithMethodV1,
   getApplicationForPrint,
 } from "src/services/fetch/fetchers/fetchers";
 import { ApplicationSubmissionsRequestBody } from "src/types/application/applicationSubmissionRequestTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
-  ApplicationAttachmentUploadResponse,
+  ApplicationAttachmentCreateResponse,
   ApplicationDetailApiResponse,
   ApplicationFormDetailApiResponse,
   ApplicationHistoryApiResponse,
@@ -230,31 +231,17 @@ export const handleUpdateApplicationFormIncludeInSubmission = async (
  * Attachments
  */
 
-export const deleteAttachment = async (
+export const createApplicationAttachment = async (
   applicationId: string,
-  application_attachment_id: string,
-): Promise<ApplicationDetailApiResponse> => {
-  const response = await fetchApplicationWithMethod("DELETE")({
-    subPath: `${applicationId}/attachments/${application_attachment_id}`,
-  });
-
-  return (await response.json()) as ApplicationDetailApiResponse;
-};
-
-export const uploadAttachment = async (
-  applicationId: string,
-  file: FormData,
-): Promise<ApplicationAttachmentUploadResponse> => {
+  pending_file_id: string,
+): Promise<ApplicationAttachmentCreateResponse> => {
   const additionalHeaders = {
     Accept: "application/json",
   };
-
-  const response = await fetchApplicationWithMethod("POST")({
+  const response = await fetchApplicationWithMethodV1("POST")({
     subPath: `${applicationId}/attachments`,
     additionalHeaders,
-    body: file,
-    addContentType: false,
+    body: { pending_file_id },
   });
-
-  return (await response.json()) as ApplicationAttachmentUploadResponse;
+  return (await response.json()) as ApplicationAttachmentCreateResponse;
 };

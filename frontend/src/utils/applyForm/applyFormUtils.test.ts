@@ -10,7 +10,6 @@ import {
   formatValidationWarning,
   getFieldListLabelFromDefinition,
   getFieldNameForHtml,
-  getFieldPathFromHtml,
   getFieldSchema,
   getFieldsForNav,
   getHtmlFieldForWarning,
@@ -442,12 +441,6 @@ describe("getRequiredProperties", () => {
   });
 });
 
-describe("getFieldPathFromHtml", () => {
-  it("converts field name to JSON pointer path", () => {
-    expect(getFieldPathFromHtml("foo--bar")).toBe("/foo/bar");
-  });
-});
-
 describe("jsonPointerToPath", () => {
   it("converts pointer to JSON path", () => {
     expect(jsonSchemaPointerToPath("/properties/foo/properties/bar")).toBe(
@@ -876,6 +869,7 @@ describe("addPrintWidgetToFields", () => {
         type: "field" as const,
         definition: "/properties/name" as const,
         schema: { title: "Name", type: "string" },
+        printDescription: true,
       },
       {
         type: "field" as const,
@@ -892,6 +886,7 @@ describe("addPrintWidgetToFields", () => {
         type: "field",
         definition: "/properties/name",
         schema: { title: "Name", type: "string" },
+        printDescription: true,
         widget: "Print",
       },
       {

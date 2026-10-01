@@ -3,6 +3,7 @@ mock_provider "aws" {}
 variables {
   service_name             = "my-service"
   load_balancer_arn_suffix = "app/my-service/abc123def456"
+  application_log_group    = "service/my-service"
 }
 
 run "sns_topic_name_uses_service_name" {
@@ -35,6 +36,15 @@ run "cloudwatch_alarms_include_service_name" {
   assert {
     condition     = aws_cloudwatch_metric_alarm.service_errors.alarm_name == "${var.service_name}-errors"
     error_message = "Service errors alarm name must include service name"
+  }
+}
+
+run "metric_filter_attaches_to_provided_log_group" {
+  command = plan
+
+  assert {
+    condition     = aws_cloudwatch_log_metric_filter.service_error_filter.log_group_name == var.application_log_group
+    error_message = "Error metric filter must use the log group passed in from the service module"
   }
 }
 

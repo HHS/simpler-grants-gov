@@ -60,7 +60,7 @@ UNSCANNED_PREFIX = os.environ.get("UNSCANNED_PREFIX", "unscanned/")
 SCANNED_PREFIX = os.environ.get("SCANNED_PREFIX", "scanned/")
 INFECTED_PREFIX = os.environ.get("INFECTED_PREFIX", "infected/")
 CLAMAV_DB_DIR = os.environ.get("CLAMAV_DB_DIR", "/mnt/clamav")
-MAX_FILE_SIZE_BYTES = int(os.environ.get("MAX_FILE_SIZE_BYTES", "471859200"))
+MAX_FILE_SIZE_BYTES = int(os.environ.get("MAX_FILE_SIZE_BYTES", "2147483648"))
 
 # File-scan callback API. FILE_SCAN_API_KEY authenticates as the internal
 # scanner user (INTERNAL_S3_SCAN privilege) via the X-API-Key header.
