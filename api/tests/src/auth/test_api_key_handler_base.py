@@ -8,8 +8,10 @@ import pytest
 from sqlalchemy import select
 
 from src.adapters import db
+from src.auth.api_key_config import ApiKeyConfig
 from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.util import datetime_util
+from src.util.api_key_gen import hash_api_key_id
 from tests.lib.db_test_models.auth_handler import SharedApiKeyHandler
 from tests.lib.db_test_models.db_test_models import SharedUserApiKey
 from tests.src.db.models.factories import SharedUserApiKeyFactory, SharedUserFactory
@@ -79,7 +81,10 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
 
     existing_key_id = "COLLISION_TEST_KEY_12345"
     SharedUserApiKeyFactory.create(
-        shared_user=user, key_name="Existing Key", key_id=existing_key_id
+        shared_user=user,
+        key_name="Existing Key",
+        key_id=existing_key_id,
+        key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
     )
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
@@ -97,13 +102,71 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
         assert mock_generate.call_count == 2
 
 
+def test_create_api_key_stores_key_id_hash(enable_factory_create, db_session: db.Session):
+    """New keys store the raw key_id and its hash side by side."""
+    user = SharedUserFactory.create()
+
+    api_key = SharedApiKeyHandler(db_session).create_api_key(
+        user_id=user.shared_user_id,
+        key_name="Hashed Key",
+    )
+    db_session.commit()
+    db_session.refresh(api_key)
+
+    assert api_key.key_id_hash == hash_api_key_id(api_key.key_id, ApiKeyConfig().pepper)
+    assert api_key.key_id_hash != api_key.key_id
+
+
+def test_create_api_key_sends_raw_key_to_api_gateway(enable_factory_create, db_session: db.Session):
+    """AWS API Gateway still gets the raw key, never the hash."""
+    user = SharedUserFactory.create()
+
+    with patch("src.auth.api_key_handler_base.import_api_key") as mock_import:
+        api_key = SharedApiKeyHandler(db_session).create_api_key(
+            user_id=user.shared_user_id,
+            key_name="Gateway Key",
+        )
+
+    assert mock_import.call_count == 1
+    assert mock_import.call_args.kwargs["api_key"] == api_key.key_id
+    assert mock_import.call_args.kwargs["api_key"] != api_key.key_id_hash
+
+
+def test_create_api_key_collision_checked_on_hash(enable_factory_create, db_session: db.Session):
+    """A generated key whose hash is already stored is rejected and regenerated."""
+    user = SharedUserFactory.create()
+
+    taken_key_id = "TAKEN_HASH_TEST_KEY_12345"
+    # Stored under a different raw key_id, so only the hash matches
+    SharedUserApiKeyFactory.create(
+        shared_user=user,
+        key_name="Existing Key",
+        key_id="SOME_OTHER_RAW_KEY_ID_123",
+        key_id_hash=hash_api_key_id(taken_key_id, ApiKeyConfig().pepper),
+    )
+
+    with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
+        mock_generate.side_effect = [taken_key_id, "FRESH_HASH_TEST_KEY_123456"]
+
+        api_key = SharedApiKeyHandler(db_session).create_api_key(
+            user_id=user.shared_user_id,
+            key_name="New Key",
+        )
+
+    assert api_key.key_id == "FRESH_HASH_TEST_KEY_123456"
+    assert mock_generate.call_count == 2
+
+
 def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: db.Session, caplog):
     """Test that create_api_key raises KeyGenerationError when max retries exceeded."""
     user = SharedUserFactory.create()
 
     existing_key_id = "COLLISION_KEY_12345678901234"
     SharedUserApiKeyFactory.create(
-        shared_user=user, key_name="Existing Key", key_id=existing_key_id
+        shared_user=user,
+        key_name="Existing Key",
+        key_id=existing_key_id,
+        key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
     )
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:

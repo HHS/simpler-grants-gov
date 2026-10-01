@@ -25,12 +25,13 @@ import uuid
 from sqlalchemy import select
 
 import src.adapters.db as db
+from src.auth.api_key_config import ApiKeyConfig
 from src.auth.auth_handler import AuthHandler
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege, UserType
 from src.constants.static_role_values import INTERNAL_S3_SCANNER_ROLE_ID
 from src.db.models.user_models import InternalUserRole, User, UserApiKey
-from src.util.api_key_gen import generate_api_key_id
+from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
 
 logger = logging.getLogger(__name__)
 
@@ -96,8 +97,12 @@ def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
     # Mint the key through the shared auth handler (no AWS API Gateway import):
     # this key is validated only against the user_api_key table by the
     # X-API-Key auth, same as the locally-seeded scanner key.
+    key_id = _generate_unique_key_id(db_session)
     api_key = AuthHandler(db_session).create_api_key(
-        user.user_id, SCANNER_API_KEY_NAME, _generate_unique_key_id(db_session)
+        user.user_id,
+        SCANNER_API_KEY_NAME,
+        key_id,
+        hash_api_key_id(key_id, ApiKeyConfig().pepper),
     )
     logger.info(
         "Registered file-scan scanner API key",

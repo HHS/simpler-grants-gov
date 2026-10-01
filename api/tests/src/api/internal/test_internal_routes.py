@@ -3,9 +3,11 @@ import uuid
 from sqlalchemy import func, select
 
 import tests.src.db.models.factories as factories
+from src.auth.api_key_config import ApiKeyConfig
 from src.constants.lookup_constants import Privilege, RoleType, UserType
 from src.constants.static_role_values import INTERNAL_S3_SCANNER_ROLE_ID
 from src.db.models.user_models import InternalUserRole, User, UserApiKey
+from src.util.api_key_gen import hash_api_key_id
 
 INTERNAL_ROLES_URL = "/v1/internal/roles"
 SCANNER_USER_URL = "/v1/internal/file-scan-scanner-user"
@@ -172,6 +174,7 @@ def test_setup_scanner_user_success(
     assert key.user_id == scanner_user_id
     assert str(key.api_key_id) == data["api_key_id"]
     assert key.is_active is True
+    assert key.key_id_hash == hash_api_key_id(generated_key, ApiKeyConfig().pepper)
 
 
 def test_setup_scanner_user_idempotent_user_and_role(
