@@ -13,6 +13,22 @@ import {
 const { targetEnv } = playwrightEnv;
 
 const FILTER_OPTIONS_TIMEOUT = targetEnv !== "local" ? 30000 : 10000;
+const CLEAR_FILTERS_TIMEOUT = targetEnv !== "local" ? 120000 : 60000;
+
+// Query params removed by the drawer's Clear filters button
+// (mirrors searchFilterNames in src/types/search/searchFilterTypes.ts)
+const FILTER_QUERY_PARAMS = [
+  "status",
+  "fundingInstrument",
+  "eligibility",
+  "agency",
+  "category",
+  "closeDate",
+  "postedDate",
+  "costSharing",
+  "topLevelAgency",
+  "assistanceListingNumber",
+];
 
 const getBrowserType = (page: Page, projectName?: string) => {
   if (projectName) {
@@ -402,6 +418,21 @@ export async function waitForLoaderToBeHidden(page: Page) {
   await page.waitForSelector(
     ".display-flex.flex-align-center.flex-justify-center.margin-bottom-15.margin-top-15",
     { state: "hidden" },
+  );
+}
+
+export async function clickClearFilters(page: Page) {
+  const clearButton = page
+    .locator('button:has-text("Clear filters"):visible')
+    .first();
+  await expect(clearButton).toBeVisible();
+  await clearButton.click();
+
+  // Clear removes every filter param from the URL (status included, which
+  // falls back to the forecasted + posted defaults)
+  await page.waitForURL(
+    (url) => FILTER_QUERY_PARAMS.every((key) => !url.searchParams.has(key)),
+    { timeout: CLEAR_FILTERS_TIMEOUT },
   );
 }
 
