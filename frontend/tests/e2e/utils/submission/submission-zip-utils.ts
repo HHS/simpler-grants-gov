@@ -17,7 +17,7 @@ import * as os from "os";
 import * as path from "path";
 import { expect, type Page } from "@playwright/test";
 import * as zip from "@zip.js/zip.js";
-import { extractText, getDocumentProxy } from "unpdf";
+import { extractText } from "unpdf";
 
 // zip.js defaults to Web Workers, which aren't available in a plain Node
 // (Playwright test) process - run inline instead.
@@ -118,12 +118,14 @@ export function assertXmlContainsFields(
 
   const xmlText = Buffer.from(xmlBytes).toString("utf-8");
 
-  for (const { element, value } of Object.values(expectedFields)) {
-    expect(
-      xmlText,
-      `Expected GrantApplication.xml to contain <${element}>${value}</${element}>`,
-    ).toContain(`<${element}>${value}</${element}>`);
-  }
+  const missing = Object.values(expectedFields)
+    .map(({ element, value }) => `<${element}>${value}</${element}>`)
+    .filter((expected) => !xmlText.includes(expected));
+
+  // Failure here is reported without hiding later checks in the test.
+  expect
+    .soft(missing, "GrantApplication.xml is missing expected elements")
+    .toEqual([]);
 }
 
 /**
@@ -148,8 +150,11 @@ export async function readPdfText(
     );
   }
 
-  const pdf = await getDocumentProxy(new Uint8Array(pdfBytes));
-  const { text } = await extractText(pdf, { mergePages: true });
+  // Pass the bytes (not a document proxy) so extractText creates and
+  // destroys the pdf.js document itself.
+  const { text } = await extractText(new Uint8Array(pdfBytes), {
+    mergePages: true,
+  });
 
   return text.replace(/\s+/g, " ").trim();
 }
@@ -174,13 +179,12 @@ export async function assertPdfContainsText(
     `${pdfFileName} has no extractable text`,
   ).toBeGreaterThan(0);
 
-  for (const item of expected) {
-    if (typeof item === "string") {
-      expect(pdfText, `Expected ${pdfFileName} to contain "${item}"`).toContain(
-        item,
-      );
-    } else {
-      expect(pdfText, `Expected ${pdfFileName} to match ${item}`).toMatch(item);
-    }
-  }
+  const missing = expected.filter((item) =>
+    typeof item === "string" ? !pdfText.includes(item) : !item.test(pdfText),
+  );
+
+  // Lists every missing item at once instead of stopping at the first.
+  expect
+    .soft(missing.map(String), `${pdfFileName} is missing expected text`)
+    .toEqual([]);
 }

@@ -11,11 +11,12 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { SF424B_ZIP_ALL_FIELDS_DATA } from "tests/e2e/apply/fixtures/sf424b-data";
 import {
-  fieldDefinitionsSF424B,
-  SF424B_FORM_MATCHER,
-} from "tests/e2e/apply/fixtures/sf424b-field-definitions";
+  SF424B_ZIP_ALL_FIELDS_DATA,
+  SF424B_ZIP_APPLICATION_URL,
+  SF424B_ZIP_PDF_EXPECTED_TEXT,
+  SF424B_ZIP_PDF_NAME,
+} from "tests/e2e/apply/fixtures/sf424b-data";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
@@ -26,22 +27,6 @@ import {
 } from "tests/e2e/utils/submission/submission-zip-utils";
 
 const { APPLY, CORE_REGRESSION, GRANTEE } = VALID_TAGS;
-
-const APPLICATION_URL =
-  "https://staging.simpler.grants.gov/workspace/applications/aa9da806-3764-4e98-8dd7-8e5a72b20bd8";
-
-const SF424B_PDF_NAME = "SF424B.pdf";
-
-const { title, applicant_organization, representative_name } =
-  SF424B_ZIP_ALL_FIELDS_DATA;
-
-const SF424B_PDF_EXPECTED_TEXT = [
-  SF424B_FORM_MATCHER,
-  fieldDefinitionsSF424B.signature.field,
-  representative_name.value,
-  `${fieldDefinitionsSF424B.title.field}* ${title.value}`,
-  `${fieldDefinitionsSF424B.applicant_organization.field}* ${applicant_organization.value}`,
-];
 
 test.beforeEach(({ page: _ }, testInfo) => {
   test.skip(
@@ -61,19 +46,21 @@ test(
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
     await authenticateE2eUser(page, context, !!isMobile);
 
-    await page.goto(APPLICATION_URL);
+    await page.goto(SF424B_ZIP_APPLICATION_URL);
     await page.waitForLoadState("domcontentloaded");
 
     const contents = await downloadAndUnzipSubmission(page);
 
-    // Verify GrantApplication.xml contains the expected SF424B field values - PR #12348
-    assertXmlContainsFields(contents, SF424B_ZIP_ALL_FIELDS_DATA);
+    await test.step("Verify GrantApplication.xml field values", () => {
+      assertXmlContainsFields(contents, SF424B_ZIP_ALL_FIELDS_DATA);
+    });
 
-    // Verify SF424B.pdf contains the expected form title and field values.
-    await assertPdfContainsText(
-      contents,
-      SF424B_PDF_NAME,
-      SF424B_PDF_EXPECTED_TEXT,
-    );
+    await test.step("Verify SF424B.pdf form title and field values", async () => {
+      await assertPdfContainsText(
+        contents,
+        SF424B_ZIP_PDF_NAME,
+        SF424B_ZIP_PDF_EXPECTED_TEXT,
+      );
+    });
   },
 );
