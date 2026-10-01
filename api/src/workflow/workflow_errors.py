@@ -32,6 +32,22 @@ class ImplementationMissingError(RetryableWorkflowError):
     """
 
 
+class EntityLockedError(RetryableWorkflowError):
+    """
+    Error that indicates the entity's row is currently locked by
+    another process (for example, a scheduled task working on the
+    same record). The event can safely be retried later.
+    """
+
+
+class EntityNotReadyError(RetryableWorkflowError):
+    """
+    Error that indicates the entity is not yet in the state the workflow
+    expects - most likely because the transaction that sent the workflow
+    event has not committed yet. The event can safely be retried later.
+    """
+
+
 #####################
 # Non-retryable errors
 #####################
