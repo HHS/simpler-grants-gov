@@ -2,7 +2,6 @@ import apiflask.exceptions
 import pytest
 
 from src.adapters import db
-from src.services.users.create_api_key import create_api_key
 from src.services.users.rename_api_key import rename_api_key
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
