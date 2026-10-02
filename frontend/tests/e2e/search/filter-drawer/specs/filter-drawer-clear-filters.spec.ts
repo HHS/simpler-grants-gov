@@ -1,6 +1,5 @@
 /**
  * @feature Filter Drawer - Clear Filters
- * @featureFile tests/e2e/search/filter-drawer/features/filter-drawer-clear-filters.feature
  * @scenario Clicking Clear Filters restores default filters
  * @scenario Clicking Clear Filters updates results immediately
  */
