@@ -1,0 +1,33 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+  ><soap:Body
+    ><ns2:GetSubmissionListResponse
+      xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/"
+      xmlns:ns11="http://schemas.xmlsoap.org/wsdl/"
+      xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0"
+      xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0"
+      xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0"
+      xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0"
+      xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0"
+      xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0"
+      xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0"
+      xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0"
+      xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0"
+      xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0"
+      ><ns2:Success>true</ns2:Success
+      ><ns2:AvailableApplicationNumber>32</ns2:AvailableApplicationNumber>
+      <ns2:SubmissionInfo
+        ><FundingOpportunityNumber>SGG-952847003-2025-11-20</FundingOpportunityNumber
+        ><CFDANumber>10.960</CFDANumber
+        ><GrantsGovTrackingNumber>GRANT80000003</GrantsGovTrackingNumber
+        ><ns2:ReceivedDateTime
+          >2025-12-16T11:42:13.207-05:00</ns2:ReceivedDateTime
+        ><GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus
+        ><SubmissionMethod>web</SubmissionMethod
+        ><SubmissionTitle>Test Application - CDG Cohort 2-DRAFT</SubmissionTitle
+        ><DelinquentFederalDebt>No</DelinquentFederalDebt
+        ><ActiveExclusions>No</ActiveExclusions></ns2:SubmissionInfo
+      ><</ns2:GetSubmissionListResponse
+    ></soap:Body
+  ></soap:Envelope
+>
+<
