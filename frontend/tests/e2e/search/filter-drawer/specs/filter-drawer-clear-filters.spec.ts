@@ -1,6 +1,5 @@
 /**
  * @feature Filter Drawer - Clear Filters
- * @scenario Clicking Clear Filters restores default filters
  * @scenario Clicking Clear Filters updates results immediately
  */
 
@@ -32,11 +31,10 @@ const { baseUrl, targetEnv } = playwrightEnv;
 const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
 const POLL_TIMEOUT = targetEnv !== "local" ? 120000 : 60000;
 
-// Background Examples: loginState
 const LOGIN_STATES = ["logged in", "not logged in"] as const;
 type LoginState = (typeof LOGIN_STATES)[number];
 
-// Additional (non-default) filters used by both scenarios
+// Additional (non-default) filters used by the scenario
 const FUNDING_INSTRUMENT_GRANT = { "funding-instrument-grant": "grant" };
 const ELIGIBILITY_COUNTY = {
   "eligibility-county_governments": "county_governments",
@@ -83,6 +81,25 @@ async function selectAdditionalFilters(page: Page): Promise<void> {
   await waitForSearchResultsInitialLoad(page);
 }
 
+// Then the selected filters should be cleared from the drawer
+async function expectAdditionalFiltersCleared(page: Page): Promise<void> {
+  await ensureAccordionExpanded(page, "Funding instrument");
+
+  await expect(
+    page.getByRole("checkbox", {
+      name: /grant/i,
+    }),
+  ).not.toBeChecked();
+
+  await ensureAccordionExpanded(page, "Eligibility");
+
+  await expect(
+    page.getByRole("checkbox", {
+      name: /county governments/i,
+    }),
+  ).not.toBeChecked();
+}
+
 for (const loginState of LOGIN_STATES) {
   test.describe(`Filter drawer - Clear Filters (${loginState})`, () => {
     // Scenario: Clicking Clear Filters updates results immediately
@@ -103,7 +120,10 @@ for (const loginState of LOGIN_STATES) {
         // When I click the Clear Filters button
         await clickClearFilters(page);
 
-        // Then the search results should update to reflect no filters
+        // Then the selected filters should be cleared from the drawer.
+        await expectAdditionalFiltersCleared(page);
+
+        // And the search results should update to reflect no filters
         await expect
           .poll(() => getNumberOfOpportunitySearchResults(page), {
             timeout: POLL_TIMEOUT,
