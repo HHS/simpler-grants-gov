@@ -23,11 +23,15 @@ const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
 export const LOGIN_STATES = ["logged in", "not logged in"] as const;
 export type LoginState = (typeof LOGIN_STATES)[number];
 
-const FUNDING_INSTRUMENT_GRANT = {
+// Default status filters (src/constants/search.ts STATUS_FILTER_DEFAULT_VALUES).
+// "Posted" is the `posted` value of the checkbox labelled "Open" (id status-open).
+export const DEFAULT_STATUS_CHECKBOX_IDS = ["status-forecasted", "status-open"];
+
+export const FUNDING_INSTRUMENT_GRANT = {
   "funding-instrument-grant": "grant",
 };
 
-const ELIGIBILITY_COUNTY = {
+export const ELIGIBILITY_COUNTY = {
   "eligibility-county_governments": "county_governments",
 };
 
