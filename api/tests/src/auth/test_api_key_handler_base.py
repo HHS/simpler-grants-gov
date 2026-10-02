@@ -8,6 +8,10 @@ import pytest
 from sqlalchemy import select
 
 from src.adapters import db
+from src.adapters.aws.api_gateway_adapter import (
+    _clear_mock_import_responses,
+    _get_mock_import_responses,
+)
 from src.auth.api_key_config import ApiKeyConfig
 from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.util import datetime_util
@@ -121,15 +125,17 @@ def test_create_api_key_sends_raw_key_to_api_gateway(enable_factory_create, db_s
     """AWS API Gateway still gets the raw key, never the hash."""
     user = SharedUserFactory.create()
 
-    with patch("src.auth.api_key_handler_base.import_api_key") as mock_import:
-        api_key = SharedApiKeyHandler(db_session).create_api_key(
-            user_id=user.shared_user_id,
-            key_name="Gateway Key",
-        )
+    _clear_mock_import_responses()
+    api_key = SharedApiKeyHandler(db_session).create_api_key(
+        user_id=user.shared_user_id,
+        key_name="Gateway Key",
+    )
 
-    assert mock_import.call_count == 1
-    assert mock_import.call_args.kwargs["api_key"] == api_key.key_id
-    assert mock_import.call_args.kwargs["api_key"] != api_key.key_id_hash
+    mock_responses = _get_mock_import_responses()
+    assert len(mock_responses) == 1
+    request_data, _ = mock_responses[0]
+    assert request_data["api_key"] == api_key.key_id
+    assert request_data["api_key"] != api_key.key_id_hash
 
 
 def test_create_api_key_collision_checked_on_hash(enable_factory_create, db_session: db.Session):

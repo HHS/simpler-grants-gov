@@ -26,6 +26,7 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 from src.auth.api_key_config import ApiKeyConfig
+from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.auth.auth_handler import AuthHandler
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege, UserType
@@ -36,14 +37,6 @@ from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
 logger = logging.getLogger(__name__)
 
 SCANNER_API_KEY_NAME = "File scan scanner key"
-
-# Number of times to retry key generation if we happen to collide with an
-# existing key_id before giving up.
-MAX_KEY_GENERATION_RETRIES = 5
-
-
-class KeyGenerationError(Exception):
-    """Raised when unable to generate a unique API key after multiple retries."""
 
 
 def setup_file_scan_scanner_user(
@@ -97,13 +90,9 @@ def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
     # Mint the key through the shared auth handler (no AWS API Gateway import):
     # this key is validated only against the user_api_key table by the
     # X-API-Key auth, same as the locally-seeded scanner key.
-    key_id = _generate_unique_key_id(db_session)
-    api_key = AuthHandler(db_session).create_api_key(
-        user.user_id,
-        SCANNER_API_KEY_NAME,
-        key_id,
-        hash_api_key_id(key_id, ApiKeyConfig().pepper),
-    )
+    auth_handler = AuthHandler(db_session)
+    key_id, key_id_hash = _generate_unique_key_id(auth_handler)
+    api_key = auth_handler.create_api_key(user.user_id, SCANNER_API_KEY_NAME, key_id, key_id_hash)
     logger.info(
         "Registered file-scan scanner API key",
         extra={"user_id": user.user_id} | api_key.get_log_extra(),
@@ -111,14 +100,14 @@ def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
     return api_key
 
 
-def _generate_unique_key_id(db_session: db.Session) -> str:
+def _generate_unique_key_id(auth_handler: AuthHandler) -> tuple[str, str]:
+    """Generate a new key_id and its hash, retrying if the hash is already taken."""
+    pepper = ApiKeyConfig().pepper
     for _attempt in range(MAX_KEY_GENERATION_RETRIES):
         key_id = generate_api_key_id()
-        existing = db_session.scalars(
-            select(UserApiKey).where(UserApiKey.key_id == key_id)
-        ).one_or_none()
-        if existing is None:
-            return key_id
+        key_id_hash = hash_api_key_id(key_id, pepper)
+        if auth_handler.get_api_key_by_key_id_hash(key_id_hash) is None:
+            return key_id, key_id_hash
 
     logger.error(
         "Failed to generate unique key_id after maximum retries",
