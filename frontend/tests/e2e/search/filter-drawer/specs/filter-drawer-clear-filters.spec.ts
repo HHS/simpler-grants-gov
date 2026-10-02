@@ -21,6 +21,7 @@ import {
   clickClearFilters,
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
+  expectCheckboxIDIsChecked,
   getNumberOfOpportunitySearchResults,
   toggleCheckboxGroup,
   waitForSearchResultsInitialLoad,
@@ -35,6 +36,10 @@ const POLL_TIMEOUT = targetEnv !== "local" ? 120000 : 60000;
 // Background Examples: loginState
 const LOGIN_STATES = ["logged in", "not logged in"] as const;
 type LoginState = (typeof LOGIN_STATES)[number];
+
+// Default status filters (src/constants/search.ts STATUS_FILTER_DEFAULT_VALUES).
+// "Posted" is the `posted` value of the checkbox labelled "Open" (id status-open).
+const DEFAULT_STATUS_CHECKBOX_IDS = ["status-forecasted", "status-open"];
 
 // Additional (non-default) filters used by both scenarios
 const FUNDING_INSTRUMENT_GRANT = { "funding-instrument-grant": "grant" };
@@ -109,6 +114,40 @@ for (const loginState of LOGIN_STATES) {
             timeout: POLL_TIMEOUT,
           })
           .toBe(defaultCount);
+      },
+    );
+
+    // Scenario: Clicking Clear Filters restores default filters
+    test(
+      "clicking Clear Filters restores default filters",
+      { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+      async ({ page, context }, testInfo) => {
+        test.setTimeout(180_000);
+
+        // Given the default filters are "Posted" and "Forecasted"
+        await openSearchWithFilterDrawer(page, context, testInfo, loginState);
+        for (const id of DEFAULT_STATUS_CHECKBOX_IDS) {
+          await expectCheckboxIDIsChecked(page, id);
+        }
+
+        // And I have selected additional filters
+        await selectAdditionalFilters(page);
+
+        // When I click the Clear Filters button
+        await clickClearFilters(page);
+
+        // Then only the default filters should remain selected
+        for (const id of DEFAULT_STATUS_CHECKBOX_IDS) {
+          await expectCheckboxIDIsChecked(page, id);
+        }
+        for (const id of [
+          ...Object.keys(FUNDING_INSTRUMENT_GRANT),
+          ...Object.keys(ELIGIBILITY_COUNTY),
+        ]) {
+          await expect(
+            page.locator(`input[id="${id}"]`).first(),
+          ).not.toBeChecked();
+        }
       },
     );
   });
