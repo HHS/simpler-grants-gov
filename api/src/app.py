@@ -40,6 +40,7 @@ from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.api.users.user_blueprint import user_blueprint
 from src.api.workflows import workflow_blueprint
+from src.submission_consumer import submission_consumer_blueprint
 from src.app_config import AppConfig
 from src.auth.auth_utils import get_app_security_scheme
 from src.auth.jwt import initialize_jwt_auth
@@ -236,6 +237,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
+    app.register_blueprint(submission_consumer_blueprint)
 
     if endpoint_config.enable_workflow_endpoints:
         app.register_blueprint(workflow_blueprint)

@@ -339,10 +339,10 @@ def build_submittable_application(create_test_form):
     return application, user
 
 
-def test_submit_application_queues_workflow_event(
+def test_submit_application_queues_submission_message(
     enable_factory_create, db_session, create_test_form, workflow_sqs_queue
 ):
-    """A successful submit queues a start event for the application submission workflow."""
+    """A successful submit queues a submission-build message for the consumer."""
     application, user = build_submittable_application(create_test_form)
 
     with db_session.begin():
@@ -355,11 +355,9 @@ def test_submit_application_queues_workflow_event(
     assert len(messages) == 1
 
     body = json.loads(messages[0]["Body"])
-    assert body["event_type"] == "start_workflow"
-    assert body["acting_user_id"] == str(user.user_id)
-    assert body["start_workflow_context"]["workflow_type"] == "application_submission"
-    assert body["start_workflow_context"]["entity_type"] == "application"
-    assert body["start_workflow_context"]["entity_id"] == str(application.application_id)
+    assert body["application_id"] == str(application.application_id)
+    assert body["submitted_by_user_id"] == str(user.user_id)
+    assert body["message_id"] is not None
 
 
 def test_submit_application_succeeds_when_queue_send_fails(
@@ -372,7 +370,7 @@ def test_submit_application_succeeds_when_queue_send_fails(
         raise Exception("simulated SQS outage")
 
     monkeypatch.setattr(
-        "src.services.applications.submit_application.send_workflow_event_to_queue",
+        "src.services.applications.submit_application.send_application_submission_message",
         _raise_on_send,
     )
 
@@ -381,6 +379,6 @@ def test_submit_application_succeeds_when_queue_send_fails(
 
     assert submitted_application.application_status == ApplicationStatus.SUBMITTED
     assert (
-        "Failed to queue application submission workflow event - the scheduled submission task will process this application"
+        "Failed to queue application submission message - the scheduled submission task will process this application"
         in caplog.messages
     )

@@ -45,7 +45,10 @@ data "aws_iam_policy_document" "s3_buckets_put_access" {
       identifiers = concat(
         [aws_iam_role.app_service.arn],
         var.db_vars != null ? [aws_iam_role.migrator_task[0].arn] : [],
-        length(aws_iam_role.opensearch_write) > 0 ? [aws_iam_role.opensearch_write[0].arn] : []
+        length(aws_iam_role.opensearch_write) > 0 ? [aws_iam_role.opensearch_write[0].arn] : [],
+        # The submission consumer builds application submission zips in the
+        # draft files bucket (and reads attachments from it).
+        length(aws_iam_role.workflow_service) > 0 ? [aws_iam_role.workflow_service[0].arn] : []
       )
     }
   }
