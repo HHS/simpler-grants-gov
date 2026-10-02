@@ -6,6 +6,7 @@ from typing import Self
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.auth.api_jwt_auth import create_jwt_for_user
+from src.auth.api_key_config import ApiKeyConfig
 from src.auth.jwt import ApiJwtConfig
 from src.constants.static_role_values import E2E_TEST_USER_ROLE
 from src.db.models.agency_models import Agency
@@ -18,6 +19,7 @@ from src.db.models.user_models import (
     Role,
     User,
 )
+from src.util.api_key_gen import hash_api_key_id
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,7 @@ class UserBuilder:
             user_api_key = factories.UserApiKeyFactory.build(user=self.user)
 
         user_api_key.key_id = key_id
+        user_api_key.key_id_hash = hash_api_key_id(key_id, ApiKeyConfig().pepper)
 
         self.db_session.add(user_api_key)
 
