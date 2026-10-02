@@ -297,7 +297,7 @@ def test_create_api_key_duplicate_name_rejected(enable_factory_create, db_sessio
         create_api_key(db_session=db_session, user_id=user.user_id, json_data={"key_name": "Prod"})
 
     assert exc_info.value.status_code == 422
-    issues = exc_info.value.detail["validation_issues"]
+    issues = exc_info.value.extra_data["validation_issues"]
     assert any(issue.type == ValidationErrorType.DUPLICATE_API_KEY_NAME for issue in issues)
 
 
@@ -312,7 +312,7 @@ def test_create_api_key_duplicate_name_case_insensitive(
         create_api_key(db_session=db_session, user_id=user.user_id, json_data={"key_name": "Prod"})
 
     assert exc_info.value.status_code == 422
-    issues = exc_info.value.detail["validation_issues"]
+    issues = exc_info.value.extra_data["validation_issues"]
     assert any(issue.field == "key_name" for issue in issues)
 
 
@@ -327,7 +327,7 @@ def test_create_api_key_duplicate_name_whitespace(enable_factory_create, db_sess
         )
 
     assert exc_info.value.status_code == 422
-    issues = exc_info.value.detail["validation_issues"]
+    issues = exc_info.value.extra_data["validation_issues"]
     assert any(issue.type == ValidationErrorType.DUPLICATE_API_KEY_NAME for issue in issues)
 
 
