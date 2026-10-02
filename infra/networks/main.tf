@@ -39,14 +39,22 @@ locals {
 
   # Whether any of the applications in the network has enabled notifications
   enable_notifications = anytrue([for app in local.apps_in_network : app.enable_notifications])
+
+  # Whether any of the applications in the network has enabled SMS notifications
+  enable_sms_notifications = anytrue([for app in local.apps_in_network : app.enable_sms_notifications])
 }
 
 terraform {
-  required_version = ">= 1.10.0"
+  required_version = "~>1.10.0"
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
+      # The template's upstream pin is ~>5.6.0, but this repo's network module keeps
+      # terraform-aws-modules/vpc/aws at v5.13.0 (for its IPv6/DNS64 subnet support,
+      # which older vpc module versions compatible with ~>5.6.0 may not fully support),
+      # and v5.13.0 itself requires aws >=5.46. Kept at the repo's pre-upgrade floor
+      # (unbounded above, same as before this PR) rather than adopting the upstream pin.
       version = ">= 5.46.0"
     }
   }
@@ -114,24 +122,26 @@ module "nofos_config" {
 }
 
 module "network" {
-  source                                  = "../modules/network"
+  source                                  = "../modules/network/resources"
   name                                    = var.network_name
-  has_database                            = local.has_database
-  database_subnet_group_name              = var.network_name
+  second_octet                            = local.network_config.second_octet
   aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
-  second_octet                            = module.project_config.network_configs[var.network_name].second_octet
+  database_subnet_group_name              = var.network_name
+  has_database                            = local.has_database
   has_external_non_aws_service            = local.has_external_non_aws_service
   enable_command_execution                = local.enable_command_execution
+  enable_notifications                    = local.enable_notifications
+  enable_sms_notifications                = local.enable_sms_notifications
 }
 
 module "domain" {
-  source              = "../modules/domain/resources"
-  name                = local.domain_config.hosted_zone
-  manage_dns          = local.domain_config.manage_dns
-  certificate_configs = local.domain_config.certificate_configs
-
+  source = "../modules/domain/resources"
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1
   }
+
+  name                = local.domain_config.hosted_zone
+  manage_dns          = local.domain_config.manage_dns
+  certificate_configs = local.domain_config.certificate_configs
 }
