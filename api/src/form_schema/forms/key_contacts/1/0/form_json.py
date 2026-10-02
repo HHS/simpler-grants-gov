@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -354,6 +355,7 @@ KeyContacts_v2_0 = Form(
     form_version="2.0",
     agency_code="SGG",
     omb_number="4040-0010",
+    expiration_date=date(2029, 8, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     # No rule schema needed — no conditional fields, attachments, or pre/post-population
