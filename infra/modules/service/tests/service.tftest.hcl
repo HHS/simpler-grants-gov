@@ -199,3 +199,22 @@ run "job_failed_cause_passes_the_error_as_arguments" {
     error_message = "States.Format placeholder count must match the number of arguments passed"
   }
 }
+
+run "default_waf_metric_identity_is_unchanged" {
+  command = plan
+  assert {
+    condition     = output.waf_metric_name == "WAF_Common_Protections"
+    error_message = "Existing services must retain their existing WAF metric identity."
+  }
+}
+
+run "explicit_waf_metric_identity_is_exported" {
+  command = plan
+  variables {
+    waf_metric_name = "nofos-infra-dev-waf"
+  }
+  assert {
+    condition     = output.waf_metric_name == "nofos-infra-dev-waf"
+    error_message = "Monitoring must receive the actual visibility metric name."
+  }
+}

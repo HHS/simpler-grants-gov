@@ -134,3 +134,21 @@ variable "database_newrelic_entity_guid" {
   description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
   default     = null
 }
+
+variable "enable_pdf_readability_monitoring" {
+  type        = bool
+  default     = false
+  description = "Opt in to the NOFO pilot dashboard and alarms for this environment."
+}
+
+variable "monitoring_email_alert_recipients" {
+  type        = set(string)
+  default     = []
+  description = "Explicit operational alert recipients; SNS email subscriptions require recipient confirmation."
+}
+
+variable "pdf_readability_alarm_actions_enabled" {
+  type        = bool
+  default     = false
+  description = "Enable pilot notifications after agreement on recipients and delivery verification."
+}
