@@ -77,3 +77,14 @@ ignore:
   # Major version upgrade required, will do after 8/12 release
   # Last checked: 08/11/2026
   - vulnerability: GHSA-55q2-fjhq-7xh7
+
+  # tarfile: hardlink fallback ignores a custom extraction filter's None result.
+  # Python 3.14.8 is still affected; the 3.14 backport merged after that release.
+  # Grype lists fixes in 3.12.15, 3.13.16 and pre-release 3.15.0, but there is
+  # no released fix on our 3.14 runtime line yet. Remove this exception once
+  # python:3.14-slim includes the backport and Grype recognizes the fixed version.
+  # Advisory: https://www.cve.org/CVERecord?id=CVE-2026-87910
+  # Backport: https://github.com/python/cpython/pull/157307
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 10/02/2026
+  - vulnerability: CVE-2026-87910
