@@ -9,7 +9,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "WAF_Common_Protections"
+    metric_name                = var.waf_metric_name == null ? "WAF_Common_Protections" : var.waf_metric_name
     sampled_requests_enabled   = true
   }
 

@@ -443,3 +443,9 @@ variable "enable_processor_service" {
   type        = bool
   default     = false
 }
+
+variable "waf_metric_name" {
+  type        = string
+  default     = null
+  description = "Optional unique WebACL CloudWatch metric name; null preserves the existing name."
+}

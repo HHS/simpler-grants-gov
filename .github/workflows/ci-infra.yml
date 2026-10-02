@@ -71,6 +71,10 @@ jobs:
           terraform_wrapper: false
       - name: Run module unit tests
         run: make infra-test-modules
+      - name: Test NOFO environment configuration
+        run: |
+          terraform -chdir=infra/nofos/app-config init -backend=false -lockfile=readonly
+          terraform -chdir=infra/nofos/app-config test
   check-compliance-with-checkov:
     name: Check compliance with checkov
     runs-on: ubuntu-22.04
