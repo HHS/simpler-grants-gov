@@ -33,6 +33,8 @@ output "service_config" {
 
     secrets = local.secrets
 
+    pdf_readability_waf = var.pdf_readability_waf
+
     file_upload_jobs = {
       for job_name, job_config in local.file_upload_jobs :
       # For job configs that don't define a source_bucket, add the source_bucket config property
