@@ -24,7 +24,7 @@ def setup_admin_privileges(db_session, api_key_value):
         user = existing_key.user
     else:
         user = factories.UserFactory.create()
-        factories.UserApiKeyFactory.create(user=user, key_id=api_key_value)
+        factories.UserApiKeyFactory.create(user=user, raw_key=api_key_value)
 
     admin_role = factories.RoleFactory.create(
         role_name=f"Internal Admin {uuid.uuid4()}", privileges=[Privilege.MANAGE_INTERNAL_ROLES]

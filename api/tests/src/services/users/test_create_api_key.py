@@ -67,7 +67,7 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
     user = UserFactory.create()
 
     existing_key_id = "COLLISION_TEST_KEY_12345"
-    UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
+    UserApiKeyFactory.create(user=user, key_name="Existing Key", raw_key=existing_key_id)
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
         mock_generate.side_effect = [
@@ -91,7 +91,7 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
     user = UserFactory.create()
 
     existing_key_id = "COLLISION_KEY_12345678901234"
-    UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
+    UserApiKeyFactory.create(user=user, key_name="Existing Key", raw_key=existing_key_id)
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id  # Always return the same colliding key
@@ -137,7 +137,7 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
     user = UserFactory.create()
 
     existing_key_id = "COLLISION_LOG_12345678901234"
-    UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
+    UserApiKeyFactory.create(user=user, key_name="Existing Key", raw_key=existing_key_id)
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id
