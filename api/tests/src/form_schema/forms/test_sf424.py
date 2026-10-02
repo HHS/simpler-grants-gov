@@ -311,6 +311,11 @@ def test_sf424_v4_0_formats(sf424_v4_0, valid_json_v4_0, data):
         {"congressional_district_applicant": ""},
         {"authorized_representative": {"first_name": "", "last_name": "Smith"}},
         {"authorized_representative_fax": ""},
+        {"federal_entity_identifier": ""},
+        {"department_name": ""},
+        {"division_name": ""},
+        {"contact_person_title": ""},
+        {"organization_affiliation": ""},
     ],
 )
 def test_sf424_v4_0_min_length(sf424_v4_0, valid_json_v4_0, data):
@@ -342,6 +347,12 @@ def test_sf424_v4_0_min_length(sf424_v4_0, valid_json_v4_0, data):
         {"revision_other_specify": "x" * 22},
         {"division_name": "x" * 31},
         {"authorized_representative_email": "a" * 52 + "@test.org"},
+        {"state_application_id": "x" * 31},
+        {"federal_entity_identifier": "x" * 31},
+        {"department_name": "x" * 31},
+        {"contact_person_title": "x" * 46},
+        {"organization_affiliation": "x" * 61},
+        {"authorized_representative_fax": "1" * 26},
     ],
 )
 def test_sf424_v4_0_max_length(sf424_v4_0, valid_json_v4_0, data):
@@ -390,6 +401,43 @@ def test_sf424_v4_0_conditionally_required_fields(
     for validation_issue in validation_issues:
         assert validation_issue.type == "required"
         assert validation_issue.field in required_fields
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"application_type": "New"},
+        {
+            "state_review": "b. Program is subject to E.O. 12372 but has not been selected by the state for review."
+        },
+        {"state_review": "c. Program is not covered by E.O. 12372."},
+    ],
+)
+def test_sf424_v4_0_conditional_fields_not_required(sf424_v4_0, valid_json_v4_0, data):
+    """The other branches of the if-then rules don't require the conditional fields."""
+    data = valid_json_v4_0 | data
+    for field in ["federal_award_identifier", "revision_type", "state_review_available_date"]:
+        data.pop(field, None)
+
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"federal_entity_identifier": "x" * 30},
+        {"department_name": "x" * 30},
+        {"division_name": "x" * 30},
+        {"contact_person_title": "x" * 45},
+        {"organization_affiliation": "x" * 60},
+        {"authorized_representative_fax": "1" * 25},
+    ],
+)
+def test_sf424_v4_0_optional_fields_at_max_length(sf424_v4_0, valid_json_v4_0, data):
+    """Optional fields are accepted right at their max length."""
+    data = valid_json_v4_0 | data
+
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
 
 
 def test_sf424_v4_0_pre_population_with_all_non_null_values(
@@ -535,3 +583,61 @@ def test_sf424_post_population(
     assert app_json["date_received"] == "2023-02-20"
     assert app_json["date_signed"] == "2023-02-20"
     assert app_json["aor_signature"] == "mynewmail@example.com"
+
+
+def _ui_field_types(ui_schema: list) -> dict:
+    """Map each UI definition path to its type ("field" or "null"), walking nested sections."""
+    field_types = {}
+    for item in ui_schema:
+        if "definition" in item:
+            field_types[item["definition"]] = item["type"]
+        field_types |= _ui_field_types(item.get("children", []))
+    return field_types
+
+
+@pytest.mark.parametrize("field_name", ["state_receive_date", "state_application_id"])
+def test_sf424_v4_0_state_fields_are_editable(sf424_v4_0, field_name):
+    """The state fields are optional user inputs, not read-only or system-populated."""
+    field_schema = sf424_v4_0.form_json_schema["properties"][field_name]
+    assert "readOnly" not in field_schema
+    if field_name == "state_receive_date":
+        # format=date is what makes the frontend render a date picker
+        assert field_schema["format"] == "date"
+    assert field_schema["description"] == "Leave blank, to be filled out by state."
+    assert field_name not in sf424_v4_0.form_json_schema["required"]
+
+    assert _ui_field_types(sf424_v4_0.form_ui_schema)[f"/properties/{field_name}"] == "field"
+
+    # Neither pre-populated nor post-populated
+    assert field_name not in sf424_v4_0.form_rule_schema
+
+
+def test_sf424_v4_0_state_fields_valid_values(sf424_v4_0, valid_json_v4_0):
+    """A date and a 30 character id are accepted, and an empty id is allowed."""
+    data = valid_json_v4_0 | {
+        "state_receive_date": "2025-06-01",
+        "state_application_id": "x" * 30,
+    }
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
+
+    data = valid_json_v4_0 | {"state_application_id": ""}
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
+
+
+@freezegun.freeze_time("2023-02-20 12:00:00", tz_offset=0)
+def test_sf424_state_fields_kept_on_submit(
+    enable_factory_create, valid_json_v4_0, sf424_v4_0, verify_no_warning_error_logs
+):
+    """Values the user enters for the state fields are not overwritten on submit."""
+    application_form = setup_application_for_form_validation(
+        valid_json_v4_0 | {"state_receive_date": "2025-06-01", "state_application_id": "STATE-123"},
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
+        user_email="mynewmail@example.com",
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.SUBMIT)
+    assert len(issues) == 0
+    app_json = application_form.application_response
+    assert app_json["state_receive_date"] == "2025-06-01"
+    assert app_json["state_application_id"] == "STATE-123"

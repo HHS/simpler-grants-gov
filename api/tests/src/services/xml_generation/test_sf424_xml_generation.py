@@ -564,10 +564,12 @@ def test_fields_at_max_length_still_validate(xsd_validator):
             "department_name": "x" * 30,
             "organization_affiliation": "x" * 60,
             "authorized_representative_email": "a" * 51 + "@test.org",
+            "state_application_id": "x" * 30,
         }
     )
 
     assert _find_text(xml_data, "SF424:DivisionName") == "x" * 30
+    assert _find_text(xml_data, "SF424:StateApplicationID") == "x" * 30
     _assert_xsd_valid(xsd_validator, xml_data)
 
 

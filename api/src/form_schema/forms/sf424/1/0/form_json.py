@@ -170,21 +170,21 @@ FORM_JSON_SCHEMA = {
             "maxLength": 25,
         },
         "state_receive_date": {
-            # A user will never fill this in, it's just on the form for agencies to use
+            # The instructions say to leave this blank for the state, but the legacy
+            # XSD allows a value, so the user is still able to fill it in.
             "type": "string",
             "title": "Date Received By State",
             "description": "Leave blank, to be filled out by state.",
             "format": "date",
-            "readOnly": True,
         },
         "state_application_id": {
-            # A user will never fill this in, it's just on the form for agencies to use
+            # Same as state_receive_date: meant for the state, but editable to match
+            # the legacy XSD.
             "type": "string",
             "title": "State Application Identifier",
             "description": "Leave blank, to be filled out by state.",
             "minLength": 0,
             "maxLength": 30,
-            "readOnly": True,
         },
         "organization_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
@@ -493,7 +493,7 @@ FORM_JSON_SCHEMA = {
             "format": "email",
             "title": "AOR email",
             "description": "Enter a valid email Address.",
-            # Based on EmailDataType (maxLength 60), same limit as the contact email
+            "minLength": 1,
             "maxLength": 60,
         },
         "aor_signature": {
@@ -552,13 +552,13 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "name": "date_received_by_state",
         "label": "6. Date Received by State",
-        "children": [{"type": "null", "definition": "/properties/state_receive_date"}],
+        "children": [{"type": "field", "definition": "/properties/state_receive_date"}],
     },
     {
         "type": "section",
         "name": "state_application_identifier",
         "label": "7. State Application Identifier",
-        "children": [{"type": "null", "definition": "/properties/state_application_id"}],
+        "children": [{"type": "field", "definition": "/properties/state_application_id"}],
     },
     {
         "type": "section",
@@ -880,8 +880,7 @@ FORM_XML_TRANSFORM_RULES = {
     "applicant_id": {"xml_transform": {"target": "ApplicantID"}},
     "federal_entity_identifier": {"xml_transform": {"target": "FederalEntityIdentifier"}},
     "federal_award_identifier": {"xml_transform": {"target": "FederalAwardIdentifier"}},
-    # state_receive_date / state_application_id are readOnly and filled by the state,
-    # so they're normally empty and excluded; mapped so a value is never silently dropped.
+    # Optional; only written to the XML when the user fills them in.
     "state_receive_date": {"xml_transform": {"target": "StateReceiveDate"}},
     "state_application_id": {"xml_transform": {"target": "StateApplicationID"}},
     # Applicant information - direct field mappings
