@@ -1,11 +1,18 @@
 import uuid
+from unittest.mock import patch
 
+import pytest
 from sqlalchemy import func, select
 
 import tests.src.db.models.factories as factories
+from src.auth.api_key_config import ApiKeyConfig
+from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
+from src.auth.auth_handler import AuthHandler
 from src.constants.lookup_constants import Privilege, RoleType, UserType
 from src.constants.static_role_values import INTERNAL_S3_SCANNER_ROLE_ID
 from src.db.models.user_models import InternalUserRole, User, UserApiKey
+from src.services.internal.setup_file_scan_scanner_user import _generate_unique_key_id
+from src.util.api_key_gen import hash_api_key_id
 
 INTERNAL_ROLES_URL = "/v1/internal/roles"
 SCANNER_USER_URL = "/v1/internal/file-scan-scanner-user"
@@ -172,6 +179,7 @@ def test_setup_scanner_user_success(
     assert key.user_id == scanner_user_id
     assert str(key.api_key_id) == data["api_key_id"]
     assert key.is_active is True
+    assert key.key_id_hash == hash_api_key_id(generated_key, ApiKeyConfig().pepper)
 
 
 def test_setup_scanner_user_idempotent_user_and_role(
@@ -245,3 +253,45 @@ def test_setup_scanner_user_invalid_input(
         SCANNER_USER_URL, headers={"X-API-Key": internal_admin_user_api_key}, json={}
     )
     assert resp.status_code == 422
+
+
+def test_setup_scanner_user_collision_checked_on_hash(
+    client, db_session, internal_admin_user_api_key, enable_factory_create
+):
+    """A generated scanner key whose hash is already stored is skipped for a new one."""
+    setup_admin_privileges(db_session, internal_admin_user_api_key)
+    pepper = ApiKeyConfig().pepper
+    taken_key_id = "TAKEN_SCANNER_KEY_1234567"
+    # Stored under a different raw key_id, so only the hash matches
+    factories.UserApiKeyFactory.create(key_id_hash=hash_api_key_id(taken_key_id, pepper))
+
+    with patch(
+        "src.services.internal.setup_file_scan_scanner_user.generate_api_key_id"
+    ) as mock_generate:
+        mock_generate.side_effect = [taken_key_id, "FRESH_SCANNER_KEY_1234567"]
+        resp = client.post(
+            SCANNER_USER_URL,
+            headers={"X-API-Key": internal_admin_user_api_key},
+            json={"user_id": str(uuid.uuid4())},
+        )
+
+    assert resp.status_code == 200
+    assert resp.get_json()["data"]["api_key"] == "FRESH_SCANNER_KEY_1234567"
+    assert mock_generate.call_count == 2
+
+
+def test_setup_scanner_user_key_generation_max_retries(db_session, enable_factory_create):
+    """Gives up with KeyGenerationError when every generated hash is already taken."""
+    taken_key_id = "TAKEN_SCANNER_KEY_7654321"
+    factories.UserApiKeyFactory.create(
+        key_id_hash=hash_api_key_id(taken_key_id, ApiKeyConfig().pepper)
+    )
+
+    with patch(
+        "src.services.internal.setup_file_scan_scanner_user.generate_api_key_id",
+        return_value=taken_key_id,
+    ) as mock_generate:
+        with pytest.raises(KeyGenerationError):
+            _generate_unique_key_id(AuthHandler(db_session))
+
+    assert mock_generate.call_count == MAX_KEY_GENERATION_RETRIES
