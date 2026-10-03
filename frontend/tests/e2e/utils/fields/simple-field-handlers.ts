@@ -16,12 +16,14 @@
  */
 
 import { expect, type Locator, type Page } from "@playwright/test";
-import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
-
 import { shouldActivateField } from "tests/e2e/utils/common/activation";
 import { getChoiceLocator } from "tests/e2e/utils/common/choice-locator";
 import { escapeRegex } from "tests/e2e/utils/common/regex-utils";
-import { type FieldHandler, type FillFieldDefinition } from "tests/e2e/utils/common/types";
+import {
+  type FieldHandler,
+  type FillFieldDefinition,
+} from "tests/e2e/utils/common/types";
+import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 
 // ---------------------------------------------------------------------------
 // Text
