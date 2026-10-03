@@ -12,6 +12,7 @@ import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
@@ -83,6 +84,17 @@ export default async function SavedSearchQueries({
         <GeneralErrorAlert callToAction={t("error")} />
       </>
     );
+  }
+
+  // A page past the end (for example after deleting the last search on the final
+  // page, which refreshes in place) would otherwise show the "no saved searches"
+  // state even though earlier pages still have searches; send the user to the last page.
+  if (
+    savedSearches.length === 0 &&
+    totalPages > 0 &&
+    currentPage > totalPages
+  ) {
+    redirect(`/workspace/saved-search-queries?page=${totalPages}`);
   }
 
   try {
