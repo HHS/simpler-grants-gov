@@ -6,11 +6,15 @@ import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
 
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
 const mockBreadcrumbs = jest.fn();
+const mockRedirect = jest.fn((url: string) => {
+  throw new Error(`NEXT_REDIRECT ${url}`);
+});
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
   usePathname: () => "/workspace/saved-search-queries",
   useRouter: () => ({ push: jest.fn() }),
+  redirect: (url: string): unknown => mockRedirect(url),
 }));
 
 jest.mock("next-intl/server", () => ({
@@ -135,6 +139,41 @@ describe("Saved Searches page", () => {
     expect(
       screen.queryByRole("navigation", { name: /pagination/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("redirects to the last page when the requested page is past the end", async () => {
+    mockFetchSavedSearchesPage.mockResolvedValueOnce({
+      savedSearches: [],
+      paginationInfo: { total_pages: 2, total_records: 26 },
+    });
+
+    await expect(
+      SavedSearchQueries({
+        params: localeParams,
+        searchParams: Promise.resolve({ page: "3" }),
+      }),
+    ).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(mockFetchSavedSearchesPage).toHaveBeenCalledWith(3);
+    expect(mockRedirect).toHaveBeenCalledWith(
+      "/workspace/saved-search-queries?page=2",
+    );
+  });
+
+  it("shows the empty state without redirecting when the user has no saved searches", async () => {
+    mockFetchSavedSearchesPage.mockResolvedValueOnce({
+      savedSearches: [],
+      paginationInfo: { total_pages: 0, total_records: 0 },
+    });
+
+    const component = await SavedSearchQueries({
+      params: localeParams,
+      searchParams: Promise.resolve({ page: "2" }),
+    });
+    render(component);
+
+    expect(mockRedirect).not.toHaveBeenCalled();
+    expect(screen.getByText("heading")).toBeInTheDocument();
   });
 
   it("passes accessibility scan", async () => {
