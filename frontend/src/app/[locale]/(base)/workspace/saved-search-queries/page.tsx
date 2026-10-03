@@ -124,7 +124,9 @@ export default async function SavedSearchQueries({
       <div className="padding-y-5">
         {savedSearches.length > 0 ? (
           <>
-            {showPagination && <OpportunitiesPagination totalPages={totalPages} />}
+            {showPagination && (
+              <OpportunitiesPagination totalPages={totalPages} />
+            )}
             <SavedSearchesList
               savedSearches={formattedSavedSearches}
               paramDisplayMapping={paramDisplayMapping}
@@ -132,7 +134,9 @@ export default async function SavedSearchQueries({
               deleteText={t("delete")}
               agencyOptions={agencyOptions}
             />
-            {showPagination && <OpportunitiesPagination totalPages={totalPages} />}
+            {showPagination && (
+              <OpportunitiesPagination totalPages={totalPages} />
+            )}
           </>
         ) : (
           <NoSavedSearches />

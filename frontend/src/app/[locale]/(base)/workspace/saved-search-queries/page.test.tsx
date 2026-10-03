@@ -56,10 +56,7 @@ const savedSearches = [
   { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "5" },
 ];
 
-const paginatedResult = (
-  results = savedSearches,
-  totalPages = 1,
-) => ({
+const paginatedResult = (results = savedSearches, totalPages = 1) => ({
   savedSearches: results,
   paginationInfo: {
     order_by: "name",
@@ -118,7 +115,9 @@ describe("Saved Searches page", () => {
     const component = await SavedSearchQueries({ params: localeParams });
     render(component);
 
-    expect(screen.queryByTestId("saved-search-pagination")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("saved-search-pagination"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders pagination above and below the list when there is more than one page", async () => {
