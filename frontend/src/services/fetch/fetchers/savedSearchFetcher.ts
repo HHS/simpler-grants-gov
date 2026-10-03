@@ -1,5 +1,5 @@
 import { getSession } from "src/services/auth/session";
-import { APIResponse } from "src/types/apiResponseTypes";
+import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   SavedSearchRecord,
   SearchRequestBody,
@@ -12,6 +12,11 @@ interface SavedSearchResponse extends APIResponse {
     saved_search_id?: string;
   };
 }
+
+export type PaginatedSavedSearches = {
+  savedSearches: SavedSearchRecord[];
+  paginationInfo?: PaginationInfo;
+};
 
 // make call from server to API to save a search
 export const handleSavedSearch = async (
@@ -50,17 +55,19 @@ export const handleDeleteSavedSearch = async (
   return (await response.json()) as APIResponse;
 };
 
-export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
+export const fetchSavedSearchesPaginated = async (
+  page = 1,
+): Promise<PaginatedSavedSearches> => {
   const session = await getSession();
   // Supplementary data: this renders on pages available to logged-out users, so a
   // missing token degrades to an empty list rather than throwing (unlike required-data
   // fetchers such as fetchApplications, which throw MissingAuthError).
   if (!session?.token) {
-    return [];
+    return { savedSearches: [] };
   }
   const body = {
     pagination: {
-      page_offset: 1,
+      page_offset: page,
       page_size: 25,
       sort_order: [
         {
@@ -75,6 +82,17 @@ export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
     subPath,
     body,
   });
-  const json = (await resp.json()) as { data: [] };
-  return json.data;
+  const json = (await resp.json()) as {
+    data: SavedSearchRecord[];
+    pagination_info?: PaginationInfo;
+  };
+  return {
+    savedSearches: json.data,
+    paginationInfo: json.pagination_info,
+  };
+};
+
+export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
+  const { savedSearches } = await fetchSavedSearchesPaginated();
+  return savedSearches;
 };
