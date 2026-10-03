@@ -1,7 +1,7 @@
 /**
  * Generic form-filling helpers that open forms, fill fields, and save when needed.
  * Usage: import { fillFormPartial, fillForm } from "tests/e2e/utils/forms/general-forms-filling";
- * (Single-field fills go through tests/e2e/utils/fields/fill-field directly.)
+ * (Single-field fills go through tests/e2e/utils/fields/fill-fields directly.)
  */
 
 import { Page, TestInfo } from "@playwright/test";
@@ -10,7 +10,7 @@ import {
   type FillFormConfig,
   type FormFillFieldDefinitions,
 } from "tests/e2e/utils/common/types";
-import { fillField } from "tests/e2e/utils/fields/fill-field";
+import { fillField } from "tests/e2e/utils/fields/fill-fields";
 
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";

@@ -18,10 +18,10 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 
-import { shouldActivateField } from "../common/activation";
-import { getChoiceLocator } from "../common/choice-locator";
-import { escapeRegex } from "../common/regex-utils";
-import { type FieldHandler, type FillFieldDefinition } from "../common/types";
+import { shouldActivateField } from "tests/e2e/utils/common/activation";
+import { getChoiceLocator } from "tests/e2e/utils/common/choice-locator";
+import { escapeRegex } from "tests/e2e/utils/common/regex-utils";
+import { type FieldHandler, type FillFieldDefinition } from "tests/e2e/utils/common/types";
 
 // ---------------------------------------------------------------------------
 // Text
