@@ -89,7 +89,6 @@ ignore:
   # Last checked: 10/02/2026
   - vulnerability: CVE-2026-87910
 
-  
   # tempfile.TemporaryDirectory: race condition in cleanup lets an attacker who
   # can modify the tree swap a directory for a symlink, so files outside the
   # temporary directory can be deleted or have permissions/flags reset.
@@ -102,4 +101,3 @@ ignore:
   # https://github.com/HHS/simpler-grants-gov/issues/8109
   # Last checked: 10/03/2026
   - vulnerability: CVE-2026-12345
-
