@@ -1,5 +1,6 @@
 import {
   fetchSavedSearches,
+  fetchSavedSearchesPage,
   handleDeleteSavedSearch,
   handleSavedSearch,
   handleUpdateSavedSearch,
@@ -43,7 +44,10 @@ describe("fetchSavedSearches", () => {
   it("calls fetchUserWithMethod as expected and returns json result", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken", user_id: "1" });
     fetchUserMock.mockReturnValue({
-      json: () => ({ data: [{ fake: "saved search" }] }),
+      json: () => ({
+        data: [{ fake: "saved search" }],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      }),
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
     const result = await fetchSavedSearches();
@@ -71,6 +75,49 @@ describe("fetchSavedSearches", () => {
     const result = await fetchSavedSearches();
 
     expect(result).toEqual([]);
+  });
+
+  it("fetches a requested page and returns pagination information", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken", user_id: "1" });
+    fetchUserMock.mockReturnValue({
+      json: () => ({
+        data: [{ fake: "saved search" }],
+        pagination_info: {
+          page_offset: 2,
+          page_size: 25,
+          total_pages: 3,
+          total_records: 51,
+        },
+      }),
+    });
+    fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
+
+    const result = await fetchSavedSearchesPage(2);
+
+    expect(result).toEqual({
+      savedSearches: [{ fake: "saved search" }],
+      paginationInfo: {
+        page_offset: 2,
+        page_size: 25,
+        total_pages: 3,
+        total_records: 51,
+      },
+    });
+    expect(fetchUserMock).toHaveBeenCalledWith({
+      subPath: "1/saved-searches/list",
+      body: {
+        pagination: {
+          page_offset: 2,
+          page_size: 25,
+          sort_order: [
+            {
+              order_by: "name",
+              sort_direction: "ascending",
+            },
+          ],
+        },
+      },
+    });
   });
 });
 

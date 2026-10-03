@@ -9,6 +9,8 @@ const mockBreadcrumbs = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
+  usePathname: () => "/workspace/saved-search-queries",
+  useRouter: () => ({ push: jest.fn() }),
 }));
 
 jest.mock("next-intl/server", () => ({
@@ -23,13 +25,18 @@ jest.mock("src/components/core/Breadcrumbs", () => ({
   },
 }));
 
-const mockFetchSavedSearches = jest.fn().mockResolvedValue([
+const savedSearches = [
   { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "1" },
   { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "2" },
   { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "3" },
   { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "4" },
   { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "5" },
-]);
+];
+
+const mockFetchSavedSearchesPage = jest.fn().mockResolvedValue({
+  savedSearches,
+  paginationInfo: { total_pages: 1, total_records: 5 },
+});
 
 const mockPerformAgencySearch = jest.fn().mockResolvedValue([]);
 
@@ -38,7 +45,8 @@ const getSessionMock = jest.fn(() => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/savedSearchFetcher", () => ({
-  fetchSavedSearches: (): unknown => mockFetchSavedSearches(),
+  fetchSavedSearchesPage: (page: number): unknown =>
+    mockFetchSavedSearchesPage(page),
 }));
 
 jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
@@ -64,7 +72,10 @@ describe("Saved Searches page", () => {
   });
 
   it("renders intro text for user with no saved searches", async () => {
-    mockFetchSavedSearches.mockResolvedValueOnce([]);
+    mockFetchSavedSearchesPage.mockResolvedValueOnce({
+      savedSearches: [],
+      paginationInfo: { total_pages: 0, total_records: 0 },
+    });
 
     const component = await SavedSearchQueries({ params: localeParams });
     render(component);
@@ -96,6 +107,34 @@ describe("Saved Searches page", () => {
     render(component);
 
     expect(screen.getByTestId("fakeSavedSearchList")).toHaveTextContent("5");
+  });
+
+  it("renders pagination above and below lists with more than 25 searches", async () => {
+    mockUseSearchParams.mockReturnValueOnce(new URLSearchParams("page=2"));
+    mockFetchSavedSearchesPage.mockResolvedValueOnce({
+      savedSearches,
+      paginationInfo: { total_pages: 3, total_records: 55 },
+    });
+
+    const component = await SavedSearchQueries({
+      params: localeParams,
+      searchParams: Promise.resolve({ page: "2" }),
+    });
+    render(component);
+
+    expect(mockFetchSavedSearchesPage).toHaveBeenCalledWith(2);
+    expect(
+      screen.getAllByRole("navigation", { name: /pagination/i }),
+    ).toHaveLength(2);
+  });
+
+  it("does not render pagination for 25 or fewer searches", async () => {
+    const component = await SavedSearchQueries({ params: localeParams });
+    render(component);
+
+    expect(
+      screen.queryByRole("navigation", { name: /pagination/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("passes accessibility scan", async () => {
