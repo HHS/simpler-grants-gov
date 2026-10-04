@@ -138,7 +138,9 @@ export async function ensureFilterDrawerOpen(page: Page) {
 
   // Try the existing toggle helper first (handles open/close selector logic)
   await toggleFilterDrawer(page);
-  await page.waitForTimeout(800);
+  await visibleStatusAccordion
+    .waitFor({ state: "visible", timeout: 5000 })
+    .catch(() => undefined);
 
   // If still not visible, force open from top of page using drawer open button
   if (!(await visibleStatusAccordion.isVisible().catch(() => false))) {
@@ -148,7 +150,9 @@ export async function ensureFilterDrawerOpen(page: Page) {
       .first();
     if (await drawerOpenButton.isVisible().catch(() => false)) {
       await drawerOpenButton.click();
-      await page.waitForTimeout(800);
+      await visibleStatusAccordion
+        .waitFor({ state: "visible", timeout: 5000 })
+        .catch(() => undefined);
     }
   }
 }
@@ -194,16 +198,14 @@ export async function toggleCheckbox(page: Page, idWithoutHash: string) {
 
   if (!(await checkBox.isChecked())) {
     await checkBoxLabel.click({ force: true });
-    await page.waitForTimeout(300);
+    try {
+      await expect(checkBox).toBeChecked({ timeout: 1000 });
+    } catch {
+      // Webkit can silently drop clicks — fall back to JS dispatch if still unchecked
+      await checkBox.dispatchEvent("click");
+      await expect(checkBox).toBeChecked({ timeout: 1000 });
+    }
   }
-
-  // Webkit can silently drop clicks — fall back to JS dispatch if still unchecked
-  if (!(await checkBox.isChecked())) {
-    await checkBox.dispatchEvent("click");
-    await page.waitForTimeout(300);
-  }
-
-  await page.waitForTimeout(100);
 }
 
 export async function toggleCheckboxGroup(
@@ -212,11 +214,10 @@ export async function toggleCheckboxGroup(
 ) {
   for (const checkboxID of Object.keys(checkboxObject)) {
     await toggleCheckbox(page, checkboxID);
-    await page.waitForTimeout(500);
   }
-  // Additional wait after all checkboxes toggled to allow filter state to propagate
-  // and React's debounce to fire before URL checks happen
-  await page.waitForTimeout(300);
+  // Callers (e.g. selectAdditionalFilters) wait on the resulting URL query
+  // param immediately after calling this, which already covers propagation
+  // and debounce — no additional fixed sleep needed here.
 }
 
 export async function expectCheckboxesChecked(
@@ -294,7 +295,9 @@ export async function ensureAccordionExpanded(
   const expanded = await button.getAttribute("aria-expanded");
   if (expanded !== "true") {
     await button.click();
-    await page.waitForTimeout(300);
+    await expect(button).toHaveAttribute("aria-expanded", "true", {
+      timeout: 2000,
+    });
   }
 }
 
@@ -362,7 +365,6 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   await filterButton.scrollIntoViewIfNeeded();
   await page.waitForTimeout(100);
   await filterButton.click();
-  await page.waitForTimeout(400);
 
   const filterOptions = page.locator(
     `#opportunity-filter-${filterType} label.usa-checkbox__label:visible`,

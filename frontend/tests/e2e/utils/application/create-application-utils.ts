@@ -108,7 +108,6 @@ export async function createApplication(
   await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
   });
-  await page.waitForTimeout(3000);
   const startAppButton = page.getByRole("button", {
     name: /start.*application/i,
   });
@@ -150,12 +149,10 @@ export async function createApplication(
   await expect(createButton).toBeEnabled({ timeout: 10000 });
   await createButton.click({ force: true });
   await createRequest;
-  await page.waitForTimeout(3000);
   await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 60000 });
   await page.waitForLoadState("domcontentloaded");
   // Avoid strict networkidle waits on pages with background polling.
   await page.waitForLoadState("load").catch(() => undefined);
-  await page.waitForTimeout(2000);
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
   await expect(
