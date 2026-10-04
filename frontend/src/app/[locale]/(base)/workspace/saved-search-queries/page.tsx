@@ -17,7 +17,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
 import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
-import PagePagination from "src/components/core/PagePagination";
+import OpportunitiesPagination from "src/app/[locale]/(base)/grantor/opportunities/_components/OpportunitiesPagination";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { SavedSearchesList } from "./_components/SavedSearchesList";
 
@@ -131,7 +131,7 @@ export default async function SavedSearchQueries({
           <>
             {totalPages > 1 && (
               <div className="grid-container display-flex flex-justify-end margin-bottom-2">
-                <PagePagination totalPages={totalPages} />
+                <OpportunitiesPagination totalPages={totalPages} />
               </div>
             )}
             <SavedSearchesList
@@ -143,7 +143,7 @@ export default async function SavedSearchQueries({
             />
             {totalPages > 1 && (
               <div className="grid-container display-flex flex-justify-end margin-top-2">
-                <PagePagination totalPages={totalPages} />
+                <OpportunitiesPagination totalPages={totalPages} />
               </div>
             )}
           </>
