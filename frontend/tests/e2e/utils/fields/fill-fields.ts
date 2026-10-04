@@ -11,7 +11,7 @@
  * here with the one function that uses it instead of living behind its own
  * single-consumer file.
  *
- * Usage: import { fillField } from "tests/e2e/utils/fields/fill-field";
+ * Usage: import { fillField } from "tests/e2e/utils/fields/fill-fields";
  */
 
 import { type Page } from "@playwright/test";

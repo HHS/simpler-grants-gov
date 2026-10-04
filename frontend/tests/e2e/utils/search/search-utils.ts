@@ -2,17 +2,11 @@
 // Search Test Helper Functions
 // =========================
 
-import { expect, Locator, Page } from "@playwright/test";
-import { camelCase } from "lodash";
+import { expect, Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
-import {
-  waitForURLContainsQueryParam,
-  waitForURLContainsQueryParamValue,
-} from "tests/e2e/playwrightUtils";
+import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
 
 const { targetEnv } = playwrightEnv;
-
-const FILTER_OPTIONS_TIMEOUT = targetEnv !== "local" ? 30000 : 10000;
 
 const getBrowserType = (page: Page, projectName?: string) => {
   if (projectName) {
@@ -30,44 +24,6 @@ const getBrowserType = (page: Page, projectName?: string) => {
 
   return page.context().browser()?.browserType().name();
 };
-
-export async function toggleFilterDrawer(page: Page) {
-  const modalOpen = await page
-    .locator('.usa-modal-overlay[aria-controls="search-filter-drawer"]')
-    .isVisible();
-  const drawerToggleButtonSelector = modalOpen
-    ? "button[data-testid='close-drawer']"
-    : "button[data-testid='toggle-drawer']";
-  const filterDrawerButton = page.locator(drawerToggleButtonSelector);
-  await filterDrawerButton.click();
-}
-
-export async function ensureFilterDrawerOpen(page: Page) {
-  const visibleStatusAccordion = page
-    .locator('button[aria-controls="opportunity-filter-status"]:visible')
-    .first();
-
-  if (await visibleStatusAccordion.isVisible().catch(() => false)) {
-    await page.waitForTimeout(200);
-    return;
-  }
-
-  // Try the existing toggle helper first (handles open/close selector logic)
-  await toggleFilterDrawer(page);
-  await page.waitForTimeout(800);
-
-  // If still not visible, force open from top of page using drawer open button
-  if (!(await visibleStatusAccordion.isVisible().catch(() => false))) {
-    await page.evaluate(() => window.scrollTo(0, 0));
-    const drawerOpenButton = page
-      .locator("button[data-testid='toggle-drawer']")
-      .first();
-    if (await drawerOpenButton.isVisible().catch(() => false)) {
-      await drawerOpenButton.click();
-      await page.waitForTimeout(800);
-    }
-  }
-}
 
 export function getSearchInput(page: Page) {
   return page.locator("#query");
@@ -116,107 +72,6 @@ export function expectURLContainsQueryParam(
 ) {
   const currentURL = page.url();
   expect(currentURL).toContain(queryParamName);
-}
-
-export async function expectCheckboxIDIsChecked(
-  page: Page,
-  checkboxId: string,
-) {
-  const checkbox: Locator = page.locator(`input[id="${checkboxId}"]`).first();
-  await expect(checkbox).toBeChecked();
-}
-
-export async function toggleCheckboxes(
-  page: Page,
-  checkboxObject: Record<string, string>,
-  queryParamName: string,
-  startingQueryParams?: string,
-) {
-  let runningQueryParams = startingQueryParams ?? "";
-  for (const [checkboxID, queryParamValue] of Object.entries(checkboxObject)) {
-    await toggleCheckbox(page, checkboxID);
-    runningQueryParams += runningQueryParams
-      ? `,${queryParamValue}`
-      : queryParamValue;
-    await waitForURLContainsQueryParamValue(
-      page,
-      queryParamName,
-      runningQueryParams,
-    );
-  }
-}
-
-export async function toggleCheckbox(page: Page, idWithoutHash: string) {
-  const checkBox = page.locator(`input[id="${idWithoutHash}"]`).first();
-  const checkBoxLabel = page
-    .locator(`label[for="${idWithoutHash}"]:visible`)
-    .first();
-  const timeout = targetEnv !== "local" ? 120000 : 30000;
-  await checkBox.waitFor({ state: "attached", timeout });
-  await checkBoxLabel.waitFor({ state: "visible", timeout });
-  await checkBoxLabel.scrollIntoViewIfNeeded();
-  await expect(checkBox).toBeEnabled();
-
-  if (!(await checkBox.isChecked())) {
-    await checkBoxLabel.click({ force: true });
-    await page.waitForTimeout(300);
-  }
-
-  // Webkit can silently drop clicks — fall back to JS dispatch if still unchecked
-  if (!(await checkBox.isChecked())) {
-    await checkBox.dispatchEvent("click");
-    await page.waitForTimeout(300);
-  }
-
-  await page.waitForTimeout(100);
-}
-
-export async function toggleCheckboxGroup(
-  page: Page,
-  checkboxObject: Record<string, string>,
-) {
-  for (const checkboxID of Object.keys(checkboxObject)) {
-    await toggleCheckbox(page, checkboxID);
-    await page.waitForTimeout(500);
-  }
-  // Additional wait after all checkboxes toggled to allow filter state to propagate
-  // and React's debounce to fire before URL checks happen
-  await page.waitForTimeout(300);
-}
-
-export async function expectCheckboxesChecked(
-  page: Page,
-  checkboxObject: Record<string, string>,
-) {
-  for (const checkboxID of Object.keys(checkboxObject)) {
-    await expectCheckboxIDIsChecked(page, checkboxID);
-  }
-}
-
-export async function getFirstNonNumericAgencyCheckboxId(page: Page) {
-  const agencyCheckboxes = page.locator(
-    '#opportunity-filter-agency input[type="checkbox"]',
-  );
-
-  const count = await agencyCheckboxes.count();
-  for (let i = 0; i < count; i += 1) {
-    const checkbox = agencyCheckboxes.nth(i);
-    const id = await checkbox.getAttribute("id");
-    const value = await checkbox.getAttribute("value");
-    if (!id) {
-      continue;
-    }
-
-    if (id.endsWith("-any") || value === "all") {
-      continue;
-    }
-
-    if (!/^\d+$/.test(id) && !(await checkbox.isChecked())) {
-      return id;
-    }
-  }
-
-  return null;
 }
 
 export async function selectSortBy(
@@ -296,17 +151,6 @@ export async function verifyOpportunityInSearchByTitleAndNumber(
   await expect(matchingSearchRow).toContainText(opportunityTitle);
   await expect(matchingSearchRow).toContainText(opportunityNumber);
   await expect(matchingSearchRow).toContainText(expectedStatus);
-}
-
-export async function clickAccordionWithTitle(
-  page: Page,
-  accordionTitle: string,
-) {
-  const button = page.locator(
-    `button.usa-accordion__button:has-text("${accordionTitle}")`,
-  );
-  await button.waitFor({ state: "visible", timeout: 15000 });
-  await button.click();
 }
 
 export async function clickPaginationPageNumber(
@@ -409,24 +253,6 @@ export async function clickSearchNavLink(page: Page) {
   await page.click("nav >> text=Search");
 }
 
-export async function ensureAccordionExpanded(
-  page: Page,
-  accordionTitle: string,
-) {
-  const button = page.locator(
-    `button.usa-accordion__button:has-text("${accordionTitle}"):visible`,
-  );
-  const timeout = targetEnv !== "local" ? 120000 : 30000;
-  await button.waitFor({ state: "visible", timeout });
-  await button.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(100);
-  const expanded = await button.getAttribute("aria-expanded");
-  if (expanded !== "true") {
-    await button.click();
-    await page.waitForTimeout(300);
-  }
-}
-
 export async function getNumberOfOpportunitySearchResults(page: Page) {
   await waitForLoaderToBeHidden(page);
   // The results table has its own Suspense boundary (keyed on searchParams, see SearchResults.tsx)
@@ -441,75 +267,3 @@ export async function getNumberOfOpportunitySearchResults(page: Page) {
     ? parseInt(opportunitiesText.replace(/\D/g, ""), 10)
     : 0;
 }
-
-export const getCountOfTopLevelFilterOptions = async (
-  page: Page,
-  filterType: string,
-): Promise<number> => {
-  const filterOptions = await page
-    .locator(`#opportunity-filter-${filterType} > ul > li > div > input`)
-    .all();
-
-  const ids = await Promise.all(
-    filterOptions.map((option) => option.getAttribute("id")),
-  );
-  return ids.filter((id) => !id?.match(/any$/)).length;
-};
-
-// returns the number of options available to be selected
-export const selectAllTopLevelFilterOptions = async (
-  page: Page,
-  filterType: string,
-): Promise<undefined> => {
-  // gather number of (top level) filter options for filter type
-
-  // click select all for filter type
-  const selectAllButton = page
-    .locator(`#opportunity-filter-${filterType} button:has-text("Select All")`)
-    .first();
-  await selectAllButton.click();
-
-  // validate that url is updated
-  await waitForURLContainsQueryParam(page, filterType);
-};
-
-export const validateTopLevelAndNestedSelectedFilterCounts = async (
-  page: Page,
-  filterName: string,
-  expectedTopLevelCount: number,
-  expectedNestedCount: number,
-) => {
-  // validate that the correct number of filter options is displayed
-  const accordionButton = page.locator(
-    `button[data-testid="accordionButton_opportunity-filter-${camelCase(filterName)}"]`,
-  );
-
-  await expect(accordionButton).toHaveText(
-    `${filterName}${expectedTopLevelCount + expectedNestedCount}`,
-  );
-
-  const expanderButton = page.locator(
-    `#opportunity-filter-${camelCase(filterName)} > ul > li:first-child > div > button`,
-  );
-
-  if (expectedNestedCount) {
-    await expect(expanderButton).toContainText(`${expectedNestedCount}`);
-  }
-};
-
-export const waitForFilterOptions = async (page: Page, filterType: string) => {
-  const filterButton = page.locator(
-    `button[aria-controls="opportunity-filter-${filterType}"]:visible`,
-  );
-  const timeout = FILTER_OPTIONS_TIMEOUT;
-  await filterButton.waitFor({ state: "visible", timeout });
-  await filterButton.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(100);
-  await filterButton.click();
-  await page.waitForTimeout(400);
-
-  const filterOptions = page.locator(
-    `#opportunity-filter-${filterType} label.usa-checkbox__label:visible`,
-  );
-  await filterOptions.first().waitFor({ state: "visible", timeout });
-};
