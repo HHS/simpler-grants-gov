@@ -4,8 +4,10 @@ from unittest.mock import patch
 import pytest
 
 from src.adapters import db
+from src.auth.api_key_config import ApiKeyConfig
 from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.services.users.create_api_key import create_api_key
+from src.util.api_key_gen import hash_api_key_id
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
@@ -42,6 +44,22 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session):
     assert api_key.updated_at is not None
 
 
+def test_create_api_key_stores_key_id_hash(enable_factory_create, db_session: db.Session):
+    """The key is saved with both the raw key_id and its hash."""
+    user = UserFactory.create()
+
+    api_key = create_api_key(
+        db_session=db_session,
+        user_id=user.user_id,
+        json_data={"key_name": "Hashed Key"},
+    )
+    db_session.commit()
+    db_session.refresh(api_key)
+
+    assert api_key.key_id is not None
+    assert api_key.key_id_hash == hash_api_key_id(api_key.key_id, ApiKeyConfig().pepper)
+
+
 def test_create_api_key_generates_unique_key_ids(enable_factory_create, db_session: db.Session):
     """Test that create_api_key generates unique key_ids for each API key."""
     user = UserFactory.create()
@@ -67,7 +85,12 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
     user = UserFactory.create()
 
     existing_key_id = "COLLISION_TEST_KEY_12345"
-    UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
+    UserApiKeyFactory.create(
+        user=user,
+        key_name="Existing Key",
+        key_id=existing_key_id,
+        key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
+    )
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
         mock_generate.side_effect = [
@@ -91,7 +114,12 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
     user = UserFactory.create()
 
     existing_key_id = "COLLISION_KEY_12345678901234"
-    UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
+    UserApiKeyFactory.create(
+        user=user,
+        key_name="Existing Key",
+        key_id=existing_key_id,
+        key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
+    )
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id  # Always return the same colliding key
@@ -137,7 +165,12 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
     user = UserFactory.create()
 
     existing_key_id = "COLLISION_LOG_12345678901234"
-    UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
+    UserApiKeyFactory.create(
+        user=user,
+        key_name="Existing Key",
+        key_id=existing_key_id,
+        key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
+    )
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id
