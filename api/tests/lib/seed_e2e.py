@@ -153,4 +153,3 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
         .with_internal_role(E2E_TEST_USER_MANAGER_ROLE)
         .build()
     )
-    
