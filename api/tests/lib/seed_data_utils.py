@@ -74,17 +74,13 @@ class UserBuilder:
         # See if we previously setup this API key
         user_api_key = None
         for key in self.user.api_keys:
-            if key.key_id == key_id:
+            if key.key_id_hash == hash_api_key_id(key_id, ApiKeyConfig().pepper):
                 user_api_key = key
                 break
 
         if user_api_key is None:
-            user_api_key = factories.UserApiKeyFactory.build(user=self.user)
-
-        user_api_key.key_id = key_id
-        user_api_key.key_id_hash = hash_api_key_id(key_id, ApiKeyConfig().pepper)
-
-        self.db_session.add(user_api_key)
+            user_api_key = factories.UserApiKeyFactory.build(user=self.user, raw_key=key_id)
+            self.db_session.add(user_api_key)
 
         self.api_key_id = key_id
         return self

@@ -24,7 +24,9 @@ def setup_admin_privileges(db_session, api_key_value):
     Checks for existing keys to avoid IntegrityError.
     """
     existing_key = db_session.execute(
-        select(UserApiKey).where(UserApiKey.key_id == api_key_value)
+        select(UserApiKey).where(
+            UserApiKey.key_id_hash == hash_api_key_id(api_key_value, ApiKeyConfig().pepper)
+        )
     ).scalar_one_or_none()
 
     if existing_key:
@@ -175,7 +177,11 @@ def test_setup_scanner_user_success(
     assert any(link.role_id == INTERNAL_S3_SCANNER_ROLE_ID for link in user.internal_user_roles)
 
     # The returned key is the one persisted for the scanner user, and is active.
-    key = db_session.scalars(select(UserApiKey).where(UserApiKey.key_id == generated_key)).one()
+    key = db_session.scalars(
+        select(UserApiKey).where(
+            UserApiKey.key_id_hash == hash_api_key_id(generated_key, ApiKeyConfig().pepper)
+        )
+    ).one()
     assert key.user_id == scanner_user_id
     assert str(key.api_key_id) == data["api_key_id"]
     assert key.is_active is True
