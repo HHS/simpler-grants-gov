@@ -50,6 +50,18 @@ E2E_ASSISTANCE_LISTING_NUMBER = "00.000"
 # local-only and does not need to match staging's organization id.
 E2E_ORGANIZATION_ID = uuid.UUID("e5f6a7b8-c9d0-4e5f-8a0b-1c2d3e4f5061")
 
+# Additional identities equivalent to the primary test user above (same org,
+# same agency, same roles), seeded so concurrently-running local/CI workers
+# don't all mutate (create applications/opportunities as) the exact same
+# user. See utils/auth/sharded-test-user-utils.ts on the frontend side,
+# which picks one of these per concurrently-running worker.
+E2E_PRIMARY_ORG_ADMIN_POOL_USER_IDS = [
+    uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"),  # pool[0] == primaryOrgAdmin above
+    uuid.UUID("f25c7491-7ebc-4f4f-8de6-3ac0594d9c64"),  # pool[1]
+    uuid.UUID("f35c7491-7ebc-4f4f-8de6-3ac0594d9c65"),  # pool[2]
+    uuid.UUID("f45c7491-7ebc-4f4f-8de6-3ac0594d9c66"),  # pool[3]
+]
+
 # Static id for the secondary E2E test user, a member of the E2E test organization.
 E2E_ORG_MEMBER_USER_ID = uuid.UUID("a7b8c9d0-e1f2-4a3b-8c4d-5e6f7a8b9c0d")
 # Static id for the local no-agency E2E test user.
@@ -102,6 +114,19 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
         .build()
     )
 
+    # Additional identities equivalent to the primary test user above (same
+    # setup, different id), so concurrently-running local/CI workers each
+    # mutate a different "org admin" instead of all colliding on one. See
+    # E2E_PRIMARY_ORG_ADMIN_POOL_USER_IDS above and
+    # utils/auth/sharded-test-user-utils.ts on the frontend side.
+    for pool_user_id in E2E_PRIMARY_ORG_ADMIN_POOL_USER_IDS[1:]:
+        (
+            UserBuilder(pool_user_id, db_session, "user for e2e (pool)")
+            .with_e2e_test_user()
+            .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+            .build()
+        )
+
     # Secondary test user with organization membership, mirroring the staging test user.
     # Add agency membership so local invalid-agency failure path can be exercised.
     (
@@ -128,3 +153,4 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
         .with_internal_role(E2E_TEST_USER_MANAGER_ROLE)
         .build()
     )
+    
