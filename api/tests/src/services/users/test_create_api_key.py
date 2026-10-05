@@ -90,7 +90,7 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
     UserApiKeyFactory.create(
         user=user,
         key_name="Existing Key",
-        key_id=existing_key_id,
+        raw_key=existing_key_id,
         key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
     )
 
@@ -119,7 +119,7 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
     UserApiKeyFactory.create(
         user=user,
         key_name="Existing Key",
-        key_id=existing_key_id,
+        raw_key=existing_key_id,
         key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
     )
 
@@ -170,7 +170,7 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
     UserApiKeyFactory.create(
         user=user,
         key_name="Existing Key",
-        key_id=existing_key_id,
+        raw_key=existing_key_id,
         key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
     )
 
