@@ -2180,6 +2180,7 @@ class JobLogFactory(BaseFactory):
         model = task_models.JobLog
 
     job_id = Generators.UuidObj
+    job_type = factory.Faker("slug")
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
 
@@ -3628,3 +3629,20 @@ class UserNotificationPreferenceFactory(BaseFactory):
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda u: u.user.user_id)
+
+
+class NotificationJobContentFactory(BaseFactory):
+    class Meta:
+        model = user_models.NotificationJobContent
+
+    notification_job_content_id = Generators.UuidObj
+
+    job = factory.SubFactory(JobLogFactory)
+    job_id = factory.LazyAttribute(lambda c: c.job.job_id)
+
+    notification_type = NotificationType.ALL_NEW_OPPORTUNITIES
+
+    subject = factory.Faker("sentence")
+    email_body = factory.LazyFunction(
+        lambda: f"<html><body><p>{fake.paragraph()}</p></body></html>"
+    )
