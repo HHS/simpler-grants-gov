@@ -19,6 +19,18 @@ variable "enable_command_execution" {
   default     = false
 }
 
+variable "enable_notifications" {
+  type        = bool
+  description = "Whether the application(s) in this network need email notification access via SES."
+  default     = false
+}
+
+variable "enable_sms_notifications" {
+  type        = bool
+  description = "Whether the application(s) in this network need SMS notification access via AWS End User Messaging."
+  default     = false
+}
+
 variable "has_database" {
   type        = bool
   description = "Whether the application(s) in this network have a database. Determines whether to create VPC endpoints needed by the database layer."
