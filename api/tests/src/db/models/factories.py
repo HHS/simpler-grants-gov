@@ -3621,6 +3621,9 @@ class SharedUserApiKeyFactory(BaseFactory):
 
     key_name = factory.Faker("sentence", nb_words=3)
     key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+    key_id_hash = factory.LazyAttribute(
+        lambda obj: hash_api_key_id(obj.key_id, ApiKeyConfig().pepper)
+    )
 
     last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")
 
