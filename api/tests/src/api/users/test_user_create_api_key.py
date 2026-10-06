@@ -114,10 +114,10 @@ def test_create_api_key_duplicate_name_validation_error(
     assert response.status_code == 422
     assert response.json["message"] == "An API key with this name already exists"
 
-    validation_issues = response.json["validation_issues"]
-    assert len(validation_issues) == 1
-    assert validation_issues[0]["type"] == "duplicate_api_key_name"
-    assert validation_issues[0]["field"] == "key_name"
+    errors = response.json["errors"]
+    assert len(errors) == 1
+    assert errors[0]["type"] == "duplicate_api_key_name"
+    assert errors[0]["field"] == "key_name"
 
     # Verify only one key was created
     api_keys = (
