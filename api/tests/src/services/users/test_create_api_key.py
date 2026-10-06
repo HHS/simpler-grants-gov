@@ -321,6 +321,19 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     assert api_key1.key_id != api_key2.key_id
 
 
+def test_create_api_key_blank_name_rejected(enable_factory_create, db_session: db.Session):
+    """Test that a whitespace-only key_name is rejected after stripping."""
+    user = UserFactory.create()
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        create_api_key(db_session=db_session, user_id=user.user_id, json_data={"key_name": "   "})
+
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.type == ValidationErrorType.MIN_LENGTH for issue in issues)
+    assert any(issue.field == "key_name" for issue in issues)
+
+
 def test_create_api_key_duplicate_name_rejected(enable_factory_create, db_session: db.Session):
     """Test that create_api_key raises 422 when the user already has a key with that name."""
     user = UserFactory.create()

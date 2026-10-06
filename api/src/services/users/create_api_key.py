@@ -15,6 +15,26 @@ class CreateApiKeyParams:
         self.key_name = json_data["key_name"]
 
 
+def _check_blank_key_name(key_name: str) -> None:
+    """Raise 422 if key_name is blank after stripping whitespace.
+
+    The schema's Length(min=1) validates the raw input, so a whitespace-only
+    value like ' ' passes schema validation but strips to ''. Catch that here.
+    """
+    if not key_name:
+        raise_flask_error(
+            422,
+            message="API key name cannot be blank",
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=ValidationErrorType.MIN_LENGTH,
+                    field="key_name",
+                    message="API key name cannot be blank",
+                )
+            ],
+        )
+
+
 def _check_duplicate_key_name(
     db_session: db.Session, user_id: UUID, key_name: str, exclude_api_key_id: UUID | None = None
 ) -> None:
@@ -42,6 +62,7 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Us
     params = CreateApiKeyParams(json_data)
     key_name = params.key_name.strip()
 
+    _check_blank_key_name(key_name)
     _check_duplicate_key_name(db_session, user_id, key_name)
 
     return SimplerApiKeyHandler(db_session).create_api_key(user_id, key_name)

@@ -168,20 +168,23 @@ def test_rename_api_key_long_name(enable_factory_create, db_session: db.Session)
     assert len(renamed_api_key.key_name) == 255
 
 
-def test_rename_api_key_empty_name_handled_by_schema(enable_factory_create, db_session: db.Session):
-    """Test that empty key names are handled by schema validation (not by the service)."""
+def test_rename_api_key_blank_name_rejected(enable_factory_create, db_session: db.Session):
+    """Test that a whitespace-only key_name is rejected after stripping."""
     user = UserFactory.create()
     api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name")
-    json_data = {"key_name": ""}
 
-    renamed_api_key = rename_api_key(
-        db_session=db_session,
-        user_id=user.user_id,
-        api_key_id=api_key.api_key_id,
-        json_data=json_data,
-    )
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        rename_api_key(
+            db_session=db_session,
+            user_id=user.user_id,
+            api_key_id=api_key.api_key_id,
+            json_data={"key_name": "   "},
+        )
 
-    assert renamed_api_key.key_name == ""
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.type == ValidationErrorType.MIN_LENGTH for issue in issues)
+    assert any(issue.field == "key_name" for issue in issues)
 
 
 def test_rename_api_key_duplicate_name_rejected(enable_factory_create, db_session: db.Session):

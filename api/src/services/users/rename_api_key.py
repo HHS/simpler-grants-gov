@@ -4,7 +4,7 @@ from uuid import UUID
 from src.adapters import db
 from src.auth.api_key_handler import SimplerApiKeyHandler
 from src.db.models.user_models import UserApiKey
-from src.services.users.create_api_key import _check_duplicate_key_name
+from src.services.users.create_api_key import _check_blank_key_name, _check_duplicate_key_name
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +28,7 @@ def rename_api_key(
     params = RenameApiKeyParams(json_data)
     key_name = params.key_name.strip()
 
+    _check_blank_key_name(key_name)
     _check_duplicate_key_name(db_session, user_id, key_name, exclude_api_key_id=api_key_id)
 
     return handler.rename_api_key(user_id, api_key_id, key_name)
