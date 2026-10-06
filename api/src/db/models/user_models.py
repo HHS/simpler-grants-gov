@@ -36,6 +36,7 @@ from src.db.models.lookup_models import (
     LkUserType,
 )
 from src.db.models.opportunity_models import Opportunity
+from src.db.models.task_models import JobLog
 from src.util import datetime_util
 
 
@@ -573,3 +574,26 @@ class UserNotificationPreference(ApiSchemaTable, TimestampMixin):
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
     user: Mapped[User] = relationship(User, back_populates="notification_preferences")
+
+
+class NotificationJobContent(ApiSchemaTable, TimestampMixin):
+    """Rendered email content for a single run of a bulk notification job"""
+
+    __tablename__ = "notification_job_content"
+
+    notification_job_content_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    job_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(JobLog.job_id), unique=True)
+    job: Mapped[JobLog] = relationship(JobLog)
+
+    notification_type: Mapped[NotificationType] = mapped_column(
+        "notification_type_id",
+        LookupColumn(LkNotificationType),
+        ForeignKey(LkNotificationType.notification_type_id),
+        nullable=False,
+    )
+
+    subject: Mapped[str]
+    email_body: Mapped[str]
