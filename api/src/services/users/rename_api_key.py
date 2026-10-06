@@ -20,9 +20,14 @@ def rename_api_key(
     db_session: db.Session, user_id: UUID, api_key_id: UUID, json_data: dict
 ) -> UserApiKey:
     """Rename an existing API key for a user"""
+    handler = SimplerApiKeyHandler(db_session)
+
+    # Verify the key exists and belongs to this user before checking for name conflicts.
+    handler.get_user_api_key(user_id, api_key_id)
+
     params = RenameApiKeyParams(json_data)
-    key_name = params.key_name
+    key_name = params.key_name.strip()
 
     _check_duplicate_key_name(db_session, user_id, key_name, exclude_api_key_id=api_key_id)
 
-    return SimplerApiKeyHandler(db_session).rename_api_key(user_id, api_key_id, key_name)
+    return handler.rename_api_key(user_id, api_key_id, key_name)
