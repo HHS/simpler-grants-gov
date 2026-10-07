@@ -15,6 +15,8 @@ import {
   LOGIN_STATES,
   openSearchWithFilterDrawer,
   selectAdditionalFilters,
+  clickClearFilters,
+  expectCheckboxIDIsChecked,
 } from "tests/e2e/utils/search/search-filter-utils";
 import { getNumberOfOpportunitySearchResults } from "tests/e2e/utils/search/search-utils";
 
