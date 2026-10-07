@@ -99,4 +99,30 @@ describe("OpportunitiesPagination Component", () => {
 
     expect(hasPreviousButton).toBe(false);
   });
+
+  it("uses currentPageOverride instead of an invalid page in the URL", () => {
+    mockUseSearchParams.mockReturnValue({
+      get: (key: string) => (key === "page" ? "-1" : null),
+      toString: () => "page=-1",
+    });
+
+    render(
+      <OpportunitiesPagination totalPages={5} currentPageOverride={1} />,
+    );
+
+    expect(screen.getByRole("button", { name: /page 1/i })).toBeInTheDocument();
+
+    const allButtons = screen.queryAllByRole("button");
+    const hasPreviousButton = allButtons.some((button) => {
+      const ariaLabel = button.getAttribute("aria-label") || "";
+      const textContent = button.textContent || "";
+
+      return (
+        ariaLabel.toLowerCase().includes("previous page") ||
+        textContent.toLowerCase().includes("previous page")
+      );
+    });
+
+    expect(hasPreviousButton).toBe(false);
+  });
 });
