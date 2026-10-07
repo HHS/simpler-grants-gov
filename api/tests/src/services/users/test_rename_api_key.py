@@ -3,6 +3,7 @@ import pytest
 
 from src.adapters import db
 from src.services.users.rename_api_key import rename_api_key
+from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
@@ -167,17 +168,102 @@ def test_rename_api_key_long_name(enable_factory_create, db_session: db.Session)
     assert len(renamed_api_key.key_name) == 255
 
 
-def test_rename_api_key_empty_name_handled_by_schema(enable_factory_create, db_session: db.Session):
-    """Test that empty key names are handled by schema validation (not by the service)."""
+def test_rename_api_key_blank_name_rejected(enable_factory_create, db_session: db.Session):
+    """Test that a whitespace-only key_name is rejected after stripping."""
     user = UserFactory.create()
     api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name")
-    json_data = {"key_name": ""}
 
-    renamed_api_key = rename_api_key(
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        rename_api_key(
+            db_session=db_session,
+            user_id=user.user_id,
+            api_key_id=api_key.api_key_id,
+            json_data={"key_name": "   "},
+        )
+
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.type == ValidationErrorType.MIN_LENGTH for issue in issues)
+    assert any(issue.field == "key_name" for issue in issues)
+
+
+def test_rename_api_key_duplicate_name_rejected(enable_factory_create, db_session: db.Session):
+    """Test that rename raises 422 when the new name collides with another key the user owns."""
+    user = UserFactory.create()
+    UserApiKeyFactory.create(user=user, key_name="Prod")
+    key_to_rename = UserApiKeyFactory.create(user=user, key_name="Staging")
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        rename_api_key(
+            db_session=db_session,
+            user_id=user.user_id,
+            api_key_id=key_to_rename.api_key_id,
+            json_data={"key_name": "Prod"},
+        )
+
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.type == ValidationErrorType.DUPLICATE_API_KEY_NAME for issue in issues)
+
+
+def test_rename_api_key_duplicate_name_case_insensitive(
+    enable_factory_create, db_session: db.Session
+):
+    """Test that duplicate name check on rename is case-insensitive."""
+    user = UserFactory.create()
+    UserApiKeyFactory.create(user=user, key_name="prod")
+    key_to_rename = UserApiKeyFactory.create(user=user, key_name="Staging")
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        rename_api_key(
+            db_session=db_session,
+            user_id=user.user_id,
+            api_key_id=key_to_rename.api_key_id,
+            json_data={"key_name": "PROD"},
+        )
+
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.field == "key_name" for issue in issues)
+
+
+def test_rename_api_key_self_collision_allowed(enable_factory_create, db_session: db.Session):
+    """Test that renaming a key to its own current name succeeds (already covered by test_rename_api_key_same_name).
+
+    This explicitly documents the self-exclusion behaviour of _check_duplicate_key_name.
+    """
+    user = UserFactory.create()
+    api_key = UserApiKeyFactory.create(user=user, key_name="Prod")
+
+    renamed = rename_api_key(
         db_session=db_session,
         user_id=user.user_id,
         api_key_id=api_key.api_key_id,
-        json_data=json_data,
+        json_data={"key_name": "Prod"},
     )
 
-    assert renamed_api_key.key_name == ""
+    assert renamed.key_name == "Prod"
+
+
+def test_rename_api_key_with_preexisting_duplicates_can_rename_to_new(
+    enable_factory_create, db_session: db.Session
+):
+    """Test that a user with pre-existing duplicate names can still rename a key to a new distinct name.
+
+    Pre-existing duplicates are unaffected; only the target name of a rename is validated.
+    """
+    user = UserFactory.create()
+    # Simulate pre-existing duplicates
+    UserApiKeyFactory.create(user=user, key_name="Prod")
+    UserApiKeyFactory.create(user=user, key_name="Prod")
+    key_to_rename = UserApiKeyFactory.create(user=user, key_name="Old Name")
+
+    # Renaming to a new, distinct name should succeed
+    renamed = rename_api_key(
+        db_session=db_session,
+        user_id=user.user_id,
+        api_key_id=key_to_rename.api_key_id,
+        json_data={"key_name": "Staging"},
+    )
+
+    assert renamed.key_name == "Staging"
