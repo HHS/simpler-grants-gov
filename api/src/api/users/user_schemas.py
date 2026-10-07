@@ -900,3 +900,16 @@ class SetUserSavedOpportunityNotificationRequestSchema(Schema):
 
 class SetUserSavedOpportunityNotificationResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class AllOpportunitiesNotificationPreferenceSchema(Schema):
+    is_enabled = fields.Boolean(
+        metadata={
+            "description": "Whether the user receives the daily email of all new opportunities",
+            "example": False,
+        }
+    )
+
+
+class UserAllOpportunitiesNotificationResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(AllOpportunitiesNotificationPreferenceSchema)

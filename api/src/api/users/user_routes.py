@@ -18,6 +18,7 @@ from src.api.users.user_schemas import (
     SetUserSavedOpportunityNotificationRequestSchema,
     SetUserSavedOpportunityNotificationResponseSchema,
     UserAgenciesResponseSchema,
+    UserAllOpportunitiesNotificationResponseSchema,
     UserApiKeyCreateRequestSchema,
     UserApiKeyCreateResponseSchema,
     UserApiKeyDeleteResponseSchema,
@@ -73,6 +74,9 @@ from src.services.users.create_saved_search import create_saved_search
 from src.services.users.delete_api_key import delete_api_key
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
+from src.services.users.get_all_opportunities_notification_preference import (
+    get_all_opportunities_notification_preference,
+)
 from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_saved_opportunity_notification_preferences import (
@@ -891,6 +895,28 @@ def user_get_saved_opportunity_notifications(
         result = get_saved_opportunity_notification_preferences(db_session, user)
 
     logger.info("Successfully fetched saved opportunity notification preferences")
+    return response.ApiResponse(message="Success", data=result)
+
+
+@user_blueprint.get("/<uuid:user_id>/all-opportunities/notifications")
+@user_blueprint.output(UserAllOpportunitiesNotificationResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def user_get_all_opportunities_notifications(
+    db_session: db.Session, user_id: UUID
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"user_id": user_id})
+    logger.info("GET /v1/users/:user_id/all-opportunities/notifications")
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # Verify the authenticated user matches the requested user_id
+    if user.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        result = get_all_opportunities_notification_preference(db_session, user.user_id)
+
     return response.ApiResponse(message="Success", data=result)
 
 
