@@ -3,11 +3,12 @@ backfill_key_id_hash_and_finalize migration.
 """
 
 import pytest
-from sqlalchemy import text
+from sqlalchemy import delete, text
 
 from src.auth.api_key_config import ApiKeyConfig
 from src.auth.auth_handler import AuthHandler
 from src.db.migrations.utils import backfill_user_api_key_hashes
+from src.db.models.user_models import UserApiKey
 from src.util.api_key_gen import hash_api_key_id
 from tests.src.db.models.factories import UserApiKeyFactory
 
@@ -28,7 +29,7 @@ def nullable_key_id_hash(db_session, test_api_schema):
     yield
 
     # Only leftover if a test failed before the backfill ran
-    db_session.execute(text(f"DELETE FROM {table} WHERE key_id_hash IS NULL"))
+    db_session.execute(delete(UserApiKey).where(UserApiKey.key_id_hash.is_(None)))
     db_session.execute(text(f"ALTER TABLE {table} ALTER COLUMN key_id_hash SET NOT NULL"))
     db_session.commit()
 
