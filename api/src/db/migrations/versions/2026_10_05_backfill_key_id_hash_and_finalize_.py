@@ -1,7 +1,7 @@
 """backfill key_id_hash and finalize column on user_api_key
 
 Revision ID: 6ad9442a4bd6
-Revises: 33fa7d0cffbe
+Revises: 0c0638b3010e
 Create Date: 2026-10-05 18:41:06.237568
 
 """
@@ -14,7 +14,7 @@ from src.db.migrations.utils import backfill_user_api_key_hashes
 
 # revision identifiers, used by Alembic.
 revision = "6ad9442a4bd6"
-down_revision = "33fa7d0cffbe"
+down_revision = "0c0638b3010e"
 branch_labels = None
 depends_on = None
 
