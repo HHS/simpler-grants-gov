@@ -12,6 +12,7 @@ import {
   ELIGIBILITY_COUNTY,
   expectAdditionalFiltersCleared,
   FUNDING_INSTRUMENT_GRANT,
+  expectAdditionalFiltersCleared,
   LOGIN_STATES,
   openSearchWithFilterDrawer,
   selectAdditionalFilters,
