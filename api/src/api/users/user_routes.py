@@ -932,10 +932,10 @@ def user_saved_opportunities_notifications(
 @user_blueprint.post("/<uuid:user_id>/all-opportunities/notifications")
 @user_blueprint.input(UserNotificationPreferenceRequestSchema)
 @user_blueprint.output(UserNotificationPreferenceResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@user_blueprint.doc(responses=[200, 401, 403, 422])
 @user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
-def update_user_notification_preferences(
+def user_all_new_opportunities_notifications(
     db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     add_extra_data_to_current_request_logs(
