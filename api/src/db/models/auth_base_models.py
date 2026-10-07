@@ -62,10 +62,11 @@ class BaseUserApiKey(Base):
     key_id: Mapped[str] = mapped_column(
         unique=True, index=True, comment="AWS API Gateway key identifier"
     )
-    # Keyed hash of key_id. Nullable while existing rows are backfilled; reads
-    # still use key_id until the switch over to the hash.
-    key_id_hash: Mapped[str | None] = mapped_column(
-        comment="HMAC-SHA256 hash of key_id, keyed with the API key pepper"
+    # Keyed hash of key_id. Reads still use key_id until the switch over to the hash.
+    key_id_hash: Mapped[str] = mapped_column(
+        unique=True,
+        index=True,
+        comment="HMAC-SHA256 hash of key_id, keyed with the API key pepper",
     )
     last_used: Mapped[datetime | None]
     is_active: Mapped[bool] = mapped_column(default=True)
