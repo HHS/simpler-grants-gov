@@ -1,6 +1,7 @@
 import string
 from unittest.mock import patch
 
+import apiflask.exceptions
 import pytest
 
 from src.adapters import db
@@ -8,6 +9,7 @@ from src.auth.api_key_config import ApiKeyConfig
 from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.services.users.create_api_key import create_api_key
 from src.util.api_key_gen import hash_api_key_id
+from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
@@ -88,7 +90,7 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
     UserApiKeyFactory.create(
         user=user,
         key_name="Existing Key",
-        key_id=existing_key_id,
+        raw_key=existing_key_id,
         key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
     )
 
@@ -117,7 +119,7 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
     UserApiKeyFactory.create(
         user=user,
         key_name="Existing Key",
-        key_id=existing_key_id,
+        raw_key=existing_key_id,
         key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
     )
 
@@ -168,7 +170,7 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
     UserApiKeyFactory.create(
         user=user,
         key_name="Existing Key",
-        key_id=existing_key_id,
+        raw_key=existing_key_id,
         key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
     )
 
@@ -317,3 +319,98 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     assert api_key1.key_name != api_key2.key_name
     assert api_key1.api_key_id != api_key2.api_key_id
     assert api_key1.key_id != api_key2.key_id
+
+
+def test_create_api_key_blank_name_rejected(enable_factory_create, db_session: db.Session):
+    """Test that a whitespace-only key_name is rejected after stripping."""
+    user = UserFactory.create()
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        create_api_key(db_session=db_session, user_id=user.user_id, json_data={"key_name": "   "})
+
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.type == ValidationErrorType.MIN_LENGTH for issue in issues)
+    assert any(issue.field == "key_name" for issue in issues)
+
+
+def test_create_api_key_duplicate_name_rejected(enable_factory_create, db_session: db.Session):
+    """Test that create_api_key raises 422 when the user already has a key with that name."""
+    user = UserFactory.create()
+    UserApiKeyFactory.create(user=user, key_name="Prod")
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        create_api_key(db_session=db_session, user_id=user.user_id, json_data={"key_name": "Prod"})
+
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.type == ValidationErrorType.DUPLICATE_API_KEY_NAME for issue in issues)
+
+
+def test_create_api_key_duplicate_name_case_insensitive(
+    enable_factory_create, db_session: db.Session
+):
+    """Test that duplicate name check is case-insensitive (Prod collides with prod)."""
+    user = UserFactory.create()
+    UserApiKeyFactory.create(user=user, key_name="prod")
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        create_api_key(db_session=db_session, user_id=user.user_id, json_data={"key_name": "Prod"})
+
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.field == "key_name" for issue in issues)
+
+
+def test_create_api_key_duplicate_name_whitespace(enable_factory_create, db_session: db.Session):
+    """Test that duplicate name check ignores surrounding whitespace (prod collides with ' prod ')."""
+    user = UserFactory.create()
+    UserApiKeyFactory.create(user=user, key_name="prod")
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        create_api_key(
+            db_session=db_session, user_id=user.user_id, json_data={"key_name": "  prod  "}
+        )
+
+    assert exc_info.value.status_code == 422
+    issues = exc_info.value.extra_data["validation_issues"]
+    assert any(issue.type == ValidationErrorType.DUPLICATE_API_KEY_NAME for issue in issues)
+
+
+def test_create_api_key_different_users_same_name_allowed(
+    enable_factory_create, db_session: db.Session
+):
+    """Test that two different users can both have a key named 'Prod'."""
+    user1 = UserFactory.create()
+    user2 = UserFactory.create()
+    UserApiKeyFactory.create(user=user1, key_name="Prod")
+
+    # Should succeed — uniqueness is per-user, not global
+    api_key = create_api_key(
+        db_session=db_session, user_id=user2.user_id, json_data={"key_name": "Prod"}
+    )
+
+    assert api_key.key_name == "Prod"
+    assert api_key.user_id == user2.user_id
+
+
+def test_create_api_key_with_preexisting_duplicates_can_create_new(
+    enable_factory_create, db_session: db.Session
+):
+    """Test that a user with pre-existing duplicate names can still create a new distinct key.
+
+    Pre-existing duplicates (created before the uniqueness constraint) are unaffected;
+    only new creations are validated.
+    """
+    user = UserFactory.create()
+    # Simulate pre-existing duplicates by creating two keys with the same name directly
+    UserApiKeyFactory.create(user=user, key_name="Prod")
+    UserApiKeyFactory.create(user=user, key_name="Prod")
+
+    # Creating a new key with a distinct name should succeed
+    api_key = create_api_key(
+        db_session=db_session, user_id=user.user_id, json_data={"key_name": "Staging"}
+    )
+
+    assert api_key.key_name == "Staging"
+    assert api_key.user_id == user.user_id

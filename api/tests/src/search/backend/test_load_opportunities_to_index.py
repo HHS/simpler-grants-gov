@@ -24,7 +24,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
             alias_name=opportunity_index_alias,
             index_prefix="test-load-opps",
         )
-        return LoadOpportunitiesToIndex(db_session, search_client, config)
+        return LoadOpportunitiesToIndex(db_session, search_client, config, full_refresh=True)
 
     def test_load_opportunities_to_index(
         self,
