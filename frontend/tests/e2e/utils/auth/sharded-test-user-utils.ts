@@ -22,13 +22,13 @@
  * parallelIndex is always 0 for staging's single-worker shards).
  *
  * IMPORTANT - this only removes collisions up to the size of the pool
- * below. A pool of 4 reduces collision probability substantially versus
- * today's single shared identity, but does not guarantee zero collisions
- * once concurrency exceeds the pool size. Full elimination requires either
- * growing the pool to match the real worst-case concurrency (6 staging
- * shards x up to 10 workers each, if that config ever changes) or moving
- * to ephemeral per-test users (see the test-user-manager API already used
- * for session spoofing) - a larger, separate change.
+ * below. The local pool (10) matches the default worker count, so local/CI
+ * runs get one user per worker. It does not guarantee zero collisions if
+ * the worker count is raised above the pool size, and staging's pool is
+ * still 1. Full elimination requires growing the pools to match real
+ * worst-case concurrency or moving to ephemeral per-test users (see the
+ * test-user-manager API already used for session spoofing) - a larger,
+ * separate change.
  */
 
 import playwrightEnv, { type SupportedEnvs } from "tests/e2e/playwright-env";
@@ -52,15 +52,20 @@ import { getTestUserId } from "tests/e2e/utils/auth/test-users";
 //   same as today.
 const PRIMARY_ORG_ADMIN_POOL_IDS: Partial<Record<SupportedEnvs, string[]>> = {
   // Matches E2E_PRIMARY_ORG_ADMIN_POOL_USER_IDS in api/tests/lib/seed_e2e.py.
-  // Covers up to 4 concurrently-running local/CI workers without collision
-  // (PLAYWRIGHT_WORKERS defaults to 10 in ci-frontend-e2e.yml - this pool
-  // reduces but does not eliminate collision risk there; see the file-level
-  // comment above for what full coverage would require).
+  // Covers up to 10 concurrently-running local/CI workers without collision,
+  // matching the PLAYWRIGHT_WORKERS default of 10 in ci-frontend-e2e.yml.
+  // If the worker count is raised, add more ids here and in seed_e2e.py.
   local: [
     getTestUserId("primaryOrgAdmin"),
     "f25c7491-7ebc-4f4f-8de6-3ac0594d9c64",
     "f35c7491-7ebc-4f4f-8de6-3ac0594d9c65",
     "f45c7491-7ebc-4f4f-8de6-3ac0594d9c66",
+    "f55c7491-7ebc-4f4f-8de6-3ac0594d9c67",
+    "f65c7491-7ebc-4f4f-8de6-3ac0594d9c68",
+    "f75c7491-7ebc-4f4f-8de6-3ac0594d9c69",
+    "f85c7491-7ebc-4f4f-8de6-3ac0594d9c6a",
+    "f95c7491-7ebc-4f4f-8de6-3ac0594d9c6b",
+    "fa5c7491-7ebc-4f4f-8de6-3ac0594d9c6c",
   ],
   // TODO: once additional staging test users are provisioned, list their
   // ids here (in shard order doesn't matter - the mapping is by index
