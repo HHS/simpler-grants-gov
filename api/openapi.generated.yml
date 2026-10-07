@@ -2949,6 +2949,45 @@ paths:
       security:
       - ApiJwtAuth: &id026 []
       - ApiUserKeyAuth: *id026
+  /v1/users/{user_id}/all-opportunities/notifications:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAllOpportunitiesNotificationResponseSchema'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Get All Opportunities Notifications
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /v1/organizations/{organization_id}/invitations/list:
     post:
       parameters:
@@ -12450,6 +12489,28 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunityGrantorSchema'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    AllOpportunitiesNotificationPreferenceSchema:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+          description: Whether the user receives the daily email of all new opportunities
+          example: false
+    UserAllOpportunitiesNotificationResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/AllOpportunitiesNotificationPreferenceSchema'
         status_code:
           type: integer
           description: The HTTP status code
