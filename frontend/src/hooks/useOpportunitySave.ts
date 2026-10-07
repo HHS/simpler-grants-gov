@@ -41,12 +41,13 @@ export const useOpportunitySave = ({
     setShowMessage(false);
 
     const method = displayAsSaved ? "DELETE" : "POST";
-    updateSaved("/api/user/saved-opportunities", {
+    void updateSaved("/api/user/saved-opportunities", {
       method,
       body: JSON.stringify({ opportunityId }),
     })
       .then((data) => {
         setLocallySaved(data.type === "save");
+        return;
       })
       .catch((e) => {
         setSavedError(true);

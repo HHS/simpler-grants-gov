@@ -25,6 +25,9 @@ type OpportunityApplyActionProps = {
   * a competition that is open for applications on Simpler.Grants.gov -> start a new application
   * otherwise, an open (posted) opportunity -> apply on Grants.gov
   * anything else (forecasted, closed, archived, no status) -> no call to action
+
+  Known limitation: a package only opportunity (no status) that is open only on Grants.gov
+  gets no call to action, as the API doesn't yet tell us whether a Grants.gov package is open
 */
 export const OpportunityApplyAction = ({
   competitions,
@@ -70,7 +73,6 @@ export const OpportunityApplyAction = ({
       }}
     >
       {t("applyOnGrantsGov")}
-      <span className="usa-sr-only"> {t("opensInNewTab")}</span>
       <USWDSIcon name="launch" className="margin-left-1 text-middle" />
     </LegacyLink>
   );

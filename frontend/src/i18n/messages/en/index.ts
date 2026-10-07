@@ -191,7 +191,6 @@ export const messages = {
       assistanceListingsUnavailable:
         "Assistance listing number is not available.",
       lastUpdated: "Last Updated:",
-      opensInNewTab: "(opens in a new tab)",
       applyOnGrantsGov: "Apply on Grants.gov",
       status: {
         posted: "Open",

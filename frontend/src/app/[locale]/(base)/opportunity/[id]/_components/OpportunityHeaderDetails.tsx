@@ -58,7 +58,6 @@ export const OpportunityHeaderAssistanceListings = ({
         rel="noopener noreferrer"
       >
         {t("assistanceListings")}
-        <span className="usa-sr-only"> {t("opensInNewTab")}</span>
         <USWDSIcon name="launch" className="margin-left-1 text-middle" />
       </a>
       <ul className="usa-list margin-top-1 margin-bottom-0">

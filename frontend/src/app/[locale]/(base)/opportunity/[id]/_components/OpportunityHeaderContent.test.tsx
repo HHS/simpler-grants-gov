@@ -156,7 +156,7 @@ describe("OpportunityHeaderContent", () => {
     expect(screen.getByRole("status")).toHaveTextContent("saveMessage.unsave");
   });
 
-  it("dismisses the save message", async () => {
+  it("dismisses the save message and returns focus to the save button", async () => {
     clientFetchMock.mockResolvedValue({ type: "save" });
     renderHeader();
 
@@ -166,6 +166,7 @@ describe("OpportunityHeaderContent", () => {
     );
 
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(screen.getByRole("button", { name: SAVED_NAME })).toHaveFocus();
   });
 
   it("shows an error above the title when saving fails", async () => {

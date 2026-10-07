@@ -73,6 +73,12 @@ export const OpportunityHeaderContent = ({
       })
     : t("saveMessage.unsave");
 
+  // the dismiss button is removed along with the message, so return focus to the save button
+  const dismissSuccessMessage = () => {
+    closeMessage();
+    document.getElementById(SAVE_BUTTON_ID)?.focus();
+  };
+
   const saveControl = user?.token ? (
     <SaveButton
       accessibleContext={accessibleContext}
@@ -138,7 +144,7 @@ export const OpportunityHeaderContent = ({
                 type="success"
                 buttonId={SAVE_BUTTON_ID}
                 messageText={successText}
-                alertClick={closeMessage}
+                alertClick={dismissSuccessMessage}
                 closeButtonLabel={t("saveMessage.dismiss")}
                 className="margin-left-0 margin-top-105 shadow-2"
               />

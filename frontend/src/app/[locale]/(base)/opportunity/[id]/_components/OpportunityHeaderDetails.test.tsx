@@ -48,11 +48,9 @@ describe("OpportunityHeaderDetails", () => {
   });
 
   describe("assistance listings", () => {
-    it("links to assistance listings in a new tab, with that context for screen readers", () => {
+    it("links to assistance listings in a new tab", () => {
       renderDetails();
-      const link = screen.getByRole("link", {
-        name: "assistanceListings opensInNewTab",
-      });
+      const link = screen.getByRole("link", { name: "assistanceListings" });
       expect(link).toHaveAttribute(
         "href",
         "https://sam.gov/assistance-listings",

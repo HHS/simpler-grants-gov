@@ -61,9 +61,7 @@ describe("OpportunityApplyAction", () => {
   it("links to apply on Grants.gov for an open opportunity with no competition open on Simpler", () => {
     renderApplyAction({ competitions: [competition("closed-comp", false)] });
 
-    const link = screen.getByRole("link", {
-      name: "applyOnGrantsGov opensInNewTab",
-    });
+    const link = screen.getByRole("link", { name: "applyOnGrantsGov" });
     expect(link).toHaveAttribute(
       "href",
       "https://test.grants.gov/search-results-detail/1",
@@ -86,7 +84,7 @@ describe("OpportunityApplyAction", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
-  it("offers starting an application for a package only opportunity, which has no status", () => {
+  it("offers starting an application when a competition is open on Simpler, even if the opportunity has no status", () => {
     renderApplyAction({
       competitions: [competition("open-comp", true)],
       opportunityStatus: null,
@@ -97,12 +95,23 @@ describe("OpportunityApplyAction", () => {
     ).toBeInTheDocument();
   });
 
+  // Known limitation, pending an API change: is_open is only true for Simpler competitions and a
+  // package only opportunity has no status, so we can't tell that its Grants.gov package is open
+  it("shows no call to action for a package only opportunity that is only open on Grants.gov (known limitation)", () => {
+    const { container } = renderApplyAction({
+      competitions: [competition("grants-gov-package", false)],
+      opportunityStatus: null,
+    });
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("falls back to Grants.gov when applying on Simpler is turned off", () => {
     mockApplyFormPrototypeOff = true;
     renderApplyAction({ competitions: [competition("open-comp", true)] });
 
     expect(
-      screen.getByRole("link", { name: "applyOnGrantsGov opensInNewTab" }),
+      screen.getByRole("link", { name: "applyOnGrantsGov" }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
