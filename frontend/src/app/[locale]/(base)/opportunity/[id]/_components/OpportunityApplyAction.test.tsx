@@ -47,6 +47,7 @@ const renderApplyAction = ({
       competitions={competitions}
       grantsGovUrl="https://test.grants.gov/search-results-detail/1"
       legacyOpportunityId={1}
+      opportunityId="test-opportunity-id"
       opportunityStatus={opportunityStatus}
       opportunityTitle={opportunityTitle}
     />,

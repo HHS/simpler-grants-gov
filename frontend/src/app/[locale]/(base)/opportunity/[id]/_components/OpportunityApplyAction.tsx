@@ -15,6 +15,7 @@ type OpportunityApplyActionProps = {
   // Grants.gov opportunity url for the current environment (resolved server side)
   grantsGovUrl: string;
   legacyOpportunityId: number;
+  opportunityId: string;
   opportunityStatus: OpportunityStatus | null;
   opportunityTitle: string | null;
 };
@@ -29,6 +30,7 @@ export const OpportunityApplyAction = ({
   competitions,
   grantsGovUrl,
   legacyOpportunityId,
+  opportunityId,
   opportunityStatus,
   opportunityTitle,
 }: OpportunityApplyActionProps) => {
@@ -44,6 +46,7 @@ export const OpportunityApplyAction = ({
   ) {
     return (
       <StartApplicationModalControl
+        opportunityId={opportunityId}
         opportunityTitle={opportunityTitle}
         competitionId={openCompetition.competition_id}
       />

@@ -37,6 +37,7 @@ const OpportunityHeader = ({ opportunityData, opportunitySaved }: Props) => {
               competitions={opportunityData.competitions}
               grantsGovUrl={grantsGovUrl}
               legacyOpportunityId={opportunityData.legacy_opportunity_id}
+              opportunityId={opportunityData.opportunity_id}
               opportunityStatus={opportunityData.opportunity_status}
               opportunityTitle={opportunityData.opportunity_title}
             />
