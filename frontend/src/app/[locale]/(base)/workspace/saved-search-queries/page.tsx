@@ -1,5 +1,6 @@
+import OpportunitiesPagination from "src/app/[locale]/(base)/grantor/opportunities/_components/OpportunitiesPagination";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
-import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
+import { fetchSavedSearchesPaginated } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import {
@@ -12,6 +13,7 @@ import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
@@ -21,6 +23,10 @@ import { SavedSearchesList } from "./_components/SavedSearchesList";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+type SavedSearchQueriesPageProps = LocalizedPageProps & {
+  searchParams?: Promise<{ page?: string | string[] }>;
+};
 
 const NoSavedSearches = () => {
   const t = useTranslations("SavedSearches");
@@ -43,12 +49,23 @@ const NoSavedSearches = () => {
   );
 };
 
+const getCurrentPage = (pageParam?: string | string[]) => {
+  const value = Array.isArray(pageParam) ? pageParam[0] : pageParam;
+  const parsedPage = Number(value);
+
+  return Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+};
+
 export default async function SavedSearchQueries({
   params,
-}: LocalizedPageProps) {
+  searchParams,
+}: SavedSearchQueriesPageProps) {
   const { locale } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const currentPage = getCurrentPage(resolvedSearchParams.page);
   const t = await getTranslations({ locale, namespace: "SavedSearches" });
   let savedSearches;
+  let totalPages = 0;
   let agencyOptions: FilterOption[] = [];
 
   const paramDisplayMapping = validSearchQueryParamKeys.reduce(
@@ -60,7 +77,9 @@ export default async function SavedSearchQueries({
   );
 
   try {
-    savedSearches = await fetchSavedSearches();
+    const result = await fetchSavedSearchesPaginated(currentPage);
+    savedSearches = result.savedSearches;
+    totalPages = result.paginationInfo?.total_pages ?? 0;
   } catch (_e) {
     return (
       <>
@@ -70,6 +89,14 @@ export default async function SavedSearchQueries({
         <GeneralErrorAlert callToAction={t("error")} />
       </>
     );
+  }
+
+  if (
+    savedSearches.length === 0 &&
+    totalPages > 0 &&
+    currentPage > totalPages
+  ) {
+    redirect(`/workspace/saved-search-queries?page=${totalPages}`);
   }
 
   try {
@@ -84,6 +111,8 @@ export default async function SavedSearchQueries({
     name: search.name,
     id: search.saved_search_id,
   }));
+
+  const showPagination = totalPages > 1;
 
   return (
     <>
@@ -103,13 +132,27 @@ export default async function SavedSearchQueries({
       </GridContainer>
       <div className="padding-y-5">
         {savedSearches.length > 0 ? (
-          <SavedSearchesList
-            savedSearches={formattedSavedSearches}
-            paramDisplayMapping={paramDisplayMapping}
-            editText={t("edit")}
-            deleteText={t("delete")}
-            agencyOptions={agencyOptions}
-          />
+          <>
+            {showPagination && (
+              <OpportunitiesPagination
+                totalPages={totalPages}
+                currentPageOverride={currentPage}
+              />
+            )}
+            <SavedSearchesList
+              savedSearches={formattedSavedSearches}
+              paramDisplayMapping={paramDisplayMapping}
+              editText={t("edit")}
+              deleteText={t("delete")}
+              agencyOptions={agencyOptions}
+            />
+            {showPagination && (
+              <OpportunitiesPagination
+                totalPages={totalPages}
+                currentPageOverride={currentPage}
+              />
+            )}
+          </>
         ) : (
           <NoSavedSearches />
         )}
