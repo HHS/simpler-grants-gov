@@ -8,15 +8,15 @@ import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import {
+  clickClearFilters,
   DEFAULT_STATUS_CHECKBOX_IDS,
   ELIGIBILITY_COUNTY,
   expectAdditionalFiltersCleared,
+  expectCheckboxIDIsChecked,
   FUNDING_INSTRUMENT_GRANT,
   LOGIN_STATES,
   openSearchWithFilterDrawer,
   selectAdditionalFilters,
-  clickClearFilters,
-  expectCheckboxIDIsChecked,
 } from "tests/e2e/utils/search/search-filter-utils";
 import { getNumberOfOpportunitySearchResults } from "tests/e2e/utils/search/search-utils";
 
