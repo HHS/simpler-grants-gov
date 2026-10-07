@@ -267,8 +267,8 @@ locals {
   scheduled_jobs = {
     load-transform = {
       task_command = local.load-transform-args[var.environment]
-      # Every hour at the top of the hour
-      schedule_expression = "cron(0 * * * ? *)"
+      # Every 15 minutes starting at 1:00 AM through 11:45 PM
+      schedule_expression = "cron(0/15 1-23 * * ? *)"
       state               = local.load-transform-state[var.environment]
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)

@@ -1,7 +1,7 @@
 #==============================================
 # Stage 0: UV binary source
 #==============================================
-ARG UV_VERSION=0.11.33
+ARG UV_VERSION=0.12.23
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 
 #==============================================
@@ -9,7 +9,7 @@ FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.7
+ARG PYTHON_VERSION=3.14.8
 ARG PY_MM=3.14
 ARG PIP_VERSION=26.0
 
@@ -71,8 +71,8 @@ RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
 # Version is pinned via the UV_VERSION build arg / uv stage at the top of this file.
 COPY --from=uv /uv /uvx /bin/
 
-# Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
-RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
+# Upgrade urllib3 to fix security vulnerabilities (GHSA-8988-9cw3-xx77, GHSA-vxq7-64xx-v4gw, GHSA-gh4c-6fx4-qh6g)
+RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.8.0"
 
 # Upgrade filelock to fix GHSA-w853-jp5j-5j7f
 RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
@@ -186,10 +186,8 @@ RUN dnf install -y \
       openssl-fips-provider-latest-3.5.8-1.amzn2023.0.1 \
       expat-2.8.3-1.amzn2023.0.1 \
       python3-pip-wheel-21.3.1-2.amzn2023.0.21 && \
-    # Late-September ALAS batch: kernel6.18-headers (3102), curl (3128), libxml2 (3122),
-    # rpm suite (3125), pcre2 (3119)
+    # Late-September ALAS batch: curl (3128), libxml2 (3122), rpm suite (3125), pcre2 (3119)
     dnf update -y --releasever=2023.12.20260928 \
-      kernel6.18-headers-6.18.48-109.150.amzn2023 \
       curl-minimal-8.21.0-5.amzn2023.0.2 \
       libcurl-minimal-8.21.0-5.amzn2023.0.2 \
       libxml2-2.10.4-1.amzn2023.0.21 \
@@ -201,6 +199,9 @@ RUN dnf install -y \
       python3-rpm-4.16.1.3-29.amzn2023.0.8 \
       pcre2-10.40-1.amzn2023.0.4 \
       pcre2-syntax-10.40-1.amzn2023.0.4 && \
+    # kernel6.18-headers (ALAS2023-2026-3148)
+    dnf update -y --releasever=2023.12.20260930 \
+      kernel6.18-headers-6.18.51-120.163.amzn2023 && \
     dnf clean all && \
     # Remove the system Python RPMs
     (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \

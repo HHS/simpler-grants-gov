@@ -14,6 +14,8 @@
 
 ## Testing
 
+* [NOFO PDF upload availability assessment and deferred test plan](./nofo-pdf-upload-assessment.md)
+
 * [Terraform unit testing](./terraform-unit-testing.md)
 
 ## Learning

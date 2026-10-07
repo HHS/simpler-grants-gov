@@ -6,6 +6,11 @@ locals {
   availability_zones     = slice(data.aws_availability_zones.available.names, 0, local.num_availability_zones)
 }
 
+module "interface" {
+  source = "../interface"
+  name   = var.name
+}
+
 module "aws_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.13.0"
@@ -18,7 +23,7 @@ module "aws_vpc" {
 
   # Public subnets
   public_subnets                                               = ["10.${var.second_octet}.10.0/24", "10.${var.second_octet}.11.0/24", "10.${var.second_octet}.12.0/24"]
-  public_subnet_tags                                           = { subnet_type = "public" }
+  public_subnet_tags                                           = module.interface.public_subnet_tags
   public_subnet_assign_ipv6_address_on_creation                = false
   public_subnet_enable_dns64                                   = true
   public_subnet_enable_resource_name_dns_aaaa_record_on_launch = true
@@ -26,7 +31,7 @@ module "aws_vpc" {
 
   # Private subnets
   private_subnets                                               = ["10.${var.second_octet}.0.0/24", "10.${var.second_octet}.1.0/24", "10.${var.second_octet}.2.0/24"]
-  private_subnet_tags                                           = { subnet_type = "private" }
+  private_subnet_tags                                           = module.interface.private_subnet_tags
   private_subnet_assign_ipv6_address_on_creation                = false
   private_subnet_enable_dns64                                   = true
   private_subnet_enable_resource_name_dns_aaaa_record_on_launch = true
@@ -36,7 +41,7 @@ module "aws_vpc" {
   # `database_subnet_tags` is only used if `database_subnets` is not empty
   # `database_subnet_group_name` is only used if `create_database_subnet_group` is true
   database_subnets                                               = ["10.${var.second_octet}.5.0/24", "10.${var.second_octet}.6.0/24", "10.${var.second_octet}.7.0/24"]
-  database_subnet_tags                                           = { subnet_type = "database" }
+  database_subnet_tags                                           = module.interface.database_subnet_tags
   create_database_subnet_group                                   = var.has_database
   database_subnet_group_name                                     = var.database_subnet_group_name
   database_subnet_assign_ipv6_address_on_creation                = false

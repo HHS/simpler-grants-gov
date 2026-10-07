@@ -77,3 +77,27 @@ ignore:
   # Major version upgrade required, will do after 8/12 release
   # Last checked: 08/11/2026
   - vulnerability: GHSA-55q2-fjhq-7xh7
+
+  # tarfile: hardlink fallback ignores a custom extraction filter's None result.
+  # Python 3.14.8 is still affected; the 3.14 backport merged after that release.
+  # Grype lists fixes in 3.12.15, 3.13.16 and pre-release 3.15.0, but there is
+  # no released fix on our 3.14 runtime line yet. Remove this exception once
+  # python:3.14-slim includes the backport and Grype recognizes the fixed version.
+  # Advisory: https://www.cve.org/CVERecord?id=CVE-2026-87910
+  # Backport: https://github.com/python/cpython/pull/157307
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 10/02/2026
+  - vulnerability: CVE-2026-87910
+
+  # tempfile.TemporaryDirectory: race condition in cleanup lets an attacker who
+  # can modify the tree swap a directory for a symlink, so files outside the
+  # temporary directory can be deleted or have permissions/flags reset.
+  # Python 3.14.8 is still affected. The fix is merged for 3.15 (3.15.0rc3) but
+  # has not been backported to 3.14, and there is no released 3.14 fix. Grype
+  # lists the fix only in 3.15.0. Remove this exception once python:3.14-slim
+  # includes a fixed 3.14 release and Grype recognizes it.
+  # Advisory: https://www.cve.org/CVERecord?id=CVE-2026-12345
+  # Upstream issue: https://github.com/python/cpython/issues/157579
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 10/03/2026
+  - vulnerability: CVE-2026-12345
