@@ -1,8 +1,7 @@
 # frontend service for the infra-sgg2 environment (AWS account 061664787759, network_name "infra-sgg2").
 #
-# Replaced the former infra-grantee1 frontend. HTTPS/custom domain is
-# deferred until an ACM cert + Route53 hosted zone exist in the "dev" account;
-# the intended domain is shown in a comment below.
+# Replaced the former infra-grantee1 frontend. ACM cert is imported
+# into the "dev" account; DNS is managed externally.
 module "infra_sgg2_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
@@ -10,8 +9,8 @@ module "infra_sgg2_config" {
   default_region                  = module.project_config.default_region
   environment                     = "infra-sgg2"
   network_name                    = "infra-sgg2"
-  domain_name                     = null # "sgg2.teams.simpler.grants.gov" once DNS + certs exist
-  enable_https                    = false
+  domain_name                     = "sgg2.teams.simpler.grants.gov"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider

@@ -1392,5 +1392,67 @@ describe("addPrintWidgetToFields", () => {
         }),
       ]);
     });
+
+    describe("required field inside a missing nested object", () => {
+      const buildFormSchema = (nameTitle?: string): RJSFSchema => ({
+        type: "object",
+        properties: {
+          registrant: {
+            type: "object",
+            required: ["individual"],
+            properties: {
+              individual: {
+                type: "object",
+                ...(nameTitle ? { title: nameTitle } : {}),
+                required: ["first_name", "last_name"],
+                properties: {
+                  first_name: { type: "string", title: "First Name" },
+                  last_name: { type: "string", title: "Last Name" },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const warnings = [
+        {
+          field: "$.registrant.individual",
+          message: "'individual' is a required property",
+          type: "required",
+          value: null,
+        },
+      ];
+
+      it("shows only the field title when the parent object has no title", () => {
+        const result = findValidationErrors(
+          warnings,
+          "/properties/registrant/properties/individual/properties/first_name",
+          undefined,
+          buildFormSchema(),
+          [],
+        );
+
+        expect(result).toEqual([
+          expect.objectContaining({ formatted: "First Name is required" }),
+        ]);
+      });
+
+      it("keeps the parent title as a prefix when the parent sets one", () => {
+        const result = findValidationErrors(
+          warnings,
+          "/properties/registrant/properties/individual/properties/last_name",
+          undefined,
+          buildFormSchema("Contact Person"),
+          [],
+        );
+
+        expect(result).toEqual([
+          expect.objectContaining({
+            formatted: "Contact Person Last Name is required",
+          }),
+        ]);
+      });
+    });
   });
 });

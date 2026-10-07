@@ -47,14 +47,20 @@ class AuthHandler(
             .options(selectinload(SharedUserApiKey.shared_user))
         ).scalar_one_or_none()
 
+    def get_api_key_by_key_id_hash(self, key_id_hash: str) -> SharedUserApiKey | None:
+        return self.db_session.execute(
+            select(SharedUserApiKey).where(SharedUserApiKey.key_id_hash == key_id_hash)
+        ).scalar_one_or_none()
+
     def create_api_key(
-        self, user_id: uuid.UUID, key_name: str, key_id: uuid.UUID
+        self, user_id: uuid.UUID, key_name: str, key_id: uuid.UUID, key_id_hash: str
     ) -> SharedUserApiKey:
         api_key = SharedUserApiKey(
             shared_api_key_id=uuid.uuid4(),
             shared_user_id=user_id,
             key_name=key_name,
             key_id=key_id,
+            key_id_hash=key_id_hash,
             is_active=True,
         )
         self.db_session.add(api_key)

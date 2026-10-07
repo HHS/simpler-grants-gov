@@ -199,6 +199,7 @@ class Form:
     form_json_schema: dict
     form_ui_schema: dict
     omb_number: str | None = None
+    expiration_date: date | None = None
     legacy_form_id: int | None = None
     active_at: datetime | None = None
     inactive_at: datetime | None = None

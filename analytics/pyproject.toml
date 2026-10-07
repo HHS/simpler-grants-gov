@@ -25,7 +25,7 @@ dependencies = [
     "smart-open>=7.0.5,<8",
     "newrelic>=11.5.0,<12",
     "requests>=2.33.0,<3",
-    "urllib3>=2.7.0,<3",
+    "urllib3>=2.8.0,<3",
 ]
 
 [project.scripts]

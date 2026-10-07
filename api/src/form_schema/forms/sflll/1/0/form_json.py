@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -335,9 +336,11 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "label": "7. Federal Program Name/Description",
         "name": "Federal Program Name/Description",
+        # Both fields are pre-populated from the opportunity on every save, so they
+        # are shown read-only like the other pre-populated fields on our forms.
         "children": [
-            {"type": "field", "definition": "/properties/federal_program_name"},
-            {"type": "field", "definition": "/properties/assistance_listing_number"},
+            {"type": "null", "definition": "/properties/federal_program_name"},
+            {"type": "null", "definition": "/properties/assistance_listing_number"},
         ],
     },
     {
@@ -965,6 +968,7 @@ SFLLL_v2_0 = Form(
     form_version="2.0",
     agency_code="SGG",
     omb_number="4040-0013",
+    expiration_date=date(2028, 6, 30),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

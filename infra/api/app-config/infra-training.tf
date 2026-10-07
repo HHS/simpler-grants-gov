@@ -62,6 +62,8 @@ module "infra_training_config" {
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
     ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS       = 1
 
+    FRONTEND_URL = "https://training.simpler.grants.gov"
+
     # Workflow. This is training's internal user id, reused because infra-training's database
     # is restored from a training snapshot and therefore carries the same user row. The
     # workflow service REQUIRES this row to exist: brought up against an empty database it

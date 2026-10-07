@@ -6,16 +6,17 @@ The `user_api_key` table stores API keys that allow users to authenticate with t
 
 ## Table Structure
 
-| Column     | Type      | Constraints              | Description |
-| ---------- | --------- | ------------------------ | ----------- |
-| api_key_id | UUID      | PRIMARY KEY              | Unique identifier for the API key record |
-| key_name   | TEXT      | NOT NULL                 | Human-readable name for the API key (e.g., "Production Key", "Development Key") |
-| key_id     | TEXT      | NOT NULL                 | AWS API Gateway key identifier |
-| user_id    | UUID      | NOT NULL, FK → user.user_id | Reference to the user who owns this API key |
-| last_used  | TIMESTAMP | NULLABLE                 | Timestamp of when this API key was last used for authentication |
-| is_active  | BOOLEAN   | NOT NULL, DEFAULT TRUE   | Whether this API key is currently active and can be used |
-| created_at | TIMESTAMP | NOT NULL, DEFAULT NOW()  | When this record was created |
-| updated_at | TIMESTAMP | NOT NULL, DEFAULT NOW()  | When this record was last updated |
+| Column      | Type      | Constraints                 | Description                                                                                                                |
+| ----------- | --------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| api_key_id  | UUID      | PRIMARY KEY                 | Unique identifier for the API key record                                                                                   |
+| key_name    | TEXT      | NOT NULL                    | Human-readable name for the API key (e.g., "Production Key", "Development Key")                                            |
+| key_id      | TEXT      | NOT NULL                    | AWS API Gateway key identifier                                                                                             |
+| key_id_hash | TEXT      | NULLABLE                    | HMAC-SHA256 hash of `key_id`, keyed with the API key pepper. Written for new keys; existing rows are backfilled separately |
+| user_id     | UUID      | NOT NULL, FK → user.user_id | Reference to the user who owns this API key                                                                                |
+| last_used   | TIMESTAMP | NULLABLE                    | Timestamp of when this API key was last used for authentication                                                            |
+| is_active   | BOOLEAN   | NOT NULL, DEFAULT TRUE      | Whether this API key is currently active and can be used                                                                   |
+| created_at  | TIMESTAMP | NOT NULL, DEFAULT NOW()     | When this record was created                                                                                               |
+| updated_at  | TIMESTAMP | NOT NULL, DEFAULT NOW()     | When this record was last updated                                                                                          |
 
 ## Relationships
 
@@ -41,6 +42,9 @@ class UserApiKey(ApiSchemaTable, TimestampMixin):
     api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     key_name: Mapped[str]
     key_id: Mapped[str] = mapped_column(comment="AWS API Gateway key identifier")
+    key_id_hash: Mapped[str | None] = mapped_column(
+        comment="HMAC-SHA256 hash of key_id, keyed with the API key pepper"
+    )
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("api.user.user_id"), index=True)
     last_used: Mapped[datetime | None]
     is_active: Mapped[bool] = mapped_column(default=True)
@@ -55,6 +59,7 @@ The table is created via Alembic migration: `2025_08_06_add_user_api_key_table.p
 ## Usage Examples
 
 ### Creating an API Key
+
 ```python
 # Create an API key for a user
 api_key = UserApiKey(
@@ -68,6 +73,7 @@ db_session.commit()
 ```
 
 ### Finding User's API Keys
+
 ```python
 # Get all active API keys for a user
 active_keys = db_session.query(UserApiKey).filter(
@@ -77,6 +83,7 @@ active_keys = db_session.query(UserApiKey).filter(
 ```
 
 ### Updating Last Used Timestamp
+
 ```python
 # Update when an API key was last used
 api_key.last_used = datetime.utcnow()
@@ -84,6 +91,7 @@ db_session.commit()
 ```
 
 ### Deactivating an API Key
+
 ```python
 # Deactivate an API key instead of deleting it
 api_key.is_active = False

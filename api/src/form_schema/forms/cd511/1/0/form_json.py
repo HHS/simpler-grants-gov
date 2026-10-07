@@ -280,6 +280,7 @@ CD511_v1_1 = Form(
     form_version="1.1",
     agency_code="SGG",
     omb_number=None,
+    expiration_date=None,
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

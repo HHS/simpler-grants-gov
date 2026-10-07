@@ -42,6 +42,10 @@ output "enable_notifications" {
   value = local.enable_notifications
 }
 
+output "enable_sms_notifications" {
+  value = local.enable_sms_notifications
+}
+
 output "enable_waf" {
   value = local.enable_waf
 }
