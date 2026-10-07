@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { OpportunityCompetitionStart } from "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityCompetitionStart";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
@@ -11,11 +10,11 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
 import OpportunityCTA from "./_components/OpportunityCTA";
 import OpportunityDescription from "./_components/OpportunityDescription";
 import OpportunityDocuments from "./_components/OpportunityDocuments";
+import OpportunityHeader from "./_components/OpportunityHeader";
 import OpportunityHistory from "./_components/OpportunityHistory";
 import OpportunityIntro from "./_components/OpportunityIntro";
 import OpportunityLink from "./_components/OpportunityLink";
@@ -134,31 +133,13 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     : emptySummary();
 
   return (
-    <div>
-      <GridContainer
-        data-testid="opportunity-intro-content"
-        className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6"
-      >
-        {opportunityData.opportunity_title ? (
-          <h2 className="margin-bottom-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
-            {opportunityData.opportunity_title}
-          </h2>
-        ) : null}
+    <div data-testid="opportunity-intro-content">
+      <OpportunityHeader
+        opportunityData={opportunityData}
+        opportunitySaved={opportunitySaved}
+      />
+      <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6">
         <Grid row gap={true}>
-          <div className="display-flex desktop:padding-y-1 padding-y-3">
-            <OpportunitySaveUserControl
-              opportunityId={opportunityData.opportunity_id}
-              type="button"
-              opportunitySaved={opportunitySaved}
-            />
-            {opportunityData.competitions &&
-              opportunityData.opportunity_title && (
-                <OpportunityCompetitionStart
-                  opportunityTitle={opportunityData.opportunity_title}
-                  competitions={opportunityData.competitions}
-                />
-              )}
-          </div>
           <div className="grid-row grid-gap" id="opportunity-detail-content">
             <div className="desktop:grid-col-8 grid-col-12 order-1 desktop:order-first">
               <OpportunityIntro opportunityData={opportunityData} />
