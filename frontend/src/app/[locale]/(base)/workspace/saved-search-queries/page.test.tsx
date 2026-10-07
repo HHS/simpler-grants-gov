@@ -4,11 +4,16 @@ import SavedSearchQueries from "src/app/[locale]/(base)/workspace/saved-search-q
 import { fakeSavedSearch } from "src/utils/testing/fixtures";
 import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
 
-const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
 const mockBreadcrumbs = jest.fn();
+const mockPaginationProps = jest.fn();
+const mockFetchSavedSearchesPaginated = jest.fn();
+const mockPerformAgencySearch = jest.fn().mockResolvedValue([]);
+const mockRedirect = jest.fn((url: string) => {
+  throw new Error(`NEXT_REDIRECT ${url}`);
+});
 
 jest.mock("next/navigation", () => ({
-  useSearchParams: () => mockUseSearchParams() as unknown,
+  redirect: (url: string): unknown => mockRedirect(url),
 }));
 
 jest.mock("next-intl/server", () => ({
@@ -23,30 +28,26 @@ jest.mock("src/components/core/Breadcrumbs", () => ({
   },
 }));
 
-const mockFetchSavedSearches = jest.fn().mockResolvedValue([
-  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "1" },
-  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "2" },
-  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "3" },
-  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "4" },
-  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "5" },
-]);
-
-const mockPerformAgencySearch = jest.fn().mockResolvedValue([]);
-
-const getSessionMock = jest.fn(() => ({
-  token: "a token",
-}));
+jest.mock(
+  "src/app/[locale]/(base)/grantor/opportunities/_components/OpportunitiesPagination",
+  () => ({
+    __esModule: true,
+    default: (props: { totalPages: number; currentPageOverride?: number }) => {
+      mockPaginationProps(props);
+      return (
+        <div data-testid="saved-search-pagination">{props.totalPages}</div>
+      );
+    },
+  }),
+);
 
 jest.mock("src/services/fetch/fetchers/savedSearchFetcher", () => ({
-  fetchSavedSearches: (): unknown => mockFetchSavedSearches(),
+  fetchSavedSearchesPaginated: (page: number): unknown =>
+    mockFetchSavedSearchesPaginated(page),
 }));
 
 jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
   performAgencySearch: (): unknown => mockPerformAgencySearch(),
-}));
-
-jest.mock("src/services/auth/session", () => ({
-  getSession: (): unknown => getSessionMock(),
 }));
 
 jest.mock(
@@ -58,13 +59,36 @@ jest.mock(
   }),
 );
 
+const savedSearches = [
+  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "1" },
+  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "2" },
+  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "3" },
+  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "4" },
+  { search_query: fakeSavedSearch, name: "whatever", saved_search_id: "5" },
+];
+
+const paginatedResult = (results = savedSearches, totalPages = 1) => ({
+  savedSearches: results,
+  paginationInfo: {
+    order_by: "name",
+    page_offset: 1,
+    page_size: 25,
+    sort_direction: "ascending",
+    total_pages: totalPages,
+    total_records: results.length,
+  },
+});
+
 describe("Saved Searches page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchSavedSearchesPaginated.mockResolvedValue(paginatedResult());
   });
 
   it("renders intro text for user with no saved searches", async () => {
-    mockFetchSavedSearches.mockResolvedValueOnce([]);
+    mockFetchSavedSearchesPaginated.mockResolvedValueOnce(
+      paginatedResult([], 0),
+    );
 
     const component = await SavedSearchQueries({ params: localeParams });
     render(component);
@@ -96,6 +120,101 @@ describe("Saved Searches page", () => {
     render(component);
 
     expect(screen.getByTestId("fakeSavedSearchList")).toHaveTextContent("5");
+  });
+
+  it("does not render pagination when there is only one page", async () => {
+    const component = await SavedSearchQueries({ params: localeParams });
+    render(component);
+
+    expect(
+      screen.queryByTestId("saved-search-pagination"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders pagination above and below the list when there is more than one page", async () => {
+    mockFetchSavedSearchesPaginated.mockResolvedValueOnce(
+      paginatedResult(savedSearches, 2),
+    );
+
+    const component = await SavedSearchQueries({ params: localeParams });
+    render(component);
+
+    expect(screen.getAllByTestId("saved-search-pagination")).toHaveLength(2);
+  });
+
+  it("forwards page 2 to the paginated saved-search fetcher", async () => {
+    mockFetchSavedSearchesPaginated.mockResolvedValueOnce(
+      paginatedResult(savedSearches, 2),
+    );
+
+    const component = await SavedSearchQueries({
+      params: localeParams,
+      searchParams: Promise.resolve({ page: "2" }),
+    });
+    render(component);
+
+    expect(mockFetchSavedSearchesPaginated).toHaveBeenCalledWith(2);
+    expect(mockPaginationProps).toHaveBeenCalledTimes(2);
+    expect(mockPaginationProps).toHaveBeenNthCalledWith(1, {
+      totalPages: 2,
+      currentPageOverride: 2,
+    });
+    expect(mockPaginationProps).toHaveBeenNthCalledWith(2, {
+      totalPages: 2,
+      currentPageOverride: 2,
+    });
+  });
+
+  it.each(["0", "-1", "not-a-number"])(
+    "falls back to page 1 for invalid page value %s",
+    async (page) => {
+      mockFetchSavedSearchesPaginated.mockResolvedValueOnce(
+        paginatedResult(savedSearches, 2),
+      );
+      const component = await SavedSearchQueries({
+        params: localeParams,
+        searchParams: Promise.resolve({ page }),
+      });
+      render(component);
+
+      expect(mockFetchSavedSearchesPaginated).toHaveBeenCalledWith(1);
+      expect(mockPaginationProps).toHaveBeenCalledWith({
+        totalPages: 2,
+        currentPageOverride: 1,
+      });
+    },
+  );
+
+  it("passes current-page saved-search data to the list", async () => {
+    mockFetchSavedSearchesPaginated.mockResolvedValueOnce(
+      paginatedResult([savedSearches[0]], 2),
+    );
+
+    const component = await SavedSearchQueries({
+      params: localeParams,
+      searchParams: Promise.resolve({ page: "2" }),
+    });
+    render(component);
+
+    expect(screen.getByTestId("fakeSavedSearchList")).toHaveTextContent("1");
+  });
+
+  it("redirects to the last page when the requested page is past the end", async () => {
+    mockFetchSavedSearchesPaginated.mockResolvedValueOnce(
+      paginatedResult([], 2),
+    );
+
+    await expect(
+      SavedSearchQueries({
+        params: localeParams,
+        searchParams: Promise.resolve({ page: "3" }),
+      }),
+    ).rejects.toThrow("NEXT_REDIRECT /workspace/saved-search-queries?page=2");
+
+    expect(mockFetchSavedSearchesPaginated).toHaveBeenCalledWith(3);
+    expect(mockRedirect).toHaveBeenCalledWith(
+      "/workspace/saved-search-queries?page=2",
+    );
   });
 
   it("passes accessibility scan", async () => {
