@@ -121,11 +121,20 @@ export async function createApplication(
     name: /start.*application/i,
   });
   await startAppButton.waitFor({ state: "visible", timeout: 15000 });
-  await startAppButton.click();
   const modal = page.locator(
     '[role="dialog"].is-visible, #start-application.is-visible',
   );
-  await expect(modal.locator("select")).toBeVisible({ timeout: 60000 });
+  // The button is visible as soon as the server-rendered HTML arrives, but its
+  // click handler is only attached after React hydrates. A click before then is
+  // silently ignored (seen on WebKit), so the modal never opens. This replaces
+  // the old fixed 3s sleep: re-click until the modal actually appears, but never
+  // click again once it is open.
+  await expect(async () => {
+    if (!(await modal.first().isVisible())) {
+      await startAppButton.click();
+    }
+    await expect(modal.locator("select")).toBeVisible({ timeout: 5000 });
+  }).toPass({ timeout: 60000, intervals: [500, 1000, 2000, 3000] });
   const orgSelect = modal.locator(
     '#create-application-organization-select, select[name*="orgnization"], select[name*="organization"]',
   );
