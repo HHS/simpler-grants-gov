@@ -48,6 +48,8 @@ from src.api.users.user_schemas import (
     UserSaveOpportunityResponseSchema,
     UserSaveSearchRequestSchema,
     UserSaveSearchResponseSchema,
+    UserSetAllOpportunitiesNotificationPreferenceRequestSchema,
+    UserSetAllOpportunitiesNotificationPreferenceResponseSchema,
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
     UserUpdateProfileRequestSchema,
@@ -66,6 +68,7 @@ from src.auth.login_gov_jwt_auth import (
     get_login_gov_redirect_uri,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
+from src.constants.lookup_constants import NotificationType
 from src.db.models.user_models import UserTokenSession
 from src.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.users.create_api_key import create_api_key
@@ -102,6 +105,9 @@ from src.services.users.set_saved_opportunity_notification_settings import (
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
 from src.services.users.user_can_access import check_user_can_access
+from src.services.users.user_notification_preferences import (
+    update_or_create_user_notification_preference,
+)
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -945,5 +951,36 @@ def user_saved_opportunities_notifications(
     with db_session.begin():
         db_session.add(user)
         set_saved_opportunity_notification_settings(db_session, user, json_data)
+
+    return response.ApiResponse(message="Success")
+
+
+@user_blueprint.post("/<uuid:user_id>/all-opportunities/notifications")
+@user_blueprint.input(UserSetAllOpportunitiesNotificationPreferenceRequestSchema)
+@user_blueprint.output(UserSetAllOpportunitiesNotificationPreferenceResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403, 422])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def user_set_all_new_opportunities_notifications(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
+    logger.info("POST /v1/users/:user_id/all-opportunities/notifications")
+
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # Verify the authenticated user matches the requested user_id
+    if user.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user)
+        update_or_create_user_notification_preference(
+            db_session, user, NotificationType.ALL_NEW_OPPORTUNITIES, json_data["is_enabled"]
+        )
 
     return response.ApiResponse(message="Success")

@@ -902,6 +902,19 @@ class SetUserSavedOpportunityNotificationResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 
+class UserSetAllOpportunitiesNotificationPreferenceRequestSchema(Schema):
+    is_enabled = fields.Boolean(
+        required=True,
+        metadata={
+            "description": "Value to indicate whether the specified notification type is enabled"
+        },
+    )
+
+
+class UserSetAllOpportunitiesNotificationPreferenceResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
 class AllOpportunitiesNotificationPreferenceSchema(Schema):
     is_enabled = fields.Boolean(
         metadata={
