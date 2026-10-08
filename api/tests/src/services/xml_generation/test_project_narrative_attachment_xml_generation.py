@@ -19,8 +19,6 @@ XSD Reference:
 https://apply07.grants.gov/apply/forms/schemas/ProjectNarrativeAttachments_1_2-V1.2.xsd
 """
 
-import base64
-import hashlib
 import uuid
 from pathlib import Path
 
@@ -31,6 +29,7 @@ from src.form_schema.forms.project_narrative_attachment import (
     FORM_XML_TRANSFORM_RULES as PROJECT_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
 )
 from src.services.xml_generation.models import XMLGenerationRequest
+from src.services.xml_generation.models.attachment import AttachmentFile
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 from src.services.xml_generation.validation.xsd_validator import XSDValidator
@@ -87,7 +86,7 @@ def _build_attachment_mapping(count: int) -> dict[str, AttachmentInfo]:
             filename=f"narrative_{i}.pdf",
             mime_type="application/pdf",
             file_location=f"narrative_{i}.pdf",
-            hash_value=base64.b64encode(hashlib.sha1(str(i).encode()).digest()).decode(),
+            hash_value=AttachmentFile.compute_base64_sha1_from_content(str(i).encode()),
         )
         for i in range(count)
     }
