@@ -23,17 +23,19 @@ import {
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
   expectCheckboxesChecked,
-  expectSortBy,
-  fillSearchInputAndSubmit,
   getFirstNonNumericAgencyCheckboxId,
-  getSearchInput,
-  selectSortBy,
   toggleCheckbox,
   toggleCheckboxGroup,
   toggleFilterDrawer,
   waitForFilterOptions,
+} from "tests/e2e/utils/search/search-filter-utils";
+import {
+  expectSortBy,
+  fillSearchInputAndSubmit,
+  getSearchInput,
+  selectSortBy,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/utils/search/searchSpecUtil";
+} from "tests/e2e/utils/search/search-utils";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION, CORE_REGRESSION } =
   VALID_TAGS;
