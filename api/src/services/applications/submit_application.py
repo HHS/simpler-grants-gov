@@ -15,6 +15,7 @@ from src.services.applications.application_validation import (
     validate_forms,
 )
 from src.services.applications.get_application import get_application
+from src.services.applications.submission_queue import send_application_submission_message
 from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
@@ -60,4 +61,25 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
         audit_event=ApplicationAuditEvent.APPLICATION_SUBMITTED,
     )
 
+    _queue_application_submission(application, user)
+
     return application
+
+
+def _queue_application_submission(application: Application, user: User) -> None:
+    """Queue the submission-build request for this application.
+
+    Failure here is deliberately non-fatal: the application is already
+    submitted, and the scheduled CreateApplicationSubmissionTask will build
+    the submission package on its next run if the queue is unavailable.
+    """
+    try:
+        send_application_submission_message(
+            application_id=application.application_id,
+            submitted_by_user_id=user.user_id,
+        )
+    except Exception:
+        logger.exception(
+            "Failed to queue application submission message - the scheduled submission task will process this application",
+            extra={"application_id": application.application_id},
+        )

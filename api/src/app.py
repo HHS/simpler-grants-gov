@@ -48,6 +48,7 @@ from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.services.files.local_file_scanner import setup_local_file_scanner
+from src.submission_consumer import submission_consumer_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
 from src.util.local import error_if_not_local
@@ -236,6 +237,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
+    app.register_blueprint(submission_consumer_blueprint)
 
     if endpoint_config.enable_workflow_endpoints:
         app.register_blueprint(workflow_blueprint)
