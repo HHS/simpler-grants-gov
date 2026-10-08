@@ -9,6 +9,7 @@ This is the single implementation used by both:
 
 import logging
 import secrets
+import shutil
 import string
 import uuid
 import zipfile
@@ -39,6 +40,8 @@ from src.services.xml_generation.utils.attachment_mapping import (
 from src.util import datetime_util, file_util
 
 logger = logging.getLogger(__name__)
+
+ATTACHMENT_COPY_CHUNK_SIZE = 8 * 1024 * 1024  # 8MB
 
 
 class ApplicationSubmissionMetric(StrEnum):
@@ -355,8 +358,11 @@ class ApplicationSubmissionBuilder:
                 if file_name_in_zip != application_attachment.file_name:
                     submission.attachment_filename_overrides[attachment_id_str] = file_name_in_zip
 
+                # Stream in chunks rather than reading the whole attachment into
+                # memory - attachments can be up to 200MB and the consumer builds
+                # several submissions concurrently
                 with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
-                    file_in_zip.write(attachment_file.read())
+                    shutil.copyfileobj(attachment_file, file_in_zip, ATTACHMENT_COPY_CHUNK_SIZE)
 
                 file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
                 submission.attachment_metadata.append(FileMetadata(file_name_in_zip, file_size))
