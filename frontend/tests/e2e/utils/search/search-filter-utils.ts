@@ -40,15 +40,11 @@ const FILTER_QUERY_PARAMS = [
 export const LOGIN_STATES = ["logged in", "not logged in"] as const;
 export type LoginState = (typeof LOGIN_STATES)[number];
 
-// Default status filters (src/constants/search.ts STATUS_FILTER_DEFAULT_VALUES).
-// "Posted" is the `posted` value of the checkbox labelled "Open" (id status-open).
-export const DEFAULT_STATUS_CHECKBOX_IDS = ["status-forecasted", "status-open"];
-
-export const FUNDING_INSTRUMENT_GRANT = {
+const FUNDING_INSTRUMENT_GRANT = {
   "funding-instrument-grant": "grant",
 };
 
-export const ELIGIBILITY_COUNTY = {
+const ELIGIBILITY_COUNTY = {
   "eligibility-county_governments": "county_governments",
 };
 
@@ -200,15 +196,22 @@ export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   await checkBoxLabel.scrollIntoViewIfNeeded();
   await expect(checkBox).toBeEnabled();
 
-  if (!(await checkBox.isChecked())) {
-    await checkBoxLabel.click({ force: true });
-    try {
-      await expect(checkBox).toBeChecked({ timeout: 1000 });
-    } catch {
-      // Webkit can silently drop clicks — fall back to JS dispatch if still unchecked
+  if (await checkBox.isChecked()) return;
+
+  await checkBoxLabel.click({ force: true });
+  try {
+    // The input is driven by URL/router state, so on a busy runner it can take
+    // longer than a second to reflect the click. Give it room before assuming
+    // the click was dropped.
+    await expect(checkBox).toBeChecked({ timeout: 5000 });
+  } catch {
+    // Some browsers (notably WebKit) can silently drop a click. Retry only if the
+    // box is still unchecked right now. Re-clicking a box that is merely slow to
+    // update would toggle it back off.
+    if (!(await checkBox.isChecked())) {
       await checkBox.dispatchEvent("click");
-      await expect(checkBox).toBeChecked({ timeout: 1000 });
     }
+    await expect(checkBox).toBeChecked({ timeout: 5000 });
   }
 }
 
