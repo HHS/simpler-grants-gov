@@ -302,6 +302,7 @@ class TestPivotIntegration:
         application_data = {
             "forecasted_cash_needs": {
                 "federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "100.50",
                     "total_amount": "100.50",
                 },
             }

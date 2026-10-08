@@ -7,6 +7,7 @@ from lxml import etree as lxml_etree
 
 import src.adapters.db as db
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
+from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_XML_TRANSFORM_RULES
 from src.services.xml_generation.constants import Namespace
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
@@ -759,3 +760,71 @@ class TestSubmissionXMLAssembler:
         # Should only return SF424_4_0 (required), not the optional form
         assert len(supported_forms) == 1
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
+
+
+class TestSubmissionXMLAssemblerClosingTags:
+    """Empty SF-424A line items keep their closing tag in the full submission XML, the way
+    legacy writes them, even though the assembler parses each form's XML again."""
+
+    @pytest.fixture
+    def sf424a_submission(self, enable_factory_create, db_session: db.Session, create_test_form):
+        opportunity = OpportunityFactory.create(opportunity_number="TEST-OPP-424A")
+        competition = CompetitionFactory.create(opportunity=opportunity, competition_forms=[])
+        application = ApplicationFactory.create(competition=competition)
+        sf424a_form = create_test_form(
+            form_name="Budget Information for Non-Construction Programs (SF-424A)",
+            short_form_name="SF424A",
+            form_version="1.0",
+            json_to_xml_schema=SF424A_XML_TRANSFORM_RULES,
+        )
+        competition_form = CompetitionFormFactory.create(competition=competition, form=sf424a_form)
+        # Section A filled in, Sections B, C and E left empty (only pre-populated totals)
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "activity_line_items": [
+                    {
+                        "activity_title": f"Activity {row}",
+                        "budget_summary": {"federal_new_or_revised_amount": "10"},
+                        "budget_categories": {
+                            "total_direct_charge_amount": "0.00",
+                            "total_amount": "0.00",
+                        },
+                        "non_federal_resources": {"total_amount": "0.00"},
+                    }
+                    for row in (1, 2)
+                ],
+                "total_non_federal_resources": {"total_amount": "0.00"},
+                "confirmation": True,
+            },
+        )
+        return application, ApplicationSubmissionFactory.create(
+            application=application, legacy_tracking_number=87654321
+        )
+
+    @pytest.mark.parametrize("pretty_print", [True, False])
+    def test_empty_line_items_keep_closing_tag(self, sf424a_submission, pretty_print):
+        assembler = SubmissionXMLAssembler(*sf424a_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=pretty_print)
+
+        for line_item in ("CategorySet", "ResourceLineItem", "FundsLineItem"):
+            for row in (1, 2):
+                assert (
+                    f'<SF424A:{line_item} SF424A:activityTitle="Activity {row}">'
+                    f"</SF424A:{line_item}>"
+                ) in xml_string
+            assert f"<SF424A:{line_item} " in xml_string
+            assert 'SF424A:activityTitle="Activity 1"/>' not in xml_string
+
+    def test_closing_tag_config_is_per_form(self, sf424a_submission):
+        assembler = SubmissionXMLAssembler(*sf424a_submission)
+
+        assert assembler._get_empty_elements_with_closing_tag("SF424A") == [
+            "CategorySet",
+            "ResourceLineItem",
+            "FundsLineItem",
+        ]
+        # Forms that don't ask for it keep writing empty elements as before
+        assert assembler._get_empty_elements_with_closing_tag("SF424_4_0") == []
