@@ -212,9 +212,7 @@ class SubmissionConsumer:
                 logger.info("Exiting after batch limit reached.")
                 break
 
-        logger.info(
-            "Finished processing submission messages - exiting process", extra=self.metrics
-        )
+        logger.info("Finished processing submission messages - exiting process", extra=self.metrics)
 
     def _idle_during_maintenance(self) -> None:
         """Idle without touching SQS or the DB while maintenance mode is enabled.
@@ -252,9 +250,7 @@ class SubmissionConsumer:
         )
         return messages_to_delete, messages_to_keep
 
-    def _handle_containers(
-        self, containers: list[MessageContainer]
-    ) -> tuple[list[str], list[str]]:
+    def _handle_containers(self, containers: list[MessageContainer]) -> tuple[list[str], list[str]]:
         """Run each message through handle_message concurrently and classify the results.
 
         Returns the receipt handles to delete and the receipt handles to keep on the
@@ -349,7 +345,7 @@ class SubmissionConsumer:
         try:
             message_body = json.loads(message.body)
             return ApplicationSubmissionMessage.model_validate(message_body)
-        except (json.JSONDecodeError, ValidationError):
+        except json.JSONDecodeError, ValidationError:
             logger.exception(
                 "Failed to parse SQS message as ApplicationSubmissionMessage",
                 extra={"message_id": message.message_id},
