@@ -81,7 +81,7 @@ def load_transform(
         if set_current:
             SetCurrentOpportunitiesTask(db_session).run()
         if sync_to_index:
-            LoadOpportunitiesToIndex(db_session, search_client, full_refresh=False).run()
+            LoadOpportunitiesToIndex(db_session, search_client).run()
         if store_version:
             StoreOpportunityVersionTask(db_session).run()
 
