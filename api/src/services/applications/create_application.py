@@ -167,6 +167,7 @@ def create_application(db_session: db.Session, user: User, json_data: dict) -> A
     application = Application(
         application_id=application_id or uuid.uuid4(),
         competition=competition,
+        competition_id=competition.competition_id,
         application_name=application_name,
         application_status=ApplicationStatus.IN_PROGRESS,
         organization_id=organization_id,  # Set the organization ID if provided

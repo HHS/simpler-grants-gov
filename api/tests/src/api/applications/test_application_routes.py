@@ -147,6 +147,8 @@ def test_application_start_logging_enhancement(
             or hasattr(record, "opportunity_id")
             or hasattr(record, "agency_code")
         ):
+            if hasattr(record, "competition_id"):
+                assert record.competition_id is not None
             found_metadata = True
             break
 
