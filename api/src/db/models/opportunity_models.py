@@ -2,7 +2,7 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Index, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -590,6 +590,15 @@ class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
 
 class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_version"
+
+    # Expression index so queries can filter versions by status without a full table scan
+    __table_args__ = (
+        Index(
+            "opportunity_version_opportunity_status_idx",
+            text("(opportunity_data ->> 'opportunity_status')"),
+        ),
+        ApiSchemaTable.__table_args__,
+    )
 
     opportunity_version_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4
