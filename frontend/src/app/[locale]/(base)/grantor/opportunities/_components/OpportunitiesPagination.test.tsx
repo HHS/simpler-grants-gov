@@ -106,9 +106,7 @@ describe("OpportunitiesPagination Component", () => {
       toString: () => "page=-1",
     });
 
-    render(
-      <OpportunitiesPagination totalPages={5} currentPageOverride={1} />,
-    );
+    render(<OpportunitiesPagination totalPages={5} currentPageOverride={1} />);
 
     expect(screen.getByRole("button", { name: /page 1/i })).toBeInTheDocument();
 
