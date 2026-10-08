@@ -13,7 +13,7 @@ Covers:
 - FormVersion attribute on root element
 - The 100 attachment maximum (AttachmentGroupMin1Max100DataType)
 - Failure when an attachment UUID is missing from the attachment mapping
-- XSD validation
+- XSD validation, both standalone and inside a complete submission
 
 XSD Reference:
 https://apply07.grants.gov/apply/forms/schemas/ProjectNarrativeAttachments_1_2-V1.2.xsd
@@ -28,11 +28,20 @@ from lxml import etree as lxml_etree
 from src.form_schema.forms.project_narrative_attachment import (
     FORM_XML_TRANSFORM_RULES as PROJECT_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
 )
+from src.form_schema.forms.project_narrative_attachment import ProjectNarrativeAttachment_v1_2
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.models.attachment import AttachmentFile
 from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 from src.services.xml_generation.validation.xsd_validator import XSDValidator
+from tests.src.db.models.factories import (
+    ApplicationFactory,
+    ApplicationFormFactory,
+    ApplicationSubmissionFactory,
+    CompetitionFactory,
+    CompetitionFormFactory,
+)
 
 _SNAPSHOT_PATH = Path(__file__).parent / "snapshots" / "project_narrative_1_2.xml"
 
@@ -290,4 +299,49 @@ class TestProjectNarrativeAttachmentsXSDValidation:
         assert validation_result["valid"] is False
         assert "Unexpected child with tag 'att:AttachedFile' at position 101" in (
             validation_result["error_message"]
+        )
+
+    def test_project_narrative_attachments_submission_xml_validates_against_xsd(
+        self, enable_factory_create, seed_form_registry, xsd_validator
+    ):
+        """Test the form inside a complete submission, as the submission task produces it.
+
+        The assembler hoists the att/glob/globLib namespace declarations to the
+        GrantApplication root, so this checks the form still validates once embedded.
+        """
+        attachment_mapping = _build_attachment_mapping(2)
+
+        competition = CompetitionFactory.create(competition_forms=[])
+        competition_form = CompetitionFormFactory.create(
+            competition=competition, form=ProjectNarrativeAttachment_v1_2
+        )
+        application = ApplicationFactory.create(competition=competition)
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={"attachments": list(attachment_mapping)},
+        )
+        application_submission = ApplicationSubmissionFactory.create(application=application)
+
+        assembler = SubmissionXMLAssembler(application, application_submission, attachment_mapping)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        form_elements = _parse(xml_string).findall(
+            ".//{http://apply.grants.gov/system/MetaGrantApplication}Forms"
+            f"/{{{FORM_NS}}}ProjectNarrativeAttachments_1_2"
+        )
+        assert len(form_elements) == 1
+
+        attached_files = form_elements[0].findall(f".//{{{ATT_NS}}}AttachedFile")
+        assert [f.findtext(f"{{{ATT_NS}}}FileName") for f in attached_files] == [
+            info.filename for info in attachment_mapping.values()
+        ]
+
+        form_xml = lxml_etree.tostring(form_elements[0], encoding="unicode")
+        validation_result = self._validate(xsd_validator, form_xml)
+
+        assert validation_result["valid"], (
+            f"XSD validation failed:\n"
+            f"Error: {validation_result['error_message']}\n"
+            f"Generated XML:\n{form_xml}"
         )

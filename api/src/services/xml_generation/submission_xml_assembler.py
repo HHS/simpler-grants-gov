@@ -228,10 +228,10 @@ class SubmissionXMLAssembler:
     def _get_schema_location_url(self) -> str | None:
         """Get the schema location URL for xsi:schemaLocation attribute.
 
-        Constructs the URL from competition's opportunity number and CFDA number.
-        Format: https://apply07.grants.gov/apply/opportunities/schemas/agency/oppOPP_NUMBER-cfdaCFDA_NUMBER.xsd
+        Constructs the URL from competition's opportunity number, CFDA number, and competition ID.
+        Format: https://apply07.grants.gov/apply/opportunities/schemas/agency/oppOPP_NUMBER-cfdaCFDA_NUMBER-cidCOMPETITION_ID.xsd
 
-        Example: https://trainingapply.grants.gov/apply/opportunities/schemas/agency/oppSIMP-QUAD4-FORMS-10202025-cfda00.000.xsd
+        Example: https://trainingapply.grants.gov/apply/opportunities/schemas/agency/oppSGG-NK-PNATT-PKG01-cfda10.986-cidSGGNKPNATTPKG01.xsd
 
         Returns:
             Schema location URL or None if opportunity_number is not set
@@ -274,8 +274,12 @@ class SubmissionXMLAssembler:
                 },
             )
 
-        # Construct XSD filename with 'opp' prefix + opportunity number + optional CFDA suffix
-        xsd_filename = f"opp{opportunity_number}{cfda_suffix}.xsd"
+        # Legacy Grants.gov appends the competition ID when the competition has one
+        public_competition_id = self.application.competition.public_competition_id
+        cid_suffix = f"-cid{public_competition_id}" if public_competition_id else ""
+
+        # Construct XSD filename with 'opp' prefix + opportunity number + optional CFDA and competition ID suffixes
+        xsd_filename = f"opp{opportunity_number}{cfda_suffix}{cid_suffix}.xsd"
         return f"{SCHEMA_LOCATION_BASE_URL}/{xsd_filename}"
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:

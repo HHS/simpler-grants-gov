@@ -41,6 +41,7 @@ def application(enable_factory_create, db_session):
     opportunity_assistance_listing = OpportunityAssistanceListingFactory.create(
         opportunity=opportunity,
         assistance_listing_number="12.345",
+        program_title="Test Program Title",
     )
 
     competition = CompetitionFactory.create(
@@ -114,6 +115,33 @@ class TestSubmissionXMLGenerator:
         cfda_elem = root.find(f"{{{HEADER_NAMESPACES['header']}}}CFDANumber")
         assert cfda_elem is not None
         assert cfda_elem.text == "12.345"
+
+        activity_title_elem = root.find(f"{{{HEADER_NAMESPACES['header']}}}ActivityTitle")
+        assert activity_title_elem is not None
+        assert activity_title_elem.text == "Test Program Title"
+
+    def test_generate_header_elements_follow_xsd_order(self, application):
+        """Test that header elements follow the Header-V1.0.xsd sequence order.
+
+        Legacy Grants.gov output places CFDANumber and ActivityTitle directly after AgencyName.
+        """
+        generator = SubmissionXMLGenerator(application)
+        xml_string = generator.generate_header_xml()
+
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"))
+
+        assert [lxml_etree.QName(child).localname for child in root] == [
+            "HashValue",
+            "AgencyName",
+            "CFDANumber",
+            "ActivityTitle",
+            "OpportunityID",
+            "OpportunityTitle",
+            "CompetitionID",
+            "OpeningDate",
+            "ClosingDate",
+            "SubmissionTitle",
+        ]
 
     def test_generate_header_without_agency_name_uses_code(self, enable_factory_create):
         """Test that agency code is used when agency name is None."""
@@ -194,6 +222,30 @@ class TestSubmissionXMLGenerator:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"))
         cfda_elem = root.find(f"{{{HEADER_NAMESPACES['header']}}}CFDANumber")
         assert cfda_elem is None
+
+        activity_title_elem = root.find(f"{{{HEADER_NAMESPACES['header']}}}ActivityTitle")
+        assert activity_title_elem is None
+
+    def test_generate_header_truncates_long_activity_title(self, enable_factory_create):
+        """Test that ActivityTitle is truncated to the 120 character XSD limit."""
+        opportunity = OpportunityFactory.create()
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, program_title="A" * 150
+        )
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
+        )
+        application = ApplicationFactory.create(competition=competition)
+
+        generator = SubmissionXMLGenerator(application)
+        xml_string = generator.generate_header_xml()
+
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"))
+        activity_title_elem = root.find(f"{{{HEADER_NAMESPACES['header']}}}ActivityTitle")
+        assert activity_title_elem is not None
+        assert activity_title_elem.text == "A" * 120
 
     def test_generate_header_date_formatting(self, enable_factory_create):
         """Test that dates are formatted correctly in YYYY-MM-DD format."""
