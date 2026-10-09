@@ -7,17 +7,20 @@ import { Pagination } from "@trussworks/react-uswds";
 
 type PaginationProps = {
   totalPages: number;
+  currentPageOverride?: number;
 };
 
 export default function OpportunitiesPagination({
   totalPages,
+  currentPageOverride,
 }: PaginationProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   // Extract current page from URL query string, default to page 1
-  const currentPage = Number(searchParams.get("page")) || 1;
+  const currentPage =
+    currentPageOverride ?? (Number(searchParams.get("page")) || 1);
 
   const handlePageClick = (pageNumber: number) => {
     // Update the client-side URL parameters
