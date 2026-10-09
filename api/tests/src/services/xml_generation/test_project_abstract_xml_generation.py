@@ -5,6 +5,9 @@ Verifies the generated XML matches the structure required by the XSD
 XSD reference: https://apply07.grants.gov/apply/forms/schemas/Project_Abstract_1_2-V1.2.xsd
 """
 
+from pathlib import Path
+
+import pytest
 from lxml import etree as lxml_etree
 
 from src.form_schema.forms.project_abstract import (
@@ -13,6 +16,7 @@ from src.form_schema.forms.project_abstract import (
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
+from src.services.xml_generation.validation.xsd_validator import XSDValidator
 
 FORM_NS = "http://apply.grants.gov/forms/Project_Abstract_1_2-V1.2"
 ATT_NS = "http://apply.grants.gov/system/Attachments-V1.0"
@@ -125,6 +129,80 @@ class TestProjectAbstractXMLContent:
         assert attached_file.find(f"{{{ATT_NS}}}FileName").text == "my_abstract.docx"
         assert "wordprocessingml" in attached_file.find(f"{{{ATT_NS}}}MimeType").text
 
+    def test_filename_xml_escaping(self):
+        """Characters requiring XML escaping in FileName are serialised correctly."""
+        info = AttachmentInfo(
+            filename='project & <draft> "v1".pdf',
+            mime_type="application/pdf",
+            file_location="project_abstract.pdf",
+            hash_value="aeB1+6gdFwih51ijIRn3b8QYn24=",
+        )
+        xml_data = _generate(attachment_info=info)
+        attached_file = self._get_attached_file(xml_data)
+        # lxml returns the unescaped text value
+        assert attached_file.find(f"{{{ATT_NS}}}FileName").text == 'project & <draft> "v1".pdf'
+        # Raw XML bytes must contain escaped entities
+        xml_bytes = xml_data.encode()
+        assert b"&amp;" in xml_bytes or b"&lt;" in xml_bytes
+
+    def test_filename_at_max_length_255(self):
+        """FileName at the XSD maximum of 255 characters is accepted."""
+        long_name = "a" * 251 + ".pdf"  # exactly 255 chars
+        assert len(long_name) == 255
+        info = AttachmentInfo(
+            filename=long_name,
+            mime_type="application/pdf",
+            file_location=long_name,
+            hash_value="aeB1+6gdFwih51ijIRn3b8QYn24=",
+        )
+        xml_data = _generate(attachment_info=info)
+        attached_file = self._get_attached_file(xml_data)
+        assert attached_file.find(f"{{{ATT_NS}}}FileName").text == long_name
+
+    def test_mime_type_at_max_length_255(self):
+        """MimeType at the XSD maximum of 255 characters is accepted."""
+        long_mime = "application/" + "x" * 243  # exactly 255 chars
+        assert len(long_mime) == 255
+        info = AttachmentInfo(
+            filename="project_abstract.pdf",
+            mime_type=long_mime,
+            file_location="project_abstract.pdf",
+            hash_value="aeB1+6gdFwih51ijIRn3b8QYn24=",
+        )
+        xml_data = _generate(attachment_info=info)
+        attached_file = self._get_attached_file(xml_data)
+        assert attached_file.find(f"{{{ATT_NS}}}MimeType").text == long_mime
+
+    def test_explicit_hash_algorithm(self):
+        """A non-default hashAlgorithm value propagates into the XML attribute."""
+        info = AttachmentInfo(
+            filename="project_abstract.pdf",
+            mime_type="application/pdf",
+            file_location="project_abstract.pdf",
+            hash_value="abc123=",
+            hash_algorithm="SHA-256",
+        )
+        xml_data = _generate(attachment_info=info)
+        attached_file = self._get_attached_file(xml_data)
+        hash_elem = attached_file.find(f"{{{GLOB_NS}}}HashValue")
+        assert hash_elem.get(f"{{{GLOB_NS}}}hashAlgorithm") == "SHA-256"
+
+    def test_file_location_href_independent_of_filename(self):
+        """FileLocation/@href is taken from file_location, not filename — they can differ."""
+        info = AttachmentInfo(
+            filename="project_abstract.pdf",
+            mime_type="application/pdf",
+            file_location="s3://bucket/submissions/abc123/project_abstract.pdf",
+            hash_value="aeB1+6gdFwih51ijIRn3b8QYn24=",
+        )
+        xml_data = _generate(attachment_info=info)
+        attached_file = self._get_attached_file(xml_data)
+        filename_text = attached_file.find(f"{{{ATT_NS}}}FileName").text
+        href = attached_file.find(f"{{{ATT_NS}}}FileLocation").get(f"{{{ATT_NS}}}href")
+        assert filename_text == "project_abstract.pdf"
+        assert href == "s3://bucket/submissions/abc123/project_abstract.pdf"
+        assert filename_text != href
+
 
 class TestProjectAbstractLegacyParity:
     """Verify structural parity with the legacy Grants.gov XML format.
@@ -207,3 +285,91 @@ class TestProjectAbstractLegacyParity:
         # Must not exist without the form namespace prefix
         assert root.find("ProjectAbstractAddAttachment") is None
         assert root.find("AttachedFile") is None
+
+
+class TestProjectAbstractXSDValidation:
+    """Validate generated XML against the Project_Abstract_1_2-V1.2.xsd schema."""
+
+    @pytest.fixture
+    def xsd_validator(self):
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
+        xsd_path = xsd_dir / "Project_Abstract_1_2-V1.2.xsd"
+        if not xsd_path.exists():
+            pytest.skip(
+                "Project_Abstract_1_2-V1.2.xsd not found. "
+                "Run 'flask task fetch-xsds' to download schemas."
+            )
+        return XSDValidator(xsd_dir)
+
+    def _xsd_path(self, xsd_validator: XSDValidator) -> Path:
+        return xsd_validator.xsd_dir / "Project_Abstract_1_2-V1.2.xsd"
+
+    def test_full_payload_validates_against_xsd(self, xsd_validator):
+        """Standard PDF attachment output passes XSD validation."""
+        xml_data = _generate()
+        result = xsd_validator.validate_xml(xml_data, self._xsd_path(xsd_validator))
+        assert result["valid"], f"XSD validation failed: {result['error_message']}\n{xml_data}"
+
+    def test_minimal_payload_validates_against_xsd(self, xsd_validator):
+        """Docx attachment (different mime type) also passes XSD validation."""
+        info = AttachmentInfo(
+            filename="abstract.docx",
+            mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            file_location="abstract.docx",
+            hash_value="aeB1+6gdFwih51ijIRn3b8QYn24=",
+        )
+        xml_data = _generate(attachment_info=info)
+        result = xsd_validator.validate_xml(xml_data, self._xsd_path(xsd_validator))
+        assert result["valid"], f"XSD validation failed: {result['error_message']}\n{xml_data}"
+
+
+class TestProjectAbstractNegativePaths:
+    """Verify the generation service fails gracefully on bad inputs."""
+
+    def test_missing_attachment_uuid_returns_error(self):
+        """UUID in application_data has no entry in attachment_mapping → failure response."""
+        service = XMLGenerationService()
+        unknown_uuid = "ffffffff-ffff-ffff-ffff-ffffffffffff"
+        request = XMLGenerationRequest(
+            application_data={"attachment": unknown_uuid},
+            transform_config=PROJECT_ABSTRACT_TRANSFORM_RULES,
+            attachment_mapping={},
+        )
+        response = service.generate_xml(request)
+        assert response.success is False
+        assert unknown_uuid in response.error_message
+
+    def test_missing_required_attachment_field_returns_error(self):
+        """No 'attachment' key in application_data → generated XML fails XSD validation.
+
+        The generator itself returns success=True with incomplete XML when application_data
+        is empty; XSD validation is the layer that catches the missing required fields.
+        """
+        from src.services.xml_generation.validation.xsd_validator import XSDValidator
+
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found.")
+        xsd_path = xsd_dir / "Project_Abstract_1_2-V1.2.xsd"
+        if not xsd_path.exists():
+            pytest.skip("Project_Abstract_1_2-V1.2.xsd not found.")
+
+        xsd_validator = XSDValidator(xsd_dir)
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data={},
+            transform_config=PROJECT_ABSTRACT_TRANSFORM_RULES,
+            attachment_mapping={},
+        )
+        response = service.generate_xml(request)
+        # Generator succeeds but produces incomplete XML (no AttachedFile element)
+        assert response.success is True
+        assert response.xml_data is not None
+        # XSD validation must catch the missing required element
+        result = xsd_validator.validate_xml(response.xml_data, xsd_path)
+        assert (
+            result["valid"] is False
+        ), f"Expected XSD validation to fail for incomplete XML, but it passed.\n{response.xml_data}"

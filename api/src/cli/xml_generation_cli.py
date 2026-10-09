@@ -11,6 +11,7 @@ from src.form_schema.forms import init_form_registry
 from src.services.xml_generation.config import _build_xml_form_map, _build_xml_form_xsd_url_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
 
@@ -42,12 +43,29 @@ from src.task.task_blueprint import task_blueprint
     type=click.Path(),
     help="Output file path (default: stdout)",
 )
+@click.option(
+    "--attachments",
+    "attachments_string",
+    help=(
+        "JSON string mapping attachment UUIDs to file info, for attachment forms. "
+        'Format: \'{"<uuid>": {"filename": "...", "mime_type": "...", '
+        '"file_location": "...", "hash_value": "...", "hash_algorithm": "SHA-1"}}\''
+    ),
+)
+@click.option(
+    "--attachments-file",
+    "attachments_file_path",
+    type=click.Path(exists=True),
+    help="Path to JSON file containing the attachment mapping (same format as --attachments).",
+)
 def generate_xml_command(
     json_string: str | None,
     file_path: str | None,
     form: str,
     compact: bool,
     output_path: str | None,
+    attachments_string: str | None,
+    attachments_file_path: str | None,
 ) -> None:
     """Generate XML from JSON application data.
 
@@ -66,8 +84,14 @@ def generate_xml_command(
 
         # Generate Budget Narrative Attachments XML
         flask task generate-xml --file input.json --form BudgetNarrativeAttachments_1_2
+
         # Generate SF-LLL from file
         flask task generate-xml --file sflll.json --form SFLLL_2_0
+
+        # Generate Project Abstract XML (attachment form)
+        flask task generate-xml --form Project_Abstract \\
+            --json '{"attachment": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"}' \\
+            --attachments '{"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": {"filename": "abstract.pdf", "mime_type": "application/pdf", "file_location": "abstract.pdf", "hash_value": "abc123="}}'
 
         # Generate compact XML and save to file
         flask task generate-xml --json '{"field": "value"}' --compact --output out.xml
@@ -103,6 +127,27 @@ def generate_xml_command(
             click.echo("Error: Must provide either --json or --file", err=True)
             sys.exit(1)
 
+        # Build attachment mapping if provided
+        attachment_mapping: dict[str, AttachmentInfo] | None = None
+        raw_attachments: dict | None = None
+        if attachments_string:
+            raw_attachments = json.loads(attachments_string)
+        elif attachments_file_path:
+            with open(attachments_file_path) as f:
+                raw_attachments = json.load(f)
+
+        if raw_attachments is not None:
+            attachment_mapping = {
+                uuid: AttachmentInfo(
+                    filename=info["filename"],
+                    mime_type=info["mime_type"],
+                    file_location=info["file_location"],
+                    hash_value=info["hash_value"],
+                    hash_algorithm=info.get("hash_algorithm", "SHA-1"),
+                )
+                for uuid, info in raw_attachments.items()
+            }
+
         # Get transform config for the specified form (validated by click.Choice)
         transform_config = form_transform_rules_map.get(form.upper())
 
@@ -112,6 +157,7 @@ def generate_xml_command(
             application_data=application_data,
             transform_config=transform_config,
             pretty_print=not compact,
+            attachment_mapping=attachment_mapping,
         )
 
         response = service.generate_xml(request)

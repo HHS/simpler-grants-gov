@@ -430,8 +430,8 @@ validate-simpler-endpoints:
 # XML Generation CLI
 ####################
 
-generate-xml: ## Generate XML from JSON (usage: make generate-xml json='{"field": "value"}' form=SF424_4_0)
-	$(PY_RUN_CMD) flask task generate-xml --json '$(json)' --form $(or $(form),SF424_4_0)
+generate-xml: ## Generate XML from JSON (usage: make generate-xml json='{"field": "value"}' form=SF424_4_0 [attachments='{"uuid": {...}}'])
+	$(PY_RUN_CMD) flask task generate-xml --json '$(json)' --form $(or $(form),SF424_4_0) $(if $(attachments),--attachments '$(attachments)')
 
 #####################
 # Workflow State Machine
