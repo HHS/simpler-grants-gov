@@ -16,6 +16,7 @@ from src.constants.lookup_constants import (
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
 from src.services.applications.application_audit import add_audit_event
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
@@ -49,6 +50,8 @@ def add_organization_to_application(
     if application is None:
         logger.info("Application not found")
         raise_flask_error(404, "Application not found")
+
+    add_application_metadata_to_logs(application)
 
     # Get the organization (raises 404 if not found)
     organization = get_organization(db_session, organization_id)

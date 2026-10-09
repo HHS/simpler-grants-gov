@@ -1,3 +1,4 @@
+import { postUserEvent } from "src/services/event/postUserEvent";
 import {
   ApplicationDetail,
   ApplicationFormDetail,
@@ -57,6 +58,9 @@ export const ApplicationFormsTable = ({
   applicationDetailsObject: ApplicationDetail;
 }) => {
   const forms = applicationDetailsObject.competition.competition_forms;
+  const applicationId = applicationDetailsObject.application_id;
+  const opportunityId =
+    applicationDetailsObject.competition.opportunity?.opportunity_id;
   const requiredForms = selectApplicationFormsByRequired({
     applicationForms,
     forms,
@@ -84,7 +88,17 @@ export const ApplicationFormsTable = ({
             {t.rich("conditionalFormsDescription", {
               instructionsLink: (chunks) => {
                 return competitionInstructionsDownloadPath ? (
-                  <a href={competitionInstructionsDownloadPath}>{chunks}</a>
+                  <a
+                    href={competitionInstructionsDownloadPath}
+                    onClick={() =>
+                      postUserEvent({
+                        name: "click_download_conditional_forms_instructions",
+                        properties: { applicationId, opportunityId },
+                      })
+                    }
+                  >
+                    {chunks}
+                  </a>
                 ) : (
                   <span>{chunks}</span>
                 );
@@ -142,6 +156,8 @@ const ApplicationTable = ({
 }) => {
   const forms = applicationDetailsObject.competition.competition_forms;
   const applicationId = applicationDetailsObject.application_id;
+  const opportunityId =
+    applicationDetailsObject.competition.opportunity?.opportunity_id;
   const applicationStatus = applicationDetailsObject.application_status;
   const t = useTranslations("Application.competitionFormTable");
   const formIdsWithErrors = errors ? errors.map((item) => item.value) : [];
@@ -211,6 +227,8 @@ const ApplicationTable = ({
               <InstructionsLink
                 forms={forms}
                 formId={form.form_id}
+                applicationId={applicationId}
+                opportunityId={opportunityId}
                 text={t("downloadInstructions")}
                 unavailableText={t("attachmentUnavailable")}
               />
@@ -263,11 +281,15 @@ const CompetitionStatus = ({
 const InstructionsLink = ({
   formId,
   forms,
+  applicationId,
+  opportunityId,
   text,
   unavailableText,
 }: {
   formId: string;
   forms: CompetitionForms;
+  applicationId: string;
+  opportunityId: string | undefined;
   text: string;
   unavailableText: string;
 }) => {
@@ -283,6 +305,12 @@ const InstructionsLink = ({
         <Link
           className="display-flex flex-align-center font-sans-2xs"
           href={downloadPath}
+          onClick={() =>
+            postUserEvent({
+              name: "click_download_form_instructions",
+              properties: { applicationId, opportunityId, formId },
+            })
+          }
         >
           <USWDSIcon name="save_alt" className="margin-right-05" />
           {text}

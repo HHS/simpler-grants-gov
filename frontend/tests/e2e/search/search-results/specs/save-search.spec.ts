@@ -3,6 +3,9 @@
  * @scenario Saved search restores query, filters, sort order, and resets pagination
  *    Test 1: pagination resets to page 1 on reopen.
  *    Test 2: query, filters, and sort order are restored on reopen.
+ *
+ * @scenario Empty state when no saved searches exist
+ *    Test 3: saved search - empty state
  */
 
 import { expect, test } from "@playwright/test";
@@ -17,24 +20,27 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 import {
+  deleteAllSavedSearches,
   navigateToSavedSearches,
   runSavedSearch,
   saveCurrentSearch,
 } from "tests/e2e/utils/search/save-search-utils";
 import {
-  clickPaginationPageIfPresent,
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
   expectCheckboxesChecked,
+  toggleCheckbox,
+  toggleFilterDrawer,
+} from "tests/e2e/utils/search/search-filter-utils";
+import {
+  clickPaginationPageIfPresent,
   expectSortBy,
   fillSearchInputAndSubmit,
   getNumberOfOpportunitySearchResults,
   getSearchInput,
   selectSortBy,
-  toggleCheckbox,
-  toggleFilterDrawer,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/utils/search/searchSpecUtil";
+} from "tests/e2e/utils/search/search-utils";
 
 const { SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 
@@ -57,6 +63,7 @@ test.describe("Saved search - restores state on reopen", () => {
        * Given I am logged in
        */
       await authenticateE2eUser(page, context, isMobile);
+      await deleteAllSavedSearches(page);
 
       /**
        * @given I have saved a search with a sort order, on page 2 of results
@@ -112,14 +119,17 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
-      // Debug: Log page state to understand why saved search isn't appearing
-      console.warn("After navigation - URL:", page.url());
-      const pageText = await page.locator("body").textContent();
-      if (pageText && pageText.includes("No saved searches")) {
-        console.error(
-          "Page shows 'No saved searches' - the save operation may have failed",
-        );
-      }
+      // Capture workspace state for diagnostics if the saved search is not found.
+      const hasNoSavedSearchesMessage = await page
+        .getByText("You don't have any saved queries yet.", { exact: false })
+        .isVisible()
+        .catch(() => false);
+
+      console.warn("Saved search workspace state after navigation:", {
+        url: page.url(),
+        savedSearchName,
+        hasNoSavedSearchesMessage,
+      });
 
       // Verify the saved search is listed in the workspace.
       // Use extended timeout to allow page content to fully load
@@ -176,6 +186,7 @@ test.describe("Saved search - restores state on reopen", () => {
        * Given I am logged in
        */
       await authenticateE2eUser(page, context, isMobile);
+      await deleteAllSavedSearches(page);
 
       /**
        * @given I have saved a search with keywords, filters, and sort order
@@ -243,14 +254,17 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
-      // Debug: Log page state to understand why saved search isn't appearing
-      console.warn("After navigation - URL:", page.url());
-      const pageText = await page.locator("body").textContent();
-      if (pageText && pageText.includes("No saved searches")) {
-        console.error(
-          "Page shows 'No saved searches' - the save operation may have failed",
-        );
-      }
+      // Capture workspace state for diagnostics if the saved search is not found.
+      const hasNoSavedSearchesMessage = await page
+        .getByText("You don't have any saved queries yet.", { exact: false })
+        .isVisible()
+        .catch(() => false);
+
+      console.warn("Saved search workspace state after navigation:", {
+        url: page.url(),
+        savedSearchName,
+        hasNoSavedSearchesMessage,
+      });
 
       // Verify the saved search is listed in the workspace.
       // Use extended timeout to allow page content to fully load
@@ -300,6 +314,60 @@ test.describe("Saved search - restores state on reopen", () => {
       const resultCountAfterReopen =
         await getNumberOfOpportunitySearchResults(page);
       expect(resultCountAfterReopen).toEqual(expectedResultCount);
+    },
+  );
+});
+
+test.describe("Saved search - empty state", () => {
+  test(
+    "visiting Saved Searches with no saved searches shows the empty state and a CTA",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    async ({ page, context }, testInfo) => {
+      const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
+
+      /**
+       * @given a user with no saved searches
+       *
+       * Uses "noAgencyUser" rather than "primaryOrgAdmin" (used above)
+       */
+      await authenticateE2eUser(page, context, isMobile, "noAgencyUser");
+      await deleteAllSavedSearches(page);
+
+      /**
+       * @when I visit the Saved Searches workspace
+       */
+      await gotoWithRetry(page, `${baseUrl}/workspace/saved-search-queries`, {
+        timeout: GOTO_TIMEOUT,
+      });
+
+      /**
+       * @then I should see the empty state message and a CTA to start a new search
+       */
+      await expect(
+        page.getByText("You don't have any saved queries yet."),
+      ).toBeVisible();
+      await expect(
+        page.getByText(
+          "As you search for opportunities, save your preferred combinations",
+          { exact: false },
+        ),
+      ).toBeVisible();
+
+      const startSearchCta = page.getByRole("link", {
+        name: "Start a new search",
+      });
+      await expect(startSearchCta).toBeVisible();
+      await expect(startSearchCta).toHaveAttribute("href", "/search");
+
+      /**
+       * @then no errors should occur
+       */
+      await expect(
+        page.getByText(
+          "We encountered an issue while loading your saved search queries",
+          { exact: false },
+        ),
+      ).not.toBeVisible();
     },
   );
 });
