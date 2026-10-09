@@ -17,10 +17,10 @@ import {
 } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getCorrelationId } from "src/services/correlationId/correlationId";
+import { logger } from "src/services/logger/simplerLogger";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { ApiMethod } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { printAwsHeaders, printResponseInfo } from "src/utils/generalUtils";
 
 // Configuration of headers to send with all requests
 // optionally adds content type and user auth token
@@ -115,7 +115,7 @@ export function fetchErrorToNetworkError(
 ) {
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
-  console.error(error);
+  logger.error({ err: error }, "Network error while making API request");
   return searchInputs
     ? new NetworkError(error, searchInputs)
     : new NetworkError(error);
@@ -128,8 +128,17 @@ export const throwError = (
 ) => {
   const { status_code = 0, message = "", errors } = responseBody;
   // errors raised here that have a status_code of 0 (the default above) and a message of "Internal server error" are injected by API GW
-  console.error(
-    `API request error at ${url} (${status_code}): ${message}, ${printResponseInfo(response)}, ${printAwsHeaders(response.headers)}`,
+  logger.error(
+    {
+      url,
+      status_code,
+      apiMessage: message,
+      responseStatus: response.status,
+      apiRequestId: response.headers.get("x-amzn-requestid"),
+      apiGatewayId: response.headers.get("x-amz-apigw-id"),
+      apiErrorType: response.headers.get("x-amzn-errortype"),
+    },
+    "API request error",
   );
 
   const details = (errors && errors[0]) || {};

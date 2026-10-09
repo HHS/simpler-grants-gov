@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -60,7 +61,10 @@ async function AwardRecommendationRisksPageContent({
         awardRecommendationId,
       );
     } catch (error) {
-      console.error("Failed to fetch award recommendation details", error);
+      logger.error(
+        { err: error, awardRecommendationId },
+        "Failed to fetch award recommendation details",
+      );
       const errorStatus = parseErrorStatus(error as ApiRequestError);
 
       if (errorStatus === 404) {

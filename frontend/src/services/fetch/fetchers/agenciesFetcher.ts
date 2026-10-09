@@ -5,6 +5,7 @@ import {
   fetchUserWithMethod,
   searchAgencies,
 } from "src/services/fetch/fetchers/fetchers";
+import { logger } from "src/services/logger/simplerLogger";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
 import { getStatusValueForAgencySearch } from "src/utils/search/searchUtils";
@@ -66,13 +67,13 @@ export const searchAndFlattenAgencies = async (
       selectedStatuses: selectedStatuses || undefined,
     });
   } catch (e) {
-    console.error("Error searching agency options");
+    logger.error({ err: e }, "Error searching agency options");
     throw e;
   }
   try {
     return flattenAgencies(agencies);
   } catch (e) {
-    console.error("Error flattening agency search results");
+    logger.error({ err: e }, "Error flattening agency search results");
     throw e;
   }
 };

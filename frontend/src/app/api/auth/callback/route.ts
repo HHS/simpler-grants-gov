@@ -1,5 +1,6 @@
 import { createSession } from "src/services/auth/session";
 import { newExpirationDate } from "src/services/auth/sessionUtils";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
@@ -17,9 +18,11 @@ export async function GET(request: NextRequest) {
   }
   try {
     await createSession(token, newExpirationDate());
-  } catch (_e) {
-    console.error("Error creating session for token", { token });
-    console.error(_e);
+  } catch (e) {
+    logger.error(
+      { err: e, awsTraceId: request.headers.get("X-Amz-Cf-Id") },
+      "Error creating session",
+    );
     return redirect("/error");
   }
   return redirect("/login");

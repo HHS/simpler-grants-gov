@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "src/services/logger/simplerLogger";
+
 import { ReviewFormData } from "src/components/award-recommendation/ReviewSubmissionForm";
 
 export type ReviewActionResponse = {
@@ -44,8 +46,9 @@ export async function submitReviewForAwardRecommendation(
     });
   } catch (e) {
     const error = e as Error;
-    console.error(
-      `Error submitting review for award recommendation - ${error.message} ${error.cause?.toString() || ""}`,
+    logger.error(
+      { err: error, awardRecommendationId },
+      "Error submitting review for award recommendation",
     );
     return Promise.resolve({
       errorMessage: error.message,

@@ -5,6 +5,7 @@ import {
   deleteSavedOpportunityForOrganization,
   saveOpportunityForOrganization,
 } from "src/services/fetch/fetchers/organizationSavedOpportunitiesFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 export type SaveOpportunityForOrganizationActionState =
   | {
@@ -71,7 +72,10 @@ export const saveOpportunityForOrganizationAction = async ({
       error: null,
     };
   } catch (error) {
-    console.error("Save opportunity for organization failed:", error);
+    logger.error(
+      { err: error, organizationId, opportunityId },
+      "Save opportunity for organization failed",
+    );
     return {
       success: false,
       error: "Failed to save opportunity for organization.",
@@ -112,7 +116,10 @@ export const deleteSavedOpportunityForOrganizationAction = async ({
       error: null,
     };
   } catch (error) {
-    console.error("Delete saved opportunity for organization failed:", error);
+    logger.error(
+      { err: error, organizationId, opportunityId },
+      "Delete saved opportunity for organization failed",
+    );
     return {
       success: false,
       error: "Failed to delete saved opportunity for organization.",

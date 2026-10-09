@@ -1,5 +1,6 @@
 import { readError } from "src/errors";
 import { deleteAwardRecommendationRisk } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { NextRequest } from "next/server";
 
@@ -25,7 +26,14 @@ export async function deleteRiskForAwardRecommendation(
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
-    console.error(e);
+    logger.error(
+      {
+        err: e,
+        awardRecommendationId: id,
+        riskId,
+      },
+      "Error deleting award recommendation risk",
+    );
     return Response.json(
       {
         message: `Error attempting to delete award recommendation risk: ${message}`,

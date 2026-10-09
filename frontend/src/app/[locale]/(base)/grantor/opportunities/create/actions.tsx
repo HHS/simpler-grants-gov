@@ -2,6 +2,7 @@
 
 import { getSession } from "src/services/auth/session";
 import { createOpportunity } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
 
 // Future: Apply any field level validations before submitting to the backend.
@@ -40,9 +41,7 @@ export const createOpportunityAction = async (
   } catch (e) {
     // General try failure catch error
     const error = e as Error;
-    console.error(
-      `Error creating opportunity - ${error.message} ${error.cause?.toString() || ""}`,
-    );
+    logger.error({ err: error }, "Error creating opportunity");
     return {
       errorMessage: error.message,
       data: rawFormData,

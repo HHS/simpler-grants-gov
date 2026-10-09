@@ -1,5 +1,6 @@
 import { createSession } from "src/services/auth/session";
 import { newExpirationDate } from "src/services/auth/sessionUtils";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
@@ -11,9 +12,8 @@ export async function POST(request: NextRequest) {
   }
   try {
     await createSession(jwt, newExpirationDate());
-  } catch (_e) {
-    console.error("Error creating session for token", { jwt });
-    console.error(_e);
+  } catch (e) {
+    logger.error({ err: e }, "Error creating local quick login session");
     return redirect("/error");
   }
   return redirect("/login");

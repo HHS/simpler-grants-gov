@@ -8,7 +8,11 @@ import {
   getRequestCorrelationId,
   isValidCorrelationId,
 } from "src/services/correlationId/correlationIdMiddleware";
-import { logRequest, logResponse } from "src/services/logger/simplerLogger";
+import {
+  logRequest,
+  logResponse,
+  serializeError,
+} from "src/services/logger/simplerLogger";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,9 +20,15 @@ const infoMock = jest.fn();
 
 jest.mock("pino", () => ({
   __esModule: true,
-  default: () => ({
-    info: (arg: unknown) => infoMock(arg) as unknown,
-  }),
+  default: Object.assign(
+    () => ({
+      info: (arg: unknown) => infoMock(arg) as unknown,
+    }),
+    {
+      stdSerializers:
+        jest.requireActual<typeof import("pino")>("pino").stdSerializers,
+    },
+  ),
 }));
 
 // note that logger instantiation is untested at the moment. As the logger matures we should consider adding
@@ -235,5 +245,32 @@ describe("logResponse", () => {
       url: null,
       awsTraceId: null,
     });
+  });
+});
+
+describe("serializeError", () => {
+  it("preserves error type, message and stack", () => {
+    const error = new TypeError("bad thing");
+    expect(serializeError(error)).toMatchObject({
+      type: "TypeError",
+      message: "bad thing",
+      stack: error.stack,
+    });
+  });
+
+  it("includes a plain object cause", () => {
+    const cause = { type: "NotFoundError", status: 404 };
+    expect(serializeError(new Error("not found", { cause }))).toMatchObject({
+      message: "not found",
+      cause,
+    });
+  });
+
+  it("leaves Error causes to pino's default handling", () => {
+    const serialized = serializeError(
+      new Error("outer", { cause: new Error("inner") }),
+    );
+    expect(serialized.message).toEqual("outer: inner");
+    expect(serialized).not.toHaveProperty("cause");
   });
 });

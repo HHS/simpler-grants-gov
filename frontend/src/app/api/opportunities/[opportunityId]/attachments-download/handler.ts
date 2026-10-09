@@ -1,6 +1,7 @@
 import * as zip from "@zip.js/zip.js";
 import { ApiRequestError, readError } from "src/errors";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { attachmentsToZipEntries } from "src/utils/opportunity/zipUtils";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -50,7 +51,13 @@ export async function getAttachmentsDownload(
       }),
     });
   } catch (e) {
-    console.error(e);
+    logger.error(
+      {
+        err: e,
+        opportunityId,
+      },
+      "Error zipping files for opportunity",
+    );
     const { status, message } = readError(e as Error, 500);
     return NextResponse.json(
       {

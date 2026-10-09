@@ -4,6 +4,7 @@ import {
   createAwardRecommendationRisk,
   updateAwardRecommendationRisk,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 export type CreateRiskActionResponse = {
   success?: boolean;
@@ -36,8 +37,9 @@ export async function createRiskAction(
     };
   } catch (e) {
     const error = e as Error;
-    console.error(
-      `Error creating award recommendation risk - ${error.message} ${error.cause?.toString() || ""}`,
+    logger.error(
+      { err: error, awardRecommendationId },
+      "Error creating award recommendation risk",
     );
     return {
       success: false,
@@ -67,8 +69,9 @@ export async function updateRiskAction(
     };
   } catch (e) {
     const error = e as Error;
-    console.error(
-      `Error updating award recommendation risk - ${error.message} ${error.cause?.toString() || ""}`,
+    logger.error(
+      { err: error, awardRecommendationId, riskId },
+      "Error updating award recommendation risk",
     );
     return {
       success: false,

@@ -4,6 +4,7 @@ import { KeyObject } from "crypto";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import { clientTokenExpirationInterval } from "src/constants/auth";
 import { environment } from "src/constants/environments";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { cookies } from "next/headers";
 
@@ -35,7 +36,7 @@ export const decrypt = async (
     });
     return payload;
   } catch (e) {
-    console.error(`Failed to decrypt session cookie with ${algorithm}`, e);
+    logger.warn({ err: e, algorithm }, "Failed to decrypt session cookie");
     return null;
   }
 };
