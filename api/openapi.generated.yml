@@ -7412,6 +7412,16 @@ components:
         is_open:
           type: boolean
           description: Whether the competition is open and accepting applications
+            on Simpler.Grants.gov
+        has_open_date:
+          type: boolean
+          description: Whether today in US Eastern time is within the competition's
+            application window, from the opening date through the closing date plus
+            any grace period, regardless of whether the competition is enabled on
+            Simpler.Grants.gov
+        is_legacy_package:
+          type: boolean
+          description: Whether the competition is an application package from Grants.gov
         is_simpler_grants_enabled:
           type: boolean
           description: Whether simpler grants are enabled for this competition
@@ -15185,6 +15195,10 @@ components:
       - message
       - status_code
   securitySchemes:
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
     InternalApiJwtAuth:
       type: apiKey
       in: header
@@ -15193,8 +15207,4 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-    ApiUserKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
 

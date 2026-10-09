@@ -30,15 +30,34 @@ jest.mock(
   }),
 );
 
-const competition = (id: string, is_open: boolean) =>
-  ({ competition_id: id, is_open }) as Competition;
+const competition = (
+  id: string,
+  {
+    has_open_date = false,
+    is_legacy_package = false,
+    is_open = false,
+  }: Partial<
+    Pick<Competition, "has_open_date" | "is_legacy_package" | "is_open">
+  > = {},
+) =>
+  ({
+    competition_id: id,
+    has_open_date,
+    is_legacy_package,
+    is_open,
+  }) as Competition;
+
+const openSimplerCompetition = (id: string) =>
+  competition(id, { has_open_date: true, is_open: true });
 
 const renderApplyAction = ({
   competitions = null,
+  legacyOpportunityId = 1,
   opportunityStatus = "posted",
   opportunityTitle = "Test Opportunity",
 }: {
   competitions?: Competition[] | null;
+  legacyOpportunityId?: number;
   opportunityStatus?: OpportunityStatus | null;
   opportunityTitle?: string | null;
 } = {}) =>
@@ -46,7 +65,7 @@ const renderApplyAction = ({
     <OpportunityApplyAction
       competitions={competitions}
       grantsGovUrl="https://test.grants.gov/search-results-detail/1"
-      legacyOpportunityId={1}
+      legacyOpportunityId={legacyOpportunityId}
       opportunityId="test-opportunity-id"
       opportunityStatus={opportunityStatus}
       opportunityTitle={opportunityTitle}
@@ -59,7 +78,7 @@ describe("OpportunityApplyAction", () => {
   });
 
   it("links to apply on Grants.gov for an open opportunity with no competition open on Simpler", () => {
-    renderApplyAction({ competitions: [competition("closed-comp", false)] });
+    renderApplyAction({ competitions: [competition("closed-comp")] });
 
     const link = screen.getByRole("link", { name: "applyOnGrantsGov" });
     expect(link).toHaveAttribute(
@@ -73,8 +92,8 @@ describe("OpportunityApplyAction", () => {
   it("offers starting an application instead when a competition is open on Simpler", () => {
     renderApplyAction({
       competitions: [
-        competition("closed-comp", false),
-        competition("open-comp", true),
+        competition("closed-comp"),
+        openSimplerCompetition("open-comp"),
       ],
     });
 
@@ -86,7 +105,7 @@ describe("OpportunityApplyAction", () => {
 
   it("offers starting an application when a competition is open on Simpler, even if the opportunity has no status", () => {
     renderApplyAction({
-      competitions: [competition("open-comp", true)],
+      competitions: [openSimplerCompetition("open-comp")],
       opportunityStatus: null,
     });
 
@@ -95,20 +114,106 @@ describe("OpportunityApplyAction", () => {
     ).toBeInTheDocument();
   });
 
-  // Known limitation, pending an API change: is_open is only true for Simpler competitions and a
-  // package only opportunity has no status, so we can't tell that its Grants.gov package is open
-  it("shows no call to action for a package only opportunity that is only open on Grants.gov (known limitation)", () => {
-    const { container } = renderApplyAction({
-      competitions: [competition("grants-gov-package", false)],
-      opportunityStatus: null,
+  describe("package only opportunities, which have no status", () => {
+    it("links to apply on Grants.gov when a Grants.gov package is within its application window", () => {
+      renderApplyAction({
+        competitions: [
+          competition("grants-gov-package", {
+            has_open_date: true,
+            is_legacy_package: true,
+          }),
+        ],
+        opportunityStatus: null,
+      });
+
+      expect(
+        screen.getByRole("link", { name: "applyOnGrantsGov" }),
+      ).toHaveAttribute(
+        "href",
+        "https://test.grants.gov/search-results-detail/1",
+      );
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
     });
 
-    expect(container).toBeEmptyDOMElement();
+    it("shows no call to action when the Grants.gov package is closed", () => {
+      const { container } = renderApplyAction({
+        competitions: [
+          competition("grants-gov-package", { is_legacy_package: true }),
+        ],
+        opportunityStatus: null,
+      });
+
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it("does not link to Grants.gov for a competition that was created on Simpler, even if it is within its application window", () => {
+      const { container } = renderApplyAction({
+        competitions: [competition("simpler-comp", { has_open_date: true })],
+        opportunityStatus: null,
+      });
+
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it("does not link to Grants.gov when there is no Grants.gov opportunity to link to", () => {
+      const { container } = renderApplyAction({
+        competitions: [
+          competition("grants-gov-package", {
+            has_open_date: true,
+            is_legacy_package: true,
+          }),
+        ],
+        // the type doesn't reflect that the API returns null for opportunities created on Simpler
+        legacyOpportunityId: null as unknown as number,
+        opportunityStatus: null,
+      });
+
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it("offers starting an application for a Grants.gov package that is also open on Simpler", () => {
+      renderApplyAction({
+        competitions: [
+          competition("grants-gov-package", {
+            has_open_date: true,
+            is_legacy_package: true,
+            is_open: true,
+          }),
+        ],
+        opportunityStatus: null,
+      });
+
+      expect(
+        screen.getByRole("button", {
+          name: "start application grants-gov-package",
+        }),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    });
+
+    it("falls back to Grants.gov for that package when applying on Simpler is turned off", () => {
+      mockApplyFormPrototypeOff = true;
+      renderApplyAction({
+        competitions: [
+          competition("grants-gov-package", {
+            has_open_date: true,
+            is_legacy_package: true,
+            is_open: true,
+          }),
+        ],
+        opportunityStatus: null,
+      });
+
+      expect(
+        screen.getByRole("link", { name: "applyOnGrantsGov" }),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    });
   });
 
   it("falls back to Grants.gov when applying on Simpler is turned off", () => {
     mockApplyFormPrototypeOff = true;
-    renderApplyAction({ competitions: [competition("open-comp", true)] });
+    renderApplyAction({ competitions: [openSimplerCompetition("open-comp")] });
 
     expect(
       screen.getByRole("link", { name: "applyOnGrantsGov" }),

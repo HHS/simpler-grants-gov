@@ -24,10 +24,9 @@ type OpportunityApplyActionProps = {
   Primary application call to action for the opportunity header
   * a competition that is open for applications on Simpler.Grants.gov -> start a new application
   * otherwise, an open (posted) opportunity -> apply on Grants.gov
-  * anything else (forecasted, closed, archived, no status) -> no call to action
-
-  Known limitation: a package only opportunity (no status) that is open only on Grants.gov
-  gets no call to action, as the API doesn't yet tell us whether a Grants.gov package is open
+  * otherwise, a package only opportunity (no status) with a Grants.gov package that is within
+    its application window -> apply on Grants.gov
+  * anything else (forecasted, closed, archived, no open package) -> no call to action
 */
 export const OpportunityApplyAction = ({
   competitions,
@@ -56,7 +55,17 @@ export const OpportunityApplyAction = ({
     );
   }
 
-  if (opportunityStatus !== "posted") {
+  // package only opportunities have no status, and can't be applied to on Grants.gov without a
+  // Grants.gov opportunity to link to
+  const hasOpenGrantsGovPackage =
+    opportunityStatus === null &&
+    !!legacyOpportunityId &&
+    (competitions || []).some(
+      ({ has_open_date, is_legacy_package }) =>
+        has_open_date && is_legacy_package,
+    );
+
+  if (opportunityStatus !== "posted" && !hasOpenGrantsGovPackage) {
     return null;
   }
 
