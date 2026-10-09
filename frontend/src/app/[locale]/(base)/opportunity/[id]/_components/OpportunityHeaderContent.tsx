@@ -136,7 +136,7 @@ export const OpportunityHeaderContent = ({
           {/* persistent live region so save results are announced after they are rendered */}
           <div
             role="status"
-            className="display-flex flex-justify-end"
+            className="display-flex flex-justify-end margin-top-105"
             data-testid="opportunity-save-message"
           >
             {showMessage && !savedError && (
