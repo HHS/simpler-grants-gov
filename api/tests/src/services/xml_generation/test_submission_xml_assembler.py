@@ -217,7 +217,7 @@ class TestSubmissionXMLAssembler:
         xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
         schema_location = root.get(f"{xsi_ns}schemaLocation")
         assert schema_location is not None
-        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
+        assert "oppTEST-OPP-001-cfda12.345-cidTEST-COMP-001.xsd" in schema_location
         assert "None.xsd" not in schema_location
 
         # Verify footer element
@@ -249,8 +249,27 @@ class TestSubmissionXMLAssembler:
         xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
         schema_location = root.get(f"{xsi_ns}schemaLocation")
         assert schema_location is not None
-        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
+        assert "oppTEST-OPP-001-cfda12.345-cidTEST-COMP-001.xsd" in schema_location
         assert "None.xsd" not in schema_location
+
+    def test_generate_complete_submission_xml_omits_cid_without_competition_id(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that schema location has no competition ID suffix when the competition has none."""
+        sample_application.competition.public_competition_id = None
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
+        schema_location = root.get(f"{xsi_ns}schemaLocation")
+        assert schema_location is not None
+        assert schema_location.endswith("/oppTEST-OPP-001-cfda12.345.xsd")
+        assert "-cid" not in schema_location
 
     def test_generate_complete_submission_xml_contains_header_data(
         self, sample_application, sample_application_submission
