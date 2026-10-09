@@ -8,13 +8,14 @@
  * run individually or as part of the full suite without any changes.
  *
  * Test users are chosen via a TestUserKey (see test-users.ts). Spoofing is the
- * only supported path — seeded test users have no login credentials or MFA — so
+ * only supported path - seeded test users have no login credentials or MFA - so
  * any failure throws and fails the test rather than falling back to a real login.
  */
 
 import { type BrowserContext, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { createSpoofedSessionCookie } from "tests/e2e/utils/auth/login-utils";
+import { getShardedPrimaryOrgAdminId } from "tests/e2e/utils/auth/sharded-test-user-utils";
 import {
   getTestUserId,
   type TestUserKey,
@@ -51,7 +52,12 @@ export async function authenticateE2eUser(
   isMobile: boolean,
   testUserKey: TestUserKey = "primaryOrgAdmin",
 ): Promise<void> {
-  const userId = getTestUserId(testUserKey);
+  // primaryOrgAdmin is the identity every mutating test shares, so spread it
+  // across the seeded pool per worker/shard. Every other key maps to one user.
+  const userId =
+    testUserKey === "primaryOrgAdmin"
+      ? getShardedPrimaryOrgAdminId()
+      : getTestUserId(testUserKey);
   const token = await fetchE2eSessionToken(userId);
   await createSpoofedSessionCookie(context, token);
 

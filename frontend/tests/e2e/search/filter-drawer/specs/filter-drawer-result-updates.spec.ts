@@ -11,11 +11,13 @@ import {
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
   getFirstNonNumericAgencyCheckboxId,
-  getNumberOfOpportunitySearchResults,
   toggleCheckboxGroup,
   waitForFilterOptions,
+} from "tests/e2e/utils/search/search-filter-utils";
+import {
+  getNumberOfOpportunitySearchResults,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/utils/search/searchSpecUtil";
+} from "tests/e2e/utils/search/search-utils";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION, FULL_REGRESSION } =
   VALID_TAGS;
