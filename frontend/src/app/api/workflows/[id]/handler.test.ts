@@ -16,6 +16,14 @@ jest.mock("next/server", () => ({
   },
 }));
 
+const mockLoggerError = jest.fn();
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    error: (...args: unknown[]): unknown => mockLoggerError(...args),
+  },
+}));
+
 jest.mock("src/services/auth/sessionUtils", () => ({
   decrypt: jest.fn(),
   encrypt: jest.fn(),
@@ -58,7 +66,7 @@ describe("GET /api/workflows/[id]", () => {
       mockWorkflowDetails,
     );
 
-    const req = {} as NextRequest;
+    const req = { headers: new Headers() } as NextRequest;
     const params = Promise.resolve({ id: "workflow-123" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { data: typeof mockWorkflowDetails };
@@ -74,7 +82,7 @@ describe("GET /api/workflows/[id]", () => {
   it("returns 400 when workflow ID is missing", async () => {
     (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
 
-    const req = {} as NextRequest;
+    const req = { headers: new Headers() } as NextRequest;
     const params = Promise.resolve({ id: "" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { error: string };
@@ -87,7 +95,7 @@ describe("GET /api/workflows/[id]", () => {
   it("returns 401 when user is not authenticated", async () => {
     (sessionModule.getSession as jest.Mock).mockResolvedValue(null);
 
-    const req = {} as NextRequest;
+    const req = { headers: new Headers() } as NextRequest;
     const params = Promise.resolve({ id: "workflow-123" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { error: string };
@@ -98,16 +106,12 @@ describe("GET /api/workflows/[id]", () => {
   });
 
   it("returns 404 when workflow is not found", async () => {
-    const consoleErrorSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
     (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
     (workflowFetcherModule.getWorkflowDetails as jest.Mock).mockRejectedValue(
       new NotFoundError("Workflow not found"),
     );
 
-    const req = {} as NextRequest;
+    const req = { headers: new Headers() } as NextRequest;
     const params = Promise.resolve({ id: "nonexistent-workflow" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { error: string };
@@ -118,21 +122,17 @@ describe("GET /api/workflows/[id]", () => {
     );
     expect(json.error).toBeDefined();
     expect(res.status).toBe(404);
-
-    consoleErrorSpy.mockRestore();
   });
 
   it("returns 500 when an unexpected error occurs", async () => {
-    const consoleErrorSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
     (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
     (workflowFetcherModule.getWorkflowDetails as jest.Mock).mockRejectedValue(
       new Error("Database error"),
     );
 
-    const req = {} as NextRequest;
+    const req = {
+      headers: new Headers({ "X-Amz-Cf-Id": "trace-id" }),
+    } as NextRequest;
     const params = Promise.resolve({ id: "workflow-123" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { error: string };
@@ -143,7 +143,13 @@ describe("GET /api/workflows/[id]", () => {
     );
     expect(json.error).toBeDefined();
     expect(res.status).toBe(500);
-
-    consoleErrorSpy.mockRestore();
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      {
+        err: expect.any(Error) as Error,
+        workflowId: "workflow-123",
+        awsTraceId: "trace-id",
+      },
+      "Error fetching workflow details",
+    );
   });
 });

@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
   try {
     await createSession(jwt, newExpirationDate());
   } catch (e) {
-    logger.error({ err: e }, "Error creating local quick login session");
+    logger.error(
+      { err: e, awsTraceId: request.headers.get("X-Amz-Cf-Id") },
+      "Error creating local quick login session",
+    );
     return redirect("/error");
   }
   return redirect("/login");

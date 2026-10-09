@@ -7,7 +7,7 @@ import { attachmentsToZipEntries } from "src/utils/opportunity/zipUtils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function getAttachmentsDownload(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ opportunityId: string }> },
 ): Promise<Response> {
   const { opportunityId } = await params;
@@ -55,6 +55,7 @@ export async function getAttachmentsDownload(
       {
         err: e,
         opportunityId,
+        awsTraceId: request.headers.get("X-Amz-Cf-Id"),
       },
       "Error zipping files for opportunity",
     );

@@ -6,7 +6,7 @@ import { logger } from "src/services/logger/simplerLogger";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
@@ -35,6 +35,7 @@ export async function GET(
       {
         err: error,
         workflowId: id,
+        awsTraceId: request.headers.get("X-Amz-Cf-Id"),
       },
       "Error fetching workflow details",
     );

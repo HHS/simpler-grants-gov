@@ -24,6 +24,7 @@ const quickLoginRequest = (jwt: string) =>
   new NextRequest("https://simpler.grants.gov/api/user/local-quick-login", {
     method: "POST",
     body: JSON.stringify({ jwt }),
+    headers: { "X-Amz-Cf-Id": "trace-id" },
   });
 
 describe("/api/user/local-quick-login POST handler", () => {
@@ -48,7 +49,7 @@ describe("/api/user/local-quick-login POST handler", () => {
 
     expect(redirectError.digest).toContain(";/error;");
     expect(mockLoggerError).toHaveBeenCalledWith(
-      { err: sessionError },
+      { err: sessionError, awsTraceId: "trace-id" },
       "Error creating local quick login session",
     );
     expect(JSON.stringify(mockLoggerError.mock.calls)).not.toContain("fakeJwt");

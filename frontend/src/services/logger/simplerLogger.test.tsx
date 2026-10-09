@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 
+import { ValidationError } from "src/errors";
 import {
   applyCorrelationId,
   CORRELATION_ID_COOKIE,
@@ -13,6 +14,7 @@ import {
   logResponse,
   serializeError,
 } from "src/services/logger/simplerLogger";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -258,12 +260,36 @@ describe("serializeError", () => {
     });
   });
 
-  it("includes a plain object cause", () => {
-    const cause = { type: "NotFoundError", status: 404 };
-    expect(serializeError(new Error("not found", { cause }))).toMatchObject({
-      message: "not found",
-      cause,
+  it("includes known fields from our custom error causes", () => {
+    const error = new ValidationError("invalid field", {
+      field: "applicant.name",
+      type: "invalid",
+      value: "submitted value",
+      searchInputs: { query: "search term" },
+    } as unknown as FrontendErrorDetails);
+    const serialized = serializeError(error);
+
+    expect(serialized).toMatchObject({
+      type: "ValidationError",
+      message: expect.stringContaining("invalid field") as string,
+      stack: expect.stringContaining("invalid field") as string,
+      cause: {
+        type: "ValidationError",
+        status: 422,
+        field: "applicant.name",
+        detailType: "invalid",
+      },
     });
+    expect(JSON.stringify(serialized)).not.toContain("submitted value");
+    expect(JSON.stringify(serialized)).not.toContain("search term");
+  });
+
+  it("ignores unknown fields on other plain object causes", () => {
+    const serialized = serializeError(
+      new Error("failed", { cause: { status: 500, body: { secret: "x" } } }),
+    );
+    expect(serialized).toMatchObject({ cause: { status: 500 } });
+    expect(JSON.stringify(serialized)).not.toContain("secret");
   });
 
   it("leaves Error causes to pino's default handling", () => {

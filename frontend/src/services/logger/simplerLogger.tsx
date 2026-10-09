@@ -17,14 +17,31 @@ import { NextRequest, NextResponse } from "next/server";
 
 const levelFormatter = (label: string) => ({ level: label });
 
+type ErrorCause = {
+  type?: unknown;
+  status?: unknown;
+  details?: { field?: unknown; type?: unknown } | null;
+};
+
 // pino's default err serializer drops non-Error causes, which is where our custom
-// error classes (see src/errors.ts) keep their type, status and details
+// error classes (see src/errors.ts) keep their type, status and details. Only known
+// fields are kept since API error details can include the submitted value
 export const serializeError = (err: Error) => {
   const serialized = pino.stdSerializers.err(err);
   const { cause } = err;
-  return cause && typeof cause === "object" && !(cause instanceof Error)
-    ? { ...serialized, cause }
-    : serialized;
+  if (!cause || typeof cause !== "object" || cause instanceof Error) {
+    return serialized;
+  }
+  const { type, status, details } = cause as ErrorCause;
+  return {
+    ...serialized,
+    cause: {
+      type,
+      status,
+      field: details?.field,
+      detailType: details?.type,
+    },
+  };
 };
 
 const serverNodeRuntimeConfig = {

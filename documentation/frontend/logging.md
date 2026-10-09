@@ -86,7 +86,7 @@ logger.warn({ organizationId }, "Organization has no roles");
 logger.info({ event: "thing_happened", opportunityId }, "Thing happened");
 ```
 
-- Pass caught errors under the `err` key. Pino serializes it with the error type, message and stack, and the logger also includes the `cause` object our custom errors (`src/errors.ts`) use for status and details.
+- Pass caught errors under the `err` key. Pino serializes it with the error type, message and stack, and the logger also includes the error type, status and failing field from the `cause` our custom errors (`src/errors.ts`) carry. Other `cause` data, such as submitted values, is not logged.
 - Do not pass the error as a second argument (`logger.error("message", e)`). Pino treats extra arguments as format values and drops the error.
 - Do not use other keys for errors (`{ error: e }`). Only `err` is serialized, so the message and stack are lost.
 - Include ids that are already in scope and help troubleshooting. Add `awsTraceId: request.headers.get("X-Amz-Cf-Id")` when the request is available.

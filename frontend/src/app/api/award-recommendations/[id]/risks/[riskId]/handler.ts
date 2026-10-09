@@ -5,7 +5,7 @@ import { logger } from "src/services/logger/simplerLogger";
 import { NextRequest } from "next/server";
 
 export async function deleteRiskForAwardRecommendation(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string; riskId: string }> },
 ) {
   const { id, riskId } = await params;
@@ -31,6 +31,7 @@ export async function deleteRiskForAwardRecommendation(
         err: e,
         awardRecommendationId: id,
         riskId,
+        awsTraceId: request.headers.get("X-Amz-Cf-Id"),
       },
       "Error deleting award recommendation risk",
     );

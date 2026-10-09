@@ -36,7 +36,12 @@ export const decrypt = async (
     });
     return payload;
   } catch (e) {
-    logger.warn({ err: e, algorithm }, "Failed to decrypt session cookie");
+    // jose claim errors carry the decoded payload, which includes the API token
+    const { name, code } = e as { name?: string; code?: string };
+    logger.warn(
+      { algorithm, errorName: name, errorCode: code },
+      "Failed to decrypt session cookie",
+    );
     return null;
   }
 };
