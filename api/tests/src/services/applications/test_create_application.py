@@ -153,6 +153,55 @@ def test_create_application_with_intends_to_add_organization_none(
     assert application.organization_id is None
 
 
+def test_create_application_log_includes_intends_to_add_organization_and_simpler_enabled(
+    db_session, enable_factory_create, caplog
+):
+    """Created new application log includes intends_to_add_organization and is_simpler_grants_enabled"""
+    caplog.set_level(logging.INFO)
+    user = UserFactory.create()
+    competition = CompetitionFactory.create(is_simpler_grants_enabled=True)
+
+    create_application(
+        db_session=db_session,
+        user=user,
+        json_data={
+            "competition_id": competition.competition_id,
+            "intends_to_add_organization": True,
+        },
+    )
+
+    created_records = [
+        record for record in caplog.records if record.message == "Created new application"
+    ]
+    assert len(created_records) == 1
+    record = created_records[0]
+    assert record.intends_to_add_organization is True
+    assert record.is_simpler_grants_enabled is True
+
+
+def test_create_application_assign_owner_role_log_includes_role(
+    db_session, enable_factory_create, caplog
+):
+    """Assigned Application Owner role log includes role field"""
+    caplog.set_level(logging.INFO)
+    user = UserFactory.create()
+    competition = CompetitionFactory.create()
+
+    create_application(
+        db_session=db_session,
+        user=user,
+        json_data={"competition_id": competition.competition_id},
+    )
+
+    role_records = [
+        record
+        for record in caplog.records
+        if record.message == "Assigned Application Owner role to application user"
+    ]
+    assert len(role_records) == 1
+    assert role_records[0].role == "application_owner"
+
+
 def test_create_application_rejects_both_organization_and_intends_to_add(
     db_session, enable_factory_create
 ):

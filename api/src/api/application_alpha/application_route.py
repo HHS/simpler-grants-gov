@@ -370,6 +370,7 @@ def application_attachment_get(
 def application_audit_list(
     db_session: db.Session, application_id: UUID, json_data: dict
 ) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("POST /alpha/applications/:application_id/audit_history")
 
     # Get user from token session
