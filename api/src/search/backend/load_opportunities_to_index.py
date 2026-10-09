@@ -1,31 +1,34 @@
 import logging
 import uuid
-from collections.abc import Iterator, Sequence
+from collections.abc import Sequence
 from enum import StrEnum
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 from sqlalchemy import delete, select, update
-from sqlalchemy.orm import selectinload
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 import src.adapters.db as db
 import src.adapters.search as search
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
-from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
-    CurrentOpportunitySummary,
     Opportunity,
     OpportunityChangeAudit,
     OpportunityIndexDeleteQueue,
-    OpportunitySummary,
+)
+from src.services.opportunities_v1.get_opportunities import (
+    get_changed_searchable_opportunities,
+    get_searchable_opportunities,
 )
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+
+OPPORTUNITY_BATCH_SIZE = 1000
 
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
@@ -50,7 +53,7 @@ class LoadOpportunitiesToIndex(Task):
         db_session: db.Session,
         search_client: search.SearchClient,
         config: LoadOpportunitiesToIndexConfig | None = None,
-        full_refresh: bool = True,
+        full_refresh: bool = False,
     ) -> None:
         super().__init__(db_session)
 
@@ -88,7 +91,9 @@ class LoadOpportunitiesToIndex(Task):
         )
 
         # load the records and mark each batch as loaded
-        for opp_batch in self.fetch_opportunities():
+        for opp_batch in get_searchable_opportunities(
+            self.db_session, batch_size=OPPORTUNITY_BATCH_SIZE
+        ):
             indexed_ids = self.load_records(opp_batch, refresh=True)
             self._mark_loaded_to_search(indexed_ids)
 
@@ -113,7 +118,9 @@ class LoadOpportunitiesToIndex(Task):
                 "Run a full refresh first to initialize the index."
             )
 
-        for opp_batch in self.fetch_changed_opportunities():
+        for opp_batch in get_changed_searchable_opportunities(
+            self.db_session, batch_size=OPPORTUNITY_BATCH_SIZE
+        ):
             indexed_ids = self.load_records(opp_batch, refresh=True)
             self._mark_loaded_to_search(indexed_ids)
 
@@ -161,72 +168,6 @@ class LoadOpportunitiesToIndex(Task):
         """Emit the total number of documents in the search index after this run."""
         resp = self.search_client.search(self.config.alias_name, {"size": 0})
         self.set_metrics({self.Metrics.OPENSEARCH_DOC_COUNT: resp.total_records})
-
-    def _opportunity_query_options(self) -> list:
-        """Shared selectinload options for opportunity queries."""
-        return [
-            # Opportunity summary
-            selectinload(Opportunity.current_opportunity_summary)
-            .selectinload(CurrentOpportunitySummary.opportunity_summary)
-            .options(
-                selectinload(OpportunitySummary.link_funding_instruments),
-                selectinload(OpportunitySummary.link_funding_categories),
-                selectinload(OpportunitySummary.link_applicant_types),
-            ),
-            # Assistance listing number
-            selectinload(Opportunity.opportunity_assistance_listings),
-            # Agency
-            selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
-        ]
-
-    def fetch_opportunities(self) -> Iterator[Sequence[Opportunity]]:
-        """
-        Fetch all indexable opportunities in batches (full refresh).
-
-        Fetches all opportunities where:
-            * is_draft = False
-            * current_opportunity_summary is not None
-        """
-        return (
-            self.db_session.execute(
-                select(Opportunity)
-                .join(CurrentOpportunitySummary)
-                .where(
-                    Opportunity.is_draft.is_(False),
-                    CurrentOpportunitySummary.opportunity_status.isnot(None),
-                )
-                .options(*self._opportunity_query_options())
-                .execution_options(yield_per=1000)
-            )
-            .scalars()
-            .partitions()
-        )
-
-    def fetch_changed_opportunities(self) -> Iterator[Sequence[Opportunity]]:
-        """
-        Fetch only opportunities whose change-audit record has not been loaded to search.
-
-        Used by incremental_refresh to avoid re-indexing the full set every cycle.
-        """
-        return (
-            self.db_session.execute(
-                select(Opportunity)
-                .join(CurrentOpportunitySummary)
-                .join(
-                    OpportunityChangeAudit,
-                    Opportunity.opportunity_id == OpportunityChangeAudit.opportunity_id,
-                )
-                .where(
-                    Opportunity.is_draft.is_(False),
-                    CurrentOpportunitySummary.opportunity_status.isnot(None),
-                    OpportunityChangeAudit.is_loaded_to_search.isnot(True),
-                )
-                .options(*self._opportunity_query_options())
-                .execution_options(yield_per=1000)
-            )
-            .scalars()
-            .partitions()
-        )
 
     @retry(
         stop=stop_after_attempt(3),  # Retry up to 3 times

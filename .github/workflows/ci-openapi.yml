@@ -208,14 +208,15 @@ jobs:
                  "https://api.github.com/repos/${{ github.repository }}/pulls/$NEW_PR_NUM/requested_reviewers" \
                  -d '{
                    "reviewers": [
-                     "chouinar",
                      "mdragon",
-                     "joshtonava",
                      "jakobpederson",
-                     "chay-REIsys",
-                     "hao10282025-sudo",
                      "kkrug",
-                     "dghazvini"
+                     "mike-slater",
+                     "babebe",
+                     "nkhazi",
+                     "freddieyebra",
+                     "mikehgrantsgov",
+                     "myduong-navapbc"
                    ]
                  }')
 

@@ -25,6 +25,7 @@ jobs:
       version: ${{ inputs.version || github.ref }}
       target: staging
       playwright_tags: "@smoke|@core-regression|@full-regression"
+      send_slack_notification: false
   daily-e2e-tests-local:
     name: Daily E2E tests (local)
     uses: ./.github/workflows/ci-frontend-e2e.yml

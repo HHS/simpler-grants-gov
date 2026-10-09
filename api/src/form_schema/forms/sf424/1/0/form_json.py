@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -133,6 +134,8 @@ FORM_JSON_SCHEMA = {
             "type": "string",
             "title": "Other Explanation",
             "description": "Please specify the type of revision. This field is required if E. Other is checked.",
+            # Grants.gov XSD caps RevisionOtherSpecify at 21 characters
+            "maxLength": 21,
         },
         "date_received": {
             "type": "string",
@@ -168,21 +171,21 @@ FORM_JSON_SCHEMA = {
             "maxLength": 25,
         },
         "state_receive_date": {
-            # A user will never fill this in, it's just on the form for agencies to use
+            # The instructions say to leave this blank for the state, but the legacy
+            # XSD allows a value, so the user is still able to fill it in.
             "type": "string",
             "title": "Date Received By State",
             "description": "Leave blank, to be filled out by state.",
             "format": "date",
-            "readOnly": True,
         },
         "state_application_id": {
-            # A user will never fill this in, it's just on the form for agencies to use
+            # Same as state_receive_date: meant for the state, but editable to match
+            # the legacy XSD.
             "type": "string",
             "title": "State Application Identifier",
             "description": "Leave blank, to be filled out by state.",
             "minLength": 0,
             "maxLength": 30,
-            "readOnly": True,
         },
         "organization_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
@@ -218,7 +221,9 @@ FORM_JSON_SCHEMA = {
             "title": "Division Name",
             "description": "Enter the name of primary organizational division, office, or major subdivision which will undertake the assistance activity.",
             "minLength": 1,
-            "maxLength": 100,
+            # Based on DivisionNameDataType (maxLength 30)
+            # https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd
+            "maxLength": 30,
         },
         "contact_person": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
@@ -489,6 +494,8 @@ FORM_JSON_SCHEMA = {
             "format": "email",
             "title": "AOR email",
             "description": "Enter a valid email Address.",
+            "minLength": 1,
+            "maxLength": 60,
         },
         "aor_signature": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
@@ -546,13 +553,13 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "name": "date_received_by_state",
         "label": "6. Date Received by State",
-        "children": [{"type": "null", "definition": "/properties/state_receive_date"}],
+        "children": [{"type": "field", "definition": "/properties/state_receive_date"}],
     },
     {
         "type": "section",
         "name": "state_application_identifier",
         "label": "7. State Application Identifier",
-        "children": [{"type": "null", "definition": "/properties/state_application_id"}],
+        "children": [{"type": "field", "definition": "/properties/state_application_id"}],
     },
     {
         "type": "section",
@@ -863,12 +870,20 @@ FORM_XML_TRANSFORM_RULES = {
     # Core application information - direct field mappings
     "submission_type": {"xml_transform": {"target": "SubmissionType"}},
     "application_type": {"xml_transform": {"target": "ApplicationType"}},
+    "revision_type": {"xml_transform": {"target": "RevisionType"}},
+    "revision_other_specify": {"xml_transform": {"target": "RevisionOtherSpecify"}},
     "date_received": {
         "xml_transform": {
             "target": "DateReceived",
             "null_handling": "include_null",
         }
     },
+    "applicant_id": {"xml_transform": {"target": "ApplicantID"}},
+    "federal_entity_identifier": {"xml_transform": {"target": "FederalEntityIdentifier"}},
+    "federal_award_identifier": {"xml_transform": {"target": "FederalAwardIdentifier"}},
+    # Optional; only written to the XML when the user fills them in.
+    "state_receive_date": {"xml_transform": {"target": "StateReceiveDate"}},
+    "state_application_id": {"xml_transform": {"target": "StateApplicationID"}},
     # Applicant information - direct field mappings
     "organization_name": {"xml_transform": {"target": "OrganizationName"}},
     "employer_taxpayer_identification_number": {
@@ -888,25 +903,34 @@ FORM_XML_TRANSFORM_RULES = {
         "zip_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
         "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
     },
+    "department_name": {"xml_transform": {"target": "DepartmentName"}},
+    "division_name": {"xml_transform": {"target": "DivisionName"}},
     # Contact person - nested structure with GlobalLibrary namespace for names
+    # Order must match HumanNameDataType: PrefixName, FirstName, MiddleName, LastName, SuffixName
     "contact_person": {
         "xml_transform": {"target": "ContactPerson", "type": "nested_object"},
+        "prefix": {"xml_transform": {"target": "PrefixName", "namespace": "globLib"}},
         "first_name": {
             "xml_transform": {
                 "target": "FirstName",
                 "namespace": "globLib",
             }
         },
+        "middle_name": {"xml_transform": {"target": "MiddleName", "namespace": "globLib"}},
         "last_name": {
             "xml_transform": {
                 "target": "LastName",
                 "namespace": "globLib",
             }
         },
+        "suffix": {"xml_transform": {"target": "SuffixName", "namespace": "globLib"}},
     },
+    # XSD element for the contact person's title is just "Title"
+    "contact_person_title": {"xml_transform": {"target": "Title"}},
+    "organization_affiliation": {"xml_transform": {"target": "OrganizationAffiliation"}},
     # Contact information - direct field mappings
     "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
-    "fax_number": {"xml_transform": {"target": "Fax"}},
+    "fax": {"xml_transform": {"target": "Fax"}},
     "email": {"xml_transform": {"target": "Email"}},
     # One-to-many mapping - applicant type codes (must come before agency_name per XSD)
     "applicant_type_code_mapping": {
@@ -1042,24 +1066,14 @@ FORM_XML_TRANSFORM_RULES = {
         }
     },
     # Authorized representative - nested structure with GlobalLibrary namespace for names
+    # Order must match HumanNameDataType: PrefixName, FirstName, MiddleName, LastName, SuffixName
     "authorized_representative": {
         "xml_transform": {"target": "AuthorizedRepresentative", "type": "nested_object"},
-        "first_name": {
-            "xml_transform": {
-                "target": "FirstName",
-                "namespace": "globLib",
-                "null_handling": "default_value",
-                "default_value": "John",
-            }
-        },
-        "last_name": {
-            "xml_transform": {
-                "target": "LastName",
-                "namespace": "globLib",
-                "null_handling": "default_value",
-                "default_value": "Doe",
-            }
-        },
+        "prefix": {"xml_transform": {"target": "PrefixName", "namespace": "globLib"}},
+        "first_name": {"xml_transform": {"target": "FirstName", "namespace": "globLib"}},
+        "middle_name": {"xml_transform": {"target": "MiddleName", "namespace": "globLib"}},
+        "last_name": {"xml_transform": {"target": "LastName", "namespace": "globLib"}},
+        "suffix": {"xml_transform": {"target": "SuffixName", "namespace": "globLib"}},
     },
     "authorized_representative_title": {
         "xml_transform": {"target": "AuthorizedRepresentativeTitle"}
@@ -1070,6 +1084,7 @@ FORM_XML_TRANSFORM_RULES = {
     "authorized_representative_email": {
         "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
     },
+    "authorized_representative_fax": {"xml_transform": {"target": "AuthorizedRepresentativeFax"}},
     "aor_signature": {"xml_transform": {"target": "AORSignature"}},
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
 }
@@ -1084,6 +1099,7 @@ SF424_v4_0 = Form(
     form_version="4.0",
     agency_code="SGG",
     omb_number="4040-0004",
+    expiration_date=date(2029, 3, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

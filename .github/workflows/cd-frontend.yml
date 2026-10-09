@@ -30,7 +30,7 @@ on:
           - grantor1
           - infra-sgg2
           - infra-sgg3
-          - infra-grantor1
+          - infra-sgg1
           - prod
       version:
         required: true
@@ -95,6 +95,7 @@ jobs:
       version: ${{ inputs.version || github.ref }}
       target: staging
       playwright_tags: "@smoke|@core-regression"
+      send_slack_notification: false
 
   send-slack-notification:
     if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))

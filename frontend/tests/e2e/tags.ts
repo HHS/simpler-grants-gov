@@ -1,5 +1,4 @@
 enum validFeatureTags {
-  GRANTOR = "@grantor",
   GRANTEE = "@grantee",
   OPPORTUNITY_SEARCH = "@opportunity-search",
   APPLY = "@apply",
@@ -7,7 +6,6 @@ enum validFeatureTags {
   AUTH = "@auth",
   USER_MANAGEMENT = "@user-management",
   APPLY_FORMS = "@apply-forms",
-  OPPORTUNITY_MANAGEMENT = "@opportunity-management",
 }
 
 enum validExecutionTags {

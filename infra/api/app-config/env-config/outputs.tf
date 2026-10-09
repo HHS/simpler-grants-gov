@@ -120,3 +120,7 @@ output "processor_service_config" {
 output "file_scan_cache_config" {
   value = local.file_scan_cache_config
 }
+
+output "monitoring_config" {
+  value = local.monitoring_config
+}

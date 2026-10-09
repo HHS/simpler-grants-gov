@@ -48,6 +48,7 @@ def _assign_application_owner_role(
         extra={
             "application_id": application_user.application_id,
             "user_id": application_user.user_id,
+            "role": "application_owner",
         },
     )
     # Add an audit event for the user being added as part of app creation
@@ -166,12 +167,14 @@ def create_application(db_session: db.Session, user: User, json_data: dict) -> A
     application = Application(
         application_id=application_id or uuid.uuid4(),
         competition=competition,
+        competition_id=competition.competition_id,
         application_name=application_name,
         application_status=ApplicationStatus.IN_PROGRESS,
         organization_id=organization_id,  # Set the organization ID if provided
         intends_to_add_organization=intends_to_add_organization,
     )
     db_session.add(application)
+    add_application_metadata_to_logs(application)
     add_audit_event(
         db_session=db_session,
         application=application,
@@ -206,10 +209,9 @@ def create_application(db_session: db.Session, user: User, json_data: dict) -> A
             "application_id": application.application_id,
             "competition_id": competition_id,
             "organization_id": organization_id,
+            "intends_to_add_organization": intends_to_add_organization,
+            "is_simpler_grants_enabled": competition.is_simpler_grants_enabled,
         },
     )
-
-    # Add application metadata to logs
-    add_application_metadata_to_logs(application)
 
     return application

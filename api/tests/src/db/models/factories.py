@@ -37,6 +37,7 @@ import src.db.models.workflow_models as workflow_models
 import src.util.datetime_util as datetime_util
 import tests.lib.db_test_models.db_test_models as db_test_models
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
+from src.auth.api_key_config import ApiKeyConfig
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
@@ -89,6 +90,7 @@ from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.form_schema.forms import SF424_v4_0, init_form_registry
 from src.util import file_util
+from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -1381,7 +1383,11 @@ class UserApiKeyFactory(BaseFactory):
     user_id = factory.LazyAttribute(lambda k: k.user.user_id)
 
     key_name = factory.Faker("sentence", nb_words=3)
-    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+
+    key_id = factory.LazyAttribute(lambda obj: obj.raw_key)
+    key_id_hash = factory.LazyAttribute(
+        lambda obj: hash_api_key_id(obj.raw_key, ApiKeyConfig().pepper)
+    )
 
     last_used = sometimes_none(
         factory.Faker("date_time_between", start_date="-30d", end_date="now"), none_chance=0.3
@@ -1399,6 +1405,10 @@ class UserApiKeyFactory(BaseFactory):
 
         # Trait for unused keys
         never_used = factory.Trait(last_used=None)
+
+        # Not a column. Tests and fixtures send this as X-API-Key.
+        # Override this, not key_id: UserApiKeyFactory(raw_key="my-test-key").
+        raw_key = factory.LazyFunction(generate_api_key_id)
 
 
 class RoleFactory(BaseFactory):
@@ -2180,6 +2190,7 @@ class JobLogFactory(BaseFactory):
         model = task_models.JobLog
 
     job_id = Generators.UuidObj
+    job_type = factory.Faker("slug")
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
 
@@ -3611,6 +3622,9 @@ class SharedUserApiKeyFactory(BaseFactory):
 
     key_name = factory.Faker("sentence", nb_words=3)
     key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+    key_id_hash = factory.LazyAttribute(
+        lambda obj: hash_api_key_id(obj.key_id, ApiKeyConfig().pepper)
+    )
 
     last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")
 
@@ -3628,3 +3642,20 @@ class UserNotificationPreferenceFactory(BaseFactory):
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda u: u.user.user_id)
+
+
+class NotificationJobContentFactory(BaseFactory):
+    class Meta:
+        model = user_models.NotificationJobContent
+
+    notification_job_content_id = Generators.UuidObj
+
+    job = factory.SubFactory(JobLogFactory)
+    job_id = factory.LazyAttribute(lambda c: c.job.job_id)
+
+    notification_type = NotificationType.ALL_NEW_OPPORTUNITIES
+
+    subject = factory.Faker("sentence")
+    email_body = factory.LazyFunction(
+        lambda: f"<html><body><p>{fake.paragraph()}</p></body></html>"
+    )
