@@ -370,6 +370,6 @@ class TestProjectAbstractNegativePaths:
         assert response.xml_data is not None
         # XSD validation must catch the missing required element
         result = xsd_validator.validate_xml(response.xml_data, xsd_path)
-        assert result["valid"] is False, (
-            f"Expected XSD validation to fail for incomplete XML, but it passed.\n{response.xml_data}"
-        )
+        assert (
+            result["valid"] is False
+        ), f"Expected XSD validation to fail for incomplete XML, but it passed.\n{response.xml_data}"
