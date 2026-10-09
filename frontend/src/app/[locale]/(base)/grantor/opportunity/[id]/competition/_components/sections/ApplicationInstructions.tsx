@@ -13,10 +13,12 @@ import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
 type ApplicationInstructionsProps = {
   existingFiles?: UploadFileMetadata[];
+  readOnly?: boolean;
 };
 
 export function ApplicationInstructions({
   existingFiles = [],
+  readOnly = false,
 }: ApplicationInstructionsProps) {
   const t = useTranslations(
     "OpportunityCompetition.sectionApplicationInstructions",
@@ -59,6 +61,7 @@ export function ApplicationInstructions({
       />
       <SimplerFileInput
         id="competition-instruction-file"
+        disabled={readOnly}
         postUploadAction={handlePostFileUpload}
         postUploadActionProgressMessage={t("uploadWidget.uploading")}
         postUploadActionSuccessMessage={t("uploadWidget.success")}
