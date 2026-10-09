@@ -26,19 +26,21 @@ import {
   saveCurrentSearch,
 } from "tests/e2e/utils/search/save-search-utils";
 import {
-  clickPaginationPageIfPresent,
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
   expectCheckboxesChecked,
+  toggleCheckbox,
+  toggleFilterDrawer,
+} from "tests/e2e/utils/search/search-filter-utils";
+import {
+  clickPaginationPageIfPresent,
   expectSortBy,
   fillSearchInputAndSubmit,
   getNumberOfOpportunitySearchResults,
   getSearchInput,
   selectSortBy,
-  toggleCheckbox,
-  toggleFilterDrawer,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/utils/search/searchSpecUtil";
+} from "tests/e2e/utils/search/search-utils";
 
 const { SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 

@@ -12,17 +12,19 @@ import { waitForAnyURLChange } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 import {
   clickAccordionWithTitle,
+  toggleCheckboxes,
+  toggleFilterDrawer,
+  waitForFilterOptions,
+} from "tests/e2e/utils/search/search-filter-utils";
+import {
   clickLastPaginationPage,
   clickPaginationPageNumber,
   getFirstSearchResultTitle,
   getLastSearchResultTitle,
   getNumberOfOpportunitySearchResults,
   selectSortBy,
-  toggleCheckboxes,
-  toggleFilterDrawer,
-  waitForFilterOptions,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/utils/search/searchSpecUtil";
+} from "tests/e2e/utils/search/search-utils";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION, CORE_REGRESSION } =
   VALID_TAGS;
