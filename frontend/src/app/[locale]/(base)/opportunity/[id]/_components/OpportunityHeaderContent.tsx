@@ -142,7 +142,6 @@ export const OpportunityHeaderContent = ({
             {showMessage && !savedError && (
               <SimplerAlert
                 type="success"
-                buttonId={SAVE_BUTTON_ID}
                 messageText={successText}
                 alertClick={dismissSuccessMessage}
                 closeButtonLabel={t("saveMessage.dismiss")}

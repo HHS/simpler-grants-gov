@@ -169,6 +169,38 @@ describe("OpportunityHeaderContent", () => {
     expect(screen.getByRole("button", { name: SAVED_NAME })).toHaveFocus();
   });
 
+  it("gives the save message a named dismiss button that can be reached and used with the keyboard", async () => {
+    clientFetchMock.mockResolvedValue({ type: "save" });
+    const { container } = renderHeader();
+
+    await userEvent.click(screen.getByRole("button", { name: SAVE_NAME }));
+
+    // the message is announced through the status region
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("saveMessage.save");
+
+    const dismiss = within(status).getByRole("button", {
+      name: "saveMessage.dismiss",
+    });
+    expect(dismiss.tagName).toBe("BUTTON");
+    // the message isn't described by the save button, which would expose its container to
+    // screen readers with the save button's name around the dismiss button
+    expect(screen.getByTestId("simpler-alert")).not.toHaveAttribute(
+      "aria-describedby",
+    );
+    expect(dismiss).toHaveAccessibleDescription("");
+    expect(await axe(container)).toHaveNoViolations();
+
+    // the dismiss button follows the call to action buttons in tab order
+    screen.getByRole("link", { name: "apply" }).focus();
+    await userEvent.tab();
+    expect(dismiss).toHaveFocus();
+
+    await userEvent.keyboard("{Enter}");
+    expect(status).toBeEmptyDOMElement();
+    expect(screen.getByRole("button", { name: SAVED_NAME })).toHaveFocus();
+  });
+
   it("shows an error above the title when saving fails", async () => {
     clientFetchMock.mockRejectedValue(new Error("save failed"));
     renderHeader();

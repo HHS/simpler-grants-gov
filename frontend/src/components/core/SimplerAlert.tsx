@@ -6,8 +6,10 @@ import { USWDSIcon } from "./USWDSIcon";
 
 interface SimplerAlertProps {
   alertClick: () => void;
-  // This is the id which will be tied to the aria-describedby of the alert
-  buttonId: string;
+  // This is the id which will be tied to the aria-describedby of the alert. Omit it when the
+  // alert shouldn't be described by that element, as the attribute exposes the alert's container
+  // to screen readers with the element's name as its description
+  buttonId?: string;
   className?: string;
   // accessible name for the dismiss button, which otherwise only contains an icon
   closeButtonLabel?: string;
