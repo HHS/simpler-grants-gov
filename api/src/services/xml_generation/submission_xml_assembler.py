@@ -20,6 +20,7 @@ from src.services.xml_generation.header_generator import (
 )
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.utils.closing_tags import write_closing_tags_for_empty_elements
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,7 @@ class SubmissionXMLAssembler:
 
         # Generate form XMLs
         form_xml_elements = []
+        closing_tag_elements: list[list[str]] = []
         for app_form in supported_forms:
             form_name = app_form.form.short_form_name
             logger.info(
@@ -109,6 +111,7 @@ class SubmissionXMLAssembler:
             try:
                 form_xml = self._generate_form_xml(app_form, pretty_print)
                 form_xml_elements.append(form_xml)
+                closing_tag_elements.append(self._get_empty_elements_with_closing_tag(form_name))
             except Exception:
                 logger.exception(
                     f"Failed to generate XML for form {form_name}",
@@ -134,7 +137,11 @@ class SubmissionXMLAssembler:
 
         # Assemble complete XML
         complete_xml = self._assemble_xml_components(
-            header_xml_str, form_xml_elements, footer_xml_str, pretty_print
+            header_xml_str,
+            form_xml_elements,
+            footer_xml_str,
+            pretty_print,
+            closing_tag_elements,
         )
 
         logger.info(
@@ -146,6 +153,11 @@ class SubmissionXMLAssembler:
         )
 
         return complete_xml
+
+    def _get_empty_elements_with_closing_tag(self, form_name: str) -> list[str]:
+        """Elements the form wants written as <Name></Name> when empty (see its _xml_config)."""
+        xml_config = load_xml_transform_config(form_name).get("_xml_config", {})
+        return xml_config.get("empty_elements_with_closing_tag", [])
 
     def _generate_form_xml(self, app_form: Any, pretty_print: bool = False) -> str:
         """Generate XML for a single application form."""
@@ -179,12 +191,20 @@ class SubmissionXMLAssembler:
         form_xmls: list[str],
         footer_xml: str,
         pretty_print: bool,
+        closing_tag_elements: list[list[str]] | None = None,
     ) -> str:
         """Assemble header, forms, and footer into complete XML structure."""
         # Parse individual XML components
         header_element = self._parse_xml_string(header_xml)
         footer_element = self._parse_xml_string(footer_xml)
         form_elements = [self._parse_xml_string(xml) for xml in form_xmls]
+
+        # Parsing writes empty elements as <Name/> again, so put back the closing tags each
+        # form asked for, on that form's own XML only
+        for form_element, element_names in zip(
+            form_elements, closing_tag_elements or [], strict=False
+        ):
+            write_closing_tags_for_empty_elements(form_element, element_names)
 
         # Create root element with namespaces
         # Add all required namespaces per Grants.gov specification

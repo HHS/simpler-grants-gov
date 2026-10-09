@@ -21,8 +21,25 @@ SECTION_B_USER_ENTERED_FIELDS = [
     "program_income_amount",
 ]
 
+# Section C (non_federal_resources) and E (federal_fund_estimates) fields that a user
+# can enter directly, including each section's own Column A (grant_program). Section C's
+# row total is auto-calculated, so it doesn't count as data for the row.
+SECTION_C_USER_ENTERED_FIELDS = [
+    "grant_program",
+    "applicant_amount",
+    "state_amount",
+    "other_amount",
+]
+SECTION_E_USER_ENTERED_FIELDS = [
+    "grant_program",
+    "first_year_amount",
+    "second_year_amount",
+    "third_year_amount",
+    "fourth_year_amount",
+]
+
 # Section A, Column A (activity_title) is only required on rows 2-4 when the row
-# has data entered in Section A (budget_summary) or Section B (budget_categories).
+# has data entered in Section A (budget_summary or Column B) or Section B (budget_categories).
 # Row 1 is always required, which is enforced separately via prefixItems below.
 ACTIVITY_TITLE_REQUIRED_WHEN_ROW_HAS_DATA = {
     "if": {
@@ -32,6 +49,11 @@ ACTIVITY_TITLE_REQUIRED_WHEN_ROW_HAS_DATA = {
             {
                 "required": ["budget_summary"],
                 "properties": {"budget_summary": {"type": "object", "minProperties": 1}},
+            },
+            # Section A - Column B (assistance_listing_number) sits on the row itself
+            {
+                "required": ["assistance_listing_number"],
+                "properties": {"assistance_listing_number": {"minLength": 1}},
             },
             # Section B - only user-entered fields count as data for this row.
             *[
@@ -45,6 +67,7 @@ ACTIVITY_TITLE_REQUIRED_WHEN_ROW_HAS_DATA = {
     },
     "then": {"required": ["activity_title"]},
 }
+
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -831,6 +854,10 @@ FORM_XML_TRANSFORM_RULES = {
             "default": "http://apply.grants.gov/forms/SF424A-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
+        # A section left empty is written as just its line items with their titles.
+        # Legacy writes those with a closing tag (<CategorySet ...></CategorySet>), so do
+        # the same instead of a self-closing tag.
+        "empty_elements_with_closing_tag": ["CategorySet", "ResourceLineItem", "FundsLineItem"],
         "xml_structure": {
             "root_element": "BudgetInformation",
             "root_namespace_prefix": "SF424A",  # Use SF424A: prefix for root element per XSD
@@ -876,11 +903,13 @@ FORM_XML_TRANSFORM_RULES = {
     "applicant_amount": {
         "xml_transform": {
             "target": "BudgetApplicantContributionAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "state_amount": {
         "xml_transform": {
             "target": "BudgetStateContributionAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     # Note: other_amount and total_amount are defined later in correct XSD order
@@ -895,57 +924,68 @@ FORM_XML_TRANSFORM_RULES = {
     "federal_estimated_unobligated_amount": {
         "xml_transform": {
             "target": "BudgetFederalEstimatedUnobligatedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "non_federal_estimated_unobligated_amount": {
         "xml_transform": {
             "target": "BudgetNonFederalEstimatedUnobligatedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "federal_new_or_revised_amount": {
         "xml_transform": {
             "target": "BudgetFederalNewOrRevisedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "non_federal_new_or_revised_amount": {
         "xml_transform": {
             "target": "BudgetNonFederalNewOrRevisedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     # Section B - Budget Categories field mappings
     "personnel_amount": {
         "xml_transform": {
             "target": "BudgetPersonnelRequestedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "fringe_benefits_amount": {
         "xml_transform": {
             "target": "BudgetFringeBenefitsRequestedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "travel_amount": {
         "xml_transform": {
             "target": "BudgetTravelRequestedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "equipment_amount": {
         "xml_transform": {
             "target": "BudgetEquipmentRequestedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "supplies_amount": {
         "xml_transform": {
             "target": "BudgetSuppliesRequestedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "contractual_amount": {
         "xml_transform": {
             "target": "BudgetContractualRequestedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "construction_amount": {
         "xml_transform": {
             "target": "BudgetConstructionRequestedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     # other_amount mapping for BudgetCategories (correct XSD position)
@@ -953,16 +993,19 @@ FORM_XML_TRANSFORM_RULES = {
     "other_amount": {
         "xml_transform": {
             "target": "BudgetOtherRequestedAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "total_direct_charge_amount": {
         "xml_transform": {
             "target": "BudgetTotalDirectChargesAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "total_indirect_charge_amount": {
         "xml_transform": {
             "target": "BudgetIndirectChargesAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     # total_amount mapping for BudgetCategories (correct XSD position)
@@ -970,32 +1013,38 @@ FORM_XML_TRANSFORM_RULES = {
     "total_amount": {
         "xml_transform": {
             "target": "BudgetTotalAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "program_income_amount": {
         "xml_transform": {
             "target": "ProgramIncomeAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     # Section E - Federal Funds Needed field mappings
     "first_year_amount": {
         "xml_transform": {
             "target": "BudgetFirstYearAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "second_year_amount": {
         "xml_transform": {
             "target": "BudgetSecondYearAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "third_year_amount": {
         "xml_transform": {
             "target": "BudgetThirdYearAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     "fourth_year_amount": {
         "xml_transform": {
             "target": "BudgetFourthYearAmount",
+            "value_transform": {"type": "currency_format"},
         }
     },
     # Budget sections decomposition
@@ -1004,9 +1053,18 @@ FORM_XML_TRANSFORM_RULES = {
     #
     # Note: This transformation handles the data restructuring step. The XML generation
     # phase will handle:
-    # - Adding activity_title and assistance_listing_number as XML attributes on line items
+    # - Adding activity_title (or grant_program) as the activityTitle attribute on line items
     # - Using different XML element names for line items vs totals per XSD
     # - Proper XML namespace handling and element ordering
+    #
+    # Pre-population adds "0.00" totals to every row and section, including the ones the
+    # user left empty. To match the legacy XML:
+    # - Every line item needs an activityTitle in the XSD, so rows with no title (rows
+    #   left empty) are dropped with skip_items_without_attributes.
+    # - In Sections B, C and E, a row with nothing entered in that section is written as
+    #   an empty line item with just its title, without the auto-calculated zeros. If
+    #   nothing was entered in the section at all, the totals are left out too
+    #   (user_entered_fields).
     #
     # XSD Structure per section:
     # - BudgetSummary: SummaryLineItem (with activityTitle & CFDANumber) + SummaryTotals
@@ -1022,11 +1080,15 @@ FORM_XML_TRANSFORM_RULES = {
                 "source_array_field": "activity_line_items",
                 "field_mappings": {
                     # Section A - Budget Summary (XSD requires BudgetSummary with SummaryLineItem/SummaryTotals)
-                    # Note: CFDANumber (assistance_listing_number) is a child element, not an attribute
+                    # Note: CFDANumber (assistance_listing_number) is a child element, not an
+                    # attribute. It lives on the row itself, so it's pulled in as a parent field
+                    # and written ahead of the budget_summary amounts, as the XSD requires.
                     "BudgetSummary": {
                         "item_field": "budget_summary",
                         "item_wrapper": "SummaryLineItem",
                         "item_attributes": ["activity_title"],
+                        "item_parent_fields": ["assistance_listing_number"],
+                        "skip_items_without_attributes": True,
                         "total_field": "total_budget_summary",
                         "total_wrapper": "SummaryTotals",
                         "field_overrides": {
@@ -1040,6 +1102,8 @@ FORM_XML_TRANSFORM_RULES = {
                         "item_field": "budget_categories",
                         "item_wrapper": "CategorySet",
                         "item_attributes": ["activity_title"],
+                        "user_entered_fields": SECTION_B_USER_ENTERED_FIELDS,
+                        "skip_items_without_attributes": True,
                         "total_field": "total_budget_categories",
                         "total_wrapper": "CategoryTotals",
                     },
@@ -1049,9 +1113,14 @@ FORM_XML_TRANSFORM_RULES = {
                     "NonFederalResources": {
                         "item_field": "non_federal_resources",
                         "item_wrapper": "ResourceLineItem",
-                        # grant_program (Column A) wins when present; activity_title is the
-                        # always-present fallback for the required activityTitle attribute.
+                        # Column A (grant_program) is the title for this section, and wins over
+                        # the Section A activity_title. When the user enters amounts but leaves
+                        # Column A blank, it goes out as "N/A" (same as the UI). A row with
+                        # nothing entered here keeps the activity_title, like legacy does.
                         "item_attributes": ["activity_title", "grant_program"],
+                        "item_attribute_defaults": {"grant_program": "N/A"},
+                        "user_entered_fields": SECTION_C_USER_ENTERED_FIELDS,
+                        "skip_items_without_attributes": True,
                         "total_field": "total_non_federal_resources",
                         "total_wrapper": "ResourceTotals",
                         # Override global field mappings for this section
@@ -1074,6 +1143,17 @@ FORM_XML_TRANSFORM_RULES = {
             "conditional_transform": {
                 "type": "pivot_object",
                 "source_field": "forecasted_cash_needs",
+                "item_value_transform": {"type": "currency_format"},
+                # Only the quarter amounts are entered by the user, the rest are
+                # auto-calculated totals. Nothing entered means no Section D at all.
+                "include_if_any_of": [
+                    f"{row}.{quarter}_quarter_amount"
+                    for row in (
+                        "federal_forecasted_cash_needs",
+                        "non_federal_forecasted_cash_needs",
+                    )
+                    for quarter in ("first", "second", "third", "fourth")
+                ],
                 "field_mapping": {
                     "BudgetFirstYearAmounts": {
                         "BudgetFederalForecastedAmount": "federal_forecasted_cash_needs.total_amount",
@@ -1118,9 +1198,14 @@ FORM_XML_TRANSFORM_RULES = {
                     "FederalFundsNeeded": {
                         "item_field": "federal_fund_estimates",
                         "item_wrapper": "FundsLineItem",
-                        # grant_program (Column A) wins when present; activity_title is the
-                        # always-present fallback for the required activityTitle attribute.
+                        # Column A (grant_program) is the title for this section, and wins over
+                        # the Section A activity_title. When the user enters amounts but leaves
+                        # Column A blank, it goes out as "N/A" (same as the UI). A row with
+                        # nothing entered here keeps the activity_title, like legacy does.
                         "item_attributes": ["activity_title", "grant_program"],
+                        "item_attribute_defaults": {"grant_program": "N/A"},
+                        "user_entered_fields": SECTION_E_USER_ENTERED_FIELDS,
+                        "skip_items_without_attributes": True,
                         "total_field": "total_federal_fund_estimates",
                         "total_wrapper": "FundsTotals",
                     },

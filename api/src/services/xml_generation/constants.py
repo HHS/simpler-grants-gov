@@ -60,9 +60,9 @@ FOOTER_NAMESPACES = {
 GRANTS_GOV_NAMESPACES = {
     "header": Namespace.HEADER,
     "footer": Namespace.FOOTER,
+    "att": Namespace.ATT,
     "glob": Namespace.GLOB,
     "globLib": Namespace.GLOB_LIB,
-    "att": Namespace.ATT,
     "grant": Namespace.GRANT,
     "xsi": Namespace.XSI,
 }
