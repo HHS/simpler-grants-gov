@@ -2,6 +2,7 @@
 
 import { getSession } from "src/services/auth/session";
 import { updateApplicationFilingName } from "src/services/fetch/fetchers/applicationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { revalidateTag } from "next/cache";
 
@@ -42,7 +43,10 @@ export const updateAppFilingNameAction = async (
 
     return { success: true, error: null };
   } catch (error) {
-    console.error("Update failed:", error);
+    logger.error(
+      { err: error, applicationId },
+      "Failed to update application filing name",
+    );
     return { success: false, error: "Failed to update application name." };
   }
 };

@@ -3,6 +3,7 @@ import {
   fetchApplicationWithMethodV1,
   getApplicationForPrint,
 } from "src/services/fetch/fetchers/fetchers";
+import { logger } from "src/services/logger/simplerLogger";
 import { ApplicationSubmissionsRequestBody } from "src/types/application/applicationSubmissionRequestTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
@@ -85,15 +86,20 @@ export const getLatestApplicationSubmission = async (
   try {
     submissionsResponse = await getApplicationSubmissions(applicationId, body);
     if (submissionsResponse.data.length !== 1) {
-      console.error(
-        `Expected 1 application submission but received ${submissionsResponse.data.length}`,
+      logger.error(
+        {
+          applicationId,
+          submissionCount: submissionsResponse.data.length,
+        },
+        "Expected 1 application submission",
       );
       return null;
     }
     return submissionsResponse.data[0];
-  } catch (_e) {
-    console.error(
-      `Error retrieving latest application submission for (${applicationId})`,
+  } catch (e) {
+    logger.error(
+      { err: e, applicationId },
+      "Error retrieving latest application submission",
     );
   }
   return null;

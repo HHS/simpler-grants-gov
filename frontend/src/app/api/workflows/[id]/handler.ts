@@ -1,11 +1,12 @@
 import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getWorkflowDetails } from "src/services/fetch/fetchers/workflowFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
@@ -30,7 +31,14 @@ export async function GET(
 
     return NextResponse.json({ data: workflowDetails });
   } catch (error) {
-    console.error("Error fetching workflow details:", error);
+    logger.error(
+      {
+        err: error,
+        workflowId: id,
+        awsTraceId: request.headers.get("X-Amz-Cf-Id"),
+      },
+      "Error fetching workflow details",
+    );
     const { status, message, cause } = readError(error as Error, 500);
 
     return NextResponse.json(

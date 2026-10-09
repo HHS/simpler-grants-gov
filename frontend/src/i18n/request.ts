@@ -1,5 +1,6 @@
 import { defaultLocale, formats, locales, timeZone } from "src/i18n/config";
 import { getMessagesWithFallbacks } from "src/i18n/getMessagesWithFallbacks";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { getRequestConfig } from "next-intl/server";
 
@@ -14,8 +15,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   const isValidLocale = locales.includes(locale); // https://github.com/microsoft/TypeScript/issues/26255
   if (!isValidLocale) {
-    console.error(
-      `Unsupported locale (${locale}) was requested. Falling back to the default locale.`,
+    logger.error(
+      { locale },
+      "Unsupported locale was requested. Falling back to the default locale.",
     );
     locale = defaultLocale;
   }

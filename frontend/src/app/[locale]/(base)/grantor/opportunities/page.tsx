@@ -6,6 +6,7 @@ import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchOpportunitiesByAgency } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
@@ -445,7 +446,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       userPrivilegeDef,
     );
   } catch (error) {
-    console.error("Error fetching privileges", error);
+    logger.error({ err: error }, "Error fetching privileges");
     if (error instanceof UnauthorizedError) {
       throw error;
     }
@@ -468,7 +469,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       totalRecords = data.totalRecords;
       totalPages = data.totalPages;
     } catch (error) {
-      console.error("Error fetching Opportunities", error);
+      logger.error({ err: error }, "Error fetching Opportunities");
       if (error instanceof UnauthorizedError) {
         throw error;
       }

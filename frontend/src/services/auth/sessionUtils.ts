@@ -4,6 +4,7 @@ import { KeyObject } from "crypto";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import { clientTokenExpirationInterval } from "src/constants/auth";
 import { environment } from "src/constants/environments";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { cookies } from "next/headers";
 
@@ -35,7 +36,12 @@ export const decrypt = async (
     });
     return payload;
   } catch (e) {
-    console.error(`Failed to decrypt session cookie with ${algorithm}`, e);
+    // jose claim errors carry the decoded payload, which includes the API token
+    const { name, code } = e as { name?: string; code?: string };
+    logger.warn(
+      { algorithm, errorName: name, errorCode: code },
+      "Failed to decrypt session cookie",
+    );
     return null;
   }
 };

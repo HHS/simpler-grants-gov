@@ -2,6 +2,7 @@
 
 import { getSession } from "src/services/auth/session";
 import { updateSavedOpportunityNotificationPreference } from "src/services/fetch/fetchers/notificationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { UpdateSavedOpportunityNotificationPreferenceApiResponse } from "src/types/preferences/notificationPreferenceTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -55,9 +56,9 @@ export const updateSavedOpportunityNotificationPreferenceAction = async ({
       error: null,
     };
   } catch (error: unknown) {
-    console.error(
-      "Update saved opportunity notification preference failed:",
-      error,
+    logger.error(
+      { err: error, organizationId },
+      "Update saved opportunity notification preference failed",
     );
 
     return {

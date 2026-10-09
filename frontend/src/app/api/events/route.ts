@@ -1,4 +1,5 @@
 import { logUserEvent } from "src/services/event/logUserEvent";
+import { logger } from "src/services/logger/simplerLogger";
 import { UserEvent } from "src/types/userEventTypes";
 
 /**
@@ -15,7 +16,10 @@ export const POST = async (request: Request) => {
     await logUserEvent(requestData);
     return new Response(null, { status: 200 });
   } catch (e) {
-    console.error("Error handling user event", e);
+    logger.error(
+      { err: e, awsTraceId: request.headers.get("X-Amz-Cf-Id") },
+      "Error handling user event",
+    );
     return new Response(null, { status: 400 });
   }
 };

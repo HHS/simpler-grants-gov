@@ -11,6 +11,14 @@ import { FunctionComponent, ReactNode } from "react";
 
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
+const mockLoggerError = jest.fn();
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    error: (...args: unknown[]) => mockLoggerError(...args) as unknown,
+  },
+}));
+
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
@@ -245,7 +253,6 @@ describe("AwardRecommendationEditPage", () => {
     });
 
     it("handles 404 error gracefully when award recommendation not found", async () => {
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
       mockGetAwardRecommendationDetails.mockRejectedValue({
         response: { status: 404 },
       });
@@ -256,12 +263,10 @@ describe("AwardRecommendationEditPage", () => {
       });
       render(component);
 
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      expect(mockLoggerError).toHaveBeenCalled();
     });
 
     it("handles generic error when fetching award recommendation fails", async () => {
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
       mockGetAwardRecommendationDetails.mockRejectedValue(
         new Error("Network error"),
       );
@@ -273,12 +278,13 @@ describe("AwardRecommendationEditPage", () => {
 
       render(component);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        {
+          err: expect.any(Error) as Error,
+          awardRecommendationId: "AR-26-0001",
+        },
         "Failed to fetch award recommendation details",
-        expect.any(Error),
       );
-
-      consoleSpy.mockRestore();
     });
 
     it("does not render selection method field on edit page", async () => {

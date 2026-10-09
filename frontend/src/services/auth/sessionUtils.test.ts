@@ -17,6 +17,7 @@ const setIssuedAtMock = jest.fn(() => fakeJWTInstance());
 const setExpirationTimeMock = jest.fn(() => fakeJWTInstance());
 const signMock = jest.fn();
 const jwtVerifyMock = jest.fn();
+const mockLoggerWarn = jest.fn();
 
 const fakeKey = new Uint8Array([1, 2, 3]);
 
@@ -40,6 +41,12 @@ const cookiesMock = () => {
     delete: deleteCookiesMock,
   };
 };
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    warn: (...args: unknown[]): unknown => mockLoggerWarn(...args),
+  },
+}));
 
 jest.mock("next/headers", () => ({
   cookies: () => cookiesMock(),
@@ -121,5 +128,27 @@ describe("decrypt", () => {
     });
     const decrypted = await decrypt(cookie, fakeKey, "HS256");
     expect(decrypted).toEqual(null);
+  });
+
+  it("logs verification failures without the decoded payload", async () => {
+    jwtVerifyMock.mockImplementation(() => {
+      throw Object.assign(new Error('"exp" claim timestamp check failed'), {
+        name: "JWTExpired",
+        code: "ERR_JWT_EXPIRED",
+        payload: { token: "fakeApiToken" },
+      });
+    });
+    await decrypt(cookie, fakeKey, "HS256");
+    expect(mockLoggerWarn).toHaveBeenCalledWith(
+      {
+        algorithm: "HS256",
+        errorName: "JWTExpired",
+        errorCode: "ERR_JWT_EXPIRED",
+      },
+      "Failed to decrypt session cookie",
+    );
+    expect(JSON.stringify(mockLoggerWarn.mock.calls)).not.toContain(
+      "fakeApiToken",
+    );
   });
 });

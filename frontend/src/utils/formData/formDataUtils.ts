@@ -63,7 +63,7 @@ export const getByPointer = (target: object, path: string): unknown => {
     if ((e as Error).message.includes("Invalid reference token:")) {
       return undefined;
     }
-    console.error("error referencing schema path", e, target, path);
+    console.error("error referencing schema path", path, e);
     throw e;
   }
 };

@@ -4,6 +4,7 @@ import {
   fetchFileUploadDetails,
   uploadFileToS3,
 } from "src/services/fetch/fetchers/filesFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { FileUploadStatusUpdate } from "src/types/fileUploadTypes";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -27,7 +28,10 @@ const pipeStatusStreamToResponse = async (
         data: FileUploadStatusUpdate;
       };
     } catch (e) {
-      console.error("Error parsing json from file upload stream payload");
+      logger.error(
+        { err: e },
+        "Error parsing json from file upload stream payload",
+      );
       throw e;
     }
     // we will expect the API to deliver duplicate chunks until a state change, but will only write to our
@@ -98,7 +102,7 @@ const processUploadInStream = (file: File): ReadableStream<string> => {
         await orchestrateFileUpload(responseStreamController, file);
         responseStreamController.close();
       } catch (e) {
-        console.error("Error in file upload orchestration stream", e);
+        logger.error({ err: e }, "Error in file upload orchestration stream");
         responseStreamController.enqueue(
           JSON.stringify({
             status: "error",
@@ -119,7 +123,10 @@ export const handleFileUpload = async (request: NextRequest) => {
     const file = formData.get("file_attachment") as File;
 
     if (!file) {
-      console.error("File upload attempt missing file");
+      logger.warn(
+        { awsTraceId: request.headers.get("X-Amz-Cf-Id") },
+        "File upload attempt missing file",
+      );
       return Response.json(
         { message: "File upload attempt missing file" },
         { status: 400 },
@@ -135,7 +142,10 @@ export const handleFileUpload = async (request: NextRequest) => {
     // this endpoint to always return a 200, and an errors will be caught and delivered within
     // the stream. We should do work up a test to see what happens if the stream errors unexpectedly, though. That also likely wouldn't be caught here, though, since the response would already have been sent.
   } catch (e) {
-    console.error(e);
+    logger.error(
+      { err: e, awsTraceId: request.headers.get("X-Amz-Cf-Id") },
+      "Error attempting to upload file",
+    );
     const { status, message } = readError(e as Error, 500);
     return Response.json(
       {

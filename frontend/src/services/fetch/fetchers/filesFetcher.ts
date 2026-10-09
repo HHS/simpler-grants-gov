@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ApiRequestError } from "src/errors";
+import { logger } from "src/services/logger/simplerLogger";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
 
@@ -66,12 +67,10 @@ export const uploadFileToS3 = async (
     if (axios.isAxiosError(error)) {
       // Non 2XX response status
       if (error.response) {
-        console.error(
-          `${defaultErrorMessage} with status: ${error.response.status}`,
-        );
+        logger.error({ status: error.response.status }, defaultErrorMessage);
       }
     } else {
-      console.error(defaultErrorMessage);
+      logger.error({ err: error }, defaultErrorMessage);
     }
     throw new ApiRequestError(defaultErrorMessage);
   }

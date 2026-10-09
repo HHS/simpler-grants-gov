@@ -1,5 +1,6 @@
 import { MissingAuthError } from "src/errors";
 import { getOrganizationUsers } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { UserDetail } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
@@ -85,7 +86,10 @@ export const OrganizationRoster = async ({
         </Alert>
       );
     }
-    console.error(e);
+    logger.error(
+      { err: e, organizationId },
+      "Unable to fetch organization users",
+    );
     return <GeneralErrorAlert />;
   }
 
