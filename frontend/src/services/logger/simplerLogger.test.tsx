@@ -299,4 +299,17 @@ describe("serializeError", () => {
     expect(serialized.message).toEqual("outer: inner");
     expect(serialized).not.toHaveProperty("cause");
   });
+
+  it.each([null, undefined, "failure", 42])(
+    "passes through non-object value %p without throwing",
+    (value) => {
+      expect(serializeError(value)).toEqual(value);
+    },
+  );
+
+  it("keeps only known cause fields on plain objects", () => {
+    expect(
+      serializeError({ cause: { status: 400, details: { value: "secret" } } }),
+    ).toEqual({ cause: { status: 400 } });
+  });
 });

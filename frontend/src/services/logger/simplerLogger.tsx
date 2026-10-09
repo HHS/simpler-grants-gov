@@ -26,9 +26,12 @@ type ErrorCause = {
 // pino's default err serializer drops non-Error causes, which is where our custom
 // error classes (see src/errors.ts) keep their type, status and details. Only known
 // fields are kept since API error details can include the submitted value
-export const serializeError = (err: Error) => {
-  const serialized = pino.stdSerializers.err(err);
-  const { cause } = err;
+export const serializeError = (err: unknown) => {
+  const serialized = pino.stdSerializers.err(err as Error);
+  if (!(err instanceof Object)) {
+    return serialized;
+  }
+  const { cause } = err as { cause?: unknown };
   if (!cause || typeof cause !== "object" || cause instanceof Error) {
     return serialized;
   }

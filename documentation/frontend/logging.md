@@ -13,7 +13,7 @@ Next JS (simplerLogger / Pino)
 → New Relic Logs
 ```
 
-The forwarding Lambda parses JSON log lines and lifts their top level fields (`level`, `err`, `awsTraceId`, `correlation_id`, etc.) into New Relic log attributes. Plain text output, such as from `console.error`, arrives without a log level, and each line of a multi-line message (such as a stack trace) arrives as a separate log event.
+The forwarding Lambda parses JSON log lines and lifts their top level fields into New Relic log attributes. Scalar fields such as `level`, `msg`, `awsTraceId` and ids are directly queryable. Nested objects such as `err` arrive as a single serialized JSON string, and long values (over roughly 3,000 characters, such as long stack traces) are truncated. Plain text output, such as from `console.error`, arrives without a log level, and each line of a multi-line message (such as a stack trace) arrives as a separate log event.
 
 ## Configuration
 
