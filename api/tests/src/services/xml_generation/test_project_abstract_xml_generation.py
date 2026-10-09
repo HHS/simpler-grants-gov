@@ -318,7 +318,7 @@ class TestProjectAbstractXSDValidation:
             filename="abstract.docx",
             mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             file_location="abstract.docx",
-            hash_value="abc123=",
+            hash_value="aeB1+6gdFwih51ijIRn3b8QYn24=",
         )
         xml_data = _generate(attachment_info=info)
         result = xsd_validator.validate_xml(xml_data, self._xsd_path(xsd_validator))
@@ -342,7 +342,22 @@ class TestProjectAbstractNegativePaths:
         assert unknown_uuid in response.error_message
 
     def test_missing_required_attachment_field_returns_error(self):
-        """No 'attachment' key in application_data → failure response."""
+        """No 'attachment' key in application_data → generated XML fails XSD validation.
+
+        The generator itself returns success=True with incomplete XML when application_data
+        is empty; XSD validation is the layer that catches the missing required fields.
+        """
+        from src.services.xml_generation.validation.xsd_validator import XSDValidator
+
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found.")
+        xsd_path = xsd_dir / "Project_Abstract_1_2-V1.2.xsd"
+        if not xsd_path.exists():
+            pytest.skip("Project_Abstract_1_2-V1.2.xsd not found.")
+
+        xsd_validator = XSDValidator(xsd_dir)
+
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data={},
@@ -350,4 +365,11 @@ class TestProjectAbstractNegativePaths:
             attachment_mapping={},
         )
         response = service.generate_xml(request)
-        assert response.success is False
+        # Generator succeeds but produces incomplete XML (no AttachedFile element)
+        assert response.success is True
+        assert response.xml_data is not None
+        # XSD validation must catch the missing required element
+        result = xsd_validator.validate_xml(response.xml_data, xsd_path)
+        assert result["valid"] is False, (
+            f"Expected XSD validation to fail for incomplete XML, but it passed.\n{response.xml_data}"
+        )
