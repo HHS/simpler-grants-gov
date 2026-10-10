@@ -22,5 +22,8 @@ module "infra_dev_config" {
   database_max_capacity         = 1
   database_instance_count       = 1
 
+  # Dashboard and silent alarms first; no recipient or delivery approval assumed.
+  enable_pdf_readability_monitoring = true
+
   service_override_extra_environment_variables = {}
 }
