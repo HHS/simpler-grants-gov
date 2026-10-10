@@ -134,3 +134,13 @@ variable "database_newrelic_entity_guid" {
   description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
   default     = null
 }
+
+variable "pdf_readability_waf" {
+  description = "Opt-in NOFO PDF pilot controls. Null preserves existing WAF rules; Count observes without blocking."
+  type = object({
+    rate_limit      = optional(number, 10)
+    rate_action     = optional(string, "count")
+    emergency_block = optional(bool, false)
+  })
+  default = null
+}
