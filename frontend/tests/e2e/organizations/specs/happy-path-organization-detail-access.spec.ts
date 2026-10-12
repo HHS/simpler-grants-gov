@@ -23,7 +23,7 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { getTestOrgId } from "tests/e2e/utils/auth/test-users";
 
-const { AUTH, CORE_REGRESSION } = VALID_TAGS;
+const { SMOKE, FULL_REGRESSION } = VALID_TAGS;
 
 const { targetEnv } = playwrightEnv;
 
@@ -48,7 +48,7 @@ test.describe("Organization detail page access", () => {
    */
   test(
     "Org member can view their organization's detail page",
-    { tag: [AUTH, CORE_REGRESSION] },
+    { tag: [SMOKE, FULL_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
