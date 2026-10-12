@@ -19,13 +19,12 @@ import {
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/search-utils";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION, FULL_REGRESSION } =
-  VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 test.describe("Search page - filter selection updates results", () => {
   test(
     "should update result count and URL when a single filter is applied",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(120_000);
 
@@ -56,7 +55,7 @@ test.describe("Search page - filter selection updates results", () => {
 
   test(
     "should update result count and URL when 3-4 filters are applied",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(180_000);
 
