@@ -11,8 +11,7 @@ import { test as base, expect } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } =
-  VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 type TestWithOpportunityId = {
   testOpportunityId: string;
 };
@@ -51,19 +50,15 @@ test.beforeEach(async ({ page, testOpportunityId }) => {
 });
 
 /** @scenario Show the page title */
-test(
-  "has title",
-  { tag: [SMOKE, GRANTEE, OPPORTUNITY_SEARCH] },
-  async ({ page }) => {
-    // Then the page title should start with "Opportunity Listing -"
-    await expect(page).toHaveTitle(/^Opportunity Listing - */);
-  },
-);
+test("has title", { tag: [DISCOVERY, FULL_REGRESSION] }, async ({ page }) => {
+  // Then the page title should start with "Opportunity Listing -"
+  await expect(page).toHaveTitle(/^Opportunity Listing - */);
+});
 
 /** @scenario Show key page content */
 test(
   "has page attributes",
-  { tag: [SMOKE, CORE_REGRESSION, OPPORTUNITY_SEARCH] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page }) => {
     // Then I should see "Application process" in "Application process section"
     await expect(page.getByText("Application process")).toBeVisible();
@@ -75,7 +70,7 @@ test(
 // nothing really special about the markup surrounding them
 test(
   "can expand and collapse opportunity description",
-  { tag: [CORE_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page }) => {
     const descriptionExpander = page.locator(
       "div[data-testid='opportunity-description'] div[data-testid='content-display-toggle']",
@@ -137,7 +132,7 @@ test(
 /** @scenario Expand and collapse the close date description */
 test(
   "can expand and collapse close date description",
-  { tag: [FULL_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page }) => {
     const descriptionExpander = page.locator(
       "div[data-testid='opportunity-status-widget'] div[data-testid='content-display-toggle']",
@@ -199,7 +194,7 @@ test(
 /** @scenario Open Grants.gov in a new tab */
 test(
   "can navigate to grants.gov",
-  { tag: [CORE_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page, context }) => {
     // Given I should see "View on Grants.gov"
     const newTabPromise = context.waitForEvent("page");
