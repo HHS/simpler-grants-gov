@@ -11,9 +11,31 @@ from src.form_schema.forms import init_form_registry
 from src.services.xml_generation.config import _build_xml_form_map, _build_xml_form_xsd_url_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.models.attachment import HASH_ALGORITHM
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
+
+def _validate_raw_attachments(raw: dict, param_name: str) -> None:
+    """Raise click.BadParameter if any attachment entry is missing required keys.
+
+    Args:
+        raw: Parsed attachment mapping dict (uuid -> info dict).
+        param_name: The CLI option name, used in the error message.
+    """
+    required_keys = {"filename", "mime_type", "file_location", "hash_value"}
+    for uuid, info in raw.items():
+        if not isinstance(info, dict):
+            raise click.BadParameter(
+                f"Attachment '{uuid}' must be an object, got {type(info).__name__}",
+                param_hint=f"'--{param_name}'",
+            )
+        missing = required_keys - info.keys()
+        if missing:
+            raise click.BadParameter(
+                f"Attachment '{uuid}' is missing required fields: {sorted(missing)}",
+                param_hint=f"'--{param_name}'",
+            )
 
 
 @task_blueprint.cli.command("generate-xml")
@@ -137,13 +159,15 @@ def generate_xml_command(
                 raw_attachments = json.load(f)
 
         if raw_attachments is not None:
+            param_name = "attachments-file" if attachments_file_path else "attachments"
+            _validate_raw_attachments(raw_attachments, param_name)
             attachment_mapping = {
                 uuid: AttachmentInfo(
                     filename=info["filename"],
                     mime_type=info["mime_type"],
                     file_location=info["file_location"],
                     hash_value=info["hash_value"],
-                    hash_algorithm=info.get("hash_algorithm", "SHA-1"),
+                    hash_algorithm=info.get("hash_algorithm", HASH_ALGORITHM),
                 )
                 for uuid, info in raw_attachments.items()
             }
