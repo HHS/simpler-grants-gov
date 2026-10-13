@@ -1,6 +1,6 @@
 // Frontend source is imported, not type-checked: checking it would need the frontend's own
 // tsconfig and packages, and the frontend's CI already checks it. These declarations cover
-// only what the site touches, loosely typed. Delete with the rest of src/vendor/sgg.
+// only what the site touches, loosely typed.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 declare module "@sgg/frontend/types/applyForm/types" {
@@ -87,4 +87,63 @@ declare module "@sgg/frontend/components/apply-form/widgets/WidgetRenderers" {
 
 declare module "@sgg/frontend/i18n/messages/en/index" {
   export const messages: Record<string, unknown>;
+}
+
+declare module "@sgg/frontend/utils/applyForm/jsonFormsUiSchema" {
+  import type { ControlElement, UISchemaElement } from "@jsonforms/core";
+  import type { RJSFSchema } from "@rjsf/utils";
+  import type { UiSchema, UiSchemaField } from "@sgg/frontend/types/applyForm/types";
+
+  export type JsonFormsUiSchema = UISchemaElement;
+  export const controlToNodes: (
+    control: ControlElement,
+    schema: RJSFSchema,
+  ) => UiSchemaField[];
+  export const groupName: (label: string) => string;
+  export const jsonFormsToUiSchema: (
+    uiSchema: JsonFormsUiSchema,
+    schema: RJSFSchema,
+  ) => UiSchema;
+  export const unadaptableScopes: (
+    uiSchema: JsonFormsUiSchema,
+    schema: RJSFSchema,
+  ) => string[];
+}
+
+declare module "@sgg/frontend/components/apply-form/jsonforms/renderers" {
+  import type { RJSFSchema } from "@rjsf/utils";
+  import type { FormattedFormValidationWarning } from "@sgg/frontend/types/applyForm/types";
+  import type { JsonFormsUiSchema } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
+  import type { Context } from "react";
+
+  export type AdapterContextValue = {
+    schema: RJSFSchema;
+    formData: object;
+    errors: FormattedFormValidationWarning[] | null;
+    requiredFieldPaths: string[];
+    rootUiSchema: JsonFormsUiSchema;
+    formContext?: unknown;
+    isFormLocked?: boolean;
+    print?: boolean;
+  };
+  export const AdapterContext: Context<AdapterContextValue | null>;
+}
+
+declare module "@sgg/frontend/components/apply-form/jsonforms/JsonFormsFields" {
+  import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
+  import type { RJSFSchema } from "@rjsf/utils";
+  import type { FormattedFormValidationWarning } from "@sgg/frontend/types/applyForm/types";
+  import type { JsonFormsUiSchema } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
+  import type { JSX } from "react";
+
+  export const JsonFormsFields: (props: {
+    errors: FormattedFormValidationWarning[] | null;
+    formData: object;
+    schema: RJSFSchema;
+    uiSchema: JsonFormsUiSchema;
+    formContext?: unknown;
+    isFormLocked?: boolean;
+    print?: boolean;
+    extraRenderers?: JsonFormsRendererRegistryEntry[];
+  }) => JSX.Element;
 }

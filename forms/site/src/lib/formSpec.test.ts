@@ -2,7 +2,7 @@ import type { JsonSchema } from "@jsonforms/core";
 import { processFormSchema } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { unadaptableScopes } from "../vendor/sgg/jsonFormsUiSchema";
+import { unadaptableScopes } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
 import { loadFormSpec, type FormSpec } from "./formSpec";
 import { createAjv } from "./validation";
 
