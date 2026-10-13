@@ -1,7 +1,7 @@
 """add opportunity status index to opportunity version
 
 Revision ID: 6a5cdd637577
-Revises: 0c0638b3010e
+Revises: 6ad9442a4bd6
 Create Date: 2026-10-06 10:00:00.000000
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "6a5cdd637577"
-down_revision = "0c0638b3010e"
+down_revision = "6ad9442a4bd6"
 branch_labels = None
 depends_on = None
 
