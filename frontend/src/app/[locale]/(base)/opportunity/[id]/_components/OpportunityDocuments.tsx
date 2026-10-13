@@ -7,6 +7,7 @@ import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { useTranslations } from "next-intl";
 import { Grid, Link, Table } from "@trussworks/react-uswds";
 
+import { SECTION_HEADING_CLASSES } from "./OpportunityDetailItem";
 import ZipDownloadButton from "./ZipDownloadButton";
 
 interface OpportunityDocumentsProps {
@@ -79,11 +80,11 @@ const OpportunityDocuments = ({
   return (
     <Grid
       row
-      className="margin-top-6 simpler-page-anchor-offset"
+      className="margin-bottom-4 simpler-page-anchor-offset"
       id="opportunity-documents"
     >
       <Grid col={8}>
-        <h2>{t("title")}</h2>
+        <h2 className={SECTION_HEADING_CLASSES}>{t("title")}</h2>
       </Grid>
       {documents.length > 0 ? (
         <>

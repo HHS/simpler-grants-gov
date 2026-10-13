@@ -85,16 +85,11 @@ describe("OpportunityIntro", () => {
       ),
     ).toBeInTheDocument();
   });
-  it("includes `Version History` link to legacy opportunity page", () => {
+  it("leaves the version history link to the History section", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);
 
-    const versionHistoryLink = screen.getByRole("link", {
-      name: "versionHistory",
-    });
-    expect(versionHistoryLink).toBeInTheDocument();
-    expect(versionHistoryLink).toHaveAttribute(
-      "href",
-      "https://www.grants.gov/search-results-detail/1",
-    );
+    expect(
+      screen.queryByRole("link", { name: "versionHistory" }),
+    ).not.toBeInTheDocument();
   });
 });

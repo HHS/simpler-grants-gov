@@ -1,87 +1,81 @@
-import { render, screen } from "@testing-library/react";
-import {
-  BaseOpportunity,
-  Summary,
-} from "src/types/opportunity/opportunityResponseTypes";
+import { render, screen, within } from "@testing-library/react";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { mockOpportunityDetail } from "src/utils/testing/fixtures";
 
 import OpportunityLink from "./OpportunityLink";
 
-// Mock `useTranslations`
-jest.mock("next-intl", () => ({
-  useTranslations: jest.fn().mockReturnValue((key: string) => {
-    const translations: { [key: string]: string } = {
-      title: "Link to additional information",
-    };
-    return translations[key] || key;
-  }),
+jest.mock("src/constants/environments", () => ({
+  environment: { LEGACY_HOST: "https://test.grants.gov" },
 }));
 
-const mockOpportunityData: BaseOpportunity = {
-  opportunity_title: "Test Opportunity",
-  summary: {
-    additional_info_url: "https://example.com",
-    additional_info_url_description: "Click here for more information",
-  } as Summary,
-} as BaseOpportunity;
+const renderLink = (
+  summary: Partial<BaseOpportunity["summary"]> = {},
+  legacyId: number | null = 12345,
+) =>
+  render(
+    <OpportunityLink
+      opportunityData={{
+        legacy_opportunity_id: legacyId as number,
+        summary: { ...mockOpportunityDetail.summary, ...summary },
+      }}
+    />,
+  );
 
 describe("OpportunityLink", () => {
-  it("renders the link with URL and description", () => {
-    render(<OpportunityLink opportunityData={mockOpportunityData} />);
-
-    const linkElement = screen.getByRole("link", {
-      name: "Click here for more information",
+  it("renders the additional information link and the legacy link as an unbulleted list", () => {
+    renderLink({
+      additional_info_url: "https://example.com/info",
+      additional_info_url_description: "Program website",
     });
-    expect(linkElement).toBeInTheDocument();
-    expect(linkElement).toHaveAttribute("href", "https://example.com");
-  });
 
-  it("renders no additional info link if URL is missing", () => {
-    const mockDataWithoutUrl: BaseOpportunity = {
-      ...mockOpportunityData,
-      summary: {
-        ...mockOpportunityData.summary,
-        additional_info_url: null,
-      },
-    };
+    expect(
+      screen.getByRole("heading", { level: 2, name: "title" }),
+    ).toBeInTheDocument();
 
-    render(<OpportunityLink opportunityData={mockDataWithoutUrl} />);
+    const items = within(screen.getByRole("list")).getAllByRole("listitem");
+    expect(items).toHaveLength(2);
 
-    const linkElement = screen.queryByRole("link");
-    expect(linkElement).not.toBeInTheDocument();
-  });
-
-  it("renders a placeholder if URL description is missing", () => {
-    const mockDataWithoutDescription: BaseOpportunity = {
-      ...mockOpportunityData,
-      summary: {
-        ...mockOpportunityData.summary,
-        additional_info_url_description: "",
-      },
-    };
-
-    render(<OpportunityLink opportunityData={mockDataWithoutDescription} />);
-
-    const linkElement = screen.getByRole("link", {
-      name: "https://example.com",
+    const infoLink = within(items[0]).getByRole("link", {
+      name: "Program website",
     });
-    expect(linkElement).toBeInTheDocument();
-    expect(linkElement).toHaveAttribute("href", "https://example.com");
-  });
+    expect(infoLink).toHaveAttribute("href", "https://example.com/info");
+    expect(infoLink).toHaveAttribute("target", "_blank");
+    expect(infoLink).toHaveAttribute("rel", "noopener noreferrer");
 
-  it("renders a fallback when both URL and description are missing", () => {
-    const mockDataWithoutUrlAndDescription: BaseOpportunity = {
-      ...mockOpportunityData,
-      summary: {
-        additional_info_url: null,
-        additional_info_url_description: null,
-      } as Summary,
-    };
-
-    render(
-      <OpportunityLink opportunityData={mockDataWithoutUrlAndDescription} />,
+    expect(
+      within(items[1]).getByRole("link", { name: "viewOnGrantsGov" }),
+    ).toHaveAttribute(
+      "href",
+      "https://test.grants.gov/search-results-detail/12345",
     );
+  });
 
-    const linkElement = screen.queryByRole("link");
-    expect(linkElement).not.toBeInTheDocument();
+  it("uses the url as the link text when there is no description", () => {
+    renderLink({ additional_info_url: "https://example.com/info" });
+    expect(
+      screen.getByRole("link", { name: "https://example.com/info" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the fallback once, alongside the legacy link", () => {
+    renderLink({
+      additional_info_url: null,
+      additional_info_url_description: "Description without a url",
+    });
+
+    expect(screen.getAllByText("noAdditionalInfo")).toHaveLength(1);
+    expect(
+      screen.queryByText("Description without a url"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "viewOnGrantsGov" }),
+    ).toBeInTheDocument();
+  });
+
+  it("omits the legacy link without a legacy id", () => {
+    renderLink({}, null);
+
+    expect(screen.getByText("noAdditionalInfo")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });

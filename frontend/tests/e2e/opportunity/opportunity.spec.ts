@@ -3,7 +3,6 @@
  * @scenario Show the page title
  * @scenario Show key page content
  * @scenario Expand and collapse the opportunity description
- * @scenario Expand and collapse the close date description
  * @scenario Open Grants.gov in a new tab
  */
 
@@ -11,8 +10,7 @@ import { test as base, expect } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } =
-  VALID_TAGS;
+const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION } = VALID_TAGS;
 type TestWithOpportunityId = {
   testOpportunityId: string;
 };
@@ -22,7 +20,6 @@ type TestWithOpportunityId = {
   each opportunity must have:
 
   * sufficiently long description to hide
-  * sufficiently long close date description to hide
 
 */
 
@@ -65,8 +62,20 @@ test(
   "has page attributes",
   { tag: [SMOKE, CORE_REGRESSION, OPPORTUNITY_SEARCH] },
   async ({ page }) => {
-    // Then I should see "Application process" in "Application process section"
-    await expect(page.getByText("Application process")).toBeVisible();
+    // Then I should see the details and content section headings
+    for (const heading of [
+      "Important dates",
+      "Award details",
+      "History",
+      "Eligibility",
+      "Documents",
+      "Agency contact information",
+      "Link to additional information",
+    ]) {
+      await expect(
+        page.getByRole("heading", { level: 2, name: heading, exact: true }),
+      ).toBeVisible();
+    }
   },
 );
 
@@ -134,78 +143,18 @@ test(
   },
 );
 
-/** @scenario Expand and collapse the close date description */
-test(
-  "can expand and collapse close date description",
-  { tag: [FULL_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
-  async ({ page }) => {
-    const descriptionExpander = page.locator(
-      "div[data-testid='opportunity-status-widget'] div[data-testid='content-display-toggle']",
-    );
-
-    // Given I should see "Show full description" in "Opportunity status"
-    await expect(
-      descriptionExpander.getByText("Show full description"),
-    ).toBeVisible();
-
-    // And I should not see "Hide full description" in "Opportunity status"
-    await expect(
-      descriptionExpander.getByText("Hide full description"),
-    ).not.toBeVisible();
-    const divCountBeforeExpanding = await page.locator("div:visible").count();
-
-    // When I click "Show full description" in "Opportunity status"
-    await descriptionExpander
-      .getByRole("button", { name: /^Show full description$/ })
-      .click();
-
-    // Then I should see "Hide full description" in "Opportunity status"
-    // validate that summary has been expanded
-    await expect(
-      descriptionExpander.getByText("Show full description"),
-    ).not.toBeVisible();
-
-    // And I should not see "Show full description" in "Opportunity status"
-    await expect(
-      descriptionExpander.getByText("Hide full description"),
-    ).toBeVisible();
-
-    // And I should see more visible page content in "Opportunity status"
-    const divCountAfterExpanding = await page.locator("div:visible").count();
-    expect(divCountBeforeExpanding).toBeLessThan(divCountAfterExpanding);
-
-    // When I click "Hide full description" in "Opportunity status"
-    await descriptionExpander
-      .getByRole("button", { name: /^Hide full description$/ })
-      .click();
-
-    // Then I should see "Show full description" in "Opportunity status"
-    // validate that summary has been collapsed
-    await expect(
-      descriptionExpander.getByText("Show full description"),
-    ).toBeVisible();
-
-    // And I should not see "Hide full description" in "Opportunity status"
-    await expect(
-      descriptionExpander.getByText("Hide full description"),
-    ).not.toBeVisible();
-
-    // And I should see less visible page content in "Opportunity status"
-    const divCountAfterCollapsing = await page.locator("div:visible").count();
-    expect(divCountAfterExpanding).toBeGreaterThan(divCountAfterCollapsing);
-  },
-);
-
 /** @scenario Open Grants.gov in a new tab */
 test(
   "can navigate to grants.gov",
   { tag: [CORE_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
   async ({ page, context }) => {
-    // Given I should see "View on Grants.gov"
+    // Given I should see "View this opportunity on Grants.gov."
     const newTabPromise = context.waitForEvent("page");
 
-    // When I click "View on Grants.gov"
-    await page.getByRole("button", { name: "View on Grants.gov" }).click();
+    // When I click "View this opportunity on Grants.gov."
+    await page
+      .getByRole("link", { name: "View this opportunity on Grants.gov." })
+      .click();
 
     // Then a new tab should open
     const newPage = await newTabPromise;
