@@ -11,7 +11,8 @@ export default defineConfig({
       dedupe: ["react", "react-dom", "@trussworks/react-uswds"],
     },
     server: {
-      fs: { allow: [".", FRONTEND_ROOT] },
+      // `../parity` compares each form page's fields with their Grants.gov sources.
+      fs: { allow: [".", "../parity", FRONTEND_ROOT] },
     },
     css: {
       preprocessorOptions: {
