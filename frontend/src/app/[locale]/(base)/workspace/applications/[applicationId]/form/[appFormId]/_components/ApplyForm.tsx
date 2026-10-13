@@ -12,6 +12,7 @@ import {
 } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { getFieldsForNav } from "src/utils/applyForm/applyFormUtils";
+import { JsonFormsUiSchema } from "src/utils/applyForm/jsonFormsUiSchema";
 import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFieldListWarningsAfterDelete";
 import {
   formatTimestamp,
@@ -24,6 +25,7 @@ import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 import { Alert, FormGroup } from "@trussworks/react-uswds";
 
 import { FormFields } from "src/components/apply-form/FormFields";
+import { JsonFormsFields } from "src/components/apply-form/jsonforms/JsonFormsFields";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import ApplyFormActionButtons from "./ApplyFormActionButtons";
 import { ApplyFormMessage } from "./ApplyFormMessage";
@@ -63,6 +65,7 @@ const ApplyForm = ({
   savedFormData,
   validationWarnings,
   uiSchema,
+  jsonFormsUiSchema,
   attachments,
   isBudgetForm = false,
   applicationStatus,
@@ -74,6 +77,9 @@ const ApplyForm = ({
   formSchema: RJSFSchema;
   savedFormData: object;
   uiSchema: UiSchema;
+  // When set, the form body renders with JSON Forms; uiSchema is then its section/field
+  // equivalent and still drives navigation.
+  jsonFormsUiSchema?: JsonFormsUiSchema;
   validationWarnings:
     FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
@@ -272,15 +278,27 @@ const ApplyForm = ({
           <AttachmentsProvider
             value={{ attachments: attachments ?? [], setAttachmentsChanged }}
           >
-            <FormFields
-              key={saved ? "after-save" : "before-save"}
-              errors={saved ? displayValidationWarnings : null}
-              formData={formObject}
-              schema={formSchema}
-              uiSchema={uiSchema}
-              formContext={formContextValue}
-              isFormLocked={isFormLocked}
-            />
+            {jsonFormsUiSchema ? (
+              <JsonFormsFields
+                key={saved ? "after-save" : "before-save"}
+                errors={saved ? displayValidationWarnings : null}
+                formData={formObject}
+                schema={formSchema}
+                uiSchema={jsonFormsUiSchema}
+                formContext={formContextValue}
+                isFormLocked={isFormLocked}
+              />
+            ) : (
+              <FormFields
+                key={saved ? "after-save" : "before-save"}
+                errors={saved ? displayValidationWarnings : null}
+                formData={formObject}
+                schema={formSchema}
+                uiSchema={uiSchema}
+                formContext={formContextValue}
+                isFormLocked={isFormLocked}
+              />
+            )}
           </AttachmentsProvider>
         </FormGroup>
         <LeftHandFormNav title={translate("navTitle")} fields={navFields} />
