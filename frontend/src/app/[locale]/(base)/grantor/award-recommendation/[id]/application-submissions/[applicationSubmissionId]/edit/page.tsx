@@ -63,12 +63,12 @@ async function AwardRecommendationSubmissionEditPageContent({
     awardRecommendationNumber =
       awardRecommendationDetails.award_recommendation_number;
     submission = submissionDetails;
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, awardRecommendationId, applicationSubmissionId },
+      { err: e, awardRecommendationId, applicationSubmissionId },
       "Failed to fetch award recommendation submission details",
     );
-    const errorStatus = parseErrorStatus(error as ApiRequestError);
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
 
     if (errorStatus === 401 || errorStatus === 403) {
       return (

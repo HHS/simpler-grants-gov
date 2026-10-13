@@ -135,12 +135,12 @@ async function AwardRecommendationPageContent({
     awardRecommendationDetails = await getAwardRecommendationDetails(
       awardRecommendationId,
     );
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, awardRecommendationId },
+      { err: e, awardRecommendationId },
       "Failed to fetch award recommendation details",
     );
-    const errorStatus = parseErrorStatus(error as ApiRequestError);
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
 
     if (errorStatus === 404) {
       awardRecommendationDetails = null;

@@ -49,12 +49,12 @@ async function EditRecommendationsPageContent({
     awardRecommendationDetails = await getAwardRecommendationDetails(
       awardRecommendationId,
     );
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, awardRecommendationId },
+      { err: e, awardRecommendationId },
       "Failed to fetch award recommendation details",
     );
-    const errorStatus = parseErrorStatus(error as ApiRequestError);
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
 
     if (errorStatus === 401 || errorStatus === 403) {
       return (

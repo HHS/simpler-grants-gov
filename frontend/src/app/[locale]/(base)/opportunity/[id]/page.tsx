@@ -40,12 +40,12 @@ export async function generateMetadata({
   try {
     const { data: opportunityData } = await getOpportunityDetails(id);
     title = `${t("OpportunityListing.pageTitle")} - ${opportunityData.opportunity_title || ""}`;
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, opportunityId: id },
+      { err: e, opportunityId: id },
       "Failed to render page title due to API error",
     );
-    if (parseErrorStatus(error as ApiRequestError) === 404) {
+    if (parseErrorStatus(e as ApiRequestError) === 404) {
       return notFound();
     }
   }
@@ -129,9 +129,9 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         opportunitySaved = true;
       }
     }
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, opportunityId: id },
+      { err: e, opportunityId: id },
       "Unable to fetch list of saved opportunities",
     );
   }

@@ -40,10 +40,10 @@ export const createOpportunityAction = async (
     return { data: createOpportunityResponse, success: true };
   } catch (e) {
     // General try failure catch error
-    const error = e as Error;
-    logger.error({ err: error }, "Error creating opportunity");
+    const typedError = e as Error;
+    logger.error({ err: typedError }, "Error creating opportunity");
     return {
-      errorMessage: error.message,
+      errorMessage: typedError.message,
       data: rawFormData,
     };
   }

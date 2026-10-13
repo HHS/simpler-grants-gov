@@ -42,9 +42,9 @@ export const updateAppFilingNameAction = async (
     revalidateTag(`application-${applicationId}`, "max");
 
     return { success: true, error: null };
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, applicationId },
+      { err: e, applicationId },
       "Failed to update application filing name",
     );
     return { success: false, error: "Failed to update application name." };

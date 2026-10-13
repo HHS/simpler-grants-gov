@@ -40,9 +40,9 @@ export async function ManageUsersPageContent({
 
   try {
     userOrganizations = await getOrganizationDetails(organizationId);
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, organizationId },
+      { err: e, organizationId },
       "Unable to fetch organization information",
     );
   }

@@ -111,12 +111,12 @@ async function EditRiskPageContent({ params }: EditRiskPageProps) {
         </GridContainer>
       </>
     );
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, awardRecommendationId, riskId },
+      { err: e, awardRecommendationId, riskId },
       "Failed to fetch award recommendation risk details",
     );
-    const errorStatus = parseErrorStatus(error as ApiRequestError);
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
 
     if (errorStatus === 401 || errorStatus === 403) {
       return (

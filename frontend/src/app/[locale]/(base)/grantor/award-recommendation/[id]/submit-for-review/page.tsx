@@ -43,9 +43,9 @@ async function SubmitForReviewPageContent({
     awardRecommendationDetails = await getAwardRecommendationDetails(
       awardRecommendationId,
     );
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, awardRecommendationId },
+      { err: e, awardRecommendationId },
       "Failed to fetch award recommendation details",
     );
     redirect(`/grantor/award-recommendation/${awardRecommendationId}/edit`);

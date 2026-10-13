@@ -115,13 +115,13 @@ export async function saveAwardRecommendation(
       success: true,
     };
   } catch (e) {
-    const error = e as Error;
+    const typedError = e as Error;
     logger.error(
-      { err: error, awardRecommendationId },
+      { err: typedError, awardRecommendationId },
       "Error saving award recommendation",
     );
     return {
-      errorMessage: error.message,
+      errorMessage: typedError.message,
     };
   }
 }
@@ -146,11 +146,11 @@ export async function saveAwardRecommendationSubmissionDetails(
       throw e;
     }
 
-    const error = e as Error;
+    const typedError = e as Error;
     logger.error(
-      { err: error, awardRecommendationId, submissionId },
+      { err: typedError, awardRecommendationId, submissionId },
       "Error saving award recommendation submission details",
     );
-    throw error;
+    throw typedError;
   }
 }

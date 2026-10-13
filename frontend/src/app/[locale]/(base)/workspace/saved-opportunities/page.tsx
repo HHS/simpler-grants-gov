@@ -66,8 +66,8 @@ export default async function SavedOpportunities({
   if (session?.token) {
     try {
       organizations = await getUserOrganizations(session.user_id);
-    } catch (error: unknown) {
-      logger.error({ err: error }, "Unable to fetch user organizations");
+    } catch (e: unknown) {
+      logger.error({ err: e }, "Unable to fetch user organizations");
       hasOrganizationsError = true;
     }
   }

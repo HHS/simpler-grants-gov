@@ -71,9 +71,9 @@ export const saveOpportunityForOrganizationAction = async ({
       success: true,
       error: null,
     };
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, organizationId, opportunityId },
+      { err: e, organizationId, opportunityId },
       "Save opportunity for organization failed",
     );
     return {
@@ -115,9 +115,9 @@ export const deleteSavedOpportunityForOrganizationAction = async ({
       success: true,
       error: null,
     };
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, organizationId, opportunityId },
+      { err: e, organizationId, opportunityId },
       "Delete saved opportunity for organization failed",
     );
     return {

@@ -30,16 +30,16 @@ export async function GET(
     const workflowDetails = await getWorkflowDetails(id);
 
     return NextResponse.json({ data: workflowDetails });
-  } catch (error) {
+  } catch (e) {
     logger.error(
       {
-        err: error,
+        err: e,
         workflowId: id,
         awsTraceId: request.headers.get("X-Amz-Cf-Id"),
       },
       "Error fetching workflow details",
     );
-    const { status, message, cause } = readError(error as Error, 500);
+    const { status, message, cause } = readError(e as Error, 500);
 
     return NextResponse.json(
       {

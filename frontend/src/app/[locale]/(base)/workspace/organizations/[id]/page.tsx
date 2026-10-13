@@ -25,12 +25,12 @@ export async function generateMetadata({
   try {
     const organizationDetails = await getOrganizationDetails(id);
     title = `${t("OrganizationDetail.pageTitle")}: ${organizationDetails.sam_gov_entity.legal_business_name || ""} | Simpler.Grants.gov`;
-  } catch (error) {
+  } catch (e) {
     logger.error(
-      { err: error, organizationId: id },
+      { err: e, organizationId: id },
       "Failed to render page title due to API error",
     );
-    if (parseErrorStatus(error as ApiRequestError) === 404) {
+    if (parseErrorStatus(e as ApiRequestError) === 404) {
       return notFound();
     }
   }

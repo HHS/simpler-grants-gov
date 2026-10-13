@@ -121,8 +121,8 @@ export const fetchSavedOpportunities = async (
       organizationIdsFilter,
     );
     return savedOpportunities;
-  } catch (error: unknown) {
-    logger.error({ err: error }, "Error fetching saved opportunities");
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Error fetching saved opportunities");
     return [];
   }
 };

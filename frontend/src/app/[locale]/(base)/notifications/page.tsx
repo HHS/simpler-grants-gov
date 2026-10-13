@@ -45,8 +45,8 @@ async function Notifications(): Promise<ReactElement | undefined> {
         organizationName: organization.sam_gov_entity.legal_business_name,
       }),
     );
-  } catch (error: unknown) {
-    logger.error({ err: error }, "Unable to fetch user organizations");
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Unable to fetch user organizations");
     hasOrganizationsFetchError = true;
   }
 
@@ -62,8 +62,8 @@ async function Notifications(): Promise<ReactElement | undefined> {
         buildOrganizationPreferenceKey(organizationPreference.organization_id)
       ] = organizationPreference.email_enabled;
     });
-  } catch (error: unknown) {
-    logger.error({ err: error }, "Unable to fetch notification preferences");
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Unable to fetch notification preferences");
     hasOrganizationsFetchError = true;
   }
 

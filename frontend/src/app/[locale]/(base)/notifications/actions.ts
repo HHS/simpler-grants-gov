@@ -55,9 +55,9 @@ export const updateSavedOpportunityNotificationPreferenceAction = async ({
       success: true,
       error: null,
     };
-  } catch (error: unknown) {
+  } catch (e: unknown) {
     logger.error(
-      { err: error, organizationId },
+      { err: e, organizationId },
       "Update saved opportunity notification preference failed",
     );
 

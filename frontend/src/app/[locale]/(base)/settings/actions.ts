@@ -61,10 +61,10 @@ export const userProfileAction = async (
     return { data: userDetailsUpdateResponse, success: true };
   } catch (e) {
     // General try failure catch error
-    const error = e as Error;
-    logger.error({ err: error }, "Error updating user details");
+    const typedError = e as Error;
+    logger.error({ err: typedError }, "Error updating user details");
     return {
-      errorMessage: error.message,
+      errorMessage: typedError.message,
       data: rawFormData,
     };
   }

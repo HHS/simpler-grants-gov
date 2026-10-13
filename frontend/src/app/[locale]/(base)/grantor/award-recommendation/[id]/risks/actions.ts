@@ -36,14 +36,14 @@ export async function createRiskAction(
       riskId: result.award_recommendation_risk_id,
     };
   } catch (e) {
-    const error = e as Error;
+    const typedError = e as Error;
     logger.error(
-      { err: error, awardRecommendationId },
+      { err: typedError, awardRecommendationId },
       "Error creating award recommendation risk",
     );
     return {
       success: false,
-      errorMessage: error.message || "Failed to create risk",
+      errorMessage: typedError.message || "Failed to create risk",
     };
   }
 }
@@ -68,14 +68,14 @@ export async function updateRiskAction(
       success: true,
     };
   } catch (e) {
-    const error = e as Error;
+    const typedError = e as Error;
     logger.error(
-      { err: error, awardRecommendationId, riskId },
+      { err: typedError, awardRecommendationId, riskId },
       "Error updating award recommendation risk",
     );
     return {
       success: false,
-      errorMessage: error.message || "Failed to update risk",
+      errorMessage: typedError.message || "Failed to update risk",
     };
   }
 }

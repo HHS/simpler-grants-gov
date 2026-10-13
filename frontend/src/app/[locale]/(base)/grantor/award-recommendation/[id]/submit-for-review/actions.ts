@@ -45,13 +45,13 @@ export async function submitReviewForAwardRecommendation(
       success: true,
     });
   } catch (e) {
-    const error = e as Error;
+    const typedError = e as Error;
     logger.error(
-      { err: error, awardRecommendationId },
+      { err: typedError, awardRecommendationId },
       "Error submitting review for award recommendation",
     );
     return Promise.resolve({
-      errorMessage: error.message,
+      errorMessage: typedError.message,
     });
   }
 }

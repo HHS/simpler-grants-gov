@@ -74,10 +74,13 @@ export const inviteUserAction = async (
       invitationCreated: inviteUserResponse.organization_invitation_id,
     };
   } catch (e) {
-    const error = e as Error;
-    logger.error({ err: error, organizationId }, "Error inviting user to org");
+    const typedError = e as Error;
+    logger.error(
+      { err: typedError, organizationId },
+      "Error inviting user to org",
+    );
     return {
-      errorMessage: `${genericErrorMessage}: ${error.message}`,
+      errorMessage: `${genericErrorMessage}: ${typedError.message}`,
     };
   }
 };

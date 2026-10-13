@@ -445,10 +445,10 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       userSession.user_id,
       userPrivilegeDef,
     );
-  } catch (error) {
-    logger.error({ err: error }, "Error fetching privileges");
-    if (error instanceof UnauthorizedError) {
-      throw error;
+  } catch (e) {
+    logger.error({ err: e }, "Error fetching privileges");
+    if (e instanceof UnauthorizedError) {
+      throw e;
     }
     return <OpportunitiesErrorPage />;
   }
@@ -468,10 +468,10 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       userOpportunities = data.opportunities;
       totalRecords = data.totalRecords;
       totalPages = data.totalPages;
-    } catch (error) {
-      logger.error({ err: error }, "Error fetching Opportunities");
-      if (error instanceof UnauthorizedError) {
-        throw error;
+    } catch (e) {
+      logger.error({ err: e }, "Error fetching Opportunities");
+      if (e instanceof UnauthorizedError) {
+        throw e;
       }
       return <OpportunitiesErrorPage />;
     }

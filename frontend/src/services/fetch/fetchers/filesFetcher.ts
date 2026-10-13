@@ -62,15 +62,15 @@ export const uploadFileToS3 = async (
         "Content-Type": "multipart/form-data",
       },
     });
-  } catch (error) {
+  } catch (e) {
     const defaultErrorMessage = "Error uploading file to S3";
-    if (axios.isAxiosError(error)) {
+    if (axios.isAxiosError(e)) {
       // Non 2XX response status
-      if (error.response) {
-        logger.error({ status: error.response.status }, defaultErrorMessage);
+      if (e.response) {
+        logger.error({ status: e.response.status }, defaultErrorMessage);
       }
     } else {
-      logger.error({ err: error }, defaultErrorMessage);
+      logger.error({ err: e }, defaultErrorMessage);
     }
     throw new ApiRequestError(defaultErrorMessage);
   }
