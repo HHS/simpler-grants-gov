@@ -52,6 +52,14 @@ JSON path and element path together, so a field the mapping writes to a differen
 than the plan says shows as both missing and extra. Order is checked against the XSD
 because the API writes elements in the order of the rules, and the XSD is a sequence.
 
+`xsdModels.test.ts` checks the XSD TypeSpec models (each form's `xsd.tsp`, and the shared ones
+in `specs/xsd/`), the XML mapping target
+the rules are read off, against the XSDs they model: missing and extra elements, order,
+requiredness, occurrences and namespaces. It compiles the specs in memory and finds each
+model by its `@GrantsGov.xsd` URL, so it needs no plan, and it checks a model no form links
+to yet. Its flattener reads a compiled program, so only that test imports it; the site
+bundles `harness/index.ts`.
+
 Suite checks then confirm the results can be trusted for each form: the plan's text is
 readable, the walked JSON schema agrees with the emitter's `index.json`, and every
 recorded difference still exists.
