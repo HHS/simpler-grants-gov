@@ -10,11 +10,12 @@ import click
 from src.form_schema.forms import init_form_registry
 from src.services.xml_generation.config import _build_xml_form_map, _build_xml_form_xsd_url_map
 from src.services.xml_generation.models import XMLGenerationRequest
-from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.models.attachment import HASH_ALGORITHM
+from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
+
 
 def _validate_raw_attachments(raw: dict, param_name: str) -> None:
     """Raise click.BadParameter if any attachment entry is missing required keys.
