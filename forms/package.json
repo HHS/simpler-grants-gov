@@ -6,7 +6,8 @@
     "node": ">=22"
   },
   "workspaces": [
-    "emitters/xml"
+    "emitters/xml",
+    "emitters/sgg"
   ],
   "imports": {
     "#catalogue/*": "./specs/catalogue/*",
@@ -17,9 +18,11 @@
     "#ui/*": "./specs/ui/*"
   },
   "scripts": {
-    "build": "npm run build -w emitters/xml",
+    "build": "npm run build --workspaces",
     "precompile": "npm run build",
     "compile": "tsp compile specs/main.tsp",
+    "sync": "node scripts/sync.mjs",
+    "sync:check": "node scripts/sync.mjs --check",
     "parity:fetch": "node parity/sources/fetch.ts",
     "pretest:parity": "npm run parity:fetch",
     "test:parity": "vitest run",
