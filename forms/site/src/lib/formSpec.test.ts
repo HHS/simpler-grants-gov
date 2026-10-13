@@ -46,6 +46,9 @@ const clone = <T>(value: T): T => structuredClone(value);
 describe.each([
   "key-contacts",
   "epa-key-contacts",
+  "rr-key-person",
+  "rr-key-person-expanded",
+  "nsf-key-person-expanded",
 ])("loadFormSpec(%s)", (specId) => {
   let spec: FormSpec;
   beforeAll(async () => {
