@@ -1074,8 +1074,15 @@ class TestSubmissionXSDValidation:
         "application_type,extra_fields,tracking_number",
         [
             ("New", {}, 99999920),
-            ("Continuation", {}, 99999921),
-            ("Revision", {"revision_type": "A: Increase Award"}, 99999922),
+            ("Continuation", {"federal_award_identifier": "AWARD-2024-001"}, 99999921),
+            (
+                "Revision",
+                {
+                    "revision_type": "A: Increase Award",
+                    "federal_award_identifier": "AWARD-2024-001",
+                },
+                99999922,
+            ),
         ],
         ids=["new", "continuation", "revision"],
     )
@@ -1090,8 +1097,9 @@ class TestSubmissionXSDValidation:
     ):
         """Test that all three ApplicationType enum values produce XSD-valid XML.
 
-        ApplicationType is a required XSD enum. Revision additionally exercises the
-        optional RevisionType element.
+        ApplicationType is a required XSD enum. Continuation and Revision also carry the
+        fields the form requires for them, and those must actually be in the XML: they
+        are optional in the XSD, so a valid document alone doesn't prove they were sent.
         """
         agency = AgencyFactory.create()
         opportunity = OpportunityFactory.create(
@@ -1185,6 +1193,13 @@ class TestSubmissionXSDValidation:
         assert result["valid"], (
             f"SF-424 XSD validation failed for application_type={application_type!r}:\n"
             f"{result['error_message']}"
+        )
+
+        sf424_root = lxml_etree.fromstring(sf424_xml.encode("utf-8"))
+        assert sf424_root.findtext(f"{sf424_ns}ApplicationType") == application_type
+        assert sf424_root.findtext(f"{sf424_ns}RevisionType") == extra_fields.get("revision_type")
+        assert sf424_root.findtext(f"{sf424_ns}FederalAwardIdentifier") == extra_fields.get(
+            "federal_award_identifier"
         )
 
     @pytest.mark.parametrize(

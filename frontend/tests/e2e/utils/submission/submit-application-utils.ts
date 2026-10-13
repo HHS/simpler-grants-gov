@@ -1,4 +1,4 @@
-import { expect, Page } from "@playwright/test";
+import { expect, Page, Request } from "@playwright/test";
 import { UUID_REGEX } from "tests/e2e/utils/common/regex-utils";
 
 export type SubmitOutcome = "success" | "validationError";
@@ -72,8 +72,10 @@ async function clickSubmitAndWaitForOutcome(
   // Mobile Chrome also needs longer timeouts than desktop Chrome
   const responseTimeoutMs =
     isWebKit || isFirefox ? 60000 : isMobileChrome ? 30000 : 20000;
+  // Must stay below the spec's 300s test timeout, otherwise the test times out
+  // first, the page is closed, and the diagnostics in the catch below can never run.
   const domOutcomeTimeoutMs = isWebKit
-    ? 300000
+    ? 180000
     : isFirefox || isMobileChrome
       ? 180000
       : 120000;
@@ -111,8 +113,48 @@ async function clickSubmitAndWaitForOutcome(
       .then(() => "validationError" as const),
   ]);
 
-  // Click submit
-  await submitAppButton.click();
+  // Click submit. The button is enabled as soon as the server-rendered HTML
+  // arrives, but its handler only exists after React hydrates, so a click that
+  // lands too early is silently dropped (most often on WebKit) and no submit
+  // request is ever sent. Re-click until the submit request is actually
+  // observed, and never click again once it has been - that would double-submit.
+  let submitRequestSeen = false;
+  const onRequest = (request: Request) => {
+    if (
+      request.method() === "POST" &&
+      request.url().includes("/api/applications/") &&
+      request.url().includes("/submit")
+    ) {
+      submitRequestSeen = true;
+    }
+  };
+  page.on("request", onRequest);
+  try {
+    await expect(async () => {
+      // An outcome already on screen means a click got through (e.g. the request
+      // URL didn't match our filter); stop retrying rather than risk a re-submit.
+      if (
+        (await successHeading.isVisible()) ||
+        (await validationHeading.isVisible())
+      ) {
+        return;
+      }
+      if (!submitRequestSeen) {
+        await submitAppButton.click({ timeout: 5000 });
+      }
+      await expect
+        .poll(
+          async () =>
+            submitRequestSeen ||
+            (await successHeading.isVisible()) ||
+            (await validationHeading.isVisible()),
+          { timeout: 10000 },
+        )
+        .toBe(true);
+    }).toPass({ timeout: 90000, intervals: [0] });
+  } finally {
+    page.off("request", onRequest);
+  }
 
   // Wait for DOM outcome - this is the real signal
   // Response promise fires in parallel for logging, but doesn't block outcome detection
@@ -140,7 +182,7 @@ async function clickSubmitAndWaitForOutcome(
     await page.screenshot({ path: `submission-timeout-${Date.now()}.png` });
 
     throw new Error(
-      `Failed to detect application submission outcome after 5 minutes. Current URL: ${currentUrl}`,
+      `Failed to detect application submission outcome before the timeout. Current URL: ${currentUrl}`,
     );
   }
 
