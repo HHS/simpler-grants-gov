@@ -682,9 +682,13 @@ class OpportunitySummaryFactory(BaseFactory):
         unique=True,
     )
 
-    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    created_at = factory.Faker(
+        "date_time_between", start_date="-5y", end_date="-3y", tzinfo=timezone.utc
+    )
     updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
+        lambda o: fake.date_time_between(
+            start_date=o.created_at, end_date="-1y", tzinfo=timezone.utc
+        )
     )
 
     class Params:
