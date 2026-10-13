@@ -183,6 +183,13 @@ class FormType(StrEnum):
     PROJECT_PERFORMANCE_SITE_LOCATION = "ProjectPerformanceSiteLocation"
 
 
+class FormRenderer(StrEnum):
+    """Which frontend renderer draws a form, and so which shape its UI schema takes."""
+
+    SGG = "sgg"  # the bespoke renderer, reading a section/field UI schema
+    JSON_FORMS = "jsonforms"  # JSON Forms, reading a JSON Forms UI schema
+
+
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
