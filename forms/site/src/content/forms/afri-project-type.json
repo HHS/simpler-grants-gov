@@ -1,0 +1,12 @@
+{
+  "title": "AFRI PROJECT TYPE",
+  "slug": "afri-project-type",
+  "status": "backlog",
+  "family": ["SF-424", "R&R"],
+  "category": "Project Details & Work Plan Forms",
+  "apps_count": 13276,
+  "fid_url": "https://www.grants.gov/forms/form-items-description/fid/796",
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/AFRI_Project_Type_2_0-V2.0_F796.pdf",
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AFRI_Project_Type_2_0-V2.0.xsd",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AFRI_Project_Type_2_0-V2.0_F796.xls"
+}

@@ -1,0 +1,48 @@
+{
+  "name": "@sgg/form-library",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "preview:worker": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "astro check && tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "audit": "npm audit --audit-level=critical",
+    "postinstall": "node scripts/postinstall.mjs"
+  },
+  "dependencies": {
+    "@nanostores/react": "^0.8.4",
+    "@uswds/uswds": "^3.13.0",
+    "astro": "^7.3.5",
+    "nanostores": "^0.11.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "overrides": {
+    "http-cache-semantics": "^4.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/react": "^7.0.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.30.1",
+    "@typescript-eslint/parser": "^8.30.1",
+    "eslint": "^9.25.0",
+    "eslint-config-prettier": "^10.1.2",
+    "prettier": "^3.5.3",
+    "sass": "^1.87.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.147.0"
+  }
+}
