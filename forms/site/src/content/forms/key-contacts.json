@@ -13,6 +13,7 @@
   "category": "Key Personnel & Contact Forms",
   "widgets": ["TextWidget", "SelectWidget", "FieldListWidget"],
   "sgg_form_id": "key_contacts",
+  "spec_id": "key-contacts",
   "description": "Collects contact information for individuals involved in a project. Captures the applicant organization name and up to four key contact persons with their name, title, organization affiliation, address, phone, fax, and email.",
   "new_concepts": ["FieldListWidget"],
   "risks": [
