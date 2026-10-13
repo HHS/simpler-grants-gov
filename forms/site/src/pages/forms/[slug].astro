@@ -1,0 +1,71 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import FormMetadata from "../../components/forms/FormMetadata.astro";
+import FormFieldTree from "../../components/forms/FormFieldTree.astro";
+
+export async function getStaticPaths() {
+  const forms = await getCollection("forms");
+  return forms.map((form: CollectionEntry<"forms">) => ({
+    params: { slug: form.data.slug },
+    props: { form },
+  }));
+}
+
+const { form } = Astro.props;
+const notes = form.data.notes ?? [];
+
+const STATUS_LABELS: Record<string, string> = {
+  backlog: "Backlog",
+  prioritized: "Prioritized",
+  in_progress: "In Progress",
+  migrated: "Migrated",
+  ready: "Ready",
+};
+---
+
+<Base title={form.data.title}>
+  <div class="grid-container">
+    <nav class="breadcrumb-simple" aria-label="Breadcrumb">
+      <a href="/forms/">Forms</a>
+      <span class="breadcrumb-sep">&rsaquo;</span>
+      <span>{form.data.title}</span>
+    </nav>
+
+    <div class="page-header">
+      <div class="form-detail-header">
+        <h1 class="page-title">{form.data.title}</h1>
+        <span class={`status-badge status-badge--${form.data.status.replace("_", "-")}`}>
+          {STATUS_LABELS[form.data.status] ?? form.data.status}
+        </span>
+      </div>
+      <p class="page-description">{form.data.description}</p>
+    </div>
+
+    <FormMetadata form={form} />
+
+    {form.data.children.length > 0 ? (
+      <>
+        <h2 class="section-title">Fields</h2>
+        <div class="field-tree">
+          <FormFieldTree nodes={form.data.children} />
+        </div>
+        {notes.length > 0 && (
+          <>
+            <h2 class="section-title margin-top-4">Notes</h2>
+            <p class="text-base">Context from planning.</p>
+            <ul class="plan-notes">
+              {notes.map((note) => (
+                <li>{note}</li>
+              ))}
+            </ul>
+          </>
+        )}
+      </>
+    ) : (
+      <p class="text-base padding-y-4">
+        Field details will be added when this form is prioritized for migration.
+      </p>
+    )}
+  </div>
+</Base>
