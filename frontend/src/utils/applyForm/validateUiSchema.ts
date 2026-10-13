@@ -2,6 +2,25 @@ import { RJSFSchema } from "@rjsf/utils";
 import Ajv, { ValidateFunction } from "ajv";
 import addFormats from "ajv-formats";
 
+/**
+ * Behavior a node may declare that this renderer does not implement.
+ *
+ * `conditional` is the first: the form specifications describe when a field is enabled,
+ * disabled or read-only, and the emitter writes those rules into every node they govern. This
+ * renderer reads none of them, so the fields they govern render unconditionally.
+ *
+ * They are still allowed through, because the alternative is worse. `additionalProperties:
+ * false` on the node types made an unread key a hard failure: `getFormData` returns
+ * `TopLevelError` and the applicant gets an error page instead of a form, so shipping a rule
+ * ahead of the renderer would take the form down rather than degrade it.
+ *
+ * Rules are objects and the scalar keys of a node are all known, so allowing unknown *object*
+ * properties admits any future rule while still catching a mistyped `label` or `widget`. What
+ * is being ignored at any moment is therefore discoverable from the artifact rather than from
+ * this list; `unimplementedRuleKeys` below reports it.
+ */
+const RULE_EXTENSION = { type: "object" } as const;
+
 // JSON Schema for the UiSchema, accepts a "field", "fieldList", "multiField", or "section"
 export const UiJsonSchema: RJSFSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
@@ -98,7 +117,7 @@ export const UiJsonSchema: RJSFSchema = {
           required: ["definition"],
         },
       ],
-      additionalProperties: false,
+      additionalProperties: RULE_EXTENSION,
     },
     multiField: {
       type: "object",
@@ -183,7 +202,7 @@ export const UiJsonSchema: RJSFSchema = {
           },
         },
       ],
-      additionalProperties: false,
+      additionalProperties: RULE_EXTENSION,
     },
     schema: {
       type: "object",
@@ -306,7 +325,7 @@ export const UiJsonSchema: RJSFSchema = {
         },
       },
       required: ["type", "label", "name", "children"],
-      additionalProperties: false,
+      additionalProperties: RULE_EXTENSION,
     },
     tableChildren: {
       type: "object",
@@ -446,6 +465,57 @@ export const validateUiSchema = (data: object) => {
   } else {
     return uiSchemaValidator.errors;
   }
+};
+
+/** Node keys this renderer reads. Anything else object-valued on a node is a rule it ignores. */
+const IMPLEMENTED_NODE_KEYS = new Set([
+  "type",
+  "name",
+  "label",
+  "description",
+  "content",
+  "definition",
+  "schema",
+  "widget",
+  "children",
+  "printDescription",
+  "hideFieldListHeading",
+  "minItemsHeading",
+  "minItemsHelperText",
+  "maxItemsHeading",
+  "maxItemsHelperText",
+  "additionalDescribedById",
+]);
+
+/**
+ * The rule keys present in a UI schema that this renderer does not act on.
+ *
+ * A form whose specification says a field is conditionally disabled renders it always
+ * enabled, and nothing else says so. Reporting the keys lets the caller log that once per
+ * form rather than leaving the difference between the artifact and the screen invisible.
+ */
+export const unimplementedRuleKeys = (data: unknown): string[] => {
+  const found = new Set<string>();
+  const visitNode = (node: unknown): void => {
+    if (Array.isArray(node)) {
+      node.forEach(visitNode);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    for (const [key, value] of Object.entries(node)) {
+      if (Array.isArray(value)) {
+        // A node's children are nodes; nothing else holds one.
+        if (key === "children") value.forEach(visitNode);
+        continue;
+      }
+      if (value === null || typeof value !== "object") continue;
+      // An unread object property is a rule. Its own shape is the rule's business, so it is
+      // named and not descended into -- otherwise every key inside it reads as a rule too.
+      if (!IMPLEMENTED_NODE_KEYS.has(key)) found.add(key);
+    }
+  };
+  visitNode(data);
+  return [...found].sort();
 };
 
 export const validateJsonBySchema = (json: object, schema: RJSFSchema) => {

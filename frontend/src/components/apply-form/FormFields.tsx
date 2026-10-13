@@ -17,7 +17,7 @@ import { Alert } from "@trussworks/react-uswds";
 
 import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 
-type RootBudgetFormContext = {
+export type RootBudgetFormContext = {
   rootSchema: RJSFSchema;
   rootFormData: unknown;
 };
@@ -85,6 +85,73 @@ const renderTextNode = (node: UiSchemaText): JSX.Element => (
   </div>
 );
 
+/**
+ * Renders one field node through the shared widget pipeline: requiredness from the schema,
+ * then `getFieldConfig` -> `renderWidget`. Exported so the JSON Forms adapter draws its
+ * controls with exactly the widgets and props a section/field UI schema would produce.
+ */
+export const renderFieldNode = ({
+  node,
+  schema,
+  errors,
+  formData,
+  requiredFieldPaths,
+  formContext,
+  isFormLocked,
+  disabled,
+}: {
+  node: UiSchemaField | UiSchemaFieldList;
+  schema: RJSFSchema;
+  errors: FormattedFormValidationWarning[] | null;
+  formData: object;
+  requiredFieldPaths: string[];
+  formContext?: RootBudgetFormContext;
+  isFormLocked?: boolean;
+  disabled?: boolean;
+}) => {
+  // FieldList is a renderable composite widget and does not have its own
+  // field definition path in the same way a standard field node does.
+  //
+  // Some renderable UiSchema nodes are definition-based and do not include an
+  // inline `schema` object. Use optional chaining here so required-field checks
+  // can safely fall back to the schema title only when it exists.
+  const requiredField =
+    node.type === "fieldList"
+      ? false
+      : isFieldRequired(
+          node.definition || node.schema?.title || "",
+          requiredFieldPaths,
+        );
+
+  const widgetConfig = getFieldConfig({
+    uiFieldObject: node,
+    formSchema: schema,
+    errors: errors ?? null,
+    formData,
+    requiredField,
+  });
+
+  /*
+   * Standard widgets, FieldList, and Table currently share the existing
+   * widget-rendering pipeline.
+   *
+   * Composite widget props are intentionally bridged through
+   * `UswdsWidgetProps` here because renderWidget/widgetComponents is the
+   * existing shared integration point. The individual widgets receive
+   * their more specific prop types inside their component adapters.
+   */
+  return renderWidget({
+    type: widgetConfig.type,
+    props: {
+      ...widgetConfig.props,
+      ...(disabled ? { disabled } : {}),
+      formContext,
+      isFormLocked,
+    },
+    definition: "definition" in node ? node.definition : undefined,
+  });
+};
+
 /*
   Runs through the UI Schema to produce a rendered array of field widgets and sections
 */
@@ -104,7 +171,7 @@ export const FormFields = ({
   isFormLocked?: boolean;
 }) => {
   let renderedFields: JSX.Element[] = [];
-  let requiredFieldPaths = [];
+  let requiredFieldPaths: string[] = [];
 
   try {
     requiredFieldPaths = getRequiredProperties(schema);
@@ -150,41 +217,14 @@ export const FormFields = ({
       } else if (!isRenderableFieldNode(node)) {
         throw new Error("child field missing definition and schema");
       } else if (!parent) {
-        // FieldList is a renderable composite widget and does not have its own
-        // field definition path in the same way a standard field node does.
-        const requiredField =
-          node.type === "fieldList"
-            ? false
-            : isFieldRequired(
-                node.definition || node.schema?.title || "",
-                requiredFieldPaths,
-              );
-
-        const widgetConfig = getFieldConfig({
-          uiFieldObject: node,
-          formSchema: schema,
-          errors: errors ?? null,
+        const field = renderFieldNode({
+          node,
+          schema,
+          errors,
           formData,
-          requiredField,
-        });
-
-        /*
-         * Standard widgets, FieldList, and Table currently share the existing
-         * widget-rendering pipeline.
-         *
-         * Composite widget props are intentionally bridged through
-         * `UswdsWidgetProps` here because renderWidget/widgetComponents is the
-         * existing shared integration point. The individual widgets receive
-         * their more specific prop types inside their component adapters.
-         */
-        const field = renderWidget({
-          type: widgetConfig.type,
-          props: {
-            ...widgetConfig.props,
-            formContext,
-            isFormLocked,
-          },
-          definition: "definition" in node ? node.definition : undefined,
+          requiredFieldPaths,
+          formContext,
+          isFormLocked,
         });
 
         if (field) {
@@ -225,36 +265,14 @@ export const FormFields = ({
           throw new Error("section child is not a defined field");
         }
 
-        // Some renderable UiSchema nodes are definition-based and do not include an
-        // inline `schema` object. Use optional chaining here so required-field checks
-        // can safely fall back to the schema title only when it exists.
-        //
-        // FieldList is a renderable composite widget and does not have its own
-        // field definition path in the same way a standard field node does.
-        const requiredField =
-          node.type === "fieldList"
-            ? false
-            : isFieldRequired(
-                node.definition || node.schema?.title || "",
-                requiredFieldPaths,
-              );
-
-        const widgetConfig = getFieldConfig({
-          uiFieldObject: node,
-          formSchema: schema,
-          errors: errors ?? null,
+        return renderFieldNode({
+          node,
+          schema,
+          errors,
           formData,
-          requiredField,
-        });
-
-        return renderWidget({
-          type: widgetConfig.type,
-          props: {
-            ...widgetConfig.props,
-            formContext,
-            isFormLocked,
-          },
-          definition: "definition" in node ? node.definition : undefined,
+          requiredFieldPaths,
+          formContext,
+          isFormLocked,
         });
       });
 

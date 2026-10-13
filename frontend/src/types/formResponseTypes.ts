@@ -1,6 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { UiSchema } from "src/types/applyForm/types";
+import { JsonFormsUiSchema } from "src/utils/applyForm/jsonFormsUiSchema";
 
 import { iso8601Date, RegexMatchedString } from "./generalTypes";
 
@@ -16,8 +17,12 @@ export interface FormDetail {
   form_instruction: FormInstruction;
   form_name: string;
   form_json_schema: RJSFSchema;
-  form_ui_schema: UiSchema;
+  // A JSON Forms UI schema when form_renderer is "jsonforms", a section/field tree otherwise.
+  form_ui_schema: UiSchema | JsonFormsUiSchema;
+  form_renderer?: FormRenderer;
 }
+
+export type FormRenderer = "sgg" | "jsonforms";
 
 export interface FormDetailApiResponse extends APIResponse {
   data: FormDetail;

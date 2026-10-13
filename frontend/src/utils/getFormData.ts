@@ -13,10 +13,19 @@ import {
 } from "src/types/applicationResponseTypes";
 import { FormValidationWarning, UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
-import { FormDetail } from "src/types/formResponseTypes";
+import { FormDetail, FormRenderer } from "src/types/formResponseTypes";
 
 import { processFormSchema } from "./applyForm/applyFormUtils";
-import { validateUiSchema } from "./applyForm/validateUiSchema";
+import {
+  jsonFormsToUiSchema,
+  JsonFormsUiSchema,
+  unadaptableScopes,
+  unappliedListRules,
+} from "./applyForm/jsonFormsUiSchema";
+import {
+  unimplementedRuleKeys,
+  validateUiSchema,
+} from "./applyForm/validateUiSchema";
 
 // either return error or data, not both
 type FormDataResult =
@@ -30,6 +39,10 @@ type FormDataResult =
         formName: string;
         formSchema: RJSFSchema;
         formUiSchema: UiSchema;
+        formRenderer: FormRenderer;
+        // Present when formRenderer is "jsonforms"; formUiSchema is then its equivalent
+        // section/field tree, for warnings and navigation.
+        jsonFormsUiSchema?: JsonFormsUiSchema;
         formValidationWarnings: FormValidationWarning[] | null;
         applicationAttachments: Attachment[];
         createdAt?: string;
@@ -152,8 +165,43 @@ export default async function getFormData({
     form_id: formId,
     form_name: formName,
     form_json_schema,
-    form_ui_schema: formUiSchema,
+    form_ui_schema,
+    form_renderer: formRenderer = "sgg",
   } = formData;
+
+  let formUiSchema: UiSchema;
+  let jsonFormsUiSchema: JsonFormsUiSchema | undefined;
+  if (formRenderer === "jsonforms") {
+    jsonFormsUiSchema = form_ui_schema as JsonFormsUiSchema;
+    try {
+      const { formSchema } = processFormSchema(form_json_schema);
+      formUiSchema = jsonFormsToUiSchema(jsonFormsUiSchema, formSchema);
+      // A control no widget can draw falls back to a plain JSON Forms input, which has no
+      // form field name and so is not saved.
+      const skipped = unadaptableScopes(jsonFormsUiSchema, formSchema);
+      if (skipped.length) {
+        logger.warn(
+          { formId, scopes: skipped },
+          "Form has controls no widget can render; their answers are not saved",
+        );
+      }
+      // The field-list widget draws a list's entries itself, so JSON Forms never applies
+      // the rules on the fields inside them.
+      const listRules = unappliedListRules(jsonFormsUiSchema);
+      if (listRules.length) {
+        logger.warn(
+          { formId, rules: listRules },
+          "Form declares rules on fields inside lists, which are not applied; those fields render unconditionally",
+        );
+      }
+    } catch (e) {
+      logger.error({ err: e, formId }, "Error converting JSON Forms ui schema");
+      return { error: "TopLevelError" };
+    }
+  } else {
+    formUiSchema = form_ui_schema as UiSchema;
+  }
+
   const schemaErrors = validateUiSchema(formUiSchema);
   if (schemaErrors) {
     logger.error(
@@ -161,6 +209,17 @@ export default async function getFormData({
       "Error validating form ui schema",
     );
     return { error: "TopLevelError" };
+  }
+
+  // Rules the UI schema declares and this renderer does not act on. Logged rather than
+  // ignored silently: a conditionally disabled field renders enabled, and the applicant has
+  // no way to tell that the form asked for anything else.
+  const ignoredRules = unimplementedRuleKeys(formUiSchema);
+  if (ignoredRules.length) {
+    logger.warn(
+      { formId, rules: ignoredRules },
+      "Form declares UI rules this renderer does not implement; the fields they govern render unconditionally",
+    );
   }
 
   try {
@@ -174,6 +233,8 @@ export default async function getFormData({
         formName,
         formSchema: result.formSchema,
         formUiSchema,
+        formRenderer,
+        jsonFormsUiSchema,
         formValidationWarnings,
         createdAt: applicationFormData.created_at,
         updatedAt: applicationFormData.updated_at,

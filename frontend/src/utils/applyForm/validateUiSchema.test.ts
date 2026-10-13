@@ -1,7 +1,11 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { UiSchema } from "src/types/applyForm/types";
 
-import { validateJsonBySchema, validateUiSchema } from "./validateUiSchema";
+import {
+  unimplementedRuleKeys,
+  validateJsonBySchema,
+  validateUiSchema,
+} from "./validateUiSchema";
 
 describe("validateFormData", () => {
   it("should return false for valid form data", () => {
@@ -627,6 +631,71 @@ describe("validateFormData", () => {
         });
 
       expect(hasMissingContentError).toBe(true);
+    });
+
+    it("should validate a field carrying a rule this renderer does not implement", () => {
+      const uiSchema = [
+        {
+          type: "field",
+          definition: "/properties/address/properties/province",
+          conditional: {
+            when: {
+              op: "notEquals",
+              ref: { scope: "item", pointer: "/address/country" },
+              value: "USA: UNITED STATES",
+            },
+            then: { interaction: "enabled" },
+            otherwise: { interaction: "disabled" },
+          },
+        },
+      ] as unknown as UiSchema;
+
+      expect(validateUiSchema(uiSchema)).toBe(false);
+    });
+
+    it("should invalidate a field whose extra property is not a rule", () => {
+      const uiSchema = [
+        {
+          type: "field",
+          definition: "/properties/address/properties/state",
+          labl: "State",
+        },
+      ] as unknown as UiSchema;
+
+      expect(Array.isArray(validateUiSchema(uiSchema))).toBe(true);
+    });
+  });
+
+  describe("unimplementedRuleKeys", () => {
+    it("should name the rules present in a UI schema that the renderer ignores", () => {
+      const uiSchema = [
+        {
+          type: "section",
+          label: "Key Contacts",
+          name: "key_contacts",
+          children: [
+            {
+              type: "field",
+              definition: "/properties/address/properties/state",
+              conditional: { then: { interaction: "enabled" } },
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      expect(unimplementedRuleKeys(uiSchema)).toEqual(["conditional"]);
+    });
+
+    it("should name nothing for a UI schema the renderer fully implements", () => {
+      const uiSchema = [
+        {
+          type: "field",
+          definition: "/properties/applicant_organization_name",
+          widget: "Text",
+        },
+      ] as unknown as UiSchema;
+
+      expect(unimplementedRuleKeys(uiSchema)).toEqual([]);
     });
   });
 });
