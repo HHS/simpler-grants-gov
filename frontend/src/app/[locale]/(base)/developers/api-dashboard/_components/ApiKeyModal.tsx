@@ -97,9 +97,11 @@ function ApiKeyInput({
 
 function CreateApiKeyInput({
   validationError,
+  apiKeyName,
   updateApiKeyName,
 }: {
   validationError?: string;
+  apiKeyName: string;
   updateApiKeyName: (name: string) => void;
 }) {
   const inputId = "create-api-key-input";
@@ -125,6 +127,7 @@ function CreateApiKeyInput({
       <TextInput
         id={inputId}
         name="create-api-key"
+        value={apiKeyName}
         onChange={(e) => updateApiKeyName(e.target?.value)}
         type="text"
         required
@@ -223,13 +226,13 @@ function CreateSuccessContent({
   modalId,
   onClose,
   keyName,
-  apiKeyId,
+  createdKey,
 }: {
   modalRef: RefObject<ModalRef | null>;
   modalId: string;
   onClose: () => void;
   keyName: string;
-  apiKeyId: string;
+  createdKey: string;
 }) {
   const t = useTranslations("ApiDashboard.modal");
   const keyInputId = "created-api-key";
@@ -263,13 +266,13 @@ function CreateSuccessContent({
             name={keyInputId}
             type="text"
             className="maxw-none"
-            value={apiKeyId}
+            value={createdKey}
             readOnly
             onFocus={(e) => e.target.select()}
           />
         </div>
         <div className="grid-col-12 mobile-lg:grid-col-auto mobile-lg:padding-left-1">
-          <CopyKeyButton content={apiKeyId} />
+          <CopyKeyButton content={createdKey} />
         </div>
       </div>
       <ModalFooter>
@@ -341,7 +344,7 @@ export default function ApiKeyModal({
 
   const [validationError, setValidationError] = useState<string>();
   const [apiKeyName, setApiKeyName] = useState<string>();
-  const [apiKeyId, setApiKeyId] = useState<string>();
+  const [createdKey, setCreatedKey] = useState<string>();
   const [deleteConfirmation, setDeleteConfirmation] = useState<string>();
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
@@ -427,7 +430,7 @@ export default function ApiKeyModal({
             key_name: nameToSubmit,
           }),
         });
-        setApiKeyId((response as { data: ApiKey }).data.key_id);
+        setCreatedKey((response as { data: ApiKey }).data.key_id);
       }
 
       if (response && (isDelete || (response as { data: ApiKey }).data)) {
@@ -469,7 +472,7 @@ export default function ApiKeyModal({
     setLoading(false);
     setSuccess(false);
     setApiKeyName("");
-    setApiKeyId(undefined);
+    setCreatedKey(undefined);
     setDeleteConfirmation("");
   }, []);
 
@@ -544,9 +547,16 @@ export default function ApiKeyModal({
         modalId={modalId}
         titleText={titleText}
         onKeyDown={(e) => {
-          // the success state has no form to submit
-          if (e.key === "Enter" && !success)
-            handleSubmit().catch(console.error);
+          // only submit from the text input: Enter on a button should just activate
+          // that button, the success state has no form, and a request may be in flight
+          if (
+            e.key !== "Enter" ||
+            !(e.target instanceof HTMLInputElement) ||
+            success ||
+            loading
+          )
+            return;
+          handleSubmit().catch(console.error);
         }}
         onClose={onClose}
       >
@@ -556,7 +566,7 @@ export default function ApiKeyModal({
             modalId={modalId}
             onClose={onClose}
             keyName={apiKeyName?.trim() || ""}
-            apiKeyId={apiKeyId || ""}
+            createdKey={createdKey || ""}
           />
         ) : success && !isCreate ? (
           <SuccessContent
@@ -611,6 +621,7 @@ export default function ApiKeyModal({
             ) : isCreate ? (
               <CreateApiKeyInput
                 validationError={validationError}
+                apiKeyName={apiKeyName ?? ""}
                 updateApiKeyName={setApiKeyName}
               />
             ) : (

@@ -416,6 +416,97 @@ describe("ApiKeyModal", () => {
       expect(within(submitButton).getByText("creating")).toBeInTheDocument();
     });
 
+    it("submits when Enter is pressed in the name input", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockResolvedValue({
+        data: { ...mockApiKey, key_name: "New Key" },
+      });
+
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      await user.type(
+        screen.getByLabelText("createApiKeyNameLabel"),
+        "New Key{Enter}",
+      );
+
+      await waitFor(() => {
+        expect(mockClientFetch).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("closes without creating a key when Enter is pressed on Cancel", async () => {
+      const user = userEvent.setup();
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      await user.type(
+        screen.getByLabelText("createApiKeyNameLabel"),
+        "New Key",
+      );
+
+      screen.getByRole("button", { name: "cancel" }).focus();
+      await user.keyboard("{Enter}");
+
+      await waitFor(() => {
+        expect(screen.getByRole("dialog", { hidden: true })).toHaveClass(
+          "is-hidden",
+        );
+      });
+      expect(mockClientFetch).not.toHaveBeenCalled();
+    });
+
+    it("does not send another request when Enter is pressed while loading", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockReturnValue(
+        new Promise(() => {
+          // never resolves, keeping the modal in the loading state
+        }),
+      );
+
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      await user.type(nameInput, "New Key{Enter}");
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("create-api-key-submit-button"),
+        ).toBeDisabled();
+      });
+      await user.type(nameInput, "{Enter}{Enter}");
+
+      expect(mockClientFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("clears the name input when the modal is closed", async () => {
+      const user = userEvent.setup();
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      await user.type(nameInput, "Abandoned Name");
+      expect(nameInput).toHaveValue("Abandoned Name");
+
+      await user.click(screen.getByRole("button", { name: "cancel" }));
+      await waitFor(() => {
+        expect(screen.getByRole("dialog", { hidden: true })).toHaveClass(
+          "is-hidden",
+        );
+      });
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      expect(screen.getByLabelText("createApiKeyNameLabel")).toHaveValue("");
+
+      // submitting the empty field shows the required error, not a stale name
+      await user.click(screen.getByTestId("create-api-key-submit-button"));
+      await waitFor(() => {
+        expect(screen.getByText("nameRequiredError")).toBeInTheDocument();
+      });
+      expect(mockClientFetch).not.toHaveBeenCalled();
+    });
+
     it("passes accessibility scan", async () => {
       const { container } = renderModal("create");
 
