@@ -12,7 +12,7 @@ name: "CI - Form Library: Validate and Deploy Preview"
 on:
   pull_request:
     paths:
-      - forms/site/**
+      - forms/**
       - .github/workflows/ci-form-library-preview.yml
 
 defaults:
@@ -30,8 +30,8 @@ permissions:
   contents: read
 
 jobs:
-  # Install, build, and run checks. Each check runs regardless of the previous one's outcome
-  # so all failures surface in a single run.
+  # Install, compile the specs, build, and run checks/tests. Each check runs regardless of
+  # the previous one's outcome so all failures surface in a single run.
   validate:
     name: Build and check the form library
     runs-on: ubuntu-latest
@@ -48,14 +48,24 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: forms/site/package-lock.json
+          cache-dependency-path: |
+            forms/package-lock.json
+            forms/site/package-lock.json
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: |
+          npm --prefix .. ci --no-audit --no-fund
+          npm ci --no-audit --no-fund
 
+      - name: Compile form specs
+        id: compile
+        run: npm --prefix .. run compile
+
+      # Run astro directly: the npm `build` and `test` scripts reinstall and recompile the
+      # specs first, which this workflow has already done.
       - name: Build site
         id: build
-        run: npm run build
+        run: npx astro build
 
       - name: Upload build output
         id: upload-build
@@ -74,6 +84,10 @@ jobs:
       - name: Lint
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: npm run lint
+
+      - name: Run tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npx vitest run
 
   # Upload the built artifact as a new version of the preview Worker, aliased to this PR.
   # Decoupled from the check outcomes (via artifact_ready) so previews stay available on

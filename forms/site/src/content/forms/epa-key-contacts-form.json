@@ -14,6 +14,7 @@
   "widgets": ["TextWidget", "SelectWidget"],
   "description": "EPA Key Contacts Form (EPA_KeyContacts_2_0, EPA Form 5700-54) collects contact information for four specific roles required by the EPA: Authorized Representative, Payee, Administrative Contact, and Project Manager. Each role captures the same set of person contact fields using the shared `ContactPersonDataTypeV3`.",
   "sgg_form_id": "epa_key_contacts",
+  "spec_id": "epa-key-contacts",
   "notes": [
     "Required fields: The XSD marks ALL fields as optional (all minOccurs=\"0\" within each ContactPersonDataTypeV3 section). The DAT shows asterisks on Name, Address, Phone, and Email fields. We'll plan to follow the current SGG pattern, making those fields required if any field in that section is filled out."
   ],
