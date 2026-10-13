@@ -3,7 +3,8 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@parity/*": ["../parity/*"]
     }
   }
 }

@@ -9,6 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@/": fileURLToPath(new URL("./src/", import.meta.url)),
+      "@parity/": fileURLToPath(new URL("../parity/", import.meta.url)),
     },
   },
   test: {
