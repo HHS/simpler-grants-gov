@@ -64,6 +64,8 @@ class SubmissionXMLGenerator:
 
         header_ns = HEADER_NAMESPACES["header"]
         self._add_field(root, "AgencyName", self._get_agency_name(), header_ns)
+        self._add_field(root, "CFDANumber", self._get_cfda_number(), header_ns)
+        self._add_field(root, "ActivityTitle", self._get_activity_title(), header_ns)
         self._add_field(root, "OpportunityID", self.opportunity.opportunity_number, header_ns)
         self._add_field(root, "OpportunityTitle", self.opportunity.opportunity_title, header_ns)
         self._add_field(root, "CompetitionID", self.competition.public_competition_id, header_ns)
@@ -74,7 +76,6 @@ class SubmissionXMLGenerator:
             root, "ClosingDate", self._format_date(self.competition.closing_date), header_ns
         )
         self._add_field(root, "SubmissionTitle", self.application.application_name, header_ns)
-        self._add_field(root, "CFDANumber", self._get_cfda_number(), header_ns)
 
         return self._generate_xml_string(root, pretty_print)
 
@@ -124,6 +125,14 @@ class SubmissionXMLGenerator:
     def _get_cfda_number(self) -> str | None:
         if self.competition.opportunity_assistance_listing:
             return self.competition.opportunity_assistance_listing.assistance_listing_number
+        return None
+
+    def _get_activity_title(self) -> str | None:
+        """Program title of the competition's assistance listing (the CFDA title)."""
+        if self.competition.opportunity_assistance_listing:
+            program_title = self.competition.opportunity_assistance_listing.program_title
+            if program_title and program_title.strip():
+                return program_title
         return None
 
     def _format_date(self, date_value: date | None) -> str | None:
