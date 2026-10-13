@@ -14,6 +14,13 @@ from .value_transformers import apply_value_transformation
 logger = logging.getLogger(__name__)
 
 
+def _has_value(value: Any) -> bool:
+    """A blank string counts as no value, same as None."""
+    if isinstance(value, str):
+        return bool(value.strip())
+    return value is not None
+
+
 def _transform_nested_field_names(
     data: dict[str, Any],
     transform_config_root: dict[str, Any],
@@ -58,6 +65,11 @@ def _transform_nested_field_names(
             if xml_transform.get("type") == "attribute":
                 processed_fields.add(field_name)
                 continue
+
+            if "value_transform" in xml_transform and field_value is not None:
+                field_value = apply_value_transformation(
+                    field_value, xml_transform["value_transform"]
+                )
 
             if target_name:
                 # Use transformed name (either from override or config)
@@ -140,9 +152,17 @@ def _apply_compose_object_transform(
 def _apply_pivot_object_transform(
     transform_config: dict[str, Any], source_data: dict[str, Any]
 ) -> dict[str, Any] | None:
-    """Apply pivot transformation to restructure nested objects."""
+    """Apply pivot transformation to restructure nested objects.
+
+    Optional settings:
+    - item_value_transform: value transform applied to every pivoted value
+    - include_if_any_of: dotted paths under source_field; the result is None unless at
+      least one of them has a value
+    """
     source_field = transform_config.get("source_field")
     field_mapping = transform_config.get("field_mapping", {})
+    item_value_transform = transform_config.get("item_value_transform")
+    include_if_any_of = transform_config.get("include_if_any_of")
 
     # Validate source_field is configured properly
     if not source_field or not isinstance(source_field, str):
@@ -153,6 +173,14 @@ def _apply_pivot_object_transform(
     # Get the source object to pivot
     source_path = source_field.split(".")
     source_object = get_nested_value(source_data, source_path)
+
+    # Leave the whole element out when none of these (dotted) source paths has a value,
+    # e.g. when the object only holds auto-calculated totals
+    if include_if_any_of is not None and not any(
+        _has_value(get_nested_value(source_object or {}, path.split(".")))
+        for path in include_if_any_of
+    ):
+        return None
 
     result = {}
 
@@ -180,6 +208,8 @@ def _apply_pivot_object_transform(
 
             # Add value if found
             if value is not None:
+                if item_value_transform:
+                    value = apply_value_transformation(value, item_value_transform)
                 nested_result[target_subfield] = value
 
         # Only add target field if we got at least one value
@@ -204,6 +234,19 @@ def _apply_array_decomposition_transform(
     - item_field: Field to extract from each array item (required)
     - item_wrapper: XML wrapper element name for line items (optional)
     - item_attributes: List of attribute names to extract from source items (optional)
+    - item_parent_fields: Fields read from the array item itself (not from item_field)
+      and written as child elements of the line item, ahead of item_field's values.
+      A line item is created if either item_field or any of these has a value (optional)
+    - user_entered_fields: Fields in item_field that the user enters, as opposed to
+      auto-calculated ones (optional). When set, a row with none of them filled in is
+      written as an empty line item (attributes only, no values), and the total is left
+      out when no row has any of them filled in
+    - item_attribute_defaults: Value to use for an attribute when the row has no value
+      for it, keyed by attribute name. With user_entered_fields set, only used on rows
+      where the user entered something (optional)
+    - skip_items_without_attributes: Leave out a line item that ends up with no
+      attributes. Used when the XSD requires an attribute, so a row with nothing but
+      auto-calculated values does not produce an invalid line item (optional)
     - total_field: Field containing the total/summary (optional)
     - total_wrapper: XML wrapper element name for totals (optional)
 
@@ -247,6 +290,11 @@ def _apply_array_decomposition_transform(
         total_field = mapping_config.get("total_field")
         total_wrapper = mapping_config.get("total_wrapper")
         field_overrides = mapping_config.get("field_overrides")
+        item_parent_fields = mapping_config.get("item_parent_fields", [])
+        skip_items_without_attributes = mapping_config.get("skip_items_without_attributes", False)
+        item_attribute_defaults = mapping_config.get("item_attribute_defaults", {})
+        user_entered_fields = mapping_config.get("user_entered_fields")
+        any_user_data = False
 
         if not item_field:
             logger.warning(f"Skipping field mapping '{output_field_name}': missing 'item_field'")
@@ -255,65 +303,87 @@ def _apply_array_decomposition_transform(
         # Extract the field from each item in the array
         extracted_values = []
         for item in source_array:
-            if isinstance(item, dict) and item_field in item:
-                value = item[item_field]
-                if value is not None:
-                    # Wrap value with metadata if configured
-                    if item_wrapper or item_attributes:
-                        wrapped_value = {}
+            if not isinstance(item, dict):
+                continue
 
-                        # Add wrapper element name
-                        if item_wrapper:
-                            wrapped_value["__wrapper"] = item_wrapper
+            value = item.get(item_field)
+            parent_values = {
+                field: item[field] for field in item_parent_fields if item.get(field) is not None
+            }
+            if parent_values and (value is None or isinstance(value, dict)):
+                # Parent fields go first so they come out ahead of the item_field values
+                value = parent_values | (value or {})
 
-                        # Extract attributes from source item or from nested field value.
-                        # Check parent item first; if not found, check within the nested field.
-                        # This allows fields like grant_program inside non_federal_resources
-                        # to be used as XML attributes on the wrapper element.
-                        if item_attributes:
-                            attrs = {}
-                            for attr_name in item_attributes:
-                                if attr_name in item and item[attr_name] is not None:
-                                    attr_value = item[attr_name]
-                                elif (
-                                    isinstance(value, dict)
-                                    and attr_name in value
-                                    and value[attr_name] is not None
-                                ):
-                                    attr_value = value[attr_name]
-                                else:
-                                    continue
-                                # Transform attribute name if transform config is provided
-                                transformed_attr_name = attr_name
-                                if transform_config_root and attr_name in transform_config_root:
-                                    attr_config = transform_config_root[attr_name]
-                                    if isinstance(attr_config, dict):
-                                        xml_transform = attr_config.get("xml_transform", {})
-                                        if xml_transform.get("type") == "attribute":
-                                            target_name = xml_transform.get("target")
-                                            if target_name:
-                                                transformed_attr_name = target_name
-                                attrs[transformed_attr_name] = attr_value
-                            if attrs:
-                                wrapped_value["__attributes"] = attrs
+            has_user_data = True
+            if user_entered_fields is not None:
+                has_user_data = isinstance(value, dict) and any(
+                    _has_value(value.get(field)) for field in user_entered_fields
+                )
+                if has_user_data:
+                    any_user_data = True
+                else:
+                    # Nothing entered in this section for the row, so leave out the
+                    # auto-calculated values and write just the line item itself
+                    value = {}
 
-                        # Add the actual data
-                        if isinstance(value, dict):
-                            # Transform field names if transform config is provided
-                            if transform_config_root:
-                                value = _transform_nested_field_names(
-                                    value, transform_config_root, field_overrides
-                                )
-                            wrapped_value.update(value)
-                        else:
-                            wrapped_value["value"] = value
+            if value is not None:
+                # Wrap value with metadata if configured
+                if item_wrapper or item_attributes:
+                    wrapped_value = {}
 
-                        extracted_values.append(wrapped_value)
+                    # Add wrapper element name
+                    if item_wrapper:
+                        wrapped_value["__wrapper"] = item_wrapper
+
+                    # Extract attributes from source item or from nested field value.
+                    # Check parent item first; if not found, check within the nested field.
+                    # This allows fields like grant_program inside non_federal_resources
+                    # to be used as XML attributes on the wrapper element.
+                    if item_attributes:
+                        attrs = {}
+                        for attr_name in item_attributes:
+                            if _has_value(item.get(attr_name)):
+                                attr_value = item[attr_name]
+                            elif isinstance(value, dict) and _has_value(value.get(attr_name)):
+                                attr_value = value[attr_name]
+                            elif has_user_data and attr_name in item_attribute_defaults:
+                                attr_value = item_attribute_defaults[attr_name]
+                            else:
+                                continue
+                            # Transform attribute name if transform config is provided
+                            transformed_attr_name = attr_name
+                            if transform_config_root and attr_name in transform_config_root:
+                                attr_config = transform_config_root[attr_name]
+                                if isinstance(attr_config, dict):
+                                    xml_transform = attr_config.get("xml_transform", {})
+                                    if xml_transform.get("type") == "attribute":
+                                        target_name = xml_transform.get("target")
+                                        if target_name:
+                                            transformed_attr_name = target_name
+                            attrs[transformed_attr_name] = attr_value
+                        if attrs:
+                            wrapped_value["__attributes"] = attrs
+                        elif skip_items_without_attributes:
+                            continue
+
+                    # Add the actual data
+                    if isinstance(value, dict):
+                        # Transform field names if transform config is provided
+                        if transform_config_root:
+                            value = _transform_nested_field_names(
+                                value, transform_config_root, field_overrides
+                            )
+                        wrapped_value.update(value)
                     else:
-                        extracted_values.append(value)
+                        wrapped_value["value"] = value
 
-        # Add total field if configured and available
-        if total_field:
+                    extracted_values.append(wrapped_value)
+                else:
+                    extracted_values.append(value)
+
+        # Add total field if configured and available. When nothing was entered in the
+        # section, the totals are only auto-calculated zeros, so they are left out.
+        if total_field and (user_entered_fields is None or any_user_data):
             total_path = total_field.split(".")
             total_value = get_nested_value(source_data, total_path)
             if total_value is not None:

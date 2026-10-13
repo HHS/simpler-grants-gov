@@ -28,19 +28,35 @@ export function buildPrintUrl(formUrl: string): string {
  * Call `buildPrintUrl(formUrl)` first to derive the print URL from a workspace
  * form URL captured before submission.
  *
+ * The print view is fully client-rendered after navigation, and WebKit is
+ * slower at both network event processing and DOM rendering (same
+ * observation already documented in submit-application-utils.ts) - a fixed
+ * 3s wait that's enough on Chrome may not be on WebKit. This was the prime
+ * suspect for the "widespread webkit flakiness" that led to skipWebkit()
+ * being added to these specs; this makes the wait match the browser instead
+ * of guessing one number for all of them.
+ *
  * @param page     - The Playwright page object.
  * @param printUrl - The print view URL (already transformed via buildPrintUrl).
- * @param waitMs   - Extra ms to wait after load for client-side rendering. Defaults to 3000.
+ * @param waitMs   - Extra ms to wait after load for client-side rendering.
+ *                   Defaults to a browser-aware value (3000 on Chrome/Mobile
+ *                   Chrome, 9000 on WebKit/Firefox) - pass an explicit value
+ *                   to override.
  */
 export async function navigateToPrintView(
   page: Page,
   printUrl: string,
-  waitMs = 3000,
+  waitMs?: number,
 ): Promise<void> {
   await page.goto(printUrl);
   await page.waitForLoadState("domcontentloaded");
-  if (waitMs > 0) {
-    await page.waitForTimeout(waitMs);
+
+  const browserType = page.context().browser()?.browserType().name();
+  const isSlowBrowser = browserType === "webkit" || browserType === "firefox";
+  const resolvedWaitMs = waitMs ?? (isSlowBrowser ? 9000 : 3000);
+
+  if (resolvedWaitMs > 0) {
+    await page.waitForTimeout(resolvedWaitMs);
   }
   await expect(page).toHaveURL(printUrl);
 }
