@@ -326,6 +326,14 @@ The [documentation/api/authentication.md](../api/authentication.md) details the 
 
 The `/api/auth/callback` route handler receives a JSON web token as query parameter, uses the `API_JWT_PUBLIC_KEY` env variable to verify that it was created by the API, sets a cookie with the token, then later uses that token to verify the user identity in `/api/auth/session` and other routes.
 
+The API token and the user details inside it (`email`, `user_id`) stay on the server. Server components and route handlers read them with `getSession()`. The browser only gets session state from `/api/auth/session`, which the `useUser` hook reads:
+
+```json
+{ "isLoggedIn": true, "expiresAt": 1760000000000 }
+```
+
+When there is no session, the response is `{ "isLoggedIn": false }`. `expiresAt` is a millisecond timestamp, and the client uses it to refresh an expiring session or log out an expired one.
+
 #### Mock Oauth2 Server
 
 When clicking "Sign in" or other buttons that simulate the login flow locally, you should be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.

@@ -8,7 +8,7 @@ const mockRefresh = jest.fn();
 const mockLogoutLocalUser = jest.fn();
 const mockUseUser = jest.fn(() => ({
   user: {
-    token: "faketoken",
+    isLoggedIn: true,
   },
   hasBeenLoggedOut: false,
   resetHasBeenLoggedOut: jest.fn(),

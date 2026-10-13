@@ -46,7 +46,7 @@ describe("StartApplicationModal", () => {
         modalRef={modalRef}
         applicantTypes={["individual"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -83,7 +83,7 @@ describe("StartApplicationModal", () => {
         modalRef={createRef()}
         applicantTypes={["individual"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -111,7 +111,7 @@ describe("StartApplicationModal", () => {
         modalRef={createRef()}
         applicantTypes={["organization"]}
         organizations={[fakeUserOrganization]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -140,7 +140,7 @@ describe("StartApplicationModal", () => {
         modalRef={createRef()}
         applicantTypes={["individual"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -164,7 +164,7 @@ describe("StartApplicationModal", () => {
         modalRef={createRef()}
         applicantTypes={["individual"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -188,7 +188,7 @@ describe("StartApplicationModal", () => {
         modalRef={createRef()}
         applicantTypes={["organization"]}
         organizations={[fakeUserOrganization]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -225,7 +225,7 @@ describe("StartApplicationModal", () => {
         modalRef={createRef()}
         applicantTypes={["organization"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -269,7 +269,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -303,7 +303,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -338,7 +338,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -355,7 +355,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -372,7 +372,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -389,7 +389,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -408,7 +408,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -425,7 +425,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -443,7 +443,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
           organizationsError={true}
         />,
@@ -462,7 +462,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
           organizationsError={false}
         />,
@@ -481,7 +481,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -499,7 +499,7 @@ describe("StartApplicationModal", () => {
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
           organizationsError={true}
         />,

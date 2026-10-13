@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
-import { applicationTestUserId, LOGIN_URL } from "src/constants/auth";
+import { LOGIN_URL } from "src/constants/auth";
 import { ExternalRoutes } from "src/constants/routes";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
@@ -145,7 +145,7 @@ const NavLinks = ({
         ],
       },
     ];
-    if (!user?.token) {
+    if (!user?.isLoggedIn) {
       return anonymousNavLinks;
     }
 
@@ -276,7 +276,7 @@ const NavLinks = ({
     });
 
     // add user account nav depending on login status
-    if (!user?.token) {
+    if (!user?.isLoggedIn) {
       items.push(
         <a
           href={LOGIN_URL}
@@ -295,8 +295,6 @@ const NavLinks = ({
       );
     } else {
       const accountIndex = navLinkList.length;
-      const isApplicationTestUser =
-        localDev && user?.user_id === applicationTestUserId;
       items.push(
         <NavDropdown
           key="account"
@@ -317,7 +315,7 @@ const NavLinks = ({
               onClick={closeDropdownAndMobileNav}
               text={t("notifications")}
             />,
-            isApplicationTestUser && <TestApplicationLink />,
+            localDev && <TestApplicationLink key="test-application" />,
             <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
           ]}
           setActiveNavDropdownIndex={setActiveNavDropdownIndex}
@@ -333,8 +331,7 @@ const NavLinks = ({
     navLinkList,
     setActiveNavDropdownIndex,
     t,
-    user?.token,
-    user?.user_id,
+    user?.isLoggedIn,
     localDev,
   ]);
 

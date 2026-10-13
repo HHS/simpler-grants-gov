@@ -37,8 +37,7 @@ jest.mock("react", () => ({
 }));
 
 const mockUser = {
-  user_id: "test-user-id",
-  token: "test-token",
+  isLoggedIn: true,
 };
 
 const mockApiKey: ApiKey = {

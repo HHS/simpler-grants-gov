@@ -141,7 +141,7 @@ export function EditSavedSearchModal({
       setValidationError(t("emptyNameError"));
       return;
     }
-    if (!user?.token) return;
+    if (!user?.isLoggedIn) return;
     setLoading(true);
     clientFetch("/api/user/saved-searches", {
       method: "PUT",
@@ -161,7 +161,7 @@ export function EditSavedSearchModal({
   }, [
     savedSearchName,
     t,
-    user?.token,
+    user?.isLoggedIn,
     validationError,
     savedSearchId,
     clientFetch,

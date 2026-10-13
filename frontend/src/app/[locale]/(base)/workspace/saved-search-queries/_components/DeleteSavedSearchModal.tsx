@@ -75,7 +75,7 @@ export function DeleteSavedSearchModal({
 
   const handleSubmit = useCallback(() => {
     setLoading(true);
-    if (!user?.token) {
+    if (!user?.isLoggedIn) {
       return;
     }
     clientFetch("/api/user/saved-searches", {
@@ -93,7 +93,7 @@ export function DeleteSavedSearchModal({
       .finally(() => {
         setLoading(false);
       });
-  }, [user?.token, savedSearchId, router, clientFetch]);
+  }, [user?.isLoggedIn, savedSearchId, router, clientFetch]);
 
   const onClose = useCallback(() => {
     setUpdated(false);

@@ -32,7 +32,7 @@ export const StartApplicationModal = ({
   modalRef,
   applicantTypes,
   organizations,
-  token,
+  isLoggedIn,
   loading,
   organizationsError,
   competitionId,
@@ -42,7 +42,7 @@ export const StartApplicationModal = ({
   modalRef: RefObject<ModalRef | null>;
   applicantTypes: ApplicantTypes[];
   organizations: UserOrganization[];
-  token: string | null;
+  isLoggedIn: boolean;
   loading: boolean;
   organizationsError?: boolean;
   competitionId: string;
@@ -61,23 +61,29 @@ export const StartApplicationModal = ({
   const [updating, setUpdating] = useState<boolean>(false);
 
   const validateSubmission = useCallback((): boolean => {
-    let isValidToken = Boolean(token);
+    let isValidSubmission = isLoggedIn;
 
     setNameValidationError("");
     setOrgValidationError("");
 
     if (!savedApplicationName) {
       setNameValidationError(t("fields.name.validationError"));
-      isValidToken = false;
+      isValidSubmission = false;
     }
 
     if (applicantTypes.includes("organization") && !selectedOrganization) {
       setOrgValidationError(t("fields.organizationSelect.validationError"));
-      isValidToken = false;
+      isValidSubmission = false;
     }
 
-    return isValidToken;
-  }, [applicantTypes, savedApplicationName, selectedOrganization, t, token]);
+    return isValidSubmission;
+  }, [
+    applicantTypes,
+    isLoggedIn,
+    savedApplicationName,
+    selectedOrganization,
+    t,
+  ]);
 
   const handleSubmit = useCallback(() => {
     const isValidSubmission = validateSubmission();
