@@ -98,7 +98,24 @@ describe("useClientFetch", () => {
     const error = await wrapForExpectedError(() =>
       result.current.clientFetch("http://wherever"),
     );
-    expect(jsonMock).toHaveBeenCalledTimes(0);
     expect(error.message).toEqual("an error!: 500");
+    expect(error.cause).toEqual({ status: 500, body: undefined });
+  });
+  it("includes the response body in the error cause", async () => {
+    jsonMock.mockResolvedValue({ errorType: "a_validation_error" });
+    fetchMock.mockResolvedValue({
+      status: 422,
+      ok: false,
+      json: () => jsonMock() as unknown,
+    });
+    const { result } = renderHook(() => useClientFetch("an error!"));
+    const error = await wrapForExpectedError(() =>
+      result.current.clientFetch("http://wherever"),
+    );
+    expect(error.message).toEqual("an error!: 422");
+    expect(error.cause).toEqual({
+      status: 422,
+      body: { errorType: "a_validation_error" },
+    });
   });
 });

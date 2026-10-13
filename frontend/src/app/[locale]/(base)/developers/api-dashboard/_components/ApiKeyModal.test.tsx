@@ -330,7 +330,18 @@ describe("ApiKeyModal", () => {
         screen.getByTestId("open-create-api-key-modal-button"),
       ).toBeInTheDocument();
       expect(screen.getByText("createDescription")).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("placeholder")).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("createApiKeyNameLabel"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("createNameHint")).toBeInTheDocument();
+    });
+
+    it("uses a hint instead of a placeholder for the name input", () => {
+      renderModal("create");
+
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      expect(nameInput).not.toHaveAttribute("placeholder");
+      expect(nameInput).toHaveAccessibleDescription("createNameHint");
     });
 
     it("validates required name field", async () => {
@@ -346,6 +357,70 @@ describe("ApiKeyModal", () => {
       await waitFor(() => {
         expect(screen.getByText("nameRequiredError")).toBeInTheDocument();
       });
+      expect(screen.getByLabelText("createApiKeyNameLabel")).toHaveClass(
+        "usa-input--error",
+      );
+      expect(mockClientFetch).not.toHaveBeenCalled();
+    });
+
+    it("shows a field error when the key name already exists", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockRejectedValue(
+        new Error("Error creating API key: 422", {
+          cause: {
+            status: 422,
+            body: { errorType: "duplicate_api_key_name" },
+          },
+        }),
+      );
+
+      const { onApiKeyUpdated } = renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      await user.type(nameInput, "Existing Name");
+      await user.click(screen.getByTestId("create-api-key-submit-button"));
+
+      await waitFor(() => {
+        expect(screen.getByText("duplicateNameError")).toBeInTheDocument();
+      });
+      expect(nameInput).toHaveClass("usa-input--error");
+      expect(nameInput).toHaveValue("Existing Name");
+      expect(screen.queryByText("createErrorHeading")).not.toBeInTheDocument();
+      expect(onApiKeyUpdated).not.toHaveBeenCalled();
+    });
+
+    it("keeps the create button in place while loading", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockReturnValue(
+        new Promise(() => {
+          // never resolves, keeping the modal in the loading state
+        }),
+      );
+
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      await user.type(
+        screen.getByLabelText("createApiKeyNameLabel"),
+        "New API Key",
+      );
+      await user.click(screen.getByTestId("create-api-key-submit-button"));
+
+      const submitButton = screen.getByTestId("create-api-key-submit-button");
+      await waitFor(() => {
+        expect(submitButton).toBeDisabled();
+      });
+      expect(submitButton).toHaveTextContent("createSubmitButtonText");
+      expect(within(submitButton).getByRole("progressbar")).toBeInTheDocument();
+      expect(within(submitButton).getByText("creating")).toBeInTheDocument();
+    });
+
+    it("passes accessibility scan", async () => {
+      const { container } = renderModal("create");
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
     });
 
     it("successfully creates API key", async () => {
@@ -359,7 +434,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name
-      const nameInput = screen.getByPlaceholderText("placeholder");
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
       await user.type(nameInput, "New API Key");
 
       // Submit
@@ -475,13 +550,18 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name and submit
-      const nameInput = screen.getByPlaceholderText("placeholder");
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
       await user.type(nameInput, "Test Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(screen.getByText("createErrorMessage")).toBeInTheDocument();
+        expect(screen.getByText("createErrorHeading")).toBeInTheDocument();
       });
+      expect(screen.getByText("createErrorMessage")).toBeInTheDocument();
+
+      // the user's input is preserved and not marked as an error
+      expect(nameInput).toHaveValue("Test Key");
+      expect(nameInput).not.toHaveClass("usa-input--error");
     });
 
     it("shows error when user is not authenticated", async () => {
@@ -506,7 +586,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name and submit
-      const nameInput = screen.getByPlaceholderText("placeholder");
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
       await user.type(nameInput, "Test Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
@@ -563,7 +643,7 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByPlaceholderText("placeholder");
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
       await user.type(nameInput, "New API Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
@@ -571,10 +651,14 @@ describe("ApiKeyModal", () => {
         expect(screen.getByText("createSuccessHeading")).toBeInTheDocument();
       });
 
-      expect(screen.getByText("new-secret-key-123")).toBeInTheDocument();
+      expect(screen.getByText("createSuccessAlertHeading")).toBeInTheDocument();
+      expect(screen.getByText("createSuccessKeyName")).toBeInTheDocument();
+      const keyInput = screen.getByLabelText("createdApiKeyLabel");
+      expect(keyInput).toHaveValue("new-secret-key-123");
+      expect(keyInput).toHaveAttribute("readonly");
     });
 
-    it("renders a copy icon next to the API key ID on create success", async () => {
+    it("copies the key and briefly shows copied feedback", async () => {
       const user = userEvent.setup();
       const createdApiKey = {
         ...mockApiKey,
@@ -587,18 +671,72 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByPlaceholderText("placeholder");
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
       await user.type(nameInput, "New API Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
-      await waitFor(() => {
-        expect(screen.getByText("copy-this-key")).toBeInTheDocument();
+      const modal = await screen.findByRole("dialog");
+      const copyButton = await within(modal).findByRole("button", {
+        name: "copyKey",
       });
 
-      const modal = screen.getByRole("dialog");
-      expect(
-        within(modal).getByRole("button", { name: "copyApiKey" }),
-      ).toBeInTheDocument();
+      await user.click(copyButton);
+
+      // userEvent.setup() swaps in its own clipboard stub, so read it back
+      await expect(navigator.clipboard.readText()).resolves.toBe(
+        "copy-this-key",
+      );
+      await waitFor(() => {
+        expect(copyButton).toHaveTextContent("copied");
+      });
+      await waitFor(
+        () => {
+          expect(copyButton).toHaveTextContent("copyKey");
+        },
+        { timeout: 3000 },
+      );
+    });
+
+    it("does not resubmit when Enter is pressed in the success state", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockResolvedValue({
+        data: { ...mockApiKey, key_name: "New Key", key_id: "enter-key" },
+      });
+
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      await user.type(
+        screen.getByLabelText("createApiKeyNameLabel"),
+        "New Key",
+      );
+      await user.click(screen.getByTestId("create-api-key-submit-button"));
+
+      const keyInput = await screen.findByLabelText("createdApiKeyLabel");
+      await user.click(keyInput);
+      await user.keyboard("{Enter}");
+
+      expect(mockClientFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("passes accessibility scan in the success state", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockResolvedValue({
+        data: { ...mockApiKey, key_name: "New Key", key_id: "a11y-key" },
+      });
+
+      const { container } = renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+      await user.type(
+        screen.getByLabelText("createApiKeyNameLabel"),
+        "New Key",
+      );
+      await user.click(screen.getByTestId("create-api-key-submit-button"));
+      await screen.findByLabelText("createdApiKeyLabel");
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
     });
 
     it("does not display the API key ID after successful edit", async () => {
@@ -628,7 +766,7 @@ describe("ApiKeyModal", () => {
       expect(screen.queryByText("edit-key-456")).not.toBeInTheDocument();
     });
 
-    it("shows close button in success content", async () => {
+    it("shows done button in success content", async () => {
       const user = userEvent.setup();
       const createdApiKey = {
         ...mockApiKey,
@@ -641,14 +779,14 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByPlaceholderText("placeholder");
+      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
       await user.type(nameInput, "New Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       await waitFor(() => {
         expect(
           screen.getByTestId("close-create-api-key-modal-button"),
-        ).toBeInTheDocument();
+        ).toHaveTextContent("done");
       });
     });
   });

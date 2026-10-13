@@ -1,7 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import { useClientFetch } from "src/hooks/useClientFetch";
+import {
+  ClientFetchErrorCause,
+  useClientFetch,
+} from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import {
   deleteApiKeyEndpoint,
@@ -12,6 +15,7 @@ import { ApiKey } from "src/types/apiKeyTypes";
 import { useTranslations } from "next-intl";
 import { RefObject, useCallback, useRef, useState } from "react";
 import {
+  Alert,
   Button,
   ErrorMessage,
   FormGroup,
@@ -22,11 +26,20 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import CopyIcon from "src/components/core/CopyIcon";
 import { LoadingButton } from "src/components/core/LoadingButton";
 import SimplerAlert from "src/components/core/SimplerAlert";
 import { SimplerModal } from "src/components/core/SimplerModal";
+import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
+
+// matches ValidationErrorType.DUPLICATE_API_KEY_NAME in the API
+const DUPLICATE_API_KEY_NAME_ERROR = "duplicate_api_key_name";
+
+const isDuplicateNameError = (error: unknown) => {
+  const cause = (error as Error)?.cause as ClientFetchErrorCause | undefined;
+  const body = cause?.body as { errorType?: string } | undefined;
+  return body?.errorType === DUPLICATE_API_KEY_NAME_ERROR;
+};
 
 interface ApiKeyModalProps {
   mode: "create" | "edit" | "delete";
@@ -76,9 +89,49 @@ function ApiKeyInput({
           type="text"
           required
           aria-required
-          placeholder={mode === "create" ? t("placeholder") : undefined}
         />
       </div>
+    </FormGroup>
+  );
+}
+
+function CreateApiKeyInput({
+  validationError,
+  updateApiKeyName,
+}: {
+  validationError?: string;
+  updateApiKeyName: (name: string) => void;
+}) {
+  const inputId = "create-api-key-input";
+  const hintId = `${inputId}-hint`;
+  const errorId = `${inputId}-error`;
+  const t = useTranslations("ApiDashboard.modal");
+
+  return (
+    <FormGroup error={!!validationError}>
+      <label className="usa-label" htmlFor={inputId}>
+        {t.rich("createApiKeyNameLabel", {
+          required: (chunks) => (
+            <span className="usa-hint usa-hint--required">{chunks}</span>
+          ),
+        })}
+      </label>
+      <span className="usa-hint" id={hintId}>
+        {t("createNameHint")}
+      </span>
+      {validationError && (
+        <ErrorMessage id={errorId}>{validationError}</ErrorMessage>
+      )}
+      <TextInput
+        id={inputId}
+        name="create-api-key"
+        onChange={(e) => updateApiKeyName(e.target?.value)}
+        type="text"
+        required
+        aria-required
+        aria-describedby={clsx(hintId, { [errorId]: !!validationError })}
+        validationStatus={validationError ? "error" : undefined}
+      />
     </FormGroup>
   );
 }
@@ -123,6 +176,117 @@ function DeleteConfirmationInput({
   );
 }
 
+function CopyKeyButton({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+  const t = useTranslations("ApiDashboard.modal");
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (e) {
+      console.error("Error copying to clipboard", e);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        className="margin-top-1 margin-right-0 padding-x-2"
+        data-testid="copy-api-key-button"
+        onClick={() => {
+          void copyToClipboard();
+        }}
+      >
+        <USWDSIcon
+          className="usa-icon margin-right-05"
+          name={copied ? "check" : "content_copy"}
+        />
+        {/* min width keeps the button from shrinking when showing "Copied" */}
+        <span className="display-inline-block minw-10 text-left">
+          {copied ? t("copied") : t("copyKey")}
+        </span>
+      </Button>
+      <span className="usa-sr-only" role="status">
+        {copied ? t("copied") : ""}
+      </span>
+    </>
+  );
+}
+
+function CreateSuccessContent({
+  modalRef,
+  modalId,
+  onClose,
+  keyName,
+  apiKeyId,
+}: {
+  modalRef: RefObject<ModalRef | null>;
+  modalId: string;
+  onClose: () => void;
+  keyName: string;
+  apiKeyId: string;
+}) {
+  const t = useTranslations("ApiDashboard.modal");
+  const keyInputId = "created-api-key";
+
+  return (
+    <>
+      <ModalHeading id={`${modalId}-heading`}>
+        {t("createSuccessHeading")}
+      </ModalHeading>
+      <Alert
+        type="warning"
+        headingLevel="h3"
+        heading={t("createSuccessAlertHeading")}
+        className="margin-top-2"
+      >
+        {t("createSuccessAlertMessage")}
+      </Alert>
+      <p>
+        {t.rich("createSuccessKeyName", {
+          keyName,
+          strong: (chunks) => <strong>{chunks}</strong>,
+        })}
+      </p>
+      <div className="grid-row">
+        <div className="grid-col-12 mobile-lg:grid-col-fill">
+          <label className="usa-sr-only" htmlFor={keyInputId}>
+            {t("createdApiKeyLabel")}
+          </label>
+          <TextInput
+            id={keyInputId}
+            name={keyInputId}
+            type="text"
+            className="maxw-none"
+            value={apiKeyId}
+            readOnly
+            onFocus={(e) => e.target.select()}
+          />
+        </div>
+        <div className="grid-col-12 mobile-lg:grid-col-auto mobile-lg:padding-left-1">
+          <CopyKeyButton content={apiKeyId} />
+        </div>
+      </div>
+      <ModalFooter>
+        <ModalToggleButton
+          modalRef={modalRef}
+          closer
+          secondary
+          onClick={onClose}
+          data-testid="close-create-api-key-modal-button"
+        >
+          {t("done")}
+        </ModalToggleButton>
+      </ModalFooter>
+    </>
+  );
+}
+
 function SuccessContent({
   modalRef,
   modalId,
@@ -130,53 +294,27 @@ function SuccessContent({
   mode,
   keyName,
   originalName = "",
-  apiKeyId,
 }: {
   modalRef: RefObject<ModalRef | null>;
   modalId: string;
   onClose: () => void;
-  mode: "create" | "edit" | "delete";
+  mode: "edit" | "delete";
   keyName: string;
   originalName?: string;
-  apiKeyId: string;
 }) {
-  const isCreate = mode === "create";
   const isDelete = mode === "delete";
   const t = useTranslations("ApiDashboard.modal");
-  let heading: string;
-  if (isCreate) {
-    heading = t("createSuccessHeading");
-  } else if (isDelete) {
-    heading = t("deleteSuccessHeading");
-  } else {
-    heading = t("editSuccessHeading");
-  }
-
-  let message: string;
-  if (isCreate) {
-    message = t("createSuccessMessage", { keyName });
-  } else if (isDelete) {
-    message = t("deleteSuccessMessage", { keyName });
-  } else {
-    message = t("editSuccessMessage", { originalName, keyName });
-  }
+  const heading = isDelete
+    ? t("deleteSuccessHeading")
+    : t("editSuccessHeading");
+  const message = isDelete
+    ? t("deleteSuccessMessage", { keyName })
+    : t("editSuccessMessage", { originalName, keyName });
 
   return (
     <>
       <ModalHeading id={`${modalId}-heading`}>{heading}</ModalHeading>
       <p>{message}</p>
-      {isCreate && apiKeyId && (
-        <div className="grid-row">
-          <div className="font-sans-s text-bold">
-            <span className="margin-right-3">{apiKeyId}</span>
-            <CopyIcon
-              content={apiKeyId}
-              className="usa-icon--size-2"
-              aria-label={t("copyApiKey")}
-            />
-          </div>
-        </div>
-      )}
       <ModalFooter>
         <ModalToggleButton
           modalRef={modalRef}
@@ -300,6 +438,10 @@ export default function ApiKeyModal({
         setApiError(true);
       }
     } catch (error) {
+      if (isCreate && isDuplicateNameError(error)) {
+        setValidationError(t("duplicateNameError"));
+        return;
+      }
       setApiError(true);
       console.error(
         `Error ${isCreate ? "creating" : isEdit ? "renaming" : "deleting"} API key:`,
@@ -327,6 +469,7 @@ export default function ApiKeyModal({
     setLoading(false);
     setSuccess(false);
     setApiKeyName("");
+    setApiKeyId(undefined);
     setDeleteConfirmation("");
   }, []);
 
@@ -401,22 +544,43 @@ export default function ApiKeyModal({
         modalId={modalId}
         titleText={titleText}
         onKeyDown={(e) => {
-          if (e.key === "Enter") handleSubmit().catch(console.error);
+          // the success state has no form to submit
+          if (e.key === "Enter" && !success)
+            handleSubmit().catch(console.error);
         }}
         onClose={onClose}
       >
-        {success ? (
+        {success && isCreate ? (
+          <CreateSuccessContent
+            modalRef={modalRef}
+            modalId={modalId}
+            onClose={onClose}
+            keyName={apiKeyName?.trim() || ""}
+            apiKeyId={apiKeyId || ""}
+          />
+        ) : success && !isCreate ? (
           <SuccessContent
             modalRef={modalRef}
             modalId={modalId}
             onClose={onClose}
             mode={mode}
             keyName={apiKeyName || apiKey?.key_name || ""}
-            apiKeyId={apiKeyId || ""}
             originalName={originalName}
           />
         ) : (
           <>
+            {isCreate && apiError && (
+              <Alert
+                type="error"
+                headingLevel="h3"
+                heading={t("createErrorHeading")}
+                role="alert"
+                className="margin-top-2"
+              >
+                {t("createErrorMessage")}
+              </Alert>
+            )}
+
             {isDelete ? (
               <>
                 <p>{t("deleteDescription")}</p>
@@ -428,16 +592,12 @@ export default function ApiKeyModal({
               <p>{isCreate ? t("createDescription") : t("editDescription")}</p>
             )}
 
-            {apiError && (
+            {!isCreate && apiError && (
               <SimplerAlert
                 alertClick={() => setApiError(false)}
                 buttonId="apiKeyModalApiError"
                 messageText={
-                  isCreate
-                    ? t("createErrorMessage")
-                    : isEdit
-                      ? t("editErrorMessage")
-                      : t("deleteErrorMessage")
+                  isEdit ? t("editErrorMessage") : t("deleteErrorMessage")
                 }
                 type="error"
               />
@@ -447,6 +607,11 @@ export default function ApiKeyModal({
               <DeleteConfirmationInput
                 validationError={validationError}
                 updateDeleteConfirmation={setDeleteConfirmation}
+              />
+            ) : isCreate ? (
+              <CreateApiKeyInput
+                validationError={validationError}
+                updateApiKeyName={setApiKeyName}
               />
             ) : (
               <ApiKeyInput
@@ -458,16 +623,46 @@ export default function ApiKeyModal({
             )}
 
             <ModalFooter>
-              {loading ? (
+              {isCreate ? (
+                <>
+                  <Button
+                    type="button"
+                    className="position-relative"
+                    disabled={loading}
+                    aria-busy={loading}
+                    onClick={() => {
+                      handleSubmit().catch(console.error);
+                    }}
+                    data-testid="create-api-key-submit-button"
+                  >
+                    {/* label stays rendered while loading so the button keeps its size */}
+                    <span
+                      className={clsx({ "opacity-0": loading })}
+                      aria-hidden={loading}
+                    >
+                      {t("createSubmitButtonText")}
+                    </span>
+                    {loading && (
+                      <span className="position-absolute top-0 bottom-0 left-0 right-0 display-flex flex-justify-center flex-align-center">
+                        <Spinner className="margin-0" />
+                        <span className="usa-sr-only">{t("creating")}</span>
+                      </span>
+                    )}
+                  </Button>
+                  <ModalToggleButton
+                    modalRef={modalRef}
+                    closer
+                    unstyled
+                    className="padding-105 text-center"
+                    onClick={onClose}
+                  >
+                    {t("cancel")}
+                  </ModalToggleButton>
+                </>
+              ) : loading ? (
                 <LoadingButton
                   id={`${mode}-api-key-button`}
-                  message={
-                    isCreate
-                      ? t("creating")
-                      : isEdit
-                        ? t("saving")
-                        : t("deleting")
-                  }
+                  message={isEdit ? t("saving") : t("deleting")}
                 />
               ) : (
                 <>
@@ -478,11 +673,7 @@ export default function ApiKeyModal({
                     }}
                     data-testid={`${mode}-api-key-submit-button`}
                   >
-                    {isCreate
-                      ? t("createButtonText")
-                      : isEdit
-                        ? t("saveChanges")
-                        : t("deleteButtonText")}
+                    {isEdit ? t("saveChanges") : t("deleteButtonText")}
                   </Button>
                   <ModalToggleButton
                     modalRef={modalRef}
