@@ -131,9 +131,10 @@ class SubmissionXMLGenerator:
         return None
 
     def _get_activity_title(self) -> str | None:
+        """Program title of the competition's assistance listing (the CFDA title)."""
         if self.competition.opportunity_assistance_listing:
             program_title = self.competition.opportunity_assistance_listing.program_title
-            if program_title:
+            if program_title and program_title.strip():
                 # Header-V1.0.xsd limits ActivityTitle to 120 characters
                 return program_title[:ACTIVITY_TITLE_MAX_LENGTH]
         return None

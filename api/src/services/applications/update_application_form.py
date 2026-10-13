@@ -147,6 +147,9 @@ def update_application_form(
         extra={
             "application_id": str(application_id),
             "form_id": str(form_id),
+            "warning_count": len(warnings),
+            "application_form_status": application_form.application_form_status,  # type: ignore[attr-defined]
+            "is_required": competition_form.is_required,
         },
     )
 

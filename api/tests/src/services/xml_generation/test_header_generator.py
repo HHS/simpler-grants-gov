@@ -41,7 +41,7 @@ def application(enable_factory_create, db_session):
     opportunity_assistance_listing = OpportunityAssistanceListingFactory.create(
         opportunity=opportunity,
         assistance_listing_number="12.345",
-        program_title="Test Program Title",
+        program_title="Test Assistance Listing Program",
     )
 
     competition = CompetitionFactory.create(
@@ -118,7 +118,39 @@ class TestSubmissionXMLGenerator:
 
         activity_title_elem = root.find(f"{{{HEADER_NAMESPACES['header']}}}ActivityTitle")
         assert activity_title_elem is not None
-        assert activity_title_elem.text == "Test Program Title"
+        assert activity_title_elem.text == "Test Assistance Listing Program"
+
+    def test_activity_title_comes_right_after_cfda_number(self, application):
+        root = lxml_etree.fromstring(
+            SubmissionXMLGenerator(application).generate_header_xml().encode("utf-8")
+        )
+        names = [lxml_etree.QName(child).localname for child in root]
+
+        assert names[names.index("CFDANumber") + 1] == "ActivityTitle"
+
+    @pytest.mark.parametrize("program_title", [None, "", "   "])
+    def test_generate_header_without_program_title(self, enable_factory_create, program_title):
+        """No program title on the assistance listing means no ActivityTitle, but the
+        CFDANumber is still written."""
+        opportunity = OpportunityFactory.create()
+        opportunity_assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity,
+            assistance_listing_number="10.762",
+            program_title=program_title,
+        )
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            opportunity_assistance_listing=opportunity_assistance_listing,
+            competition_forms=[],
+        )
+        application = ApplicationFactory.create(competition=competition)
+
+        root = lxml_etree.fromstring(
+            SubmissionXMLGenerator(application).generate_header_xml().encode("utf-8")
+        )
+
+        assert root.findtext(f"{{{HEADER_NAMESPACES['header']}}}CFDANumber") == "10.762"
+        assert root.find(f"{{{HEADER_NAMESPACES['header']}}}ActivityTitle") is None
 
     def test_generate_header_elements_follow_xsd_order(self, application):
         """Test that header elements follow the Header-V1.0.xsd sequence order.
@@ -222,9 +254,7 @@ class TestSubmissionXMLGenerator:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"))
         cfda_elem = root.find(f"{{{HEADER_NAMESPACES['header']}}}CFDANumber")
         assert cfda_elem is None
-
-        activity_title_elem = root.find(f"{{{HEADER_NAMESPACES['header']}}}ActivityTitle")
-        assert activity_title_elem is None
+        assert root.find(f"{{{HEADER_NAMESPACES['header']}}}ActivityTitle") is None
 
     def test_generate_header_truncates_long_activity_title(self, enable_factory_create):
         """Test that ActivityTitle is truncated to the 120 character XSD limit."""
