@@ -34,6 +34,7 @@
     "The Key Person section allows up to 99 entries (XSD maxOccurs=99)",
     "State and ZIP/Postal Code show asterisks in the DAT for Key Person (implying required) but the XSD marks them optional. The XSD is authoritative for required/optional."
   ],
+  "spec_id": "rr-key-person-expanded",
   "children": [
     {
       "kind": "section",
