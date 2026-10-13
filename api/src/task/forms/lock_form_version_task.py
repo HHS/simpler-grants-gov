@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 
+from src.form_schema.forms._loader import form_source_files
 from src.task.task_blueprint import task_blueprint
 from src.util.local import error_if_not_local
 
@@ -14,20 +15,20 @@ FORMS_DIR = Path(__file__).parents[2] / "form_schema" / "forms"
 
 
 def compute_version_hash(form_dir: Path, version_dir: Path) -> str:
-    """Return the SHA-256 hex digest of form_json.py + config.py for a version directory.
+    """Return the SHA-256 hex digest of the form definition + config.py for a version directory.
 
-    Always hashes form_json.py first, then config.py, so the digest is stable.
+    The form definition is whichever of form_json.py or form.json the version declares, plus
+    any schema files a form.json keeps beside it. Always hashes the definition files first,
+    then config.py, so the digest is stable.
     """
-    form_json_path = version_dir / "form_json.py"
     config_path = form_dir / "config.py"
 
-    if not form_json_path.exists():
-        raise FileNotFoundError(f"form_json.py not found: {form_json_path}")
     if not config_path.exists():
         raise FileNotFoundError(f"config.py not found: {config_path}")
 
     h = hashlib.sha256()
-    h.update(form_json_path.read_bytes())
+    for path in form_source_files(version_dir):
+        h.update(path.read_bytes())
     h.update(config_path.read_bytes())
     return h.hexdigest()
 
@@ -51,7 +52,7 @@ def get_version_dir(form_name: str, version: str) -> tuple[Path, Path]:
 
 @task_blueprint.cli.command(
     "lock-form-version",
-    help="Hash form_json.py + config.py for a form version and write to a checksum file.",
+    help="Hash the form definition + config.py for a form version and write to a checksum file.",
 )
 @click.option("--form", required=True, help="Form directory name, e.g. sf424")
 @click.option("--version", required=True, help="Version in MAJOR.MINOR format, e.g. 1.0")
