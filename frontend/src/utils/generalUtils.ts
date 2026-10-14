@@ -178,6 +178,18 @@ export const getModifiedTimeDisplay = (
   return formatTimestamp(updated_at);
 };
 
+export const getAwsHeaders = (headers: Headers) => ({
+  apiRequestId: headers.get("x-amzn-requestid"),
+  apiGatewayId: headers.get("x-amz-apigw-id"),
+  apiErrorType: headers.get("x-amzn-errortype"),
+  contentType: headers.get("Content-Type"),
+});
+
+export const getResponseInfo = (response: Response) => ({
+  responseOk: response.ok,
+  responseStatus: response.status,
+});
+
 // polyfill for RegExp.escape found here https://stackoverflow.com/a/6969486
 export const escapeRegExpString = (regexpString: string) => {
   return RegExp.escape

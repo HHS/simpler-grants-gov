@@ -21,6 +21,7 @@ import { logger } from "src/services/logger/simplerLogger";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { ApiMethod } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+import { getAwsHeaders, getResponseInfo } from "src/utils/generalUtils";
 
 // Configuration of headers to send with all requests
 // optionally adds content type and user auth token
@@ -133,10 +134,8 @@ export const throwError = (
       url,
       status_code,
       apiMessage: message,
-      responseStatus: response.status,
-      apiRequestId: response.headers.get("x-amzn-requestid"),
-      apiGatewayId: response.headers.get("x-amz-apigw-id"),
-      apiErrorType: response.headers.get("x-amzn-errortype"),
+      ...getResponseInfo(response),
+      ...getAwsHeaders(response.headers),
     },
     "API request error",
   );
