@@ -1089,3 +1089,219 @@ class TestConditionalStructure:
 
         assert result is not None
         assert result["target"] == "PrimeOrContractor"
+
+
+class TestArrayDecompositionParentFieldsAndSkipping:
+    """item_parent_fields and skip_items_without_attributes on array_decomposition."""
+
+    TRANSFORM_CONFIG = {
+        "type": "array_decomposition",
+        "source_array_field": "items",
+        "field_mappings": {
+            "Data": {
+                "item_field": "data",
+                "item_wrapper": "DataItem",
+                "item_attributes": ["title"],
+                "item_parent_fields": ["code"],
+            },
+        },
+    }
+
+    def test_parent_fields_written_ahead_of_item_field_values(self):
+        source_data = {"items": [{"title": "Item 1", "code": "93.001", "data": {"value": "10"}}]}
+
+        result = apply_conditional_transform(self.TRANSFORM_CONFIG, source_data, ["data"])
+
+        item = result["Data"][0]
+        assert item["__attributes"] == {"title": "Item 1"}
+        assert item["code"] == "93.001"
+        assert item["value"] == "10"
+        data_keys = [key for key in item if not key.startswith("__")]
+        assert data_keys == ["code", "value"]
+
+    def test_line_item_created_from_parent_fields_alone(self):
+        source_data = {"items": [{"title": "Item 1", "code": "93.001"}]}
+
+        result = apply_conditional_transform(self.TRANSFORM_CONFIG, source_data, ["data"])
+
+        assert result["Data"] == [
+            {"__wrapper": "DataItem", "__attributes": {"title": "Item 1"}, "code": "93.001"}
+        ]
+
+    def test_none_parent_fields_are_ignored(self):
+        source_data = {"items": [{"title": "Item 1", "code": None}]}
+
+        assert apply_conditional_transform(self.TRANSFORM_CONFIG, source_data, ["data"]) is None
+
+    def test_items_without_attributes_skipped_when_enabled(self):
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_wrapper": "DataItem",
+                    "item_attributes": ["title"],
+                    "skip_items_without_attributes": True,
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"title": "Item 1", "data": {"value": "10"}},
+                {"data": {"value": "0.00"}},
+            ]
+        }
+
+        result = apply_conditional_transform(transform_config, source_data, ["data"])
+
+        assert result["Data"] == [
+            {"__wrapper": "DataItem", "__attributes": {"title": "Item 1"}, "value": "10"}
+        ]
+
+    def test_items_without_attributes_kept_by_default(self):
+        """Without the option, the existing behavior is unchanged."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_wrapper": "DataItem",
+                    "item_attributes": ["title"],
+                },
+            },
+        }
+        source_data = {"items": [{"data": {"value": "0.00"}}]}
+
+        result = apply_conditional_transform(transform_config, source_data, ["data"])
+
+        assert result["Data"] == [{"__wrapper": "DataItem", "value": "0.00"}]
+
+
+class TestArrayDecompositionItemFiltersAndDefaults:
+    """user_entered_fields, item_attribute_defaults and value_transform on
+    array_decomposition."""
+
+    TRANSFORM_CONFIG = {
+        "type": "array_decomposition",
+        "source_array_field": "items",
+        "field_mappings": {
+            "Data": {
+                "item_field": "data",
+                "item_wrapper": "DataItem",
+                "item_attributes": ["title", "label"],
+                "item_attribute_defaults": {"label": "N/A"},
+                "user_entered_fields": ["label", "amount"],
+                "skip_items_without_attributes": True,
+                "total_field": "totals",
+                "total_wrapper": "DataTotals",
+            },
+        },
+    }
+
+    def test_rows_without_user_data_are_written_empty_and_totals_dropped(self):
+        source_data = {
+            "items": [
+                {"title": "Item 1", "data": {"total": "0.00"}},
+                {"title": "Item 2"},
+                {"data": {"total": "0.00"}},
+            ],
+            "totals": {"total": "0.00"},
+        }
+
+        result = apply_conditional_transform(self.TRANSFORM_CONFIG, source_data, ["data"])
+
+        assert result["Data"] == [
+            {"__wrapper": "DataItem", "__attributes": {"title": "Item 1"}},
+            {"__wrapper": "DataItem", "__attributes": {"title": "Item 2"}},
+        ]
+
+    def test_rows_with_user_data_keep_values_and_totals(self):
+        source_data = {
+            "items": [
+                {"title": "Item 1", "data": {"amount": "10", "total": "10"}},
+                {"title": "Item 2", "data": {"total": "0.00"}},
+            ],
+            "totals": {"total": "10"},
+        }
+
+        result = apply_conditional_transform(self.TRANSFORM_CONFIG, source_data, ["data"])
+
+        assert result["Data"] == [
+            {
+                "__wrapper": "DataItem",
+                "__attributes": {"title": "Item 1", "label": "N/A"},
+                "amount": "10",
+                "total": "10",
+            },
+            {"__wrapper": "DataItem", "__attributes": {"title": "Item 2"}},
+            {"__wrapper": "DataTotals", "total": "10"},
+        ]
+
+    @pytest.mark.parametrize("label", [None, "", "   "])
+    def test_attribute_default_used_when_blank_and_row_has_data(self, label):
+        data = {"amount": "10"}
+        if label is not None:
+            data["label"] = label
+        source_data = {"items": [{"data": data}]}
+
+        result = apply_conditional_transform(self.TRANSFORM_CONFIG, source_data, ["data"])
+
+        assert result["Data"][0]["__attributes"] == {"label": "N/A"}
+
+    def test_attribute_default_not_used_without_user_data(self):
+        """A row with no title and nothing entered gets no default, so it's skipped."""
+        source_data = {"items": [{"data": {"total": "0.00"}}]}
+
+        assert apply_conditional_transform(self.TRANSFORM_CONFIG, source_data, ["data"]) is None
+
+    def test_entered_attribute_counts_as_user_data(self):
+        source_data = {"items": [{"data": {"label": "Label 1", "total": "0.00"}}]}
+
+        result = apply_conditional_transform(self.TRANSFORM_CONFIG, source_data, ["data"])
+
+        assert result["Data"] == [
+            {
+                "__wrapper": "DataItem",
+                "__attributes": {"label": "Label 1"},
+                "label": "Label 1",
+                "total": "0.00",
+            }
+        ]
+
+    def test_value_transform_applied_to_line_items_and_totals(self):
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_wrapper": "DataItem",
+                    "total_field": "totals",
+                    "total_wrapper": "DataTotals",
+                },
+            },
+        }
+        transform_config_root = {
+            "amount": {
+                "xml_transform": {
+                    "target": "Amount",
+                    "value_transform": {"type": "currency_format"},
+                }
+            },
+            "note": {"xml_transform": {"target": "Note"}},
+        }
+        source_data = {
+            "items": [{"data": {"amount": "11", "note": "11"}}],
+            "totals": {"amount": ".50"},
+        }
+
+        result = apply_conditional_transform(
+            transform_config, source_data, ["data"], transform_config_root
+        )
+
+        assert result["Data"] == [
+            {"__wrapper": "DataItem", "Amount": "11.00", "Note": "11"},
+            {"__wrapper": "DataTotals", "Amount": "0.50"},
+        ]

@@ -178,8 +178,9 @@ class TestSubmissionXSDValidation:
                 "activity_line_items": [
                     {
                         "activity_title": "Main Activity",
+                        # Column B lives on the row, like the UI sends it
+                        "assistance_listing_number": "93.002",
                         "budget_summary": {
-                            "assistance_listing_number": "93.002",
                             # Fields in correct XSD order per BudgetAmountGroup
                             "federal_new_or_revised_amount": "50000.00",
                             "non_federal_new_or_revised_amount": "10000.00",
