@@ -61,6 +61,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    NotificationQueueStatus,
     NotificationType,
     OpportunityAuditEvent,
     OpportunityCategory,
@@ -3663,3 +3664,25 @@ class NotificationJobContentFactory(BaseFactory):
     email_body = factory.LazyFunction(
         lambda: f"<html><body><p>{fake.paragraph()}</p></body></html>"
     )
+
+
+class NotificationQueueFactory(BaseFactory):
+    class Meta:
+        model = user_models.NotificationQueue
+
+    notification_queue_id = Generators.UuidObj
+
+    job_content = factory.SubFactory(NotificationJobContentFactory)
+    job_content_id = factory.LazyAttribute(lambda q: q.job_content.notification_job_content_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda q: q.user.user_id)
+
+    status = NotificationQueueStatus.PENDING
+    ses_message_id = None
+
+    class Params:
+        is_sent = factory.Trait(
+            status=NotificationQueueStatus.SENT,
+            ses_message_id=factory.Faker("uuid4"),
+        )
