@@ -8,7 +8,10 @@ set -euo pipefail
 env_config="infra/frontend/app-config/env-config/environment_variables.tf"
 workflow=".github/workflows/update-frontend-feature-flag.yml"
 
-expected=$(grep -E '^ *secret_store_name *=' "$env_config" | grep -oE '/feature-[a-z0-9-]+"' | tr -d '/"' | sort)
+expected=$(grep -E '^ *secret_store_name *=' "$env_config" | grep -oE '/feature-[a-z0-9-]+"' | tr -d '/"' | sort) || {
+  echo "No feature-* secret_store_name entries found in ${env_config}" >&2
+  exit 1
+}
 actual=$(yq '.on.workflow_dispatch.inputs.feature_flag.options[]' "$workflow" | sort)
 
 if ! diff <(echo "$expected") <(echo "$actual"); then
