@@ -5,6 +5,7 @@ from datetime import date, datetime, timezone
 from http import HTTPStatus
 from uuid import uuid4
 
+import pytest
 from common_grants_sdk.schemas.pydantic import (
     ArrayOperator,
     CustomFieldType,
@@ -1676,3 +1677,59 @@ def test_build_filter_info_reports_status_errors_before_custom_filter_errors():
         'status: unsupported value "posted"',
         "customFilters.bogus: unsupported filter",
     ]
+
+
+@pytest.mark.parametrize("archived_status", [OpportunityStatus.ARCHIVED, "archived"])
+def test_transform_search_result_archived_status_is_custom_with_custom_value(archived_status):
+    """An archived v1 opportunity maps to status custom with customValue archived."""
+    opp_data = _opp_data_with_info_url("https://example.com", "Details")
+    opp_data["opportunity_status"] = archived_status
+
+    result = transform_search_result_to_cg(opp_data)
+
+    assert result.status.value == OppStatusOptions.CUSTOM
+    assert result.status.custom_value == "archived"
+    assert result.status.model_dump(by_alias=True)["customValue"] == "archived"
+
+
+def test_transform_opportunity_archived_status_is_custom_with_custom_value():
+    """The get path also returns status custom with customValue archived."""
+
+    class MockOpportunity:
+        def __init__(self):
+            self.opportunity_id = uuid4()
+            self.opportunity_title = "Test"
+            self.opportunity_status = OpportunityStatus.ARCHIVED
+            self.created_at = datetime(2024, 1, 1, 12, 0, 0)
+            self.updated_at = datetime(2024, 1, 2, 12, 0, 0)
+            vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
+            self.summary = None
+            self.opportunity_attachments = []
+
+    result = transform_opportunity_to_cg(MockOpportunity())
+
+    assert result.status.value == OppStatusOptions.CUSTOM
+    assert result.status.custom_value == "archived"
+    assert result.status.model_dump(by_alias=True)["customValue"] == "archived"
+
+
+@pytest.mark.parametrize(
+    ("v1_status", "expected_value"),
+    [
+        (OpportunityStatus.FORECASTED, OppStatusOptions.FORECASTED),
+        (OpportunityStatus.POSTED, OppStatusOptions.OPEN),
+        (OpportunityStatus.CLOSED, OppStatusOptions.CLOSED),
+        ("posted", OppStatusOptions.OPEN),
+        ("not_a_real_status", OppStatusOptions.FORECASTED),
+    ],
+)
+def test_transform_search_result_non_archived_status_has_no_custom_value(v1_status, expected_value):
+    """Non-archived (and unknown) statuses leave customValue unset."""
+    opp_data = _opp_data_with_info_url("https://example.com", "Details")
+    opp_data["opportunity_status"] = v1_status
+
+    result = transform_search_result_to_cg(opp_data)
+
+    assert result.status.value == expected_value
+    assert result.status.custom_value is None
+    assert "customValue" not in result.status.model_dump(by_alias=True, exclude_none=True)

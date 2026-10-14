@@ -383,6 +383,8 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
         # Transform status
         v1_status = opp_data.get("opportunity_status", OpportunityStatus.POSTED)
         cg_status = transform_status_to_cg(v1_status)
+        # Custom statuses carry the v1 value (e.g. "archived") so clients can round-trip it
+        cg_custom_status = str(v1_status) if cg_status == OppStatusOptions.CUSTOM else None
 
         # Create timeline
         post_date = summary.get("post_date") if isinstance(summary, dict) else summary.post_date
@@ -434,7 +436,7 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
             id=opportunity_id,
             title=title,
             description=description,
-            status=OppStatus(value=cg_status),
+            status=OppStatus(value=cg_status, customValue=cg_custom_status),
             keyDates=timeline,
             funding=OppFunding(
                 totalAmountAvailable=total_amount_money,
