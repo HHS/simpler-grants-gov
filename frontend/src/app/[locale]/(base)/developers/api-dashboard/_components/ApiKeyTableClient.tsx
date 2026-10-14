@@ -12,6 +12,7 @@ import {
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
 import ApiKeyModal from "./ApiKeyModal";
+import { useDeletedApiKeyAlert } from "./DeletedApiKeyAlertProvider";
 
 interface ApiKeyTableClientProps {
   apiKeys: ApiKey[];
@@ -70,11 +71,13 @@ const LastUsedDateDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
 
 const ModifyActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   const router = useRouter();
+  const { showDeletedAlert } = useDeletedApiKeyAlert();
 
   const handleApiKeyRenamed = () => {
     router.refresh();
   };
   const handleApiKeyDeleted = () => {
+    showDeletedAlert(apiKey.key_name);
     router.refresh();
   };
 
@@ -146,6 +149,7 @@ export default function ApiKeyTableClient({ apiKeys }: ApiKeyTableClientProps) {
     <TableWithResponsiveHeader
       headerContent={headerContent}
       tableRowData={tableRowData}
+      rowKeys={apiKeys.map((apiKey) => apiKey.api_key_id)}
     />
   );
 }

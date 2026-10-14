@@ -1,5 +1,9 @@
 import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
 import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
+import {
+  DeletedApiKeyAlert,
+  DeletedApiKeyAlertProvider,
+} from "src/app/[locale]/(base)/developers/api-dashboard/_components/DeletedApiKeyAlertProvider";
 import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
 import { getSession } from "src/services/auth/session";
 import { handleListApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
@@ -37,13 +41,17 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
   }
 
   return (
-    <div className="grid-container margin-y-5">
-      <div className="flex-justify margin-bottom-4">
-        <h1>{t("heading")}</h1>
-        <CreateApiKeyButton />
-      </div>
+    // wraps the whole page so opening any API key modal clears the deleted key confirmation
+    <DeletedApiKeyAlertProvider>
+      <div className="grid-container margin-y-5">
+        <div className="flex-justify margin-bottom-4">
+          <h1>{t("heading")}</h1>
+          <CreateApiKeyButton />
+        </div>
 
-      <ApiKeyTable apiKeys={apiKeyResponse.data} />
-    </div>
+        <DeletedApiKeyAlert />
+        <ApiKeyTable apiKeys={apiKeyResponse.data} />
+      </div>
+    </DeletedApiKeyAlertProvider>
   );
 }
