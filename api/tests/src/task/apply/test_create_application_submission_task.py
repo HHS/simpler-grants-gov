@@ -11,13 +11,16 @@ from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationSta
 from src.db.models.competition_models import Application, Form
 from src.form_schema.forms import SF424_v4_0
 from src.form_schema.registry.form_template_registry import form_template_registry
+from src.services.applications.create_application_submission import (
+    ApplicationSubmissionMetrics,
+    FileMetadata,
+    SubmissionContainer,
+    create_manifest_text,
+)
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
     CreateApplicationSubmissionTask,
-    FileMetadata,
-    SubmissionContainer,
-    create_manifest_text,
 )
 from src.util import file_util
 from tests.conftest import BaseTestClass
@@ -258,11 +261,11 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert len(not_picked_up_app2.application_submissions) == 0
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 2
-        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 0
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_PROCESSED_COUNT] == 2
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_ATTACHMENT_COUNT] == 0
         apps_processed = [application_with_attachments, application_without_attachments]
         assert (
-            metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT]
+            metrics[ApplicationSubmissionMetrics.APPLICATION_FORM_COUNT]
             == sum([len(app.application_forms) for app in apps_processed]) - 1
         )  # Not counting the one app form that we skip
 
@@ -337,7 +340,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 1
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_ATTACHMENT_COUNT] == 1
 
     def test_run_task_with_erroring_application(
         self, db_session, create_submission_task, monkeypatch
@@ -350,7 +353,9 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             raise Exception("It errors")
 
         monkeypatch.setattr(
-            create_submission_task, "process_application_attachments", erroring_function
+            create_submission_task.application_submission_builder,
+            "process_application_attachments",
+            erroring_function,
         )
 
         create_submission_task.run_task()
@@ -361,7 +366,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert len(application.application_submissions) == 0
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 1
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_PROCESSED_COUNT] == 1
         assert metrics[create_submission_task.Metrics.ERROR_COUNT] == 1
 
     def test_xml_generation_unsupported_form(self, db_session, enable_factory_create, s3_config):
