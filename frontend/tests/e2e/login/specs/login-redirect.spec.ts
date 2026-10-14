@@ -71,7 +71,7 @@ test.describe("Login Page Redirect", () => {
     async ({ page }) => {
       // Given I have stored "/grantor/opportunities" as the login redirect
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
+        sessionStorage.setItem("post-auth-redirect", "/grantor/opportunities");
       });
       // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
@@ -86,7 +86,7 @@ test.describe("Login Page Redirect", () => {
     async ({ page }) => {
       // Given I have stored "/" as the login redirect
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/");
+        sessionStorage.setItem("post-auth-redirect", "/");
       });
       // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
@@ -103,7 +103,7 @@ test.describe("Login Page Redirect", () => {
     async ({ page }) => {
       // Given I have stored "https://external.com" as the login redirect
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "https://external.com");
+        sessionStorage.setItem("post-auth-redirect", "https://external.com");
       });
       // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
@@ -120,7 +120,7 @@ test.describe("Login Page Redirect", () => {
     async ({ page }) => {
       // Given I have stored "/grantor/opportunities" as the login redirect
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
+        sessionStorage.setItem("post-auth-redirect", "/grantor/opportunities");
       });
 
       // When I open the login page
