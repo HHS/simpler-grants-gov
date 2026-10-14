@@ -31,7 +31,7 @@ import SimplerAlert from "src/components/core/SimplerAlert";
 import { SimplerModal } from "src/components/core/SimplerModal";
 import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
-import { useDeletedApiKeyAlert } from "./DeletedApiKeyAlertProvider";
+import { useApiKeyAlert } from "./ApiKeyAlertProvider";
 
 // matches ValidationErrorType.DUPLICATE_API_KEY_NAME in the API
 const DUPLICATE_API_KEY_NAME_ERROR = "duplicate_api_key_name";
@@ -375,7 +375,7 @@ export default function ApiKeyModal({
 }: ApiKeyModalProps) {
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
-  const { hideDeletedAlert } = useDeletedApiKeyAlert();
+  const { hideAlert } = useApiKeyAlert();
   const t = useTranslations("ApiDashboard.modal");
 
   const [validationError, setValidationError] = useState<string>();
@@ -600,7 +600,7 @@ export default function ApiKeyModal({
           handleSubmit().catch(console.error);
         }}
         onClose={onClose}
-        onOpen={hideDeletedAlert}
+        onOpen={hideAlert}
       >
         {success && isCreate ? (
           <CreateSuccessContent

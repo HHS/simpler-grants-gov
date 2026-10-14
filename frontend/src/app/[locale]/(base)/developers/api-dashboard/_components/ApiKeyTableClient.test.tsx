@@ -4,9 +4,9 @@ import { axe } from "jest-axe";
 import ApiKeyTableClient from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTableClient";
 import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
 import {
-  DeletedApiKeyAlert,
-  DeletedApiKeyAlertProvider,
-} from "src/app/[locale]/(base)/developers/api-dashboard/_components/DeletedApiKeyAlertProvider";
+  ApiKeyAlert,
+  ApiKeyAlertProvider,
+} from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyAlertProvider";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
@@ -75,11 +75,11 @@ const renderTable = (apiKeys: ApiKey[] = mockApiKeys) => {
 };
 
 const tableWithAlert = (apiKeys: ApiKey[]) => (
-  <DeletedApiKeyAlertProvider>
+  <ApiKeyAlertProvider>
     <CreateApiKeyButton />
-    <DeletedApiKeyAlert />
+    <ApiKeyAlert />
     <ApiKeyTableClient apiKeys={apiKeys} />
-  </DeletedApiKeyAlertProvider>
+  </ApiKeyAlertProvider>
 );
 
 const newApiKey = createMockApiKey({
@@ -311,7 +311,7 @@ describe("ApiKeyTableClient", () => {
       render(tableWithAlert(mockApiKeys));
 
       expect(
-        screen.queryByTestId("deleted-api-key-alert"),
+        screen.queryByTestId("api-key-alert"),
       ).not.toBeInTheDocument();
 
       await user.click(
@@ -327,7 +327,7 @@ describe("ApiKeyTableClient", () => {
       );
 
       expect(
-        await screen.findByTestId("deleted-api-key-alert"),
+        await screen.findByTestId("api-key-alert"),
       ).toHaveTextContent("deleteSuccessMessage");
       expect(mockRefresh).toHaveBeenCalledTimes(1);
       expect(modal).toHaveClass("is-hidden");
@@ -355,13 +355,13 @@ describe("ApiKeyTableClient", () => {
         await user.click(
           within(modal).getByTestId("delete-api-key-submit-button"),
         );
-        await screen.findByTestId("deleted-api-key-alert");
+        await screen.findByTestId("api-key-alert");
 
         await user.click(screen.getByTestId(openButtonTestId));
 
         await waitFor(() => {
           expect(
-            screen.queryByTestId("deleted-api-key-alert"),
+            screen.queryByTestId("api-key-alert"),
           ).not.toBeInTheDocument();
         });
       },
