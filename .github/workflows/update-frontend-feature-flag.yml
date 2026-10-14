@@ -8,9 +8,15 @@ on:
         description: Feature flag to update
         required: true
         type: choice
+        # Must match the feature-* parameters in infra/frontend/app-config/env-config/environment_variables.tf.
+        # Enforced by bin/check-frontend-feature-flag-options in CI.
         options:
           - feature-apply-form-prototype-off
-          - feature-developer-page-off
+          - feature-award-recommendation-off
+          - feature-feature-flag-admin-off
+          - feature-maintenance-banner-enabled
+          - feature-maintenance-mode
+          - feature-opportunities-list-off
       environment:
         description: Target environment
         required: true

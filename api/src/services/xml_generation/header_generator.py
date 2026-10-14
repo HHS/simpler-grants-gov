@@ -13,6 +13,8 @@ from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 
+ACTIVITY_TITLE_MAX_LENGTH = 120
+
 
 class SubmissionXMLGenerator:
 
@@ -62,6 +64,7 @@ class SubmissionXMLGenerator:
         # Namespace redeclarations are handled via nsmap in lxml
         # The namespaces are already declared in the nsmap and will be serialized correctly
 
+        # Fields must be added in the Header-V1.0.xsd sequence order
         header_ns = HEADER_NAMESPACES["header"]
         self._add_field(root, "AgencyName", self._get_agency_name(), header_ns)
         self._add_field(root, "CFDANumber", self._get_cfda_number(), header_ns)
@@ -132,7 +135,8 @@ class SubmissionXMLGenerator:
         if self.competition.opportunity_assistance_listing:
             program_title = self.competition.opportunity_assistance_listing.program_title
             if program_title and program_title.strip():
-                return program_title
+                # Header-V1.0.xsd limits ActivityTitle to 120 characters
+                return program_title[:ACTIVITY_TITLE_MAX_LENGTH]
         return None
 
     def _format_date(self, date_value: date | None) -> str | None:
