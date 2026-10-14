@@ -93,7 +93,7 @@ class CommonGrantsOpportunityService:
         pagination = search_request.pagination or PaginatedBodyParams()
 
         # Convert search request to v1 format
-        v1_search_params, custom_filter_errors = transform_search_request_from_cg(
+        v1_search_params, filter_errors = transform_search_request_from_cg(
             filters, sorting, pagination, search_request.search
         )
 
@@ -117,4 +117,4 @@ class CommonGrantsOpportunityService:
             totalPages=pagination_data_v1.total_pages,
         )
 
-        return opportunity_data_cg, paginated_results_info_cg, custom_filter_errors
+        return opportunity_data_cg, paginated_results_info_cg, filter_errors

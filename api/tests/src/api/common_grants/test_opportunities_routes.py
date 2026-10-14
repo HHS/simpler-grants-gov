@@ -317,6 +317,25 @@ class TestSearchOpportunities:
         data = response.get_json()
         assert "message" in data
 
+    def test_search_unsupported_status_reported_in_filter_info(
+        self,
+        client: FlaskClient,
+        user_api_key_id,
+        search_client,
+        opportunity_index,
+        opportunity_index_alias,
+    ):
+        """An unsupported status value returns 200 with the error in filterInfo.errors."""
+        search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+        response = client.post(
+            "/common-grants/opportunities/search",
+            headers={"X-API-Key": user_api_key_id},
+            json={"filters": {"status": {"operator": "in", "value": ["posted"]}}},
+        )
+        assert response.status_code == 200
+        data = response.get_json()
+        assert 'status: unsupported value "posted"' in data["filterInfo"]["errors"]
+
 
 class TestResponseSchemaValidation:
     """Test that responses conform to the expected marshmallow schema format."""

@@ -1,5 +1,6 @@
 """Tests for the transformation utility."""
 
+import logging
 from datetime import date, datetime, timezone
 from http import HTTPStatus
 from uuid import uuid4
@@ -612,14 +613,20 @@ class TestTransformation:
 
     def test_transform_status_from_cg(self):
         """Test status transformation from CommonGrants format."""
-        # Test all known status mappings
-        assert transform_status_from_cg(OppStatusOptions.FORECASTED) == OpportunityStatus.FORECASTED
-        assert transform_status_from_cg(OppStatusOptions.OPEN) == OpportunityStatus.POSTED
-        assert transform_status_from_cg(OppStatusOptions.CLOSED) == OpportunityStatus.CLOSED
-        assert transform_status_from_cg(OppStatusOptions.CUSTOM) == OpportunityStatus.ARCHIVED
+        assert transform_status_from_cg("forecasted") == OpportunityStatus.FORECASTED
+        assert transform_status_from_cg("open") == OpportunityStatus.POSTED
+        assert transform_status_from_cg("closed") == OpportunityStatus.CLOSED
+        assert transform_status_from_cg("custom") == OpportunityStatus.ARCHIVED
+        assert transform_status_from_cg("archived") == OpportunityStatus.ARCHIVED
 
-        # Test unknown status
-        assert transform_status_from_cg("unknown_status") == OppStatusOptions.FORECASTED
+        # Normalization: surrounding whitespace and casing are ignored
+        assert transform_status_from_cg("  OPEN ") == OpportunityStatus.POSTED
+        assert transform_status_from_cg("Closed") == OpportunityStatus.CLOSED
+
+        # Unknown values are unsupported (None), not silently mapped
+        assert transform_status_from_cg("unknown_status") is None
+        assert transform_status_from_cg("posted") is None
+        assert transform_status_from_cg("   ") is None
 
     def test_transform_sorting_from_cg(self):
         """Test sorting field transformation from CommonGrants format."""
@@ -1580,3 +1587,92 @@ def test_build_custom_filters_applies_valid_filter_when_other_key_invalid():
     )
     assert applied == {"agency": {"one_of": ["USAID"]}}
     assert errors == ["customFilters.bogus: unsupported filter"]
+
+
+def _status_request(values):
+    """Run transform_search_request_from_cg with a status filter (and optional extras)."""
+    filters = OppFilters.model_validate({"status": {"operator": "in", "value": values}})
+    return filters, transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+
+
+def test_transform_status_archived_and_custom_map_to_archived():
+    _, (params, errors) = _status_request(["archived"])
+    assert params["filters"]["opportunity_status"] == {"one_of": [OpportunityStatus.ARCHIVED]}
+    _, (params, errors) = _status_request(["custom"])
+    assert params["filters"]["opportunity_status"] == {"one_of": [OpportunityStatus.ARCHIVED]}
+    assert errors == []
+
+
+def test_transform_status_supported_values_normalized_into_v1():
+    _, (params, errors) = _status_request([" Forecasted ", "OPEN", "closed"])
+    assert params["filters"]["opportunity_status"] == {
+        "one_of": [OpportunityStatus.FORECASTED, OpportunityStatus.POSTED, OpportunityStatus.CLOSED]
+    }
+    assert errors == []
+
+
+def test_transform_status_unsupported_value_reported_and_warned(caplog):
+    caplog.set_level(logging.WARNING)
+    filters, (params, errors) = _status_request(["posted"])
+    assert "opportunity_status" not in params.get("filters", {})
+    assert errors == ['status: unsupported value "posted"']
+    assert any(
+        r.levelno == logging.WARNING and getattr(r, "unsupported_statuses", None) == ["posted"]
+        for r in caplog.records
+    )
+    assert not any(r.levelno >= logging.ERROR for r in caplog.records)
+    assert 'status: unsupported value "posted"' in build_filter_info(filters, errors).errors
+
+
+def test_transform_status_all_unsupported_omits_opportunity_status():
+    _, (params, errors) = _status_request(["posted", "bogus"])
+    assert "opportunity_status" not in params.get("filters", {})
+    assert errors == ['status: unsupported value "posted"', 'status: unsupported value "bogus"']
+
+
+def test_transform_status_mixed_supported_and_unsupported(caplog):
+    caplog.set_level(logging.WARNING)
+    _, (params, errors) = _status_request(["open", "posted", "closed"])
+    assert params["filters"]["opportunity_status"] == {
+        "one_of": [OpportunityStatus.POSTED, OpportunityStatus.CLOSED]
+    }
+    assert errors == ['status: unsupported value "posted"']
+    warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(warnings) == 1
+
+
+def test_transform_status_duplicates_collapse_preserving_order():
+    _, (params, _) = _status_request(["open", "OPEN", "closed", " open"])
+    assert params["filters"]["opportunity_status"] == {
+        "one_of": [OpportunityStatus.POSTED, OpportunityStatus.CLOSED]
+    }
+
+
+def test_transform_status_custom_and_archived_give_single_archived():
+    _, (params, _) = _status_request(["custom", "archived"])
+    assert params["filters"]["opportunity_status"] == {"one_of": [OpportunityStatus.ARCHIVED]}
+
+
+def test_transform_status_whitespace_only_is_unsupported():
+    _, (params, errors) = _status_request(["   "])
+    assert "opportunity_status" not in params.get("filters", {})
+    assert errors == ['status: unsupported value "   "']
+
+
+def test_build_filter_info_reports_status_errors_before_custom_filter_errors():
+    filters = OppFilters.model_validate(
+        {
+            "status": {"operator": "in", "value": ["posted"]},
+            "customFilters": {"bogus": {"operator": "in", "value": ["x"]}},
+        }
+    )
+    _, errors = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    info = build_filter_info(filters, errors)
+    assert info.errors == [
+        'status: unsupported value "posted"',
+        "customFilters.bogus: unsupported filter",
+    ]
