@@ -3,13 +3,16 @@
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
 import { useGetCookie } from "cookies-next";
 import noop from "lodash/noop";
+import { LOGOUT_URL } from "src/constants/auth";
 import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 import { UserContext } from "src/services/auth/useUser";
 import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";
 import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
 import { UserProfile, UserSession } from "src/types/authTypes";
 import { isExpired, isExpiring } from "src/utils/dateUtil";
+import { storeCurrentPage } from "src/utils/userUtils";
 
+import { redirect } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function UserProvider({
@@ -51,17 +54,18 @@ export default function UserProvider({
       // TBD if removing that will cause any problems
       const fetchedUser: UserSession = await debouncedUserFetcher();
       if (fetchedUser) {
+        setLocalUser(fetchedUser);
+        setUserFetchError(undefined);
+        setIsLoading(false);
         if (localUser?.token && !fetchedUser.token) {
           setHasBeenLoggedOut(true);
 
           // Invoke the logout endpoint for explicit logout. This will ensure
           // the correlation_id cookie is properly removed since the correlation_id
           // cookie is httpOnly.
-          await fetch("/api/auth/logout", { method: "POST" }).catch(noop);
+          storeCurrentPage(location.pathname, location.search);
+          redirect(LOGOUT_URL);
         }
-        setLocalUser(fetchedUser);
-        setUserFetchError(undefined);
-        setIsLoading(false);
         return;
       }
       throw new Error("received empty user session");
