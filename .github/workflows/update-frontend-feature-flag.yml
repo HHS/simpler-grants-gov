@@ -11,6 +11,10 @@ on:
         options:
           - feature-apply-form-prototype-off
           - feature-developer-page-off
+          - feature-feature-flag-admin-off
+          - feature-opportunities-list-off
+          - feature-maintenance-mode
+          - feature-award-recommendation-off
       environment:
         description: Target environment
         required: true
