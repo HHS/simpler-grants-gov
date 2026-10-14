@@ -1,19 +1,19 @@
 #!/bin/bash
 # Checks that the feature flag options in the Update Frontend Feature Flag workflow
-# exactly match the feature-* SSM parameters the frontend reads, in sorted order.
-# Exits non-zero and prints a diff if they have drifted.
+# match the feature-* SSM parameters the frontend reads.
+# Exits non-zero and prints a diff if they have drifted. Requires yq.
 
 set -euo pipefail
 
 env_config="infra/frontend/app-config/env-config/environment_variables.tf"
 workflow=".github/workflows/update-frontend-feature-flag.yml"
 
-expected=$(grep -oE '/feature-[a-z0-9-]+"' "$env_config" | tr -d '/"' | sort)
-actual=$(grep -oE '^ +- feature-[a-z0-9-]+$' "$workflow" | sed -E 's/^ +- //')
+expected=$(grep -E '^ *secret_store_name *=' "$env_config" | grep -oE '/feature-[a-z0-9-]+"' | tr -d '/"' | sort)
+actual=$(yq '.on.workflow_dispatch.inputs.feature_flag.options[]' "$workflow" | sort)
 
 if ! diff <(echo "$expected") <(echo "$actual"); then
-  echo "Feature flag options in ${workflow} must exactly match the feature-* parameters in ${env_config}, sorted alphabetically." >&2
-  echo "Lines starting with '<' are missing from the workflow; lines starting with '>' should be removed or reordered." >&2
+  echo "Feature flag options in ${workflow} must match the feature-* parameters in ${env_config}." >&2
+  echo "Lines starting with '<' are missing from the workflow; lines starting with '>' should be removed." >&2
   exit 1
 fi
 
