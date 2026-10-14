@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "infra-dev", "infra-staging", "infra-training"]
+  environments = ["dev", "staging", "prod", "infra-dev", "infra-staging", "infra-training"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -53,10 +53,9 @@ locals {
   enable_waf = false
 
   environment_configs = {
-    dev      = module.dev_config
-    staging  = module.staging_config
-    prod     = module.prod_config
-    training = module.training_config
+    dev     = module.dev_config
+    staging = module.staging_config
+    prod    = module.prod_config
     # infra-dev is a dev-like environment in the "dev" AWS account (061664787759),
     # running in the "infra-dev-simpler-grants" VPC.
     infra-dev = module.infra_dev_config
@@ -102,7 +101,6 @@ locals {
     dev            = "simpler-grants-gov"
     staging        = "simpler-grants-gov"
     prod           = "simpler-grants-gov"
-    training       = "simpler-grants-gov"
     infra-dev      = "dev"      # infra-dev environment lives in AWS account 061664787759
     infra-staging  = "staging"  # infra-staging environment lives in AWS account 317380566348
     infra-training = "training" # infra-training environment lives in AWS account 049145893907
