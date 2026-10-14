@@ -11,7 +11,7 @@ import { test as base, expect } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, SMOKE, FULL_REGRESSION } = VALID_TAGS;
 type TestWithOpportunityId = {
   testOpportunityId: string;
 };
@@ -50,20 +50,16 @@ test.beforeEach(async ({ page, testOpportunityId }) => {
 });
 
 /** @scenario Show the page title */
-test("has title", { tag: [DISCOVERY, FULL_REGRESSION] }, async ({ page }) => {
+test("has title", { tag: [DISCOVERY, SMOKE] }, async ({ page }) => {
   // Then the page title should start with "Opportunity Listing -"
   await expect(page).toHaveTitle(/^Opportunity Listing - */);
 });
 
 /** @scenario Show key page content */
-test(
-  "has page attributes",
-  { tag: [DISCOVERY, FULL_REGRESSION] },
-  async ({ page }) => {
-    // Then I should see "Application process" in "Application process section"
-    await expect(page.getByText("Application process")).toBeVisible();
-  },
-);
+test("has page attributes", { tag: [DISCOVERY, SMOKE] }, async ({ page }) => {
+  // Then I should see "Application process" in "Application process section"
+  await expect(page.getByText("Application process")).toBeVisible();
+});
 
 /** @scenario Expand and collapse the opportunity description */
 // a bit tough to target the content display toggles on the page, since they have the same text and there's

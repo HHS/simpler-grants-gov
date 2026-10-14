@@ -8,7 +8,7 @@ import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { FULL_REGRESSION } = VALID_TAGS;
+const { SMOKE, FULL_REGRESSION } = VALID_TAGS;
 const { baseUrl, targetEnv } = playwrightEnv;
 
 const TEST_REDIRECT_TIMEOUT = targetEnv === "local" ? 5000 : 30000;
@@ -67,7 +67,7 @@ test.describe("Login Page Redirect", () => {
   // Scenario: should redirect to stored URL after login
   test(
     "should redirect to stored URL after login",
-    { tag: [FULL_REGRESSION] },
+    { tag: [SMOKE] },
     async ({ page }) => {
       // Given I have stored "/grantor/opportunities" as the login redirect
       await page.evaluate(() => {
@@ -99,7 +99,7 @@ test.describe("Login Page Redirect", () => {
   // Scenario: should redirect to home page when stored URL is external
   test(
     "should redirect to home page when stored URL is external",
-    { tag: [FULL_REGRESSION] },
+    { tag: [SMOKE] },
     async ({ page }) => {
       // Given I have stored "https://external.com" as the login redirect
       await page.evaluate(() => {

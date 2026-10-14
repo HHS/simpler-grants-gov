@@ -100,7 +100,7 @@ test(
  */
 test(
   "displays mobile nav at mobile width",
-  { tag: [FULL_REGRESSION] },
+  { tag: [SMOKE] },
   async ({ page }, { project }) => {
     // Given the viewport is set to a mobile width
     if (project.name.match(/[Mm]obile/)) {
