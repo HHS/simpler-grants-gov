@@ -13,10 +13,12 @@ import {
 } from "@playwright/test";
 import {
   SF424B_ZIP_ALL_FIELDS_DATA,
-  SF424B_ZIP_APPLICATION_URL,
+  SF424B_ZIP_APPLICATION_PATH,
   SF424B_ZIP_PDF_EXPECTED_TEXT,
   SF424B_ZIP_PDF_NAME,
+  SF424B_ZIP_PDF_UNEXPECTED_TEXT,
 } from "tests/e2e/apply/fixtures/sf424b-data";
+import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
@@ -30,7 +32,7 @@ const { APPLY, CORE_REGRESSION, GRANTEE } = VALID_TAGS;
 
 test.beforeEach(({ page: _ }, testInfo) => {
   test.skip(
-    process.env.PLAYWRIGHT_TARGET_ENV === "local",
+    playwrightEnv.targetEnv !== "staging",
     "Submission ZIP verification runs only against staging",
   );
   skipNonChromeOnStaging(testInfo);
@@ -46,7 +48,7 @@ test(
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
     await authenticateE2eUser(page, context, !!isMobile);
 
-    await page.goto(SF424B_ZIP_APPLICATION_URL);
+    await page.goto(SF424B_ZIP_APPLICATION_PATH);
     await page.waitForLoadState("domcontentloaded");
 
     const contents = await downloadAndUnzipSubmission(page);
@@ -60,6 +62,7 @@ test(
         contents,
         SF424B_ZIP_PDF_NAME,
         SF424B_ZIP_PDF_EXPECTED_TEXT,
+        SF424B_ZIP_PDF_UNEXPECTED_TEXT,
       );
     });
   },

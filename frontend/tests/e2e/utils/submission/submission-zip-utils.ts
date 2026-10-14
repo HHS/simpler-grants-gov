@@ -159,18 +159,26 @@ export async function readPdfText(
   return text.replace(/\s+/g, " ").trim();
 }
 
+/** Returns true if the text contains the string or matches the pattern. */
+function textMatches(text: string, item: string | RegExp): boolean {
+  return typeof item === "string" ? text.includes(item) : item.test(text);
+}
+
 /**
  * Asserts that the named PDF in the zip exists, has extractable text,
- * and contains each expected string or pattern.
+ * contains each expected string or pattern, and contains none of the
+ * unexpected ones.
  *
  * @param contents ZipContents returned by downloadAndUnzipSubmission
  * @param pdfFileName Entry name in the zip, e.g. "SF424B.pdf"
  * @param expected Strings or patterns that must appear in the PDF text
+ * @param unexpected Strings or patterns that must NOT appear in the PDF text
  */
 export async function assertPdfContainsText(
   contents: ZipContents,
   pdfFileName: string,
   expected: (string | RegExp)[],
+  unexpected: (string | RegExp)[] = [],
 ): Promise<void> {
   const pdfText = await readPdfText(contents, pdfFileName);
 
@@ -179,12 +187,14 @@ export async function assertPdfContainsText(
     `${pdfFileName} has no extractable text`,
   ).toBeGreaterThan(0);
 
-  const missing = expected.filter((item) =>
-    typeof item === "string" ? !pdfText.includes(item) : !item.test(pdfText),
-  );
+  const missing = expected.filter((item) => !textMatches(pdfText, item));
+  const present = unexpected.filter((item) => textMatches(pdfText, item));
 
-  // Lists every missing item at once instead of stopping at the first.
+  // Lists every problem at once instead of stopping at the first.
   expect
     .soft(missing.map(String), `${pdfFileName} is missing expected text`)
+    .toEqual([]);
+  expect
+    .soft(present.map(String), `${pdfFileName} contains unexpected text`)
     .toEqual([]);
 }

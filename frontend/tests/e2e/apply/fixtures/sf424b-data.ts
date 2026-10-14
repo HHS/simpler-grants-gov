@@ -50,12 +50,13 @@ export const SF424B_OPPORTUNITY_DATA: PrintViewFormData = {
 };
 
 /**
- * Pre-submitted staging application used by the submission ZIP verification
- * spec. SF424B_ZIP_ALL_FIELDS_DATA below describes this application, so keep
- * the two together.
+ * Path of the pre-submitted staging application used by the submission ZIP
+ * verification spec. Relative so it resolves against the Playwright baseURL.
+ * SF424B_ZIP_ALL_FIELDS_DATA below describes this application, so keep the
+ * two together.
  */
-export const SF424B_ZIP_APPLICATION_URL =
-  "https://staging.simpler.grants.gov/workspace/applications/aa9da806-3764-4e98-8dd7-8e5a72b20bd8";
+export const SF424B_ZIP_APPLICATION_PATH =
+  "/workspace/applications/aa9da806-3764-4e98-8dd7-8e5a72b20bd8";
 
 /**
  * Fixed test data used specifically for submission ZIP/XML/PDF verification.
@@ -96,4 +97,15 @@ export const SF424B_ZIP_PDF_EXPECTED_TEXT: (string | RegExp)[] = [
   `${fieldDefinitionsSF424B.title.field}* ${SF424B_ZIP_ALL_FIELDS_DATA.title.value}`,
   `${fieldDefinitionsSF424B.applicant_organization.field}* ${SF424B_ZIP_ALL_FIELDS_DATA.applicant_organization.value}`,
   SF424B_ZIP_ALL_FIELDS_DATA.SubmittedDate.value,
+];
+
+/**
+ * Text that must NOT appear in SF424B.pdf: template/serialization leaks and
+ * validation messages that would mean the form was rendered incorrectly.
+ */
+export const SF424B_ZIP_PDF_UNEXPECTED_TEXT: (string | RegExp)[] = [
+  "undefined",
+  "[object Object]",
+  "NaN",
+  /\bis required\b/i,
 ];
