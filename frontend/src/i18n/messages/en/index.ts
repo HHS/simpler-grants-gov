@@ -843,23 +843,34 @@ export const messages = {
     },
     modal: {
       apiKeyNameLabel: "Name <required>(required)</required>",
-      placeholder: "e.g., Production API Key",
-      createTitle: "Create New API Key",
+      createApiKeyNameLabel: "API key name <required>(required)</required>",
+      createNameHint: "e.g. Staging, iOS App, Production",
+      createTitle: "Create a new API key",
       createDescription:
-        "Create a new key for use with the Simpler.Grants.gov API",
+        "Enter a descriptive name to identify how this key will be used. Your key name must be unique.",
+      createSubmitButtonText: "Create key",
       editDescription: "Change the name of your Simpler.Grants.gov API key",
-      createSuccessHeading: "Save your key",
+      createSuccessHeading: "API key created",
+      createSuccessAlertHeading: "Copy and save this key now",
+      createSuccessAlertMessage:
+        "For security, you will not be able to see or copy this key again.",
+      createSuccessKeyName: "<strong>Key name:</strong> {keyName}",
+      createdApiKeyLabel: "API key",
+      copyKey: "Copy key",
+      copied: "Copied",
+      done: "Done",
       editSuccessHeading: "API Key Renamed Successfully",
-      createSuccessMessage:
-        'Your API key "{keyName}" has been created successfully. Please save your secret key in a safe place. Keep it secure, as anyone with your API key can make requests on your behalf.',
       editSuccessMessage:
         'Your API key has been renamed from "{originalName}" to "{keyName}".',
       close: "Close",
+      createErrorHeading: "Unable to create API key",
       createErrorMessage:
-        "There was an error creating your API key. Please try again.",
+        "Something went wrong on our end. Please try again in a few minutes.",
       editErrorMessage:
         "There was an error renaming your API key. Please try again.",
-      nameRequiredError: "API key name is required",
+      nameRequiredError: "Enter a name for your API key.",
+      duplicateNameError:
+        "A key with this name already exists. Enter a different name.",
       nameChangedError: "Please enter a different name",
       editTitle: "Rename API Key",
       createButtonText: "Create API Key",
