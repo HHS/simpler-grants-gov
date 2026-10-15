@@ -6,6 +6,7 @@ import {
 } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { handleCreateApiKey } from "src/services/fetch/fetchers/apiKeyFetcher";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
 
 export const createApiKeyHandler = async (request: Request) => {
@@ -40,9 +41,14 @@ export const createApiKeyHandler = async (request: Request) => {
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
+    // surfaces API validation error types (ie. duplicate_api_key_name) to the client
+    const errorType = (
+      (e as Error).cause as { details?: FrontendErrorDetails } | undefined
+    )?.details?.type;
     return Response.json(
       {
         message: `Error attempting to create API key: ${message}`,
+        errorType,
       },
       { status },
     );
