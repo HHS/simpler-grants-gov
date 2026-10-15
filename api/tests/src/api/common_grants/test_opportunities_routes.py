@@ -6,7 +6,13 @@ from datetime import datetime
 import marshmallow
 from flask.testing import FlaskClient
 
-from tests.src.db.models.factories import OpportunityFactory
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.constants.lookup_constants import OpportunityStatus
+from tests.src.db.models.factories import (
+    CurrentOpportunitySummaryFactory,
+    OpportunityFactory,
+    OpportunitySummaryFactory,
+)
 
 
 def validate_opportunity_structure(opportunity):
@@ -326,6 +332,23 @@ class TestSearchOpportunities:
         opportunity_index_alias,
     ):
         """An unsupported status value returns 200 with the error in filterInfo.errors."""
+        # Index a record so the sort fields are mapped; an empty index fails the search
+        opportunity = OpportunityFactory.build(
+            current_opportunity_summary=None,
+            created_at=datetime(2024, 1, 1),
+            updated_at=datetime(2024, 1, 2),
+        )
+        opportunity.current_opportunity_summary = CurrentOpportunitySummaryFactory.build(
+            opportunity_status=OpportunityStatus.POSTED,
+            opportunity_summary=OpportunitySummaryFactory.build(opportunity=opportunity),
+            opportunity=opportunity,
+        )
+        search_client.bulk_upsert(
+            opportunity_index,
+            [OpportunityV1Schema().dump(opportunity)],
+            "opportunity_id",
+            refresh=True,
+        )
         search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
         response = client.post(
             "/common-grants/opportunities/search",
