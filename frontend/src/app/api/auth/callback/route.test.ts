@@ -8,9 +8,16 @@ import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 import { NextRequest } from "next/server";
 
 const createSessionMock = jest.fn();
+const mockLoggerError = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   createSession: (token: string): unknown => createSessionMock(token),
+}));
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    error: (...args: unknown[]): unknown => mockLoggerError(...args),
+  },
 }));
 
 // note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
@@ -33,5 +40,27 @@ describe("/api/auth/callback GET handler", () => {
     );
     expect(createSessionMock).toHaveBeenCalledTimes(0);
     expect(redirectError.digest).toContain(";/unauthenticated;");
+  });
+
+  it("logs session creation failures without the token and redirects to the error page", async () => {
+    const sessionError = new Error("session failure");
+    createSessionMock.mockRejectedValueOnce(sessionError);
+
+    const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
+      GET(
+        new NextRequest("https://simpler.grants.gov/?token=fakeToken", {
+          headers: { "X-Amz-Cf-Id": "trace-id" },
+        }),
+      ),
+    );
+
+    expect(redirectError.digest).toContain(";/error;");
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      { err: sessionError, awsTraceId: "trace-id" },
+      "Error creating session",
+    );
+    expect(JSON.stringify(mockLoggerError.mock.calls)).not.toContain(
+      "fakeToken",
+    );
   });
 });

@@ -35,7 +35,7 @@ import {
   uploadFile,
 } from "tests/e2e/utils/common/file-upload-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 
 const OPPORTUNITY_URL = `/opportunity/${ATTACHMENT_OPPORTUNITY_DATA.opportunityId}`;
@@ -59,7 +59,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
 
   test(
     "aborted upload does not save the file",
-    { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
@@ -105,7 +105,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
 
   test(
     "failed single-file upload does not save the file",
-    { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,

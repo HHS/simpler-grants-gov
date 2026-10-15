@@ -13,7 +13,7 @@ import {
 } from "tests/e2e/utils/search/search-filter-utils";
 import { waitForSearchResultsInitialLoad } from "tests/e2e/utils/search/search-utils";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 const SEARCH_TIMEOUT = playwrightEnv.targetEnv !== "local" ? 15000 : 5000;
 
@@ -24,7 +24,7 @@ const UNLABELED_PILL = '[aria-label="Remove  pill"]';
 test.describe("Search invalid filter values", () => {
   test(
     "should drop an invalid filter value from the URL rather than erroring",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       // Given I navigate to "/search?status=not_a_status"
       await page.goto("/search?status=not_a_status");
@@ -45,7 +45,7 @@ test.describe("Search invalid filter values", () => {
 
   test(
     "should keep the valid values when only some are invalid",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       // Given I navigate to "/search?status=not_a_status,closed"
       await page.goto("/search?status=not_a_status,closed");
@@ -62,7 +62,7 @@ test.describe("Search invalid filter values", () => {
 
   test(
     "should not re-append an invalid value when a valid filter is applied",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       // Given I navigate to "/search?status=not_a_status"
       await page.goto("/search?status=not_a_status");

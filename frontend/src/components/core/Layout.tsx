@@ -4,6 +4,7 @@ import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
 import UserProvider from "src/services/auth/UserProvider";
 import { assignBaseFlags } from "src/services/featureFlags/featureFlagHelpers";
 import { getTestUsers } from "src/services/fetch/fetchers/userFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { TestUser } from "src/types/userTypes";
 
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -32,7 +33,7 @@ export default async function Layout({ children, locale }: Props) {
       // if this returns more than 500 users we likely are in a deployed env and will disable the feature
       testUsers = await getTestUsers();
     } catch (e) {
-      console.error("unable to fetch test users, oh well", e);
+      logger.error({ err: e }, "Unable to fetch test users");
     }
   }
 

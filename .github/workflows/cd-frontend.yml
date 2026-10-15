@@ -94,7 +94,7 @@ jobs:
     with:
       version: ${{ inputs.version || github.ref }}
       target: staging
-      playwright_tags: "@smoke|@core-regression"
+      playwright_tags: "@smoke|@full-regression"
       send_slack_notification: false
 
   send-slack-notification:

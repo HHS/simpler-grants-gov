@@ -1,3 +1,4 @@
+import { logger } from "src/services/logger/simplerLogger";
 import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   QueryParamData,
@@ -36,7 +37,7 @@ const ResolvedSearchResults = async ({
   try {
     savedOpportunities = await savedOpportunitiesPromise;
   } catch (e) {
-    console.error("Unable to fetch saved opportunities for user", e);
+    logger.error({ err: e }, "Unable to fetch saved opportunities for user");
   }
 
   // if there are no results because we've requested a page beyond the number of total pages

@@ -38,8 +38,7 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE, FULL_REGRESSION } =
-  VALID_TAGS;
+const { APPLY_FORMS, SMOKE, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
@@ -58,25 +57,25 @@ const applicantScenarios = [
   {
     testName: `Key Contacts - Required fields only - Organization user`,
     orgLabel: testOrgLabel,
-    tags: [SMOKE, GRANTEE, APPLY, APPLY_FORMS],
+    tags: [APPLY_FORMS, SMOKE],
     buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
   },
   {
     testName: `Key Contacts - Complete form - Organization user`,
     orgLabel: testOrgLabel,
-    tags: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+    tags: [APPLY_FORMS, FULL_REGRESSION],
     buildTestData: buildKeyContactsHappyPathTestData,
   },
   {
     testName: `Key Contacts - Required fields only - Individual user`,
     orgLabel: undefined,
-    tags: [SMOKE, GRANTEE, APPLY, APPLY_FORMS],
+    tags: [APPLY_FORMS, SMOKE],
     buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
   },
   {
     testName: `Key Contacts - Complete form - Individual user`,
     orgLabel: undefined,
-    tags: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+    tags: [APPLY_FORMS, FULL_REGRESSION],
     buildTestData: buildKeyContactsHappyPathTestData,
   },
 ] as const;

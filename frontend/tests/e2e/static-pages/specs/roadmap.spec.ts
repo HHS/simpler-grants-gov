@@ -9,7 +9,7 @@
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { STATIC, EXTENDED, FULL_REGRESSION } = VALID_TAGS;
+const { FULL_REGRESSION } = VALID_TAGS;
 
 test.beforeEach(async ({ page }) => {
   // Background: Given I open "/roadmap"
@@ -19,7 +19,7 @@ test.beforeEach(async ({ page }) => {
 /**
  * @scenario Show the page title
  */
-test("has title", { tag: [STATIC, FULL_REGRESSION] }, async ({ page }) => {
+test("has title", { tag: [FULL_REGRESSION] }, async ({ page }) => {
   // Then the page title should be "Roadmap | Simpler.Grants.gov"
   await expect(page).toHaveTitle("Roadmap | Simpler.Grants.gov");
 });
@@ -29,7 +29,7 @@ test("has title", { tag: [STATIC, FULL_REGRESSION] }, async ({ page }) => {
  */
 test(
   "can return to top after scrolling to the bottom",
-  { tag: [STATIC, FULL_REGRESSION] },
+  { tag: [FULL_REGRESSION] },
   async (
     { page },
     {
@@ -69,7 +69,7 @@ test(
  */
 test(
   "can view the 'View all deliverables on Github'",
-  { tag: [STATIC, EXTENDED] },
+  { tag: [FULL_REGRESSION] },
   async ({ page }) => {
     const newTabPromise = page.waitForEvent("popup");
 

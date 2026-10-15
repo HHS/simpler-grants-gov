@@ -2,6 +2,7 @@
 
 import { getSession } from "src/services/auth/session";
 import { inviteUserToOrganization } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import { z } from "zod";
 
@@ -73,12 +74,13 @@ export const inviteUserAction = async (
       invitationCreated: inviteUserResponse.organization_invitation_id,
     };
   } catch (e) {
-    const error = e as Error;
-    console.error(
-      `Error inviting user to org - ${error.message} ${error.cause?.toString() || ""}`,
+    const typedError = e as Error;
+    logger.error(
+      { err: typedError, organizationId },
+      "Error inviting user to org",
     );
     return {
-      errorMessage: `${genericErrorMessage}: ${error.message}`,
+      errorMessage: `${genericErrorMessage}: ${typedError.message}`,
     };
   }
 };

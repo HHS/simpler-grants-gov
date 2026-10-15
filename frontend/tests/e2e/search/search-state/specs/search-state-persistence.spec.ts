@@ -37,8 +37,7 @@ import {
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/search-utils";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION, CORE_REGRESSION } =
-  VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 const searchTerm = "education";
 
@@ -147,7 +146,7 @@ test.describe("Search page - state persistence after refresh", () => {
 
   test(
     "should retain search input and sort after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }, { project }) => {
       test.setTimeout(240_000);
       const isMobile = !!project.name.match(/[Mm]obile/);
@@ -217,7 +216,7 @@ test.describe("Search page - state persistence after refresh", () => {
    */
   test(
     "should retain status filter after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
 
@@ -278,7 +277,7 @@ test.describe("Search page - state persistence after refresh", () => {
    */
   test(
     "should retain funding instrument filter after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
 
@@ -335,7 +334,7 @@ test.describe("Search page - state persistence after refresh", () => {
    */
   test(
     "should retain eligibility filter after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
 
@@ -394,7 +393,7 @@ test.describe("Search page - state persistence after refresh", () => {
    */
   test(
     "should retain category filter after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
 
@@ -449,7 +448,7 @@ test.describe("Search page - state persistence after refresh", () => {
    */
   test(
     "should retain agency filter after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
 
@@ -536,7 +535,7 @@ test.describe("Search page - state persistence after refresh", () => {
    */
   test(
     "should retain sub-agency filter after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
 
@@ -737,7 +736,7 @@ test.describe("Search page - state persistence after refresh", () => {
    */
   test(
     "should retain all filters and inputs after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }, { project }) => {
       test.setTimeout(240_000);
       const isMobile = !!project.name.match(/[Mm]obile/);
@@ -916,7 +915,7 @@ test.describe("Search page - state persistence after refresh", () => {
    */
   test(
     "should retain all multi-value filters and inputs after refresh",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }, { project }) => {
       test.setTimeout(240_000);
       const isMobile = !!project.name.match(/[Mm]obile/);
