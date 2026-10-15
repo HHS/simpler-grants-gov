@@ -29,6 +29,14 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
+const mockLoggerError = jest.fn();
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    error: (...args: unknown[]) => mockLoggerError(...args) as unknown,
+  },
+}));
+
 describe("Award Recommendation Actions", () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -64,13 +72,17 @@ describe("Award Recommendation Actions", () => {
     });
 
     it("returns an error message when the fetcher throws", async () => {
-      jest.spyOn(console, "error").mockImplementation(() => {});
-      mockUpdateAwardRecommendation.mockRejectedValue(new Error("Boom"));
+      const error = new Error("Boom");
+      mockUpdateAwardRecommendation.mockRejectedValue(error);
 
       const result = await saveAwardRecommendation({}, buildFormData());
 
       expect(result.success).toBeUndefined();
       expect(result.errorMessage).toBe("Boom");
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        { err: error, awardRecommendationId: "ar-id-123" },
+        "Error saving award recommendation",
+      );
     });
   });
 

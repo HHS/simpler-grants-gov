@@ -43,6 +43,10 @@ locals {
   # 2. Configures email notifications using AWS SES
   enable_notifications = false
 
+  # Whether or not the application should enable SMS notifications via AWS End User
+  # Messaging. Not yet used by this application; defaults to false until adopted.
+  enable_sms_notifications = false
+
   # Whether or not the application should enable WAF for the load balancer.
   # If enabled:
   # 1. Creates an AWS WAF web ACL with AWSManagedRulesCommonRuleSet

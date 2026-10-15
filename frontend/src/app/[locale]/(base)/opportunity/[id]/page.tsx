@@ -4,6 +4,7 @@ import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { getUserSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -39,9 +40,12 @@ export async function generateMetadata({
   try {
     const { data: opportunityData } = await getOpportunityDetails(id);
     title = `${t("OpportunityListing.pageTitle")} - ${opportunityData.opportunity_title || ""}`;
-  } catch (error) {
-    console.error("Failed to render page title due to API error", error);
-    if (parseErrorStatus(error as ApiRequestError) === 404) {
+  } catch (e) {
+    logger.error(
+      { err: e, opportunityId: id },
+      "Failed to render page title due to API error",
+    );
+    if (parseErrorStatus(e as ApiRequestError) === 404) {
       return notFound();
     }
   }
@@ -125,8 +129,11 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         opportunitySaved = true;
       }
     }
-  } catch (error) {
-    console.error("Unable to fetch list of saved opportunities", error);
+  } catch (e) {
+    logger.error(
+      { err: e, opportunityId: id },
+      "Unable to fetch list of saved opportunities",
+    );
   }
 
   opportunityData.summary = opportunityData?.summary

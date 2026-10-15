@@ -4,7 +4,7 @@
 
 import { expect, Locator, Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
-import { waitForSearchResultsInitialLoad } from "tests/e2e/utils/search/searchSpecUtil";
+import { waitForSearchResultsInitialLoad } from "tests/e2e/utils/search/search-utils";
 
 const { targetEnv } = playwrightEnv;
 

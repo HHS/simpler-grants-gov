@@ -336,9 +336,11 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "label": "7. Federal Program Name/Description",
         "name": "Federal Program Name/Description",
+        # Both fields are pre-populated from the opportunity on every save, so they
+        # are shown read-only like the other pre-populated fields on our forms.
         "children": [
-            {"type": "field", "definition": "/properties/federal_program_name"},
-            {"type": "field", "definition": "/properties/assistance_listing_number"},
+            {"type": "null", "definition": "/properties/federal_program_name"},
+            {"type": "null", "definition": "/properties/assistance_listing_number"},
         ],
     },
     {

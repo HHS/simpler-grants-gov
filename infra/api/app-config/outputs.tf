@@ -42,6 +42,10 @@ output "enable_notifications" {
   value = local.enable_notifications
 }
 
+output "enable_sms_notifications" {
+  value = local.enable_sms_notifications
+}
+
 output "shared_network_name" {
   value = local.shared_network_name
 }

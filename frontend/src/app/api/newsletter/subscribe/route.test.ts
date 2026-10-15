@@ -3,6 +3,7 @@
  */
 
 import { POST } from "src/app/api/newsletter/subscribe/route";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { NextRequest } from "next/server";
 
@@ -26,6 +27,7 @@ const buildRequest = (fields: Record<string, string>): NextRequest => {
     {
       method: "POST",
       body: formData,
+      headers: { "X-Amz-Cf-Id": "test-aws-trace-id" },
     },
   );
 };
@@ -118,6 +120,13 @@ describe("POST /api/newsletter/subscribe", () => {
       success: false,
       errorCode: "alreadySubscribed",
     });
+    expect(logger.info).toHaveBeenCalledWith(
+      {
+        mailchimpErrorCode: "ERROR_CONTACT_EXISTS",
+        awsTraceId: "test-aws-trace-id",
+      },
+      "Newsletter subscription skipped: contact already subscribed",
+    );
   });
 
   it("returns invalidEmail when Mailchimp rejects the email as fake or invalid", async () => {
@@ -184,6 +193,10 @@ describe("POST /api/newsletter/subscribe", () => {
       success: false,
       errorCode: "tooManyRequests",
     });
+    expect(logger.warn).toHaveBeenCalledWith(
+      { mailchimpStatus: 429, awsTraceId: "test-aws-trace-id" },
+      "Newsletter subscription rate-limited by Mailchimp (HTTP status)",
+    );
   });
 
   it("returns a server error for other Mailchimp member errors", async () => {
@@ -209,6 +222,10 @@ describe("POST /api/newsletter/subscribe", () => {
       success: false,
       errorCode: "server",
     });
+    expect(logger.error).toHaveBeenCalledWith(
+      { mailchimpErrorCode: "ERROR_GENERIC", awsTraceId: "test-aws-trace-id" },
+      "Newsletter subscription failed: unrecognized Mailchimp member error",
+    );
   });
 
   it("returns a server error when Mailchimp rejects our credentials (401)", async () => {
@@ -253,6 +270,10 @@ describe("POST /api/newsletter/subscribe", () => {
       success: false,
       errorCode: "server",
     });
+    expect(logger.error).toHaveBeenCalledWith(
+      { err: expect.any(Error) as Error, awsTraceId: "test-aws-trace-id" },
+      "Newsletter subscription failed: exception calling Mailchimp",
+    );
   });
 
   it("returns a validation error when the name is missing", async () => {

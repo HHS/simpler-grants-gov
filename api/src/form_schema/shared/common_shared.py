@@ -3,8 +3,11 @@ from src.form_schema.shared.shared_schema import SharedSchema
 COMMON_SHARED_JSON_SCHEMA_V1 = {
     "attachment": {"type": "string", "format": "uuid"},
     "person_name": {
+        # No title here on purpose. The frontend prefixes a nested field's required
+        # message with its parent's title, so a generic title would show up as
+        # "Name and Contact Information First Name is required". Forms that want a
+        # prefix set their own title where they use this, e.g. "Contact Person".
         "type": "object",
-        "title": "Name and Contact Information",
         "description": "",
         "required": [
             "first_name",

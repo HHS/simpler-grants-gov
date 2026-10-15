@@ -1,5 +1,6 @@
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { fetchSavedSearchesPage } from "src/services/fetch/fetchers/savedSearchFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { LocalizedPageProps } from "src/types/intl";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import {
@@ -101,7 +102,10 @@ export default async function SavedSearchQueries({
     const agencies = await performAgencySearch();
     agencyOptions = agencies.map(agencyToFilterOption);
   } catch (e) {
-    console.error("Unable to fetch agencies list for saved search display", e);
+    logger.error(
+      { err: e },
+      "Unable to fetch agencies list for saved search display",
+    );
   }
 
   const formattedSavedSearches = savedSearches.map((search) => ({

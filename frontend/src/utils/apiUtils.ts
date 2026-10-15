@@ -1,5 +1,5 @@
 import { UnauthorizedError } from "src/errors";
-import { logResponse } from "src/services/logger/simplerLogger";
+import { logger, logResponse } from "src/services/logger/simplerLogger";
 
 import { NextRequest } from "next/server";
 
@@ -65,8 +65,11 @@ export async function throwOnApiError(
   try {
     const body = await resp.json();
     backendMessage = getBackendErrorMessage(body);
-  } catch {
-    console.warn(`Failed to parse error body for ${operationName}`);
+  } catch (e) {
+    logger.warn(
+      { err: e, operationName, status: resp.status },
+      "Failed to parse API error response body",
+    );
   }
 
   if (resp.status === unauthorizedStatus) {

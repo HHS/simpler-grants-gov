@@ -14,6 +14,14 @@ import { FunctionComponent, ReactNode } from "react";
 
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
+const mockLoggerError = jest.fn();
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    error: (...args: unknown[]) => mockLoggerError(...args) as unknown,
+  },
+}));
+
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
@@ -237,7 +245,6 @@ describe("EditRecommendationsPage", () => {
     });
 
     it("handles 404 error gracefully when award recommendation not found", async () => {
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
       const notFoundError = new Error("Not found");
       notFoundError.cause = { status: 404 };
       mockGetAwardRecommendationDetails.mockRejectedValue(notFoundError);
@@ -247,18 +254,16 @@ describe("EditRecommendationsPage", () => {
       });
       render(component);
 
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(mockLoggerError).toHaveBeenCalled();
       expect(
         screen.getByText("errorHeadingAwardRecommendation"),
       ).toBeInTheDocument();
       expect(
         screen.getByText("awardRecommendationNotFound"),
       ).toBeInTheDocument();
-      consoleSpy.mockRestore();
     });
 
     it("handles generic error when fetching award recommendation fails", async () => {
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
       mockGetAwardRecommendationDetails.mockRejectedValue(
         new Error("Network error"),
       );
@@ -269,9 +274,12 @@ describe("EditRecommendationsPage", () => {
 
       render(component);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
+        {
+          err: expect.any(Error) as Error,
+          awardRecommendationId: "AR-26-0001",
+        },
         "Failed to fetch award recommendation details",
-        expect.any(Error),
       );
 
       expect(
@@ -280,12 +288,9 @@ describe("EditRecommendationsPage", () => {
       expect(
         screen.getByText("awardRecommendationFetchError"),
       ).toBeInTheDocument();
-
-      consoleSpy.mockRestore();
     });
 
     it("handles authentication errors", async () => {
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
       const authError = new Error("Unauthorized");
       authError.cause = { status: 401 };
       mockGetAwardRecommendationDetails.mockRejectedValue(authError);
@@ -299,7 +304,6 @@ describe("EditRecommendationsPage", () => {
         screen.getByText("errorHeadingAuthentication"),
       ).toBeInTheDocument();
       expect(screen.getByText("authenticationError")).toBeInTheDocument();
-      consoleSpy.mockRestore();
     });
   });
 

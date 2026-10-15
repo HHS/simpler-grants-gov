@@ -42,7 +42,7 @@ describe("deleteRiskForAwardRecommendation", () => {
     (
       fetcherModule.deleteAwardRecommendationRisk as jest.Mock
     ).mockResolvedValue({ success: true, message: "Risk deleted" });
-    const req = {} as unknown as NextRequest;
+    const req = { headers: new Headers() } as unknown as NextRequest;
     const params = Promise.resolve({ id: "award-id", riskId: "risk-id" });
     const res = await deleteRiskForAwardRecommendation(req, { params });
     const json = (await res.json()) as { success: boolean; message: string };
@@ -55,14 +55,14 @@ describe("deleteRiskForAwardRecommendation", () => {
   });
 
   it("throws error if award recommendation ID is missing", async () => {
-    const req = {} as unknown as NextRequest;
+    const req = { headers: new Headers() } as unknown as NextRequest;
     const params = Promise.resolve({ id: "", riskId: "risk-id" });
     const res = await deleteRiskForAwardRecommendation(req, { params });
     expect(res.status).toBe(500);
   });
 
   it("throws error if risk ID is missing", async () => {
-    const req = {} as unknown as NextRequest;
+    const req = { headers: new Headers() } as unknown as NextRequest;
     const params = Promise.resolve({ id: "award-id", riskId: "" });
     const res = await deleteRiskForAwardRecommendation(req, { params });
     expect(res.status).toBe(500);
