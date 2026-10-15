@@ -106,12 +106,14 @@ export const messages = {
       save: "Save",
       saved: "Saved",
       loading: "Updating",
+      accessibleContext: "opportunity: {title}",
     },
     saveMessage: {
-      save: "This opportunity was saved to <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
-      unsave: "This opportunity was unsaved.",
-      errorSave: "Error saving. Please try again.",
-      errorUnsave: "Error undoing save. Please try again.",
+      save: "<srOnly>This opportunity was saved. </srOnly>Manage notifications in <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
+      unsave: "This opportunity was removed.",
+      errorSave: "Opportunity could not be saved. Please try again.",
+      errorUnsave: "Opportunity could not be unsaved. Please try again.",
+      dismiss: "Dismiss message",
     },
     saveloginModal: {
       button: "Sign in with Login.gov",
@@ -183,10 +185,27 @@ export const messages = {
           "You can apply as an individual or organization. To apply as part of an organization you must:",
       },
     },
+    header: {
+      agency: "Agency:",
+      assistanceListings: "Assistance Listings",
+      assistanceListingsUnavailable:
+        "Assistance listing number is not available.",
+      lastUpdated: "Last Updated:",
+      applyOnGrantsGov: "Apply on Grants.gov",
+      status: {
+        posted: "Open",
+        forecasted: "Forecasted",
+        closed: "Closed",
+        archived: "Archived",
+      },
+      statusAccessible: {
+        posted: "Open opportunity",
+        forecasted: "Forecasted opportunity",
+        closed: "Closed opportunity",
+        archived: "Archived opportunity",
+      },
+    },
     intro: {
-      agency: "Agency: ",
-      assistanceListings: "Assistance Listings:",
-      lastUpdated: "Last Updated: ",
       versionHistory: "View version history on Grants.gov",
     },
     description: {
