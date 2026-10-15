@@ -1,3 +1,4 @@
+import OpportunitiesPagination from "src/app/[locale]/(base)/grantor/opportunities/_components/OpportunitiesPagination";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { fetchSavedSearchesPage } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { logger } from "src/services/logger/simplerLogger";
@@ -18,7 +19,6 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
 import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
-import OpportunitiesPagination from "src/app/[locale]/(base)/grantor/opportunities/_components/OpportunitiesPagination";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { SavedSearchesList } from "./_components/SavedSearchesList";
 
