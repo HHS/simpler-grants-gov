@@ -15,7 +15,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   const isValidLocale = locales.includes(locale); // https://github.com/microsoft/TypeScript/issues/26255
   if (!isValidLocale) {
-    logger.error(
+    logger.warn(
       { locale },
       "Unsupported locale was requested. Falling back to the default locale.",
     );
