@@ -15,10 +15,17 @@ import {
 const mockFetchFileUpload = jest.fn();
 const mockFetchFileUploadWithMethod = jest.fn();
 const mockAxiosPost = jest.fn();
+const mockLoggerError = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchFileUploadWithMethod: (arg: unknown) =>
     mockFetchFileUploadWithMethod(arg) as unknown,
+}));
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    error: (...args: unknown[]) => mockLoggerError(...args) as unknown,
+  },
 }));
 
 jest.mock("axios", () => ({
@@ -58,15 +65,8 @@ describe("fetchFileUploadDetails", () => {
 });
 
 describe("uploadFileToS3", () => {
-  let consoleErrorSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
-  });
-
   afterEach(() => {
     jest.resetAllMocks();
-    consoleErrorSpy.mockRestore();
   });
 
   const postedFormDataEntries = () => {
@@ -128,8 +128,9 @@ describe("uploadFileToS3", () => {
       ["file", "hi.txt"],
     ]);
     expect(err).toBeInstanceOf(ApiRequestError);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Error uploading file to S3 with status: 403",
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      { status: 403 },
+      "Error uploading file to S3",
     );
   });
   it("throws when the request fails without a response", async () => {
@@ -141,9 +142,7 @@ describe("uploadFileToS3", () => {
     });
 
     expect(err).toBeInstanceOf(ApiRequestError);
-    expect(consoleErrorSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining("with status"),
-    );
+    expect(mockLoggerError).not.toHaveBeenCalled();
   });
   it("throws when the failure is not an axios error", async () => {
     mockAxiosPost.mockRejectedValue(new Error("something else went wrong"));
@@ -154,7 +153,10 @@ describe("uploadFileToS3", () => {
     });
 
     expect(err).toBeInstanceOf(ApiRequestError);
-    expect(consoleErrorSpy).toHaveBeenCalledWith("Error uploading file to S3");
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      { err: expect.any(Error) as unknown },
+      "Error uploading file to S3",
+    );
   });
 });
 

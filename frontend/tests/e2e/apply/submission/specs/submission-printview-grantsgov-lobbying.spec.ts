@@ -37,7 +37,7 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
@@ -67,19 +67,20 @@ test.beforeEach(({ page: _ }, testInfo) => {
 for (const { testName, orgLabel } of applicantScenarios) {
   test(
     testName,
-    { tag: [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
     ) => {
       test.setTimeout(300_000); // 5-min timeout
 
-      const isMobile = testInfo.project.use.isMobile ?? false;
+      const isMobile = testInfo.project.name.match(/[Mm]obile/);
+
       const baseSuffix = Date.now();
 
       // --- Login ---
       // Given the user is logged in
-      await authenticateE2eUser(page, context, isMobile);
+      await authenticateE2eUser(page, context, !!isMobile);
 
       // --- Navigate to Opportunity page and start a new application ---
       // And the user launches the URL for an opportunity with an open Grants.gov Lobbying Form competition

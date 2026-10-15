@@ -22,7 +22,7 @@ import { getNumberOfOpportunitySearchResults } from "tests/e2e/utils/search/sear
 
 const { targetEnv } = playwrightEnv;
 
-const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 const POLL_TIMEOUT = targetEnv !== "local" ? 120000 : 60000;
 
@@ -30,7 +30,7 @@ for (const loginState of LOGIN_STATES) {
   test.describe(`Filter drawer - Clear Filters (${loginState})`, () => {
     test(
       "clicking Clear Filters updates results immediately",
-      { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+      { tag: [DISCOVERY, FULL_REGRESSION] },
 
       async ({ page, context }, testInfo) => {
         test.setTimeout(180_000);
@@ -64,7 +64,7 @@ for (const loginState of LOGIN_STATES) {
     // Scenario: Clicking Clear Filters restores default filters
     test(
       "clicking Clear Filters restores default filters",
-      { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+      { tag: [DISCOVERY, FULL_REGRESSION] },
       async ({ page, context }, testInfo) => {
         test.setTimeout(180_000);
 

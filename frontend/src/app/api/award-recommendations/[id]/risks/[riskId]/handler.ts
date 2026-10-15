@@ -1,10 +1,11 @@
 import { readError } from "src/errors";
 import { deleteAwardRecommendationRisk } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { NextRequest } from "next/server";
 
 export async function deleteRiskForAwardRecommendation(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string; riskId: string }> },
 ) {
   const { id, riskId } = await params;
@@ -25,7 +26,15 @@ export async function deleteRiskForAwardRecommendation(
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
-    console.error(e);
+    logger.error(
+      {
+        err: e,
+        awardRecommendationId: id,
+        riskId,
+        awsTraceId: request.headers.get("X-Amz-Cf-Id"),
+      },
+      "Error deleting award recommendation risk",
+    );
     return Response.json(
       {
         message: `Error attempting to delete award recommendation risk: ${message}`,

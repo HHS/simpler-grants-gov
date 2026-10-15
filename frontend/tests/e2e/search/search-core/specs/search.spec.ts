@@ -26,13 +26,12 @@ import {
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/search-utils";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION, CORE_REGRESSION } =
-  VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 test.describe("Search page tests", () => {
   test(
     "Page resets to 1 after filter change",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       // Given I am on the "Search funding opportunities" page
       await page.goto("/search?status=none");
@@ -77,7 +76,7 @@ test.describe("Search page tests", () => {
 
   test(
     "Flipping sort order reverses first and last result positions",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
@@ -126,7 +125,7 @@ test.describe("Search page tests", () => {
 
   test(
     "Result count is unchanged when all statuses are selected",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       // Given I am on the "Search funding opportunities" page
       // And all opportunity status are effectively unselected via status=none
@@ -161,7 +160,7 @@ test.describe("Search page tests", () => {
 
   test(
     "Out-of-range page query redirects to the last valid page",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       // When I navigate to "/search?page=1000000"
       await page.goto("/search?page=1000000");

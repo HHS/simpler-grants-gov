@@ -504,3 +504,11 @@ class JobType(StrEnum):
 
 class NotificationType(StrEnum):
     ALL_NEW_OPPORTUNITIES = "all_new_opportunities"
+
+
+class NotificationQueueStatus(StrEnum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    SENT = "sent"
+    FAILED = "failed"
+    SUPPRESSED = "suppressed"

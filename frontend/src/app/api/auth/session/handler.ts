@@ -1,4 +1,5 @@
 import { getSession, refreshSession } from "src/services/auth/session";
+import { logger } from "src/services/logger/simplerLogger";
 import { isExpiring } from "src/utils/dateUtil";
 
 import { NextResponse } from "next/server";
@@ -11,7 +12,7 @@ export async function getUserSession(): Promise<NextResponse> {
         const refreshedSession = await refreshSession(currentSession.token);
         return NextResponse.json(refreshedSession);
       } catch (e) {
-        console.error("Unable to refresh expiring token", e);
+        logger.error({ err: e }, "Unable to refresh expiring token");
       }
     }
     return NextResponse.json(currentSession);

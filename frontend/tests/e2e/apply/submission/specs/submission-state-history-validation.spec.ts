@@ -42,7 +42,7 @@ const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
-const { APPLY, CORE_REGRESSION, GRANTEE } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 // Validation errors specific to required SF-424B and conditional SF-LLL form combination
 const EXPECTED_SUBMISSION_ERRORS = {
@@ -73,7 +73,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "SF-424B submission and application history validation",
-  { tag: [APPLY, CORE_REGRESSION, GRANTEE] },
+  { tag: [APPLY_FORMS, FULL_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

@@ -13,7 +13,7 @@ import {
 } from "tests/e2e/utils/auth/perform-login-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 
-const { SMOKE, AUTH } = VALID_TAGS;
+const { SMOKE } = VALID_TAGS;
 
 const { baseUrl, targetEnv, testUserAuthKey, testUserEmail, testUserPassword } =
   playwrightEnv;
@@ -37,7 +37,7 @@ test.describe("Login.gov based authentication tests", () => {
   // Scenario: signs in with Login.gov MFA and reaches an authenticated state
   test(
     "Login.gov authentication with MFA",
-    { tag: [SMOKE, AUTH] },
+    { tag: [SMOKE] },
     async ({ page, context }: { page: Page; context: BrowserContext }) => {
       const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
 

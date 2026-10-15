@@ -3,6 +3,7 @@ import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashb
 import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
 import { getSession } from "src/services/auth/session";
 import { handleListApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
@@ -25,7 +26,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
   try {
     apiKeyResponse = await handleListApiKeys(session.user_id);
   } catch (e) {
-    console.error("Failed to fetch API keys:", e);
+    logger.error({ err: e }, "Failed to fetch API keys");
     return (
       <>
         <div className="grid-container margin-y-5">
