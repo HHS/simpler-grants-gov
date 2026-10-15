@@ -28,7 +28,7 @@ import {
   downloadAndUnzipSubmission,
 } from "tests/e2e/utils/submission/submission-zip-utils";
 
-const { APPLY, CORE_REGRESSION, GRANTEE } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 test.beforeEach(({ page: _ }, testInfo) => {
   test.skip(
@@ -40,7 +40,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "Downloaded Submission ZIP contains expected SF424B XML and PDF data",
-  { tag: [APPLY, GRANTEE, CORE_REGRESSION] },
+  { tag: [APPLY_FORMS, FULL_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,
