@@ -1,4 +1,5 @@
 import { downloadOpportunities } from "src/services/fetch/fetchers/searchFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -30,7 +31,10 @@ export async function exportSearchResult(request: NextRequest) {
       },
     });
   } catch (e) {
-    console.error("Error downloading search results", e);
+    logger.error(
+      { err: e, awsTraceId: request.headers.get("X-Amz-Cf-Id") },
+      "Error downloading search results",
+    );
     throw e;
   }
 }

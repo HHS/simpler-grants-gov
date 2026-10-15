@@ -21,7 +21,7 @@ locals {
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#browser-variables
     NEW_RELIC_BROWSER_MONITORING_ATTRIBUTES_ENABLED = "true"
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#application-logging-enabled
-    # Turned off to avoid duplicate logging, and use logging from fluent bit instead
+    # Turned off to avoid duplicate logging, logs are forwarded from CloudWatch to New Relic instead
     NEW_RELIC_APPLICATION_LOGGING_ENABLED = "false"
   }
 
