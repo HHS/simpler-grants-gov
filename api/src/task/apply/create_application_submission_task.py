@@ -13,6 +13,7 @@ from src.db.models.competition_models import Application, ApplicationForm
 from src.services.applications.create_application_submission import (
     ApplicationSubmissionBuilder,
     ApplicationSubmissionMetrics,
+    create_internal_token_for_pdf_generation,
 )
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.ecs_background_task import ecs_background_task
@@ -47,8 +48,15 @@ class CreateApplicationSubmissionTask(Task):
             pdf_generation_config = PdfGenerationConfig()
         self.pdf_generation_config = pdf_generation_config
         self.has_more_to_process = True
+        internal_token = create_internal_token_for_pdf_generation(
+            self.db_session, self.pdf_generation_config
+        )
         self.application_submission_builder = ApplicationSubmissionBuilder(
-            self.db_session, self.s3_config, self.pdf_generation_config, self.increment
+            self.db_session,
+            self.s3_config,
+            self.pdf_generation_config,
+            self.increment,
+            internal_token,
         )
 
     class Metrics(StrEnum):

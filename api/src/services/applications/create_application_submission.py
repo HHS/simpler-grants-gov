@@ -209,17 +209,17 @@ def create_internal_token_for_pdf_generation(
         minutes=pdf_generation_config.short_lived_token_expiration_minutes
     )
 
-    token, short_lived_token = create_jwt_for_internal_token(
-        expires_at=expires_at, db_session=db_session
-    )
-
-    # Commit this token creation immediately in its own transaction
-    db_session.commit()
+    with db.Session(bind=db_session.get_bind(), expire_on_commit=False) as token_session:
+        with token_session.begin():
+            token, short_lived_token = create_jwt_for_internal_token(
+                expires_at=expires_at, db_session=token_session
+            )
+            token_id = short_lived_token.short_lived_internal_token_id
 
     logger.info(
         "Created internal token for PDF generation",
         extra={
-            "token_id": str(short_lived_token.short_lived_internal_token_id),
+            "token_id": str(token_id),
             "expires_at": expires_at.isoformat(),
         },
     )
@@ -277,6 +277,7 @@ class ApplicationSubmissionBuilder:
         s3_config: S3Config | None = None,
         pdf_generation_config: PdfGenerationConfig | None = None,
         increment: Callable[[str], None] | None = None,
+        internal_token: str | None = None,
     ):
         self.db_session = db_session
         self.s3_config = s3_config or S3Config()
@@ -285,6 +286,7 @@ class ApplicationSubmissionBuilder:
             self.db_session, self.pdf_generation_config
         )
         self.increment = increment
+        self.internal_token = internal_token
 
     def _increment(self, name: str) -> None:
         if self.increment:
