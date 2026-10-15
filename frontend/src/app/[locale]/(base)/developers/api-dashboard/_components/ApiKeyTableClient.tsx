@@ -11,8 +11,8 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
-import ApiKeyModal from "./ApiKeyModal";
 import { useApiKeyAlert } from "./ApiKeyAlertProvider";
+import ApiKeyModal from "./ApiKeyModal";
 
 interface ApiKeyTableClientProps {
   apiKeys: ApiKey[];

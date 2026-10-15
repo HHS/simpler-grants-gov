@@ -1,12 +1,12 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import ApiKeyTableClient from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTableClient";
-import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
 import {
   ApiKeyAlert,
   ApiKeyAlertProvider,
 } from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyAlertProvider";
+import ApiKeyTableClient from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTableClient";
+import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
@@ -310,9 +310,7 @@ describe("ApiKeyTableClient", () => {
       mockClientFetch.mockResolvedValue({ message: "Success" });
       render(tableWithAlert(mockApiKeys));
 
-      expect(
-        screen.queryByTestId("api-key-alert"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("api-key-alert")).not.toBeInTheDocument();
 
       await user.click(
         screen.getByTestId("open-delete-api-key-modal-button-key-2"),
@@ -326,9 +324,9 @@ describe("ApiKeyTableClient", () => {
         within(modal).getByTestId("delete-api-key-submit-button"),
       );
 
-      expect(
-        await screen.findByTestId("api-key-alert"),
-      ).toHaveTextContent("deleteSuccessMessage");
+      expect(await screen.findByTestId("api-key-alert")).toHaveTextContent(
+        "deleteSuccessMessage",
+      );
       expect(mockRefresh).toHaveBeenCalledTimes(1);
       expect(modal).toHaveClass("is-hidden");
     });
@@ -360,9 +358,7 @@ describe("ApiKeyTableClient", () => {
         await user.click(screen.getByTestId(openButtonTestId));
 
         await waitFor(() => {
-          expect(
-            screen.queryByTestId("api-key-alert"),
-          ).not.toBeInTheDocument();
+          expect(screen.queryByTestId("api-key-alert")).not.toBeInTheDocument();
         });
       },
     );

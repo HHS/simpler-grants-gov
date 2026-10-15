@@ -1,9 +1,9 @@
-import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
-import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
 import {
   ApiKeyAlert,
   ApiKeyAlertProvider,
 } from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyAlertProvider";
+import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
+import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
 import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
 import { getSession } from "src/services/auth/session";
 import { handleListApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
