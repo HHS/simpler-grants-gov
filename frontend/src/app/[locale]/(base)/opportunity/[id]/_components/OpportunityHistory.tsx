@@ -1,61 +1,69 @@
-import {
-  OpportunityStatus,
-  Summary,
-} from "src/types/opportunity/opportunityResponseTypes";
-import { formatDate } from "src/utils/dateUtil";
+import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { legacyOpportunityUrl } from "src/utils/opportunity/opportunityUtils";
 
 import { useTranslations } from "next-intl";
 
-const formatHistoryDate = (date: string | null) => {
-  return date === null ? "--" : formatDate(date);
+import { USWDSIcon } from "src/components/core/USWDSIcon";
+import {
+  formatOptionalDate,
+  OpportunityDetailItem,
+  OpportunityDetailsCard,
+  SECTION_HEADING_CLASSES,
+} from "./OpportunityDetailItem";
+
+type Props = {
+  opportunityData: Pick<
+    OpportunityDetail,
+    "opportunity_status" | "summary" | "legacy_opportunity_id"
+  >;
 };
 
-export const OpportunityHistoryItem = ({
-  title,
-  content,
-}: {
-  title: string;
-  content: string;
-}) => {
-  return (
-    <div>
-      <p className={"text-bold"}>
-        {title}
-        {":"}
-      </p>
-      <p>{content}</p>
-    </div>
-  );
-};
-
-const OpportunityHistory = ({
-  summary,
-  status,
-}: {
-  summary: Summary;
-  status: OpportunityStatus;
-}) => {
+const OpportunityHistory = ({ opportunityData }: Props) => {
   const t = useTranslations("OpportunityListing.history");
+  const notAvailable = useTranslations("OpportunityListing")("notAvailable");
+  const {
+    opportunity_status: status,
+    summary,
+    legacy_opportunity_id: legacyId,
+  } = opportunityData;
+
+  const postedDate = formatOptionalDate(summary.post_date);
+  const version = summary.version_number
+    ? `${summary.is_forecast ? t("forecastVersion") : t("synopsisVersion")} ${summary.version_number}`
+    : notAvailable;
 
   return (
-    <div className="margin-top-4">
-      <h3>{t("history")}</h3>
-      <OpportunityHistoryItem
-        title={t("version")}
-        content={
-          summary.version_number ? summary.version_number.toString() : "--"
-        }
-      />
-      <OpportunityHistoryItem
-        title={
-          status === "forecasted" ? t("forecastPostedDate") : t("postedDate")
-        }
-        content={formatHistoryDate(summary.post_date)}
-      />
-      <OpportunityHistoryItem
-        title={t("archiveDate")}
-        content={formatHistoryDate(summary.archive_date)}
-      />
+    <div className="margin-bottom-4">
+      <h2 className={SECTION_HEADING_CLASSES}>{t("title")}</h2>
+      <OpportunityDetailsCard>
+        {/* forecasts often have no posted date yet, so it is hidden rather than shown as not available */}
+        {(postedDate || status !== "forecasted") && (
+          <OpportunityDetailItem label={t("postedDate")}>
+            {postedDate || notAvailable}
+          </OpportunityDetailItem>
+        )}
+        <OpportunityDetailItem
+          label={status === "archived" ? t("archivedDate") : t("archiveDate")}
+        >
+          {formatOptionalDate(summary.archive_date) || notAvailable}
+        </OpportunityDetailItem>
+        <OpportunityDetailItem label={t("version")}>
+          {version}
+        </OpportunityDetailItem>
+        {legacyId && (
+          <p className="margin-y-1">
+            <a
+              className="usa-link"
+              href={legacyOpportunityUrl(legacyId)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("versionHistory")}
+              <USWDSIcon name="launch" className="text-middle margin-left-05" />
+            </a>
+          </p>
+        )}
+      </OpportunityDetailsCard>
     </div>
   );
 };

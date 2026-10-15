@@ -13,7 +13,7 @@ type ZipDownloadProps = {
 };
 
 const ZipDownloadButton = ({ opportunityId }: ZipDownloadProps) => {
-  const t = useTranslations("OpportunityListing.description");
+  const t = useTranslations("OpportunityListing.documents");
 
   return (
     <Button

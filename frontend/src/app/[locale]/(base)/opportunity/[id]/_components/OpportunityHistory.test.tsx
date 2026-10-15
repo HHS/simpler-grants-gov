@@ -1,70 +1,88 @@
 import { render, screen } from "@testing-library/react";
-import { Summary } from "src/types/opportunity/opportunityResponseTypes";
-import { formatDate } from "src/utils/dateUtil";
+import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { mockOpportunityDetail } from "src/utils/testing/fixtures";
 
 import OpportunityHistory from "./OpportunityHistory";
 
-// Mock the formatDate function
-jest.mock("src/utils/dateUtil", () => ({
-  formatDate: jest.fn((date: string) => date),
-}));
+const renderHistory = (
+  status: OpportunityDetail["opportunity_status"],
+  summary: Partial<OpportunityDetail["summary"]> = {},
+  legacyId: number | null = 12345,
+) =>
+  render(
+    <OpportunityHistory
+      opportunityData={{
+        opportunity_status: status,
+        legacy_opportunity_id: legacyId as number,
+        summary: { ...mockOpportunityDetail.summary, ...summary },
+      }}
+    />,
+  );
 
-const mockSummary = {
-  post_date: "2024-01-15",
-  archive_date: "2024-12-31",
-  version_number: 1,
-} as Summary;
+const detailItem = (label: string) =>
+  // eslint-disable-next-line testing-library/no-node-access
+  screen.getByText(`${label}:`).closest("p");
 
 describe("OpportunityHistory", () => {
-  it("renders history section with dates formatted correctly", () => {
-    render(<OpportunityHistory status="posted" summary={mockSummary} />);
+  it("renders posted, archive, version and the version history link", () => {
+    renderHistory("posted", {
+      post_date: "2026-08-17",
+      archive_date: "2027-02-17",
+      version_number: 2,
+      is_forecast: false,
+    });
 
-    expect(screen.getByText("history")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "title" }),
+    ).toBeInTheDocument();
+    expect(detailItem("postedDate")).toHaveTextContent("August 17, 2026");
+    expect(detailItem("archiveDate")).toHaveTextContent("February 17, 2027");
+    expect(detailItem("version")).toHaveTextContent("synopsisVersion 2");
 
-    expect(screen.getByText("version:")).toBeInTheDocument();
-    expect(screen.getByText("1")).toBeInTheDocument();
-
-    expect(screen.getByText("postedDate:")).toBeInTheDocument();
-    expect(screen.getByText("2024-01-15")).toBeInTheDocument();
-
-    expect(screen.getByText("archiveDate:")).toBeInTheDocument();
-    expect(screen.getByText("2024-12-31")).toBeInTheDocument();
-  });
-
-  it("calls formatDate for date fields", () => {
-    render(<OpportunityHistory status="posted" summary={mockSummary} />);
-
-    // Check that formatDate is called with the right dates
-    expect(formatDate).toHaveBeenCalledWith("2024-01-15");
-    expect(formatDate).toHaveBeenCalledWith("2024-12-31");
-  });
-
-  it("displays correct defaults when null values are present", () => {
-    render(
-      <OpportunityHistory
-        status="posted"
-        summary={
-          {
-            post_date: null,
-            archive_date: null,
-            version_number: null,
-          } as Summary
-        }
-      />,
+    const link = screen.getByRole("link", { name: "versionHistory" });
+    expect(link).toHaveAttribute(
+      "href",
+      "https://www.grants.gov/search-results-detail/12345",
     );
+    expect(link).toHaveAttribute("target", "_blank");
+  });
 
-    const firstHeading = screen.getByText("history");
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(firstHeading.nextSibling).toHaveTextContent("--");
+  it("labels forecast versions", () => {
+    renderHistory("forecasted", { version_number: 3, is_forecast: true });
+    expect(detailItem("version")).toHaveTextContent("forecastVersion 3");
+  });
 
-    const secondHeading = screen.getByText("version:");
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(secondHeading.nextSibling).toHaveTextContent("--");
-    const thirdHeading = screen.getByText("postedDate:");
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(thirdHeading.nextSibling).toHaveTextContent("--");
-    const fifthHeading = screen.getByText("archiveDate:");
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(fifthHeading.nextSibling).toHaveTextContent("--");
+  it("labels the archive date as archived for archived opportunities", () => {
+    renderHistory("archived", { archive_date: "2027-02-17" });
+
+    expect(detailItem("archivedDate")).toHaveTextContent("February 17, 2027");
+    expect(screen.queryByText("archiveDate:")).not.toBeInTheDocument();
+  });
+
+  it("shows not available for missing values", () => {
+    renderHistory("posted", {
+      post_date: null,
+      archive_date: null,
+      version_number: null,
+    });
+
+    expect(detailItem("postedDate")).toHaveTextContent("notAvailable");
+    expect(detailItem("archiveDate")).toHaveTextContent("notAvailable");
+    expect(detailItem("version")).toHaveTextContent("notAvailable");
+  });
+
+  it("hides a missing posted date for forecasts", () => {
+    renderHistory("forecasted", { post_date: null });
+    expect(screen.queryByText("postedDate:")).not.toBeInTheDocument();
+  });
+
+  it("shows the posted date for forecasts when there is one", () => {
+    renderHistory("forecasted", { post_date: "2026-08-17" });
+    expect(detailItem("postedDate")).toHaveTextContent("August 17, 2026");
+  });
+
+  it("omits the version history link without a legacy id", () => {
+    renderHistory("posted", {}, null);
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });

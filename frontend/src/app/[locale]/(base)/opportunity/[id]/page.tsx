@@ -12,14 +12,15 @@ import { notFound, redirect, RedirectType } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
+import OpportunityAgencyContact from "./_components/OpportunityAgencyContact";
 import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
-import OpportunityCTA from "./_components/OpportunityCTA";
-import OpportunityDescription from "./_components/OpportunityDescription";
 import OpportunityDocuments from "./_components/OpportunityDocuments";
+import OpportunityEligibility from "./_components/OpportunityEligibility";
 import OpportunityHistory from "./_components/OpportunityHistory";
+import OpportunityImportantDates from "./_components/OpportunityImportantDates";
 import OpportunityIntro from "./_components/OpportunityIntro";
 import OpportunityLink from "./_components/OpportunityLink";
-import OpportunityStatusWidget from "./_components/OpportunityStatusWidget";
+import OpportunitySummary from "./_components/OpportunitySummary";
 
 type OpportunityListingProps = {
   params: Promise<{ id: string }>;
@@ -160,33 +161,35 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
                 />
               )}
           </div>
-          <div className="grid-row grid-gap" id="opportunity-detail-content">
-            <div className="desktop:grid-col-8 grid-col-12 order-1 desktop:order-first">
-              <OpportunityIntro opportunityData={opportunityData} />
-              <OpportunityDescription
-                summary={opportunityData.summary}
-                attachments={opportunityData.attachments}
-              />
-              <OpportunityDocuments
-                documents={opportunityData.attachments}
-                opportunityId={opportunityData.opportunity_id}
-              />
-              <OpportunityLink opportunityData={opportunityData} />
-            </div>
-
-            <div className="desktop:grid-col-4 grid-col-12 order-0">
-              <OpportunityStatusWidget opportunityData={opportunityData} />
-              <OpportunityCTA
-                legacyId={opportunityData.legacy_opportunity_id}
-              />
-              <OpportunityAwardInfo opportunityData={opportunityData} />
-              <OpportunityHistory
-                summary={opportunityData.summary}
-                status={opportunityData.opportunity_status}
-              />
-            </div>
+          <div className="grid-col-12">
+            <OpportunityIntro opportunityData={opportunityData} />
           </div>
         </Grid>
+        {/*
+          Source order is the mobile reading order, which screen readers and keyboard
+          navigation follow at every width. On desktop the content column is only
+          visually placed to the left of the details column.
+        */}
+        <div
+          className="grid-row grid-gap margin-top-4"
+          id="opportunity-detail-content"
+        >
+          <div className="grid-col-12 desktop:grid-col-4">
+            <OpportunityImportantDates opportunityData={opportunityData} />
+            <OpportunityAwardInfo opportunityData={opportunityData} />
+            <OpportunityHistory opportunityData={opportunityData} />
+          </div>
+          <div className="grid-col-12 desktop:grid-col-8 desktop:order-first">
+            <OpportunitySummary summary={opportunityData.summary} />
+            <OpportunityEligibility opportunityData={opportunityData} />
+            <OpportunityDocuments
+              documents={opportunityData.attachments}
+              opportunityId={opportunityData.opportunity_id}
+            />
+            <OpportunityAgencyContact summary={opportunityData.summary} />
+            <OpportunityLink opportunityData={opportunityData} />
+          </div>
+        </div>
       </GridContainer>
     </div>
   );

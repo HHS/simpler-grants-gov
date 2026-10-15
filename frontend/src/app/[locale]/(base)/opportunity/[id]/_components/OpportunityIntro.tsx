@@ -3,11 +3,8 @@ import {
   OpportunityAssistanceListing,
   OpportunityDetail,
 } from "src/types/opportunity/opportunityResponseTypes";
-import { legacyOpportunityUrl } from "src/utils/opportunity/opportunityUtils";
 
 import { useTranslations } from "next-intl";
-
-import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type Props = {
   opportunityData: OpportunityDetail;
@@ -88,22 +85,10 @@ const OpportunityIntro = ({ opportunityData }: Props) => {
         assistanceListings={opportunityData.opportunity_assistance_listings}
         assistanceListingsText={t("assistanceListings")}
       />
-      <div className="tablet-lg:font-sans-2xs display-flex tablet:flex-row flex-column">
-        <div className="flex-2">
-          <LastUpdatedDisplay timestamp={opportunityData.updated_at} />
-        </div>
-        <div className="flex-3">
-          <a
-            className="usa-button usa-button--unstyled"
-            href={legacyOpportunityUrl(opportunityData.legacy_opportunity_id)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t("versionHistory")}
-            <USWDSIcon name="launch" />
-          </a>
-        </div>
-      </div>
+      {/* the version history link is shown in the History section */}
+      <p className="tablet-lg:font-sans-2xs">
+        <LastUpdatedDisplay timestamp={opportunityData.updated_at} />
+      </p>
     </>
   );
 };
