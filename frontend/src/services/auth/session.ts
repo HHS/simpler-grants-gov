@@ -10,6 +10,7 @@ import {
   newExpirationDate,
 } from "src/services/auth/sessionUtils";
 import { postTokenRefresh } from "src/services/fetch/fetchers/fetchers";
+import { logger } from "src/services/logger/simplerLogger";
 import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
 
@@ -21,12 +22,10 @@ let loginGovJwtKey: KeyObject;
 // isolate encoding behavior from file execution
 const initializeSessionSecrets = () => {
   if (!environment.SESSION_SECRET || !environment.API_JWT_PUBLIC_KEY) {
-    // eslint-disable-next-line
-    console.debug("Session keys not present");
+    logger.warn("Session keys not present");
     return;
   }
-  // eslint-disable-next-line
-  console.debug("Initializing Session Secrets");
+  logger.info("Initializing Session Secrets");
   clientJwtKey = encodeText(environment.SESSION_SECRET);
   loginGovJwtKey = createPublicKey(environment.API_JWT_PUBLIC_KEY);
 };

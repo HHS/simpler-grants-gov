@@ -2,13 +2,19 @@
  * @jest-environment node
  */
 
+import { ValidationError } from "src/errors";
 import {
   applyCorrelationId,
   CORRELATION_ID_COOKIE,
   getRequestCorrelationId,
   isValidCorrelationId,
 } from "src/services/correlationId/correlationIdMiddleware";
-import { logRequest, logResponse } from "src/services/logger/simplerLogger";
+import {
+  logRequest,
+  logResponse,
+  serializeError,
+} from "src/services/logger/simplerLogger";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,9 +22,15 @@ const infoMock = jest.fn();
 
 jest.mock("pino", () => ({
   __esModule: true,
-  default: () => ({
-    info: (arg: unknown) => infoMock(arg) as unknown,
-  }),
+  default: Object.assign(
+    () => ({
+      info: (arg: unknown) => infoMock(arg) as unknown,
+    }),
+    {
+      stdSerializers:
+        jest.requireActual<typeof import("pino")>("pino").stdSerializers,
+    },
+  ),
 }));
 
 // note that logger instantiation is untested at the moment. As the logger matures we should consider adding
@@ -235,5 +247,69 @@ describe("logResponse", () => {
       url: null,
       awsTraceId: null,
     });
+  });
+});
+
+describe("serializeError", () => {
+  it("preserves error type, message and stack", () => {
+    const error = new TypeError("bad thing");
+    expect(serializeError(error)).toMatchObject({
+      type: "TypeError",
+      message: "bad thing",
+      stack: error.stack,
+    });
+  });
+
+  it("includes known fields from our custom error causes", () => {
+    const error = new ValidationError("invalid field", {
+      field: "applicant.name",
+      type: "invalid",
+      value: "submitted value",
+      searchInputs: { query: "search term" },
+    } as unknown as FrontendErrorDetails);
+    const serialized = serializeError(error);
+
+    expect(serialized).toMatchObject({
+      type: "ValidationError",
+      message: expect.stringContaining("invalid field") as string,
+      stack: expect.stringContaining("invalid field") as string,
+      cause: {
+        type: "ValidationError",
+        status: 422,
+        field: "applicant.name",
+        detailType: "invalid",
+      },
+    });
+    expect(JSON.stringify(serialized)).not.toContain("submitted value");
+    expect(JSON.stringify(serialized)).not.toContain("search term");
+  });
+
+  it("ignores unknown fields on other plain object causes", () => {
+    const serialized = serializeError(
+      new Error("failed", { cause: { status: 500, body: { secret: "x" } } }),
+    );
+    expect(serialized).toMatchObject({ cause: { status: 500 } });
+    expect(JSON.stringify(serialized)).not.toContain("secret");
+  });
+
+  it("leaves Error causes to pino's default handling", () => {
+    const serialized = serializeError(
+      new Error("outer", { cause: new Error("inner") }),
+    );
+    expect(serialized.message).toEqual("outer: inner");
+    expect(serialized).not.toHaveProperty("cause");
+  });
+
+  it.each([null, undefined, "failure", 42])(
+    "passes through non-object value %p without throwing",
+    (value) => {
+      expect(serializeError(value)).toEqual(value);
+    },
+  );
+
+  it("keeps only known cause fields on plain objects", () => {
+    expect(
+      serializeError({ cause: { status: 400, details: { value: "secret" } } }),
+    ).toEqual({ cause: { status: 400 } });
   });
 });
