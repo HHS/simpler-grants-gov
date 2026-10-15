@@ -12,11 +12,11 @@ import { fillSearchInputAndSubmit } from "tests/e2e/utils/search/search-utils";
 
 const { baseUrl } = playwrightEnv;
 
-const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 test(
   "should copy search query URL to clipboard",
-  { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page }, { project }) => {
     // clipboard testing does not work in webkit
     if (project.name.match(/[Ww]ebkit/)) {
