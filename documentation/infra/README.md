@@ -17,6 +17,7 @@
 * [NOFO PDF upload availability assessment and deferred test plan](./nofo-pdf-upload-assessment.md)
 
 * [Terraform unit testing](./terraform-unit-testing.md)
+* [NOFO PDF readability WAF controls and dev verification](./nofo-pdf-readability-waf.md)
 
 ## Learning
 

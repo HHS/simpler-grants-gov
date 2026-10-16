@@ -192,6 +192,8 @@ module "service" {
   enable_s3_cdn        = false
   enable_drafts_bucket = false
 
+  pdf_readability_waf = local.service_config.pdf_readability_waf
+
   readonly_root_filesystem = false
 
   db_vars = module.app_config.has_database ? {

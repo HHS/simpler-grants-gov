@@ -443,3 +443,34 @@ variable "enable_processor_service" {
   type        = bool
   default     = false
 }
+
+variable "pdf_readability_waf" {
+  description = "Opt-in NOFO PDF pilot controls. Null preserves existing WAF rules; Count observes without blocking."
+  type = object({
+    rate_limit      = optional(number, 10)
+    rate_action     = optional(string, "count")
+    emergency_block = optional(bool, false)
+  })
+  default = null
+
+  validation {
+    condition = var.pdf_readability_waf == null ? true : (
+      can(regex("(^|-)nofos-", var.service_name)) && var.enable_load_balancer
+    )
+    error_message = "PDF readability WAF controls require a NOFO service (nofos- or a workspace-prefixed -nofos-) with a load balancer."
+  }
+
+  validation {
+    condition = var.pdf_readability_waf == null ? true : (
+      var.pdf_readability_waf.rate_limit >= 10 &&
+      var.pdf_readability_waf.rate_limit <= 2000000000 &&
+      floor(var.pdf_readability_waf.rate_limit) == var.pdf_readability_waf.rate_limit
+    )
+    error_message = "The WAF rate limit must be an integer between 10 and 2000000000 requests per five minutes."
+  }
+
+  validation {
+    condition     = var.pdf_readability_waf == null ? true : contains(["count", "block"], var.pdf_readability_waf.rate_action)
+    error_message = "The PDF readability rate action must be count or block."
+  }
+}
