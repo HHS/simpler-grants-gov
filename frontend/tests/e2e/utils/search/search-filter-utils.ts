@@ -48,6 +48,10 @@ export const FUNDING_INSTRUMENT_GRANT = {
   "funding-instrument-grant": "grant",
 };
 
+export const FUNDING_INSTRUMENT_OTHER = {
+  "funding-instrument-other": "other",
+};
+
 export const ELIGIBILITY_COUNTY = {
   "eligibility-county_governments": "county_governments",
 };
@@ -180,8 +184,28 @@ export const getFilterDrawer = (page: Page): Locator =>
 export const getFilterDrawerToggle = (page: Page): Locator =>
   page.locator("button[data-testid='toggle-drawer']");
 
+// The drawer is rendered to a portal only after hydration (Drawer.tsx,
+// renderToPortal={!isSSR}), so toBeHidden() alone passes vacuously on a page
+// that has not hydrated yet. Require the overlay to be mounted and hidden.
+export async function expectFilterDrawerClosed(page: Page): Promise<void> {
+  await expect(getFilterDrawerToggle(page)).toBeEnabled();
+  await expect(getFilterDrawer(page)).toHaveCount(1);
+  await expect(getFilterDrawer(page)).toBeHidden();
+}
+
 export async function openFilterDrawer(page: Page): Promise<void> {
   await getFilterDrawerToggle(page).click();
+  await expect(getFilterDrawer(page)).toBeVisible();
+}
+
+// Keyboard open keeps focus on the Filters button (a mouse click does not on
+// every browser, e.g. WebKit), which the focus-return assertions rely on.
+export async function openFilterDrawerWithKeyboard(
+  page: Page,
+  key: "Enter" | "Space" = "Enter",
+): Promise<void> {
+  await getFilterDrawerToggle(page).focus();
+  await page.keyboard.press(key);
   await expect(getFilterDrawer(page)).toBeVisible();
 }
 
@@ -189,7 +213,7 @@ export async function closeFilterDrawerWithCloseButton(
   page: Page,
 ): Promise<void> {
   await getFilterDrawer(page).locator("button.usa-modal__close").click();
-  await expect(getFilterDrawer(page)).toBeHidden();
+  await expectFilterDrawerClosed(page);
 }
 
 export async function closeFilterDrawerWithViewResults(
@@ -198,7 +222,7 @@ export async function closeFilterDrawerWithViewResults(
   await getFilterDrawer(page)
     .locator("button[data-testid='close-drawer']")
     .click();
-  await expect(getFilterDrawer(page)).toBeHidden();
+  await expectFilterDrawerClosed(page);
 }
 
 // Clicks the page overlay beside the drawer panel (not on the panel itself)
@@ -222,8 +246,22 @@ export async function clickOutsideFilterDrawer(page: Page): Promise<void> {
   }
 }
 
+// Focus is on the drawer panel itself or on an element inside it
 export async function expectFocusInsideFilterDrawer(page: Page): Promise<void> {
-  await expect(page.locator("#search-filter-drawer :focus")).toHaveCount(1);
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const active = document.activeElement;
+        return !!active?.closest("#search-filter-drawer .usa-modal");
+      }),
+    )
+    .toBe(true);
+}
+
+export async function expectFocusReturnedToFilterDrawerToggle(
+  page: Page,
+): Promise<void> {
+  await expect(getFilterDrawerToggle(page)).toBeFocused();
 }
 
 // Drawer panel and its critical controls are fully on screen

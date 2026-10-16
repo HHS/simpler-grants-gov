@@ -14,15 +14,19 @@ import {
   ELIGIBILITY_COUNTY,
   ensureAccordionExpanded,
   expectCheckboxIDIsChecked,
+  expectFilterDrawerClosed,
   expectFilterDrawerFitsViewport,
   expectFocusInsideFilterDrawer,
+  expectFocusReturnedToFilterDrawerToggle,
   expectSelectedFilterCount,
   FUNDING_INSTRUMENT_GRANT,
+  FUNDING_INSTRUMENT_OTHER,
   getFilterDrawer,
   getFilterDrawerToggle,
   gotoSearchPage,
   LOGIN_STATES,
   openFilterDrawer,
+  openFilterDrawerWithKeyboard,
   selectAdditionalFilters,
   toggleCheckboxGroup,
 } from "tests/e2e/utils/search/search-filter-utils";
@@ -44,7 +48,7 @@ for (const loginState of LOGIN_STATES) {
 
         // Given I am on the Search Funding Opportunity page
         await gotoSearchPage(page, context, testInfo, loginState);
-        await expect(getFilterDrawer(page)).toBeHidden();
+        await expectFilterDrawerClosed(page);
 
         // When I click the 'Filters' button
         await getFilterDrawerToggle(page).click();
@@ -122,6 +126,8 @@ for (const loginState of LOGIN_STATES) {
         }
 
         // And the drawer should display the selected filter counts correctly
+        // (the UI has no numeric badge: count = checked options + highlighted
+        // accordion, see expectSelectedFilterCount)
         await expectSelectedFilterCount(page, "fundingInstrument", 1);
       },
     );
@@ -138,8 +144,14 @@ for (const loginState of LOGIN_STATES) {
         // When I open the drawer
         await openFilterDrawer(page);
 
-        // And I select multiple filters (Funding instrument + Eligibility)
+        // And I select multiple filters: two in Funding instrument (same
+        // group) plus one in Eligibility (different group)
         await selectAdditionalFilters(page);
+        await toggleCheckboxGroup(page, FUNDING_INSTRUMENT_OTHER);
+        await waitForURLContainsQueryParamValues(page, "fundingInstrument", [
+          "grant",
+          "other",
+        ]);
 
         // And I close the drawer
         await closeFilterDrawerWithViewResults(page);
@@ -152,11 +164,12 @@ for (const loginState of LOGIN_STATES) {
         await ensureAccordionExpanded(page, "Eligibility");
         for (const id of [
           ...Object.keys(FUNDING_INSTRUMENT_GRANT),
+          ...Object.keys(FUNDING_INSTRUMENT_OTHER),
           ...Object.keys(ELIGIBILITY_COUNTY),
         ]) {
           await expectCheckboxIDIsChecked(page, id);
         }
-        await expectSelectedFilterCount(page, "fundingInstrument", 1);
+        await expectSelectedFilterCount(page, "fundingInstrument", 2);
         await expectSelectedFilterCount(page, "eligibility", 1);
       },
     );
@@ -182,7 +195,7 @@ for (const loginState of LOGIN_STATES) {
         await clickOutsideFilterDrawer(page);
 
         // Then the drawer should not be visible
-        await expect(getFilterDrawer(page)).toBeHidden();
+        await expectFilterDrawerClosed(page);
       },
     );
 
@@ -193,10 +206,14 @@ for (const loginState of LOGIN_STATES) {
       async ({ page, context }, testInfo) => {
         test.setTimeout(TEST_TIMEOUT);
 
+        await gotoSearchPage(page, context, testInfo, loginState);
+
+        // Listen only after load so unrelated page-load noise is not counted
         const pageErrors: string[] = [];
         page.on("pageerror", (error) => pageErrors.push(error.message));
-
-        await gotoSearchPage(page, context, testInfo, loginState);
+        page.on("console", (message) => {
+          if (message.type() === "error") pageErrors.push(message.text());
+        });
 
         // When I click the 'Filters' button multiple times rapidly
         // (dispatched in one tick: once open, the overlay covers the button,
@@ -210,6 +227,12 @@ for (const loginState of LOGIN_STATES) {
         await expectFocusInsideFilterDrawer(page);
 
         // And no errors should occur
+        expect(pageErrors).toEqual([]);
+
+        // And the drawer still works: it closes and reopens normally
+        await closeFilterDrawerWithCloseButton(page);
+        await openFilterDrawer(page);
+        await expectFocusInsideFilterDrawer(page);
         expect(pageErrors).toEqual([]);
       },
     );
@@ -240,35 +263,52 @@ for (const loginState of LOGIN_STATES) {
           );
           await viewResults.focus();
           await page.keyboard.press(key);
-          await expect(getFilterDrawer(page)).toBeHidden();
+          await expectFilterDrawerClosed(page);
         },
       );
     }
 
     // Scenario: Focus moves correctly when drawer opens/closes
-    test(
-      "focus moves into the drawer on open and returns to the Filters button on close",
-      { tag: [DISCOVERY, FULL_REGRESSION] },
-      async ({ page, context }, testInfo) => {
-        test.setTimeout(TEST_TIMEOUT);
+    // (checked for every way of closing the drawer)
+    for (const closeMethod of [
+      "close (X) button",
+      "View results",
+      "outside click",
+    ]) {
+      test(
+        `focus moves into the drawer on open and returns to the Filters button on close via ${closeMethod}`,
+        { tag: [DISCOVERY, FULL_REGRESSION] },
+        async ({ page, context }, testInfo) => {
+          test.setTimeout(TEST_TIMEOUT);
+          test.skip(
+            closeMethod === "outside click" &&
+              /mobile/i.test(testInfo.project.name),
+            "Drawer fills the viewport on mobile; nothing outside it to click",
+          );
 
-        await gotoSearchPage(page, context, testInfo, loginState);
+          await gotoSearchPage(page, context, testInfo, loginState);
 
-        // When I open the drawer (via keyboard so the button holds focus)
-        await getFilterDrawerToggle(page).focus();
-        await page.keyboard.press("Enter");
-        await expect(getFilterDrawer(page)).toBeVisible();
+          // When I open the drawer (via keyboard so the button holds focus)
+          await openFilterDrawerWithKeyboard(page, "Enter");
 
-        // Then the focus should move into the drawer
-        await expectFocusInsideFilterDrawer(page);
+          // Then the focus should move into the drawer
+          await expectFocusInsideFilterDrawer(page);
 
-        // When I close the drawer
-        await closeFilterDrawerWithCloseButton(page);
+          // When I close the drawer
+          if (closeMethod === "close (X) button") {
+            await closeFilterDrawerWithCloseButton(page);
+          } else if (closeMethod === "View results") {
+            await closeFilterDrawerWithViewResults(page);
+          } else {
+            await clickOutsideFilterDrawer(page);
+            await expectFilterDrawerClosed(page);
+          }
 
-        // Then the focus should return to the 'Filters' button
-        await expect(getFilterDrawerToggle(page)).toBeFocused();
-      },
-    );
+          // Then the focus should return to the 'Filters' button
+          await expectFocusReturnedToFilterDrawerToggle(page);
+        },
+      );
+    }
 
     // Scenario: Drawer opens correctly on different viewport sizes
     // (viewport comes from the Playwright project: Chrome / Mobile chrome)
@@ -309,7 +349,7 @@ for (const loginState of LOGIN_STATES) {
         await waitForSearchResultsInitialLoad(page);
 
         // Then the drawer should close
-        await expect(getFilterDrawer(page)).toBeHidden();
+        await expectFilterDrawerClosed(page);
       },
     );
   });
