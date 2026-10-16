@@ -1,7 +1,9 @@
+import json
 import uuid
 from datetime import timedelta
 
 import apiflask.exceptions
+import boto3
 import pytest
 
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, Privilege
@@ -309,3 +311,74 @@ def test_submit_application_signature_post_processing(
     assert submitted_application2.application_forms[0].application_response == {
         "signature": UNKNOWN_VALUE
     }
+
+
+def build_submittable_application(create_test_form):
+    """Build an in-progress application plus a user allowed to submit it."""
+    today = get_now_us_eastern_date()
+    competition = CompetitionFactory.create(
+        closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
+    )
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
+
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
+    )
+
+    user = UserFactory.create()
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+    return application, user
+
+
+def test_submit_application_queues_submission_message(
+    enable_factory_create, db_session, create_test_form, workflow_sqs_queue
+):
+    """A successful submit queues a submission-build message for the consumer."""
+    application, user = build_submittable_application(create_test_form)
+
+    with db_session.begin():
+        submit_application(db_session, application.application_id, user)
+
+    sqs = boto3.client("sqs", region_name="us-east-1")
+    messages = sqs.receive_message(QueueUrl=workflow_sqs_queue, MaxNumberOfMessages=10).get(
+        "Messages", []
+    )
+    assert len(messages) == 1
+
+    body = json.loads(messages[0]["Body"])
+    assert body["application_id"] == str(application.application_id)
+    assert body["submitted_by_user_id"] == str(user.user_id)
+    assert body["message_id"] is not None
+
+
+def test_submit_application_succeeds_when_queue_send_fails(
+    enable_factory_create, db_session, create_test_form, monkeypatch, caplog
+):
+    """A queue failure never fails the submit - the scheduled task is the fallback."""
+    application, user = build_submittable_application(create_test_form)
+
+    def _raise_on_send(*args, **kwargs):
+        raise Exception("simulated SQS outage")
+
+    monkeypatch.setattr(
+        "src.services.applications.submit_application.send_application_submission_message",
+        _raise_on_send,
+    )
+
+    with db_session.begin():
+        submitted_application = submit_application(db_session, application.application_id, user)
+
+    assert submitted_application.application_status == ApplicationStatus.SUBMITTED
+    assert (
+        "Failed to queue application submission message - the scheduled submission task will process this application"
+        in caplog.messages
+    )

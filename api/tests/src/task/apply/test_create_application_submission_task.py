@@ -11,13 +11,15 @@ from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationSta
 from src.db.models.competition_models import Application, Form
 from src.form_schema.forms import SF424_v4_0
 from src.form_schema.registry.form_template_registry import form_template_registry
+from src.services.applications.create_application_submission import (
+    FileMetadata,
+    SubmissionContainer,
+    create_manifest_text,
+)
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
     CreateApplicationSubmissionTask,
-    FileMetadata,
-    SubmissionContainer,
-    create_manifest_text,
 )
 from src.util import file_util
 from tests.conftest import BaseTestClass
@@ -350,7 +352,9 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             raise Exception("It errors")
 
         monkeypatch.setattr(
-            create_submission_task, "process_application_attachments", erroring_function
+            create_submission_task.submission_builder,
+            "process_application_attachments",
+            erroring_function,
         )
 
         create_submission_task.run_task()
