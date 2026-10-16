@@ -1735,3 +1735,25 @@ $simpler-switch-transition-easing: ease;
 .bg-mint-lighter-custom {
   background-color: color("mint-10");
 }
+
+// Opportunity page header call to action buttons:
+// stacked and full width on small screens, side by side on larger screens
+.opportunity-header__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: units(1.5);
+
+  .usa-button {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  @include at-media("tablet-lg") {
+    flex-direction: row;
+    justify-content: flex-end;
+
+    .usa-button {
+      width: auto;
+    }
+  }
+}
