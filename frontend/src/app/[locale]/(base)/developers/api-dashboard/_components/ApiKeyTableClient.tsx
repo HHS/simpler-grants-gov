@@ -74,7 +74,13 @@ const ModifyActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   const t = useTranslations("ApiDashboard");
   const { showAlert } = useApiKeyAlert();
 
-  const handleApiKeyRenamed = () => {
+  const handleApiKeyRenamed = (renamedKey?: ApiKey) => {
+    showAlert(
+      t("renameSuccessMessage", {
+        originalName: apiKey.key_name,
+        keyName: renamedKey?.key_name ?? "",
+      }),
+    );
     router.refresh();
   };
   const handleApiKeyDeleted = () => {
