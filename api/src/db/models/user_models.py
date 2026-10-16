@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import ForeignKey, UniqueConstraint, and_
+from sqlalchemy import ForeignKey, Index, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -10,6 +10,7 @@ from sqlalchemy.sql.functions import now as sqlnow
 
 from src.constants.lookup_constants import (
     ExternalUserType,
+    NotificationQueueStatus,
     NotificationType,
     Privilege,
     RoleType,
@@ -30,12 +31,14 @@ from src.db.models.entity_models import Organization
 from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import (
     LkExternalUserType,
+    LkNotificationQueueStatus,
     LkNotificationType,
     LkPrivilege,
     LkRoleType,
     LkUserType,
 )
 from src.db.models.opportunity_models import Opportunity
+from src.db.models.task_models import JobLog
 from src.util import datetime_util
 
 
@@ -573,3 +576,62 @@ class UserNotificationPreference(ApiSchemaTable, TimestampMixin):
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
     user: Mapped[User] = relationship(User, back_populates="notification_preferences")
+
+
+class NotificationJobContent(ApiSchemaTable, TimestampMixin):
+    """Rendered email content for a single run of a bulk notification job"""
+
+    __tablename__ = "notification_job_content"
+
+    notification_job_content_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    job_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(JobLog.job_id), unique=True)
+    job: Mapped[JobLog] = relationship(JobLog)
+
+    notification_type: Mapped[NotificationType] = mapped_column(
+        "notification_type_id",
+        LookupColumn(LkNotificationType),
+        ForeignKey(LkNotificationType.notification_type_id),
+        nullable=False,
+    )
+
+    subject: Mapped[str]
+    email_body: Mapped[str]
+
+
+class NotificationQueue(ApiSchemaTable, TimestampMixin):
+    """Work queue and per-recipient send log for a bulk notification job"""
+
+    __tablename__ = "notification_queue"
+
+    __table_args__ = (
+        UniqueConstraint("job_content_id", "user_id"),
+        # Supports the processor's drain query, which filters on status and orders by created_at
+        Index(
+            "notification_queue_status_created_at_idx", "notification_queue_status_id", "created_at"
+        ),
+        ApiSchemaTable.__table_args__,
+    )
+
+    notification_queue_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    job_content_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(NotificationJobContent.notification_job_content_id)
+    )
+    job_content: Mapped[NotificationJobContent] = relationship(NotificationJobContent)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
+    user: Mapped[User] = relationship(User)
+
+    status: Mapped[NotificationQueueStatus] = mapped_column(
+        "notification_queue_status_id",
+        LookupColumn(LkNotificationQueueStatus),
+        ForeignKey(LkNotificationQueueStatus.notification_queue_status_id),
+        nullable=False,
+    )
+
+    ses_message_id: Mapped[str | None]

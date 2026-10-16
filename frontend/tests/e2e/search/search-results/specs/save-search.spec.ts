@@ -26,21 +26,23 @@ import {
   saveCurrentSearch,
 } from "tests/e2e/utils/search/save-search-utils";
 import {
-  clickPaginationPageIfPresent,
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
   expectCheckboxesChecked,
+  toggleCheckbox,
+  toggleFilterDrawer,
+} from "tests/e2e/utils/search/search-filter-utils";
+import {
+  clickPaginationPageIfPresent,
   expectSortBy,
   fillSearchInputAndSubmit,
   getNumberOfOpportunitySearchResults,
   getSearchInput,
   selectSortBy,
-  toggleCheckbox,
-  toggleFilterDrawer,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/utils/search/searchSpecUtil";
+} from "tests/e2e/utils/search/search-utils";
 
-const { SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 const { baseUrl, targetEnv } = playwrightEnv;
 const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
@@ -50,7 +52,7 @@ const sortValue = "awardCeilingDesc";
 test.describe("Saved search - restores state on reopen", () => {
   test(
     "reopening a saved search resets pagination to page 1",
-    { tag: [SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page, context }, testInfo) => {
       test.setTimeout(300_000);
       const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
@@ -169,7 +171,7 @@ test.describe("Saved search - restores state on reopen", () => {
   );
   test(
     "reopening a saved search restores query, filters, and sort order",
-    { tag: [SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page, context }, testInfo) => {
       test.setTimeout(300_000);
       const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
@@ -319,7 +321,7 @@ test.describe("Saved search - restores state on reopen", () => {
 test.describe("Saved search - empty state", () => {
   test(
     "visiting Saved Searches with no saved searches shows the empty state and a CTA",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page, context }, testInfo) => {
       const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
 

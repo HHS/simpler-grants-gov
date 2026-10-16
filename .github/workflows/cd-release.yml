@@ -104,7 +104,7 @@ jobs:
     uses: ./.github/workflows/ci-frontend-e2e.yml
     secrets: inherit
     with:
-      playwright_tags: "@smoke|@core-regression"
+      playwright_tags: "@smoke|@full-regression"
 
   # =====================================================
   # PHASE 2: Deploy to prod (or selected environment)
@@ -143,7 +143,7 @@ jobs:
     with:
       version: ${{ inputs.version || github.ref }}
       target: staging
-      playwright_tags: "@smoke|@core-regression"
+      playwright_tags: "@smoke|@full-regression"
 
   # 3. Deploy Analytics after API completes successfully
   deploy-analytics:

@@ -24,6 +24,13 @@ module "infra_dev_config" {
 
   # Dashboard and silent alarms first; no recipient or delivery approval assumed.
   enable_pdf_readability_monitoring = true
+  # Observation first. Switch rate_action to block only for the coordinated
+  # synthetic dev test; public pilot enablement remains a separate decision.
+  pdf_readability_waf = {
+    rate_limit      = 10
+    rate_action     = "count"
+    emergency_block = false
+  }
 
   service_override_extra_environment_variables = {}
 }

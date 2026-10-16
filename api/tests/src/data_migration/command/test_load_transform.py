@@ -4,7 +4,7 @@ import src.data_migration.command.load_transform as load_transform_module
 
 
 class FakeLoadOpportunitiesToIndex:
-    def __init__(self, db_session, search_client, full_refresh):
+    def __init__(self, db_session, search_client, config=None, full_refresh=False):
         self.calls.append({"full_refresh": full_refresh})
 
     def run(self):

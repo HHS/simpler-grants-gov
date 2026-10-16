@@ -194,7 +194,8 @@ module "service" {
 
   # AWS/WAFV2 uses the visibility metric name, which was previously shared by
   # every service. Give monitored NOFO environments an unambiguous identity.
-  waf_metric_name = local.service_config.enable_pdf_readability_monitoring ? "${local.service_name}-waf" : null
+  waf_metric_name     = local.service_config.enable_pdf_readability_monitoring ? "${local.service_name}-waf" : null
+  pdf_readability_waf = local.service_config.pdf_readability_waf
 
   readonly_root_filesystem = false
 

@@ -152,3 +152,13 @@ variable "pdf_readability_alarm_actions_enabled" {
   default     = false
   description = "Enable pilot notifications after agreement on recipients and delivery verification."
 }
+
+variable "pdf_readability_waf" {
+  description = "Opt-in NOFO PDF pilot controls. Null preserves existing WAF rules; Count observes without blocking."
+  type = object({
+    rate_limit      = optional(number, 10)
+    rate_action     = optional(string, "count")
+    emergency_block = optional(bool, false)
+  })
+  default = null
+}

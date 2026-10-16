@@ -1,3 +1,7 @@
+locals {
+  pdf_readability_managed_priority_offset = var.pdf_readability_waf == null ? 0 : 2
+}
+
 resource "aws_wafv2_web_acl" "waf" {
   count = var.enable_load_balancer ? 1 : 0
   name  = "${var.service_name}-wafv2-web-acl"
@@ -13,9 +17,132 @@ resource "aws_wafv2_web_acl" "waf" {
     sampled_requests_enabled   = true
   }
 
+  # These controls must precede terminating Allow overrides in managed groups.
+  # Null leaves every existing managed priority unchanged for other services.
+  dynamic "rule" {
+    for_each = var.pdf_readability_waf == null ? [] : [var.pdf_readability_waf]
+    content {
+      name     = "NOFO-PDFReadability-EmergencyBlock"
+      priority = 0
+
+      action {
+        dynamic "block" {
+          for_each = rule.value.emergency_block ? [1] : []
+          content {}
+        }
+        dynamic "count" {
+          for_each = rule.value.emergency_block ? [] : [1]
+          content {}
+        }
+      }
+
+      statement {
+        and_statement {
+          statement {
+            regex_match_statement {
+              regex_string = "^/readability/?$"
+              field_to_match {
+                uri_path {}
+              }
+              text_transformation {
+                priority = 0
+                type     = "NONE"
+              }
+            }
+          }
+          statement {
+            regex_match_statement {
+              regex_string = "^(GET|POST)$"
+              field_to_match {
+                method {}
+              }
+              text_transformation {
+                priority = 0
+                type     = "NONE"
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "NOFO-PDFReadability-EmergencyBlock"
+        sampled_requests_enabled   = false
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.pdf_readability_waf == null ? [] : [var.pdf_readability_waf]
+    content {
+      name     = "NOFO-PDFReadability-UploadRate"
+      priority = 1
+
+      action {
+        dynamic "block" {
+          for_each = rule.value.rate_action == "block" ? [1] : []
+          content {
+            custom_response {
+              response_code = 429
+            }
+          }
+        }
+        dynamic "count" {
+          for_each = rule.value.rate_action == "count" ? [1] : []
+          content {}
+        }
+      }
+
+      statement {
+        rate_based_statement {
+          aggregate_key_type    = "IP"
+          limit                 = rule.value.rate_limit
+          evaluation_window_sec = 300
+
+          scope_down_statement {
+            and_statement {
+              statement {
+                regex_match_statement {
+                  regex_string = "^/readability/?$"
+                  field_to_match {
+                    uri_path {}
+                  }
+                  text_transformation {
+                    priority = 0
+                    type     = "NONE"
+                  }
+                }
+              }
+              statement {
+                byte_match_statement {
+                  positional_constraint = "EXACTLY"
+                  search_string         = "POST"
+                  field_to_match {
+                    method {}
+                  }
+                  text_transformation {
+                    priority = 0
+                    type     = "NONE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "NOFO-PDFReadability-UploadRate"
+        sampled_requests_enabled   = false
+      }
+    }
+  }
+
   rule {
     name     = "AWS-AWSManagedRulesCommonRuleSet"
-    priority = 0
+    priority = 0 + local.pdf_readability_managed_priority_offset
     override_action {
       none {}
     }
@@ -68,7 +195,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesLinuxRuleSet"
-    priority = 1
+    priority = 1 + local.pdf_readability_managed_priority_offset
     override_action {
       none {
       }
@@ -88,7 +215,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesAmazonIpReputationList"
-    priority = 2
+    priority = 2 + local.pdf_readability_managed_priority_offset
     override_action {
       none {
       }
@@ -108,7 +235,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesAnonymousIpList"
-    priority = 3
+    priority = 3 + local.pdf_readability_managed_priority_offset
     override_action {
       none {
       }
@@ -136,7 +263,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
-    priority = 4
+    priority = 4 + local.pdf_readability_managed_priority_offset
     override_action {
       none {
       }
@@ -156,7 +283,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesUnixRuleSet"
-    priority = 5
+    priority = 5 + local.pdf_readability_managed_priority_offset
     override_action {
       none {
       }
@@ -176,7 +303,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesWindowsRuleSet"
-    priority = 6
+    priority = 6 + local.pdf_readability_managed_priority_offset
     override_action {
       none {
       }

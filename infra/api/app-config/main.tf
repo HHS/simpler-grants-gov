@@ -43,6 +43,10 @@ locals {
   # 2. Configures email notifications using AWS SES
   enable_notifications = true
 
+  # Whether or not the application should enable SMS notifications via AWS End User
+  # Messaging. Not yet used by this application; defaults to false until adopted.
+  enable_sms_notifications = false
+
   environment_configs = {
     dev      = module.dev_config
     staging  = module.staging_config

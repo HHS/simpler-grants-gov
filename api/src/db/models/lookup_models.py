@@ -25,6 +25,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    NotificationQueueStatus,
     NotificationType,
     OpportunityAuditEvent,
     OpportunityCategory,
@@ -481,6 +482,16 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
 NOTIFICATION_TYPE_CONFIG: LookupConfig[NotificationType] = LookupConfig(
     [
         LookupStr(NotificationType.ALL_NEW_OPPORTUNITIES, 1),
+    ]
+)
+
+NOTIFICATION_QUEUE_STATUS_CONFIG: LookupConfig[NotificationQueueStatus] = LookupConfig(
+    [
+        LookupStr(NotificationQueueStatus.PENDING, 1),
+        LookupStr(NotificationQueueStatus.IN_PROGRESS, 2),
+        LookupStr(NotificationQueueStatus.SENT, 3),
+        LookupStr(NotificationQueueStatus.FAILED, 4),
+        LookupStr(NotificationQueueStatus.SUPPRESSED, 5),
     ]
 )
 
@@ -988,4 +999,19 @@ class LkNotificationType(ApiLookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> LkNotificationType:
         return LkNotificationType(
             notification_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(NOTIFICATION_QUEUE_STATUS_CONFIG)
+class LkNotificationQueueStatus(ApiLookupTable, TimestampMixin):
+    __tablename__ = "lk_notification_queue_status"
+
+    notification_queue_status_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkNotificationQueueStatus:
+        return LkNotificationQueueStatus(
+            notification_queue_status_id=lookup.lookup_val,
+            description=lookup.get_description(),
         )

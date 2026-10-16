@@ -145,6 +145,13 @@ class Competition(ApiSchemaTable, TimestampMixin):
             return False
         return self.has_open_date
 
+    @property
+    def is_legacy_package(self) -> bool:
+        """The competition is an application package from Grants.gov.
+        Only the Grants.gov transformation sets the legacy package ID.
+        """
+        return self.legacy_package_id is not None
+
 
 class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_instruction"
@@ -199,6 +206,7 @@ class Form:
     form_json_schema: dict
     form_ui_schema: dict
     omb_number: str | None = None
+    expiration_date: date | None = None
     legacy_form_id: int | None = None
     active_at: datetime | None = None
     inactive_at: datetime | None = None

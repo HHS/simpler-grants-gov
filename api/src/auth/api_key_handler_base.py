@@ -7,9 +7,10 @@ from uuid import UUID
 from src.adapters import db
 from src.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
 from src.api.route_utils import raise_flask_error
+from src.auth.api_key_config import ApiKeyConfig
 from src.auth.auth_handler_base import AbstractAuthHandler
 from src.db.models.auth_base_models import BaseUserApiKey
-from src.util.api_key_gen import generate_api_key_id
+from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +42,16 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
 
     def create_api_key(self, user_id: UUID, key_name: str) -> USER_API_KEY:
         """Create an API key for a user and associate with API gateway"""
+        pepper = ApiKeyConfig().pepper
+
         # Generate a unique key_id with collision detection
-        key_id = self._generate_unique_key_id()
+        key_id, key_id_hash = self._generate_unique_key_id(pepper)
 
-        # Create the new API key in our database first
-        api_key = self.get_auth_handler().create_api_key(user_id, key_name, key_id)
+        # Create the new API key in our database first. Both the raw key and its
+        # hash are stored until reads move over to the hash.
+        api_key = self.get_auth_handler().create_api_key(user_id, key_name, key_id, key_id_hash)
 
-        # Import the API key to AWS API Gateway
+        # Import the API key to AWS API Gateway (it needs the raw key)
         self._import_api_key_to_aws_gateway(api_key)
 
         logger.info(
@@ -155,15 +159,16 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
             # since the AWS adapter already logs the underlying error
             raise ApiGatewayIntegrationError("Failed to import API key to AWS API Gateway") from e
 
-    def _generate_unique_key_id(self) -> str:
+    def _generate_unique_key_id(self, pepper: str) -> tuple[str, str]:
+        """Generate a new key_id and its hash, retrying if the hash is already taken."""
         for _attempt in range(MAX_KEY_GENERATION_RETRIES):
             key_id = generate_api_key_id()
+            key_id_hash = hash_api_key_id(key_id, pepper)
 
-            # Check if this key_id already exists
-            existing_key = self.get_auth_handler().get_api_key_by_key_id(key_id)
+            existing_key = self.get_auth_handler().get_api_key_by_key_id_hash(key_id_hash)
 
             if existing_key is None:
-                return key_id
+                return key_id, key_id_hash
 
         # If we get here, we failed to generate a unique key after all retries
         logger.error(

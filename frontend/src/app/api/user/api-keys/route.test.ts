@@ -3,6 +3,7 @@
  */
 
 import { createApiKeyHandler } from "src/app/api/user/api-keys/handler";
+import { ValidationError } from "src/errors";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { UserSession } from "src/types/authTypes";
 import { baseApiKey } from "src/utils/testing/fixtures";
@@ -40,6 +41,7 @@ jest.mock("src/services/fetch/fetchers/apiKeyFetcher", () => ({
 interface JsonData {
   message: string;
   data?: ApiKey;
+  errorType?: string;
 }
 
 const mockApiKeyResponse: ApiKey = baseApiKey;
@@ -150,6 +152,26 @@ describe("POST /api/user/api-keys", () => {
 
     expect(response.status).toBe(500);
     expect(data.message).toContain("Error creating API key");
+  });
+
+  it("passes the API validation error type through on a duplicate name", async () => {
+    mockHandleCreateApiKey.mockRejectedValueOnce(
+      new ValidationError("An API key with this name already exists", {
+        field: "key_name",
+        type: "duplicate_api_key_name",
+      }),
+    );
+
+    const request = new NextRequest("http://localhost:3000/api/user/api-keys", {
+      method: "POST",
+      body: JSON.stringify({ key_name: "Existing Name" }),
+    });
+
+    const response = await createApiKeyHandler(request);
+    const data = (await response.json()) as JsonData;
+
+    expect(response.status).toBe(422);
+    expect(data.errorType).toBe("duplicate_api_key_name");
   });
 
   it("handles unexpected errors", async () => {

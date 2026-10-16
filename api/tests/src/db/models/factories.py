@@ -37,6 +37,7 @@ import src.db.models.workflow_models as workflow_models
 import src.util.datetime_util as datetime_util
 import tests.lib.db_test_models.db_test_models as db_test_models
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
+from src.auth.api_key_config import ApiKeyConfig
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
@@ -60,6 +61,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    NotificationQueueStatus,
     NotificationType,
     OpportunityAuditEvent,
     OpportunityCategory,
@@ -89,6 +91,7 @@ from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.form_schema.forms import SF424_v4_0, init_form_registry
 from src.util import file_util
+from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -680,9 +683,13 @@ class OpportunitySummaryFactory(BaseFactory):
         unique=True,
     )
 
-    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    created_at = factory.Faker(
+        "date_time_between", start_date="-5y", end_date="-3y", tzinfo=timezone.utc
+    )
     updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
+        lambda o: fake.date_time_between(
+            start_date=o.created_at, end_date="-1y", tzinfo=timezone.utc
+        )
     )
 
     class Params:
@@ -1381,7 +1388,11 @@ class UserApiKeyFactory(BaseFactory):
     user_id = factory.LazyAttribute(lambda k: k.user.user_id)
 
     key_name = factory.Faker("sentence", nb_words=3)
-    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+
+    key_id = factory.LazyAttribute(lambda obj: obj.raw_key)
+    key_id_hash = factory.LazyAttribute(
+        lambda obj: hash_api_key_id(obj.raw_key, ApiKeyConfig().pepper)
+    )
 
     last_used = sometimes_none(
         factory.Faker("date_time_between", start_date="-30d", end_date="now"), none_chance=0.3
@@ -1399,6 +1410,10 @@ class UserApiKeyFactory(BaseFactory):
 
         # Trait for unused keys
         never_used = factory.Trait(last_used=None)
+
+        # Not a column. Tests and fixtures send this as X-API-Key.
+        # Override this, not key_id: UserApiKeyFactory(raw_key="my-test-key").
+        raw_key = factory.LazyFunction(generate_api_key_id)
 
 
 class RoleFactory(BaseFactory):
@@ -2180,6 +2195,7 @@ class JobLogFactory(BaseFactory):
         model = task_models.JobLog
 
     job_id = Generators.UuidObj
+    job_type = factory.Faker("slug")
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
 
@@ -3611,6 +3627,9 @@ class SharedUserApiKeyFactory(BaseFactory):
 
     key_name = factory.Faker("sentence", nb_words=3)
     key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+    key_id_hash = factory.LazyAttribute(
+        lambda obj: hash_api_key_id(obj.key_id, ApiKeyConfig().pepper)
+    )
 
     last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")
 
@@ -3628,3 +3647,42 @@ class UserNotificationPreferenceFactory(BaseFactory):
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda u: u.user.user_id)
+
+
+class NotificationJobContentFactory(BaseFactory):
+    class Meta:
+        model = user_models.NotificationJobContent
+
+    notification_job_content_id = Generators.UuidObj
+
+    job = factory.SubFactory(JobLogFactory)
+    job_id = factory.LazyAttribute(lambda c: c.job.job_id)
+
+    notification_type = NotificationType.ALL_NEW_OPPORTUNITIES
+
+    subject = factory.Faker("sentence")
+    email_body = factory.LazyFunction(
+        lambda: f"<html><body><p>{fake.paragraph()}</p></body></html>"
+    )
+
+
+class NotificationQueueFactory(BaseFactory):
+    class Meta:
+        model = user_models.NotificationQueue
+
+    notification_queue_id = Generators.UuidObj
+
+    job_content = factory.SubFactory(NotificationJobContentFactory)
+    job_content_id = factory.LazyAttribute(lambda q: q.job_content.notification_job_content_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda q: q.user.user_id)
+
+    status = NotificationQueueStatus.PENDING
+    ses_message_id = None
+
+    class Params:
+        is_sent = factory.Trait(
+            status=NotificationQueueStatus.SENT,
+            ses_message_id=factory.Faker("uuid4"),
+        )

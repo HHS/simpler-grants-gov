@@ -35,14 +35,14 @@ import {
   waitForAttachmentSaveResponse,
 } from "tests/e2e/utils/common/file-upload-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${ATTACHMENT_OPPORTUNITY_DATA.opportunityId}`;
 
 test.describe("File upload interactions - Attachment Form streamed upload endpoint", () => {
   test(
     "streamed single-file upload shows progress statuses and allows deletion after completion",
-    { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
@@ -79,7 +79,7 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
 
   test(
     "deleting the uploaded streamed file restores the file input on single file inputs",
-    { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
@@ -116,7 +116,7 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
 
   test(
     "single-file attachment should not accept multiple files",
-    { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,

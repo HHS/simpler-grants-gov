@@ -13,14 +13,14 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import {
   fillSearchInputAndSubmit,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/utils/search/searchSpecUtil";
+} from "tests/e2e/utils/search/search-utils";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 test.describe("Search page no results tests", () => {
   test(
     "should return 0 results when searching for obscure term",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       const searchTerm = generateRandomString([10]);
 

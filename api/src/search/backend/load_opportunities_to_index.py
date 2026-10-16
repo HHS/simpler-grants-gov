@@ -53,7 +53,7 @@ class LoadOpportunitiesToIndex(Task):
         db_session: db.Session,
         search_client: search.SearchClient,
         config: LoadOpportunitiesToIndexConfig | None = None,
-        full_refresh: bool = True,
+        full_refresh: bool = False,
     ) -> None:
         super().__init__(db_session)
 

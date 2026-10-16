@@ -7,6 +7,7 @@ import {
   getAwardRecommendationRisk,
   getAwardRecommendationSubmissionsForRisk,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -110,9 +111,12 @@ async function EditRiskPageContent({ params }: EditRiskPageProps) {
         </GridContainer>
       </>
     );
-  } catch (error) {
-    console.error("Failed to fetch award recommendation risk details", error);
-    const errorStatus = parseErrorStatus(error as ApiRequestError);
+  } catch (e) {
+    logger.error(
+      { err: e, awardRecommendationId, riskId },
+      "Failed to fetch award recommendation risk details",
+    );
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
 
     if (errorStatus === 401 || errorStatus === 403) {
       return (
