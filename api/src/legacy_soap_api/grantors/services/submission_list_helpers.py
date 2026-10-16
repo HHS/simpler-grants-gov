@@ -25,7 +25,7 @@ from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors.filters import GetSubmissionListFilter
-from src.legacy_soap_api.grantors.schemas.application_list_filter_schemas import ConsolidatedFilter
+from src.legacy_soap_api.grantors.schemas.get_submission_list_schemas import ConsolidatedFilter
 from src.legacy_soap_api.grantors.statuses import (
     AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS,
     RECEIVED_BY_AGENCY_STATUS,
