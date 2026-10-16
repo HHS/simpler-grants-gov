@@ -818,6 +818,7 @@ export const messages = {
     metaDescription: "Manage your API keys for Simpler.Grants.gov",
     heading: "API dashboard",
     errorLoadingKeys: "Failed to load API keys",
+    deleteSuccessMessage: 'API key "{keyName}" has been deleted successfully.',
     table: {
       headers: {
         apiKey: "Name",
@@ -879,19 +880,17 @@ export const messages = {
       saving: "Saving...",
       saveChanges: "Save Changes",
       cancel: "Cancel",
-      deleteTitle: "Delete API Key",
+      deleteTitle: 'Delete "{keyName}" API key?',
+      deleteTriggerTitle: 'Delete "{keyName}" API key',
       deleteDescription:
-        'To confirm deletion, type "delete" in the field below:',
+        "Any application or service using this key will immediately lose access to the API. This action cannot be undone.",
       deleteConfirmationLabel:
         'Type "delete" to confirm <required>(required)</required>',
-      deleteConfirmationPlaceholder: "delete",
-      deleteConfirmationError: 'Please type "delete" to confirm deletion',
-      deleteSuccessHeading: "API Key Deleted Successfully",
-      deleteSuccessMessage:
-        'Your API key "{keyName}" has been deleted successfully.',
+      deleteConfirmationError: "Text does not match.",
+      deleteErrorHeading: "Unable to delete API key",
       deleteErrorMessage:
-        "There was an error deleting your API key. Please try again.",
-      deleteButtonText: "Delete Key",
+        "Something went wrong on our end. Please try again in a few minutes.",
+      deleteButtonText: "Delete key",
       deleting: "Deleting...",
       copyApiKey: "Copy API key",
     },
