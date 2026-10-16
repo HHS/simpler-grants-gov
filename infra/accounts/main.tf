@@ -25,12 +25,12 @@ locals {
 
 terraform {
 
-  required_version = "1.14.3"
+  required_version = "1.16.6"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.68.0"
+      version = "~> 5.100.0"
     }
     newrelic = {
       source  = "newrelic/newrelic"
