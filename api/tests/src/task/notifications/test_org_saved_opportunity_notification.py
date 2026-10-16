@@ -5,7 +5,7 @@ import tests.src.db.models.factories as factories
 from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog
 from src.task.notifications.config import EmailNotificationConfig
-from src.task.notifications.constants import NotificationReason
+from src.task.notifications.constants import EmailType, NotificationReason
 from src.task.notifications.org_saved_opportunity_notification import (
     OrgSavedOpportunityNotificationTask,
 )
@@ -54,6 +54,7 @@ class TestOrgSavedOpportunityNotification:
         configuration,
         ses_client,
         get_sent_emails,
+        sent_email_tags,
     ):
         """Test that email is sent when org has unprocessed saved opportunity."""
         opportunity = factories.OpportunityFactory.create()
@@ -84,6 +85,7 @@ class TestOrgSavedOpportunityNotification:
         emails = get_sent_emails()
         assert len(emails) == 1
         assert emails[0].destinations["ToAddresses"] == ["test@example.com"]
+        assert sent_email_tags[0].email_tags == {"email_type": EmailType.ORG_SAVED_OPPORTUNITY}
 
     def test_no_email_sent_on_second_run(
         self,

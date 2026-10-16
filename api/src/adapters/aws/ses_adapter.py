@@ -10,6 +10,9 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
+# Tag name used as the CloudWatch dimension on the SES configuration set's event destination
+EMAIL_TYPE_TAG = "email_type"
+
 
 class SESConfig(PydanticBaseEnvConfig):
     aws_ses_from_email: str = Field(alias="AWS_SES_FROM_EMAIL")
@@ -31,6 +34,7 @@ def send_email(
     subject: str,
     message: str,
     ses_client: botocore.client.BaseClient | None = None,
+    email_tags: dict[str, str] | None = None,
 ) -> str:
     """
     Send an email using AWS SESv2.
@@ -40,6 +44,7 @@ def send_email(
         subject: Email subject line
         message: Email body (supports both HTML and plain text)
         ses_client: Optional SESv2 client (for testing)
+        email_tags: Optional SES message tags, as tag name -> value
 
     Returns:
         Message ID from SESv2
@@ -57,6 +62,7 @@ def send_email(
                 "to_address": to_address,
                 "subject": subject,
                 "from_address": config.aws_ses_from_email,
+                "email_tags": email_tags,
             },
         )
         return "local-mock-message-id"
@@ -64,8 +70,14 @@ def send_email(
     if ses_client is None:
         ses_client = get_ses_client()
 
+    send_kwargs: dict = {}
+    if email_tags:
+        send_kwargs["EmailTags"] = [
+            {"Name": name, "Value": value} for name, value in email_tags.items()
+        ]
+
     try:
-        logger.info("Sending email via SESv2")
+        logger.info("Sending email via SESv2", extra={"email_tags": email_tags})
 
         response = ses_client.send_email(
             FromEmailAddress=config.aws_ses_from_email,
@@ -79,6 +91,7 @@ def send_email(
                     },
                 }
             },
+            **send_kwargs,
         )
 
         response_object = SESResponse.model_validate(response)

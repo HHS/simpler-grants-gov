@@ -4,6 +4,7 @@ from src.constants.lookup_constants import ApprovalResponseType, Privilege, Work
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow
+from src.task.notifications.constants import EmailType
 from tests.lib.agency_test_utils import create_user_in_agency
 from tests.src.db.models.factories import (
     OpportunityFactory,
@@ -40,7 +41,7 @@ def verify_email(
 
 
 def test_workflow_approval_email_listener_moving_into_budget_officer_state(
-    db_session, agency, budget_officer, opportunity, ses_client, get_sent_emails
+    db_session, agency, budget_officer, opportunity, ses_client, get_sent_emails, sent_email_tags
 ):
     """Verify that when we first enter the pending budget officer approval state, an email is sent"""
 
@@ -71,6 +72,7 @@ def test_workflow_approval_email_listener_moving_into_budget_officer_state(
         expected_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
         expected_privilege=Privilege.BUDGET_OFFICER_APPROVAL,
     )
+    assert sent_email_tags[0].email_tags == {"email_type": EmailType.WORKFLOW_APPROVAL}
 
 
 def test_workflow_approval_email_listener_moving_into_program_officer_state(

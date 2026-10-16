@@ -31,6 +31,8 @@ _PROTECTED_HEADERS = (
     "content-type",
     "content-transfer-encoding",
     "x-simpler-trace-id",
+    "x-ses-message-tags",
+    "x-tags",
 )
 
 
@@ -43,6 +45,7 @@ def send_email_to_address(
     bcc_addresses: list[str] | None = None,
     headers: dict[str, str] | None = None,
     config: LocalEmailConfig | None = None,
+    email_tags: dict[str, str] | None = None,
 ) -> str:
     """Send an email using local capture when enabled, otherwise use SESv2."""
     if config is None:
@@ -58,12 +61,14 @@ def send_email_to_address(
             bcc_addresses=bcc_addresses,
             headers=headers,
             config=config,
+            email_tags=email_tags,
         )
 
     return send_ses_email(
         to_address=to_address,
         subject=subject,
         message=message,
+        email_tags=email_tags,
     )
 
 
@@ -105,6 +110,7 @@ def send_local_email(
     bcc_addresses: list[str] | None = None,
     headers: dict[str, str] | None = None,
     config: LocalEmailConfig | None = None,
+    email_tags: dict[str, str] | None = None,
 ) -> str:
     """Deliver an email to the local SMTP capture service.
 
@@ -139,6 +145,12 @@ def send_local_email(
     email_message["Date"] = formatdate(localtime=False, usegmt=True)
     email_message["Message-ID"] = make_msgid()
     email_message["X-Simpler-Trace-Id"] = trace_id
+    if email_tags:
+        # X-SES-MESSAGE-TAGS is how SES accepts tags over SMTP; X-Tags shows them as Mailpit tags
+        email_message["X-SES-MESSAGE-TAGS"] = ", ".join(
+            f"{name}={value}" for name, value in email_tags.items()
+        )
+        email_message["X-Tags"] = ", ".join(email_tags.values())
     for header_name, header_value in headers.items():
         if header_name.lower() in _PROTECTED_HEADERS:
             raise ValueError(f"Cannot override protected email header: {header_name}")

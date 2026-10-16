@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import src.workflow.util.workflow_util as workflow_util
+from src.task.notifications.constants import EmailType
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
 
 
@@ -19,6 +20,7 @@ def test_send_workflow_email_uses_email_router(monkeypatch):
         user,
         subject="Workflow approval needed",
         message="<p>Please review this workflow.</p>",
+        email_type=EmailType.WORKFLOW_APPROVAL,
     )
 
     email_sender.assert_called_once()
@@ -27,6 +29,7 @@ def test_send_workflow_email_uses_email_router(monkeypatch):
     assert email_call["subject"] == "Workflow approval needed"
     assert email_call["message"] == "<p>Please review this workflow.</p>"
     assert email_call["trace_id"]
+    assert email_call["email_tags"] == {"email_type": EmailType.WORKFLOW_APPROVAL}
     state_machine_event.increment.assert_called_once_with(
         WorkflowMetricContext.Metrics.EMAIL_SENT_COUNT
     )

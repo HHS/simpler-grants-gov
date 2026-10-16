@@ -10,7 +10,7 @@ from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedSearch
 from src.task.notifications.config import EmailNotificationConfig, _reset_email_config
-from src.task.notifications.constants import NotificationReason
+from src.task.notifications.constants import EmailType, NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.search_notification import (
     UTM_TAG,
@@ -76,6 +76,7 @@ def test_search_notifications_cli(
     caplog,
     ses_client,
     get_sent_emails,
+    sent_email_tags,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
 
@@ -150,6 +151,7 @@ def test_search_notifications_cli(
     emails = get_sent_emails()
     assert len(emails) == 1
     assert emails[0].destinations["ToAddresses"] == ["test@example.com"]
+    assert sent_email_tags[0].email_tags == {"email_type": EmailType.SEARCH_UPDATES}
 
     # Verify notification log was created
     notification_logs = (
