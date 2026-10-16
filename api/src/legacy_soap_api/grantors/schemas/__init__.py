@@ -2,7 +2,7 @@ from src.legacy_soap_api.grantors.schemas.confirm_application_delivery_schemas i
     ConfirmApplicationDeliveryRequest,
     ConfirmApplicationDeliveryResponseSOAPEnvelope,
 )
-from src.legacy_soap_api.grantors.schemas.get_application_list_schemas import (
+from src.legacy_soap_api.grantors.schemas.get_application_list_expanded_schemas import (
     ExpandedApplicationInfo,
     GetApplicationListExpandedRequest,
     GetApplicationListExpandedResponse,

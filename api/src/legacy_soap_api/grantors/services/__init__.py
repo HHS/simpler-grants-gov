@@ -2,7 +2,7 @@ from src.legacy_soap_api.grantors.services.confirm_application_delivery_response
     confirm_application_delivery,
     get_confirm_application_delivery_response,
 )
-from src.legacy_soap_api.grantors.services.get_application_list_response import (
+from src.legacy_soap_api.grantors.services.get_application_list_expanded_response import (
     get_application_list_expanded,
     get_application_list_expanded_response,
 )

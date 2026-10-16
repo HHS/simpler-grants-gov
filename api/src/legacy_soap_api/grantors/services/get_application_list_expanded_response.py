@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone
 
 import src.adapters.db as db
-from src.legacy_soap_api.grantors.schemas.get_application_list_schemas import (
+from src.legacy_soap_api.grantors.schemas.get_application_list_expanded_schemas import (
     ExpandedApplicationInfo,
     GetApplicationListExpandedRequest,
     GetApplicationListExpandedResponse,
