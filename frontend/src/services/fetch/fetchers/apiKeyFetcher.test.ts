@@ -25,7 +25,6 @@ const mockApiKeys: ApiKey[] = [
   createMockApiKey({
     api_key_id: "test-key-id-2",
     key_name: "Test API Key 2",
-    key_id: "def456",
     created_at: "2023-01-02T00:00:00Z",
     last_used: "2023-01-03T00:00:00Z",
   }),

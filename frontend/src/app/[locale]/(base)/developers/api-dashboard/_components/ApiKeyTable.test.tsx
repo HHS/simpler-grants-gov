@@ -43,14 +43,12 @@ const mockApiKeys: ApiKey[] = [
   createMockApiKey({
     api_key_id: "test-api-key-1",
     key_name: "Production API Key",
-    key_id: "abc123def456",
     created_at: "2023-01-01",
     last_used: "2023-01-02",
   }),
   createMockApiKey({
     api_key_id: "test-api-key-2",
     key_name: "Development API Key",
-    key_id: "xyz789uvw012",
     created_at: "2023-01-03",
     last_used: null,
   }),
@@ -97,13 +95,11 @@ describe("ApiKeyTable", () => {
       renderTable();
 
       const headers = screen.getAllByRole("columnheader");
-      expect(headers).toHaveLength(6);
-      expect(headers[0]).toHaveTextContent("headers.apiKey");
-      expect(headers[1]).toHaveTextContent("headers.status");
-      expect(headers[2]).toHaveTextContent("headers.secret");
-      expect(headers[3]).toHaveTextContent("headers.created");
-      expect(headers[4]).toHaveTextContent("headers.lastUsed");
-      expect(headers[5]).toHaveTextContent("headers.modify");
+      expect(headers).toHaveLength(4);
+      expect(headers[0]).toHaveTextContent("headers.keyName");
+      expect(headers[1]).toHaveTextContent("headers.created");
+      expect(headers[2]).toHaveTextContent("headers.lastUsed");
+      expect(headers[3]).toHaveTextContent("headers.actions");
 
       expect(screen.getByText("Production API Key")).toBeInTheDocument();
       expect(screen.getByText("Development API Key")).toBeInTheDocument();
@@ -113,17 +109,21 @@ describe("ApiKeyTable", () => {
       renderTable();
 
       expect(screen.getByText("Production API Key")).toBeInTheDocument();
-      expect(screen.getByText("abc...456")).toBeInTheDocument();
+      expect(screen.getByText("January 1, 2023")).toBeInTheDocument();
+      expect(screen.getByText("January 2, 2023")).toBeInTheDocument();
 
       expect(screen.getByText("Development API Key")).toBeInTheDocument();
-      expect(screen.getByText("xyz...012")).toBeInTheDocument();
+      expect(screen.getByText("January 3, 2023")).toBeInTheDocument();
       expect(screen.getByText("never")).toBeInTheDocument();
     });
 
     it("renders empty state when no API keys", () => {
       renderTable([]);
 
-      expect(screen.getByText("emptyState")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 2, name: "emptyStateHeading" }),
+      ).toBeInTheDocument();
+      expect(screen.getByText("emptyStateDescription")).toBeInTheDocument();
       expect(screen.queryByRole("table")).not.toBeInTheDocument();
     });
   });
@@ -351,13 +351,11 @@ describe("ApiKeyTable", () => {
       renderTable();
 
       const headers = screen.getAllByRole("columnheader");
-      expect(headers).toHaveLength(6);
-      expect(headers[0]).toHaveTextContent("headers.apiKey");
-      expect(headers[1]).toHaveTextContent("headers.status");
-      expect(headers[2]).toHaveTextContent("headers.secret");
-      expect(headers[3]).toHaveTextContent("headers.created");
-      expect(headers[4]).toHaveTextContent("headers.lastUsed");
-      expect(headers[5]).toHaveTextContent("headers.modify");
+      expect(headers).toHaveLength(4);
+      expect(headers[0]).toHaveTextContent("headers.keyName");
+      expect(headers[1]).toHaveTextContent("headers.created");
+      expect(headers[2]).toHaveTextContent("headers.lastUsed");
+      expect(headers[3]).toHaveTextContent("headers.actions");
     });
 
     it("displays API key data in correct order", () => {
@@ -375,13 +373,14 @@ describe("ApiKeyTable", () => {
     it("passes accessibility scan", async () => {
       const { container } = renderTable();
 
-      const results = await axe(container, {
-        rules: {
-          // CopyIcon and edit icon buttons are icon-only; a11y labels are a
-          // pre-existing concern tracked separately from this test file.
-          "button-name": { enabled: false },
-        },
-      });
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
+    });
+
+    it("passes accessibility scan in the empty state", async () => {
+      const { container } = renderTable([]);
+
+      const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
 
