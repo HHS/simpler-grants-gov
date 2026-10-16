@@ -83,12 +83,12 @@ data "external" "account_ids_by_name" {
 }
 
 terraform {
-  required_version = "1.14.3"
+  required_version = "1.16.6"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.13.0"
+      version = "~> 6.69.0"
     }
   }
 
