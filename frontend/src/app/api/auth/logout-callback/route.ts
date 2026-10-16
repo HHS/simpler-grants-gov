@@ -1,5 +1,6 @@
 import { deleteSession } from "src/services/auth/sessionUtils";
 import { clearCorrelationId } from "src/services/correlationId/correlationId";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { redirect } from "next/navigation";
 
@@ -12,8 +13,8 @@ export async function GET() {
     // token expiration.
     await clearCorrelationId("Clearing correlation_id on logout");
   } catch (_e) {
-    console.error("Error deleting session");
-    console.error(_e);
+    logger.error("Error deleting session");
+    logger.error(_e);
     return redirect("/error");
   }
   return redirect("/logout");
