@@ -28,12 +28,13 @@ export const dynamic = "force-dynamic";
 // If any other forms need to be blocked, add them to this array
 const blockedForms = ["cf355a4d-d840-43fd-a78f-729edf41ab4c"];
 
-const ButtonSaveAndExit = () => {
+const ButtonSaveAndExit = ({ disabled = false }: { disabled?: boolean }) => {
   const t = useTranslations("OpportunityCompetition");
   return (
     <>
       <Button
         type="submit"
+        disabled={disabled}
         form="opportunity-competition-form"
         className="margin-left-1"
       >
@@ -120,7 +121,7 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
         locale={locale}
         hasBackToOverview={true}
       >
-        <ButtonSaveAndExit />
+        <ButtonSaveAndExit disabled={!opportunityData.is_draft} />
       </OpportunityDetailsHeader>
 
       <div className="grid-container padding-bottom-4">
@@ -130,6 +131,7 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <CompetitionForm
               opportunityId={id}
+              readOnly={!opportunityData.is_draft}
               competition={competition}
               forms={forms.data}
             />

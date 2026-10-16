@@ -47,6 +47,17 @@ describe("SubmissionWindow", () => {
       expect(requiredIndicator).toHaveClass("usa-hint--required");
     });
 
+    it("disables all form fields when readOnly is true", () => {
+      render(<SubmissionWindow readOnly />);
+
+      const dateInputs = screen.getAllByTestId("date-picker-external-input");
+      expect(dateInputs[0]).toBeDisabled();
+      expect(dateInputs[1]).toBeDisabled();
+      expect(
+        screen.getByRole("spinbutton", { name: /graceperiod/i }),
+      ).toBeDisabled();
+    });
+
     it("does not render expected number of applicants field", () => {
       render(<SubmissionWindow />);
 
