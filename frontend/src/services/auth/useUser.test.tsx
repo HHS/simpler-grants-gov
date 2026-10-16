@@ -30,7 +30,7 @@ const UseUserConsumer = () => {
     <>
       <div data-testid="error">{error?.toString() || ""}</div>
       <div data-testid="isLoading">{isLoading.toString()}</div>
-      <div data-testid="user">{user?.email?.toString() || ""}</div>
+      <div data-testid="user">{user?.isLoggedIn?.toString() || ""}</div>
     </>
   );
 };
@@ -56,9 +56,7 @@ const wrapper = ({ children }: PropsWithChildren) => (
 describe("useUser", () => {
   afterEach(() => jest.clearAllMocks());
   it("renders with the expected state on successful fetch", async () => {
-    debouncedUserFetcherMock.mockResolvedValue({
-      email: "this is where a user email would be",
-    });
+    debouncedUserFetcherMock.mockResolvedValue({ isLoggedIn: true });
 
     renderWrappedConsumer();
 
@@ -66,9 +64,7 @@ describe("useUser", () => {
     const userDisplay = await screen.findByTestId("user");
 
     await waitFor(() => {
-      expect(userDisplay).toHaveTextContent(
-        "this is where a user email would be",
-      );
+      expect(userDisplay).toHaveTextContent("true");
     });
 
     expect(errorDisplay).toBeEmptyDOMElement();
@@ -89,42 +85,42 @@ describe("useUser", () => {
     expect(userDisplay).toBeEmptyDOMElement();
     expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
   });
-  it("sets user as logged out if second fetch for user comes back without a token", async () => {
-    debouncedUserFetcherMock.mockReturnValue({ token: "a token" });
+  it("sets user as logged out if second fetch for user comes back logged out", async () => {
+    debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true });
     const wrapper = ({ children }: PropsWithChildren) => (
       <UserProvider featureFlagDefaults={{}}>{children}</UserProvider>
     );
     const { result } = renderHook(() => useUser(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.user?.token).toEqual("a token");
+      expect(result.current.user?.isLoggedIn).toEqual(true);
     });
 
     expect(result.current.hasBeenLoggedOut).toEqual(false);
 
-    debouncedUserFetcherMock.mockReturnValue({ token: "" });
+    debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
 
     await result.current.refreshUser();
 
     await waitFor(() => {
-      expect(result.current.user?.token).toEqual("");
+      expect(result.current.user?.isLoggedIn).toEqual(false);
     });
     expect(result.current.hasBeenLoggedOut).toEqual(true);
     // clears the correlation id cookie server-side, mirroring explicit logout
     expect(redirectMock).toHaveBeenCalledWith("fake-logout-url");
   });
   it("does not clear the correlation id when an anonymous user remains logged out", async () => {
-    debouncedUserFetcherMock.mockReturnValue({ token: "" });
+    debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
     const { result } = renderHook(() => useUser(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.user?.token).toEqual("");
+      expect(result.current.user?.isLoggedIn).toEqual(false);
     });
 
     await result.current.refreshUser();
 
     await waitFor(() => {
-      expect(result.current.user?.token).toEqual("");
+      expect(result.current.user?.isLoggedIn).toEqual(false);
     });
     expect(result.current.hasBeenLoggedOut).toEqual(false);
     expect(fetchMock).not.toHaveBeenCalledWith("/api/auth/logout", {
@@ -132,29 +128,31 @@ describe("useUser", () => {
     });
   });
   describe("logoutLocalUser", () => {
-    it("removes user token", async () => {
-      debouncedUserFetcherMock.mockReturnValue({ token: "a token" });
+    it("marks the user as logged out", async () => {
+      debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true });
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.user?.token).toEqual("a token");
+        expect(result.current.user?.isLoggedIn).toEqual(true);
       });
 
       result.current.logoutLocalUser();
 
-      await waitFor(() => expect(result.current.user?.token).toEqual(""));
+      await waitFor(() =>
+        expect(result.current.user?.isLoggedIn).toEqual(false),
+      );
     });
   });
   describe("refreshIfExpired", () => {
     it("makes fetch call if token is expired", async () => {
       debouncedUserFetcherMock.mockReturnValue({
-        token: "a token",
+        isLoggedIn: true,
         expiresAt: Date.now() - 10000,
       });
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.user?.token).toEqual("a token");
+        expect(result.current.user?.isLoggedIn).toEqual(true);
       });
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
@@ -165,13 +163,13 @@ describe("useUser", () => {
     });
     it("does not make fetch call if token is not expired", async () => {
       debouncedUserFetcherMock.mockReturnValue({
-        token: "a token",
+        isLoggedIn: true,
         expiresAt: Date.now() + 10000,
       });
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.user?.token).toEqual("a token");
+        expect(result.current.user?.isLoggedIn).toEqual(true);
       });
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
@@ -180,15 +178,15 @@ describe("useUser", () => {
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
     });
-    it("does not make a fetch call if there is no token (user is not logged in)", async () => {
+    it("does not make a fetch call if the user is not logged in", async () => {
       debouncedUserFetcherMock.mockReturnValue({
-        token: "",
+        isLoggedIn: false,
         expiresAt: Date.parse("1-1-2099"),
       });
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.user?.token).toEqual("");
+        expect(result.current.user?.isLoggedIn).toEqual(false);
       });
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
@@ -202,13 +200,13 @@ describe("useUser", () => {
   describe("refreshIfExpiring", () => {
     it("makes fetch call if token is expiring", async () => {
       debouncedUserFetcherMock.mockReturnValue({
-        token: "a token",
+        isLoggedIn: true,
         expiresAt: Date.now() + 100000,
       });
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.user?.token).toEqual("a token");
+        expect(result.current.user?.isLoggedIn).toEqual(true);
       });
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
@@ -219,13 +217,13 @@ describe("useUser", () => {
     });
     it("does not make fetch call if token is not expiring", async () => {
       debouncedUserFetcherMock.mockReturnValue({
-        token: "a token",
+        isLoggedIn: true,
         expiresAt: Date.now() + 10000000,
       });
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.user?.token).toEqual("a token");
+        expect(result.current.user?.isLoggedIn).toEqual(true);
       });
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
@@ -234,14 +232,14 @@ describe("useUser", () => {
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
     });
-    it("does not make a fetch call if there is no token (user is not logged in)", async () => {
+    it("does not make a fetch call if the user is not logged in", async () => {
       debouncedUserFetcherMock.mockReturnValue({
-        token: "",
+        isLoggedIn: false,
       });
       const { result } = renderHook(() => useUser(), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.user?.token).toEqual("");
+        expect(result.current.user?.isLoggedIn).toEqual(false);
       });
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);

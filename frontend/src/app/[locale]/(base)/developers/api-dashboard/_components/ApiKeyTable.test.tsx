@@ -36,8 +36,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 const mockUser = {
-  user_id: "test-user-id",
-  token: "test-token",
+  isLoggedIn: true,
 };
 
 const mockApiKeys: ApiKey[] = [

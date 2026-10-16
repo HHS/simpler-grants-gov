@@ -37,7 +37,7 @@ describe("SaveSearchPanel", () => {
   it("renders a copy button when not authenticated", () => {
     mockUseUser.mockImplementation(() => ({
       user: {
-        token: undefined,
+        isLoggedIn: false,
       },
     }));
     render(<SaveSearchPanel />);
@@ -47,7 +47,7 @@ describe("SaveSearchPanel", () => {
   it("renders a copy button when authenticated", () => {
     mockUseUser.mockImplementation(() => ({
       user: {
-        token: "a token",
+        isLoggedIn: true,
       },
     }));
     render(<SaveSearchPanel />);
@@ -57,7 +57,7 @@ describe("SaveSearchPanel", () => {
   it("renders a save button when authenticated", () => {
     mockUseUser.mockImplementation(() => ({
       user: {
-        token: "a token",
+        isLoggedIn: true,
       },
     }));
     render(<SaveSearchPanel />);
@@ -67,7 +67,7 @@ describe("SaveSearchPanel", () => {
   it("renders a select for saved searches when authenticated and saved searches exist", async () => {
     mockUseUser.mockImplementation(() => ({
       user: {
-        token: "a token",
+        isLoggedIn: true,
       },
     }));
     render(<SaveSearchPanel />);
@@ -83,7 +83,7 @@ describe("SaveSearchPanel", () => {
   it.skip("displays a tooltip next to copy button when not authenticated", async () => {
     mockUseUser.mockImplementation(() => ({
       user: {
-        token: undefined,
+        isLoggedIn: false,
       },
     }));
     render(<SaveSearchPanel />);
@@ -98,7 +98,7 @@ describe("SaveSearchPanel", () => {
   it.skip("displays a tooltip next to description text when authenticated", () => {
     mockUseUser.mockImplementation(() => ({
       user: {
-        token: "a token",
+        isLoggedIn: true,
       },
     }));
     render(<SaveSearchPanel />);

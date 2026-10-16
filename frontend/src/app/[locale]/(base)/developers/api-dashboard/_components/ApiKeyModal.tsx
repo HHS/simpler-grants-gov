@@ -434,7 +434,7 @@ export default function ApiKeyModal({
       }
     }
 
-    if (!user?.user_id) {
+    if (!user?.isLoggedIn) {
       setApiError(true);
       return;
     }
@@ -507,7 +507,7 @@ export default function ApiKeyModal({
     apiKeyName,
     deleteConfirmation,
     apiKey,
-    user?.user_id,
+    user?.isLoggedIn,
     clientFetch,
     onApiKeyUpdated,
     onClose,

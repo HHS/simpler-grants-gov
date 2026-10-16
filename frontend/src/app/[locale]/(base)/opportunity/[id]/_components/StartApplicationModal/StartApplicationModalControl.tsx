@@ -51,10 +51,10 @@ export const StartApplicationModalControl = ({
     UserOrganization[]
   >([]);
 
-  const token = user?.token || null;
+  const isLoggedIn = Boolean(user?.isLoggedIn);
 
   // TODO: these fetches should likely only happen if the user opens the modal, or if user is logged in so as not to overfetch
-  // We could either move them around or just gate off of the presence of the token
+  // We could either move them around or just gate off of whether the user is logged in
 
   // see what the accepted applicant types are for this particular competition
   useEffect(() => {
@@ -81,7 +81,7 @@ export const StartApplicationModalControl = ({
   // see what organizations the user belongs to, in order to handle organzation or
   // organization / individual competition types
   useEffect(() => {
-    if (!token) {
+    if (!isLoggedIn) {
       return;
     }
     // TODO #9633
@@ -103,7 +103,7 @@ export const StartApplicationModalControl = ({
       .finally(() => {
         setOrganizationsLoading(false);
       });
-  }, [fetchUserOrganizations, token]);
+  }, [fetchUserOrganizations, isLoggedIn]);
 
   return (
     <div className="display-flex flex-align-start">
@@ -131,9 +131,9 @@ export const StartApplicationModalControl = ({
           </>
         )}
       </ModalToggleButton>
-      {token ? (
+      {isLoggedIn ? (
         <StartApplicationModal
-          token={token}
+          isLoggedIn={isLoggedIn}
           opportunityId={opportunityId}
           opportunityTitle={opportunityTitle}
           modalRef={modalRef}

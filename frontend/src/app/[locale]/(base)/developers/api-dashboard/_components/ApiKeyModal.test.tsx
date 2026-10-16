@@ -26,8 +26,7 @@ jest.mock("src/services/auth/useUser", () => ({
 }));
 
 const mockUser = {
-  user_id: "test-user-id",
-  token: "test-token",
+  isLoggedIn: true,
 };
 
 const mockApiKey: ApiKey = {
