@@ -348,13 +348,10 @@ class TestOpportunityNotification:
         recipients = {email.destinations["ToAddresses"][0] for email in get_sent_emails()}
         assert {user.email, user_2.email} <= recipients
         assert {
-            sent.to_address: sent.email_tags
+            sent.to_address
             for sent in sent_email_tags
-            if sent.to_address in {user.email, user_2.email}
-        } == {
-            user.email: {"email_type": EmailType.OPPORTUNITY_UPDATES},
-            user_2.email: {"email_type": EmailType.OPPORTUNITY_UPDATES},
-        }
+            if sent.email_tags == {"email_type": EmailType.OPPORTUNITY_UPDATES}
+        } == {user.email, user_2.email}
 
         # Verify the log contains the correct metrics
         log_records = [
