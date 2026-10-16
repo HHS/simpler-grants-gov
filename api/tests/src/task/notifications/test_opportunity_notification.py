@@ -17,6 +17,7 @@ from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedOpportunity
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
+    EmailType,
     Metrics,
     NotificationReason,
     OpportunityVersionChange,
@@ -246,6 +247,7 @@ class TestOpportunityNotification:
         notification_task,
         ses_client,
         get_sent_emails,
+        sent_email_tags,
     ):
         caplog.set_level(logging.INFO)
 
@@ -345,6 +347,14 @@ class TestOpportunityNotification:
         # recipients rather than the total number of messages SES received.
         recipients = {email.destinations["ToAddresses"][0] for email in get_sent_emails()}
         assert {user.email, user_2.email} <= recipients
+        assert {
+            sent.to_address: sent.email_tags
+            for sent in sent_email_tags
+            if sent.to_address in {user.email, user_2.email}
+        } == {
+            user.email: {"email_type": EmailType.OPPORTUNITY_UPDATES},
+            user_2.email: {"email_type": EmailType.OPPORTUNITY_UPDATES},
+        }
 
         # Verify the log contains the correct metrics
         log_records = [

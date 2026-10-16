@@ -13,7 +13,7 @@ from src.db.models.user_models import (
 )
 from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
-from src.task.notifications.constants import NotificationReason
+from src.task.notifications.constants import EmailType, NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -50,6 +50,7 @@ class TestClosingDateNotification:
         configuration,
         ses_client,
         get_sent_emails,
+        sent_email_tags,
     ):
         """Test that notifications are sent for opportunities closing in two weeks"""
         two_weeks_from_now = datetime_util.get_now_us_eastern_date() + timedelta(days=14)
@@ -145,6 +146,7 @@ class TestClosingDateNotification:
         emails = get_sent_emails()
         assert len(emails) == 1
         assert emails[0].destinations["ToAddresses"] == ["test@example.com"]
+        assert sent_email_tags[0].email_tags == {"email_type": EmailType.CLOSING_DATE_REMINDER}
 
     def test_closing_date_notification_not_sent_twice(
         self,
