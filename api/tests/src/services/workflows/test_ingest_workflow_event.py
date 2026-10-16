@@ -1,4 +1,6 @@
 import uuid
+import boto3
+from moto import mock_aws
 
 import apiflask.exceptions
 import pytest

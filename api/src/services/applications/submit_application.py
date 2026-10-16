@@ -16,6 +16,7 @@ from src.services.applications.application_validation import (
 )
 from src.services.applications.get_application import get_application
 from src.util.datetime_util import utcnow
+from src.services.applications.submission_queue import send_application_submission_message
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,8 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     application.application_status = ApplicationStatus.SUBMITTED
     application.submitted_at = utcnow()
     logger.info("Application successfully submitted")
+
+    send_application_submission_message(application.application_id, user.user_id if user else None)
 
     # Add application metadata to logs
     add_application_metadata_to_logs(application)
