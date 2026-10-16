@@ -5,9 +5,20 @@ import { useUser } from "src/services/auth/useUser";
 import { PropsWithChildren } from "react";
 
 const debouncedUserFetcherMock = jest.fn();
+const redirectMock = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
   debouncedUserFetcher: () => debouncedUserFetcherMock() as unknown,
+}));
+
+jest.mock("next/navigation", () => ({
+  redirect: (location: string) => redirectMock(location) as unknown,
+}));
+
+jest.mock("src/constants/auth", () => ({
+  LOGOUT_URL: "fake-logout-url",
+  clientTokenRefreshInterval: 10 * 60 * 1000,
+  clientTokenExpirationInterval: 15 * 60 * 1000,
 }));
 
 const fetchMock = jest.fn(() => Promise.resolve({ ok: true } as Response));
@@ -100,9 +111,7 @@ describe("useUser", () => {
     });
     expect(result.current.hasBeenLoggedOut).toEqual(true);
     // clears the correlation id cookie server-side, mirroring explicit logout
-    expect(fetchMock).toHaveBeenCalledWith("/api/auth/logout", {
-      method: "POST",
-    });
+    expect(redirectMock).toHaveBeenCalledWith("fake-logout-url");
   });
   it("does not clear the correlation id when an anonymous user remains logged out", async () => {
     debouncedUserFetcherMock.mockReturnValue({ token: "" });
