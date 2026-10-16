@@ -94,11 +94,6 @@ locals {
       secret_store_name = "/api/${var.environment}/frontend-logout-redirect-url"
     }
 
-    AUTH_LOGOUT_URL = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/auth-logout-url"
-    },
-
     FRONTEND_BASE_URL = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/frontend-base-url"
