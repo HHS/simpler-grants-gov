@@ -11,6 +11,7 @@
 ## Technical Design
 
 * [Module architecture](./module-architecture.md)
+* [NOFO PDF pilot monitoring and alert routing](./nofo-pdf-readability-monitoring.md)
 
 ## Testing
 
