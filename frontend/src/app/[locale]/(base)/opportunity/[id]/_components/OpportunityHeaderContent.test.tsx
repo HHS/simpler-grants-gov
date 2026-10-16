@@ -9,7 +9,7 @@ import { OpportunityHeaderContent } from "./OpportunityHeaderContent";
 
 // note that next-intl is mocked globally, translations render as their keys
 
-let mockUser: { token?: string } = {};
+let mockUser: { isLoggedIn?: boolean } = {};
 const clientFetchMock = jest.fn();
 
 jest.mock("src/services/auth/useUser", () => ({
@@ -66,7 +66,7 @@ const deferredRequest = () => {
 
 describe("OpportunityHeaderContent", () => {
   beforeEach(() => {
-    mockUser = { token: "a token" };
+    mockUser = { isLoggedIn: true };
     jest.spyOn(console, "error").mockImplementation(noop);
   });
 

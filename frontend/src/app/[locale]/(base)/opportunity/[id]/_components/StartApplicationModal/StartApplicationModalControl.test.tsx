@@ -9,7 +9,7 @@ import { StartApplicationModalControl } from "./StartApplicationModalControl";
 
 const mockUseUser = jest.fn(() => ({
   user: {
-    token: "faketoken",
+    isLoggedIn: true,
   },
 }));
 
@@ -42,7 +42,7 @@ jest.mock("src/hooks/useClientFetch", () => ({
 describe("StartApplicationModalControl", () => {
   beforeEach(() => {
     mockRouterPush.mockResolvedValue(true);
-    mockUseUser.mockReturnValue({ user: { token: "a token" } });
+    mockUseUser.mockReturnValue({ user: { isLoggedIn: true } });
   });
   afterEach(() => {
     jest.resetAllMocks();
@@ -141,7 +141,7 @@ describe("StartApplicationModalControl", () => {
     });
   });
   it("displays login modal on click if user is not logged in", async () => {
-    mockUseUser.mockReturnValue({ user: { token: "" } });
+    mockUseUser.mockReturnValue({ user: { isLoggedIn: false } });
     const { rerender } = render(
       <StartApplicationModalControl
         competitionId="1"

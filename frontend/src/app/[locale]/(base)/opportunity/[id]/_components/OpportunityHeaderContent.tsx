@@ -79,7 +79,7 @@ export const OpportunityHeaderContent = ({
     document.getElementById(SAVE_BUTTON_ID)?.focus();
   };
 
-  const saveControl = user?.token ? (
+  const saveControl = user?.isLoggedIn ? (
     <SaveButton
       accessibleContext={accessibleContext}
       buttonClick={toggleSaved}

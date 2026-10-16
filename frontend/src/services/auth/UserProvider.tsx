@@ -3,13 +3,16 @@
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
 import { useGetCookie } from "cookies-next";
 import noop from "lodash/noop";
+import { LOGOUT_URL } from "src/constants/auth";
 import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 import { UserContext } from "src/services/auth/useUser";
 import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";
 import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
-import { UserProfile, UserSession } from "src/types/authTypes";
+import { UserProfile } from "src/types/authTypes";
 import { isExpired, isExpiring } from "src/utils/dateUtil";
+import { storeCurrentPage } from "src/utils/userUtils";
 
+import { redirect } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function UserProvider({
@@ -49,19 +52,20 @@ export default function UserProvider({
     try {
       // there was custom logic around 204 responses in the original function
       // TBD if removing that will cause any problems
-      const fetchedUser: UserSession = await debouncedUserFetcher();
+      const fetchedUser: UserProfile = await debouncedUserFetcher();
       if (fetchedUser) {
-        if (localUser?.token && !fetchedUser.token) {
+        setLocalUser(fetchedUser);
+        setUserFetchError(undefined);
+        setIsLoading(false);
+        if (localUser?.isLoggedIn && !fetchedUser.isLoggedIn) {
           setHasBeenLoggedOut(true);
 
           // Invoke the logout endpoint for explicit logout. This will ensure
           // the correlation_id cookie is properly removed since the correlation_id
           // cookie is httpOnly.
-          await fetch("/api/auth/logout", { method: "POST" }).catch(noop);
+          storeCurrentPage(location.pathname, location.search);
+          redirect(LOGOUT_URL);
         }
-        setLocalUser(fetchedUser);
-        setUserFetchError(undefined);
-        setIsLoading(false);
         return;
       }
       throw new Error("received empty user session");
@@ -71,9 +75,8 @@ export default function UserProvider({
     }
   }, [localUser]);
 
-  // just remove the token
   const logoutLocalUser = useCallback(() => {
-    setLocalUser({ ...(localUser as UserProfile), token: "" });
+    setLocalUser({ ...(localUser as UserProfile), isLoggedIn: false });
   }, [localUser]);
 
   // fetch user on hook startup
@@ -94,14 +97,14 @@ export default function UserProvider({
   const refreshIfExpired = useCallback(async (): Promise<
     boolean | undefined
   > => {
-    if (!localUser?.token) {
+    if (!localUser?.isLoggedIn) {
       return;
     }
     if (isExpired(localUser?.expiresAt)) {
       await getUserSession().then(noop).catch(noop);
       return true;
     }
-  }, [localUser?.expiresAt, localUser?.token, getUserSession]);
+  }, [localUser?.expiresAt, localUser?.isLoggedIn, getUserSession]);
 
   // if token is less than 10 mins from its expiration, refresh the user to get a token refresh
   const refreshIfExpiring = useCallback(async () => {

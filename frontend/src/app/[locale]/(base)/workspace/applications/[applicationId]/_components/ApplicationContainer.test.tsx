@@ -27,9 +27,7 @@ jest.mock("next/navigation", () => ({
 jest.mock("src/services/auth/useUser", () => ({
   useUser: () => ({
     user: {
-      token: "mock-token",
-      email: "test@example.com",
-      user_id: "test-user-id",
+      isLoggedIn: true,
     },
   }),
 }));

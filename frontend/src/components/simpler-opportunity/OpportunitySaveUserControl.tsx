@@ -105,7 +105,7 @@ export const OpportunitySaveUserControl = ({
   if (type === "icon") {
     return (
       <>
-        {user?.token ? (
+        {user?.isLoggedIn ? (
           <SaveIcon
             onClick={toggleSaved}
             loading={loading}
@@ -143,7 +143,7 @@ export const OpportunitySaveUserControl = ({
 
   return (
     <>
-      {user?.token ? (
+      {user?.isLoggedIn ? (
         <SaveButton
           buttonClick={toggleSaved}
           messageClick={closeMessage}
