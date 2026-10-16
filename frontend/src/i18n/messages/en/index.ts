@@ -819,6 +819,7 @@ export const messages = {
     heading: "API dashboard",
     errorLoadingKeys: "Failed to load API keys",
     deleteSuccessMessage: 'API key "{keyName}" has been deleted successfully.',
+    renameSuccessMessage: 'API key "{originalName}" renamed to "{keyName}".',
     table: {
       headers: {
         apiKey: "Name",
@@ -843,14 +844,12 @@ export const messages = {
         "You don't have any API keys yet. Create your first API key to get started.",
     },
     modal: {
-      apiKeyNameLabel: "Name <required>(required)</required>",
-      createApiKeyNameLabel: "API key name <required>(required)</required>",
-      createNameHint: "e.g. Staging, iOS App, Production",
-      createTitle: "Create a new API key",
-      createDescription:
+      apiKeyNameLabel: "API key name <required>(required)</required>",
+      apiKeyNameHint: "e.g. Staging, iOS App, Production",
+      apiKeyNameDescription:
         "Enter a descriptive name to identify how this key will be used. Your key name must be unique.",
+      createTitle: "Create a new API key",
       createSubmitButtonText: "Create key",
-      editDescription: "Change the name of your Simpler.Grants.gov API key",
       createSuccessHeading: "API key created",
       createSuccessAlertHeading: "Copy and save this key now",
       createSuccessAlertMessage:
@@ -860,25 +859,21 @@ export const messages = {
       copyKey: "Copy key",
       copied: "Copied",
       done: "Done",
-      editSuccessHeading: "API Key Renamed Successfully",
-      editSuccessMessage:
-        'Your API key has been renamed from "{originalName}" to "{keyName}".',
-      close: "Close",
       createErrorHeading: "Unable to create API key",
       createErrorMessage:
         "Something went wrong on our end. Please try again in a few minutes.",
+      editErrorHeading: "Unable to rename API key",
       editErrorMessage:
-        "There was an error renaming your API key. Please try again.",
+        "Something went wrong on our end. Please try again in a few minutes.",
       nameRequiredError: "Enter a name for your API key.",
       duplicateNameError:
         "A key with this name already exists. Enter a different name.",
-      nameChangedError: "Please enter a different name",
-      editTitle: "Rename API Key",
+      editTitle: 'Edit "{keyName}" API key name',
+      editTriggerTitle: 'Edit "{keyName}" API key name',
       createButtonText: "Create API Key",
-      editNameButtonText: "Edit Name",
       creating: "Creating...",
       saving: "Saving...",
-      saveChanges: "Save Changes",
+      saveChanges: "Save changes",
       cancel: "Cancel",
       deleteTitle: 'Delete "{keyName}" API key?',
       deleteTriggerTitle: 'Delete "{keyName}" API key',
