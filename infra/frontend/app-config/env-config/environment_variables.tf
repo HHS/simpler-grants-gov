@@ -23,6 +23,8 @@ locals {
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#application-logging-enabled
     # Turned off to avoid duplicate logging, logs are forwarded from CloudWatch to New Relic instead
     NEW_RELIC_APPLICATION_LOGGING_ENABLED = "false"
+    # Node keep-alive (ms) must exceed the ALB idle_timeout (120s) or the ALB reuses closed sockets → 502
+    KEEP_ALIVE_TIMEOUT = "125000"
   }
 
   # Configuration for secrets
