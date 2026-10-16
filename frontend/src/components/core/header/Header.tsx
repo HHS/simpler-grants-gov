@@ -318,7 +318,10 @@ const NavLinks = ({
               text={t("notifications")}
             />,
             isApplicationTestUser && <TestApplicationLink />,
-            <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
+            <SignOutNavLink
+              key="logout"
+              closeDropdownAndMobileNav={closeDropdownAndMobileNav}
+            />,
           ]}
           setActiveNavDropdownIndex={setActiveNavDropdownIndex}
         />,

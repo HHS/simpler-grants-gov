@@ -106,12 +106,14 @@ export const messages = {
       save: "Save",
       saved: "Saved",
       loading: "Updating",
+      accessibleContext: "opportunity: {title}",
     },
     saveMessage: {
-      save: "This opportunity was saved to <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
-      unsave: "This opportunity was unsaved.",
-      errorSave: "Error saving. Please try again.",
-      errorUnsave: "Error undoing save. Please try again.",
+      save: "<srOnly>This opportunity was saved. </srOnly>Manage notifications in <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
+      unsave: "This opportunity was removed.",
+      errorSave: "Opportunity could not be saved. Please try again.",
+      errorUnsave: "Opportunity could not be unsaved. Please try again.",
+      dismiss: "Dismiss message",
     },
     saveloginModal: {
       button: "Sign in with Login.gov",
@@ -183,10 +185,27 @@ export const messages = {
           "You can apply as an individual or organization. To apply as part of an organization you must:",
       },
     },
+    header: {
+      agency: "Agency:",
+      assistanceListings: "Assistance Listings",
+      assistanceListingsUnavailable:
+        "Assistance listing number is not available.",
+      lastUpdated: "Last Updated:",
+      applyOnGrantsGov: "Apply on Grants.gov",
+      status: {
+        posted: "Open",
+        forecasted: "Forecasted",
+        closed: "Closed",
+        archived: "Archived",
+      },
+      statusAccessible: {
+        posted: "Open opportunity",
+        forecasted: "Forecasted opportunity",
+        closed: "Closed opportunity",
+        archived: "Archived opportunity",
+      },
+    },
     intro: {
-      agency: "Agency: ",
-      assistanceListings: "Assistance Listings:",
-      lastUpdated: "Last Updated: ",
       versionHistory: "View version history on Grants.gov",
     },
     description: {
@@ -799,6 +818,7 @@ export const messages = {
     metaDescription: "Manage your API keys for Simpler.Grants.gov",
     heading: "API dashboard",
     errorLoadingKeys: "Failed to load API keys",
+    deleteSuccessMessage: 'API key "{keyName}" has been deleted successfully.',
     table: {
       headers: {
         apiKey: "Name",
@@ -860,19 +880,17 @@ export const messages = {
       saving: "Saving...",
       saveChanges: "Save Changes",
       cancel: "Cancel",
-      deleteTitle: "Delete API Key",
+      deleteTitle: 'Delete "{keyName}" API key?',
+      deleteTriggerTitle: 'Delete "{keyName}" API key',
       deleteDescription:
-        'To confirm deletion, type "delete" in the field below:',
+        "Any application or service using this key will immediately lose access to the API. This action cannot be undone.",
       deleteConfirmationLabel:
         'Type "delete" to confirm <required>(required)</required>',
-      deleteConfirmationPlaceholder: "delete",
-      deleteConfirmationError: 'Please type "delete" to confirm deletion',
-      deleteSuccessHeading: "API Key Deleted Successfully",
-      deleteSuccessMessage:
-        'Your API key "{keyName}" has been deleted successfully.',
+      deleteConfirmationError: "Text does not match.",
+      deleteErrorHeading: "Unable to delete API key",
       deleteErrorMessage:
-        "There was an error deleting your API key. Please try again.",
-      deleteButtonText: "Delete Key",
+        "Something went wrong on our end. Please try again in a few minutes.",
+      deleteButtonText: "Delete key",
       deleting: "Deleting...",
       copyApiKey: "Copy API key",
     },

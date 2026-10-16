@@ -1,20 +1,56 @@
 "use client";
 
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { useIsSSR } from "src/hooks/useIsSSR";
+import { useOpportunitySave } from "src/hooks/useOpportunitySave";
 import { useLoginModal } from "src/services/auth/LoginModalProvider";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { ReactNode } from "react";
 import { ModalToggleButton } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 import SaveButton from "src/components/saved-opportunities/SaveButton";
 import SaveIcon from "src/components/saved-opportunities/SaveIcon";
 
-const SAVED_OPPS_PAGE_LINK = "/workspace/saved-opportunities";
+export const SAVED_OPPS_PAGE_LINK = "/workspace/saved-opportunities";
+
+// Opens the login modal for signed out users who try to save an opportunity
+export const OpportunitySaveLoginButton = ({
+  children,
+}: {
+  children?: ReactNode;
+}) => {
+  const t = useTranslations("OpportunityListing");
+  const {
+    loginModalRef,
+    setButtonText,
+    setCloseText,
+    setDescriptionText,
+    setHelpText,
+    setTitleText,
+  } = useLoginModal();
+
+  return (
+    <ModalToggleButton
+      modalRef={loginModalRef}
+      opener
+      className="usa-button usa-button--outline"
+      onClick={() => {
+        setHelpText(t("saveloginModal.help"));
+        setButtonText(t("saveloginModal.button"));
+        setCloseText(t("saveloginModal.close"));
+        setDescriptionText(t("saveloginModal.description"));
+        setTitleText(t("saveloginModal.title"));
+      }}
+    >
+      <USWDSIcon name="star_outline" className="button-icon-large" />
+      {t("saveButton.save")}
+      {children}
+    </ModalToggleButton>
+  );
+};
 
 export const OpportunitySaveUserControl = ({
   opportunityId,
@@ -41,44 +77,15 @@ export const OpportunitySaveUserControl = ({
   // instead
   const isSSR = useIsSSR();
 
-  const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
-    "Error updating saved opportunity",
-  );
-
   const { user } = useUser();
-  const [locallySaved, setLocallySaved] = useState<boolean | null>(null);
-  const [showMessage, setshowMessage] = useState(false);
-  const [savedError, setSavedError] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const displayAsSaved = useMemo(() => {
-    return locallySaved === null ? opportunitySaved : locallySaved;
-  }, [locallySaved, opportunitySaved]);
-
-  const closeMessage = () => {
-    setshowMessage(false);
-  };
-
-  const userSavedOppCallback = () => {
-    setLoading(true);
-
-    const method = displayAsSaved ? "DELETE" : "POST";
-    updateSaved("/api/user/saved-opportunities", {
-      method,
-      body: JSON.stringify({ opportunityId }),
-    })
-      .then((data) => {
-        setLocallySaved(data.type === "save");
-      })
-      .catch((e) => {
-        setSavedError(true);
-        console.error(e);
-      })
-      .finally(() => {
-        setshowMessage(true);
-        setLoading(false);
-      });
-  };
+  const {
+    closeMessage,
+    displayAsSaved,
+    loading,
+    savedError,
+    showMessage,
+    toggleSaved,
+  } = useOpportunitySave({ opportunityId, opportunitySaved });
 
   const messageText = displayAsSaved
     ? savedError
@@ -89,6 +96,7 @@ export const OpportunitySaveUserControl = ({
               {chunks}
             </Link>
           ),
+          srOnly: (chunks) => <span className="usa-sr-only">{chunks}</span>,
         })
     : savedError
       ? t("saveMessage.errorSave")
@@ -99,7 +107,7 @@ export const OpportunitySaveUserControl = ({
       <>
         {user?.token ? (
           <SaveIcon
-            onClick={userSavedOppCallback}
+            onClick={toggleSaved}
             loading={loading}
             saved={displayAsSaved}
           />
@@ -137,7 +145,7 @@ export const OpportunitySaveUserControl = ({
     <>
       {user?.token ? (
         <SaveButton
-          buttonClick={userSavedOppCallback}
+          buttonClick={toggleSaved}
           messageClick={closeMessage}
           buttonId="opp-save-button"
           defaultText={t("saveButton.save")}
@@ -152,21 +160,7 @@ export const OpportunitySaveUserControl = ({
       ) : isSSR ? (
         <SaveIcon saved={false} />
       ) : (
-        <ModalToggleButton
-          modalRef={loginModalRef}
-          opener
-          className="usa-button usa-button--outline"
-          onClick={() => {
-            setHelpText(t("saveloginModal.help"));
-            setButtonText(t("saveloginModal.button"));
-            setCloseText(t("saveloginModal.close"));
-            setDescriptionText(t("saveloginModal.description"));
-            setTitleText(t("saveloginModal.title"));
-          }}
-        >
-          <USWDSIcon name="star_outline" className="button-icon-large" />
-          {t("saveButton.save")}
-        </ModalToggleButton>
+        <OpportunitySaveLoginButton />
       )}
     </>
   );

@@ -45,6 +45,8 @@ export type Competition = {
   contact_info: string | null;
   expected_application_count: number | null;
   grace_period: number | null;
+  has_open_date: boolean;
+  is_legacy_package: boolean;
   is_open: boolean;
   open_to_applicants: ApplicantTypes[];
   opening_date: string;
