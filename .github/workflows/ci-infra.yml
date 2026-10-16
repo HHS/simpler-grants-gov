@@ -36,6 +36,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Shellcheck
         run: make infra-lint-scripts
+  check-frontend-feature-flag-options:
+    name: Check frontend feature flag workflow options
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check options match frontend feature flag parameters
+        run: ./bin/check-frontend-feature-flag-options
   check-terraform-format:
     name: Check Terraform format
     runs-on: ubuntu-22.04
@@ -71,6 +78,10 @@ jobs:
           terraform_wrapper: false
       - name: Run module unit tests
         run: make infra-test-modules
+      - name: Test NOFO environment configuration
+        run: |
+          terraform -chdir=infra/nofos/app-config init -backend=false -lockfile=readonly
+          terraform -chdir=infra/nofos/app-config test
   check-compliance-with-checkov:
     name: Check compliance with checkov
     runs-on: ubuntu-22.04

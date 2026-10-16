@@ -1,6 +1,7 @@
 import { getSession } from "src/services/auth/session";
 import { getSavedOpportunityNotificationPreferences } from "src/services/fetch/fetchers/notificationsFetcher";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { Organization } from "src/types/applicationResponseTypes";
 import {
   NotificationOrganization,
@@ -23,7 +24,7 @@ async function Notifications(): Promise<ReactElement | undefined> {
 
   const session = await getSession();
   if (!session?.email) {
-    console.error("No user session, or user has no email address");
+    logger.warn("No user session, or user has no email address");
     return;
   }
 
@@ -44,8 +45,8 @@ async function Notifications(): Promise<ReactElement | undefined> {
         organizationName: organization.sam_gov_entity.legal_business_name,
       }),
     );
-  } catch (error: unknown) {
-    console.error("Unable to fetch user organizations", error);
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Unable to fetch user organizations");
     hasOrganizationsFetchError = true;
   }
 
@@ -61,8 +62,8 @@ async function Notifications(): Promise<ReactElement | undefined> {
         buildOrganizationPreferenceKey(organizationPreference.organization_id)
       ] = organizationPreference.email_enabled;
     });
-  } catch (error: unknown) {
-    console.error("Unable to fetch notification preferences", error);
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Unable to fetch notification preferences");
     hasOrganizationsFetchError = true;
   }
 

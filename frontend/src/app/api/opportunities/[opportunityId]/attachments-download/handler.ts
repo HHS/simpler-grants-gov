@@ -1,12 +1,13 @@
 import * as zip from "@zip.js/zip.js";
 import { ApiRequestError, readError } from "src/errors";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { attachmentsToZipEntries } from "src/utils/opportunity/zipUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 
 export async function getAttachmentsDownload(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ opportunityId: string }> },
 ): Promise<Response> {
   const { opportunityId } = await params;
@@ -50,7 +51,14 @@ export async function getAttachmentsDownload(
       }),
     });
   } catch (e) {
-    console.error(e);
+    logger.error(
+      {
+        err: e,
+        opportunityId,
+        awsTraceId: request.headers.get("X-Amz-Cf-Id"),
+      },
+      "Error zipping files for opportunity",
+    );
     const { status, message } = readError(e as Error, 500);
     return NextResponse.json(
       {

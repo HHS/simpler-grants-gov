@@ -9,6 +9,7 @@ import {
   createOpportunityAttachment,
   deleteOpportunityAttachment,
 } from "src/services/fetch/fetchers/opportunityAttachmentFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { OpportunitySummaryUpdateRawData } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
@@ -112,7 +113,10 @@ async function processAttachmentChanges(
       pendingFileId,
     );
     if (response.status_code === 422) {
-      console.error("API side validation errors:", response.errors);
+      logger.error(
+        { errors: response.errors, opportunityId, pendingFileId },
+        "API side validation errors creating opportunity attachment",
+      );
       const { errorMessage } = mapApiValidationErrors(response, genericMessage);
       return { errorMessage: errorMessage ?? genericMessage };
     }
@@ -123,7 +127,10 @@ async function processAttachmentChanges(
       attachmentId,
     );
     if (response.status_code === 422) {
-      console.error("API side validation errors:", response.errors);
+      logger.error(
+        { errors: response.errors, opportunityId, attachmentId },
+        "API side validation errors deleting opportunity attachment",
+      );
       const { errorMessage } = mapApiValidationErrors(response, genericMessage);
       return { errorMessage: errorMessage ?? genericMessage };
     }
@@ -438,7 +445,10 @@ export async function saveOpportunityEditAction(
       });
 
       if (createResponse.status_code === 422) {
-        console.error("API side validation errors:", createResponse.errors);
+        logger.error(
+          { errors: createResponse.errors, opportunityId },
+          "API side validation errors creating opportunity summary",
+        );
         return mapApiValidationErrors(createResponse, alerts("genericError"));
       }
 
@@ -494,7 +504,10 @@ export async function saveOpportunityEditAction(
       body,
     });
     if (response.status_code === 422) {
-      console.error("API side validation errors:", response.errors);
+      logger.error(
+        { errors: response.errors, opportunityId, opportunitySummaryId },
+        "API side validation errors updating opportunity summary",
+      );
       return mapApiValidationErrors(response, alerts("genericError"));
     }
 

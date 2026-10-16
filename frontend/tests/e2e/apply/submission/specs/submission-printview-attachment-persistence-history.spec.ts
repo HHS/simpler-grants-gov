@@ -39,8 +39,8 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
-const TAGS = [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION];
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
+const TAGS = [APPLY_FORMS, FULL_REGRESSION];
 
 const { testOrgLabel } = playwrightEnv;
 

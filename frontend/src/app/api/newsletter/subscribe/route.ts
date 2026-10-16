@@ -45,6 +45,7 @@ type MailchimpBatchResponse = {
 };
 
 export async function POST(request: NextRequest) {
+  const awsTraceId = request.headers.get("X-Amz-Cf-Id");
   const formData = await request.formData();
 
   const name = (formData.get("name") as string) ?? "";
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
     if (!mailchimpResponse.ok) {
       if (mailchimpResponse.status === RATE_LIMITED_STATUS) {
         logger.warn(
-          { mailchimpStatus: mailchimpResponse.status },
+          { mailchimpStatus: mailchimpResponse.status, awsTraceId },
           "Newsletter subscription rate-limited by Mailchimp (HTTP status)",
         );
         return NextResponse.json(
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
       }
 
       logger.error(
-        { mailchimpStatus: mailchimpResponse.status },
+        { mailchimpStatus: mailchimpResponse.status, awsTraceId },
         "Newsletter subscription failed: Mailchimp returned a non-ok status",
       );
       return NextResponse.json(
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
 
       if (memberErrorCode === ALREADY_SUBSCRIBED_CODE) {
         logger.info(
-          { mailchimpErrorCode: memberErrorCode },
+          { mailchimpErrorCode: memberErrorCode, awsTraceId },
           "Newsletter subscription skipped: contact already subscribed",
         );
         return NextResponse.json(
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
 
       if (memberErrorCode === TOO_MANY_SIGNUPS_CODE) {
         logger.warn(
-          { mailchimpErrorCode: memberErrorCode },
+          { mailchimpErrorCode: memberErrorCode, awsTraceId },
           "Newsletter subscription rate-limited by Mailchimp (member error)",
         );
         return NextResponse.json(
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
 
       if (memberError && INVALID_EMAIL_MESSAGE.test(memberError.error)) {
         logger.info(
-          { mailchimpErrorCode: memberErrorCode },
+          { mailchimpErrorCode: memberErrorCode, awsTraceId },
           "Newsletter subscription rejected: invalid email address",
         );
         return NextResponse.json(
@@ -164,7 +165,7 @@ export async function POST(request: NextRequest) {
       }
 
       logger.error(
-        { mailchimpErrorCode: memberErrorCode },
+        { mailchimpErrorCode: memberErrorCode, awsTraceId },
         "Newsletter subscription failed: unrecognized Mailchimp member error",
       );
       return NextResponse.json(
@@ -175,9 +176,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    const error = e as Error;
     logger.error(
-      { error: error.message, cause: error.cause?.toString() },
+      { err: e, awsTraceId },
       "Newsletter subscription failed: exception calling Mailchimp",
     );
     return NextResponse.json(

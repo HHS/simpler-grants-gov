@@ -183,7 +183,10 @@ def user_logout(db_session: db.Session) -> flask.Response:
     with db_session.begin():
         # This endpoint doesn't require any auth token, but
         # if it's provided, we'll handle logging the user out of our system.
-        logout_user(db_session, flask.request.headers.get("X-SGG-Token", None))
+        auth_token = flask.request.headers.get("X-SGG-Token", None)
+        if not auth_token:
+            auth_token = flask.request.cookies.get("sgg_token", None)
+        logout_user(db_session, auth_token)
 
     return response.redirect_response(get_login_gov_logout_redirect_uri())
 
