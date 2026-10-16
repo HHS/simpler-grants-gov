@@ -79,3 +79,10 @@ variable "node_ami_type" {
   description = "EKS AMI type. Must match the architecture of node_instance_types (ARM_64 for Graviton, x86_64 otherwise)."
   type        = string
 }
+
+variable "enable_karpenter" {
+  # Creates only the AWS-side prerequisites: IRSA role, SQS interruption queue,
+  # EventBridge rules. The Helm install needs a kubernetes-aware provider.
+  type    = bool
+  default = false
+}
