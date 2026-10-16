@@ -6,7 +6,13 @@ from datetime import datetime
 import marshmallow
 from flask.testing import FlaskClient
 
-from tests.src.db.models.factories import OpportunityFactory
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.constants.lookup_constants import OpportunityStatus
+from tests.src.db.models.factories import (
+    CurrentOpportunitySummaryFactory,
+    OpportunityFactory,
+    OpportunitySummaryFactory,
+)
 
 
 def validate_opportunity_structure(opportunity):
@@ -316,6 +322,42 @@ class TestSearchOpportunities:
         assert response.status_code in [400, 422, 500]
         data = response.get_json()
         assert "message" in data
+
+    def test_search_unsupported_status_reported_in_filter_info(
+        self,
+        client: FlaskClient,
+        user_api_key_id,
+        search_client,
+        opportunity_index,
+        opportunity_index_alias,
+    ):
+        """An unsupported status value returns 200 with the error in filterInfo.errors."""
+        # Index a record so the sort fields are mapped; an empty index fails the search
+        opportunity = OpportunityFactory.build(
+            current_opportunity_summary=None,
+            created_at=datetime(2024, 1, 1),
+            updated_at=datetime(2024, 1, 2),
+        )
+        opportunity.current_opportunity_summary = CurrentOpportunitySummaryFactory.build(
+            opportunity_status=OpportunityStatus.POSTED,
+            opportunity_summary=OpportunitySummaryFactory.build(opportunity=opportunity),
+            opportunity=opportunity,
+        )
+        search_client.bulk_upsert(
+            opportunity_index,
+            [OpportunityV1Schema().dump(opportunity)],
+            "opportunity_id",
+            refresh=True,
+        )
+        search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+        response = client.post(
+            "/common-grants/opportunities/search",
+            headers={"X-API-Key": user_api_key_id},
+            json={"filters": {"status": {"operator": "in", "value": ["posted"]}}},
+        )
+        assert response.status_code == 200
+        data = response.get_json()
+        assert 'status: unsupported value "posted"' in data["filterInfo"]["errors"]
 
 
 class TestResponseSchemaValidation:
