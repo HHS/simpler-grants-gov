@@ -282,9 +282,6 @@ class ApplicationSubmissionBuilder:
         self.db_session = db_session
         self.s3_config = s3_config or S3Config()
         self.pdf_generation_config = pdf_generation_config or PdfGenerationConfig()
-        self.internal_token = create_internal_token_for_pdf_generation(
-            self.db_session, self.pdf_generation_config
-        )
         self.increment = increment
         self.internal_token = internal_token
 
