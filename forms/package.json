@@ -1,0 +1,22 @@
+{
+  "name": "@sgg/form-specs",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "imports": {
+    "#catalogue/*": "./specs/catalogue/*",
+    "#forms/*": "./specs/forms/*",
+    "#questions/*": "./specs/questions/*",
+    "#ui/*": "./specs/ui/*"
+  },
+  "scripts": {
+    "compile": "tsp compile specs/main.tsp"
+  },
+  "devDependencies": {
+    "@typespec/compiler": "^1.16.0",
+    "@typespec/json-schema": "^1.16.0",
+    "simpler-forms": "^0.1.0"
+  }
+}
