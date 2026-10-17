@@ -1,3 +1,4 @@
+import "form-library-xml";
 import "simpler-forms";
 
 import "#forms/index.tsp";
@@ -11,6 +12,13 @@ namespace Forms.KeyContacts;
 
 /** KEY CONTACTS (Grants.gov FID 683, v2.0) */
 @Meta.form(#{ id: "key-contacts", formName: "KEY CONTACTS" })
+@GrantsGov.form(#{
+  legacyFormId: 683,
+  shortFormName: "Key_Contacts",
+  formVersion: "2.0",
+  agencyCode: "SGG",
+  ombNumber: "4040-0010",
+})
 @example(#{
   applicantOrganizationName: "Acme Corporation",
   keyContacts: #[
