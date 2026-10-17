@@ -160,6 +160,18 @@ class federalFundingSource(CustomField):
     )
 
 
+class federalFundingInstruments(CustomField):
+    """The federal funding instruments available for this opportunity."""
+
+    name = fields.String(required=True, metadata={"example": "federalFundingInstruments"})
+    fieldType = fields.String(required=True, metadata={"example": "array"})
+    value = fields.List(fields.String(), required=True)
+    description = fields.String(
+        allow_none=True,
+        metadata={"example": "Federal funding instruments available for this opportunity"},
+    )
+
+
 class AgencyContactValue(Schema):
     """Schema for populating the AgencyContact value field"""
 

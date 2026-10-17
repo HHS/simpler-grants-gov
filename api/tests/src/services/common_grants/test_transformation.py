@@ -139,8 +139,10 @@ class TestTransformation:
                                 "post_date": date(2024, 1, 1),
                                 "close_date": date(2024, 12, 31),
                                 "estimated_total_program_funding": 1000000,
+                                "expected_number_of_awards": 12,
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
+                                "funding_instruments": ["grant", "cooperative_agreement"],
                                 "additional_info_url": "https://example.com/opportunity",
                                 "additional_info_url_description": "Additional opportunity information",
                                 "agency_contact_description": "Contact the grants office for questions",
@@ -200,6 +202,7 @@ class TestTransformation:
         assert result.funding.max_award_amount.currency == "USD"
         assert result.funding.min_award_amount.amount == "10000"
         assert result.funding.min_award_amount.currency == "USD"
+        assert result.funding.estimated_award_count == 12
 
         # Check source URL
         assert str(result.source) == "https://example.com/opportunity"
@@ -215,6 +218,18 @@ class TestTransformation:
 
         assert "federalFundingSource" in result.custom_fields
         assert result.custom_fields["federalFundingSource"].value == "Mandatory"
+
+        assert result.custom_fields["federalFundingInstruments"].value == [
+            "grant",
+            "cooperative_agreement",
+        ]
+        serialized_custom_fields = result.model_dump(by_alias=True, mode="json")["customFields"]
+        validated_custom_fields = OpportunityCustomFields().load(serialized_custom_fields)
+        assert isinstance(validated_custom_fields, dict)
+        assert validated_custom_fields["federalFundingInstruments"]["value"] == [
+            "grant",
+            "cooperative_agreement",
+        ]
 
         assert "agency" in result.custom_fields
         assert result.custom_fields["agency"].value.code == "A2345"
@@ -653,8 +668,10 @@ class TestTransformation:
                 "post_date": date(2024, 1, 1),
                 "close_date": date(2024, 12, 31),
                 "estimated_total_program_funding": 1000000,
+                "expected_number_of_awards": 12,
                 "award_ceiling": 500000,
                 "award_floor": 10000,
+                "funding_instruments": ["grant", "cooperative_agreement"],
                 "additional_info_url": "https://example.com/opportunity",
                 "created_at": datetime(2024, 1, 3, 12, 0, 0),
                 "updated_at": datetime(2024, 1, 4, 12, 0, 0),
@@ -665,6 +682,8 @@ class TestTransformation:
 
         # The transformation should succeed and return a valid OpportunityBase object
         assert result is not None
+        assert result.funding is not None
+        assert result.custom_fields is not None
         assert result.title == "Test Opportunity"
         assert result.description == "Test description"
         assert result.id == opp_data["opportunity_id"]
@@ -672,6 +691,11 @@ class TestTransformation:
         assert result.funding.total_amount_available.amount == "1000000"
         assert result.funding.max_award_amount.amount == "500000"
         assert result.funding.min_award_amount.amount == "10000"
+        assert result.funding.estimated_award_count == 12
+        assert result.custom_fields["federalFundingInstruments"].value == [
+            "grant",
+            "cooperative_agreement",
+        ]
         assert result.key_dates.post_date.date == date(2024, 1, 1)
         assert result.key_dates.close_date.date == date(2024, 12, 31)
         assert str(result.source) == "https://example.com/opportunity"
@@ -699,6 +723,7 @@ class TestTransformation:
         assert result.status.value == "open"
         assert result.created_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
         assert result.last_modified_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
+        assert result.funding is not None
 
         # Check that timeline and funding are None when summary is empty
         assert result.key_dates.post_date is None
@@ -706,6 +731,8 @@ class TestTransformation:
         assert result.funding.total_amount_available is None
         assert result.funding.max_award_amount is None
         assert result.funding.min_award_amount is None
+        assert result.funding.estimated_award_count is None
+        assert result.custom_fields is None
         assert result.source is None
 
     def test_transform_search_result_to_cg_with_invalid_data(self):
