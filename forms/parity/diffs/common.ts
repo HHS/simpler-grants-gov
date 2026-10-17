@@ -1,4 +1,4 @@
-import type { Pinned, Recorded, Wording } from "../harness/model.ts";
+import type { FormDiff, Pinned, Recorded, Wording } from "../harness/model.ts";
 
 /** A label the form library standardized across forms, where this form's DAT words it differently. */
 export const standardLabel = (plan: string, source: string): Pinned => ({
@@ -43,3 +43,44 @@ export const ADDRESS_HEADING: Recorded = {
   reason:
     "The DAT numbers the Address heading as a field. It has no answer of its own and no element in the XSD; its fields follow it.",
 };
+
+/** Fields the key-person forms' groups place differently from the DAT. */
+export const PROFILE_GROUPS: Recorded = {
+  category: "intentional",
+  reason:
+    "Every key-person form lays a profile out in the same groups: Name, Role, Address, Contact Information, Credentials, Attachments. Role puts the organization before the department and the project role after the division, where the DAT lists them elsewhere.",
+};
+
+/** Attachments, which the XML transform rules cannot write yet. */
+export const ATTACHMENT_XML: Recorded = {
+  category: "gap",
+  reason:
+    "Each attachment sits in a wrapper element (e.g. BioSketchsAttached) with no field of its own, which the API's XML transform rules, keyed by the response's properties, cannot write. A rule format keyed by XML path would; until then the emitter leaves them out.",
+};
+
+/**
+ * The XML registers for attachments the rules leave out, from each one's JSON path and element
+ * path as the plan links them.
+ */
+export const unmappedAttachments = (
+  links: [json: string, xml: string][],
+): Pick<
+  FormDiff,
+  "xmlMapping" | "xmlMappingVsJsonSchema" | "xmlMappingVsXsd"
+> => ({
+  xmlMapping: {
+    absentFromSource: Object.fromEntries(
+      links.map(([json, xml]) => [`${json} -> ${xml}`, ATTACHMENT_XML]),
+    ),
+  },
+  xmlMappingVsJsonSchema: {
+    absentFromPlan: Object.fromEntries(
+      links.map(([json]) => [json, ATTACHMENT_XML]),
+    ),
+  },
+  xmlMappingVsXsd: {
+    absentFromPlan: Object.fromEntries(
+      links.map(([, xml]) => [xml, ATTACHMENT_XML]),
+    ),
+  },
+});
