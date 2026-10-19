@@ -242,9 +242,10 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         assert len(set(application_status)) == 1
         assert application_status[0] == "Validated"
 
-    def test_get_submission_list_expanded_entering_invalid_status_just_ignores_status_filters_entirely(
+    def test_get_submission_list_expanded_entering_invalid_status_returns_no_results(
         self, db_session, enable_factory_create, setup_data
     ):
+        """An unrecognized Status value has no Simpler equivalent — Simpler returns no submissions."""
         soap_request = _make_soap_request(setup_data["soap_client_certificate"], status="X")
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
@@ -261,7 +262,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
-        assert result.available_application_number == 5
+        assert result.available_application_number == 0
 
     def test_get_submission_list_expanded_response_does_not_include_grants_gov_application_status_if_it_is_none(
         self, db_session, enable_factory_create, setup_data
