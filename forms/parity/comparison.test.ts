@@ -57,6 +57,19 @@ describe("Key Contacts", () => {
     });
   });
 
+  describe("XML mapping", () => {
+    const id = "key_contacts[].phone";
+
+    it("form writes the element the plan links", () => {
+      expect(statusOf(form, id, "xmlMapping", "form")).toBe("match");
+    });
+
+    it("DAT and XSD are not compared", () => {
+      expect(statusOf(form, id, "xmlMapping", "dat")).toBe("notCompared");
+      expect(statusOf(form, id, "xmlMapping", "xsd")).toBe("notCompared");
+    });
+  });
+
   describe("the tree", () => {
     const labels = (nodes: ComparisonNode[]): unknown[] =>
       nodes.flatMap((node) =>

@@ -48,6 +48,7 @@ export const ATTRIBUTE_LABELS: Record<Attribute, string> = {
   range: "Range",
   options: "Options",
   position: "Position",
+  xmlMapping: "XML mapping",
 };
 
 export const STATUS: Record<

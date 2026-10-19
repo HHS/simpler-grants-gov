@@ -24,6 +24,7 @@ import {
   walkFields,
 } from "./harness/index.ts";
 import { readRequired } from "./harness/flatten/plan.ts";
+import { link } from "./harness/flatten/xmlTransform.ts";
 import { fromXmlPath, type Category } from "./harness/model.ts";
 
 export type Source = "dat" | "xsd" | "form";
@@ -41,7 +42,8 @@ export type Attribute =
   | "format"
   | "range"
   | "options"
-  | "position";
+  | "position"
+  | "xmlMapping";
 
 /** One attribute of one field, as one source states it. */
 export interface Cell {
@@ -135,6 +137,8 @@ function compares(spec: Spec, attribute: Attribute): boolean {
       return "order" in spec && spec.order;
     case "required":
       return "constraints" in spec;
+    case "xmlMapping":
+      return true;
   }
   const keywords: readonly string[] =
     "constraints" in spec ? spec.constraints.keywords : [];
@@ -146,6 +150,7 @@ const NOT_COMPARED: Partial<
   Record<Source, Partial<Record<Attribute, string>>>
 > = {
   dat: {
+    xmlMapping: "The DAT names no XML elements.",
     format:
       "The DAT is compared on maximum length only, not on patterns or formats.",
     range: "The DAT is compared on maximum length only, not on numeric ranges.",
@@ -157,6 +162,8 @@ const NOT_COMPARED: Partial<
     help: "The XSD has no help text.",
     position:
       "Field order is compared with the DAT, which sets the order Grants.gov shows.",
+    xmlMapping:
+      "The plan's XSD path is compared with the XSD on Matched by. This row compares what the form's XML rules write.",
   },
 };
 
@@ -239,11 +246,16 @@ const unexpectedIn = (result: PairResult): Discrepancy[] => [
   ...result.helpText,
 ];
 
-function side(pair: Pair, spec: Spec): Side {
+/** `attributeFor` names the row each discrepancy is shown on; by default, the one its kind concerns. */
+function side(
+  pair: Pair,
+  spec: Spec,
+  attributeFor: (kind: string) => Attribute | undefined = attributeOf,
+): Side {
   const result = comparePair(pair, spec);
   const found: Side["found"] = new Map();
   const add = (d: Discrepancy, into: "accepted" | "unexpected") => {
-    const attribute = attributeOf(d.kind);
+    const attribute = attributeFor(d.kind);
     if (!attribute) return;
     const key = `${d.path}#${attribute}`;
     if (!found.has(key)) found.set(key, { accepted: [], unexpected: [] });
@@ -331,6 +343,7 @@ const ATTRIBUTES: Attribute[] = [
   "range",
   "options",
   "position",
+  "xmlMapping",
 ];
 
 /** Rows shown only when the plan or a source states a value. */
@@ -339,6 +352,7 @@ const OPTIONAL_ROWS = new Set<Attribute>([
   "format",
   "range",
   "options",
+  "xmlMapping",
 ]);
 
 interface Sides {
@@ -347,6 +361,8 @@ interface Sides {
   jsonSchema?: Side;
   uiSchema?: Side;
   jsonSchemaVsXsd?: Side;
+  /** Absent for a form with no emitted XML transform. */
+  xml?: { plan: Side; jsonSchema: Side; xsd: Side };
 }
 
 /** The pairs that judge each source's cells for an attribute. */
@@ -365,6 +381,10 @@ function sidesFor(
       return [sides.jsonSchemaVsXsd];
     case "matchedBy":
       return [sides.jsonSchema];
+    case "xmlMapping":
+      return sides.xml
+        ? [sides.xml.plan, sides.xml.jsonSchema, sides.xml.xsd]
+        : [];
     default:
       return [sides.jsonSchema, sides.jsonSchemaVsXsd];
   }
@@ -410,6 +430,15 @@ function buildField<F extends PlanField>(
         ) ?? "",
       )
     : undefined;
+  /** The compiled schema's path for the field, which the XML rules read. */
+  const schemaPath =
+    keys.form && (sides.jsonSchema?.matched.get(keys.form) ?? keys.form);
+  /** The elements the form's XML rules write the field to. */
+  const written = schemaPath
+    ? [...(sides.xml?.plan.pair.source.keys() ?? [])]
+        .filter((rule) => rule.startsWith(link(schemaPath, "")))
+        .map((rule) => rule.slice(link(schemaPath, "").length))
+    : [];
 
   const position = (source: Source) => {
     const s = source === "form" ? sides.uiSchema : sides[source];
@@ -462,6 +491,8 @@ function buildField<F extends PlanField>(
         return showOptions(rules);
       case "position":
         return position(source);
+      case "xmlMapping":
+        return source === "form" && written.length ? written.join(", ") : null;
     }
   };
 
@@ -491,10 +522,47 @@ function buildField<F extends PlanField>(
         return showOptions(planFlat);
       case "position":
         return planPosition("dat") ?? planPosition("form");
+      case "xmlMapping":
+        return keys.xsd ?? null;
     }
   };
 
+  /**
+   * Whether the form's XML rules write the field to the element the plan links it to. The
+   * three XML comparisons judge it together, so a link they all miss counts once.
+   */
+  const xmlCell = (source: Source): Cell => {
+    const cellValue = value("xmlMapping", source);
+    const never = NOT_COMPARED[source]?.xmlMapping;
+    if (never) return { status: "notCompared", value: null, reason: never };
+    if (!sides.xml)
+      return {
+        status: "notCompared",
+        value: null,
+        reason:
+          "This form has no XML transform rules yet, so what it writes to XML is not compared.",
+      };
+    if (!keys.form || !keys.xsd)
+      return {
+        status: "notCompared",
+        value: cellValue,
+        reason: `The plan gives no ${keys.form ? KEYS.xsd.name : KEYS.form.name} for this field, so it links it to no element.`,
+      };
+    const xsdPath = sides.xsd.matched.get(keys.xsd) ?? keys.xsd;
+    const pathFor = (s: Side) =>
+      s === sides.xml!.plan
+        ? link(keys.form!, keys.xsd!)
+        : s === sides.xml!.jsonSchema
+          ? schemaPath
+          : xsdPath;
+    return {
+      ...judge(sidesFor(sides, source, "xmlMapping"), pathFor, "xmlMapping"),
+      value: cellValue,
+    };
+  };
+
   const cell = (attribute: Attribute, source: Source): Cell => {
+    if (attribute === "xmlMapping") return xmlCell(source);
     const key = keys[source];
     const s = planSide(source);
     const name = SOURCE_NAMES[source];
@@ -638,6 +706,18 @@ export async function compareForm<F extends PlanField>(
     jsonSchemaVsXsd:
       compiled && side(compiled.jsonSchemaVsXsd, SPECS.jsonSchemaVsXsd),
   };
+  const mapping = compiled?.xmlMapping;
+  // Every XML comparison shows on one row: the field's XML mapping.
+  if (mapping)
+    sides.xml = {
+      plan: side(mapping.plan, SPECS.xmlMapping, () => "xmlMapping"),
+      jsonSchema: side(
+        mapping.jsonSchema,
+        SPECS.xmlMappingVsJsonSchema,
+        () => "xmlMapping",
+      ),
+      xsd: side(mapping.xsd, SPECS.xmlMappingVsXsd, () => "xmlMapping"),
+    };
   const all = walkFields(plan.children).map(({ field }) => field);
   const labels = Object.fromEntries(
     SOURCES.map((source) => [
