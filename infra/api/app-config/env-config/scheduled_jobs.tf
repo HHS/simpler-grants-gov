@@ -45,16 +45,6 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    training = [
-      "flask",
-      "data-migration",
-      "load-transform",
-      "--load",
-      "--transform",
-      "--set-current",
-      "--store-version"
-    ],
-    # Mirrors training.
     "infra-training" = [
       "flask",
       "data-migration",
@@ -135,20 +125,6 @@ locals {
 
   # Below is the config for overriding the defaults for the step functions.
   scheduled_jobs_config = {
-    training = {
-      cpu = 1024
-      mem = 4096
-      # To configure environment variables uncomment the below section
-      /*
-      environment_vars = [
-        {
-          "Name" : "test",
-          "Value" : "test-value"
-        }
-      ]
-      */
-    }
-
     "infra-training" = {
       cpu = 1024
       mem = 4096
@@ -164,7 +140,6 @@ locals {
     "infra-dev"      = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
     staging          = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
     "infra-staging"  = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    training         = ["flask", "task", "sam-extracts"]
     "infra-training" = ["flask", "task", "sam-extracts"]
     grantee1         = ["flask", "task", "sam-extracts"]
     "infra-sgg2"     = ["flask", "task", "sam-extracts"]
@@ -179,7 +154,6 @@ locals {
     "infra-dev"      = "ENABLED"
     staging          = "ENABLED"
     "infra-staging"  = "ENABLED"
-    training         = "DISABLED"
     "infra-training" = "DISABLED"
     grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
@@ -194,7 +168,6 @@ locals {
     "infra-dev"      = "ENABLED"
     staging          = "ENABLED"
     "infra-staging"  = "ENABLED"
-    training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
@@ -209,7 +182,6 @@ locals {
     "infra-dev"      = "ENABLED"
     staging          = "ENABLED"
     "infra-staging"  = "ENABLED"
-    training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
@@ -224,7 +196,6 @@ locals {
     "infra-dev"      = "ENABLED"
     staging          = "ENABLED"
     "infra-staging"  = "ENABLED"
-    training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
@@ -239,7 +210,6 @@ locals {
     "infra-dev"      = "ENABLED"
     staging          = "ENABLED"
     "infra-staging"  = "ENABLED"
-    training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
@@ -254,7 +224,6 @@ locals {
     "infra-dev"      = "ENABLED"
     staging          = "ENABLED"
     "infra-staging"  = "ENABLED"
-    training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
