@@ -16,7 +16,6 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("src/constants/auth", () => ({
-  LOGOUT_URL: "fake-logout-url",
   clientTokenRefreshInterval: 10 * 60 * 1000,
   clientTokenExpirationInterval: 15 * 60 * 1000,
 }));
@@ -85,7 +84,7 @@ describe("useUser", () => {
     expect(userDisplay).toBeEmptyDOMElement();
     expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
   });
-  it("sets user as logged out if second fetch for user comes back logged out", async () => {
+  it("sets user as logged out without redirecting if second fetch for user comes back logged out", async () => {
     debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true });
     const wrapper = ({ children }: PropsWithChildren) => (
       <UserProvider featureFlagDefaults={{}}>{children}</UserProvider>
@@ -106,8 +105,8 @@ describe("useUser", () => {
       expect(result.current.user?.isLoggedIn).toEqual(false);
     });
     expect(result.current.hasBeenLoggedOut).toEqual(true);
-    // clears the correlation id cookie server-side, mirroring explicit logout
-    expect(redirectMock).toHaveBeenCalledWith("fake-logout-url");
+    // implicit logout stays on the current page, explicit logout is handled by the sign out link
+    expect(redirectMock).not.toHaveBeenCalled();
   });
   it("does not clear the correlation id when an anonymous user remains logged out", async () => {
     debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
@@ -126,6 +125,27 @@ describe("useUser", () => {
     expect(fetchMock).not.toHaveBeenCalledWith("/api/auth/logout", {
       method: "POST",
     });
+  });
+  it("keeps a logged in user when a session refresh fails with a network or server error", async () => {
+    debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true });
+    const { result } = renderHook(() => useUser(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.user?.isLoggedIn).toEqual(true);
+    });
+
+    debouncedUserFetcherMock.mockRejectedValue(
+      new Error("Unable to fetch user: 500"),
+    );
+
+    await result.current.refreshUser();
+
+    await waitFor(() => {
+      expect(result.current.error).toBeDefined();
+    });
+    expect(result.current.user?.isLoggedIn).toEqual(true);
+    expect(result.current.hasBeenLoggedOut).toEqual(false);
+    expect(redirectMock).not.toHaveBeenCalled();
   });
   describe("logoutLocalUser", () => {
     it("marks the user as logged out", async () => {
