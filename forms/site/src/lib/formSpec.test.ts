@@ -119,6 +119,46 @@ describe("validation rules", () => {
   });
 });
 
+describe.each([
+  "rr-key-person",
+  "rr-key-person-expanded",
+  "nsf-key-person-expanded",
+])("%s PD/PI profile", (specId) => {
+  type Data = { principal_investigator: { profile: Record<string, unknown> } };
+
+  it("rejects a profile with only an email", async () => {
+    const { schema } = await loadFormSpec(specId);
+    const data = {
+      principal_investigator: { profile: { email: "pi@example.invalid" } },
+    };
+    expect(createAjv().compile(schema)(data)).toBe(false);
+  });
+
+  it.each(["name", "address", "phone", "project_role"])(
+    "requires %s alongside the email",
+    async (field) => {
+      const { schema, example } = await loadFormSpec(specId);
+      const data = clone(example) as Data;
+      delete data.principal_investigator.profile[field];
+      const validate = createAjv().compile(schema);
+      expect(validate(data)).toBe(false);
+      expect(validate.errors).toContainEqual(
+        expect.objectContaining({
+          instancePath: "/principal_investigator/profile",
+          params: { missingProperty: field },
+        }),
+      );
+    },
+  );
+
+  it("requires an email", async () => {
+    const { schema, example } = await loadFormSpec(specId);
+    const data = clone(example) as Data;
+    delete data.principal_investigator.profile.email;
+    expect(createAjv().compile(schema)(data)).toBe(false);
+  });
+});
+
 describe("UI layout", () => {
   it("lays out each key contacts entry with its Role group first", async () => {
     const { uischema } = await loadFormSpec("key-contacts");
