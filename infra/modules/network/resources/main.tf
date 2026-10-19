@@ -1,9 +1,8 @@
-data "aws_availability_zones" "available" {}
-
 locals {
-  vpc_cidr               = "10.${var.second_octet}.0.0/20"
-  num_availability_zones = 3
-  availability_zones     = slice(data.aws_availability_zones.available.names, 0, local.num_availability_zones)
+  vpc_cidr = "10.${var.second_octet}.0.0/20"
+  # Fixed list rather than an aws_availability_zones lookup, so the subnets' zones
+  # can't change if AWS adds a zone or one is temporarily unavailable (CKV_AWS_394).
+  availability_zones = [for suffix in ["a", "b", "c"] : "${data.aws_region.current.name}${suffix}"]
 }
 
 module "interface" {
