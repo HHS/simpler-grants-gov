@@ -1,95 +1,70 @@
 /**
  * @jest-environment node
  */
+import { GET } from "src/app/api/auth/logout/route";
+import { environment } from "src/constants/environments";
+import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
-import { logoutUser } from "src/app/api/auth/logout/handler";
-import { UnauthorizedError } from "src/errors";
+import { NextRequest } from "next/server";
 
-const deleteSessionMock = jest.fn();
-const postLogoutMock = jest.fn();
-const clearCorrelationIdMock = jest.fn();
+const FAKE_LOGOUT_TOKEN = "fake-logout-token";
+const mockSetLogoutTokenCookie = jest.fn();
+const mockGetSession = jest.fn();
+
+jest.mock("src/constants/environments", () => ({
+  environment: { AUTH_LOGOUT_URL: "http://simpler.grants.gov/logout" },
+}));
 
 jest.mock("src/services/auth/sessionUtils", () => ({
-  deleteSession: (): unknown => deleteSessionMock(),
+  setLogoutTokenCookie: (token: string) =>
+    mockSetLogoutTokenCookie(token) as unknown,
 }));
 
-jest.mock("src/services/correlationId/correlationId", () => ({
-  clearCorrelationId: (message?: string): unknown =>
-    clearCorrelationIdMock(message),
+jest.mock("src/services/auth/session", () => ({
+  getSession: () => mockGetSession() as unknown,
 }));
 
-jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  postUserLogout: () => postLogoutMock() as unknown,
-}));
-
-// note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
-// is to throw an error
-describe("/api/auth/logout POST handler", () => {
+describe("/api/auth/logout GET handler", () => {
+  beforeEach(() => {
+    mockGetSession.mockReturnValue({ token: FAKE_LOGOUT_TOKEN });
+    jest.replaceProperty(
+      environment,
+      "AUTH_LOGOUT_URL",
+      "http://some-test-url",
+    );
+  });
   afterEach(() => jest.clearAllMocks());
-  it("calls postUserLogout", async () => {
-    await logoutUser();
+  it("redirects correctly", async () => {
+    // next redirects result in an error
+    const error = await wrapForExpectedError<{
+      digest: string;
+      message: string;
+    }>(() => GET(new NextRequest("https://simpler.grants.gov/")));
 
-    expect(postLogoutMock).toHaveBeenCalledTimes(1);
+    expect(error.message).toEqual("NEXT_REDIRECT");
+    expect(error.digest).toContain(";http://some-test-url;");
+    expect(error.digest).toContain(";307;");
   });
-  it("errors if API logout call errors", async () => {
-    postLogoutMock.mockImplementation(() => {
-      throw new Error("the API threw this error");
-    });
-    const response = await logoutUser();
+  it("errors correctly if logout url is not set", async () => {
+    jest.replaceProperty(environment, "AUTH_LOGOUT_URL", "");
 
-    expect(postLogoutMock).toHaveBeenCalledTimes(1);
-    expect(response.status).toEqual(500);
-    expect(clearCorrelationIdMock).not.toHaveBeenCalled();
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toEqual("Error logging out: the API threw this error");
+    const response = await GET(new NextRequest("https://simpler.grants.gov/"));
+
+    expect(response.headers.get("location")).toBe(null);
+    expect(response.status).toBe(500);
   });
-  it("errors if API logout call returns nothing", async () => {
-    postLogoutMock.mockImplementation(() => null);
-    const response = await logoutUser();
-
-    expect(postLogoutMock).toHaveBeenCalledTimes(1);
-    expect(response.status).toEqual(400);
-    expect(clearCorrelationIdMock).not.toHaveBeenCalled();
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toEqual(
-      "Error logging out: No logout response from API",
-    );
+  it("sets token in logout cookie", async () => {
+    await wrapForExpectedError<{
+      digest: string;
+      message: string;
+    }>(() => GET(new NextRequest("https://simpler.grants.gov/")));
+    expect(mockSetLogoutTokenCookie).toHaveBeenCalledWith(FAKE_LOGOUT_TOKEN);
   });
-  it("calls deleteSession", async () => {
-    postLogoutMock.mockImplementation(() => "success");
-    await logoutUser();
+  it("errors correctly if user token is not present", async () => {
+    mockGetSession.mockReturnValue({ token: "" });
+    const response = await GET(new NextRequest("https://simpler.grants.gov/"));
 
-    expect(deleteSessionMock).toHaveBeenCalledTimes(1);
-  });
-  it("clears the correlation id on successful logout", async () => {
-    postLogoutMock.mockImplementation(() => "success");
-    await logoutUser();
-
-    expect(clearCorrelationIdMock).toHaveBeenCalledTimes(1);
-    expect(clearCorrelationIdMock).toHaveBeenCalledWith(
-      "Clearing correlation_id on logout",
-    );
-  });
-  it("calls deleteSession if token expired", async () => {
-    postLogoutMock.mockImplementation(() => {
-      throw new UnauthorizedError("Token expired");
-    });
-    const response = await logoutUser();
-
-    expect(postLogoutMock).toHaveBeenCalledTimes(1);
-    expect(response.status).toEqual(401);
-    expect(deleteSessionMock).toHaveBeenCalledTimes(1);
-    // implicit logout via token expiration must NOT rotate the correlation_id
-    expect(clearCorrelationIdMock).not.toHaveBeenCalled();
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toEqual("session previously expired");
-  });
-  it("returns sucess message on success", async () => {
-    postLogoutMock.mockImplementation(() => "success");
-    const response = await logoutUser();
-
-    expect(response.status).toEqual(200);
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toEqual("logout success");
+    expect(response.headers.get("location")).toBe(null);
+    expect(response.status).toBe(500);
   });
 });

@@ -3,33 +3,10 @@ import userEvent from "@testing-library/user-event";
 
 import { SignOutNavLink } from "./SignOutNavLink";
 
-const mockPush = jest.fn();
-const mockRefresh = jest.fn();
-const mockLogoutLocalUser = jest.fn();
-const mockUseUser = jest.fn(() => ({
-  user: {
-    token: "faketoken",
-  },
-  hasBeenLoggedOut: false,
-  resetHasBeenLoggedOut: jest.fn(),
-  logoutLocalUser: mockLogoutLocalUser,
-}));
+const mockStoreCurrentPage = jest.fn();
 
-jest.mock("src/hooks/useFeatureFlags", () => ({
-  useFeatureFlags: () => ({
-    checkFeatureFlag: () => true,
-  }),
-}));
-
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: (url: unknown): unknown => mockPush(url),
-    refresh: mockRefresh,
-  }),
-}));
-
-jest.mock("src/services/auth/useUser", () => ({
-  useUser: () => mockUseUser(),
+jest.mock("src/utils/userUtils", () => ({
+  storeCurrentPage: () => mockStoreCurrentPage() as unknown,
 }));
 
 describe("SignOutNavLink", () => {
@@ -40,25 +17,22 @@ describe("SignOutNavLink", () => {
 
   it("renders Sign out text", () => {
     const onClick = jest.fn();
-    render(<SignOutNavLink onClick={onClick} />);
+    render(<SignOutNavLink closeDropdownAndMobileNav={onClick} />);
 
     expect(screen.getByText("logout")).toBeInTheDocument();
   });
 
-  it("calls onClick when clicked after logout", async () => {
+  it("calls closeDropdownAndMobileNav when clicked after logout", async () => {
     const onClick = jest.fn();
     const user = userEvent.setup();
-    render(<SignOutNavLink onClick={onClick} />);
+    render(<SignOutNavLink closeDropdownAndMobileNav={onClick} />);
 
     const signOutLabel = screen.getByText("logout");
     await user.click(signOutLabel);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith("/api/auth/logout", {
-        method: "POST",
-      });
-      expect(mockLogoutLocalUser).toHaveBeenCalled();
-      expect(mockRefresh).toHaveBeenCalled();
+      // gotta figure out how to mock location, may not be possible
+      expect(mockStoreCurrentPage).toHaveBeenCalled();
       expect(onClick).toHaveBeenCalled();
     });
   });

@@ -42,7 +42,7 @@ describe("ActivityMonitor", () => {
       "click",
       expect.any(Function),
     );
-    fakeUser = { token: "logged in" };
+    fakeUser = { isLoggedIn: true };
     rerender(<ActivityMonitor />);
     expect(mockAddEventListener).toHaveBeenCalledWith(
       "click",
@@ -50,7 +50,7 @@ describe("ActivityMonitor", () => {
     );
   });
   it("removes handlers when logging out", () => {
-    fakeUser = { token: "logged in" };
+    fakeUser = { isLoggedIn: true };
     const { rerender } = render(<ActivityMonitor />);
 
     expect(mockAddEventListener).toHaveBeenCalledWith(
@@ -62,7 +62,7 @@ describe("ActivityMonitor", () => {
       expect.any(Function),
     );
 
-    fakeUser = { token: "" };
+    fakeUser = { isLoggedIn: false };
     rerender(<ActivityMonitor />);
     expect(mockRemoveEventListener).toHaveBeenCalledWith(
       "click",
@@ -71,7 +71,7 @@ describe("ActivityMonitor", () => {
   });
   it("calls refreshIfExpiring, refreshIfExpired, when clicking after handlers are added and token is not expired", async () => {
     mockRefreshIfExpired.mockResolvedValue(false);
-    fakeUser = { token: "" };
+    fakeUser = { isLoggedIn: false };
     const { rerender } = render(
       <>
         <ActivityMonitor />
@@ -83,7 +83,7 @@ describe("ActivityMonitor", () => {
     expect(mockRefreshIfExpired).not.toHaveBeenCalled();
     expect(mockRefreshIfExpiring).not.toHaveBeenCalled();
 
-    fakeUser = { token: "logged in" };
+    fakeUser = { isLoggedIn: true };
     rerender(
       <>
         <ActivityMonitor />
@@ -98,7 +98,7 @@ describe("ActivityMonitor", () => {
   });
   it("calls refreshIfExpired, logoutLocalUser when clicking after handlers are added and token is expired", async () => {
     mockRefreshIfExpired.mockResolvedValue(true);
-    fakeUser = { token: "logged in" };
+    fakeUser = { isLoggedIn: true };
     render(
       <>
         <ActivityMonitor />
@@ -112,7 +112,7 @@ describe("ActivityMonitor", () => {
     await waitFor(() => expect(mockLogoutLocalUser).toHaveBeenCalled());
   });
   it("does not call refreshIfExpiring, refreshIfExpired, logoutLocal user, when clicking before handlers are added", async () => {
-    fakeUser = { token: "" };
+    fakeUser = { isLoggedIn: false };
     render(
       <>
         <ActivityMonitor />
@@ -125,7 +125,7 @@ describe("ActivityMonitor", () => {
     expect(mockLogoutLocalUser).not.toHaveBeenCalled();
   });
   it("does not call refreshIfExpiring, refreshIfExpired, logoutLocal user, when clicking after handlers are removed", async () => {
-    fakeUser = { token: "logged in" };
+    fakeUser = { isLoggedIn: true };
     const { rerender } = render(
       <>
         <ActivityMonitor />
@@ -137,7 +137,7 @@ describe("ActivityMonitor", () => {
     expect(mockRefreshIfExpired).toHaveBeenCalledTimes(1);
     expect(mockLogoutLocalUser).toHaveBeenCalledTimes(1);
 
-    fakeUser = { token: "" };
+    fakeUser = { isLoggedIn: false };
     rerender(
       <>
         <ActivityMonitor />

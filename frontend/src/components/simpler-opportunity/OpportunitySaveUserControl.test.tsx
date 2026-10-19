@@ -65,7 +65,7 @@ describe("OpportunitySaveUserControl", () => {
 
   it("updates local saved state on save", async () => {
     clientFetchMock.mockResolvedValue({ type: "save" });
-    mockUser = { token: "a token" };
+    mockUser = { isLoggedIn: true };
     const { rerender } = render(
       <OpportunitySaveUserControl
         opportunitySaved={false}

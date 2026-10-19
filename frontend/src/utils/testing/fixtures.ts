@@ -889,8 +889,7 @@ export const fakeTestUser: TestUser = {
 };
 
 export const fakeUserProfile: UserProfile = {
-  token: "a token",
-  user_id: "an id",
+  isLoggedIn: true,
 };
 
 export const mockApplicationSubmission: ApplicationSubmission = {
