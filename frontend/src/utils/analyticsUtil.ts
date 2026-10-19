@@ -60,8 +60,6 @@ export const setNewRelicCorrelationIdAttribute = (
   newRelic.setCustomAttribute!("correlation_id", correlationId);
 };
 
-// each search state is sent as its own PageAction event so that its attributes are tied to
-// that search, rather than relying on page level custom attributes
 export const sendNewRelicSearchAttempt = (
   attributes: NewRelicSearchAttemptAttributes,
 ): undefined => {

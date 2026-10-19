@@ -14,7 +14,7 @@ jest.mock("@next/third-parties/google", () => ({
   sendGAEvent: (...args: unknown[]) => sendGAEventMock(...args),
 }));
 
-// only mock waiting for new relic, so that the event sent to the browser object can be verified
+// only mock the wait, so tests can assert the payload sent to window.newrelic
 jest.mock("src/utils/analyticsUtil", () => ({
   ...jest.requireActual<object>("src/utils/analyticsUtil"),
   waitForNewRelic: () => waitForNewRelicMock() as unknown,
@@ -40,7 +40,6 @@ const basicSearchAttempt = {
   search_filter_count: 3,
 };
 
-// lets a test control when waiting for new relic finishes
 const deferNewRelicReady = () => {
   let resolveReady: (ready: boolean) => void = () => {};
   waitForNewRelicMock.mockReturnValue(
@@ -56,7 +55,6 @@ const deferNewRelicReady = () => {
   };
 };
 
-// waits for the search_attempt event that is sent once new relic is initialized
 const renderWithNewRelic = async (params: OptionalStringDict) => {
   const view = render(
     <SearchAnalytics params={params} newRelicEnabled={true} />,

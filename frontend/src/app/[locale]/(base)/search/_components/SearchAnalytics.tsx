@@ -17,9 +17,8 @@ const getCurrentFilters = (params: OptionalStringDict): string => {
   return JSON.stringify(withoutQueryAndPage);
 };
 
-// only active, approved query params are sent to NR, prefixed with `search_param_`
-// using underscores since NR has problems with querying fields with dashes.
-// Built in allow list order so that the same search state always serializes the same way
+// Built in allowlist order so equivalent search states serialize identically.
+// Using underscores since NR has problems with querying fields with dashes.
 const getNewRelicSearchAttemptAttributes = (
   params: OptionalStringDict,
 ): NewRelicSearchAttemptAttributes => {
@@ -30,11 +29,9 @@ const getNewRelicSearchAttemptAttributes = (
     }
     return activeParams;
   }, {} as NewRelicSearchAttemptAttributes);
-  // New relic does not support certain functionalities such as calculating string
-  // lengths. This is needed to log and gain insights into search query length.
+  // NRQL can't calculate string lengths, so send the query length directly.
   attributes.search_param_query_length = params.query?.length ?? 0;
-  // number of user facing filter categories in use, regardless of how many values each has selected.
-  // agency and topLevelAgency are both set from the Agency filter, so they count as one category
+  // agency and topLevelAgency are one user-facing Agency filter.
   attributes.search_filter_count = new Set(
     searchFilterNames
       .filter((filterName) => params[filterName])
@@ -45,7 +42,6 @@ const getNewRelicSearchAttemptAttributes = (
   return attributes;
 };
 
-// send custom New Relic and GA data for search pages
 function SearchAnalytics({
   params,
   newRelicEnabled,
@@ -64,13 +60,11 @@ function SearchAnalytics({
       .catch((e) => console.error("Error waiting for new relic", e));
   }, [newRelicEnabled]);
 
-  // serialized so that a new event is only sent when the search state changes,
-  // not when the same params are received as a new object
+  // Use serialized attributes so equivalent param objects don't resend the event.
   const searchAttemptAttributes = JSON.stringify(
     getNewRelicSearchAttemptAttributes(params),
   );
 
-  // send one new relic search_attempt event per search state
   useEffect(() => {
     if (!newRelicEnabled || !newRelicInitialized) {
       return;
