@@ -6,7 +6,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { dereference } from "@apidevtools/json-schema-ref-parser";
+import { dereferenceFormSchema } from "../../site/src/lib/dereferenceSchema.ts";
 
 import type { Plan } from "./flatten/plan.ts";
 import type { Json } from "./model.ts";
@@ -67,47 +67,9 @@ const formFile = (specId: string, name: string) =>
 const readJson = (file: string) =>
   JSON.parse(readFileSync(file, "utf8")) as Json;
 
-/**
- * A `$ref` with keywords beside it, as an `allOf` of the two. JSON Schema applies both, but
- * dereferencing merges them shallowly, so a `required` beside a `$ref` would replace the
- * referenced schema's own list. The local keywords come first, so their annotations win.
- */
-const refsBesideKeywords = (node: unknown): unknown => {
-  if (Array.isArray(node)) return node.map(refsBesideKeywords);
-  if (typeof node !== "object" || node === null) return node;
-  const { $ref, ...rest } = Object.fromEntries(
-    Object.entries(node).map(([key, value]) => [
-      key,
-      refsBesideKeywords(value),
-    ]),
-  ) as Json;
-  if ($ref === undefined) return rest;
-  return Object.keys(rest).length ? { allOf: [rest, { $ref }] } : { $ref };
-};
-
-/**
- * Reads each schema file without its top-level `$id`, as `loadFormSpec` in
- * `site/src/lib/formSpec.ts` does: the emitter's `$id`s are relative to a hosting base, so
- * resolving against them would re-base the relative `$ref`s.
- */
-const fileWithoutId = {
-  order: 1,
-  canRead: (file: { url: string }) => !/^https?:/.test(file.url),
-  read: (file: { url: string }) => {
-    const schema = readJson(
-      file.url.startsWith("file:") ? fileURLToPath(file.url) : file.url,
-    );
-    delete schema.$id;
-    return JSON.stringify(refsBesideKeywords(schema));
-  },
-};
-
-/** The form's `schema.json` with every `$ref` inlined. */
-export async function loadFormSchema(specId: string): Promise<Json> {
-  return (await dereference(formFile(specId, "schema.json"), {
-    resolve: { file: fileWithoutId, http: false },
-  })) as Json;
-}
+/** The form's `schema.json` with every `$ref` inlined, as the form preview loads it. */
+export const loadFormSchema = (specId: string): Promise<Json> =>
+  dereferenceFormSchema(formFile(specId, "schema.json"));
 
 export const loadUiSchema = (specId: string): Json =>
   readJson(formFile(specId, "ui.json"));
