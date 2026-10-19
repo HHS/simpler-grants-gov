@@ -6,12 +6,18 @@ from botocore.exceptions import ClientError
 from pydantic import BaseModel, Field
 
 from src.adapters.aws.aws_session import get_boto_session, is_local_aws
+from src.constants.email_constants import EmailType
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
 # Tag name used as the CloudWatch dimension on the SES configuration set's event destination
 EMAIL_TYPE_TAG = "email_type"
+
+
+def build_email_tags(email_type: EmailType) -> dict[str, str]:
+    """Build the SES message tags for an email of the given type"""
+    return {EMAIL_TYPE_TAG: email_type}
 
 
 class SESConfig(PydanticBaseEnvConfig):

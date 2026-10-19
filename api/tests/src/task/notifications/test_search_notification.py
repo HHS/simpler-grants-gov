@@ -6,11 +6,12 @@ from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedSearch
 from src.task.notifications.config import EmailNotificationConfig, _reset_email_config
-from src.task.notifications.constants import EmailType, NotificationReason
+from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.search_notification import (
     UTM_TAG,

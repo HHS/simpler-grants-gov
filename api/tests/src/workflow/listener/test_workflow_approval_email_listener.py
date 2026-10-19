@@ -1,10 +1,10 @@
 import logging
 
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import ApprovalResponseType, Privilege, WorkflowType
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow
-from src.task.notifications.constants import EmailType
 from tests.lib.agency_test_utils import create_user_in_agency
 from tests.src.db.models.factories import (
     OpportunityFactory,

@@ -4,10 +4,10 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
 from src.task.notifications.config import _reset_email_config
-from src.task.notifications.constants import EmailType
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
 from tests.src.db.models.factories import (
     LinkOrganizationInvitationToRoleFactory,

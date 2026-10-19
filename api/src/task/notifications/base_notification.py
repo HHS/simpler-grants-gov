@@ -4,11 +4,12 @@ from abc import abstractmethod
 
 from src.adapters import db
 from src.adapters.aws.local_email_adapter import send_email_to_address
-from src.adapters.aws.ses_adapter import EMAIL_TYPE_TAG
+from src.adapters.aws.ses_adapter import build_email_tags
+from src.constants.email_constants import EmailType
 from src.db.models.user_models import UserNotificationLog
 from src.task.notifications import constants
 from src.task.notifications.config import EmailNotificationConfig, get_email_config
-from src.task.notifications.constants import EmailType, Metrics, UserEmailNotification
+from src.task.notifications.constants import Metrics, UserEmailNotification
 from src.task.task import Task
 
 logger = logging.getLogger(__name__)
@@ -82,7 +83,7 @@ class BaseNotificationTask(Task):
                     subject=user_notification.subject,
                     message=user_notification.content,
                     trace_id=trace_id,
-                    email_tags={EMAIL_TYPE_TAG: EmailType(user_notification.notification_reason)},
+                    email_tags=build_email_tags(EmailType(user_notification.notification_reason)),
                 )
 
                 logger.info(

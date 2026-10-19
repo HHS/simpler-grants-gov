@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
+from src.constants.email_constants import EmailType
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     SuppressedEmail,
@@ -13,7 +14,7 @@ from src.db.models.user_models import (
 )
 from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
-from src.task.notifications.constants import EmailType, NotificationReason
+from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table

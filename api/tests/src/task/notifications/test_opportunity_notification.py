@@ -6,6 +6,7 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.adapters import db
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -17,7 +18,6 @@ from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedOpportunity
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
-    EmailType,
     Metrics,
     NotificationReason,
     OpportunityVersionChange,

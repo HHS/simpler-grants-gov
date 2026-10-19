@@ -7,9 +7,9 @@ import logging
 import uuid
 
 from src.adapters.aws.local_email_adapter import send_email_to_address
-from src.adapters.aws.ses_adapter import EMAIL_TYPE_TAG
+from src.adapters.aws.ses_adapter import build_email_tags
+from src.constants.email_constants import EmailType
 from src.db.models.user_models import User
-from src.task.notifications.constants import EmailType
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
 
@@ -53,7 +53,7 @@ def send_workflow_email(
             subject=subject,
             message=message,
             trace_id=trace_id,
-            email_tags={EMAIL_TYPE_TAG: email_type},
+            email_tags=build_email_tags(email_type),
         )
 
     except Exception:

@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 import src.workflow.util.workflow_util as workflow_util
-from src.task.notifications.constants import EmailType
+from src.constants.email_constants import EmailType
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
 
 

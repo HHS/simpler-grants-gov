@@ -1,6 +1,7 @@
 import pytest
 
-from src.task.notifications.constants import EmailType, NotificationReason
+from src.constants.email_constants import EmailType
+from src.task.notifications.constants import NotificationReason
 
 
 @pytest.mark.parametrize("notification_reason", NotificationReason)

@@ -2,10 +2,11 @@ import pytest
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
+from src.constants.email_constants import EmailType
 from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog
 from src.task.notifications.config import EmailNotificationConfig
-from src.task.notifications.constants import EmailType, NotificationReason
+from src.task.notifications.constants import NotificationReason
 from src.task.notifications.org_saved_opportunity_notification import (
     OrgSavedOpportunityNotificationTask,
 )
