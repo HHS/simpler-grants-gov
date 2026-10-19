@@ -1,9 +1,4 @@
-import { validSearchQueryParamKeys } from "src/types/search/searchQueryTypes";
-import {
-  setNewRelicCustomAttribute,
-  unsetAllNewRelicQueryAttributes,
-  waitForNewRelic,
-} from "src/utils/analyticsUtil";
+import { waitForNewRelic } from "src/utils/analyticsUtil";
 
 jest.mock("src/constants/environments", () => ({
   environment: {
@@ -11,7 +6,6 @@ jest.mock("src/constants/environments", () => ({
   },
 }));
 jest.useFakeTimers();
-const mockSetCustomAttribute = jest.fn();
 
 describe("waitForNewRelic", () => {
   afterEach(() => {
@@ -38,66 +32,5 @@ describe("waitForNewRelic", () => {
 
     const result = await resolution;
     expect(result).toEqual(false);
-  });
-});
-
-describe("setNewRelicCustomAttribute", () => {
-  afterEach(() => {
-    // eslint-disable-next-line
-    // @ts-ignore
-    window.newrelic = undefined;
-    jest.resetAllMocks();
-  });
-  it("does not attempt to call new relic if new relic does not exist", () => {
-    setNewRelicCustomAttribute("key", "value");
-    expect(mockSetCustomAttribute).not.toHaveBeenCalled();
-  });
-  it("calls new relic with passed values, with key properly prefixed", () => {
-    // eslint-disable-next-line
-    // @ts-ignore
-    window.newrelic = {
-      setCustomAttribute: mockSetCustomAttribute,
-    };
-
-    setNewRelicCustomAttribute("key", "value");
-    expect(mockSetCustomAttribute).toHaveBeenCalledWith(
-      "search_param_key",
-      "value",
-    );
-  });
-});
-
-describe("unsetAllNewRelicQueryAttributes", () => {
-  afterEach(() => {
-    // eslint-disable-next-line
-    // @ts-ignore
-    window.newrelic = undefined;
-    jest.resetAllMocks();
-  });
-  it("does not attempt to call new relic if new relic does not exist", () => {
-    unsetAllNewRelicQueryAttributes();
-    expect(mockSetCustomAttribute).not.toHaveBeenCalled();
-  });
-  it("calls new relic with passed values, with key properly prefixed", () => {
-    // eslint-disable-next-line
-    // @ts-ignore
-    window.newrelic = {
-      setCustomAttribute: mockSetCustomAttribute,
-    };
-
-    unsetAllNewRelicQueryAttributes();
-    expect(mockSetCustomAttribute).toHaveBeenCalledTimes(
-      [...validSearchQueryParamKeys, "query_length"].length,
-    );
-    validSearchQueryParamKeys.forEach((key) => {
-      expect(mockSetCustomAttribute).toHaveBeenCalledWith(
-        `search_param_${key}`,
-        "",
-      );
-    });
-    expect(mockSetCustomAttribute).toHaveBeenCalledWith(
-      "search_param_query_length",
-      0,
-    );
   });
 });

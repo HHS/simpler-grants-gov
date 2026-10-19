@@ -1,8 +1,6 @@
-import { validSearchQueryParamKeys } from "src/types/search/searchQueryTypes";
 import {
+  sendNewRelicSearchAttempt,
   setNewRelicCorrelationIdAttribute,
-  setNewRelicCustomAttribute,
-  unsetAllNewRelicQueryAttributes,
   waitForNewRelic,
   type NewRelicBrowser,
 } from "src/utils/analyticsUtil";
@@ -87,46 +85,6 @@ describe("analyticsUtil", () => {
     });
   });
 
-  describe("setNewRelicCustomAttribute", () => {
-    it("sets a custom attribute when newrelic is available", () => {
-      const mockSetCustomAttribute = jest.fn();
-      setMockNewRelic({ setCustomAttribute: mockSetCustomAttribute });
-
-      setNewRelicCustomAttribute("test_key", "test_value");
-
-      expect(mockSetCustomAttribute).toHaveBeenCalledWith(
-        "search_param_test_key",
-        "test_value",
-      );
-    });
-
-    it("sets a numeric custom attribute when newrelic is available", () => {
-      const mockSetCustomAttribute = jest.fn();
-      setMockNewRelic({ setCustomAttribute: mockSetCustomAttribute });
-
-      setNewRelicCustomAttribute("test_key", 42);
-
-      expect(mockSetCustomAttribute).toHaveBeenCalledWith(
-        "search_param_test_key",
-        42,
-      );
-    });
-
-    it("logs error and returns undefined when newrelic is not available", () => {
-      // Ensure newrelic is not defined
-      if (window.newrelic) {
-        deleteNewRelic();
-      }
-
-      const result = setNewRelicCustomAttribute("test_key", "test_value");
-
-      expect(result).toBeUndefined();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "New Relic not defined setting custom attribute",
-      );
-    });
-  });
-
   describe("setNewRelicCorrelationIdAttribute", () => {
     it("sets correlation_id attribute when newrelic is available", () => {
       const mockSetCustomAttribute = jest.fn();
@@ -155,45 +113,53 @@ describe("analyticsUtil", () => {
     });
   });
 
-  describe("unsetAllNewRelicQueryAttributes", () => {
-    it("unsets all query attributes and query_length", () => {
+  describe("sendNewRelicSearchAttempt", () => {
+    it("sends a search_attempt page action with the passed attributes", () => {
+      const mockAddPageAction = jest.fn();
       const mockSetCustomAttribute = jest.fn();
-      setMockNewRelic({ setCustomAttribute: mockSetCustomAttribute });
-
-      unsetAllNewRelicQueryAttributes();
-
-      // Should be called once for each valid search query param key + 1 for query_length
-      expect(mockSetCustomAttribute).toHaveBeenCalledTimes(
-        validSearchQueryParamKeys.length + 1,
-      );
-
-      // Verify each search param was called with empty string
-      validSearchQueryParamKeys.forEach((key) => {
-        expect(mockSetCustomAttribute).toHaveBeenCalledWith(
-          `search_param_${key}`,
-          "",
-        );
+      setMockNewRelic({
+        addPageAction: mockAddPageAction,
+        setCustomAttribute: mockSetCustomAttribute,
       });
 
-      // Verify query_length was called with 0
-      expect(mockSetCustomAttribute).toHaveBeenCalledWith(
-        "search_param_query_length",
-        0,
+      const attributes = {
+        search_param_status: "posted,forecasted",
+        search_param_agency: "HHS",
+        search_param_page: "1",
+        search_param_query_length: 0,
+      };
+      sendNewRelicSearchAttempt(attributes);
+
+      expect(mockAddPageAction).toHaveBeenCalledTimes(1);
+      expect(mockAddPageAction).toHaveBeenCalledWith(
+        "search_attempt",
+        attributes,
       );
+      expect(mockSetCustomAttribute).not.toHaveBeenCalled();
     });
 
-    it("handles when newrelic is not available", () => {
+    it("logs error and returns undefined when newrelic is not available", () => {
       if (window.newrelic) {
         deleteNewRelic();
       }
 
-      // Should not throw an error
-      expect(() => {
-        unsetAllNewRelicQueryAttributes();
-      }).not.toThrow();
+      const result = sendNewRelicSearchAttempt({ search_param_page: "1" });
 
-      // Should log errors for each attempted call
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(result).toBeUndefined();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "New Relic not defined sending search_attempt page action",
+      );
+    });
+
+    it("does not throw when newrelic does not support addPageAction", () => {
+      setMockNewRelic({ setCustomAttribute: jest.fn() });
+
+      expect(() =>
+        sendNewRelicSearchAttempt({ search_param_page: "1" }),
+      ).not.toThrow();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "New Relic not defined sending search_attempt page action",
+      );
     });
   });
 });
