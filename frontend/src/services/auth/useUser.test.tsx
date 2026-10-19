@@ -105,7 +105,6 @@ describe("useUser", () => {
       expect(result.current.user?.isLoggedIn).toEqual(false);
     });
     expect(result.current.hasBeenLoggedOut).toEqual(true);
-    // implicit logout stays on the current page, explicit logout is handled by the sign out link
     expect(redirectMock).not.toHaveBeenCalled();
   });
   it("does not clear the correlation id when an anonymous user remains logged out", async () => {

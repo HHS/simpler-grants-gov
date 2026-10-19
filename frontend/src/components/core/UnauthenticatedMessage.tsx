@@ -5,8 +5,6 @@ import { Alert, GridContainer } from "@trussworks/react-uswds";
 
 import { LoginLink } from "src/components/core/LoginButton";
 
-// shared signed-out state for auth-gated content. Rendered in place at the requested URL,
-// authentication only starts when the user explicitly chooses to sign in or create an account
 export const UnauthenticatedMessage = () => {
   const t = useTranslations("Errors");
   return (

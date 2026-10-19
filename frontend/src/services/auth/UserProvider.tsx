@@ -54,8 +54,6 @@ export default function UserProvider({
         setLocalUser(fetchedUser);
         setUserFetchError(undefined);
         setIsLoading(false);
-        // implicit logout (expired or missing session) stays on the current page,
-        // auth-gated content resolves to the shared signed-out state
         if (localUser?.isLoggedIn && !fetchedUser.isLoggedIn) {
           setHasBeenLoggedOut(true);
         }
