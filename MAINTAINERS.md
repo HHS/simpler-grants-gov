@@ -29,6 +29,7 @@ This is a list of maintainers for this project. Team members include:
 * [Michael Slater](https://github.com/mike-slater)
 * [Shawn VanderJagt](https://github.com/shawnvanderjagt)
 * [Bethany Alcamo](https://github.com/balcamo)
+* [Branford Harris](https://github.com/afrothundr)
 
 ## Content and Design
 
