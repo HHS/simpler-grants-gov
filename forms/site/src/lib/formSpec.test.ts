@@ -56,8 +56,12 @@ describe.each([
     expect(JSON.stringify(spec.schema)).not.toContain('"$ref"');
   });
 
-  it("resolves every UI scope against the schema", () => {
-    const found = controls(spec.uischema as unknown as UiNode, spec.schema);
+  it("resolves every UI scope against the rendered schema", () => {
+    const { formSchema } = processFormSchema(spec.schema);
+    const found = controls(
+      spec.uischema as unknown as UiNode,
+      formSchema as JsonSchema,
+    );
     expect(found.length).toBeGreaterThan(0);
     for (const [scope, schema] of found) {
       expect(resolveScope(schema, scope), scope).toBeDefined();
