@@ -18,6 +18,7 @@ import pytest
 
 import src.form_schema.forms as forms_pkg
 from src.form_schema.forms.sf424 import FORM_JSON_SCHEMA, FORM_XML_TRANSFORM_RULES
+from src.services.xml_generation.transformers.base_transformer import FIELD_REFERENCE_PATTERN
 
 # Schema fields that are intentionally not written to the XML, keyed by form package name.
 # Every entry needs a reason, and test_fields_not_in_xml_are_real keeps this list honest.
@@ -96,14 +97,25 @@ def _conditional_source_fields(transform: dict, from_root: bool) -> set[str]:
 
 def _mapped_fields(rules: dict, schema_fields: set[str]) -> set[str]:
     """Top-level schema fields that the transform rules read from."""
+    xml_config = rules.get("_xml_config", {})
     mapped = {key for key in rules if not key.startswith("_")}
-    mapped |= set(rules.get("_xml_config", {}).get("attachment_fields", {}))
+    mapped |= set(xml_config.get("attachment_fields", {}))
+    # Root element attributes read a root field when the value looks like a field name,
+    # otherwise the value is written as-is (e.g. "FormVersion": "1.2")
+    for value in xml_config.get("xml_structure", {}).get("root_attributes", {}).values():
+        if isinstance(value, str) and FIELD_REFERENCE_PATTERN.match(value):
+            mapped.add(value)
 
     def walk(node: Any, from_root: bool) -> None:
         if isinstance(node, dict):
             transform = node.get("conditional_transform")
             if isinstance(transform, dict):
                 mapped.update(_conditional_source_fields(transform, from_root))
+            xml_transform = node.get("xml_transform")
+            if isinstance(xml_transform, dict):
+                # A nested child falls back to this path in the root data when its own
+                # value is missing (e.g. SF-LLL individual_performing_service)
+                mapped.update(_root_field(xml_transform.get("source_path")))
             for value in node.values():
                 walk(value, from_root)
         elif isinstance(node, list):
@@ -114,11 +126,19 @@ def _mapped_fields(rules: dict, schema_fields: set[str]) -> set[str]:
         if key.startswith("_") or not isinstance(rule, dict):
             continue
         from_root = key not in schema_fields
+        xml_transform = rule.get("xml_transform", {})
         # A nested_object wrapper that isn't a schema field (e.g. SF-LLL
         # federal_program_wrapper) has no source object, so its child rules read
-        # straight from the root data
-        if from_root and rule.get("xml_transform", {}).get("type") == "nested_object":
-            mapped |= {child for child in rule if child != "xml_transform"}
+        # straight from the root data, as do its attributes. The children are listed in
+        # xml_transform.nested_fields when present, otherwise they're siblings of it.
+        if from_root and xml_transform.get("type") == "nested_object":
+            nested_fields = xml_transform.get("nested_fields")
+            if nested_fields:
+                mapped |= set(nested_fields)
+            else:
+                mapped |= {child for child in rule if child != "xml_transform"}
+            for path in xml_transform.get("attributes", {}).values():
+                mapped |= _root_field(path)
         walk(rule, from_root)
 
     return mapped
@@ -162,6 +182,130 @@ def test_removed_mapping_is_reported():
     rules = {key: rule for key, rule in FORM_XML_TRANSFORM_RULES.items() if key != "fax"}
 
     assert _unmapped_fields(FORM_JSON_SCHEMA, rules) == {"fax"}
+
+
+def _conditional(transform: dict) -> dict:
+    return {"xml_transform": {"type": "conditional", "conditional_transform": transform}}
+
+
+# Each rule reads only the `read` field. `inner` is a path relative to an item or
+# sub-object, so it must not count as a top-level field, and `other` isn't read at all.
+RULE_SHAPES = {
+    "top_level_key": {"read": {"xml_transform": {"target": "Read"}}},
+    "attachment_fields": {"_xml_config": {"attachment_fields": {"read": {}}}},
+    "one_to_many": {
+        "wrapper": _conditional(
+            {"type": "one_to_many", "source_field": "read", "target_pattern": "Item{index}"}
+        )
+    },
+    "pivot_object": {
+        "wrapper": _conditional(
+            {
+                "type": "pivot_object",
+                "source_field": "read",
+                "field_mapping": {"Target": {"Child": "inner.amount"}},
+            }
+        )
+    },
+    "field_grouping": {
+        "wrapper": _conditional({"type": "field_grouping", "source_fields": ["read"]})
+    },
+    "compose_object": {
+        "wrapper": _conditional({"type": "compose_object", "field_mapping": {"Child": "read"}})
+    },
+    "compose_object_attributes": {
+        "wrapper": _conditional(
+            {"type": "compose_object", "field_mapping": {}, "attributes": {"attr": "read"}}
+        )
+    },
+    "array_decomposition": {
+        "wrapper": _conditional(
+            {
+                "type": "array_decomposition",
+                "source_array_field": "read",
+                "field_mappings": {
+                    "Section": {
+                        "item_field": "inner",
+                        "item_attributes": ["inner"],
+                        "item_parent_fields": ["inner"],
+                    }
+                },
+            }
+        )
+    },
+    "array_decomposition_total": {
+        "wrapper": _conditional(
+            {
+                "type": "array_decomposition",
+                "source_array_field": "read",
+                "field_mappings": {"Section": {"item_field": "inner", "total_field": "read"}},
+            }
+        )
+    },
+    "conditional_structure_on_wrapper": {
+        "wrapper": _conditional(
+            {
+                "type": "conditional_structure",
+                "condition": {"type": "field_equals", "field": "read", "value": "x"},
+                "if_true": {"source_fields": {"read": "Read"}},
+            }
+        )
+    },
+    "conditional_structure_on_field": {
+        "read": _conditional(
+            {
+                "type": "conditional_structure",
+                "condition": {"type": "field_equals", "field": "read", "value": "x"},
+                "if_true": {"source_fields": {"inner": "Inner"}},
+            }
+        )
+    },
+    "nested_object_wrapper_siblings": {
+        "wrapper": {
+            "xml_transform": {"type": "nested_object", "target": "Wrapper"},
+            "read": {"xml_transform": {"target": "Read"}},
+        }
+    },
+    "nested_object_wrapper_nested_fields": {
+        "wrapper": {
+            "xml_transform": {
+                "type": "nested_object",
+                "target": "Wrapper",
+                "nested_fields": {"read": {"xml_transform": {"target": "Read"}}},
+            }
+        }
+    },
+    "nested_object_wrapper_attributes": {
+        "wrapper": {"xml_transform": {"type": "nested_object", "attributes": {"attr": "read"}}}
+    },
+    "nested_object_field_attributes": {
+        "read": {"xml_transform": {"type": "nested_object", "attributes": {"attr": "inner"}}}
+    },
+    "root_attributes": {
+        "_xml_config": {
+            "xml_structure": {"root_attributes": {"attr": "read", "FormVersion": "1.2"}}
+        }
+    },
+    "nested_child_source_path": {
+        "wrapper": {
+            "xml_transform": {"type": "nested_object", "target": "Wrapper"},
+            "child": {
+                "xml_transform": {
+                    "type": "nested_object",
+                    "target": "Child",
+                    "source_path": "read.child",
+                }
+            },
+        }
+    },
+}
+
+
+@pytest.mark.parametrize("rules", RULE_SHAPES.values(), ids=RULE_SHAPES.keys())
+def test_each_rule_shape_counts_only_the_fields_it_reads(rules):
+    schema = {"properties": {"read": {}, "other": {}, "inner": {}}}
+
+    assert _unmapped_fields(schema, rules) == {"other", "inner"}
 
 
 def test_unknown_conditional_transform_type_fails():
