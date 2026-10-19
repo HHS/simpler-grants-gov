@@ -28,6 +28,7 @@ This is a list of maintainers for this project. Team members include:
 * [Nasiruddin Khazi](https://github.com/nkhazi)
 * [Michael Slater](https://github.com/mike-slater)
 * [Shawn VanderJagt](https://github.com/shawnvanderjagt)
+* [Bethany Alcamo](https://github.com/balcamo)
 
 ## Content and Design
 
