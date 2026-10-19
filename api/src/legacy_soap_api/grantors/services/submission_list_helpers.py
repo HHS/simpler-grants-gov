@@ -187,6 +187,9 @@ def get_submissions(
                         ~ApplicationSubmission.application_submission_tracking_numbers.any(),
                         Application.application_status == simpler_status,
                     )
+                else:
+                    # Status value is unrecognized or has no Simpler equivalent — return nothing.
+                    return []
         # Each one of these filters is Last One Wins — if multiple of the same type are entered,
         # only the last one is applied.
         grants_gov_tracking_numbers = get_filter_values(
