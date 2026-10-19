@@ -11,6 +11,7 @@ const mockSimplerFileInput = jest.fn();
 
 type MockSimplerFileInputProps = {
   id: string;
+  disabled?: boolean;
   postUploadAction: PostUploadAction;
   onDelete: (fileId: string) => Promise<unknown>;
   existingFiles?: UploadFileMetadata[];
@@ -124,6 +125,14 @@ describe("ApplicationInstructions", () => {
 
       expect(mockSimplerFileInput).toHaveBeenCalledWith(
         expect.objectContaining({ existingFiles }),
+      );
+    });
+
+    it("passes the readOnly flag through to the upload widget", () => {
+      render(<ApplicationInstructions readOnly />);
+
+      expect(mockSimplerFileInput).toHaveBeenCalledWith(
+        expect.objectContaining({ disabled: true }),
       );
     });
   });

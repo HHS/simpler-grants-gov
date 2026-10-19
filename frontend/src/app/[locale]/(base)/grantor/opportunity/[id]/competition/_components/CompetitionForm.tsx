@@ -35,12 +35,14 @@ type CompetitionFormProps = {
   opportunityId: string;
   competition?: Competition;
   forms: FormType[];
+  readOnly?: boolean;
 };
 
 export function CompetitionForm({
   opportunityId: _opportunityId,
   competition,
   forms,
+  readOnly = false,
 }: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition");
 
@@ -134,17 +136,25 @@ export function CompetitionForm({
                 {t("applicationRequirementsSubheader")}
               </p>
               <SubmissionSetUp
+                readOnly={readOnly}
                 publicCompetitionId={competition?.public_competition_id}
                 competitionTitle={competition?.competition_title}
                 openToApplicants={competition?.open_to_applicants}
               />
               <SubmissionWindow
+                readOnly={readOnly}
                 openingDate={competition?.opening_date}
                 closingDate={competition?.closing_date}
                 gracePeriod={competition?.grace_period}
               />
-              <AgencyContact contactInfo={competition?.contact_info} />
-              <ApplicationInstructions existingFiles={existingFiles} />
+              <AgencyContact
+                readOnly={readOnly}
+                contactInfo={competition?.contact_info}
+              />
+              <ApplicationInstructions
+                readOnly={readOnly}
+                existingFiles={existingFiles}
+              />
               <RequiredForms
                 alwaysRequiredForms={alwaysRequiredForms}
                 requiredForms={requiredForms}
@@ -152,6 +162,7 @@ export function CompetitionForm({
               />
               <ModalToggleButton
                 modalRef={formModalRef}
+                disabled={readOnly}
                 opener
                 className="usa-button usa-button--secondary"
                 type="button"
@@ -165,6 +176,7 @@ export function CompetitionForm({
                   type="submit"
                   data-submit-type="saveAndGoBack"
                   className="usa-button--outline"
+                  disabled={readOnly}
                 >
                   {isPending ? t("button.processing") : t("button.back")}
                 </Button>
@@ -178,7 +190,11 @@ export function CompetitionForm({
                   setRequiredForms(forms);
                 }}
               />
-              <Button type="submit" data-submit-type="saveAndContinue">
+              <Button
+                type="submit"
+                data-submit-type="saveAndContinue"
+                disabled={readOnly}
+              >
                 {isPending
                   ? t("button.processing")
                   : t("button.saveAndContinue")}
