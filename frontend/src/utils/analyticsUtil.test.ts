@@ -138,6 +138,17 @@ describe("analyticsUtil", () => {
       expect(mockSetCustomAttribute).not.toHaveBeenCalled();
     });
 
+    // TEMPORARY #12725: diagnostics are gated to the sgg2 host
+    it("does not log #12725 diagnostics outside sgg2", () => {
+      const warnSpy = jest.spyOn(console, "warn").mockImplementation();
+      setMockNewRelic({ addPageAction: jest.fn() });
+
+      sendNewRelicSearchAttempt({ search_param_page: "1" });
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
     it("logs error and returns undefined when newrelic is not available", () => {
       if (window.newrelic) {
         deleteNewRelic();

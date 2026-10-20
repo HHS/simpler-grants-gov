@@ -1,4 +1,5 @@
 import { environment } from "src/constants/environments";
+import { withNrDebug12725 } from "src/utils/newRelicDebug12725";
 
 // note that the `newrelic` referenced here is the newrelic object added to window when
 // client side new relic scripts are loaded and run, rather than anything explicity imported
@@ -68,5 +69,8 @@ export const sendNewRelicSearchAttempt = (
     console.error("New Relic not defined sending search_attempt page action");
     return;
   }
-  newRelic.addPageAction("search_attempt", attributes);
+  // TEMPORARY #12725: remove wrapper, keep the addPageAction call
+  withNrDebug12725(attributes, () =>
+    newRelic.addPageAction!("search_attempt", attributes),
+  );
 };
