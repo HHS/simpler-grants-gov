@@ -1,0 +1,67 @@
+{
+  "name": "@sgg/form-library",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "predev": "npm run specs",
+    "dev": "astro dev",
+    "prebuild": "npm run specs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "preview:worker": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "astro check && tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "pretest": "npm run specs",
+    "test": "vitest run",
+    "audit": "npm audit --audit-level=critical",
+    "postinstall": "node scripts/postinstall.mjs",
+    "specs": "npm --prefix .. install --no-audit --no-fund && npm --prefix .. run compile"
+  },
+  "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^16.0.3",
+    "@jsonforms/core": "^3.8.0",
+    "@jsonforms/react": "^3.8.0",
+    "@jsonforms/vanilla-renderers": "^3.8.0",
+    "@nanostores/react": "^0.8.4",
+    "@rjsf/utils": "^5.24.13",
+    "@trussworks/react-uswds": "^11.2.0",
+    "@uswds/uswds": "^3.13.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "astro": "^7.3.5",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.23",
+    "json-pointer": "^0.6.2",
+    "json-schema-merge-allof": "^0.8.1",
+    "lodash": "^4.18.1",
+    "nanostores": "^0.11.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "overrides": {
+    "http-cache-semantics": "^4.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/react": "^7.0.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.30.1",
+    "@typescript-eslint/parser": "^8.30.1",
+    "eslint": "^9.25.0",
+    "eslint-config-prettier": "^10.1.2",
+    "prettier": "^3.5.3",
+    "sass": "^1.87.0",
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.3",
+    "wrangler": "^4.147.0"
+  }
+}

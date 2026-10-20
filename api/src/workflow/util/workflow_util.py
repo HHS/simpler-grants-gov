@@ -7,6 +7,8 @@ import logging
 import uuid
 
 from src.adapters.aws.local_email_adapter import send_email_to_address
+from src.adapters.aws.ses_adapter import build_email_tags
+from src.constants.email_constants import EmailType
 from src.db.models.user_models import User
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
@@ -15,7 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 def send_workflow_email(
-    state_machine_event: StateMachineEvent, user: User, subject: str, message: str
+    state_machine_event: StateMachineEvent,
+    user: User,
+    subject: str,
+    message: str,
+    email_type: EmailType,
 ) -> None:
     """
 
@@ -47,6 +53,7 @@ def send_workflow_email(
             subject=subject,
             message=message,
             trace_id=trace_id,
+            email_tags=build_email_tags(email_type),
         )
 
     except Exception:

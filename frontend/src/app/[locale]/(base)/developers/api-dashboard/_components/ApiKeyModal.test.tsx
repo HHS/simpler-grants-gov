@@ -539,8 +539,10 @@ describe("ApiKeyModal", () => {
       renderModal("edit", mockApiKey);
 
       expect(
-        screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
-      ).toHaveAttribute("title", "editTriggerTitle");
+        within(
+          screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
+        ).getByText("editTriggerKeyName"),
+      ).toHaveClass("usa-sr-only");
       expect(
         screen.getByRole("heading", { name: "editTitle", hidden: true }),
       ).toBeInTheDocument();

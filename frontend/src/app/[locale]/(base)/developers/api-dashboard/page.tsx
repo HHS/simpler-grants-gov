@@ -45,8 +45,8 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
     // wraps the whole page so opening any API key modal clears the API key confirmation
     <ApiKeyAlertProvider>
       <div className="grid-container margin-y-5">
-        <div className="flex-justify margin-bottom-4">
-          <h1>{t("heading")}</h1>
+        <h1>{t("heading")}</h1>
+        <div className="margin-bottom-4">
           <CreateApiKeyButton />
         </div>
 
