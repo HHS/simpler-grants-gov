@@ -57,10 +57,15 @@ def test_validate_api_key_in_db_looks_up_by_hash(enable_factory_create, db_sessi
         key_id_hash=hash_api_key_id("hashed-key-123", ApiKeyConfig().pepper),
     )
 
+    api_key_id, user_id = api_key.api_key_id, user.user_id
+    # Clear the session so the user has to be loaded by the lookup itself
+    db_session.expunge_all()
+
     result = validate_api_key_in_db("hashed-key-123", db_session)
-    assert result.api_key_id == api_key.api_key_id
+    assert result.api_key_id == api_key_id
     # The user is loaded with the key so the auth can return it
-    assert result.user.user_id == user.user_id
+    assert "user" in result.__dict__
+    assert result.user.user_id == user_id
 
     with pytest.raises(ApiKeyValidationError, match="Invalid API key"):
         validate_api_key_in_db("stale-plaintext-key", db_session)

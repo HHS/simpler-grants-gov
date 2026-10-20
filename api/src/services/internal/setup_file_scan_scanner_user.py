@@ -25,7 +25,7 @@ import uuid
 from sqlalchemy import select
 
 import src.adapters.db as db
-from src.auth.api_key_config import ApiKeyConfig
+from src.auth.api_key_config import get_api_key_config
 from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.auth.auth_handler import AuthHandler
 from src.auth.endpoint_access_util import verify_access
@@ -102,7 +102,7 @@ def _create_api_key(db_session: db.Session, user: User) -> tuple[UserApiKey, str
 
 def _generate_unique_key_id(auth_handler: AuthHandler) -> tuple[str, str]:
     """Generate a new key_id and its hash, retrying if the hash is already taken."""
-    pepper = ApiKeyConfig().pepper
+    pepper = get_api_key_config().pepper
     for _attempt in range(MAX_KEY_GENERATION_RETRIES):
         key_id = generate_api_key_id()
         key_id_hash = hash_api_key_id(key_id, pepper)

@@ -7,7 +7,7 @@ from uuid import UUID
 from src.adapters import db
 from src.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
 from src.api.route_utils import raise_flask_error
-from src.auth.api_key_config import ApiKeyConfig
+from src.auth.api_key_config import get_api_key_config
 from src.auth.auth_handler_base import AbstractAuthHandler
 from src.db.models.auth_base_models import BaseUserApiKey
 from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
@@ -42,7 +42,7 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
 
     def create_api_key(self, user_id: UUID, key_name: str) -> tuple[USER_API_KEY, str]:
         """Create an API key for a user and associate with API gateway"""
-        pepper = ApiKeyConfig().pepper
+        pepper = get_api_key_config().pepper
 
         # Generate a unique key_id with collision detection
         key_id, key_id_hash = self._generate_unique_key_id(pepper)
