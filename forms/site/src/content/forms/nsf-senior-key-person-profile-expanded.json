@@ -35,6 +35,7 @@
     "The NSF-specific fields (NSFID, Organization UEI) may require agency-specific validation that is not defined in the XSD.",
     "`PDPIProfileDataType` and `PersonProfileDataType` differ in one field: the PD/PI gives the organization's name, a senior/key person its UEI. Neither has Credential, Other Project Role Category or the degree fields."
   ],
+  "spec_id": "nsf-key-person-expanded",
   "children": [
     {
       "kind": "section",
