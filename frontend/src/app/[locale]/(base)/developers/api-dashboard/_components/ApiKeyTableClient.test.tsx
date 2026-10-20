@@ -163,6 +163,9 @@ describe("ApiKeyTableClient", () => {
       expect(editButtons).toHaveLength(2);
       editButtons.forEach((button) => {
         expect(button).toHaveTextContent("editTriggerText");
+        expect(within(button).getByText("editTriggerKeyName")).toHaveClass(
+          "usa-sr-only",
+        );
       });
     });
 
@@ -175,6 +178,9 @@ describe("ApiKeyTableClient", () => {
       expect(deleteButtons).toHaveLength(2);
       deleteButtons.forEach((button) => {
         expect(button).toHaveTextContent("deleteTriggerText");
+        expect(within(button).getByText("deleteTriggerKeyName")).toHaveClass(
+          "usa-sr-only",
+        );
         expect(button).toHaveClass("text-error-dark");
       });
     });

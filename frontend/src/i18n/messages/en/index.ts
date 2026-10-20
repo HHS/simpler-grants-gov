@@ -860,16 +860,16 @@ export const messages = {
       duplicateNameError:
         "A key with this name already exists. Enter a different name.",
       editTitle: 'Edit "{keyName}" API key name',
-      editTriggerTitle: 'Edit "{keyName}" API key name',
       editTriggerText: "Edit name",
+      editTriggerKeyName: 'for "{keyName}" API key',
       createButtonText: "Create API key",
       creating: "Creating...",
       saving: "Saving...",
       saveChanges: "Save changes",
       cancel: "Cancel",
       deleteTitle: 'Delete "{keyName}" API key?',
-      deleteTriggerTitle: 'Delete "{keyName}" API key',
       deleteTriggerText: "Delete",
+      deleteTriggerKeyName: '"{keyName}" API key',
       deleteDescription:
         "Any application or service using this key will immediately lose access to the API. This action cannot be undone.",
       deleteConfirmationLabel:

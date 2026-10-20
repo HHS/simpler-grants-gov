@@ -17,3 +17,11 @@ export interface CreatedApiKey extends ApiKey {
 export interface ApiKeyResponse extends APIResponse {
   data: ApiKey[];
 }
+
+export interface CreateApiKeyResponse extends APIResponse {
+  data: CreatedApiKey;
+}
+
+export interface RenameApiKeyResponse extends APIResponse {
+  data: ApiKey;
+}

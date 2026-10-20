@@ -4,7 +4,7 @@ import {
   handleListApiKeys,
   handleRenameApiKey,
 } from "src/services/fetch/fetchers/apiKeyFetcher";
-import { ApiKey } from "src/types/apiKeyTypes";
+import { ApiKey, CreatedApiKey } from "src/types/apiKeyTypes";
 import { baseApiKey, createMockApiKey } from "src/utils/testing/fixtures";
 
 const mockFetchUserWithMethod = jest.fn();
@@ -19,6 +19,12 @@ jest.mock("src/services/auth/session", () => ({
 }));
 
 const mockApiKey: ApiKey = baseApiKey;
+
+// what list and rename return until the hashing cutover
+const withKeyId = (apiKey: ApiKey): CreatedApiKey => ({
+  ...apiKey,
+  key_id: `secret-${apiKey.api_key_id}`,
+});
 
 const mockApiKeys: ApiKey[] = [
   mockApiKey,
@@ -41,7 +47,7 @@ describe("apiKeyFetcher", () => {
         json: () =>
           Promise.resolve({
             status_code: 200,
-            data: mockApiKey,
+            data: withKeyId(mockApiKey),
             message: "Success",
           }),
       };
@@ -56,7 +62,8 @@ describe("apiKeyFetcher", () => {
       });
 
       expect(result.status_code).toBe(200);
-      expect(result.data).toEqual(mockApiKey);
+      // create is the one place the full key is returned
+      expect(result.data).toEqual(withKeyId(mockApiKey));
     });
 
     it("handles API key creation failure", async () => {
@@ -91,7 +98,7 @@ describe("apiKeyFetcher", () => {
         json: () =>
           Promise.resolve({
             status_code: 200,
-            data: mockApiKeys,
+            data: mockApiKeys.map(withKeyId),
             message: "Success",
           }),
       };
@@ -117,6 +124,7 @@ describe("apiKeyFetcher", () => {
       });
 
       expect(result.status_code).toBe(200);
+      // the full key is dropped so it never reaches the page
       expect(result.data).toEqual(mockApiKeys);
     });
 
@@ -171,7 +179,7 @@ describe("apiKeyFetcher", () => {
         json: () =>
           Promise.resolve({
             status_code: 200,
-            data: renamedApiKey,
+            data: withKeyId(renamedApiKey),
             message: "Success",
           }),
       };
@@ -190,6 +198,7 @@ describe("apiKeyFetcher", () => {
       });
 
       expect(result.status_code).toBe(200);
+      // the full key is dropped so the rename route never returns it
       expect(result.data).toEqual(renamedApiKey);
     });
 

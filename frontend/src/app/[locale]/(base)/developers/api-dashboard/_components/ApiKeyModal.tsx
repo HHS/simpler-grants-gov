@@ -485,11 +485,14 @@ export default function ApiKeyModal({
       children: (
         <>
           <USWDSIcon name="edit" className="usa-icon margin-right-05" />
-          {t("editTriggerText")}
+          {t("editTriggerText")}{" "}
+          {/* every row has the same visible label, so name the key for screen readers and voice control */}
+          <span className="usa-sr-only">
+            {t("editTriggerKeyName", { keyName: apiKey?.key_name ?? "" })}
+          </span>
         </>
       ),
       unstyled: true,
-      title: t("editTriggerTitle", { keyName: apiKey?.key_name ?? "" }),
       "data-testid": `open-edit-api-key-modal-button-${apiKey?.api_key_id ?? "unknown"}`,
     },
     delete: {
@@ -497,11 +500,13 @@ export default function ApiKeyModal({
       children: (
         <>
           <USWDSIcon name="delete" className="usa-icon margin-right-05" />
-          {t("deleteTriggerText")}
+          {t("deleteTriggerText")}{" "}
+          <span className="usa-sr-only">
+            {t("deleteTriggerKeyName", { keyName: apiKey?.key_name ?? "" })}
+          </span>
         </>
       ),
       unstyled: true,
-      title: t("deleteTriggerTitle", { keyName: apiKey?.key_name ?? "" }),
       "data-testid": `open-delete-api-key-modal-button-${apiKey?.api_key_id ?? "unknown"}`,
     },
   };

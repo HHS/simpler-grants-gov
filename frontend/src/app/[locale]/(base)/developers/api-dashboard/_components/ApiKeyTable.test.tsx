@@ -384,14 +384,16 @@ describe("ApiKeyTable", () => {
       expect(results).toHaveNoViolations();
     });
 
-    it("has proper ARIA labels for delete buttons", () => {
+    it("names the key in each delete button for screen readers", () => {
       renderTable();
 
       const deleteButtons = screen.getAllByTestId(
         /open-delete-api-key-modal-button-/,
       );
       deleteButtons.forEach((button) => {
-        expect(button).toHaveAttribute("title", "deleteTriggerTitle");
+        expect(within(button).getByText("deleteTriggerKeyName")).toHaveClass(
+          "usa-sr-only",
+        );
       });
     });
 
