@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
-    "wait_for_ecs_task", ROOT / "bin/wait_for_ecs_task.py"
+    "wait_for_ecs_task", ROOT / "scripts/utilities/wait_for_ecs_task.py"
 )
 helper = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(helper)

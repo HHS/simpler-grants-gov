@@ -118,7 +118,7 @@ or that its task never completed.
 Offline verification (no AWS credentials or network calls):
 
 ```bash
-python3 -m unittest discover -s bin/tests -v
+python3 -m unittest discover -s scripts/tests -v
 bash -n bin/run-command bin/run-database-migrations
 ```
 

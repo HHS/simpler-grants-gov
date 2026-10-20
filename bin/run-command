@@ -136,7 +136,7 @@ echo
 echo "Waiting for task to complete"
 
 if [ -n "${wait_timeout_seconds}" ]; then
-  python3 ./bin/wait_for_ecs_task.py --cluster "${cluster_name}" --task "${task_arn}" \
+  python3 ./scripts/utilities/wait_for_ecs_task.py --cluster "${cluster_name}" --task "${task_arn}" \
     --container "${container_name}" --region "${current_region}" \
     --timeout-seconds "${wait_timeout_seconds}"
   exit 0
