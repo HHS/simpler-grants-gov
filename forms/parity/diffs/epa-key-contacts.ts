@@ -451,5 +451,11 @@ export const DIFF: FormDiff = {
       (role, field) => `${ROLES[role]}.address.${field.toLowerCase()}`,
     ),
   },
+  xmlMapping: {
+    absentFromPlan: notAsked(
+      (role, field) =>
+        `${ROLES[role]}.address.${field.toLowerCase()} -> ${XSD_ROLES[role]}/Address/${field}`,
+    ),
+  },
   uiSchema: { outOfOrder: addressOrder },
 };
