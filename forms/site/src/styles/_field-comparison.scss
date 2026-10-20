@@ -18,6 +18,9 @@
   --status-unrecorded-fill: #{color("red-60v")};
   --status-unrecorded-ink: #{color("white")};
   --status-unrecorded-tint: #{color("red-5")};
+  --status-stale-fill: #{color("gray-60")};
+  --status-stale-ink: #{color("white")};
+  --status-stale-tint: #{color("gray-5")};
   --status-notCompared-fill: repeating-linear-gradient(
     45deg,
     #{color("gray-10")} 0 3px,
@@ -27,7 +30,7 @@
   --status-notCompared-tint: #{color("gray-5")};
 }
 
-$statuses: match, intentional, upstream, gap, unrecorded, notCompared;
+$statuses: match, intentional, upstream, gap, unrecorded, stale, notCompared;
 
 // Shared
 .status-dot {
@@ -535,4 +538,17 @@ $statuses: match, intentional, upstream, gap, unrecorded, notCompared;
   margin: 0 0 units(1);
   @include u-font("sans", "xs");
   font-weight: 700;
+}
+
+// Original check evidence in the Findings tab shares the sheet's difference cards.
+.finding-card__paths,
+.finding-card__details {
+  margin: units(1) 0;
+  @include u-font("sans", "3xs");
+  overflow-wrap: anywhere;
+}
+
+.finding-card__details summary {
+  cursor: pointer;
+  color: color("base-dark");
 }

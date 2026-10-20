@@ -2,17 +2,23 @@ interface Props {
   plan: string | null;
   value: string | null;
   sourceLabel: string;
+  planLabel?: string;
 }
 
 const shown = (value: string | null) =>
   value ?? <span className="value-pair__none">None stated</span>;
 
 /** The plan's value beside the source's, in full. */
-export default function ValuePair({ plan, value, sourceLabel }: Props) {
+export default function ValuePair({
+  plan,
+  value,
+  sourceLabel,
+  planLabel = "Plan",
+}: Props) {
   return (
     <dl className="value-pair">
       <div>
-        <dt>Plan</dt>
+        <dt>{planLabel}</dt>
         <dd>{shown(plan)}</dd>
       </div>
       <div>

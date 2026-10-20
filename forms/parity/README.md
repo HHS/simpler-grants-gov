@@ -133,11 +133,16 @@ or out of order is recorded by path alone.
 A recorded difference that stops being real fails _recorded differences still exist_, so
 the record cannot rot.
 
-The form page retains its field comparison sheets and adds a collapsed list of every
-finding grouped by check. This includes source-only items, occurrence differences and
-stale records. The list counts original check findings; the field table counts displayed
-cells and affected fields. Several checks can report the same field. Context that cannot
-be checked goes in the plan's `notes`, which the page shows separately.
+The form page retains its field comparison sheets and gives all original findings their
+own Findings tab. Its category tiles and dimension chips filter check findings, including
+source-only items, missing/extra elements, occurrence differences and stale records.
+Filters use independent local state: OR within categories or dimensions, AND between
+the groups. Compared values, qualified artifact paths and recorded reasons appear on
+each card; its raw kind/detail, check path and recording coordinate remain available
+under Check details. Findings are not fabricated into field-table cells. Counts
+describe original check findings, while the field table counts displayed cells and
+affected fields. Several checks can report the same field. Context that cannot be
+checked goes in the plan's `notes`, which the page shows separately.
 
 ## Interface for the form library
 
@@ -180,9 +185,13 @@ actual schema/XSD coordinate. Suite/stale evidence without an unambiguous field 
 stays in the full ledger. Paths retain their artifact's syntax; finding ids and fallback
 field ids are local to one evaluation/plan, not durable cross-release identities.
 
-This is a build-time interface. The table receives only formatted rows/tree; its React
-props contain no raw checks or findings ledger. `comparison.ts` formats values, selects
-optional display rows and counts cells. Check selection, path association and outcomes
+This is a build-time interface. The field-tree island receives only formatted rows/tree;
+its React props contain no raw checks or findings ledger. A separate Findings island
+receives the public `Finding[]` and hydrates local filters, adding serialized ledger
+bytes and client rendering/filter cost. It does not rerun comparisons or share filter
+state with the field tree. The two views share only card/tile/chip presentation.
+`comparison.ts` formats values, selects optional display rows and counts cells.
+Check selection, path association and outcomes
 belong to `harness/fields.ts`. The suite's existing `checkForm` result remains a
 compatibility projection of the same evaluation, without another comparison run. Calling
 the two convenience entry points separately creates separate evaluations; there is no

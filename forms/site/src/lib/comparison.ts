@@ -51,8 +51,10 @@ export const ATTRIBUTE_LABELS: Record<Attribute, string> = {
   xmlMapping: "XML mapping",
 };
 
+export type DisplayStatus = Status | "stale";
+
 export const STATUS: Record<
-  Status,
+  DisplayStatus,
   { label: string; symbol: string; description: string }
 > = {
   match: {
@@ -85,6 +87,12 @@ export const STATUS: Record<
     symbol: "!",
     description:
       "A difference no record accepts. The parity tests fail until it is recorded.",
+  },
+  stale: {
+    label: "Stale record",
+    symbol: "S",
+    description:
+      "A recorded difference no longer matches the checked artifacts.",
   },
 };
 

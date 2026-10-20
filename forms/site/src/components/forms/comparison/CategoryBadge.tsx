@@ -1,9 +1,9 @@
-import { STATUS, type Status } from "@/lib/comparison";
+import { STATUS, type DisplayStatus } from "@/lib/comparison";
 
 import StatusDot from "./StatusDot";
 
 interface Props {
-  status: Status;
+  status: DisplayStatus;
   /** Shown before the label, e.g. "2 intentional". */
   count?: number;
 }
