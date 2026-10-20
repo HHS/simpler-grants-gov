@@ -5,9 +5,10 @@ import {
   type NewRelicBrowser,
 } from "src/utils/analyticsUtil";
 
+// the client bundle has no server env vars, so NEW_RELIC_ENABLED reads as "false" in the browser
 jest.mock("src/constants/environments", () => ({
   environment: {
-    NEW_RELIC_ENABLED: "true",
+    NEW_RELIC_ENABLED: "false",
   },
 }));
 declare global {
@@ -46,6 +47,12 @@ describe("analyticsUtil", () => {
   });
 
   describe("waitForNewRelic", () => {
+    it("does not depend on the client side NEW_RELIC_ENABLED value", async () => {
+      setMockNewRelic({ addPageAction: jest.fn() });
+
+      await expect(waitForNewRelic()).resolves.toBe(true);
+    });
+
     it("returns true immediately if newrelic is already present", async () => {
       setMockNewRelic({ setCustomAttribute: jest.fn() });
 

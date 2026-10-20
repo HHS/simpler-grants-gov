@@ -1,4 +1,3 @@
-import { environment } from "src/constants/environments";
 import { withNrDebug12725 } from "src/utils/newRelicDebug12725";
 
 // note that the `newrelic` referenced here is the newrelic object added to window when
@@ -17,11 +16,9 @@ const NEW_RELIC_POLL_INTERVAL = 2;
 const NEW_RELIC_POLL_TIMEOUT = 500;
 
 // taking less than 2 ms to intantiate locally but not ready on first run
-// this will wait until it's present on the window
+// this will wait until it's present on the window. Callers decide whether New Relic
+// is enabled, since server env vars are not available in the client bundle
 export const waitForNewRelic = async (): Promise<boolean> => {
-  if (environment.NEW_RELIC_ENABLED !== "true") {
-    return false;
-  }
   let present = !!window.newrelic;
   if (present) {
     return true;

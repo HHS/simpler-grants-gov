@@ -14,6 +14,11 @@ jest.mock("@next/third-parties/google", () => ({
   sendGAEvent: (...args: unknown[]) => sendGAEventMock(...args),
 }));
 
+// the client bundle has no server env vars, so NEW_RELIC_ENABLED reads as "false" in the browser
+jest.mock("src/constants/environments", () => ({
+  environment: { NEW_RELIC_ENABLED: "false" },
+}));
+
 // only mock the wait, so tests can assert the payload sent to window.newrelic
 jest.mock("src/utils/analyticsUtil", () => ({
   ...jest.requireActual<object>("src/utils/analyticsUtil"),
@@ -151,6 +156,20 @@ describe("SearchAnalytics", () => {
       />,
     );
     expect(addPageActionMock).not.toHaveBeenCalled();
+  });
+
+  it("sends search_attempt with the real wait when the prop enables New Relic", async () => {
+    const { waitForNewRelic } = jest.requireActual<{
+      waitForNewRelic: () => Promise<boolean>;
+    }>("src/utils/analyticsUtil");
+    waitForNewRelicMock.mockImplementation(waitForNewRelic);
+
+    await renderWithNewRelic(basicParams);
+
+    expect(addPageActionMock).toHaveBeenCalledWith(
+      "search_attempt",
+      basicSearchAttempt,
+    );
   });
 
   it("sends one search_attempt event with all active search params once New Relic initializes", async () => {
