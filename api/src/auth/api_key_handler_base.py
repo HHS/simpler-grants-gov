@@ -40,7 +40,7 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
         """Get the auth handler that backs this key handler"""
         pass
 
-    def create_api_key(self, user_id: UUID, key_name: str) -> USER_API_KEY:
+    def create_api_key(self, user_id: UUID, key_name: str) -> tuple[USER_API_KEY, str]:
         """Create an API key for a user and associate with API gateway"""
         pepper = ApiKeyConfig().pepper
 
@@ -48,18 +48,18 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
         key_id, key_id_hash = self._generate_unique_key_id(pepper)
 
         # Create the new API key in our database first. Both the raw key and its
-        # hash are stored until reads move over to the hash.
+        # hash are stored until the raw key column is dropped.
         api_key = self.get_auth_handler().create_api_key(user_id, key_name, key_id, key_id_hash)
 
         # Import the API key to AWS API Gateway (it needs the raw key)
-        self._import_api_key_to_aws_gateway(api_key)
+        self._import_api_key_to_aws_gateway(api_key, key_id)
 
         logger.info(
             "Created new API key",
             extra=api_key.get_log_extra(),
         )
 
-        return api_key
+        return api_key, key_id
 
     def get_user_api_keys(self, user_id: UUID) -> Sequence[USER_API_KEY]:
         """Get a user's API keys"""
@@ -125,7 +125,7 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
 
         return api_key
 
-    def _import_api_key_to_aws_gateway(self, api_key: USER_API_KEY) -> None:
+    def _import_api_key_to_aws_gateway(self, api_key: USER_API_KEY, key_id: str) -> None:
         """Import an API key to AWS API Gateway and associate it with a usage plan"""
         try:
             config = ApiGatewayConfig()
@@ -138,7 +138,7 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
             )
 
             gateway_response = import_api_key(
-                api_key=api_key.key_id,
+                api_key=key_id,
                 name=api_key.key_name,
                 description=f"API key for {description_info}",
                 enabled=api_key.is_active,
@@ -165,7 +165,7 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
             key_id = generate_api_key_id()
             key_id_hash = hash_api_key_id(key_id, pepper)
 
-            existing_key = self.get_auth_handler().get_api_key_by_key_id_hash(key_id_hash)
+            existing_key = self.get_auth_handler().get_api_key_by_hash(key_id_hash)
 
             if existing_key is None:
                 return key_id, key_id_hash

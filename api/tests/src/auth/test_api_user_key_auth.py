@@ -3,12 +3,14 @@ from freezegun import freeze_time
 
 import src.app as app_entry
 import src.logs
+from src.auth.api_key_config import ApiKeyConfig
 from src.auth.api_user_key_auth import (
     ApiKeyValidationError,
     api_user_key_auth,
     validate_api_key_in_db,
 )
 from src.db.models.user_models import UserApiKey
+from src.util.api_key_gen import hash_api_key_id
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
@@ -44,6 +46,32 @@ def test_validate_api_key_in_db_success(enable_factory_create, db_session):
     assert result.api_key_id == api_key.api_key_id
     assert result.user_id == user.user_id
     assert result.is_active is True
+
+
+def test_validate_api_key_in_db_looks_up_by_hash(enable_factory_create, db_session):
+    """The key is resolved by its hash, not by the plaintext key_id column"""
+    user = UserFactory.create()
+    api_key = UserApiKeyFactory.create(
+        user=user,
+        key_id="stale-plaintext-key",
+        key_id_hash=hash_api_key_id("hashed-key-123", ApiKeyConfig().pepper),
+    )
+
+    result = validate_api_key_in_db("hashed-key-123", db_session)
+    assert result.api_key_id == api_key.api_key_id
+    # The user is loaded with the key so the auth can return it
+    assert result.user.user_id == user.user_id
+
+    with pytest.raises(ApiKeyValidationError, match="Invalid API key"):
+        validate_api_key_in_db("stale-plaintext-key", db_session)
+
+
+def test_validate_api_key_in_db_rejects_raw_hash(enable_factory_create, db_session):
+    """Sending the stored hash itself as the key does not authenticate"""
+    api_key = UserApiKeyFactory.create(raw_key="raw-key-for-hash-test")
+
+    with pytest.raises(ApiKeyValidationError, match="Invalid API key"):
+        validate_api_key_in_db(api_key.key_id_hash, db_session)
 
 
 def test_validate_api_key_in_db_key_not_found(enable_factory_create, db_session):

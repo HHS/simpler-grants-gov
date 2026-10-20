@@ -7,10 +7,12 @@ import src.util.datetime_util as datetime_util
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api.route_utils import raise_flask_error
+from src.auth.api_key_config import ApiKeyConfig
 from src.auth.auth_handler import AuthHandler
 from src.db.models.auth_base_models import BaseUserApiKey
 from src.db.models.user_models import User, UserApiKey
 from src.logs.flask_logger import add_extra_data_to_current_request_logs
+from src.util.api_key_gen import hash_api_key_id
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +76,8 @@ def verify_api_key(db_session: db.Session, token: str) -> BaseUserApiKey:
 
 
 def validate_api_key_in_db(api_key: str, db_session: db.Session) -> UserApiKey:
-    user_api_key = AuthHandler(db_session).get_api_key_by_key_id(api_key)
+    key_id_hash = hash_api_key_id(api_key, ApiKeyConfig().pepper)
+    user_api_key = AuthHandler(db_session).get_api_key_by_hash(key_id_hash)
 
     if user_api_key is None:
         raise ApiKeyValidationError("Invalid API key")
