@@ -1,0 +1,11 @@
+emit:
+  - simpler-forms
+  - form-library-xml
+options:
+  simpler-forms:
+    emitter-output-dir: "{project-root}/dist/canonical"
+    property-casing: snake
+  form-library-xml:
+    emitter-output-dir: "{project-root}/dist/canonical"
+    mapping-targets: [grantsGovXml]
+    property-casing: snake

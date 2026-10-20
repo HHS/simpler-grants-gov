@@ -10,7 +10,7 @@ import {
   deleteApiKeyEndpoint,
   deleteApiKeyRequestConfig,
 } from "src/services/fetch/fetchers/apiKeyClientHelpers";
-import { ApiKey } from "src/types/apiKeyTypes";
+import { ApiKey, CreatedApiKey } from "src/types/apiKeyTypes";
 
 import { useTranslations } from "next-intl";
 import { ReactNode, RefObject, useCallback, useRef, useState } from "react";
@@ -403,7 +403,7 @@ export default function ApiKeyModal({
           }),
         });
         if (isCreate) {
-          setCreatedKey((response as { data: ApiKey }).data.key_id);
+          setCreatedKey((response as { data: CreatedApiKey }).data.key_id);
         }
       }
 
@@ -483,19 +483,30 @@ export default function ApiKeyModal({
     edit: {
       className: "padding-1 hover:bg-base-lightest",
       children: (
-        <USWDSIcon name="edit" className="usa-icon--size-3 margin-right-05" />
+        <>
+          <USWDSIcon name="edit" className="usa-icon margin-right-05" />
+          {t("editTriggerText")}{" "}
+          {/* every row has the same visible label, so name the key for screen readers and voice control */}
+          <span className="usa-sr-only">
+            {t("editTriggerKeyName", { keyName: apiKey?.key_name ?? "" })}
+          </span>
+        </>
       ),
       unstyled: true,
-      title: t("editTriggerTitle", { keyName: apiKey?.key_name ?? "" }),
       "data-testid": `open-edit-api-key-modal-button-${apiKey?.api_key_id ?? "unknown"}`,
     },
     delete: {
-      className: "padding-1 hover:bg-base-lightest",
+      className: "padding-1 hover:bg-base-lightest text-error-dark",
       children: (
-        <USWDSIcon className="usa-icon--size-3 margin-right-05" name="delete" />
+        <>
+          <USWDSIcon name="delete" className="usa-icon margin-right-05" />
+          {t("deleteTriggerText")}{" "}
+          <span className="usa-sr-only">
+            {t("deleteTriggerKeyName", { keyName: apiKey?.key_name ?? "" })}
+          </span>
+        </>
       ),
       unstyled: true,
-      title: t("deleteTriggerTitle", { keyName: apiKey?.key_name ?? "" }),
       "data-testid": `open-delete-api-key-modal-button-${apiKey?.api_key_id ?? "unknown"}`,
     },
   };
