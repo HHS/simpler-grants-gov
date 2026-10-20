@@ -98,7 +98,7 @@ jobs:
     uses: ./.github/workflows/e2e-staging.yml
     secrets: inherit
     with:
-      version: ${{ inputs.version || github.ref }}
+      version: ${{ inputs.version || github.sha }}
       target: staging
       playwright_tags: "@smoke|@full-regression"
       send_slack_notification: false
@@ -108,4 +108,3 @@ jobs:
     needs: [api-checks, vulnerability-scans, deploy, e2e-test-staging]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
-    
