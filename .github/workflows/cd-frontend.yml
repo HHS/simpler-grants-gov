@@ -108,3 +108,4 @@ jobs:
     needs: [frontend-checks, vulnerability-scans, deploy, e2e-test-staging]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
+    
