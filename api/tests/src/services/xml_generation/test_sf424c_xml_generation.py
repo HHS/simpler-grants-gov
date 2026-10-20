@@ -42,6 +42,13 @@ def _generate(application_data: dict) -> str:
     return response.xml_data
 
 
+def _reverse_key_order(data: dict) -> dict:
+    return {
+        key: _reverse_key_order(value) if isinstance(value, dict) else value
+        for key, value in reversed(data.items())
+    }
+
+
 class TestSF424CXMLGeneration:
     def test_root_element_and_attributes(self):
         """Root element is SF424C_2_0 with programType=Construction and FormVersion=2.0."""
@@ -321,6 +328,15 @@ class TestSF424CXMLGeneration:
         for element_name in expected_elements:
             assert pc.find(f"{{{NS}}}{element_name}") is not None, f"{element_name} missing"
 
+    def test_xml_output_independent_of_input_key_order(self):
+        """XML element order follows the transform config, not the order of the input keys."""
+        reversed_data = _reverse_key_order(_SNAPSHOT_DATA)
+        assert list(reversed_data["budget_information"]) != list(
+            _SNAPSHOT_DATA["budget_information"]
+        )
+
+        assert _generate(reversed_data) == _generate(_SNAPSHOT_DATA)
+
 
 # ---------------------------------------------------------------------------
 # Snapshot data — a comprehensive case covering all budget rows + federal funding
@@ -508,6 +524,80 @@ class TestSF424CXSDValidation:
         assert result[
             "valid"
         ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
+
+    @pytest.mark.parametrize(
+        "omitted_rows,missing_element",
+        [
+            (["subtotal_1"], "CostSubtotalBeforeContingencies"),
+            (["subtotal_2"], "CostSubtotalAfterContingencies"),
+            (["subtotal_1", "subtotal_2"], "CostSubtotalBeforeContingencies"),
+        ],
+    )
+    def test_missing_subtotal_fails_xsd_validation(
+        self,
+        enable_factory_create,
+        xsd_validator,
+        seed_form_registry,
+        omitted_rows,
+        missing_element,
+    ):
+        # Unlike every other ProjectCosts child, the two subtotals have no
+        # minOccurs="0", so omitting either while ProjectCosts exists is invalid.
+        budget_information = {
+            row: values
+            for row, values in _SNAPSHOT_DATA["budget_information"].items()
+            if row not in omitted_rows
+        }
+        application = self._make_application(
+            enable_factory_create,
+            {**_SNAPSHOT_DATA, "budget_information": budget_information},
+        )
+        submission = ApplicationSubmissionFactory.create(
+            application=application, legacy_tracking_number=44444444
+        )
+        assembler = SubmissionXMLAssembler(application, submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        result = self._extract_and_validate(xml_string, xsd_validator)
+        assert result["valid"] is False
+        assert missing_element in result["error_message"]
+
+    @pytest.mark.parametrize(
+        "row,amount,is_valid",
+        [
+            # Entered rows use EnteredAmountType (max 9999999999.99)
+            ("construction", "9999999999.99", True),
+            ("construction", "10000000000.00", False),
+            # Subtotal rows use SubtotalType (max 999999999999.99)
+            ("subtotal_1", "999999999999.99", True),
+            ("subtotal_1", "1000000000000.00", False),
+        ],
+    )
+    def test_amount_boundaries_against_xsd(
+        self,
+        enable_factory_create,
+        xsd_validator,
+        seed_form_registry,
+        row,
+        amount,
+        is_valid,
+    ):
+        budget_information = {
+            name: dict(values) for name, values in _SNAPSHOT_DATA["budget_information"].items()
+        }
+        budget_information[row]["total_cost"] = amount
+        application = self._make_application(
+            enable_factory_create,
+            {**_SNAPSHOT_DATA, "budget_information": budget_information},
+        )
+        submission = ApplicationSubmissionFactory.create(
+            application=application, legacy_tracking_number=55555555
+        )
+        assembler = SubmissionXMLAssembler(application, submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        result = self._extract_and_validate(xml_string, xsd_validator)
+        assert result["valid"] is is_valid, result["error_message"]
 
     def test_all_rows_validates_against_xsd(
         self, enable_factory_create, xsd_validator, seed_form_registry
