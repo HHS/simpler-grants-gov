@@ -13,12 +13,10 @@ import { ApiKey } from "src/types/apiKeyTypes";
 import {
   baseApiKey,
   createMockApiKey,
-  inactiveApiKey,
   usedApiKey,
 } from "src/utils/testing/fixtures";
 
 const mockClientFetch = jest.fn();
-const mockWriteText = jest.fn(() => Promise.resolve());
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: jest.fn(),
@@ -40,12 +38,6 @@ jest.mock("next/navigation", () => ({
   })),
 }));
 
-Object.defineProperty(navigator, "clipboard", {
-  value: { writeText: mockWriteText },
-  writable: true,
-  configurable: true,
-});
-
 const mockUser = {
   isLoggedIn: true,
 };
@@ -54,7 +46,6 @@ const mockApiKeys: ApiKey[] = [
   createMockApiKey({
     api_key_id: "key-1",
     key_name: "Production Key",
-    key_id: "abc123def456",
     created_at: "2025-01-15",
     last_used: "2025-02-01",
     is_active: true,
@@ -62,7 +53,6 @@ const mockApiKeys: ApiKey[] = [
   createMockApiKey({
     api_key_id: "key-2",
     key_name: "Development Key",
-    key_id: "xyz789uvw012",
     created_at: "2025-01-20",
     last_used: null,
     is_active: false,
@@ -84,7 +74,6 @@ const tableWithAlert = (apiKeys: ApiKey[]) => (
 const newApiKey = createMockApiKey({
   api_key_id: "key-new",
   key_name: "New Key",
-  key_id: "new123new456",
   created_at: "2025-03-01",
 });
 
@@ -122,17 +111,15 @@ describe("ApiKeyTableClient", () => {
   });
 
   describe("Table Headers", () => {
-    it("renders all six column headers", () => {
+    it("renders all four column headers", () => {
       renderTable();
 
       const headers = screen.getAllByRole("columnheader");
-      expect(headers).toHaveLength(6);
-      expect(headers[0]).toHaveTextContent("headers.apiKey");
-      expect(headers[1]).toHaveTextContent("headers.status");
-      expect(headers[2]).toHaveTextContent("headers.secret");
-      expect(headers[3]).toHaveTextContent("headers.created");
-      expect(headers[4]).toHaveTextContent("headers.lastUsed");
-      expect(headers[5]).toHaveTextContent("headers.modify");
+      expect(headers).toHaveLength(4);
+      expect(headers[0]).toHaveTextContent("headers.keyName");
+      expect(headers[1]).toHaveTextContent("headers.created");
+      expect(headers[2]).toHaveTextContent("headers.lastUsed");
+      expect(headers[3]).toHaveTextContent("headers.actions");
     });
   });
 
@@ -145,50 +132,18 @@ describe("ApiKeyTableClient", () => {
     });
   });
 
-  describe("Status Column", () => {
-    it("shows active status for active keys", () => {
-      renderTable([baseApiKey]);
-
-      expect(screen.getByText("active")).toBeInTheDocument();
-    });
-
-    it("shows inactive status for inactive keys", () => {
-      renderTable([inactiveApiKey]);
-
-      expect(screen.getByText("inactive")).toBeInTheDocument();
-    });
-  });
-
-  describe("Secret Column", () => {
-    it("renders truncated key_id with ellipsis", () => {
-      renderTable();
-
-      expect(screen.getByText("abc...456")).toBeInTheDocument();
-      expect(screen.getByText("xyz...012")).toBeInTheDocument();
-    });
-
-    it("renders copy icons for each API key", () => {
-      renderTable();
-
-      const copyButtons = screen.getAllByRole("button", {
-        name: "copyApiKey",
-      });
-      expect(copyButtons.length).toBeGreaterThanOrEqual(2);
-    });
-  });
-
   describe("Date Columns", () => {
     it("renders created date", () => {
       renderTable();
 
-      expect(screen.getByText("Jan 15, 2025")).toBeInTheDocument();
-      expect(screen.getByText("Jan 20, 2025")).toBeInTheDocument();
+      expect(screen.getByText("January 15, 2025")).toBeInTheDocument();
+      expect(screen.getByText("January 20, 2025")).toBeInTheDocument();
     });
 
     it("renders last used date when available", () => {
       renderTable([usedApiKey]);
 
-      expect(screen.getByText("Jun 1, 2023")).toBeInTheDocument();
+      expect(screen.getByText("June 1, 2023")).toBeInTheDocument();
     });
 
     it('shows "never" when last_used is null', () => {
@@ -198,23 +153,36 @@ describe("ApiKeyTableClient", () => {
     });
   });
 
-  describe("Modify Column", () => {
-    it("renders edit buttons for each API key", () => {
+  describe("Actions Column", () => {
+    it("renders a labeled edit name button for each API key", () => {
       renderTable();
 
       const editButtons = screen.getAllByTestId(
         /open-edit-api-key-modal-button-/,
       );
       expect(editButtons).toHaveLength(2);
+      editButtons.forEach((button) => {
+        expect(button).toHaveTextContent("editTriggerText");
+        expect(within(button).getByText("editTriggerKeyName")).toHaveClass(
+          "usa-sr-only",
+        );
+      });
     });
 
-    it("renders delete buttons for each API key", () => {
+    it("renders a labeled, red delete button for each API key", () => {
       renderTable();
 
       const deleteButtons = screen.getAllByTestId(
         /open-delete-api-key-modal-button-/,
       );
       expect(deleteButtons).toHaveLength(2);
+      deleteButtons.forEach((button) => {
+        expect(button).toHaveTextContent("deleteTriggerText");
+        expect(within(button).getByText("deleteTriggerKeyName")).toHaveClass(
+          "usa-sr-only",
+        );
+        expect(button).toHaveClass("text-error-dark");
+      });
     });
   });
 
@@ -242,13 +210,7 @@ describe("ApiKeyTableClient", () => {
     it("passes accessibility scan", async () => {
       const { container } = renderTable();
 
-      const results = await axe(container, {
-        rules: {
-          // CopyIcon and edit icon buttons are icon-only; a11y labels are a
-          // pre-existing concern tracked separately from this test file.
-          "button-name": { enabled: false },
-        },
-      });
+      const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
   });

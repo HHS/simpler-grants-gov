@@ -41,6 +41,12 @@ export const toShortMonthDate = (unformattedDate: string): string => {
   return dateInstance.isValid() ? dateInstance.format("MMM D, YYYY") : "";
 };
 
+// "2025-01-15" -> "January 15, 2025"
+export const toLongMonthDate = (unformattedDate: string): string => {
+  const dateInstance = dayjs(unformattedDate);
+  return dateInstance.isValid() ? dateInstance.format("LL") : "";
+};
+
 export const isExpired = (expiration?: number) =>
   !!expiration && expiration < Date.now();
 
