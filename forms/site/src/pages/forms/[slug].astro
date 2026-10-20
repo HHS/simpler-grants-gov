@@ -1,11 +1,14 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import type { FieldNode } from "../../content.config";
 import Base from "../../layouts/Base.astro";
 import FormMetadata from "../../components/forms/FormMetadata.astro";
 import FormFieldTree from "../../components/forms/FormFieldTree.astro";
+import FieldComparison from "@/components/forms/comparison/FieldComparison";
 import FormDataPanel from "../../components/forms/preview/FormDataPanel";
 import FormPreview from "../../components/forms/preview/FormPreview";
 import { loadFormSpec } from "../../lib/formSpec";
+import { compareForm } from "@parity/comparison.ts";
 
 export async function getStaticPaths() {
   const forms = await getCollection("forms");
@@ -17,6 +20,7 @@ export async function getStaticPaths() {
 
 const { form } = Astro.props;
 const spec = form.data.spec_id ? await loadFormSpec(form.data.spec_id) : undefined;
+const comparison = await compareForm<FieldNode>(form.data);
 const notes = form.data.notes ?? [];
 
 const STATUS_LABELS: Record<string, string> = {
@@ -75,13 +79,17 @@ const STATUS_LABELS: Record<string, string> = {
 
         <div data-panel="fields">
           <h2 class="section-title">Fields</h2>
-          <div class="field-tree">
-            <FormFieldTree nodes={form.data.children} />
-          </div>
+          {comparison ? (
+            <FieldComparison client:load comparison={comparison} />
+          ) : (
+            <div class="field-tree">
+              <FormFieldTree nodes={form.data.children} />
+            </div>
+          )}
           {notes.length > 0 && (
             <>
               <h2 class="section-title margin-top-4">Notes</h2>
-              <p class="text-base">Context from planning.</p>
+              <p class="text-base">Context from planning. Unlike the comparison above, notes are not checked.</p>
               <ul class="plan-notes">
                 {notes.map((note) => (
                   <li>{note}</li>

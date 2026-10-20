@@ -2,6 +2,8 @@
 import type { FormNode } from "../../content.config";
 import { countFields } from "../../lib/planTree";
 import FieldRow from "./FieldRow.astro";
+import SectionMeta from "./SectionMeta";
+import SectionSummary from "./SectionSummary";
 
 interface Props {
   nodes: FormNode[];
@@ -19,14 +21,13 @@ const { nodes, depth = 0 } = Astro.props;
   return (
     <details class={depth ? "field-section field-section--nested" : "field-section"} open>
       <summary>
-        <span class="field-section__label">{section.label}</span>
-        <span class="section-count">{`${total} ${total === 1 ? "field" : "fields"}`}</span>
+        <SectionSummary
+          section={section}
+          count={`${total} ${total === 1 ? "field" : "fields"}`}
+          contents={children.map((child) => child.label)}
+        />
       </summary>
-      {section.help_text && (
-        <div class="section-meta">
-          <div class="field-row__help">{section.help_text}</div>
-        </div>
-      )}
+      <SectionMeta section={section} />
       <div class="field-section__body">
         <Astro.self nodes={children} depth={depth + 1} />
       </div>

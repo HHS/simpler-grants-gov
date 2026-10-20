@@ -61,6 +61,21 @@ jobs:
         id: compile
         run: npm --prefix .. run compile
 
+      # The Grants.gov DATs and XSDs the parity suite compares the forms against. The key is
+      # the lockfile's hash, so a new or revised source is fetched once and then reused.
+      - name: Restore parity sources
+        uses: actions/cache@v5
+        with:
+          path: forms/.cache/sources
+          key: parity-sources-${{ hashFiles('forms/parity/sources/sources.lock.json') }}
+
+      - name: Run parity tests
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        working-directory: ./forms
+        run: |
+          npm run check:parity
+          npm run test:parity
+
       # Run astro directly: the npm `build` and `test` scripts reinstall and recompile the
       # specs first, which this workflow has already done.
       - name: Build site
