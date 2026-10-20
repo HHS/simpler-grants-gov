@@ -1,0 +1,22 @@
+name: ECS migration helper tests
+on:
+  pull_request:
+    paths:
+      - 'bin/run-command'
+      - 'bin/run-database-migrations'
+      - 'bin/wait_for_ecs_task.py'
+      - 'bin/tests/**'
+      - '.github/workflows/deploy-nofos.yml'
+      - '.github/workflows/ci-ecs-migration-helper.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: bash -n bin/run-command bin/run-database-migrations
+      - run: python3 -m unittest discover -s bin/tests -v

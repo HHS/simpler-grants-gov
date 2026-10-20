@@ -27,6 +27,7 @@ set -euo pipefail
 # Parse optional parameters
 environment_variables=""
 task_role_arn=""
+wait_timeout_seconds=""
 while :; do
   case "$1" in
   --environment-variables)
@@ -35,6 +36,10 @@ while :; do
     ;;
   --task-role-arn)
     task_role_arn="$2"
+    shift 2
+    ;;
+  --wait-timeout-seconds)
+    wait_timeout_seconds="$2"
     shift 2
     ;;
   *)
@@ -47,6 +52,14 @@ app_name="$1"
 environment="$2"
 command="$3"
 
+if [ -n "${wait_timeout_seconds}" ]; then
+  if ! [[ "${wait_timeout_seconds}" =~ ^[1-9][0-9]{0,3}$ ]] || (( wait_timeout_seconds > 7200 )); then
+    echo "--wait-timeout-seconds must be between 1 and 7200" >&2
+    exit 2
+  fi
+  command -v python3 > /dev/null
+fi
+
 ./bin/terraform-init "infra/${app_name}/service" "${environment}"
 
 echo "==============="
@@ -55,8 +68,7 @@ echo "==============="
 echo "Input parameters"
 echo "  app_name=${app_name}"
 echo "  environment=${environment}"
-echo "  command=${command}"
-echo "  environment_variables=${environment_variables:-}"
+echo "  command and environment values omitted from logs"
 echo "  task_role_arn=${task_role_arn:-}"
 echo
 
@@ -109,7 +121,7 @@ aws_args=(
   --overrides "${overrides}"
 )
 echo "::group::Running AWS CLI command"
-printf " ... %s\n" "${aws_args[@]}"
+echo "Launching ECS task (command and overrides omitted)"
 task_arn=$(aws --no-cli-pager "${aws_args[@]}" --query "tasks[0].taskArn" --output text)
 echo "::endgroup::"
 echo
@@ -122,6 +134,13 @@ echo "  task_id=${ecs_task_id}"
 
 echo
 echo "Waiting for task to complete"
+
+if [ -n "${wait_timeout_seconds}" ]; then
+  python3 ./bin/wait_for_ecs_task.py --cluster "${cluster_name}" --task "${task_arn}" \
+    --container "${container_name}" --region "${current_region}" \
+    --timeout-seconds "${wait_timeout_seconds}"
+  exit 0
+fi
 
 aws ecs wait tasks-stopped --cluster "${cluster_name}" --tasks "${task_arn}"
 
