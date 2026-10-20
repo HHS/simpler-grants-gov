@@ -126,7 +126,7 @@ jobs:
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
-    needs: e2e-test-staging
+    needs: e2e-tests-deployed
     uses: ./.github/workflows/e2e-create-report.yml
     secrets: inherit
     with:
