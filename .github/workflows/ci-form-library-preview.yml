@@ -1,0 +1,143 @@
+name: "CI - Form Library: Validate and Deploy Preview"
+
+# Builds and checks the internal form library (forms/site), then uploads the build as a
+# version of the `sgg-form-library` Cloudflare Worker aliased to the PR. The alias URL is
+# `pr-<number>-sgg-form-library.<subdomain>.workers.dev` and is overwritten on each push,
+# so no cleanup is needed.
+#
+# Previews deploy from the repositories holding the Cloudflare secrets:
+#   - secrets.CLOUDFLARE_API_TOKEN, secrets.CLOUDFLARE_ACCOUNT_ID
+# The Worker must already exist (first deploy is manual: `npm run build && npm run deploy`).
+
+on:
+  pull_request:
+    paths:
+      - forms/site/**
+      - .github/workflows/ci-form-library-preview.yml
+
+defaults:
+  run:
+    working-directory: ./forms/site
+
+env:
+  NODE_VERSION: 24
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Install, build, and run checks. Each check runs regardless of the previous one's outcome
+  # so all failures surface in a single run.
+  validate:
+    name: Build and check the form library
+    runs-on: ubuntu-latest
+    outputs:
+      # Read from the upload step so deploy-preview only runs when the artifact exists.
+      artifact_ready: ${{ steps.upload-build.outcome == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: forms/site/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build site
+        id: build
+        run: npm run build
+
+      - name: Upload build output
+        id: upload-build
+        if: always() && steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: form-library-build
+          path: forms/site/dist
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Type check
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npm run check
+
+      - name: Lint
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npm run lint
+
+  # Upload the built artifact as a new version of the preview Worker, aliased to this PR.
+  # Decoupled from the check outcomes (via artifact_ready) so previews stay available on
+  # PRs with unrelated failures.
+  deploy-preview:
+    name: Deploy PR preview
+    runs-on: ubuntu-latest
+    needs: validate
+    # !cancelled() (not always()) so a user-cancelled run skips the deploy. Only the repos
+    # below hold the Cloudflare secrets, so this no-ops on any other fork. Dependabot PRs
+    # have no access to secrets either.
+    if: |
+      !cancelled()
+      && needs.validate.outputs.artifact_ready == 'true'
+      && (github.repository == 'agilesix/simpler-grants-gov'
+        || github.repository == 'HHS/simpler-grants-gov')
+      && github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download build output
+        uses: actions/download-artifact@v8
+        with:
+          name: form-library-build
+          path: forms/site/dist
+
+      - name: Upload Worker version (preview)
+        id: upload
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        # A block scalar, because in a plain YAML value ` #` would start a comment.
+        run: |
+          scripts/upload-worker-preview.sh "pr-${PR_NUMBER}" "PR #${PR_NUMBER} @ ${HEAD_SHA}"
+
+      - name: Find existing comment
+        id: find-comment
+        uses: peter-evans/find-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: Form Library Preview Deployed
+
+      - name: Post preview link comment
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            🚀 **Form Library Preview Deployed!**
+
+            Preview your changes at: ${{ steps.upload.outputs.url }}
+
+            Built from commit ${{ github.event.pull_request.head.sha }}
