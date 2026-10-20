@@ -1,0 +1,12 @@
+{
+  "title": "USDA AD-1052",
+  "slug": "usda-ad-1052",
+  "status": "backlog",
+  "family": ["SF-424", "R&R"],
+  "category": "Key Personnel & Contact Forms",
+  "apps_count": 333,
+  "fid_url": "https://www.grants.gov/forms/form-items-description/fid/696",
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/AD_1052_2_0-V2.0_F696.pdf",
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AD_1052_2_0-V2.0.xsd",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AD_1052_2_0-V2.0_F696.xls"
+}

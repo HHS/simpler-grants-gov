@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // PR previews are uploaded as versions of this Worker, so keep this name in sync with the
+  // Worker created by the first manual `wrangler deploy`.
+  "name": "sgg-form-library",
+  "compatibility_date": "2026-10-06",
+  // The site is static Astro output, so this Worker serves assets only and has no `main`.
+  "assets": {
+    "directory": "./dist",
+  },
+  // Each PR uploads a version aliased `pr-<number>`, served at
+  // `pr-<number>-sgg-form-library.<subdomain>.workers.dev`.
+  "preview_urls": true,
+}

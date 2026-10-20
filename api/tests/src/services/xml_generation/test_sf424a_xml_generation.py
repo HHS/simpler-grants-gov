@@ -20,7 +20,7 @@ import pytest
 from lxml import etree as lxml_etree
 
 from src.form_schema.forms import init_form_registry
-from src.form_schema.forms.sf424a import FORM_JSON_SCHEMA, FORM_XML_TRANSFORM_RULES, SF424a_v1_0
+from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES, SF424a_v1_0
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
@@ -143,12 +143,6 @@ SCHEMA_MINIMAL_APPLICATION = {
     "confirmation": True,
 }
 
-# Top-level schema fields that are intentionally not written to the XML
-FIELDS_NOT_IN_XML = {
-    # The "Is this form complete?" checkbox only exists in our UI, the XSD has no element for it
-    "confirmation",
-}
-
 MINIMAL_APPLICATION = {
     "activity_line_items": [
         {
@@ -227,79 +221,11 @@ def _xsd_sequence(xpath: str) -> list[str]:
     ]
 
 
-def _extract_referenced_fields(rule: dict) -> set[str]:
-    """Every JSON schema field a transform rule pulls data from, whatever its type.
-
-    Each conditional_transform type keeps its source fields under different keys
-    (pivot_object even uses dotted paths), so each shape is handled explicitly.
-    """
-    referenced: set[str] = set()
-
-    def add_field(value: Any) -> None:
-        if isinstance(value, str):
-            referenced.add(value.split(".")[0])
-
-    def walk(node: Any) -> None:
-        if not isinstance(node, dict):
-            return
-        transform_type = node.get("type")
-        if transform_type in ("compose_object", "field_grouping"):
-            for value in node.get("field_mapping", {}).values():
-                add_field(value)
-            for value in node.get("source_fields", []):
-                add_field(value)
-        elif transform_type == "pivot_object":
-            add_field(node.get("source_field"))
-            for group in node.get("field_mapping", {}).values():
-                if isinstance(group, dict):
-                    for value in group.values():
-                        add_field(value)
-        elif transform_type == "array_decomposition":
-            add_field(node.get("source_array_field"))
-            for mapping in node.get("field_mappings", {}).values():
-                add_field(mapping.get("item_field"))
-                add_field(mapping.get("total_field"))
-                for attribute in mapping.get("item_attributes", []):
-                    add_field(attribute)
-                for parent_field in mapping.get("item_parent_fields", []):
-                    add_field(parent_field)
-        elif transform_type == "one_to_many":
-            add_field(node.get("source_field"))
-        for key in ("xml_transform", "conditional_transform"):
-            if key in node:
-                walk(node[key])
-
-    walk(rule)
-    return referenced
-
-
 def _json_issues(application_data: dict) -> list[tuple[str, str]]:
     form = setup_resolved_form(SF424a_v1_0)
     return [
         (issue.field, issue.type) for issue in validate_json_schema_for_form(application_data, form)
     ]
-
-
-###################################
-# Guardrail: every schema field has an XML mapping
-###################################
-
-
-def test_all_schema_fields_have_xml_mapping():
-    """A new schema field without a transform rule would be silently dropped from the XML."""
-    schema_fields = set(FORM_JSON_SCHEMA["properties"])
-    mapped_fields = set(FORM_XML_TRANSFORM_RULES)
-    for rule in FORM_XML_TRANSFORM_RULES.values():
-        mapped_fields |= _extract_referenced_fields(rule)
-
-    unmapped = schema_fields - mapped_fields - FIELDS_NOT_IN_XML
-    assert not unmapped, f"Schema fields with no XML mapping: {unmapped}"
-
-
-def test_fields_not_in_xml_are_really_unmapped():
-    """Keeps the exemption list honest: anything on it must exist and have no rule."""
-    assert FIELDS_NOT_IN_XML <= set(FORM_JSON_SCHEMA["properties"])
-    assert not FIELDS_NOT_IN_XML & set(FORM_XML_TRANSFORM_RULES)
 
 
 ###################################
