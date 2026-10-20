@@ -1,5 +1,3 @@
-import { evaluateCheck } from "./evaluate.ts";
-import type { CheckName, FormEvaluation } from "../result.ts";
 /**
  * The harness's entry point: `checkForm` runs every comparison for one form.
  *
@@ -8,6 +6,10 @@ import type { CheckName, FormEvaluation } from "../result.ts";
  *   compare.ts   compares two `Fields` maps and applies a form's recorded differences
  *   model.ts     the vocabulary all three share
  */
+import { evaluateCheck, type CompletedCheck } from "./evaluate.ts";
+import { fieldsForForm } from "./fields.ts";
+import type { CheckName, FormResult } from "../result.ts";
+
 import { type Pair, type PairResult, type PairSpec } from "./compare.ts";
 import { datFields } from "./flatten/dat.ts";
 import { indexLeaves, jsonSchemaFields } from "./flatten/jsonSchema.ts";
@@ -98,7 +100,12 @@ export const SPECS = {
     },
     occurrences: "contains",
   },
-} satisfies Record<string, PairSpec>;
+} satisfies Record<CheckName, PairSpec>;
+
+export interface FormEvaluation extends FormResult {
+  checks: Partial<Record<CheckName, CompletedCheck>>;
+  suite: { planProblems: Discrepancy[]; indexProblems: Discrepancy[] };
+}
 
 /** Every comparison for one form, grouped as the tests report them. */
 export interface FormCheck {
@@ -354,7 +361,13 @@ export function evaluatePairs(pairs: FormPairs): FormEvaluation {
       }),
     );
   }
-  return { plan, checks, findings, suite: { planProblems, indexProblems } };
+  return {
+    plan,
+    checks,
+    findings,
+    fields: fieldsForForm(plan, checks),
+    suite: { planProblems, indexProblems },
+  };
 }
 
 export async function evaluateForm(

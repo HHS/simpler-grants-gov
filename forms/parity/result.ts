@@ -1,16 +1,37 @@
-/** Completed build-time evidence. Views project these records; they do not rerun checks. */
-import type { PairResult } from "./harness/compare.ts";
-import type { Plan } from "./harness/flatten/plan.ts";
-import type { SPECS } from "./harness/index.ts";
+/** Public build-time contract shared by parity consumers. */
+import type { Plan, PlanField } from "./harness/flatten/plan.ts";
 import type {
   Category,
   Discrepancy,
-  Fields,
+  FlatField,
   Recorded,
-  Renamed,
 } from "./harness/model.ts";
 
-export type CheckName = keyof typeof SPECS;
+export const SOURCES = ["dat", "xsd", "form"] as const;
+export type Source = (typeof SOURCES)[number];
+export const ATTRIBUTES = [
+  "matchedBy",
+  "label",
+  "help",
+  "required",
+  "length",
+  "format",
+  "range",
+  "options",
+  "position",
+  "xmlMapping",
+] as const;
+export type Attribute = (typeof ATTRIBUTES)[number];
+export type Status = "match" | Category | "notCompared" | "unrecorded";
+export type CheckName =
+  | "dat"
+  | "xsd"
+  | "jsonSchema"
+  | "uiSchema"
+  | "jsonSchemaVsXsd"
+  | "xmlMapping"
+  | "xmlMappingVsJsonSchema"
+  | "xmlMappingVsXsd";
 export type Artifact =
   | "plan"
   | "dat"
@@ -20,14 +41,13 @@ export type Artifact =
   | "xmlMapping"
   | "differenceRecord"
   | "index";
-/** Paths retain their originating check's syntax; these are not universal JSON pointers. */
+/** Paths retain their artifact/check syntax; they are not universal JSON pointers. */
 export interface Anchor {
   artifact: Artifact;
   path: string;
 }
-
 export interface Finding extends Discrepancy {
-  /** Unique within this evaluation, not a cross-release comment or question identity. */
+  /** Evaluation-local identity, not a durable comment or question identifier. */
   id: string;
   check: CheckName | "plan" | "index";
   checkTitle: string;
@@ -36,31 +56,42 @@ export interface Finding extends Discrepancy {
   anchors: Anchor[];
   entry?: Recorded;
 }
-
-export interface CompletedCheck {
-  name: CheckName;
-  title: string;
-  /** `plan` and `source` retain the existing comparison orientation, named by these artifacts. */
-  artifacts: { plan: Artifact; source: Artifact };
-  plan: Fields;
-  source: Fields;
-  matched: Map<string, string>;
-  renames: Record<string, Renamed>;
-  coverage: Set<string>;
-  result: PairResult;
+/** Neighbor labels, falling back to paths when no plan label exists. */
+export interface Position {
+  before?: string;
+  after?: string;
+}
+export interface FieldSource extends Omit<FlatField, "order"> {
+  /** Expected plan address and the actual matched artifact address, respectively. */
+  key?: string;
+  path?: string;
+  position?: Position;
+  planPosition?: Position;
+}
+export interface Outcome {
+  status: Status;
+  reason?: string;
+  /** Original finding objects contributing to this outcome. */
+  findings: Finding[];
+  options?: { missing: string[]; extra: string[] };
+}
+export interface FieldResult<F extends PlanField = PlanField> {
+  /** Existing json_path, else the field's tree position; local to this plan. */
+  id: string;
+  field: F;
+  plan: FlatField;
+  sources: Record<Source, FieldSource>;
+  writtenPaths: string[];
+  outcomes: Record<Attribute, Record<Source, Outcome>>;
+  /** Includes dimensions omitted from table rows, such as maxOccurs. */
   findings: Finding[];
 }
-
-/** Internal Maps stay at build time. Only field rows and diagnostics are serialized for views. */
-export interface FormEvaluation {
-  plan: Plan;
-  checks: Partial<Record<CheckName, CompletedCheck>>;
+/** Fields are in depth-first plan order. Source-only/stale evidence stays in the full ledger. */
+export interface FormResult<F extends PlanField = PlanField> {
+  plan: Plan<F>;
+  fields: FieldResult<F>[];
   findings: Finding[];
-  suite: { planProblems: Discrepancy[]; indexProblems: Discrepancy[] };
 }
-
-export { evaluateForm } from "./harness/index.ts";
-export { readRequired, walkFields } from "./harness/flatten/plan.ts";
 export type {
   Plan,
   PlanField,

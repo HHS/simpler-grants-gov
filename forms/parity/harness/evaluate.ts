@@ -6,7 +6,22 @@ import {
   type PairSpec,
   type PairResult,
 } from "./compare.ts";
-import type { CheckName, CompletedCheck, Finding } from "../result.ts";
+import type { CheckName, Finding, Artifact } from "../result.ts";
+import type { Fields, Renamed } from "./model.ts";
+
+/** Producer-owned completed checks; not part of the consumer contract. */
+export interface CompletedCheck {
+  name: CheckName;
+  title: string;
+  artifacts: { plan: Artifact; source: Artifact };
+  plan: Fields;
+  source: Fields;
+  matched: Map<string, string>;
+  renames: Record<string, Renamed>;
+  coverage: Set<string>;
+  result: PairResult;
+  findings: Finding[];
+}
 
 const ARTIFACTS = {
   dat: ["plan", "dat", "Plan vs DAT"],
