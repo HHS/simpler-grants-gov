@@ -188,8 +188,16 @@ def get_submissions(
                         Application.application_status == simpler_status,
                     )
                 else:
-                    # Status value is unrecognized or has no Simpler equivalent — return nothing.
-                    return []
+                    # Unrecognized status — if other filters are present, ignore status and
+                    # let them apply. If status is the only filter, return nothing.
+                    other_filter_types = [
+                        f for f in GetSubmissionListFilter if f != GetSubmissionListFilter.STATUS
+                    ]
+                    has_other_filters = any(
+                        get_filter_values(submission_filters, f) for f in other_filter_types
+                    )
+                    if not has_other_filters:
+                        return []
         # Each one of these filters is Last One Wins — if multiple of the same type are entered,
         # only the last one is applied.
         grants_gov_tracking_numbers = get_filter_values(
