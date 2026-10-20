@@ -1,7 +1,6 @@
 "use client";
 
 import { sendGAEvent } from "@next/third-parties/google";
-import { environment } from "src/constants/environments";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { searchFilterNames } from "src/types/search/searchFilterTypes";
 import { expectedQueryParamKeys } from "src/types/search/searchQueryTypes";
@@ -10,12 +9,6 @@ import {
   sendNewRelicSearchAttempt,
   waitForNewRelic,
 } from "src/utils/analyticsUtil";
-// TEMPORARY #12725
-import {
-  installNrDebug12725,
-  isNrDebug12725Enabled,
-  nrDebug12725Log,
-} from "src/utils/newRelicDebug12725";
 
 import { useEffect, useState } from "react";
 
@@ -58,29 +51,11 @@ function SearchAnalytics({
 }) {
   const [newRelicInitialized, setNewRelicInitialized] = useState(false);
 
-  // TEMPORARY #12725
-  useEffect(() => {
-    installNrDebug12725();
-    if (isNrDebug12725Enabled()) {
-      nrDebug12725Log("SearchAnalytics newRelicEnabled prop", newRelicEnabled);
-    }
-  }, [newRelicEnabled]);
-
   useEffect(() => {
     if (!newRelicEnabled) {
       return;
     }
     waitForNewRelic()
-      .then((ready) => {
-        // TEMPORARY #12725: client-side NEW_RELIC_ENABLED may not be inlined into the bundle
-        if (isNrDebug12725Enabled()) {
-          nrDebug12725Log("waitForNewRelic resolved", {
-            ready,
-            clientNewRelicEnabled: environment.NEW_RELIC_ENABLED,
-          });
-        }
-        return ready;
-      })
       .then((ready) => setNewRelicInitialized(!!ready))
       .catch((e) => console.error("Error waiting for new relic", e));
   }, [newRelicEnabled]);
