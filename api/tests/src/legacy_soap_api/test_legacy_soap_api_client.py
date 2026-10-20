@@ -1933,9 +1933,9 @@ class TestSimplerSOAPGetApplicationListExpanded:
             "<GrantsGovTrackingNumber>GRANT00839196</GrantsGovTrackingNumber>"
             "<ns2:ReceivedDateTime>2025-11-20T12:24:13.000-05:00</ns2:ReceivedDateTime>"
             "</ns2:ExpandedApplicationInfo>"
-            # Invalid: nested ExpandedApplicationFilter inside ExpandedApplicationInfo triggers validation error
+            # Invalid: unparseable ReceivedDateTime triggers a Pydantic validation error
             "<ns2:ExpandedApplicationInfo>"
-            "<ExpandedApplicationFilter><FilterType>INVALID</FilterType></ExpandedApplicationFilter>"
+            "<ns2:ReceivedDateTime>NOT-A-VALID-DATETIME</ns2:ReceivedDateTime>"
             "</ns2:ExpandedApplicationInfo>"
             "</ns2:GetApplicationListExpandedResponse>"
             "</soap:Body>"
