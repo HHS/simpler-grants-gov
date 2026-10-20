@@ -43,7 +43,7 @@ on:
         type: boolean
 
 # One run per target at a time, shared by every caller (cd-frontend, cd-api,
-# cd-release, daily, weekly). In a reusable workflow github.workflow is the
+# cd-release, daily). In a reusable workflow github.workflow is the
 # CALLER's name, so a literal prefix is needed for callers to share a group.
 # Runs queue instead of cancelling: the suite shares a handful of static test
 # users, so two concurrent runs against one target would collide.

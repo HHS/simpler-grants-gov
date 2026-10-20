@@ -573,7 +573,7 @@ jobs:
           fi
 
       # PRs run Chrome only.
-      # Cross-browser coverage still runs on push to main and in the daily/weekly
+      # Cross-browser coverage still runs on push to main and in the daily
       # scheduled runs, which leave playwright_projects blank to get every project.
       - name: Determine browsers to run
         shell: bash
