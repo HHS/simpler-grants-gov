@@ -4,6 +4,7 @@ import type { FieldNode } from "../../content.config";
 import Base from "../../layouts/Base.astro";
 import FormMetadata from "../../components/forms/FormMetadata.astro";
 import FormFieldTree from "../../components/forms/FormFieldTree.astro";
+import ParityFindings from "../../components/forms/comparison/ParityFindings.astro";
 import FieldComparison from "@/components/forms/comparison/FieldComparison";
 import FormDataPanel from "../../components/forms/preview/FormDataPanel";
 import FormPreview from "../../components/forms/preview/FormPreview";
@@ -80,7 +81,8 @@ const STATUS_LABELS: Record<string, string> = {
         <div data-panel="fields">
           <h2 class="section-title">Fields</h2>
           {comparison ? (
-            <FieldComparison client:load comparison={comparison} />
+            <FieldComparison client:load comparison={{ children: comparison.children, fields: comparison.fields }} />
+            <ParityFindings findings={comparison.findings} />
           ) : (
             <div class="field-tree">
               <FormFieldTree nodes={form.data.children} />
@@ -120,9 +122,12 @@ const STATUS_LABELS: Record<string, string> = {
         )}
       </>
     ) : (
-      <p class="text-base padding-y-4">
-        Field details will be added when this form is prioritized for migration.
-      </p>
+      <>
+        <p class="text-base padding-y-4">
+          Field details will be added when this form is prioritized for migration.
+        </p>
+        {comparison && <ParityFindings findings={comparison.findings} />}
+      </>
     )}
   </div>
 </Base>

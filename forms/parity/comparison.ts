@@ -8,22 +8,18 @@
  */
 import { DIFFS } from "./diffs/index.ts";
 import {
-  comparePair,
-  formPairs,
-  matchFields,
-  SPECS,
-  type Accepted,
-  type Discrepancy,
+  evaluateForm,
+  readRequired,
+  walkFields,
+  type CompletedCheck,
+  type Finding,
+  type FormEvaluation,
   type FlatField,
-  type Pair,
-  type PairResult,
   type Plan,
   type PlanField,
   type PlanNode,
   type PlanSection,
-  walkFields,
-} from "./harness/index.ts";
-import { readRequired } from "./harness/flatten/plan.ts";
+} from "./result.ts";
 import { link } from "./harness/flatten/xmlTransform.ts";
 import { fromXmlPath, type Category } from "./harness/model.ts";
 
@@ -102,47 +98,38 @@ const KEYWORDS: Partial<Record<Attribute, readonly string[]>> = {
 };
 
 /** The attribute a discrepancy is about, or undefined for one the sheet does not show. */
-function attributeOf(kind: string): Attribute | undefined {
-  switch (kind) {
-    case "missing from source":
-    case "missing from plan":
+function attributeOf(dimension: string): Attribute | undefined {
+  switch (dimension) {
+    case "presence":
       return "matchedBy";
-    case "out of order":
+    case "order":
       return "position";
-    case "label differs":
+    case "label":
       return "label";
-    case "help differs":
+    case "help":
       return "help";
-    case "requiredness differs":
+    case "required":
       return "required";
   }
-  const keyword = kind.replace(/ differs$/, "");
+  const keyword = dimension;
   return (Object.keys(KEYWORDS) as Attribute[]).find((attribute) =>
     KEYWORDS[attribute]!.includes(keyword),
   );
 }
 
-type Spec = (typeof SPECS)[keyof typeof SPECS];
-
-/** Whether a spec compares an attribute at all. */
-function compares(spec: Spec, attribute: Attribute): boolean {
-  switch (attribute) {
-    case "matchedBy":
-      return true;
-    case "label":
-      return "labels" in spec && spec.labels;
-    case "help":
-      return "help" in spec && spec.help;
-    case "position":
-      return "order" in spec && spec.order;
-    case "required":
-      return "constraints" in spec;
-    case "xmlMapping":
-      return true;
-  }
-  const keywords: readonly string[] =
-    "constraints" in spec ? spec.constraints.keywords : [];
-  return KEYWORDS[attribute]!.some((keyword) => keywords.includes(keyword));
+/** Coverage is declared by the completed check, not inferred from an empty findings list. */
+function compares(check: CompletedCheck, attribute: Attribute): boolean {
+  if (attribute === "xmlMapping") return check.name.startsWith("xmlMapping");
+  const dimension =
+    attribute === "matchedBy"
+      ? "presence"
+      : attribute === "position"
+        ? "order"
+        : attribute;
+  return (
+    check.coverage.has(dimension) ||
+    (KEYWORDS[attribute] ?? []).some((keyword) => check.coverage.has(keyword))
+  );
 }
 
 /** Why a source is never compared on an attribute. */
@@ -227,50 +214,32 @@ function neighbors(sequence: string[], at: number): string {
 // ---------------------------------------------------------------------------------------
 
 /** One pair's results, indexed by the plan key and attribute they concern. */
-interface Side {
-  pair: Pair;
-  spec: Spec;
-  matched: Map<string, string>;
-  found: Map<string, { accepted: Accepted[]; unexpected: Discrepancy[] }>;
-  /** Plan keys in the source's order, for position. */
+interface Side extends CompletedCheck {
+  found: Map<string, { accepted: Finding[]; unexpected: Finding[] }>;
   sourceOrder: string[];
 }
 
-const unexpectedIn = (result: PairResult): Discrepancy[] => [
-  ...result.missingFields,
-  ...result.extraFields,
-  ...result.fieldOrder,
-  ...result.fieldLabels,
-  ...result.fieldConstraints,
-  ...result.fieldOccurrences,
-  ...result.helpText,
-];
-
-/** `attributeFor` names the row each discrepancy is shown on; by default, the one its kind concerns. */
-function side(
-  pair: Pair,
-  spec: Spec,
-  attributeFor: (kind: string) => Attribute | undefined = attributeOf,
-): Side {
-  const result = comparePair(pair, spec);
+/** Index completed findings for this view's row groups. No comparison or settlement runs here. */
+function side(check: CompletedCheck, xml = false): Side {
   const found: Side["found"] = new Map();
-  const add = (d: Discrepancy, into: "accepted" | "unexpected") => {
-    const attribute = attributeFor(d.kind);
-    if (!attribute) return;
+  for (const d of check.findings) {
+    if (d.status === "stale") continue;
+    const attribute = xml ? "xmlMapping" : attributeOf(d.dimension);
+    if (!attribute) continue;
     const key = `${d.path}#${attribute}`;
     if (!found.has(key)) found.set(key, { accepted: [], unexpected: [] });
-    (found.get(key)![into] as Discrepancy[]).push(d);
-  };
-  result.recorded.forEach((d) => add(d, "accepted"));
-  unexpectedIn(result).forEach((d) => add(d, "unexpected"));
-  const matched = matchFields(pair);
-  const sourceOrder = [...matched]
-    .filter(([, target]) => pair.source.get(target)?.order !== undefined)
+    found
+      .get(key)!
+      [d.status === "unrecorded" ? "unexpected" : "accepted"].push(d);
+  }
+  const sourceOrder = [...check.matched]
+    .filter(([, target]) => check.source.get(target)?.order !== undefined)
     .sort(
-      ([, a], [, b]) => pair.source.get(a)!.order! - pair.source.get(b)!.order!,
+      ([, a], [, b]) =>
+        check.source.get(a)!.order! - check.source.get(b)!.order!,
     )
     .map(([path]) => path);
-  return { pair, spec, matched, found, sourceOrder };
+  return { ...check, found, sourceOrder };
 }
 
 const RANK: Status[] = [
@@ -287,12 +256,12 @@ function judge(
   key: (side: Side) => string | undefined,
   attribute: Attribute,
 ): { status: Status; reason?: string } {
-  const accepted: Accepted[] = [];
+  const accepted: Finding[] = [];
   let unexpected = false;
   let compared = false;
   for (const s of sides) {
     const path = s && key(s);
-    if (!s || !path || !compares(s.spec, attribute)) continue;
+    if (!s || !path || !compares(s, attribute)) continue;
     compared = true;
     const found = s.found.get(`${path}#${attribute}`);
     accepted.push(...(found?.accepted ?? []));
@@ -306,10 +275,8 @@ function judge(
     };
   if (!compared) return { status: "notCompared" };
   if (!accepted.length) return { status: "match" };
-  const status = RANK.find((rank) =>
-    accepted.some((d) => d.entry.category === rank),
-  )!;
-  const reasons = [...new Set(accepted.map((d) => d.entry.reason))];
+  const status = RANK.find((rank) => accepted.some((d) => d.status === rank))!;
+  const reasons = [...new Set(accepted.map((d) => d.entry!.reason))];
   return { status, reason: reasons.join(" ") };
 }
 
@@ -402,14 +369,14 @@ function buildField<F extends PlanField>(
   const planSide = (source: Source) =>
     source === "form" ? sides.jsonSchema : sides[source];
   const planFlat =
-    sides.dat.pair.plan.get(keys.dat ?? "") ??
-    sides.xsd.pair.plan.get(keys.xsd ?? "") ??
-    sides.jsonSchema?.pair.plan.get(keys.form ?? "");
+    sides.dat.plan.get(keys.dat ?? "") ??
+    sides.xsd.plan.get(keys.xsd ?? "") ??
+    sides.jsonSchema?.plan.get(keys.form ?? "");
   /** The source's own field matched to this plan field, and the side that matched it. */
   const sourceField = (source: Source, s: Side | undefined) => {
     const key = keys[source];
     const target = key && s?.matched.get(key);
-    return target ? s!.pair.source.get(target) : undefined;
+    return target ? s!.source.get(target) : undefined;
   };
   // The form's rules come from the compiled schema; its label, help and order from the UI.
   const formRules = sourceField("form", sides.jsonSchema);
@@ -424,7 +391,7 @@ function buildField<F extends PlanField>(
     form: { rules: formRules, text: formUi },
   };
   const joinedXsd = keys.form
-    ? sides.jsonSchemaVsXsd?.pair.source.get(
+    ? sides.jsonSchemaVsXsd?.source.get(
         sides.jsonSchemaVsXsd.matched.get(
           sides.jsonSchema?.matched.get(keys.form) ?? keys.form,
         ) ?? "",
@@ -435,7 +402,7 @@ function buildField<F extends PlanField>(
     keys.form && (sides.jsonSchema?.matched.get(keys.form) ?? keys.form);
   /** The elements the form's XML rules write the field to. */
   const written = schemaPath
-    ? [...(sides.xml?.plan.pair.source.keys() ?? [])]
+    ? [...(sides.xml?.plan.source.keys() ?? [])]
         .filter((rule) => rule.startsWith(link(schemaPath, "")))
         .map((rule) => rule.slice(link(schemaPath, "").length))
     : [];
@@ -454,7 +421,7 @@ function buildField<F extends PlanField>(
     const s = source === "form" ? sides.uiSchema : sides[source];
     const key = keys[source];
     if (!s || !key) return null;
-    const order = [...s.pair.plan]
+    const order = [...s.plan]
       .filter(([, f]) => f.order !== undefined)
       .sort(([, a], [, b]) => a.order! - b.order!)
       .map(([k]) => k);
@@ -638,7 +605,7 @@ function buildField<F extends PlanField>(
       judged.status === "match" &&
       cellValue !== key
     ) {
-      const renamed = s.pair.registers.renamed?.[key];
+      const renamed = s.renames?.[key];
       if (renamed)
         return {
           status: renamed.category,
@@ -691,32 +658,31 @@ function buildField<F extends PlanField>(
  * not check. Needs the compiled forms (`npm run compile`) and cached sources
  * (`npm run parity:fetch`).
  */
-export async function compareForm<F extends PlanField>(
-  plan: Plan<F>,
-): Promise<FormComparison<F> | null> {
-  const diff = DIFFS.find((d) => d.slug === plan.slug);
-  if (!diff) return null;
-  const pairs = await formPairs(diff, new Map([[plan.slug, plan]]));
-  const { compiled } = pairs;
+export interface InspectedComparison<
+  F extends PlanField = PlanField,
+> extends FormComparison<F> {
+  /** All original check entries, including evidence grouped into table cells. */
+  findings: Finding[];
+}
+
+/** Pure presentation of completed evidence. The table keeps its existing values and count units. */
+export function projectComparison<F extends PlanField = PlanField>(
+  evaluation: FormEvaluation,
+): InspectedComparison<F> {
+  const plan = evaluation.plan as Plan<F>;
+  const { checks } = evaluation;
   const sides: Sides = {
-    dat: side(pairs.dat, SPECS.dat),
-    xsd: side(pairs.xsd, SPECS.xsd),
-    jsonSchema: compiled && side(compiled.jsonSchema, SPECS.jsonSchema),
-    uiSchema: compiled && side(compiled.uiSchema, SPECS.uiSchema),
-    jsonSchemaVsXsd:
-      compiled && side(compiled.jsonSchemaVsXsd, SPECS.jsonSchemaVsXsd),
+    dat: side(checks.dat!),
+    xsd: side(checks.xsd!),
+    jsonSchema: checks.jsonSchema && side(checks.jsonSchema),
+    uiSchema: checks.uiSchema && side(checks.uiSchema),
+    jsonSchemaVsXsd: checks.jsonSchemaVsXsd && side(checks.jsonSchemaVsXsd),
   };
-  const mapping = compiled?.xmlMapping;
-  // Every XML comparison shows on one row: the field's XML mapping.
-  if (mapping)
+  if (checks.xmlMapping)
     sides.xml = {
-      plan: side(mapping.plan, SPECS.xmlMapping, () => "xmlMapping"),
-      jsonSchema: side(
-        mapping.jsonSchema,
-        SPECS.xmlMappingVsJsonSchema,
-        () => "xmlMapping",
-      ),
-      xsd: side(mapping.xsd, SPECS.xmlMappingVsXsd, () => "xmlMapping"),
+      plan: side(checks.xmlMapping, true),
+      jsonSchema: side(checks.xmlMappingVsJsonSchema!, true),
+      xsd: side(checks.xmlMappingVsXsd!, true),
     };
   const all = walkFields(plan.children).map(({ field }) => field);
   const labels = Object.fromEntries(
@@ -748,5 +714,16 @@ export async function compareForm<F extends PlanField>(
       return { kind: "field", id: field.id };
     });
   const children = compare(plan.children ?? [], []);
-  return { children, fields };
+  return { children, fields, findings: evaluation.findings };
+}
+
+export async function compareForm<F extends PlanField>(
+  plan: Plan<F>,
+): Promise<InspectedComparison<F> | null> {
+  const diff = DIFFS.find((d) => d.slug === plan.slug);
+  return diff
+    ? projectComparison<F>(
+        await evaluateForm(diff, new Map([[plan.slug, plan]])),
+      )
+    : null;
 }

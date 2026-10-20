@@ -1,3 +1,5 @@
+import { evaluateCheck } from "./evaluate.ts";
+import type { CheckName, FormEvaluation } from "../result.ts";
 /**
  * The harness's entry point: `checkForm` runs every comparison for one form.
  *
@@ -6,12 +8,7 @@
  *   compare.ts   compares two `Fields` maps and applies a form's recorded differences
  *   model.ts     the vocabulary all three share
  */
-import {
-  comparePair,
-  type Pair,
-  type PairResult,
-  type PairSpec,
-} from "./compare.ts";
+import { type Pair, type PairResult, type PairSpec } from "./compare.ts";
 import { datFields } from "./flatten/dat.ts";
 import { indexLeaves, jsonSchemaFields } from "./flatten/jsonSchema.ts";
 import { planFields, walkFields, type Plan } from "./flatten/plan.ts";
@@ -155,17 +152,20 @@ function joinThroughPlan(
   const toXsd = diff.xsd?.renamed ?? {};
   const left: Fields = new Map();
   const right: Fields = new Map();
+  const sourcePaths = new Map<string, string>();
   for (const { field } of walkFields(plan.children)) {
     if (!field.json_path || !field.xml_path) continue;
     const schemaPath = toSchema[field.json_path]?.to ?? field.json_path;
     const xmlPath = fromXmlPath(field.xml_path);
-    const xsdField = xsd.get(toXsd[xmlPath]?.to ?? xmlPath);
+    const xsdPath = toXsd[xmlPath]?.to ?? xmlPath;
+    const xsdField = xsd.get(xsdPath);
     const schemaField = schema.get(schemaPath);
     if (!xsdField || !schemaField) continue;
     left.set(schemaPath, schemaField);
     right.set(schemaPath, xsdField);
+    sourcePaths.set(schemaPath, xsdPath);
   }
-  return { left, right };
+  return { left, right, sourcePaths };
 }
 
 /** The plan's links from a JSON path to an element, keyed as `xmlTransformFields` keys them. */
@@ -224,7 +224,8 @@ export interface FormPairs {
     schema: Fields;
     jsonSchema: Pair;
     uiSchema: Pair;
-    jsonSchemaVsXsd: Pair;
+    /** Join keys are JSON paths; retain the original XSD coordinates for findings. */
+    jsonSchemaVsXsd: Pair & { sourcePaths?: ReadonlyMap<string, string> };
     /** The leaves `index.json` lists. */
     indexLeaves: Set<string>;
     /** Absent for a form with no emitted XML transform. */
@@ -277,7 +278,10 @@ export async function formPairs(
         jsonPlan,
         uiSchemaFields(loadUiSchema(specId), schema),
       ),
-      jsonSchemaVsXsd: pair(diff.jsonSchemaVsXsd, joined.left, joined.right),
+      jsonSchemaVsXsd: {
+        ...pair(diff.jsonSchemaVsXsd, joined.left, joined.right),
+        sourcePaths: joined.sourcePaths,
+      },
       indexLeaves: new Set(indexLeaves(loadIndex(specId))),
       xmlMapping: mapped && {
         plan: pair(diff.xmlMapping, planLinks(plan), mapped.byLink),
@@ -292,57 +296,102 @@ export async function formPairs(
   };
 }
 
+/** Evaluate each named check once, retaining the facts needed by every projection. */
+export function evaluatePairs(pairs: FormPairs): FormEvaluation {
+  const { plan, planProblems, compiled } = pairs;
+  const checks: FormEvaluation["checks"] = {};
+  const add = (
+    name: CheckName,
+    pair: Pair,
+    sourcePaths?: ReadonlyMap<string, string>,
+  ) => {
+    checks[name] = evaluateCheck(name, pair, SPECS[name], sourcePaths);
+  };
+  add("dat", pairs.dat);
+  add("xsd", pairs.xsd);
+  if (compiled) {
+    add("jsonSchema", compiled.jsonSchema);
+    add("uiSchema", compiled.uiSchema);
+    add(
+      "jsonSchemaVsXsd",
+      compiled.jsonSchemaVsXsd,
+      compiled.jsonSchemaVsXsd.sourcePaths,
+    );
+    if (compiled.xmlMapping) {
+      add("xmlMapping", compiled.xmlMapping.plan);
+      add("xmlMappingVsJsonSchema", compiled.xmlMapping.jsonSchema);
+      add("xmlMappingVsXsd", compiled.xmlMapping.xsd);
+    }
+  }
+  const indexProblems = compiled
+    ? indexDisagreements(compiled.schema, compiled.indexLeaves)
+    : [];
+  const findings = Object.values(checks).flatMap((check) => check!.findings);
+  for (const [check, rows] of [
+    ["plan", planProblems],
+    ["index", indexProblems],
+  ] as const) {
+    rows.forEach((d, i) =>
+      findings.push({
+        ...d,
+        id: `${check}:${i}`,
+        check,
+        checkTitle:
+          check === "plan" ? "Plan readability" : "Schema/index consistency",
+        status: "unrecorded",
+        dimension: check,
+        anchors: [
+          {
+            artifact:
+              check === "plan"
+                ? "plan"
+                : d.kind === "schema leaf missing from index"
+                  ? "jsonSchema"
+                  : "index",
+            path: d.path,
+          },
+        ],
+      }),
+    );
+  }
+  return { plan, checks, findings, suite: { planProblems, indexProblems } };
+}
+
+export async function evaluateForm(
+  diff: FormDiff,
+  plans: Map<string, Plan> = loadPlans(),
+): Promise<FormEvaluation> {
+  return evaluatePairs(await formPairs(diff, plans));
+}
+
+/** Compatibility view for the existing parity suite; no checks are rerun. */
+export function formCheck(evaluation: FormEvaluation): FormCheck {
+  const { checks, suite } = evaluation;
+  const required = (name: CheckName) => checks[name]!.result;
+  const requirements = { dat: required("dat"), xsd: required("xsd") };
+  const stale = Object.values(checks).flatMap((check) => check!.result.stale);
+  if (!checks.jsonSchema) return { requirements, suite: { ...suite, stale } };
+  return {
+    requirements,
+    implementation: {
+      jsonSchema: required("jsonSchema"),
+      uiSchema: required("uiSchema"),
+      xmlMapping: checks.xmlMapping?.result,
+    },
+    xml: {
+      jsonSchemaVsXsd: required("jsonSchemaVsXsd"),
+      xmlMappingVsJsonSchema: checks.xmlMappingVsJsonSchema?.result,
+      xmlMappingVsXsd: checks.xmlMappingVsXsd?.result,
+    },
+    suite: { ...suite, stale },
+  };
+}
+
 export async function checkForm(
   diff: FormDiff,
   plans: Map<string, Plan> = loadPlans(),
 ): Promise<FormCheck> {
-  const { planProblems, ...pairs } = await formPairs(diff, plans);
-  const dat = comparePair(pairs.dat, SPECS.dat);
-  const xsd = comparePair(pairs.xsd, SPECS.xsd);
-  const requirements = { dat, xsd };
-  if (!pairs.compiled)
-    return {
-      requirements,
-      suite: {
-        planProblems,
-        indexProblems: [],
-        stale: [...dat.stale, ...xsd.stale],
-      },
-    };
-
-  const { compiled } = pairs;
-  const jsonSchema = comparePair(compiled.jsonSchema, SPECS.jsonSchema);
-  const uiSchema = comparePair(compiled.uiSchema, SPECS.uiSchema);
-  const jsonSchemaVsXsd = comparePair(
-    compiled.jsonSchemaVsXsd,
-    SPECS.jsonSchemaVsXsd,
-  );
-  const mapping = compiled.xmlMapping;
-  const xmlMapping = mapping && comparePair(mapping.plan, SPECS.xmlMapping);
-  const xmlMappingVsJsonSchema =
-    mapping && comparePair(mapping.jsonSchema, SPECS.xmlMappingVsJsonSchema);
-  const xmlMappingVsXsd =
-    mapping && comparePair(mapping.xsd, SPECS.xmlMappingVsXsd);
-
-  return {
-    requirements,
-    implementation: { jsonSchema, uiSchema, xmlMapping },
-    xml: { jsonSchemaVsXsd, xmlMappingVsJsonSchema, xmlMappingVsXsd },
-    suite: {
-      planProblems,
-      indexProblems: indexDisagreements(compiled.schema, compiled.indexLeaves),
-      stale: [
-        dat,
-        xsd,
-        jsonSchema,
-        uiSchema,
-        jsonSchemaVsXsd,
-        xmlMapping,
-        xmlMappingVsJsonSchema,
-        xmlMappingVsXsd,
-      ].flatMap((result) => result?.stale ?? []),
-    },
-  };
+  return formCheck(await evaluateForm(diff, plans));
 }
 
 export {
