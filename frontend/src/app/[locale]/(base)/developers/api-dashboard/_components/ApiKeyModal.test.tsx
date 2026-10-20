@@ -26,8 +26,7 @@ jest.mock("src/services/auth/useUser", () => ({
 }));
 
 const mockUser = {
-  user_id: "test-user-id",
-  token: "test-token",
+  isLoggedIn: true,
 };
 
 const mockApiKey: ApiKey = {
@@ -316,19 +315,17 @@ describe("ApiKeyModal", () => {
       expect(
         screen.getByTestId("open-create-api-key-modal-button"),
       ).toBeInTheDocument();
-      expect(screen.getByText("createDescription")).toBeInTheDocument();
-      expect(
-        screen.getByLabelText("createApiKeyNameLabel"),
-      ).toBeInTheDocument();
-      expect(screen.getByText("createNameHint")).toBeInTheDocument();
+      expect(screen.getByText("apiKeyNameDescription")).toBeInTheDocument();
+      expect(screen.getByLabelText("apiKeyNameLabel")).toBeInTheDocument();
+      expect(screen.getByText("apiKeyNameHint")).toBeInTheDocument();
     });
 
     it("uses a hint instead of a placeholder for the name input", () => {
       renderModal("create");
 
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       expect(nameInput).not.toHaveAttribute("placeholder");
-      expect(nameInput).toHaveAccessibleDescription("createNameHint");
+      expect(nameInput).toHaveAccessibleDescription("apiKeyNameHint");
     });
 
     it("validates required name field", async () => {
@@ -344,7 +341,7 @@ describe("ApiKeyModal", () => {
       await waitFor(() => {
         expect(screen.getByText("nameRequiredError")).toBeInTheDocument();
       });
-      expect(screen.getByLabelText("createApiKeyNameLabel")).toHaveClass(
+      expect(screen.getByLabelText("apiKeyNameLabel")).toHaveClass(
         "usa-input--error",
       );
       expect(mockClientFetch).not.toHaveBeenCalled();
@@ -364,7 +361,7 @@ describe("ApiKeyModal", () => {
       const { onApiKeyUpdated } = renderModal("create");
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "Existing Name");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
@@ -388,10 +385,7 @@ describe("ApiKeyModal", () => {
       renderModal("create");
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
-      await user.type(
-        screen.getByLabelText("createApiKeyNameLabel"),
-        "New API Key",
-      );
+      await user.type(screen.getByLabelText("apiKeyNameLabel"), "New API Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       const submitButton = screen.getByTestId("create-api-key-submit-button");
@@ -413,7 +407,7 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
       await user.type(
-        screen.getByLabelText("createApiKeyNameLabel"),
+        screen.getByLabelText("apiKeyNameLabel"),
         "New Key{Enter}",
       );
 
@@ -427,10 +421,7 @@ describe("ApiKeyModal", () => {
       renderModal("create");
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
-      await user.type(
-        screen.getByLabelText("createApiKeyNameLabel"),
-        "New Key",
-      );
+      await user.type(screen.getByLabelText("apiKeyNameLabel"), "New Key");
 
       screen.getByRole("button", { name: "cancel" }).focus();
       await user.keyboard("{Enter}");
@@ -454,7 +445,7 @@ describe("ApiKeyModal", () => {
       renderModal("create");
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "New Key{Enter}");
 
       await waitFor(() => {
@@ -472,7 +463,7 @@ describe("ApiKeyModal", () => {
       renderModal("create");
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "Abandoned Name");
       expect(nameInput).toHaveValue("Abandoned Name");
 
@@ -484,7 +475,7 @@ describe("ApiKeyModal", () => {
       });
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
-      expect(screen.getByLabelText("createApiKeyNameLabel")).toHaveValue("");
+      expect(screen.getByLabelText("apiKeyNameLabel")).toHaveValue("");
 
       // submitting the empty field shows the required error, not a stale name
       await user.click(screen.getByTestId("create-api-key-submit-button"));
@@ -512,7 +503,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "New API Key");
 
       // Submit
@@ -537,71 +528,251 @@ describe("ApiKeyModal", () => {
   });
 
   describe("Edit Mode", () => {
+    const openEditModal = async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.click(
+        screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
+      );
+      return screen.getByLabelText("apiKeyNameLabel");
+    };
+
     it("renders edit modal with correct content", () => {
       renderModal("edit", mockApiKey);
 
       expect(
         screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
+      ).toHaveAttribute("title", "editTriggerTitle");
+      expect(
+        screen.getByRole("heading", { name: "editTitle", hidden: true }),
       ).toBeInTheDocument();
-      expect(screen.getByText("editDescription")).toBeInTheDocument();
-      expect(screen.getByDisplayValue("Test API Key")).toBeInTheDocument();
+      expect(screen.getByText("apiKeyNameDescription")).toBeInTheDocument();
+
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
+      expect(nameInput).toHaveValue("Test API Key");
+      expect(nameInput).not.toHaveAttribute("placeholder");
+      expect(nameInput).toHaveAccessibleDescription("apiKeyNameHint");
+
+      expect(
+        screen.getByTestId("edit-api-key-submit-button"),
+      ).toHaveTextContent("saveChanges");
     });
 
-    it("validates that name has changed", async () => {
+    it("shows the required error when the name is cleared", async () => {
       const user = userEvent.setup();
       renderModal("edit", mockApiKey);
 
-      // Open modal
-      await user.click(
-        screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
-      );
-
-      // Try to submit without changing name
+      const nameInput = await openEditModal(user);
+      await user.clear(nameInput);
       await user.click(screen.getByTestId("edit-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(screen.getByText("nameChangedError")).toBeInTheDocument();
+        expect(screen.getByText("nameRequiredError")).toBeInTheDocument();
       });
+      expect(nameInput).toHaveClass("usa-input--error");
+      expect(mockClientFetch).not.toHaveBeenCalled();
     });
 
-    it("successfully renames API key", async () => {
+    it("closes without a request when the name is unchanged", async () => {
+      const user = userEvent.setup();
+      const { onApiKeyUpdated } = renderModal("edit", mockApiKey);
+
+      const nameInput = await openEditModal(user);
+      // surrounding whitespace is trimmed, so this is still the same name
+      await user.type(nameInput, "  ");
+      const submitButton = screen.getByTestId("edit-api-key-submit-button");
+      expect(submitButton).toBeEnabled();
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole("dialog", { hidden: true })).toHaveClass(
+          "is-hidden",
+        );
+      });
+      expect(mockClientFetch).not.toHaveBeenCalled();
+      expect(onApiKeyUpdated).not.toHaveBeenCalled();
+    });
+
+    it("shows a field error when the key name already exists", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockRejectedValue(
+        new Error("Error renaming API key: 422", {
+          cause: {
+            status: 422,
+            body: { errorType: "duplicate_api_key_name" },
+          },
+        }),
+      );
+
+      const { onApiKeyUpdated } = renderModal("edit", mockApiKey);
+
+      const nameInput = await openEditModal(user);
+      await user.clear(nameInput);
+      await user.type(nameInput, "Existing Name");
+      await user.click(screen.getByTestId("edit-api-key-submit-button"));
+
+      await waitFor(() => {
+        expect(screen.getByText("duplicateNameError")).toBeInTheDocument();
+      });
+      expect(nameInput).toHaveClass("usa-input--error");
+      expect(nameInput).toHaveValue("Existing Name");
+      expect(screen.queryByText("editErrorHeading")).not.toBeInTheDocument();
+      expect(onApiKeyUpdated).not.toHaveBeenCalled();
+    });
+
+    it("shows an error alert and keeps the input when renaming fails", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockRejectedValueOnce(new Error("API Error"));
+
+      const { onApiKeyUpdated } = renderModal("edit", mockApiKey);
+
+      const nameInput = await openEditModal(user);
+      await user.clear(nameInput);
+      await user.type(nameInput, "Unique Name");
+      await user.click(screen.getByTestId("edit-api-key-submit-button"));
+
+      await waitFor(() => {
+        expect(screen.getByText("editErrorHeading")).toBeInTheDocument();
+      });
+      expect(screen.getByText("editErrorMessage")).toBeInTheDocument();
+      expect(nameInput).toHaveValue("Unique Name");
+      expect(nameInput).not.toHaveClass("usa-input--error");
+      expect(onApiKeyUpdated).not.toHaveBeenCalled();
+    });
+
+    it("shows loading state while renaming", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockReturnValue(
+        new Promise(() => {
+          // never resolves, keeping the modal in the loading state
+        }),
+      );
+
+      renderModal("edit", mockApiKey);
+
+      const nameInput = await openEditModal(user);
+      await user.clear(nameInput);
+      await user.type(nameInput, "Renamed API Key");
+      await user.click(screen.getByTestId("edit-api-key-submit-button"));
+
+      const submitButton = screen.getByTestId("edit-api-key-submit-button");
+      await waitFor(() => {
+        expect(submitButton).toBeDisabled();
+      });
+      expect(submitButton).toHaveTextContent("saveChanges");
+      expect(within(submitButton).getByRole("progressbar")).toBeInTheDocument();
+      expect(within(submitButton).getByText("saving")).toBeInTheDocument();
+    });
+
+    it("renames the API key and closes the modal", async () => {
       const user = userEvent.setup();
       const renamedApiKey = { ...mockApiKey, key_name: "Renamed API Key" };
       mockClientFetch.mockResolvedValue({ data: renamedApiKey });
 
       const { onApiKeyUpdated } = renderModal("edit", mockApiKey);
 
-      // Open modal
-      await user.click(
-        screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
-      );
-
-      // Change name
-      const nameInput = screen.getByDisplayValue("Test API Key");
+      const nameInput = await openEditModal(user);
       await user.clear(nameInput);
-      await user.type(nameInput, "Renamed API Key");
-
-      // Submit
+      await user.type(nameInput, " Renamed API Key ");
       await user.click(screen.getByTestId("edit-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(mockClientFetch).toHaveBeenCalledWith(
-          "/api/user/api-keys/test-api-key-id",
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              key_name: "Renamed API Key",
-            }),
+        expect(onApiKeyUpdated).toHaveBeenCalledWith(renamedApiKey);
+      });
+      expect(mockClientFetch).toHaveBeenCalledWith(
+        "/api/user/api-keys/test-api-key-id",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            key_name: "Renamed API Key",
+          }),
+        },
+      );
+
+      // the modal closes rather than showing a success state; the page shows the confirmation
+      expect(screen.getByRole("dialog", { hidden: true })).toHaveClass(
+        "is-hidden",
+      );
+      expect(screen.queryByText("Renamed API Key")).not.toBeInTheDocument();
+    });
+
+    it("submits when Enter is pressed in the name input", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockResolvedValue({
+        data: { ...mockApiKey, key_name: "Renamed" },
+      });
+
+      renderModal("edit", mockApiKey);
+
+      const nameInput = await openEditModal(user);
+      await user.clear(nameInput);
+      await user.type(nameInput, "Renamed{Enter}");
+
+      await waitFor(() => {
+        expect(mockClientFetch).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("restores the key's current name when the modal is reopened", async () => {
+      const user = userEvent.setup();
+      renderModal("edit", mockApiKey);
+
+      const nameInput = await openEditModal(user);
+      await user.clear(nameInput);
+      await user.click(screen.getByTestId("edit-api-key-submit-button"));
+      expect(screen.getByText("nameRequiredError")).toBeInTheDocument();
+      await user.type(nameInput, "Abandoned Name");
+
+      await user.click(screen.getByRole("button", { name: "cancel" }));
+      await waitFor(() => {
+        expect(screen.getByRole("dialog", { hidden: true })).toHaveClass(
+          "is-hidden",
         );
       });
 
-      await waitFor(() => {
-        expect(onApiKeyUpdated).toHaveBeenCalled();
-      });
+      await openEditModal(user);
+      expect(screen.getByLabelText("apiKeyNameLabel")).toHaveValue(
+        "Test API Key",
+      );
+      expect(screen.queryByText("nameRequiredError")).not.toBeInTheDocument();
+    });
+
+    it("shows the new name when the key it is given changes", () => {
+      const { rerender } = renderModal("edit", mockApiKey);
+
+      rerender(
+        <ApiKeyModal
+          mode="edit"
+          apiKey={{ ...mockApiKey, key_name: "Refreshed Name" }}
+          onApiKeyUpdated={jest.fn()}
+        />,
+      );
+
+      expect(screen.getByLabelText("apiKeyNameLabel")).toHaveValue(
+        "Refreshed Name",
+      );
+    });
+
+    it("gives each key's name input its own id", () => {
+      render(
+        <>
+          <ApiKeyModal
+            mode="edit"
+            apiKey={mockApiKey}
+            onApiKeyUpdated={jest.fn()}
+          />
+          <ApiKeyModal
+            mode="edit"
+            apiKey={{ ...mockApiKey, api_key_id: "other-api-key-id" }}
+            onApiKeyUpdated={jest.fn()}
+          />
+        </>,
+      );
+
+      const inputs = screen.getAllByLabelText("apiKeyNameLabel");
+      expect(inputs).toHaveLength(2);
+      expect(inputs[0].id).not.toEqual(inputs[1].id);
     });
 
     it("throws error when apiKey is not provided for edit mode", () => {
@@ -614,6 +785,23 @@ describe("ApiKeyModal", () => {
       }).toThrow("ApiKey is required when mode is 'edit'");
 
       consoleSpy.mockRestore();
+    });
+
+    it("passes accessibility scan with errors shown", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockRejectedValue(new Error("API Error"));
+      const { container } = renderModal("edit", mockApiKey);
+
+      const nameInput = await openEditModal(user);
+      await user.clear(nameInput);
+      await user.click(screen.getByTestId("edit-api-key-submit-button"));
+      await screen.findByText("nameRequiredError");
+      expect(await axe(container)).toHaveNoViolations();
+
+      await user.type(nameInput, "Unique Name");
+      await user.click(screen.getByTestId("edit-api-key-submit-button"));
+      await screen.findByText("editErrorHeading");
+      expect(await axe(container)).toHaveNoViolations();
     });
   });
 
@@ -628,7 +816,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name and submit
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "Test Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
@@ -664,7 +852,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name and submit
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "Test Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
@@ -721,7 +909,7 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "New API Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
@@ -749,7 +937,7 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "New API Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
@@ -784,10 +972,7 @@ describe("ApiKeyModal", () => {
       renderModal("create");
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
-      await user.type(
-        screen.getByLabelText("createApiKeyNameLabel"),
-        "New Key",
-      );
+      await user.type(screen.getByLabelText("apiKeyNameLabel"), "New Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       const keyInput = await screen.findByLabelText("createdApiKeyLabel");
@@ -806,42 +991,12 @@ describe("ApiKeyModal", () => {
       const { container } = renderModal("create");
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
-      await user.type(
-        screen.getByLabelText("createApiKeyNameLabel"),
-        "New Key",
-      );
+      await user.type(screen.getByLabelText("apiKeyNameLabel"), "New Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
       await screen.findByLabelText("createdApiKeyLabel");
 
       const results = await axe(container);
       expect(results).toHaveNoViolations();
-    });
-
-    it("does not display the API key ID after successful edit", async () => {
-      const user = userEvent.setup();
-      const renamedApiKey = {
-        ...mockApiKey,
-        key_name: "Renamed Key",
-        key_id: "edit-key-456",
-      };
-      mockClientFetch.mockResolvedValue({ data: renamedApiKey });
-
-      renderModal("edit", mockApiKey);
-
-      await user.click(
-        screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
-      );
-
-      const nameInput = screen.getByDisplayValue("Test API Key");
-      await user.clear(nameInput);
-      await user.type(nameInput, "Renamed Key");
-      await user.click(screen.getByTestId("edit-api-key-submit-button"));
-
-      await waitFor(() => {
-        expect(screen.getByText("editSuccessHeading")).toBeInTheDocument();
-      });
-
-      expect(screen.queryByText("edit-key-456")).not.toBeInTheDocument();
     });
 
     it("shows done button in success content", async () => {
@@ -857,7 +1012,7 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByLabelText("createApiKeyNameLabel");
+      const nameInput = screen.getByLabelText("apiKeyNameLabel");
       await user.type(nameInput, "New Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 

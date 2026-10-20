@@ -26,8 +26,7 @@ const ApiKeyAlertContext = createContext<ApiKeyAlertContextValue>({
 export const useApiKeyAlert = () => useContext(ApiKeyAlertContext);
 
 /*
-  Holds the success confirmation shown on the page after an API key action, such as a
-  deletion.
+  Holds the success confirmation shown on the page after an API key is renamed or deleted.
 
   The confirmation lives here rather than in the modals because a deleted key's row, and
   the modal with it, is removed from the page once the key list refreshes. It stays until

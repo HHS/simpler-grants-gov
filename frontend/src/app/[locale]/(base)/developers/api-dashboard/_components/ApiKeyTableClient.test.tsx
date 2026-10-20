@@ -47,8 +47,7 @@ Object.defineProperty(navigator, "clipboard", {
 });
 
 const mockUser = {
-  user_id: "test-user-id",
-  token: "test-token",
+  isLoggedIn: true,
 };
 
 const mockApiKeys: ApiKey[] = [
@@ -89,13 +88,16 @@ const newApiKey = createMockApiKey({
   created_at: "2025-03-01",
 });
 
-const getDeleteModal = (apiKeyId: string) => {
+const getModal = (mode: "edit" | "delete", apiKeyId: string) => {
   const modal = screen
     .getAllByRole("dialog", { hidden: true })
-    .find((dialog) => dialog.id === `delete-api-key-${apiKeyId}`);
-  if (!modal) throw new Error(`No delete modal for ${apiKeyId}`);
+    .find((dialog) => dialog.id === `${mode}-api-key-${apiKeyId}`);
+  if (!modal) throw new Error(`No ${mode} modal for ${apiKeyId}`);
   return modal;
 };
+
+const getDeleteModal = (apiKeyId: string) => getModal("delete", apiKeyId);
+const getEditModal = (apiKeyId: string) => getModal("edit", apiKeyId);
 
 describe("ApiKeyTableClient", () => {
   const mockUseClientFetch = jest.mocked(useClientFetch);
@@ -362,5 +364,98 @@ describe("ApiKeyTableClient", () => {
         });
       },
     );
+  });
+  describe("Renaming a key", () => {
+    const renameKey = async (
+      user: ReturnType<typeof userEvent.setup>,
+      apiKeyId: string,
+      newName: string,
+    ) => {
+      await user.click(
+        screen.getByTestId(`open-edit-api-key-modal-button-${apiKeyId}`),
+      );
+      const modal = getEditModal(apiKeyId);
+      const nameInput = within(modal).getByLabelText("apiKeyNameLabel");
+      await user.clear(nameInput);
+      await user.type(nameInput, newName);
+      await user.click(within(modal).getByTestId("edit-api-key-submit-button"));
+      return modal;
+    };
+
+    it("shows the renamed key alert and refreshes the page after renaming", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockResolvedValue({
+        data: { ...mockApiKeys[0], key_name: "Production v2" },
+      });
+      render(tableWithAlert(mockApiKeys));
+
+      const modal = await renameKey(user, "key-1", "Production v2");
+
+      expect(await screen.findByTestId("api-key-alert")).toHaveTextContent(
+        "renameSuccessMessage",
+      );
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(modal).toHaveClass("is-hidden");
+    });
+
+    it("replaces the deleted key alert rather than stacking", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockResolvedValueOnce({ message: "Success" });
+      render(tableWithAlert(mockApiKeys));
+
+      await user.click(
+        screen.getByTestId("open-delete-api-key-modal-button-key-2"),
+      );
+      const deleteModal = getDeleteModal("key-2");
+      await user.type(
+        within(deleteModal).getByLabelText("deleteConfirmationLabel"),
+        "delete",
+      );
+      await user.click(
+        within(deleteModal).getByTestId("delete-api-key-submit-button"),
+      );
+      expect(await screen.findByTestId("api-key-alert")).toHaveTextContent(
+        "deleteSuccessMessage",
+      );
+
+      mockClientFetch.mockResolvedValueOnce({
+        data: { ...mockApiKeys[0], key_name: "Production v2" },
+      });
+      await renameKey(user, "key-1", "Production v2");
+
+      await waitFor(() => {
+        expect(screen.getByTestId("api-key-alert")).toHaveTextContent(
+          "renameSuccessMessage",
+        );
+      });
+      expect(screen.getAllByTestId("api-key-alert")).toHaveLength(1);
+    });
+
+    it("shows each key's own name when a new key is added at the top", async () => {
+      const user = userEvent.setup();
+      mockClientFetch.mockResolvedValue({
+        data: { ...newApiKey, key_name: "New Key v2" },
+      });
+      const { rerender } = render(tableWithAlert(mockApiKeys));
+
+      // keys come back newest first, so a newly created key takes the first row
+      rerender(tableWithAlert([newApiKey, ...mockApiKeys]));
+
+      expect(
+        within(getEditModal("key-new")).getByLabelText("apiKeyNameLabel"),
+      ).toHaveValue("New Key");
+      expect(
+        within(getEditModal("key-1")).getByLabelText("apiKeyNameLabel"),
+      ).toHaveValue("Production Key");
+
+      await renameKey(user, "key-new", "New Key v2");
+
+      await waitFor(() => {
+        expect(mockClientFetch).toHaveBeenCalledWith(
+          "/api/user/api-keys/key-new",
+          expect.objectContaining({ method: "PUT" }),
+        );
+      });
+    });
   });
 });

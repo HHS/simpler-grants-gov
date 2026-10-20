@@ -91,6 +91,32 @@ def test_send_local_email_preserves_message_metadata(monkeypatch):
     assert email_message.get_body(preferencelist=("html",)).get_content().strip() == (
         "<p>Hello from local email</p>"
     )
+    assert email_message["X-SES-MESSAGE-TAGS"] is None
+    assert email_message["X-Tags"] is None
+
+
+def test_send_local_email_adds_email_tag_headers(monkeypatch):
+    """Email tags are added as SES-style and Mailpit tag headers"""
+    monkeypatch.setattr(local_email_adapter.smtplib, "SMTP", FakeSMTP)
+    monkeypatch.setattr(local_email_adapter, "is_local_aws", lambda: True)
+    config = LocalEmailConfig(
+        ENABLE_LOCAL_EMAIL_CAPTURE=True,
+        ENVIRONMENT="local",
+        LOCAL_EMAIL_SMTP_HOST="mailpit",
+    )
+
+    send_local_email(
+        to_address="recipient@example.com",
+        subject="A tagged message",
+        message="<p>Hello</p>",
+        trace_id="trace-tags",
+        config=config,
+        email_tags={"email_type": "closing_date_reminder"},
+    )
+
+    email_message = FakeSMTP.message
+    assert email_message["X-SES-MESSAGE-TAGS"] == "email_type=closing_date_reminder"
+    assert email_message["X-Tags"] == "closing_date_reminder"
 
 
 @pytest.mark.parametrize(
@@ -222,6 +248,7 @@ def test_send_email_to_address_uses_local_capture_when_enabled(monkeypatch):
         bcc_addresses=["hidden@example.com"],
         headers={"Reply-To": "reply@example.com"},
         config=config,
+        email_tags={"email_type": "org_invitation"},
     )
 
     assert message_id == "<local-message-id>"
@@ -234,6 +261,7 @@ def test_send_email_to_address_uses_local_capture_when_enabled(monkeypatch):
         bcc_addresses=["hidden@example.com"],
         headers={"Reply-To": "reply@example.com"},
         config=config,
+        email_tags={"email_type": "org_invitation"},
     )
     ses_sender.assert_not_called()
 
@@ -255,6 +283,7 @@ def test_send_email_to_address_uses_ses_when_local_capture_is_disabled(monkeypat
         message="<p>Hello from SES</p>",
         trace_id="trace-ses",
         config=config,
+        email_tags={"email_type": "opportunity_updates"},
     )
 
     assert message_id == "<ses-message-id>"
@@ -263,6 +292,7 @@ def test_send_email_to_address_uses_ses_when_local_capture_is_disabled(monkeypat
         to_address="recipient@example.com",
         subject="An SES message",
         message="<p>Hello from SES</p>",
+        email_tags={"email_type": "opportunity_updates"},
     )
 
 
@@ -306,6 +336,8 @@ def test_send_email_to_address_does_not_fall_back_to_ses_when_local_capture_fail
         "Content-Type",
         "Content-Transfer-Encoding",
         "X-Simpler-Trace-Id",
+        "X-SES-MESSAGE-TAGS",
+        "X-Tags",
     ],
 )
 def test_send_local_email_refuses_protected_headers(monkeypatch, protected_header):

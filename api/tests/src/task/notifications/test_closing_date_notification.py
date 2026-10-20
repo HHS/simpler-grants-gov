@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
+from src.constants.email_constants import EmailType
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     SuppressedEmail,
@@ -50,6 +51,7 @@ class TestClosingDateNotification:
         configuration,
         ses_client,
         get_sent_emails,
+        sent_email_tags,
     ):
         """Test that notifications are sent for opportunities closing in two weeks"""
         two_weeks_from_now = datetime_util.get_now_us_eastern_date() + timedelta(days=14)
@@ -145,6 +147,7 @@ class TestClosingDateNotification:
         emails = get_sent_emails()
         assert len(emails) == 1
         assert emails[0].destinations["ToAddresses"] == ["test@example.com"]
+        assert sent_email_tags[0].email_tags == {"email_type": EmailType.CLOSING_DATE_REMINDER}
 
     def test_closing_date_notification_not_sent_twice(
         self,

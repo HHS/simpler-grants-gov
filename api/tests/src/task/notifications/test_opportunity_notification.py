@@ -6,6 +6,7 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.adapters import db
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -246,6 +247,7 @@ class TestOpportunityNotification:
         notification_task,
         ses_client,
         get_sent_emails,
+        sent_email_tags,
     ):
         caplog.set_level(logging.INFO)
 
@@ -345,6 +347,11 @@ class TestOpportunityNotification:
         # recipients rather than the total number of messages SES received.
         recipients = {email.destinations["ToAddresses"][0] for email in get_sent_emails()}
         assert {user.email, user_2.email} <= recipients
+        assert {
+            sent.to_address
+            for sent in sent_email_tags
+            if sent.email_tags == {"email_type": EmailType.OPPORTUNITY_UPDATES}
+        } == {user.email, user_2.email}
 
         # Verify the log contains the correct metrics
         log_records = [

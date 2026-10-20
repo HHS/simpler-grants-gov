@@ -2,7 +2,6 @@
 
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { applicationTestUserId } from "src/constants/auth";
 import { fakeTestUser } from "src/utils/testing/fixtures";
 import * as userUtils from "src/utils/userUtils";
 
@@ -81,7 +80,7 @@ describe("Header", () => {
   beforeEach(() => {
     mockUseUser.mockReturnValue({
       user: {
-        token: "faketoken",
+        isLoggedIn: true,
       },
       hasBeenLoggedOut: false,
       resetHasBeenLoggedOut: jest.fn(),
@@ -287,7 +286,7 @@ describe("Header", () => {
   it("shows snackbar if user has been logged out", () => {
     mockUseUser.mockReturnValue({
       user: {
-        token: "a token",
+        isLoggedIn: true,
       },
       hasBeenLoggedOut: true,
       resetHasBeenLoggedOut: jest.fn(),
@@ -339,7 +338,7 @@ describe("Header", () => {
   it("calls storeCurrentPage when sign-in is clicked in mobile menu", async () => {
     (userUtils.storeCurrentPage as jest.Mock).mockClear();
     mockUseUser.mockReturnValue({
-      user: { token: undefined },
+      user: { isLoggedIn: false },
       hasBeenLoggedOut: false,
       resetHasBeenLoggedOut: jest.fn(),
     });
@@ -364,7 +363,7 @@ describe("Header", () => {
     it("shows Sign in as a nav link when user is unauthenticated", () => {
       mockUseUser.mockImplementation(() => ({
         user: {
-          token: undefined,
+          isLoggedIn: false,
         },
         hasBeenLoggedOut: false,
         resetHasBeenLoggedOut: jest.fn(),
@@ -382,7 +381,7 @@ describe("Header", () => {
     it("places Sign in inside the nav when unauthenticated so screen reader announces it as a nav item", () => {
       mockUseUser.mockImplementation(() => ({
         user: {
-          token: undefined,
+          isLoggedIn: false,
         },
         hasBeenLoggedOut: false,
         resetHasBeenLoggedOut: jest.fn(),
@@ -400,7 +399,7 @@ describe("Header", () => {
 
     it("shows Account dropdown in nav when user is authenticated", () => {
       mockUseUser.mockReturnValue({
-        user: { token: "faketoken" },
+        user: { isLoggedIn: true },
         hasBeenLoggedOut: false,
         resetHasBeenLoggedOut: jest.fn(),
       });
@@ -412,7 +411,7 @@ describe("Header", () => {
 
     it("Account dropdown contains Settings, Notifications, and Sign out when opened", async () => {
       mockUseUser.mockReturnValue({
-        user: { token: "faketoken" },
+        user: { isLoggedIn: true },
         hasBeenLoggedOut: false,
         resetHasBeenLoggedOut: jest.fn(),
       });
@@ -441,7 +440,7 @@ describe("Header", () => {
     it("does not show Notifications link when user is unauthenticated", () => {
       mockUseUser.mockImplementation(() => ({
         user: {
-          token: undefined,
+          isLoggedIn: false,
         },
         hasBeenLoggedOut: false,
         resetHasBeenLoggedOut: jest.fn(),
@@ -456,25 +455,9 @@ describe("Header", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("does not display test application link if not for a test application user", async () => {
-      mockUseUser.mockReturnValue({
-        user: { token: "faketoken" },
-        hasBeenLoggedOut: false,
-        resetHasBeenLoggedOut: jest.fn(),
-      });
-      render(<Header {...props} localDev={true} />);
-
-      const accountButton = screen.getByRole("button", { name: "account" });
-      await userEvent.click(accountButton);
-
-      expect(
-        screen.queryByRole("link", { name: "testApplication" }),
-      ).not.toBeInTheDocument();
-    });
-
     it("does not display test application link if not local dev", async () => {
       mockUseUser.mockReturnValue({
-        user: { token: "faketoken", id: applicationTestUserId },
+        user: { isLoggedIn: true },
         hasBeenLoggedOut: false,
         resetHasBeenLoggedOut: jest.fn(),
       });
@@ -488,9 +471,9 @@ describe("Header", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("displays test application link for a test application user if local dev", async () => {
+    it("displays test application link for a logged in user if local dev", async () => {
       mockUseUser.mockReturnValue({
-        user: { token: "faketoken", id: applicationTestUserId },
+        user: { isLoggedIn: true },
         hasBeenLoggedOut: false,
         resetHasBeenLoggedOut: jest.fn(),
       });
@@ -500,8 +483,8 @@ describe("Header", () => {
       await userEvent.click(accountButton);
 
       expect(
-        screen.queryByRole("link", { name: "testApplication" }),
-      ).not.toBeInTheDocument();
+        screen.getByRole("link", { name: "testApplication" }),
+      ).toBeInTheDocument();
     });
   });
 });
