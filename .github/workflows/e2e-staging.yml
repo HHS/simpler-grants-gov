@@ -42,9 +42,14 @@ on:
         default: true
         type: boolean
 
+# One run per target at a time, shared by every caller (cd-frontend, cd-api,
+# cd-release, daily, weekly). In a reusable workflow github.workflow is the
+# CALLER's name, so a literal prefix is needed for callers to share a group.
+# Runs queue instead of cancelling: the suite shares a handful of static test
+# users, so two concurrent runs against one target would collide.
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.target || 'staging' }}-${{ inputs.version || github.ref }}
-  cancel-in-progress: true
+  group: e2e-staging-${{ inputs.target || 'staging' }}
+  cancel-in-progress: false
 
 jobs:
   e2e-tests-deployed:
@@ -58,7 +63,7 @@ jobs:
     # Each project gets its own shard count instead of sharing one matrix. On a
     # deployed target, most spec files skip everything but Chrome (see
     # utils/auth/skip-non-chrome-staging-utils.ts), so most Mobile chrome tests
-    # skip at runtime — but Playwright balances shards by collected test count,
+    # skip at runtime - but Playwright balances shards by collected test count,
     # which means a shared matrix hands whole runners work that evaporates in
     # seconds while the Chrome shards carry everything.
     strategy:
@@ -121,7 +126,7 @@ jobs:
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
-    needs: e2e-tests-deployed
+    needs: e2e-test-staging
     uses: ./.github/workflows/e2e-create-report.yml
     secrets: inherit
     with:
@@ -134,3 +139,4 @@ jobs:
     with:
       "channel_id": "alerts-e2e"
     secrets: inherit
+    

@@ -89,6 +89,12 @@ jobs:
     name: E2E Staging (post-deploy)
     needs: [deploy]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    # Newest post-deploy run wins: if the API deploy for the same merge (or a
+    # later merge) finishes while this run is going, that run cancels this one
+    # and tests the fully deployed state. Shared with cd-api.yml.
+    concurrency:
+      group: staging-e2e-post-deploy
+      cancel-in-progress: true
     uses: ./.github/workflows/e2e-staging.yml
     secrets: inherit
     with:
