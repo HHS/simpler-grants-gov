@@ -2,11 +2,6 @@
 
 import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
 import { JsonForms } from "@jsonforms/react";
-import {
-  JsonFormsStyleContext,
-  vanillaCells,
-  vanillaStyles,
-} from "@jsonforms/vanilla-renderers";
 import type { RJSFSchema } from "@rjsf/utils";
 import type { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import {
@@ -23,15 +18,6 @@ import {
   renderers,
   type AdapterContextValue,
 } from "./renderers";
-
-// USWDS classes for the few elements the vanilla fallback renderers draw.
-const uswdsStyles = [
-  ...vanillaStyles,
-  { name: "control.input", classNames: ["usa-input"] },
-  { name: "control.select", classNames: ["usa-select"] },
-  { name: "control.label", classNames: ["usa-label"] },
-  { name: "control.validation", classNames: ["usa-error-message"] },
-];
 
 const NO_EXTRA_RENDERERS: JsonFormsRendererRegistryEntry[] = [];
 
@@ -94,19 +80,16 @@ export const JsonFormsFields = ({
 
   return (
     <AdapterContext.Provider value={adapterContext}>
-      <JsonFormsStyleContext.Provider value={{ styles: uswdsStyles }}>
-        <div onInput={refreshRuleData} onChange={refreshRuleData}>
-          <JsonForms
-            schema={schema as object}
-            uischema={uiSchema}
-            data={ruleData}
-            renderers={allRenderers}
-            cells={vanillaCells}
-            readonly={isFormLocked || print}
-            validationMode="NoValidation"
-          />
-        </div>
-      </JsonFormsStyleContext.Provider>
+      <div onInput={refreshRuleData} onChange={refreshRuleData}>
+        <JsonForms
+          schema={schema as object}
+          uischema={uiSchema}
+          data={ruleData}
+          renderers={allRenderers}
+          readonly={isFormLocked || print}
+          validationMode="NoValidation"
+        />
+      </div>
     </AdapterContext.Provider>
   );
 };

@@ -17,7 +17,6 @@ import {
   withJsonFormsControlProps,
   withJsonFormsLayoutProps,
 } from "@jsonforms/react";
-import { vanillaRenderers } from "@jsonforms/vanilla-renderers";
 import type { RJSFSchema } from "@rjsf/utils";
 import type { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
@@ -132,12 +131,17 @@ const AdaptedLayout = ({
   });
 };
 
-/*
-  Ranked above the vanilla set, which stays registered only as a fallback for a control no
-  widget can draw. getFormData logs those, because a fallback input carries no form field
-  name and so is not saved.
-*/
 const ADAPTER_RANK = 10;
+
+/*
+  Ranked below the adapter, so it only matches a control no widget can render. That control
+  is skipped: JSON Forms' default input wouldn't match the SGG widgets, and its answer
+  wouldn't be saved. getFormData logs each one. Without this entry, JSON Forms would show
+  "No applicable renderer found" instead.
+*/
+const SKIP_RANK = 1;
+
+const SkipControl = () => null;
 
 export const adaptedControlTester = rankWith(
   ADAPTER_RANK,
@@ -161,7 +165,10 @@ export const adaptedLayoutTester = rankWith(
 );
 
 export const renderers: JsonFormsRendererRegistryEntry[] = [
-  ...vanillaRenderers,
+  {
+    tester: rankWith(SKIP_RANK, isControl),
+    renderer: SkipControl,
+  },
   {
     tester: adaptedControlTester,
     renderer: withJsonFormsControlProps(AdaptedControl),

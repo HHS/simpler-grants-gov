@@ -121,7 +121,7 @@ const entryFields = (
  * object's leaves, which is how the SGG UI schema lists a composed question. A control
  * scoped to a top-level array of objects is a field list, whose fields follow the control's
  * `options.detail` when it has one and the item schema otherwise. Anything else returns no
- * nodes, and JSON Forms falls back to its own renderer for it.
+ * nodes, and the control is skipped.
  */
 export const controlToNodes = (
   control: ControlElement,
@@ -220,7 +220,7 @@ export const jsonFormsToUiSchema = (
     ? uiSchema.elements.flatMap((element) => convertElement(element, schema))
     : convertElement(uiSchema, schema);
 
-/** Scopes of the controls no widget can render, which JSON Forms renders with its own fallback. */
+/** Scopes of the controls no widget can render, which are skipped. */
 export const findUnsupportedControls = (
   uiSchema: JsonFormsUiSchema,
   schema: RJSFSchema,
