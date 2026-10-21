@@ -328,6 +328,32 @@ class TestSF424CXMLGeneration:
         for element_name in expected_elements:
             assert pc.find(f"{{{NS}}}{element_name}") is not None, f"{element_name} missing"
 
+    def test_whole_dollar_amounts_formatted_with_two_decimals(self):
+        """Whole-dollar input ("100") is written as "100.00", matching legacy Grants.gov."""
+        application_data = {
+            "budget_information": {
+                "contingencies": {
+                    "total_cost": "5000",
+                    "non_allowable_cost": "0",
+                    "total_allowable_cost": "5000.00",
+                },
+            },
+            "federal_funding": {
+                "federal_percentage_share": 50,
+                "federal_funding_share": "2500",
+            },
+        }
+        xml_data = _generate(application_data)
+        root = lxml_etree.fromstring(xml_data.encode("utf-8"))
+
+        contingencies = root.find(f"{{{NS}}}ProjectCosts/{{{NS}}}Contingencies")
+        assert contingencies.find(f"{{{NS}}}BudgetEstimatedCostAmount").text == "5000.00"
+        assert contingencies.find(f"{{{NS}}}BudgetNonAllowableCostAmount").text == "0.00"
+        assert contingencies.find(f"{{{NS}}}BudgetTotalAllowableCostAmount").text == "5000.00"
+        assert root.find(f"{{{NS}}}FederalFundingShareValue").text == "2500.00"
+        # Percentage is a whole number, not currency
+        assert root.find(f"{{{NS}}}FederalFundingPercentageShareValue").text == "50"
+
     def test_xml_output_independent_of_input_key_order(self):
         """XML element order follows the transform config, not the order of the input keys."""
         reversed_data = _reverse_key_order(_SNAPSHOT_DATA)
