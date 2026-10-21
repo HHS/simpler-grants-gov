@@ -80,7 +80,6 @@ Current designated maintainers:
 
 - @btabaska
 - @mdragon
-- @KevinJBoyer
 
 ### Paid contributions
 The Simpler Grants team is excited to offer bounties on key issues. Full terms of service are available in the [paid contributor program Terms of Service](/documentation/bounties/paid-contributor-TOS.md). Some key facts:
