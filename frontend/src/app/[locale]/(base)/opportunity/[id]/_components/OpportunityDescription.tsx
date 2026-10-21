@@ -23,16 +23,9 @@ const OpportunityDescription = ({
 
   const additionalInformationOnEligibility =
     summary.applicant_eligibility_description ?? "--";
-  const agencyEmailLink = summary?.agency_email_address ? (
-    <a href={`mailto:${summary.agency_email_address}`}>
-      {summary.agency_email_address}
-    </a>
-  ) : (
-    "--"
-  );
 
   return (
-    <div className="margin-top-6" data-testid="opportunity-description">
+    <div data-testid="opportunity-description">
       <div className="display-block tablet:display-flex flex-align-end margin-bottom-2">
         <h2 className="flex-1">{t("title")}</h2>
         <OpportunityDownload attachments={attachments} />
@@ -43,28 +36,17 @@ const OpportunityDescription = ({
         hideCallToAction={t("hideSummaryDescription")}
       />
       <h2>{t("eligibility")}</h2>
-      <h3>{t("eligibleApplicants")}</h3>
-      <OpportunityEligibility applicantTypes={summary.applicant_types || []} />
+      <div className="padding-left-6">
+        <OpportunityEligibility
+          applicantTypes={summary.applicant_types || []}
+        />
+      </div>
       <h3>{t("additionalInfo")}</h3>
       <div
         dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(additionalInformationOnEligibility),
         }}
       />
-      <h2>{t("contactInfo")}</h2>
-      <h3>{t("contactDescription")}</h3>
-      <div
-        dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(
-            summary?.agency_contact_description || "--",
-          ),
-        }}
-      />
-      <h4>{t("email")}</h4>
-      {summary?.agency_email_address_description && (
-        <p>{summary.agency_email_address_description}</p>
-      )}
-      <p>{agencyEmailLink}</p>
     </div>
   );
 };
