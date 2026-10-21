@@ -9,6 +9,7 @@
   "dat_url": "https://apply07.grants.gov/apply/forms/sample/Key_Contacts_2_0-V2.0_F683.xls",
   "status": "in_progress",
   "category": "Key Personnel & Contact Forms",
+  "spec_id": "key-contacts-tutorial",
   "description": "A copy of Key Contacts for the form library tutorial. Its labels and help text follow the Grants.gov DAT word for word.",
   "children": [
     {
