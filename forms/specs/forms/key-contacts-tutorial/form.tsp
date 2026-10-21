@@ -2,7 +2,7 @@ import "form-library-xml";
 import "simpler-forms";
 
 import "#forms/index.tsp";
-import "#questions/types/codes.tsp";
+import "#questions/person/index.tsp";
 
 using SimplerForms;
 
@@ -30,7 +30,11 @@ model KeyContactsTutorial {
   keyContacts: TutorialKeyContact[];
 }
 
-/** One key contact. Every field is declared here rather than taken from the question bank. */
+// Person makes email optional; Key Contacts requires it. Only a question can say so.
+/** One key contact: a project role and an affiliation around the question bank's `Person`. */
+@Meta.question(#{ id: "person/tutorial-key-contact" })
+@Meta.tag(Catalogue.Tag.person, Catalogue.Tag.role)
+@Validation.requiredPaths("email")
 model TutorialKeyContact {
   /** Enter the project role of the contact person (e.g., project manager, fiscal contact). Additional contacts are optional. */
   @UI.label("Contact 1 Project Role")
@@ -38,117 +42,11 @@ model TutorialKeyContact {
   @maxLength(45)
   projectRole: string;
 
-  @UI.label("Name")
-  name: TutorialContactName;
-
-  /** Enter the position title. */
-  @UI.label("Title")
-  @minLength(1)
-  @maxLength(45)
-  title?: string;
+  ...Questions.People.Person;
 
   /** Enter the Organizational Affiliation of the person to contact on matters related to this application. */
   @UI.label("Organizational Affiliation")
   @minLength(1)
   @maxLength(60)
   organizationalAffiliation?: string;
-
-  @UI.label("Address")
-  address: TutorialContactAddress;
-
-  /** Enter the daytime Telephone Number. This field is required. */
-  @UI.label("Telephone Number")
-  @minLength(1)
-  @maxLength(25)
-  phone: string;
-
-  /** Enter the Fax Number. */
-  @UI.label("Fax")
-  @minLength(1)
-  @maxLength(25)
-  fax?: string;
-
-  /** Enter a valid Email Address. This field is required. */
-  @UI.label("Email")
-  @minLength(1)
-  @maxLength(60)
-  email: string;
-}
-
-model TutorialContactName {
-  /** Select the Prefix from the provided list or enter a new Prefix not provided on the list. */
-  @UI.label("Prefix")
-  @minLength(1)
-  @maxLength(10)
-  prefix?: string;
-
-  /** Enter the First Name. This field is required. */
-  @UI.label("First Name")
-  @minLength(1)
-  @maxLength(35)
-  firstName: string;
-
-  /** Enter the Middle Name. */
-  @UI.label("Middle Name")
-  @minLength(1)
-  @maxLength(25)
-  middleName?: string;
-
-  /** Enter the Last Name. This field is required. */
-  @UI.label("Last Name")
-  @minLength(1)
-  @maxLength(60)
-  lastName: string;
-
-  /** Select the Suffix from the provided list or enter a new Suffix not provided on the list. */
-  @UI.label("Suffix")
-  @minLength(1)
-  @maxLength(10)
-  suffix?: string;
-}
-
-model TutorialContactAddress {
-  /** Enter the first line of the Street Address. This field is required. */
-  @UI.label("Street1")
-  @minLength(1)
-  @maxLength(55)
-  street1: string;
-
-  /** Enter the second line of the Street Address. */
-  @UI.label("Street2")
-  @minLength(1)
-  @maxLength(55)
-  street2?: string;
-
-  /** Enter the City. This field is required. */
-  @UI.label("City")
-  @minLength(1)
-  @maxLength(35)
-  city: string;
-
-  /** Enter the County. */
-  @UI.label("County")
-  @minLength(1)
-  @maxLength(30)
-  county?: string;
-
-  /** Select the state, US possession or military code from the provided list. This field is required if Country is the United States. */
-  @UI.label("State")
-  state?: Questions.Types.StateCode;
-
-  /** Enter the Province. */
-  @UI.label("Province")
-  @minLength(1)
-  @maxLength(30)
-  province?: string;
-
-  /** Select the Country from the provided list. This field is required. */
-  @UI.label("Country")
-  country: Questions.Types.CountryCode;
-
-  /** Enter the Postal Code (e.g., ZIP code). This field is required if Country is the United States. */
-  @UI.label("Zip / Postal Code")
-  @minLength(1)
-  @maxLength(30)
-  zipCode?: string;
 }

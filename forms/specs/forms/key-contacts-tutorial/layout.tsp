@@ -17,5 +17,12 @@ model KeyContactsTutorialLayout {
   /** You may enter up to four (4) key contacts. At least one (1) contact person is required. */
   @UI.label("Key Contacts")
   @UI.field(KeyContactsTutorial.keyContacts)
-  keyContacts: {};
+  keyContacts: {
+    // Person's fields come between the project role and the affiliation; the DAT puts the
+    // affiliation straight after the title. Entries listed here come first, in this order.
+    projectRole: TutorialKeyContact.projectRole;
+    name: TutorialKeyContact.name;
+    title: TutorialKeyContact.title;
+    organizationalAffiliation: TutorialKeyContact.organizationalAffiliation;
+  };
 }
