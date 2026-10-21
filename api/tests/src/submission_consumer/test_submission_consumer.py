@@ -231,9 +231,8 @@ class TestSubmissionConsumer:
         caplog.set_level(logging.INFO)
         submission_consumer = build_consumer()
         sqs = boto3.client("sqs", region_name="us-east-1")
-        queue = sqs.create_queue(QueueName=QUEUE_NAME)
         sent_message = sqs.send_message(
-            QueueUrl=queue["QueueUrl"], MessageBody=json.dumps({"application_id": "abc"})
+            QueueUrl=consumer_queue, MessageBody=json.dumps({"application_id": "abc"})
         )
         sent_message_id = sent_message["MessageId"]
 
@@ -257,8 +256,7 @@ class TestSubmissionConsumer:
         caplog.set_level(logging.INFO)
         submission_consumer = build_consumer()
         sqs = boto3.client("sqs", region_name="us-east-1")
-        queue = sqs.create_queue(QueueName=QUEUE_NAME)
-        sent_message = sqs.send_message(QueueUrl=queue["QueueUrl"], MessageBody="not valid json")
+        sent_message = sqs.send_message(QueueUrl=consumer_queue, MessageBody="not valid json")
         sent_message_id = sent_message["MessageId"]
 
         containers = submission_consumer.fetch_messages()
@@ -283,16 +281,15 @@ class TestSubmissionConsumer:
         user = UserFactory.create()
         submission_consumer = build_consumer()
         sqs = boto3.client("sqs", region_name="us-east-1")
-        queue = sqs.create_queue(QueueName=QUEUE_NAME)
         send_application_submission_message(application.application_id, user.user_id)
         messages = sqs.receive_message(
-            QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
+            QueueUrl=consumer_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
         )
         assert messages.get("Messages", []) != []
 
         submission_consumer.delete_messages([messages["Messages"][0]["ReceiptHandle"]])
         messages = sqs.receive_message(
-            QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
+            QueueUrl=consumer_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
         )
 
         assert messages.get("Messages", []) == []
@@ -307,16 +304,15 @@ class TestSubmissionConsumer:
         response = MockSQSDeleteMessage(successful_deletes={"x"}, failed_deletes={"y"})
         with patch.object(SQSClient, "delete_message_batch", return_value=response):
             sqs = boto3.client("sqs", region_name="us-east-1")
-            queue = sqs.create_queue(QueueName=QUEUE_NAME)
             send_application_submission_message(application.application_id, user.user_id)
             messages = sqs.receive_message(
-                QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
+                QueueUrl=consumer_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
             )
             assert messages.get("Messages", []) != []
 
             submission_consumer.delete_messages([messages["Messages"][0]["ReceiptHandle"]])
             messages = sqs.receive_message(
-                QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
+                QueueUrl=consumer_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
             )
 
             assert messages.get("Messages", []) != []
@@ -334,16 +330,15 @@ class TestSubmissionConsumer:
         submission_consumer = build_consumer()
         with patch.object(SQSClient, "delete_message_batch", side_effect=Exception()):
             sqs = boto3.client("sqs", region_name="us-east-1")
-            queue = sqs.create_queue(QueueName=QUEUE_NAME)
             send_application_submission_message(application.application_id, user.user_id)
             messages_1 = sqs.receive_message(
-                QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
+                QueueUrl=consumer_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
             )
             assert messages_1.get("Messages", []) != []
 
             submission_consumer.delete_messages([messages_1["Messages"][0]["ReceiptHandle"]])
             messages_2 = sqs.receive_message(
-                QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
+                QueueUrl=consumer_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
             )
 
             assert messages_2.get("Messages", []) != []
@@ -853,14 +848,37 @@ def test_submission_consumer_maintenance_mode(
     assert "Skipping submission processing due to maintenance mode" in caplog.messages
 
 
-def test_submission_consumer_run_command(app, monkeypatch, cli_runner, caplog):
+def test_submission_consumer_run_command(
+    app,
+    db_session,
+    monkeypatch,
+    enable_factory_create,
+    registered_form,
+    cli_runner,
+    caplog,
+    consumer_queue,
+):
     caplog.set_level(logging.INFO)
     monkeypatch.setenv("SUBMISSION_CONSUMER_MAXIMUM_BATCH_COUNT", "1")
     monkeypatch.setenv("SUBMISSION_CONSUMER_CYCLE_DURATION", "0")
+    sqs = boto3.client("sqs", region_name="us-east-1")
+    application = build_submitted_application(registered_form)
+    user = UserFactory.create()
+    send_application_submission_message(application.application_id, user.user_id)
 
     result = cli_runner.invoke(args=["submission-consumer", "run"])
 
     assert result.exit_code == 0
+    submissions = get_submissions(db_session, application.application_id)
+    assert len(submissions) == 1
+    db_session.refresh(application)
+    assert application.application_status == ApplicationStatus.ACCEPTED
+    attrs = sqs.get_queue_attributes(
+        QueueUrl=consumer_queue,
+        AttributeNames=["ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"],
+    )["Attributes"]
+    assert attrs["ApproximateNumberOfMessages"] == "0"
+    assert attrs["ApproximateNumberOfMessagesNotVisible"] == "0"
     start_log = next(
         r for r in caplog.records if r.message == "Processing application submission messages"
     )
