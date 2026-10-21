@@ -112,3 +112,21 @@ def test_truncate_html_inline(
         "<a href='http://testhost:3000/opportunity/1' style='color:blue;'>...Read full description</a>",
     )
     assert res == expected_html
+
+
+@pytest.mark.parametrize(
+    "value,expected", [(0, "$0"), (5, "$5"), (1_000, "$1,000"), (1_500_000, "$1,500,000")]
+)
+def test_fmt_currency(value, expected):
+    assert fmt_currency(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        (datetime.date(2026, 3, 1), "3/1/2026"),
+        (datetime.date(2026, 12, 25), "12/25/2026"),
+    ],
+)
+def test_fmt_date(value, expected):
+    assert fmt_date(value) == expected
