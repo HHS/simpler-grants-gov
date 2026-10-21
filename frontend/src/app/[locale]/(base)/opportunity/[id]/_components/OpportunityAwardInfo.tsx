@@ -74,7 +74,7 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
 
   return (
     <div className="margin-top-4">
-      <h2>Award</h2>
+      <h2>{t("title")}</h2>
       <Grid row className="margin-top-2 grid-gap-2">
         {Object.entries(awardGridInfo).map(([title, content], index) => (
           <Grid
@@ -89,16 +89,17 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
           </Grid>
         ))}
       </Grid>
-
-      {Object.entries(awardSubInfo).map(([title, content], index) => (
-        <div key={`awardInfo-${index}`}>
-          <p className={"text-bold"}>
-            {t(`${title as TranslationKeys}`)}
-            {":"}
-          </p>
-          <div>{formatSubContent(content)}</div>
-        </div>
-      ))}
+      <div className="border radius-md border-base-lighter padding-x-2">
+        {Object.entries(awardSubInfo).map(([title, content], index) => (
+          <div key={`awardInfo-${index}`}>
+            <p className={"text-bold"}>
+              {t(`${title as TranslationKeys}`)}
+              {":"}
+            </p>
+            <div>{formatSubContent(content)}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

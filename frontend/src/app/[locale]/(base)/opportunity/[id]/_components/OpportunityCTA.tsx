@@ -51,6 +51,7 @@ const OpportunityCTA = ({ legacyId }: { legacyId: number }) => {
 
   return (
     <div className="margin-top-2">
+      <h2>{t("importantDates")}</h2>
       <OpportunityContentBox title={t("applyTitle")} content={content} />
     </div>
   );

@@ -12,11 +12,13 @@ import { notFound, redirect, RedirectType } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
+import OpportunityContact from "./_components/OpportunityContact";
 import OpportunityCTA from "./_components/OpportunityCTA";
 import OpportunityDescription from "./_components/OpportunityDescription";
 import OpportunityDocuments from "./_components/OpportunityDocuments";
 import OpportunityHeader from "./_components/OpportunityHeader";
 import OpportunityHistory from "./_components/OpportunityHistory";
+import OpportunityImportantDates from "./_components/OpportunityImportantDates";
 import OpportunityIntro from "./_components/OpportunityIntro";
 import OpportunityLink from "./_components/OpportunityLink";
 import OpportunityStatusWidget from "./_components/OpportunityStatusWidget";
@@ -149,7 +151,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         <Grid row gap={true}>
           <div className="grid-row grid-gap" id="opportunity-detail-content">
             <div className="desktop:grid-col-8 grid-col-12 order-1 desktop:order-first">
-              <OpportunityIntro opportunityData={opportunityData} />
               <OpportunityDescription
                 summary={opportunityData.summary}
                 attachments={opportunityData.attachments}
@@ -158,18 +159,21 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
                 documents={opportunityData.attachments}
                 opportunityId={opportunityData.opportunity_id}
               />
+              <OpportunityContact summary={opportunityData.summary} />
               <OpportunityLink opportunityData={opportunityData} />
             </div>
 
             <div className="desktop:grid-col-4 grid-col-12 order-0">
-              <OpportunityStatusWidget opportunityData={opportunityData} />
-              <OpportunityCTA
+              {/*<OpportunityStatusWidget opportunityData={opportunityData} />*/}
+              {/*<OpportunityCTA
                 legacyId={opportunityData.legacy_opportunity_id}
-              />
+              />*/}
+              <OpportunityImportantDates detail={opportunityData} />
               <OpportunityAwardInfo opportunityData={opportunityData} />
               <OpportunityHistory
                 summary={opportunityData.summary}
                 status={opportunityData.opportunity_status}
+                legacy_opportunity_id={opportunityData.legacy_opportunity_id}
               />
             </div>
           </div>
