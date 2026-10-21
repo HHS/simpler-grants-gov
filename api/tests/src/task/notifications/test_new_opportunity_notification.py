@@ -326,9 +326,14 @@ class TestBuildEmail:
             agency_id=agency.agency_id,
             is_posted_summary=True,
         )
+        opportunity.competitions = [
+            factories.CompetitionFactory.build(
+                opportunity=opportunity,
+                opening_date=date(2026, 1, 2),
+                closing_date=date(2026, 3, 4),
+            )
+        ]
         summary = opportunity.summary
-        summary.post_date = date(2026, 1, 2)
-        summary.close_date = date(2026, 3, 4)
         summary.award_floor = 0
         summary.award_ceiling = 1234567
         summary.expected_number_of_awards = 5
@@ -337,7 +342,8 @@ class TestBuildEmail:
         email_body = build_email_body([opportunity], "http://frontend.test")
 
         assert (
-            f"<a href='http://frontend.test/opportunity/{opportunity.opportunity_id}" in email_body
+            f"<a href='http://frontend.test/opportunity/{opportunity.opportunity_id}?utm_source="
+            in email_body
         )
         assert "Research &amp; &lt;Development&gt;" in email_body
         assert f"Agency: {agency.agency_code} - {agency.agency_name}<br/>" in email_body
@@ -355,8 +361,6 @@ class TestBuildEmail:
             is_forecasted_summary=True,
         )
         summary = opportunity.summary
-        summary.forecasted_post_date = None
-        summary.forecasted_close_date = None
         summary.award_floor = None
         summary.award_ceiling = None
         summary.expected_number_of_awards = None

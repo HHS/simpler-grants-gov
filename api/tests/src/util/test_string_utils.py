@@ -1,6 +1,14 @@
+import datetime
+
 import pytest
 
-from src.util.string_utils import is_valid_uuid, join_list, truncate_html_inline
+from src.util.string_utils import (
+    fmt_currency,
+    fmt_date,
+    is_valid_uuid,
+    join_list,
+    truncate_html_inline,
+)
 
 
 def test_join_list():
@@ -124,7 +132,7 @@ def test_fmt_currency(value, expected):
 @pytest.mark.parametrize(
     "value,expected",
     [
-        (datetime.date(2026, 3, 1), "3/1/2026"),
+        (datetime.date(2026, 3, 1), "03/01/2026"),
         (datetime.date(2026, 12, 25), "12/25/2026"),
     ],
 )

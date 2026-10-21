@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 from bs4 import BeautifulSoup, NavigableString
@@ -86,4 +87,4 @@ def fmt_currency(value: int) -> str:
 
 
 def fmt_date(value: datetime.date) -> str:
-    return value.strftime("%-m/%-d/%Y")
+    return value.strftime("%m/%d/%Y")

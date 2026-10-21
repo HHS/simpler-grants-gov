@@ -14,9 +14,8 @@ from src.constants.lookup_constants import (
     JobType,
     NotificationQueueStatus,
     NotificationType,
-    OpportunityStatus,
 )
-from src.db.models.opportunity_models import Opportunity, OpportunitySummary
+from src.db.models.opportunity_models import Opportunity
 from src.db.models.task_models import JobLog
 from src.db.models.user_models import (
     NotificationJobContent,
@@ -28,9 +27,11 @@ from src.services.opportunities_v1.get_opportunities import get_new_searchable_o
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.config import EmailNotificationConfig, get_email_config
 from src.task.notifications.constants import NOTIFICATION_TYPE_DEFAULTS
+from src.task.notifications.opportunity_notification_content import OpportunityNotificationContent
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 from src.util import datetime_util
+from src.util.string_utils import fmt_date
 
 logger = logging.getLogger(__name__)
 
@@ -40,14 +41,6 @@ DEFAULT_LOOKBACK = timedelta(hours=24)
 
 # Gmail clips messages over ~102 KB, warn before we get there
 EMAIL_BODY_SIZE_WARNING_BYTES = 90 * 1024
-
-NOT_SPECIFIED = "Not specified"
-TO_BE_ANNOUNCED = "To be announced"
-
-STATUS_DISPLAY = {
-    OpportunityStatus.FORECASTED: "Forecasted",
-    OpportunityStatus.POSTED: "Open",
-}
 
 
 @task_blueprint.cli.command(
@@ -214,7 +207,7 @@ class NewOpportunityNotificationTask(Task):
 
 
 def build_subject(job_date: date) -> str:
-    return f"New opportunity updates for {_format_date(job_date)}"
+    return f"New opportunity updates for {fmt_date(job_date)}"
 
 
 def build_email_body(opportunities: Sequence[Opportunity], frontend_base_url: str) -> str:
@@ -223,17 +216,16 @@ def build_email_body(opportunities: Sequence[Opportunity], frontend_base_url: st
     ]
 
     for opportunity in opportunities:
-        summary = opportunity.summary
-        url = f"{frontend_base_url}/opportunity/{opportunity.opportunity_id}{UTM_TAG}"
-        title = html.escape(opportunity.opportunity_title or "")
+        content = OpportunityNotificationContent(opportunity, frontend_base_url)
+        url = f"{content.opportunity_details_page_url}{UTM_TAG}"
         sections.append(
-            f"<b><a href='{url}' target='_blank'>{title}</a></b><br/>\n"
-            f"Agency: {html.escape(_format_agency(opportunity))}<br/>\n"
-            f"Status: {_format_status(opportunity.opportunity_status)}<br/>\n"
-            f"Submission period: {_format_submission_period(summary)}<br/>\n"
-            f"Award range: {_format_award_range(summary)}<br/>\n"
-            f"Expected awards: {_format_expected_awards(summary)}<br/>\n"
-            f"Cost sharing: {_format_cost_sharing(summary)}<br/>\n"
+            f"<b><a href='{url}' target='_blank'>{html.escape(content.title or '')}</a></b><br/>\n"
+            f"Agency: {html.escape(content.agency_code_with_name)}<br/>\n"
+            f"Status: {content.status}<br/>\n"
+            f"Submission period: {content.submission_period}<br/>\n"
+            f"Award range: {content.award_range}<br/>\n"
+            f"Expected awards: {content.expected_number_of_awards}<br/>\n"
+            f"Cost sharing: {content.is_cost_sharing}<br/>\n"
             "<br/>\n"
         )
 
@@ -243,62 +235,3 @@ def build_email_body(opportunities: Sequence[Opportunity], frontend_base_url: st
     )
 
     return "".join(sections)
-
-
-def _format_date(value: date | None) -> str:
-    if value is None:
-        return TO_BE_ANNOUNCED
-    return value.strftime("%m/%d/%Y")
-
-
-def _format_dollars(value: int | None) -> str:
-    if value is None:
-        return NOT_SPECIFIED
-    return f"${value:,}"
-
-
-def _format_agency(opportunity: Opportunity) -> str:
-    agency = opportunity.agency_record
-    if agency is None:
-        return opportunity.agency_code or NOT_SPECIFIED
-    return f"{agency.agency_code} - {agency.agency_name}"
-
-
-def _format_status(status: OpportunityStatus | None) -> str:
-    if status is None:
-        return NOT_SPECIFIED
-    return STATUS_DISPLAY.get(status, NOT_SPECIFIED)
-
-
-def _format_submission_period(summary: OpportunitySummary | None) -> str:
-    if summary is None:
-        return TO_BE_ANNOUNCED
-
-    if summary.is_forecast:
-        start, end = summary.forecasted_post_date, summary.forecasted_close_date
-    else:
-        start, end = summary.post_date, summary.close_date
-
-    if start is None and end is None:
-        return TO_BE_ANNOUNCED
-
-    return f"{_format_date(start)}–{_format_date(end)}"
-
-
-def _format_award_range(summary: OpportunitySummary | None) -> str:
-    if summary is None or (summary.award_floor is None and summary.award_ceiling is None):
-        return NOT_SPECIFIED
-
-    return f"{_format_dollars(summary.award_floor)}–{_format_dollars(summary.award_ceiling)}"
-
-
-def _format_expected_awards(summary: OpportunitySummary | None) -> str:
-    if summary is None or summary.expected_number_of_awards is None:
-        return NOT_SPECIFIED
-    return str(summary.expected_number_of_awards)
-
-
-def _format_cost_sharing(summary: OpportunitySummary | None) -> str:
-    if summary is None or summary.is_cost_sharing is None:
-        return NOT_SPECIFIED
-    return "Yes" if summary.is_cost_sharing else "No"

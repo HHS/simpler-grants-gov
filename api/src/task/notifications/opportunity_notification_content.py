@@ -1,9 +1,13 @@
-import datetime
-
+from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.util.string_utils import fmt_currency, fmt_date
 
 NOT_SPECIFIED = "Not specified"
+
+STATUS_DISPLAY = {
+    OpportunityStatus.FORECASTED: "Forecasted",
+    OpportunityStatus.POSTED: "Open",
+}
 
 
 class OpportunityNotificationContent:
@@ -20,7 +24,7 @@ class OpportunityNotificationContent:
         self.frontend_url = frontend_url
         self.agency = self.opportunity.agency_record
         self.competitions = self.opportunity.competitions if self.opportunity.competitions else []
-        self.is_multi_competition = self.competitions and len(self.competitions) > 1
+        self.is_multi_competition = len(self.competitions) > 1
         self.summary = None
         if self.opportunity.current_opportunity_summary is not None:
             self.summary = self.opportunity.current_opportunity_summary.opportunity_summary
@@ -39,7 +43,7 @@ class OpportunityNotificationContent:
 
     @property
     def award_ceiling(self) -> int | None:
-        if self.summary and self.summary.award_ceiling:
+        if self.summary and self.summary.award_ceiling is not None:
             return self.summary.award_ceiling
         return None
 
@@ -52,13 +56,13 @@ class OpportunityNotificationContent:
     @property
     def award_range(self) -> str:
         floor, ceiling = self.award_floor, self.award_ceiling
-        if floor is None and ceiling is None:
-            return NOT_SPECIFIED
-        if floor is None:
-            return f"{fmt_currency(ceiling)} maximum (minimum not specified)"
-        if ceiling is None:
-            return f"{fmt_currency(floor)} minimum (maximum not specified)"
-        return f"{fmt_currency(floor)}-{fmt_currency(ceiling)}"
+        if floor is not None and ceiling is not None:
+            return f"{fmt_currency(floor)}–{fmt_currency(ceiling)}"
+        if ceiling is not None:
+            return f"{fmt_currency(ceiling)} maximum (no minimum specified)"
+        if floor is not None:
+            return f"{fmt_currency(floor)} minimum (no maximum specified)"
+        return NOT_SPECIFIED
 
     @property
     def expected_number_of_awards(self) -> str:
@@ -78,9 +82,12 @@ class OpportunityNotificationContent:
 
     @property
     def status(self) -> str:
+        # Only forecasted and posted opportunities are expected, posted displays as Open
         if self.opportunity.opportunity_status is None:
             return NOT_SPECIFIED
-        return self.opportunity.opportunity_status.capitalize()
+        return STATUS_DISPLAY.get(
+            self.opportunity.opportunity_status, self.opportunity.opportunity_status.capitalize()
+        )
 
     @property
     def submission_period(self) -> str:
@@ -91,14 +98,14 @@ class OpportunityNotificationContent:
         competition = self.competitions[0]
         open_date = competition.opening_date if competition.opening_date else None
         close_date = competition.closing_date if competition.closing_date else None
-        if open_date is None and close_date is None:
-            return NOT_SPECIFIED
-        if open_date is None:
-            return f"Ends {fmt_date(close_date)} (no start date specified)"
-        if close_date is None:
+        if open_date is not None and close_date is not None:
+            return f"{fmt_date(open_date)}–{fmt_date(close_date)}"
+        if open_date is not None:
             return f"Starts {fmt_date(open_date)} (no end date specified)"
-        return f"{fmt_date(open_date)}-{fmt_date(close_date)}"
+        if close_date is not None:
+            return f"Ends {fmt_date(close_date)} (no start date specified)"
+        return NOT_SPECIFIED
 
     @property
-    def title(self) -> str:
+    def title(self) -> str | None:
         return self.opportunity.opportunity_title

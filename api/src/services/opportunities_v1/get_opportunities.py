@@ -83,6 +83,7 @@ def get_new_searchable_opportunities(
             Agency.is_test_agency.is_(False),
             Opportunity.opportunity_id.in_(new_opportunity_ids),
         )
+        .options(selectinload(Opportunity.competitions))
         .order_by(Opportunity.opportunity_title, Opportunity.opportunity_id)
     )
 
