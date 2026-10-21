@@ -185,7 +185,7 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      closeDate: ["closeDateOrder"],
+      close_date: ["closeDateOrder"],
     });
   });
 
@@ -196,7 +196,7 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      closeDate: ["closeDateOrder"],
+      close_date: ["closeDateOrder"],
     });
   });
 
@@ -207,7 +207,7 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      closeDate: ["closeDateOrder"],
+      close_date: ["closeDateOrder"],
     });
   });
 

@@ -293,7 +293,7 @@ async function validateOpportunityEditForm(formData: FormData) {
       if (!close.isValid() || !publish.isValid() || close.isBefore(publish)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["closeDate"],
+          path: ["close_date"],
           message: validationErrors("closeDateOrder"),
         });
       }
