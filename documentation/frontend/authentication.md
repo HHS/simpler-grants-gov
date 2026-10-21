@@ -17,7 +17,23 @@ Once the flow takes you into the frontend code, the token:
 
 - sent down to the client on redirect
   - If the token is valid and the session is successfully created, the user is redirected to the `/login` page.
-  - If the token is missing or an error occurs during session creation, the user is redirected to an error page (`/unauthenticated` or `/error`).
+  - If the token is missing or an error occurs during session creation, the user is also redirected to `/login`, which returns them to their saved page in the signed-out state.
+  - If Login.gov reports that PIV is required (`login_piv_required_error=true`), the user is redirected to `/login?pivError=true`.
+
+## Return Navigation
+
+The frontend returns users to the page where they chose Sign in or Create account.
+
+1. `storeCurrentPage()` saves the current pathname + query (for example `/search?query=test&utm_source=grants.gov`) to `sessionStorage["login-redirect"]` when the user explicitly starts authentication. This is the only return-state mechanism; `/api/auth/login` does not carry a return destination.
+2. `/api/auth/login` hands the user off to Login.gov.
+3. Login.gov returns to `/api/auth/callback`, which always redirects to `/login` (or `/login?pivError=true`). The callback never reads or clears the saved destination and never logs the token.
+4. `/login` reads `login-redirect`, validates it, keeps the safe destination in a local variable, clears `login-redirect`, then calls `router.replace(destination)` exactly once. Repeated effect runs, such as under React Strict Mode, do not navigate again.
+
+A saved destination is used only if it is a root-relative Simpler path: it must begin with `/`, must not begin with `//`, must not contain backslashes, whitespace, or control characters, must be well formed, and must not be (or be under) `/login`, `/maintenance`, `/unauthenticated`, `/error`, `/api`, or `/dev`. Invalid values are not repaired; they fall back to `/`.
+
+If the user leaves Login.gov with the browser Back button, they return to the previous Simpler page. Authentication is not restarted automatically, and `login-redirect` stays in that tab until `/login` uses it or the user starts authentication again, which replaces it.
+
+The validator and its blocked prefixes live in `src/utils/userUtils.ts` and `src/constants/auth.ts`. The `/logout` page uses the same `PostAuthRedirect` component and destination rules.
 
 ## Token Checks
 
@@ -77,9 +93,10 @@ flowchart TD
     C --> D[createSession function called with token and expiration date]
     D --> E[Token encrypted into client token]
     E --> F[Client token stored in session cookie]
-    F --> G{Token valid?}
+    F --> G{Session created?}
     G -->|Yes| H[Redirect to /login]
-    G -->|No| I[Redirect to /unauthenticated or /error]
+    G -->|No| H
+    H --> J["/login restores the saved destination with one router.replace"]
 ```
 
 ### Token Refresh
