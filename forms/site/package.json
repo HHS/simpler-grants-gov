@@ -21,7 +21,7 @@
     "test": "vitest run",
     "audit": "npm audit --audit-level=critical",
     "postinstall": "node scripts/postinstall.mjs",
-    "specs": "npm --prefix .. install --no-audit --no-fund && npm --prefix .. run compile"
+    "specs": "npm --prefix .. install --no-audit --no-fund && npm --prefix .. run clean && npm --prefix .. run compile"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^16.0.3",

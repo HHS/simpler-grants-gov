@@ -19,6 +19,7 @@
   },
   "scripts": {
     "build": "npm run build --workspaces",
+    "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\"",
     "precompile": "npm run build",
     "compile": "tsp compile specs/main.tsp",
     "sync": "node scripts/sync.mjs",
