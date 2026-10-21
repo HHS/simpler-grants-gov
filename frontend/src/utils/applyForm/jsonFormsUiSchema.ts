@@ -91,8 +91,8 @@ type EntryField = UiSchemaFieldList["children"][number];
  *
  * Scopes inside the detail are relative to one entry, so each control is rebased beneath
  * the list's `items` and then read like any other control. A list nested inside the entry
- * has no field-list equivalent and is left out; `unappliedListRules` and
- * `unadaptableScopes` report what this drops.
+ * has no field-list equivalent and is left out; `findIgnoredListRules` and
+ * `findUnsupportedControls` report what this drops.
  */
 const entryFields = (
   element: UISchemaElement,
@@ -220,8 +220,8 @@ export const jsonFormsToUiSchema = (
     ? uiSchema.elements.flatMap((element) => convertElement(element, schema))
     : convertElement(uiSchema, schema);
 
-/** Control scopes no widget can draw, which JSON Forms renders with its own fallback. */
-export const unadaptableScopes = (
+/** Scopes of the controls no widget can render, which JSON Forms renders with its own fallback. */
+export const findUnsupportedControls = (
   uiSchema: JsonFormsUiSchema,
   schema: RJSFSchema,
 ): string[] => {
@@ -237,7 +237,9 @@ export const unadaptableScopes = (
       : [];
   }
   return isLayout(uiSchema)
-    ? uiSchema.elements.flatMap((element) => unadaptableScopes(element, schema))
+    ? uiSchema.elements.flatMap((element) =>
+        findUnsupportedControls(element, schema),
+      )
     : [];
 };
 
@@ -259,11 +261,11 @@ const droppedEntryScopes = (
 };
 
 /**
- * Rules on fields inside a list, which the field-list widget draws without applying, as
+ * Rules on fields inside a list, which the field-list widget renders without applying, as
  * `<list scope> -> <field scope>`. Logged so a conditionally disabled field that renders
  * enabled is not a silent difference.
  */
-export const unappliedListRules = (uiSchema: JsonFormsUiSchema): string[] => {
+export const findIgnoredListRules = (uiSchema: JsonFormsUiSchema): string[] => {
   const ruled = (element: UISchemaElement): string[] => [
     ...(element.rule && isControlElement(element) ? [element.scope] : []),
     ...(isLayout(element) ? element.elements.flatMap(ruled) : []),
@@ -275,6 +277,6 @@ export const unappliedListRules = (uiSchema: JsonFormsUiSchema): string[] => {
       : [];
   }
   return isLayout(uiSchema)
-    ? uiSchema.elements.flatMap(unappliedListRules)
+    ? uiSchema.elements.flatMap(findIgnoredListRules)
     : [];
 };

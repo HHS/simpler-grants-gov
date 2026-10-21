@@ -17,10 +17,10 @@ import { FormDetail, FormRenderer } from "src/types/formResponseTypes";
 
 import { processFormSchema } from "./applyForm/applyFormUtils";
 import {
+  findIgnoredListRules,
+  findUnsupportedControls,
   jsonFormsToUiSchema,
   JsonFormsUiSchema,
-  unadaptableScopes,
-  unappliedListRules,
 } from "./applyForm/jsonFormsUiSchema";
 import {
   unimplementedRuleKeys,
@@ -176,22 +176,23 @@ export default async function getFormData({
     try {
       const { formSchema } = processFormSchema(form_json_schema);
       formUiSchema = jsonFormsToUiSchema(jsonFormsUiSchema, formSchema);
-      // A control no widget can draw falls back to a plain JSON Forms input, which has no
-      // form field name and so is not saved.
-      const skipped = unadaptableScopes(jsonFormsUiSchema, formSchema);
-      if (skipped.length) {
+      // A control no widget can render falls back to a plain JSON Forms input. That input
+      // has no `name` attribute, so it's left out of the form's FormData and isn't saved.
+      for (const control of findUnsupportedControls(
+        jsonFormsUiSchema,
+        formSchema,
+      )) {
         logger.warn(
-          { formId, scopes: skipped },
-          "Form has controls no widget can render; their answers are not saved",
+          { formId, formName, control },
+          "Form has a control that can't be rendered by any widget. The answer provided to this field won't be saved",
         );
       }
-      // The field-list widget draws a list's entries itself, so JSON Forms never applies
+      // The field-list widget renders a list's entries itself, so JSON Forms never applies
       // the rules on the fields inside them.
-      const listRules = unappliedListRules(jsonFormsUiSchema);
-      if (listRules.length) {
+      for (const control of findIgnoredListRules(jsonFormsUiSchema)) {
         logger.warn(
-          { formId, rules: listRules },
-          "Form declares rules on fields inside lists, which are not applied; those fields render unconditionally",
+          { formId, formName, control },
+          "Form has a rule on a field inside a list that won't be applied. The field will always be shown and enabled",
         );
       }
     } catch (e) {
@@ -217,8 +218,8 @@ export default async function getFormData({
   const ignoredRules = unimplementedRuleKeys(formUiSchema);
   if (ignoredRules.length) {
     logger.warn(
-      { formId, rules: ignoredRules },
-      "Form declares UI rules this renderer does not implement; the fields they govern render unconditionally",
+      { formId, formName, rules: ignoredRules },
+      "Form has UI rules the SGG renderer doesn't support yet. The fields they apply to will always be shown and enabled",
     );
   }
 

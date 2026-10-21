@@ -6,10 +6,10 @@ import {
 import { RJSFSchema } from "@rjsf/utils";
 import {
   controlToNodes,
+  findIgnoredListRules,
+  findUnsupportedControls,
   groupName,
   jsonFormsToUiSchema,
-  unadaptableScopes,
-  unappliedListRules,
 } from "src/utils/applyForm/jsonFormsUiSchema";
 import { validateUiSchema } from "src/utils/applyForm/validateUiSchema";
 
@@ -212,7 +212,7 @@ describe("a list control with options.detail", () => {
     expect(childDefinitions(listControl)).toEqual([
       ["field", "/properties/contacts/items/properties/role"],
     ]);
-    expect(unadaptableScopes(listControl, listSchema)).toEqual([
+    expect(findUnsupportedControls(listControl, listSchema)).toEqual([
       "#/properties/contacts -> #/properties/phones",
     ]);
   });
@@ -232,7 +232,7 @@ describe("a list control with options.detail", () => {
       ],
     } as UISchemaElement;
 
-    expect(unappliedListRules(uiSchema)).toEqual([
+    expect(findIgnoredListRules(uiSchema)).toEqual([
       "#/properties/contacts -> #/properties/role",
     ]);
   });
@@ -279,7 +279,7 @@ describe("jsonFormsToUiSchema", () => {
   });
 });
 
-describe("unadaptableScopes", () => {
+describe("findUnsupportedControls", () => {
   it("lists every control no widget can draw", () => {
     const uiSchema = {
       type: "Group",
@@ -289,7 +289,7 @@ describe("unadaptableScopes", () => {
       ],
     } as UISchemaElement;
 
-    expect(unadaptableScopes(uiSchema, schema)).toEqual([
+    expect(findUnsupportedControls(uiSchema, schema)).toEqual([
       "#/properties/nested/properties/people",
     ]);
   });
