@@ -1,8 +1,4 @@
-import {
-  fieldCount,
-  type DiffType,
-  type VisibleSection,
-} from "@/lib/comparison";
+import { fieldCount, type Tally, type VisibleSection } from "@/lib/comparison";
 import type { ReactNode } from "react";
 
 import SectionMeta from "../SectionMeta";
@@ -15,7 +11,7 @@ interface Props {
   contents: string[];
   /** 0 for a top-level section. */
   depth: number;
-  counts: Record<DiffType, number>;
+  counts: Tally;
   filtering: boolean;
   children: ReactNode;
 }
