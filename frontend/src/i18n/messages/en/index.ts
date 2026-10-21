@@ -208,17 +208,19 @@ export const messages = {
     intro: {
       versionHistory: "View version history on Grants.gov",
     },
+    importantDates: {
+      title: "Important Dates",
+    },
     description: {
-      title: "Description",
+      title: "Summary",
       eligibility: "Eligibility",
-      eligibleApplicants: "Eligible applicants",
-      additionalInfo: "Additional information",
-      contactInfo: "Grantor contact information",
-      contactDescription: "Description",
-      email: "Email",
+      additionalInfo: "Additional information on eligibility",
+      contactInfo: "Agency contact information",
+      email: "Email:",
+      noContactInfo: "No additional contact information provided.",
       showDescription: "Show full description",
       hideSummaryDescription: "Hide full description",
-      jumpToDocuments: "Jump to all documents",
+      jumpToDocuments: "Jump to documents",
       zipDownload: "Download all",
     },
     documents: {
@@ -233,6 +235,7 @@ export const messages = {
       noDocuments: "No documents are currently available.",
     },
     awardInfo: {
+      title: "Award details",
       yes: "Yes",
       no: "No",
       programFunding: "Program Funding",
@@ -261,6 +264,10 @@ export const messages = {
       forecastedProjectStartDate: "Estimated Project Start Date",
       forecastedLastUpdated: "Last Updated Date",
       fiscalYear: "Fiscal Year",
+      closing: "Closing",
+      closed: "Closed",
+      closeDateDescription: "Close Date Description",
+      closeDateDescriptionNotAvailable: "Not available",
 
       version: "Version",
     },

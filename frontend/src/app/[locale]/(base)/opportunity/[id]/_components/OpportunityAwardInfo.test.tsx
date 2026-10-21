@@ -10,6 +10,7 @@ import OpportunityAwardInfo from "./OpportunityAwardInfo";
 jest.mock("next-intl", () => ({
   useTranslations: jest.fn().mockReturnValue((key: string) => {
     const translations: { [key: string]: string } = {
+      title: "Award details",
       yes: "Yes",
       no: "No",
       programFunding: "Program Funding",
@@ -48,7 +49,7 @@ describe("OpportunityAwardInfo", () => {
     render(<OpportunityAwardInfo opportunityData={mockOpportunityData} />);
 
     // Check the headings
-    expect(screen.getByText("Award")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Award details" })).toBeInTheDocument();
 
     // Check the main award grid info
     expect(screen.getByText("Program Funding")).toBeInTheDocument();

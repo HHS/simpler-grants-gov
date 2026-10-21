@@ -116,24 +116,6 @@ describe("OpportunityDescription", () => {
     );
   });
 
-  it("renders agency contact information", () => {
-    render(
-      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
-    );
-
-    const contactInfoHeading = screen.getByText("contactInfo");
-    expect(contactInfoHeading).toBeInTheDocument();
-
-    expect(screen.getByText("contact@example.com")).toBeInTheDocument();
-    expect(screen.getByText("Contact Email Description")).toBeInTheDocument();
-
-    const mailtoLink = screen.getByRole("link", {
-      name: "contact@example.com",
-    });
-    const agency_email = "contact@example.com";
-    expect(mailtoLink).toHaveAttribute("href", `mailto:${agency_email}`);
-  });
-
   it("renders information correctly when null values are present", () => {
     render(
       <OpportunityDescription
@@ -141,32 +123,21 @@ describe("OpportunityDescription", () => {
           ...mockSummaryData,
           applicant_types: [],
           applicant_eligibility_description: null,
-          agency_contact_description: null,
-          agency_email_address: null,
-          agency_email_address_description: null,
           summary_description: null,
         }}
         attachments={[]}
       />,
     );
 
-    const contactInfoHeading = screen.getByText("contactDescription");
-    expect(contactInfoHeading).toBeInTheDocument();
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(contactInfoHeading.nextElementSibling).toHaveTextContent("--");
+    expect(screen.getByText("eligibility")).toBeInTheDocument();
+    expect(screen.queryByText("eligibleApplicants")).not.toBeInTheDocument();
 
-    const applicantsHeading = screen.getByText("eligibleApplicants");
-    expect(applicantsHeading).toBeInTheDocument();
+    const additionalInfoHeading = screen.getByText("additionalInfo");
     // eslint-disable-next-line testing-library/no-node-access
-    expect(applicantsHeading.nextSibling).toHaveTextContent("--");
+    expect(additionalInfoHeading.nextElementSibling).toHaveTextContent("--");
 
-    const emailHeading = screen.getByText("email");
-    expect(emailHeading).toBeInTheDocument();
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(emailHeading.nextElementSibling).toHaveTextContent("--");
-
-    // documents and summary are harder to target here, but we can just get a total count
+    // summary, eligible applicants and additional information all fall back
     const allEmpty = screen.getAllByText("--");
-    expect(allEmpty).toHaveLength(5);
+    expect(allEmpty).toHaveLength(3);
   });
 });
