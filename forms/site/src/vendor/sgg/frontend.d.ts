@@ -104,7 +104,7 @@ declare module "@sgg/frontend/utils/applyForm/jsonFormsUiSchema" {
     uiSchema: JsonFormsUiSchema,
     schema: RJSFSchema,
   ) => UiSchema;
-  export const unadaptableScopes: (
+  export const findUnsupportedControls: (
     uiSchema: JsonFormsUiSchema,
     schema: RJSFSchema,
   ) => string[];

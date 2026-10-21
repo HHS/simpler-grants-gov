@@ -459,15 +459,16 @@ describe("getFormData", () => {
       ]);
     });
 
-    it("warns about controls no widget can render, since their answers are not saved", async () => {
+    it("warns about each control no widget can render, since its answer won't be saved", async () => {
       await getFormData({ applicationId: "app1", appFormId: "form1" });
 
       expect(mockLoggerWarn).toHaveBeenCalledWith(
-        expect.objectContaining({
-          formId: expect.anything() as unknown,
-          scopes: expect.arrayContaining(["#/properties/missing"]) as unknown,
-        }),
-        expect.stringContaining("not saved"),
+        {
+          formId: "form1",
+          formName: "Test",
+          control: "#/properties/missing",
+        },
+        expect.stringContaining("won't be saved"),
       );
     });
   });
