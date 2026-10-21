@@ -1,5 +1,6 @@
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 
 import "#forms/index.tsp";
 import "#questions/person/index.tsp";
@@ -10,6 +11,7 @@ namespace Forms.KeyContactsTutorial;
 
 /** KEY CONTACTS, rebuilt for the form library tutorial. */
 @Meta.form(#{ id: "key-contacts-tutorial", formName: "KEY CONTACTS (TUTORIAL)" })
+@Sgg.sync
 @GrantsGov.form(#{
   legacyFormId: 683,
   shortFormName: "Key_Contacts_Tutorial",
