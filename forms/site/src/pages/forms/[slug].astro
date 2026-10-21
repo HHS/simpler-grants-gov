@@ -4,6 +4,7 @@ import type { FieldNode } from "../../content.config";
 import Base from "../../layouts/Base.astro";
 import FormMetadata from "../../components/forms/FormMetadata.astro";
 import FormFieldTree from "../../components/forms/FormFieldTree.astro";
+import Findings from "@/components/forms/comparison/Findings";
 import FieldComparison from "@/components/forms/comparison/FieldComparison";
 import FormDataPanel from "../../components/forms/preview/FormDataPanel";
 import FormPreview from "../../components/forms/preview/FormPreview";
@@ -52,18 +53,18 @@ const STATUS_LABELS: Record<string, string> = {
 
     <FormMetadata form={form} />
 
-    {form.data.children.length > 0 ? (
-      <>
-        <div class="tab-bar" role="tablist">
-          <button class="tab-bar__tab tab-bar__tab--active" role="tab" aria-selected="true" data-tab="fields">
+    <div class="form-tabs">
+        <div class="tab-bar" role="tablist" aria-label="Form details">
+          <button class="tab-bar__tab tab-bar__tab--active" role="tab" id="form-tab-fields" aria-controls="form-panel-fields" aria-selected="true" tabindex="0" data-tab="fields">
             Field tree
           </button>
+          {comparison && <button class="tab-bar__tab" role="tab" id="form-tab-findings" aria-controls="form-panel-findings" aria-selected="false" tabindex="-1" data-tab="findings">Findings</button>}
           {spec ? (
             <>
-              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="preview">
+              <button class="tab-bar__tab" role="tab" id="form-tab-preview" aria-controls="form-panel-preview" aria-selected="false" tabindex="-1" data-tab="preview">
                 Form preview
               </button>
-              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="data">
+              <button class="tab-bar__tab" role="tab" id="form-tab-data" aria-controls="form-panel-data" aria-selected="false" tabindex="-1" data-tab="data">
                 Data
               </button>
             </>
@@ -77,10 +78,12 @@ const STATUS_LABELS: Record<string, string> = {
           <button class="tab-bar__tab tab-bar__tab--disabled" disabled>XML Mapping</button>
         </div>
 
-        <div data-panel="fields">
+        <div id="form-panel-fields" role="tabpanel" aria-labelledby="form-tab-fields" data-panel="fields">
           <h2 class="section-title">Fields</h2>
-          {comparison ? (
-            <FieldComparison client:load comparison={comparison} />
+          {form.data.children.length === 0 ? (
+            <p class="text-base padding-y-4">Field details will be added when this form is prioritized for migration.</p>
+          ) : comparison ? (
+            <FieldComparison client:load comparison={{ children: comparison.children, fields: comparison.fields }} />
           ) : (
             <div class="field-tree">
               <FormFieldTree nodes={form.data.children} />
@@ -99,8 +102,13 @@ const STATUS_LABELS: Record<string, string> = {
           )}
         </div>
 
+        {comparison && <div id="form-panel-findings" role="tabpanel" aria-labelledby="form-tab-findings" data-panel="findings" hidden>
+          <h2 class="section-title">Findings</h2>
+          <Findings client:load findings={comparison.findings} />
+        </div>}
+
         {spec && (
-          <div data-panel="preview" hidden>
+          <div id="form-panel-preview" role="tabpanel" aria-labelledby="form-tab-preview" data-panel="preview" hidden>
             <h2 class="section-title">Form preview</h2>
             <FormPreview
               client:only="react"
@@ -112,32 +120,41 @@ const STATUS_LABELS: Record<string, string> = {
         )}
 
         {spec && (
-          <div data-panel="data" hidden>
+          <div id="form-panel-data" role="tabpanel" aria-labelledby="form-tab-data" data-panel="data" hidden>
             <h2 class="section-title">Form data</h2>
             <p class="text-base">The JSON entered in the form preview, updated as you type.</p>
             <FormDataPanel client:only="react" />
           </div>
         )}
-      </>
-    ) : (
-      <p class="text-base padding-y-4">
-        Field details will be added when this form is prioritized for migration.
-      </p>
-    )}
+    </div>
   </div>
 </Base>
 
 <script>
-  for (const tab of document.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
-    tab.addEventListener("click", () => {
-      for (const other of document.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
+  for (const container of document.querySelectorAll<HTMLElement>(".form-tabs")) {
+    const tabs = [...container.querySelectorAll<HTMLButtonElement>("[data-tab]")];
+    const activate = (tab: HTMLButtonElement) => {
+      for (const other of tabs) {
         const active = other === tab;
         other.classList.toggle("tab-bar__tab--active", active);
         other.setAttribute("aria-selected", String(active));
+        other.tabIndex = active ? 0 : -1;
       }
-      for (const panel of document.querySelectorAll<HTMLElement>("[data-panel]")) {
+      for (const panel of container.querySelectorAll<HTMLElement>("[data-panel]")) {
         panel.hidden = panel.dataset.panel !== tab.dataset.tab;
       }
-    });
+    };
+    for (const [index, tab] of tabs.entries()) {
+      tab.addEventListener("click", () => activate(tab));
+      tab.addEventListener("keydown", event => {
+        const next = event.key === "ArrowRight" ? (index + 1) % tabs.length
+          : event.key === "ArrowLeft" ? (index - 1 + tabs.length) % tabs.length
+          : event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : null;
+        if (next === null) return;
+        event.preventDefault();
+        activate(tabs[next]);
+        tabs[next].focus();
+      });
+    }
   }
 </script>

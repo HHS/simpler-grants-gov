@@ -1,4 +1,4 @@
-import type { FilterKey } from "@/lib/comparison";
+import type { DisplayStatus, FilterKey } from "@/lib/comparison";
 import {
   $categoryCounts,
   $categoryFilter,
@@ -15,6 +15,39 @@ const TITLES: Record<FilterKey, string> = {
   matches: "Matches every source",
 };
 
+/** A controlled filter tile, shared by field and original-finding counts. */
+export function DeviationTileView({
+  status,
+  title,
+  count,
+  description,
+  pressed,
+  onClick,
+}: {
+  status: DisplayStatus;
+  title: string;
+  count: number;
+  description: string;
+  pressed: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`deviation-tile deviation-tile--${status}`}
+      aria-pressed={pressed}
+      onClick={onClick}
+    >
+      <span className="deviation-tile__heading">
+        <StatusDot status={status} />
+        {title}
+      </span>
+      <span className="deviation-tile__count">{count}</span>
+      <span className="deviation-tile__fields">{description}</span>
+    </button>
+  );
+}
+
 /** A filter for one category: its count, and how many fields it covers. */
 export default function DeviationTile({ filterKey }: { filterKey: FilterKey }) {
   const { count, fields } = useStore($categoryCounts)[filterKey];
@@ -22,20 +55,13 @@ export default function DeviationTile({ filterKey }: { filterKey: FilterKey }) {
   const status = filterKey === "matches" ? "match" : filterKey;
   const noun = fields === 1 ? "field" : "fields";
   return (
-    <button
-      type="button"
-      className={`deviation-tile deviation-tile--${status}`}
-      aria-pressed={pressed}
+    <DeviationTileView
+      status={status}
+      title={TITLES[filterKey]}
+      count={count}
+      description={filterKey === "matches" ? noun : `in ${fields} ${noun}`}
+      pressed={pressed}
       onClick={() => toggleCategory(filterKey)}
-    >
-      <span className="deviation-tile__heading">
-        <StatusDot status={status} />
-        {TITLES[filterKey]}
-      </span>
-      <span className="deviation-tile__count">{count}</span>
-      <span className="deviation-tile__fields">
-        {filterKey === "matches" ? noun : `in ${fields} ${noun}`}
-      </span>
-    </button>
+    />
   );
 }

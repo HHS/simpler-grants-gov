@@ -58,7 +58,7 @@ the rules are read off, against the XSDs they model: missing and extra elements,
 requiredness, occurrences and namespaces. It compiles the specs in memory and finds each
 model by its `@GrantsGov.xsd` URL, so it needs no plan, and it checks a model no form links
 to yet. Its flattener reads a compiled program, so only that test imports it; the site
-bundles `harness/index.ts`.
+uses the build-time interface in `parity/index.ts`.
 
 Suite checks then confirm the results can be trusted for each form: the plan's text is
 readable, the walked JSON schema agrees with the emitter's `index.json`, and every
@@ -133,25 +133,90 @@ or out of order is recorded by path alone.
 A recorded difference that stops being real fails _recorded differences still exist_, so
 the record cannot rot.
 
-Every recorded difference is shown on the form's page in the form library, in the field
-tree's comparison sheet (see `comparison.ts`). Context that cannot be checked goes in the
-plan's `notes` instead, which the page shows separately.
+The form page retains its field comparison sheets and gives all original findings their
+own Findings tab. Its category tiles and dimension chips filter check findings, including
+source-only items, missing/extra elements, occurrence differences and stale records.
+Filters use independent local state: OR within categories or dimensions, AND between
+the groups. Compared values, qualified artifact paths and recorded reasons appear on
+each card; its raw kind/detail, check path and recording coordinate remain available
+under Check details. Findings are not fabricated into field-table cells. Counts
+describe original check findings, while the field table counts displayed cells and
+affected fields. Several checks can report the same field. Context that cannot be
+checked goes in the plan's `notes`, which the page shows separately.
+
+## Interface for the form library
+
+Import `getFormResult` and its types from `parity/index.ts`. It returns `null` for an
+unregistered plan. With compiled artifacts and cached sources available, it evaluates
+each applicable check once and returns a `FormResult` containing:
+
+- `plan`: the original plan, including its section tree.
+- `fields`: resolved `FieldResult` records in depth-first plan order. Each contains the
+  original field, its existing local id, raw plan/source facts, expected and matched
+  paths, already-resolved neighbors and written XML targets. `outcomes[attribute][source]`
+  supplies the status, explanation and original contributing findings. `field.findings`
+  also retains dimensions the table does not display, such as `maxOccurs`.
+- `findings`: the complete original check and suite ledger, independent of field
+  association. Each entry retains check identity, original detail and values, available
+  artifact/path anchors, and the recorded category/reason when accepted.
+
+```ts
+import { getFormResult } from "./parity/index.ts";
+
+const result = await getFormResult(plan);
+if (result) {
+  for (const field of result.fields) {
+    const outcome = field.outcomes.required.form;
+    // Format the supplied facts and outcome; do not select checks or match paths here.
+  }
+}
+```
+
+A `match` means the relevant check actually covered the field/attribute and found no
+difference. `notCompared` includes an explanation; an empty list of findings alone does
+not imply a match. The Form column takes constraints from JSON Schema and labels/help
+from UI schema. A missing UI control cannot be treated as matching text merely because
+the JSON Schema contains the property.
+
+Field association uses the originating check, artifact side and established matches.
+An orphan source path remains independent of a same-spelled plan path that matches
+elsewhere. Conversely, a missing XML rule can belong to a field through that field's
+actual schema/XSD coordinate. Suite/stale evidence without an unambiguous field relation
+stays in the full ledger. Paths retain their artifact's syntax; finding ids and fallback
+field ids are local to one evaluation/plan, not durable cross-release identities.
+
+This is a build-time interface. The field-tree island receives only formatted rows/tree;
+its React props contain no raw checks or findings ledger. A separate Findings island
+receives the public `Finding[]` and hydrates local filters, adding serialized ledger
+bytes and client rendering/filter cost. It does not rerun comparisons or share filter
+state with the field tree. The two views share only card/tile/chip presentation.
+`comparison.ts` formats values, selects optional display rows and counts cells.
+Check selection, path association and outcomes
+belong to `harness/fields.ts`. The suite's existing `checkForm` result remains a
+compatibility projection of the same evaluation, without another comparison run. Calling
+the two convenience entry points separately creates separate evaluations; there is no
+global cache.
 
 ## Layout
 
-Read top-down; each layer only imports the ones below it. Unit tests sit beside the module
-they cover.
+The public contract is separate from check production and table formatting. Unit tests
+sit beside the module they cover.
 
 ```
 forms.test.ts       every check, per registered form -- start here
 harness.test.ts     each check, on hand-built fields: does it report what its name says?
 diffs/              one record of known differences per form
-comparison.ts       each plan field against every source, as the form library's field tree shows it
+index.ts            getFormResult(): the site's build-time entry point
+result.ts           public field facts, outcomes and complete findings
+comparison.ts       format resolved fields into the existing table/tree
+format.ts           display text for raw values and resolved neighbors
 sources/
   fetch.ts            the parity:fetch CLI
   sources.lock.json   SHA-256 of every cached Grants.gov file
 harness/
-  index.ts            checkForm() and SPECS: what each comparison checks
+  index.ts            load/evaluate orchestration and checkForm() compatibility
+  evaluate.ts         run a named check and retain its evidence/provenance
+  fields.ts           resolve evidence and outcomes per plan field
   load.ts             every disk read: plans, compiled artifacts, cached sources
   flatten/            one pure flattener per artifact, each with its own *.test.ts
   compare.ts          comparePair(): the six checks, with recorded differences applied
