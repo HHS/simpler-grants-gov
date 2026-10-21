@@ -10,7 +10,7 @@ import moto
 import pytest
 from freezegun import freeze_time
 from pydantic import BaseModel, Field, ValidationError
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
@@ -359,7 +359,6 @@ class TestSubmissionConsumer:
 
         with Session(engine) as locked_session, Session(engine) as fetch_session:
             locked_application = get_locked_application(locked_session, application.application_id)
-            fetch_session.execute(text("SET LOCAL lock_timeout = '2s'"))
 
             with pytest.raises(OperationalError):
                 fetch_session.execute(
@@ -487,7 +486,6 @@ class TestSubmissionConsumer:
                 .where(Application.application_id == application.application_id)
                 .with_for_update()
             ).one()
-            fetch_session.execute(text("SET LOCAL lock_timeout = '2s'"))
 
             response = process_application_submission_message(fetch_session, container.message)
 
