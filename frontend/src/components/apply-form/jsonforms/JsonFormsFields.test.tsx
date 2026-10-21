@@ -109,6 +109,48 @@ describe("JsonFormsFields", () => {
     expect(screen.getByText("Saved title")).toBeInTheDocument();
   });
 
+  it("skips a control no widget can render", () => {
+    const nestedListSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        title: { type: "string", title: "Project Title" },
+        budget: {
+          type: "object",
+          properties: {
+            line_items: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: { amount: { type: "string" } },
+              },
+            },
+          },
+        },
+      },
+    };
+    render(
+      <JsonFormsFields
+        errors={null}
+        formData={{}}
+        schema={nestedListSchema}
+        uiSchema={{
+          type: "VerticalLayout",
+          elements: [
+            { type: "Control", scope: "#/properties/title" },
+            {
+              type: "Control",
+              scope: "#/properties/budget/properties/line_items",
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("title")).toBeInTheDocument();
+    expect(screen.getAllByRole("textbox")).toHaveLength(1);
+    expect(screen.queryByText(/No applicable/)).not.toBeInTheDocument();
+  });
+
   it("draws an element with an extra renderer ranked above the SGG ones", () => {
     const groups: JsonFormsRendererRegistryEntry[] = [
       {
