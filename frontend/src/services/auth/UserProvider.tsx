@@ -10,6 +10,7 @@ import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetc
 import { UserProfile } from "src/types/authTypes";
 import { isExpired, isExpiring } from "src/utils/dateUtil";
 
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function UserProvider({
@@ -19,6 +20,7 @@ export default function UserProvider({
   featureFlagDefaults: FeatureFlags;
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const getCookie = useGetCookie();
   const cookie = decodeURIComponent(getCookie(FEATURE_FLAGS_KEY) || "{}");
   const [localUser, setLocalUser] = useState<UserProfile>();
@@ -56,6 +58,7 @@ export default function UserProvider({
         setIsLoading(false);
         if (localUser?.isLoggedIn && !fetchedUser.isLoggedIn) {
           setHasBeenLoggedOut(true);
+          router.refresh();
         }
         return;
       }
@@ -64,7 +67,7 @@ export default function UserProvider({
       setIsLoading(false);
       setUserFetchError(e as Error);
     }
-  }, [localUser]);
+  }, [localUser, router]);
 
   const logoutLocalUser = useCallback(() => {
     setLocalUser({ ...(localUser as UserProfile), isLoggedIn: false });
