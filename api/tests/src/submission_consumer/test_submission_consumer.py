@@ -10,7 +10,7 @@ import moto
 import pytest
 from freezegun import freeze_time
 from pydantic import BaseModel, Field, ValidationError
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
@@ -156,8 +156,10 @@ class TestSubmissionConsumer:
         user = UserFactory.create()
         submission_consumer = build_consumer()
         send_application_submission_message(application.application_id, user.user_id)
+
         containers = submission_consumer.fetch_messages()
         container = containers[0]
+
         assert container.message is not None
         assert container.message.application_id == application.application_id
         assert container.message.submitted_by_user_id == user.user_id
@@ -172,15 +174,17 @@ class TestSubmissionConsumer:
         user = UserFactory.create()
         response = MockSQSMessage(
             Body=f'{{"message_id": "11111111-aaaa-bbbb-cccc-222222222222", "application_id": "{application.application_id}", "submitted_by_user_id": "{user.user_id}"}}',
-            ReceiptHandle="cntcvhbxnbnpjzdwutepqmzovkwfqjzvctkyffssihbisuxokptupkclxupthhfnbpwrfbgovitfsmfkgblmkbekpezbgcyghtlathdjngpsipfurxzavicoxqrczdqwtuoyjtlvajbtwzijlhfjhiipunlbmlvwnpprxrhgdfucntdnokywktcpl",
+            ReceiptHandle="abc",
             MessageId="22222222-aaaa-bbbb-cccc-333333333333",
             attributes={"SentTimestamp": None},
         )
         submission_consumer = build_consumer()
+
         with patch.object(SQSClient, "receive_messages", return_value=[response]):
             send_application_submission_message(application.application_id, user.user_id)
             containers = submission_consumer.fetch_messages()
         container = containers[0]
+
         assert container.message is not None
         assert container.message.application_id == application.application_id
         assert container.message.submitted_by_user_id == user.user_id
@@ -200,6 +204,7 @@ class TestSubmissionConsumer:
         application = ApplicationFactory.create()
         user = UserFactory.create()
         submission_consumer = build_consumer()
+
         with patch(
             "src.submission_consumer.submission_consumer.datetime_util.from_timestamp"
         ) as mock_from_timestamp:
@@ -207,6 +212,7 @@ class TestSubmissionConsumer:
             send_application_submission_message(application.application_id, user.user_id)
             containers = submission_consumer.fetch_messages()
         container = containers[0]
+
         assert container.message is not None
         assert container.message.application_id == application.application_id
         assert container.message.submitted_by_user_id == user.user_id
@@ -230,8 +236,10 @@ class TestSubmissionConsumer:
             QueueUrl=queue["QueueUrl"], MessageBody=json.dumps({"application_id": "abc"})
         )
         sent_message_id = sent_message["MessageId"]
+
         containers = submission_consumer.fetch_messages()
         container = containers[0]
+
         assert container.message is None
         log = next(
             r
@@ -252,8 +260,10 @@ class TestSubmissionConsumer:
         queue = sqs.create_queue(QueueName=QUEUE_NAME)
         sent_message = sqs.send_message(QueueUrl=queue["QueueUrl"], MessageBody="not valid json")
         sent_message_id = sent_message["MessageId"]
+
         containers = submission_consumer.fetch_messages()
         container = containers[0]
+
         assert container.message is None
         log = next(
             r
@@ -279,10 +289,12 @@ class TestSubmissionConsumer:
             QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
         )
         assert messages.get("Messages", []) != []
+
         submission_consumer.delete_messages([messages["Messages"][0]["ReceiptHandle"]])
         messages = sqs.receive_message(
             QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
         )
+
         assert messages.get("Messages", []) == []
 
     def test_submission_consumer_delete_message_call_fails(
@@ -301,10 +313,12 @@ class TestSubmissionConsumer:
                 QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
             )
             assert messages.get("Messages", []) != []
+
             submission_consumer.delete_messages([messages["Messages"][0]["ReceiptHandle"]])
             messages = sqs.receive_message(
                 QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
             )
+
             assert messages.get("Messages", []) != []
         log = next(
             r for r in caplog.records if r.message == "Failed to delete messages from SQS queue"
@@ -326,10 +340,12 @@ class TestSubmissionConsumer:
                 QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
             )
             assert messages_1.get("Messages", []) != []
+
             submission_consumer.delete_messages([messages_1["Messages"][0]["ReceiptHandle"]])
             messages_2 = sqs.receive_message(
                 QueueUrl=queue["QueueUrl"], MaxNumberOfMessages=1, VisibilityTimeout=0
             )
+
             assert messages_2.get("Messages", []) != []
         log = next(r for r in caplog.records if r.message == "SQS delete message batch failed")
         assert log.failed_deletes == [messages_1["Messages"][0]["ReceiptHandle"]]
@@ -340,12 +356,15 @@ class TestSubmissionConsumer:
         caplog.set_level(logging.INFO)
         application = ApplicationFactory.create()
         engine = db_session.get_bind().engine
-        with Session(engine) as _, Session(engine) as fetch_session:
-            application = get_locked_application(db_session, application.application_id)
+
+        with Session(engine) as locked_session, Session(engine) as fetch_session:
+            locked_application = get_locked_application(locked_session, application.application_id)
+            fetch_session.execute(text("SET LOCAL lock_timeout = '2s'"))
+
             with pytest.raises(OperationalError):
                 fetch_session.execute(
                     select(Application)
-                    .where(Application.application_id == application.application_id)
+                    .where(Application.application_id == locked_application.application_id)
                     .with_for_update(nowait=True)
                 )
 
@@ -366,7 +385,9 @@ class TestSubmissionConsumer:
         containers = submission_consumer.fetch_messages()
         container = containers[0]
         assert container.message
+
         response = process_application_submission_message(db_session, container.message)
+
         assert response == SubmissionProcessingResult.SUCCESS
         submissions = get_submissions(db_session, application.application_id)
         db_session.refresh(application)
@@ -390,7 +411,9 @@ class TestSubmissionConsumer:
         containers = submission_consumer.fetch_messages()
         container = containers[0]
         assert container.message
+
         response = process_application_submission_message(db_session, container.message)
+
         assert response == SubmissionProcessingResult.ALREADY_PROCESSED
         submissions = get_submissions(db_session, application.application_id)
         assert len(submissions) == 0
@@ -406,7 +429,9 @@ class TestSubmissionConsumer:
     ):
         caplog.set_level(logging.INFO)
         message = ApplicationSubmissionMessage(message_id=uuid.uuid4(), application_id=uuid.uuid4())
+
         response = process_application_submission_message(db_session, message)
+
         assert response == SubmissionProcessingResult.APPLICATION_NOT_FOUND
         log = next(
             r for r in caplog.records if r.message == "Application not found for submission message"
@@ -424,7 +449,9 @@ class TestSubmissionConsumer:
         containers = submission_consumer.fetch_messages()
         container = containers[0]
         assert container.message
+
         response = process_application_submission_message(db_session, container.message)
+
         assert response == SubmissionProcessingResult.NOT_READY
         submissions = get_submissions(db_session, application.application_id)
         assert len(submissions) == 0
@@ -453,12 +480,17 @@ class TestSubmissionConsumer:
         containers = submission_consumer.fetch_messages()
         container = containers[0]
         assert container.message
-        with patch(
-            "src.submission_consumer.submission_consumer._process_application_submission_message"
-        ) as mock_process_application_submission_message:
-            error = OperationalError("SELECT 1", {}, Exception("connection lost"))
-            mock_process_application_submission_message.side_effect = error
-            response = process_application_submission_message(db_session, container.message)
+        engine = db_session.get_bind().engine
+        with Session(engine) as locked_session, Session(engine) as fetch_session:
+            locked_session.scalars(
+                select(Application)
+                .where(Application.application_id == application.application_id)
+                .with_for_update()
+            ).one()
+            fetch_session.execute(text("SET LOCAL lock_timeout = '2s'"))
+
+            response = process_application_submission_message(fetch_session, container.message)
+
             assert response == SubmissionProcessingResult.LOCKED
             submissions = get_submissions(db_session, application.application_id)
             assert len(submissions) == 0
@@ -491,7 +523,9 @@ class TestSubmissionConsumer:
             "src.submission_consumer.submission_consumer._process_application_submission_message"
         ) as mock_process_application_submission_message:
             mock_process_application_submission_message.side_effect = Exception()
+
             response = process_application_submission_message(db_session, container.message)
+
             assert response == SubmissionProcessingResult.ERROR
             submissions = get_submissions(db_session, application.application_id)
             assert len(submissions) == 0
@@ -518,8 +552,10 @@ class TestSubmissionConsumer:
         containers = submission_consumer.fetch_messages()
         container = containers[0]
         assert container.message
+
         with app.app_context():
             response = handle_message(container)
+
         assert response == SubmissionProcessingResult.SUCCESS
         submissions = get_submissions(db_session, application.application_id)
         db_session.refresh(application)
@@ -550,9 +586,12 @@ class TestSubmissionConsumer:
         send_application_submission_message(application.application_id, user.user_id)
         containers = submission_consumer.fetch_messages()
         container = containers[0]
+        #  Create the conditions for a parse error
         container.message = None
+
         with app.app_context():
             response = handle_message(container)
+
         assert response == SubmissionProcessingResult.PARSE_ERROR
         submissions = get_submissions(db_session, application.application_id)
         db_session.refresh(application)
@@ -584,18 +623,22 @@ class TestSubmissionConsumer:
             for c in containers
             if c.message and c.message.application_id == application_keep.application_id
         )
+
         with app.app_context():
             to_delete, to_keep = submission_consumer.handle_containers(containers)
+
             assert to_delete == [container_delete.receipt_handle]
             assert to_keep == [container_keep.receipt_handle]
 
-    def test_submission_Consumer_handle_containers_when_no_containers(
+    def test_submission_consumer_handle_containers_when_no_containers(
         self, app, db_session, enable_factory_create, monkeypatch, caplog, consumer_queue
     ):
         caplog.set_level(logging.INFO)
         submission_consumer = build_consumer()
+
         with app.app_context():
             to_delete, to_keep = submission_consumer.handle_containers([])
+
             assert to_delete == []
             assert to_keep == []
 
@@ -613,8 +656,10 @@ class TestSubmissionConsumer:
         send_application_submission_message(application_delete.application_id, user.user_id)
         send_application_submission_message(application_keep.application_id, user.user_id)
         submission_consumer = build_consumer()
+
         with app.app_context():
             to_keep, to_delete = submission_consumer.process_batch()
+
             assert len(to_keep) == 1
             assert len(to_delete) == 1
         log_1 = next(r for r in caplog.records if r.message == "Fetched SQS messages")
@@ -808,3 +853,29 @@ def test_submission_consumer_maintenance_mode(
         consumer.process_messages()
 
     assert "Skipping submission processing due to maintenance mode" in caplog.messages
+
+
+def test_submission_consumer_run_command(app, monkeypatch, cli_runner, caplog):
+    caplog.set_level(logging.INFO)
+    monkeypatch.setenv("SUBMISSION_CONSUMER_MAXIMUM_BATCH_COUNT", "1")
+    monkeypatch.setenv("SUBMISSION_CONSUMER_CYCLE_DURATION", "0")
+
+    result = cli_runner.invoke(args=["submission-consumer", "run"])
+
+    assert result.exit_code == 0
+    start_log = next(
+        r for r in caplog.records if r.message == "Processing application submission messages"
+    )
+    assert start_log is not None
+    consumer_batch_log = next(
+        r for r in caplog.records if r.message == "Finished running submission consumer batch"
+    )
+    assert consumer_batch_log is not None
+    break_log = next(r for r in caplog.records if r.message == "Exiting after batch limit reached.")
+    assert break_log is not None
+    finished_log = next(
+        r
+        for r in caplog.records
+        if r.message == "Finished processing submission messages - exiting process"
+    )
+    assert finished_log is not None

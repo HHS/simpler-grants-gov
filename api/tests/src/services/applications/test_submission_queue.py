@@ -55,12 +55,7 @@ def test_application_submission_message_schema_raises_validation_errors_for_requ
     }
     with pytest.raises(ValidationError) as exc:
         ApplicationSubmissionMessage(**data)
-    expected = (
-        "<ExceptionInfo 2 validation errors for ApplicationSubmissionMessage\nmessage_id\n  UUID inp"
-        "ut should be a string, bytes or UUID object ..., input_value=None, input_type=NoneType]\n  "
-        "  For further information visit https://errors.pydantic.dev/2.13/v/uuid_type tblen=2>"
-    )
-    assert str(exc) == expected
+    assert {e["loc"][0] for e in exc.value.errors()} == {"message_id", "application_id"}
 
 
 def test_application_submission_message_model_dump_json():
