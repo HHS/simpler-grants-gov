@@ -176,15 +176,15 @@ export default async function getFormData({
     try {
       const { formSchema } = processFormSchema(form_json_schema);
       formUiSchema = jsonFormsToUiSchema(jsonFormsUiSchema, formSchema);
-      // A control no widget can render falls back to a plain JSON Forms input. That input
-      // has no `name` attribute, so it's left out of the form's FormData and isn't saved.
+      // A control no widget can render is skipped, so the applicant never sees it and no
+      // answer is collected for it.
       for (const control of findUnsupportedControls(
         jsonFormsUiSchema,
         formSchema,
       )) {
         logger.warn(
           { formId, formName, control },
-          "Form has a control that can't be rendered by any widget. The answer provided to this field won't be saved",
+          "Form has a control that can't be rendered by any widget. It won't be shown, and no answer will be collected for it",
         );
       }
       // The field-list widget renders a list's entries itself, so JSON Forms never applies

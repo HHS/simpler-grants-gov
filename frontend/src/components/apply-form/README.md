@@ -144,13 +144,12 @@ Instead of the SGG UI schema described above, a form can use a [JSON Forms](http
 
 ### Terminology
 
-A field in a JSON Forms form can be rendered by three kinds of widget:
+A field in a JSON Forms form can be rendered by two kinds of widget:
 
-| Term                          | What it is                                                                                                                                   | Where it's used                                                                          |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **SGG widget**                | One of the existing USWDS widgets in `widgets/`, patterned after RJSF widgets and registered in `widgetComponents`                           | Every field in an SGG form, and every field the SGG adapter can map in a JSON Forms form |
-| **Custom JSON Forms widget**  | A component we write with JSON Forms' API (a tester plus `withJsonFormsControlProps` or `withJsonFormsLayoutProps`) instead of an SGG widget | The form library's sections and collapsible list. The apply form doesn't use any yet     |
-| **JSON Forms vanilla widget** | A default component from `@jsonforms/vanilla-renderers`, like a bare `<input>`                                                               | Only as a fallback for controls SGG widgets can't render                                 |
+| Term                         | What it is                                                                                                                                   | Where it's used                                                                          |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **SGG widget**               | One of the existing USWDS widgets in `widgets/`, patterned after RJSF widgets and registered in `widgetComponents`                           | Every field in an SGG form, and every field the SGG adapter can map in a JSON Forms form |
+| **Custom JSON Forms widget** | A component we write with JSON Forms' API (a tester plus `withJsonFormsControlProps` or `withJsonFormsLayoutProps`) instead of an SGG widget | The form library's sections and collapsible list. The apply form doesn't use any yet     |
 
 The **SGG adapter** (`AdaptedControl`, `AdaptedLayout`) is what lets JSON Forms render a control with an SGG widget.
 
@@ -176,13 +175,13 @@ In this README, "renderer" means the form-level renderer: the SGG renderer, or t
 
 ### How widgets are picked
 
-`JsonFormsFields` picks a widget for each element by rank. Each widget is registered with a tester that scores how well it matches an element, and the highest score wins:
+`JsonFormsFields` picks a widget for each element by rank. Each widget is registered with a tester that scores how well it matches an element, and the highest score wins. A control that no SGG widget can render is skipped, so the applicant doesn't see it, and the server logs a warning for it:
 
-| Rank     | Widgets                                                                  | Used for                                                    |
-| -------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
-| Below 10 | JSON Forms vanilla widgets                                               | The fallback for controls existing SGG widgets can't render |
-| 10       | The SGG adapter (`AdaptedControl`, `AdaptedLayout`)                      | Everything else                                             |
-| Above 10 | Custom JSON Forms widgets, registered in `renderers` or `extraRenderers` | Whatever their tester matches                               |
+| Rank     | Widgets                                                                  | Used for                                             |
+| -------- | ------------------------------------------------------------------------ | ---------------------------------------------------- |
+| 1        | `SkipControl`                                                            | Controls no SGG widget can render, which are skipped |
+| 10       | The SGG adapter (`AdaptedControl`, `AdaptedLayout`)                      | Everything else                                      |
+| Above 10 | Custom JSON Forms widgets, registered in `renderers` or `extraRenderers` | Whatever their tester matches                        |
 
 See [Adding a new widget](./widgets/README.md#adding-a-new-widget) for how to add one.
 
@@ -191,9 +190,7 @@ See [Adding a new widget](./widgets/README.md#adding-a-new-widget) for how to ad
 These limitations come from the SGG widgets, not from JSON Forms. The SGG field-list widget renders each list entry itself, outside of JSON Forms, so JSON Forms never processes what's inside an entry:
 
 - **Rules on fields inside a list aren't applied.** Those fields always show.
-- **A list nested inside an object or a list entry isn't supported.** For example, a budget's line items (`budget.line_items`) or each key contact's phone numbers (`contacts[].phones`). It falls back to a JSON Forms vanilla widget, so its answers aren't saved.
-
-The vanilla widget's answers aren't saved because the save action reads answers from the browser's `<form>` data, and the browser only includes inputs with a `name` attribute. Every SGG widget sets `name` to its field's path (e.g. `contacts[0]--role`), but the vanilla widget's `<input>` keeps its value in JSON Forms' own state and doesn't set `name`.
+- **A list nested inside an object or a list entry isn't supported.** For example, a budget's line items (`budget.line_items`) or each key contact's phone numbers (`contacts[].phones`). It's skipped, so the applicant doesn't see it and no answer is collected for it.
 
 The server logs a warning when a form uses either one.
 
