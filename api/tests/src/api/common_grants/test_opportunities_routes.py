@@ -328,11 +328,13 @@ class TestSearchOpportunities:
         client: FlaskClient,
         user_api_key_id,
         search_client,
-        opportunity_index,
         opportunity_index_alias,
     ):
         """An unsupported status value returns 200 with the error in filterInfo.errors."""
-        # Index a record so the sort fields are mapped; an empty index fails the search
+        # Index a record so the sort fields are mapped; an empty index fails the search.
+        # Private index: the session-scoped one gets deleted by the grantors publish teardown.
+        index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+        search_client.create_index(index_name)
         opportunity = OpportunityFactory.build(
             current_opportunity_summary=None,
             created_at=datetime(2024, 1, 1),
@@ -344,17 +346,18 @@ class TestSearchOpportunities:
             opportunity=opportunity,
         )
         search_client.bulk_upsert(
-            opportunity_index,
+            index_name,
             [OpportunityV1Schema().dump(opportunity)],
             "opportunity_id",
             refresh=True,
         )
-        search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+        search_client.swap_alias_index(index_name, opportunity_index_alias)
         response = client.post(
             "/common-grants/opportunities/search",
             headers={"X-API-Key": user_api_key_id},
             json={"filters": {"status": {"operator": "in", "value": ["posted"]}}},
         )
+        search_client.delete_index(index_name)
         assert response.status_code == 200
         data = response.get_json()
         assert 'status: unsupported value "posted"' in data["filterInfo"]["errors"]
