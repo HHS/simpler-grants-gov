@@ -2,15 +2,15 @@
 
 import {
   and,
-  ControlElement,
-  ControlProps,
-  GroupLayout,
   isControl,
-  JsonFormsRendererRegistryEntry,
-  LayoutProps,
   or,
   rankWith,
   uiTypeIs,
+  type ControlElement,
+  type ControlProps,
+  type GroupLayout,
+  type JsonFormsRendererRegistryEntry,
+  type LayoutProps,
 } from "@jsonforms/core";
 import {
   JsonFormsDispatch,
@@ -18,20 +18,20 @@ import {
   withJsonFormsLayoutProps,
 } from "@jsonforms/react";
 import { vanillaRenderers } from "@jsonforms/vanilla-renderers";
-import { RJSFSchema } from "@rjsf/utils";
-import { FormattedFormValidationWarning } from "src/types/applyForm/types";
+import type { RJSFSchema } from "@rjsf/utils";
+import type { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
 import {
   controlToNodes,
   groupName,
-  JsonFormsUiSchema,
+  type JsonFormsUiSchema,
 } from "src/utils/applyForm/jsonFormsUiSchema";
 
 import { createContext, useContext } from "react";
 
 import {
   renderFieldNode,
-  RootBudgetFormContext,
+  type RootBudgetFormContext,
 } from "src/components/apply-form/FormFields";
 import { wrapSection } from "src/components/apply-form/widgets/WidgetRenderers";
 
