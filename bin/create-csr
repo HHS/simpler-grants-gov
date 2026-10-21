@@ -79,5 +79,3 @@ echo "Output files"
 echo "======================================"
 echo "  Private key : ${KEY_FILE}"
 echo "  CSR         : ${CSR_FILE}"
-echo
-echo "!!!!!! - Move this files someplace safe before /tmp is cleaned"
