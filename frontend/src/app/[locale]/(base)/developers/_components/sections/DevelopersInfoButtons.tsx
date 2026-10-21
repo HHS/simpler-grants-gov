@@ -17,7 +17,7 @@ export default function DevelopersInfoButtons() {
 
   return (
     <>
-      {user?.token ? (
+      {user?.isLoggedIn ? (
         <Link href="/developers/api-dashboard">
           <Button
             className="margin-y-2 usa-button--secondary"

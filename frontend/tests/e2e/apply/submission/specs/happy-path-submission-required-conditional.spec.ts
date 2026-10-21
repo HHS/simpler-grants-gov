@@ -35,7 +35,7 @@ import {
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, SMOKE, GRANTEE } = VALID_TAGS;
+const { APPLY_FORMS, SMOKE } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -63,7 +63,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 for (const { testName, orgLabel } of applicantScenarios) {
   test(
     testName,
-    { tag: [SMOKE, GRANTEE, APPLY] },
+    { tag: [APPLY_FORMS, SMOKE] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,

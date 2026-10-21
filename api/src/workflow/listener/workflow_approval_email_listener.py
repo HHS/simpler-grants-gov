@@ -4,6 +4,7 @@ from statemachine.event_data import EventData
 
 from src.adapters import db
 from src.auth.endpoint_access_util import get_users_with_privileges_for_agency
+from src.constants.email_constants import EmailType
 from src.db.models.user_models import User
 from src.task.notifications.config import get_email_config
 from src.workflow.event.state_machine_event import StateMachineEvent
@@ -110,4 +111,5 @@ class WorkflowApprovalEmailListener:
                 user=user,
                 subject=subject,
                 message=approval_message,
+                email_type=EmailType.WORKFLOW_APPROVAL,
             )

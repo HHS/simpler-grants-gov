@@ -1,0 +1,24 @@
+{
+  "name": "form-library-xml",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Emits Grants.gov XML transform rules from a SimplerForms specification's @Mapping links.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "typespec": "./lib/main.tsp",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "check:types": "tsc -p . --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@typespec/compiler": "^1.16.0",
+    "@typespec/xml": "^0.86.0",
+    "simpler-forms": "*"
+  }
+}

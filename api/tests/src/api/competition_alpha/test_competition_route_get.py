@@ -293,6 +293,72 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     assert resp.get_json()["data"]["is_open"] is False
 
 
+@pytest.mark.parametrize(
+    "competition_params,expected_has_open_date,expected_is_legacy_package,expected_is_open",
+    [
+        # Grants.gov package within its application window, not enabled on Simpler
+        (
+            {
+                "legacy_package_id": "PKG-00260155",
+                "is_simpler_grants_enabled": False,
+                "opening_date": date(2025, 1, 1),
+                "closing_date": date(2025, 12, 31),
+            },
+            True,
+            True,
+            False,
+        ),
+        # Competition created on Simpler, enabled and within its application window
+        (
+            {
+                "legacy_package_id": None,
+                "is_simpler_grants_enabled": True,
+                "opening_date": date(2025, 1, 1),
+                "closing_date": date(2025, 12, 31),
+            },
+            True,
+            False,
+            True,
+        ),
+        # Grants.gov package past its closing date and grace period
+        (
+            {
+                "legacy_package_id": "PKG-00260155",
+                "is_simpler_grants_enabled": False,
+                "opening_date": date(2024, 1, 1),
+                "closing_date": date(2025, 1, 10),
+                "grace_period": 0,
+            },
+            False,
+            True,
+            False,
+        ),
+    ],
+)
+@freeze_time("2025-01-15 12:00:00", tz_offset=0)
+def test_competition_get_200_has_open_date_and_is_legacy_package(
+    client,
+    user_api_key_id,
+    enable_factory_create,
+    competition_params,
+    expected_has_open_date,
+    expected_is_legacy_package,
+    expected_is_open,
+):
+    competition = CompetitionFactory.create(**competition_params)
+
+    resp = client.get(
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-API-Key": user_api_key_id}
+    )
+
+    assert resp.status_code == 200
+    response_competition = resp.get_json()["data"]
+
+    assert response_competition["has_open_date"] is expected_has_open_date
+    assert response_competition["is_legacy_package"] is expected_is_legacy_package
+    assert response_competition["is_open"] is expected_is_open
+
+
 def test_competition_get_404_not_found(client, user_api_key_id):
     competition_id = uuid.uuid4()
     resp = client.get(

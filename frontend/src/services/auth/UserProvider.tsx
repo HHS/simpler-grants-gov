@@ -7,9 +7,10 @@ import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 import { UserContext } from "src/services/auth/useUser";
 import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";
 import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
-import { UserProfile, UserSession } from "src/types/authTypes";
+import { UserProfile } from "src/types/authTypes";
 import { isExpired, isExpiring } from "src/utils/dateUtil";
 
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function UserProvider({
@@ -19,6 +20,7 @@ export default function UserProvider({
   featureFlagDefaults: FeatureFlags;
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const getCookie = useGetCookie();
   const cookie = decodeURIComponent(getCookie(FEATURE_FLAGS_KEY) || "{}");
   const [localUser, setLocalUser] = useState<UserProfile>();
@@ -49,19 +51,15 @@ export default function UserProvider({
     try {
       // there was custom logic around 204 responses in the original function
       // TBD if removing that will cause any problems
-      const fetchedUser: UserSession = await debouncedUserFetcher();
+      const fetchedUser: UserProfile = await debouncedUserFetcher();
       if (fetchedUser) {
-        if (localUser?.token && !fetchedUser.token) {
-          setHasBeenLoggedOut(true);
-
-          // Invoke the logout endpoint for explicit logout. This will ensure
-          // the correlation_id cookie is properly removed since the correlation_id
-          // cookie is httpOnly.
-          await fetch("/api/auth/logout", { method: "POST" }).catch(noop);
-        }
         setLocalUser(fetchedUser);
         setUserFetchError(undefined);
         setIsLoading(false);
+        if (localUser?.isLoggedIn && !fetchedUser.isLoggedIn) {
+          setHasBeenLoggedOut(true);
+          router.refresh();
+        }
         return;
       }
       throw new Error("received empty user session");
@@ -69,11 +67,10 @@ export default function UserProvider({
       setIsLoading(false);
       setUserFetchError(e as Error);
     }
-  }, [localUser]);
+  }, [localUser, router]);
 
-  // just remove the token
   const logoutLocalUser = useCallback(() => {
-    setLocalUser({ ...(localUser as UserProfile), token: "" });
+    setLocalUser({ ...(localUser as UserProfile), isLoggedIn: false });
   }, [localUser]);
 
   // fetch user on hook startup
@@ -94,14 +91,14 @@ export default function UserProvider({
   const refreshIfExpired = useCallback(async (): Promise<
     boolean | undefined
   > => {
-    if (!localUser?.token) {
+    if (!localUser?.isLoggedIn) {
       return;
     }
     if (isExpired(localUser?.expiresAt)) {
       await getUserSession().then(noop).catch(noop);
       return true;
     }
-  }, [localUser?.expiresAt, localUser?.token, getUserSession]);
+  }, [localUser?.expiresAt, localUser?.isLoggedIn, getUserSession]);
 
   // if token is less than 10 mins from its expiration, refresh the user to get a token refresh
   const refreshIfExpiring = useCallback(async () => {

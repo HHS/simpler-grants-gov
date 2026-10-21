@@ -12,7 +12,7 @@ import {
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/search-utils";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, SMOKE, FULL_REGRESSION } = VALID_TAGS;
 
 test.beforeEach(async ({ page }) => {
   const searchTerm = "grants";
@@ -35,7 +35,7 @@ test.beforeEach(async ({ page }) => {
 test.describe("Search page results tests", () => {
   test(
     "should return at least 1 result when searching with valid term",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, SMOKE] },
+    { tag: [DISCOVERY, SMOKE] },
     async ({ page }) => {
       // Then the results heading should show at least 1 opportunity
       const resultsHeading = page.locator("h3", {
@@ -47,7 +47,7 @@ test.describe("Search page results tests", () => {
 
   test(
     "search list should have at least 1 item",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       // And the search results list should contain at least 1 item
       const searchList = page.locator("ul.usa-list--unstyled");

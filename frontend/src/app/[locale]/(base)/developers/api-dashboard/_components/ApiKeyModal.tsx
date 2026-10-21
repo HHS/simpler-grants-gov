@@ -10,10 +10,10 @@ import {
   deleteApiKeyEndpoint,
   deleteApiKeyRequestConfig,
 } from "src/services/fetch/fetchers/apiKeyClientHelpers";
-import { ApiKey } from "src/types/apiKeyTypes";
+import { ApiKey, CreatedApiKey } from "src/types/apiKeyTypes";
 
 import { useTranslations } from "next-intl";
-import { RefObject, useCallback, useRef, useState } from "react";
+import { ReactNode, RefObject, useCallback, useRef, useState } from "react";
 import {
   Alert,
   Button,
@@ -26,11 +26,10 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import { LoadingButton } from "src/components/core/LoadingButton";
-import SimplerAlert from "src/components/core/SimplerAlert";
 import { SimplerModal } from "src/components/core/SimplerModal";
 import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
+import { useApiKeyAlert } from "./ApiKeyAlertProvider";
 
 // matches ValidationErrorType.DUPLICATE_API_KEY_NAME in the API
 const DUPLICATE_API_KEY_NAME_ERROR = "duplicate_api_key_name";
@@ -44,67 +43,27 @@ const isDuplicateNameError = (error: unknown) => {
 interface ApiKeyModalProps {
   mode: "create" | "edit" | "delete";
   apiKey?: ApiKey; // Required for edit and delete modes
-  onApiKeyUpdated: () => void; // Called after successful create, edit, or delete
+  // Called after a successful create, edit, or delete, with the created or renamed key.
+  // Edit and delete close the modal first.
+  onApiKeyUpdated: (apiKey?: ApiKey) => void;
   triggerButtonProps?: {
     className?: string;
     children?: React.ReactNode;
   };
 }
 
-function ApiKeyInput({
-  validationError,
-  updateApiKeyName,
-  defaultValue = "",
-  mode,
-}: {
-  validationError?: string;
-  updateApiKeyName: (name: string) => void;
-  defaultValue?: string;
-  mode: "create" | "edit" | "delete";
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const inputId = `${mode}-api-key-input`;
-  const t = useTranslations("ApiDashboard.modal");
-
-  return (
-    <FormGroup error={!!validationError}>
-      <label htmlFor={inputId}>
-        {t.rich("apiKeyNameLabel", {
-          required: (chunks) => (
-            <span className="usa-hint usa-hint--required">{chunks}</span>
-          ),
-        })}
-      </label>
-      {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
-      <div className="usa-search usa-search--big" role="search">
-        <TextInput
-          ref={inputRef}
-          className={clsx("usa-input", "maxw-none", {
-            "usa-input--error": !!validationError,
-          })}
-          id={inputId}
-          name={`${mode}-api-key`}
-          defaultValue={defaultValue}
-          onChange={(e) => updateApiKeyName(e.target?.value)}
-          type="text"
-          required
-          aria-required
-        />
-      </div>
-    </FormGroup>
-  );
-}
-
-function CreateApiKeyInput({
+function ApiKeyNameInput({
+  inputId,
   validationError,
   apiKeyName,
   updateApiKeyName,
 }: {
+  // every key's row renders its own edit modal, so the id must be unique per key
+  inputId: string;
   validationError?: string;
   apiKeyName: string;
   updateApiKeyName: (name: string) => void;
 }) {
-  const inputId = "create-api-key-input";
   const hintId = `${inputId}-hint`;
   const errorId = `${inputId}-error`;
   const t = useTranslations("ApiDashboard.modal");
@@ -112,21 +71,21 @@ function CreateApiKeyInput({
   return (
     <FormGroup error={!!validationError}>
       <label className="usa-label" htmlFor={inputId}>
-        {t.rich("createApiKeyNameLabel", {
+        {t.rich("apiKeyNameLabel", {
           required: (chunks) => (
             <span className="usa-hint usa-hint--required">{chunks}</span>
           ),
         })}
       </label>
       <span className="usa-hint" id={hintId}>
-        {t("createNameHint")}
+        {t("apiKeyNameHint")}
       </span>
       {validationError && (
         <ErrorMessage id={errorId}>{validationError}</ErrorMessage>
       )}
       <TextInput
         id={inputId}
-        name="create-api-key"
+        name="api-key-name"
         value={apiKeyName}
         onChange={(e) => updateApiKeyName(e.target?.value)}
         type="text"
@@ -140,42 +99,83 @@ function CreateApiKeyInput({
 }
 
 function DeleteConfirmationInput({
+  inputId,
   validationError,
+  deleteConfirmation,
   updateDeleteConfirmation,
 }: {
+  // every key's row renders its own delete modal, so the id must be unique per key
+  inputId: string;
   validationError?: string;
+  deleteConfirmation: string;
   updateDeleteConfirmation: (value: string) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const inputId = "delete-confirmation-input";
+  const errorId = `${inputId}-error`;
   const t = useTranslations("ApiDashboard.modal");
 
   return (
     <FormGroup error={!!validationError}>
-      <label htmlFor={inputId}>
+      <label className="usa-label" htmlFor={inputId}>
         {t.rich("deleteConfirmationLabel", {
           required: (chunks) => (
             <span className="usa-hint usa-hint--required">{chunks}</span>
           ),
         })}
       </label>
-      {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
-      <div className="usa-search usa-search--big" role="search">
-        <TextInput
-          ref={inputRef}
-          className={clsx("usa-input", "maxw-none", {
-            "usa-input--error": !!validationError,
-          })}
-          id={inputId}
-          name="delete-confirmation"
-          onChange={(e) => updateDeleteConfirmation(e.target?.value)}
-          type="text"
-          required
-          aria-required
-          placeholder={t("deleteConfirmationPlaceholder")}
-        />
-      </div>
+      {validationError && (
+        <ErrorMessage id={errorId}>{validationError}</ErrorMessage>
+      )}
+      <TextInput
+        id={inputId}
+        name="delete-confirmation"
+        value={deleteConfirmation}
+        onChange={(e) => updateDeleteConfirmation(e.target?.value)}
+        type="text"
+        autoComplete="off"
+        required
+        aria-required
+        aria-describedby={validationError ? errorId : undefined}
+        validationStatus={validationError ? "error" : undefined}
+      />
     </FormGroup>
+  );
+}
+
+function SubmitButton({
+  loading,
+  loadingText,
+  onClick,
+  className,
+  testId,
+  children,
+}: {
+  loading?: boolean;
+  loadingText: string;
+  onClick: () => void;
+  className?: string;
+  testId: string;
+  children: ReactNode;
+}) {
+  return (
+    <Button
+      type="button"
+      className={clsx("position-relative", className)}
+      disabled={loading}
+      aria-busy={loading}
+      onClick={onClick}
+      data-testid={testId}
+    >
+      {/* label stays rendered while loading so the button keeps its size */}
+      <span className={clsx({ "opacity-0": loading })} aria-hidden={loading}>
+        {children}
+      </span>
+      {loading && (
+        <span className="position-absolute top-0 bottom-0 left-0 right-0 display-flex flex-justify-center flex-align-center">
+          <Spinner className="margin-0" />
+          <span className="usa-sr-only">{loadingText}</span>
+        </span>
+      )}
+    </Button>
   );
 }
 
@@ -290,48 +290,6 @@ function CreateSuccessContent({
   );
 }
 
-function SuccessContent({
-  modalRef,
-  modalId,
-  onClose,
-  mode,
-  keyName,
-  originalName = "",
-}: {
-  modalRef: RefObject<ModalRef | null>;
-  modalId: string;
-  onClose: () => void;
-  mode: "edit" | "delete";
-  keyName: string;
-  originalName?: string;
-}) {
-  const isDelete = mode === "delete";
-  const t = useTranslations("ApiDashboard.modal");
-  const heading = isDelete
-    ? t("deleteSuccessHeading")
-    : t("editSuccessHeading");
-  const message = isDelete
-    ? t("deleteSuccessMessage", { keyName })
-    : t("editSuccessMessage", { originalName, keyName });
-
-  return (
-    <>
-      <ModalHeading id={`${modalId}-heading`}>{heading}</ModalHeading>
-      <p>{message}</p>
-      <ModalFooter>
-        <ModalToggleButton
-          modalRef={modalRef}
-          closer
-          onClick={onClose}
-          data-testid={`close-${mode}-api-key-modal-button`}
-        >
-          {t("close")}
-        </ModalToggleButton>
-      </ModalFooter>
-    </>
-  );
-}
-
 export default function ApiKeyModal({
   mode,
   apiKey,
@@ -340,16 +298,17 @@ export default function ApiKeyModal({
 }: ApiKeyModalProps) {
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
+  const { hideAlert } = useApiKeyAlert();
   const t = useTranslations("ApiDashboard.modal");
 
   const [validationError, setValidationError] = useState<string>();
+  // undefined until the user types, so edit mode shows the key's current name
   const [apiKeyName, setApiKeyName] = useState<string>();
   const [createdKey, setCreatedKey] = useState<string>();
   const [deleteConfirmation, setDeleteConfirmation] = useState<string>();
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
   const [success, setSuccess] = useState<boolean>();
-  const [originalName] = useState(apiKey?.key_name);
 
   const isCreate = mode === "create";
   const isEdit = mode === "edit";
@@ -367,6 +326,22 @@ export default function ApiKeyModal({
     { authGatedRequest: true },
   );
 
+  const onClose = useCallback(() => {
+    setValidationError(undefined);
+    setApiError(false);
+    setLoading(false);
+    setSuccess(false);
+    setApiKeyName(undefined);
+    setCreatedKey(undefined);
+    setDeleteConfirmation("");
+  }, []);
+
+  const nameToSubmit = (
+    apiKeyName ??
+    (isEdit ? apiKey?.key_name : undefined) ??
+    ""
+  ).trim();
+
   const handleSubmit = useCallback(async () => {
     if (isDelete) {
       if (deleteConfirmation?.trim() !== "delete") {
@@ -374,21 +349,20 @@ export default function ApiKeyModal({
         return;
       }
     } else {
-      const nameToSubmit =
-        apiKeyName?.trim() || (isEdit ? apiKey?.key_name : "");
-
       if (!nameToSubmit) {
         setValidationError(t("nameRequiredError"));
         return;
       }
 
+      // saving an unchanged name has nothing to update, so just close
       if (isEdit && nameToSubmit === apiKey?.key_name) {
-        setValidationError(t("nameChangedError"));
+        modalRef.current?.toggleModal(undefined, false);
+        onClose();
         return;
       }
     }
 
-    if (!user?.user_id) {
+    if (!user?.isLoggedIn) {
       setApiError(true);
       return;
     }
@@ -408,8 +382,6 @@ export default function ApiKeyModal({
         );
       } else {
         // Create or edit API call
-        const nameToSubmit =
-          apiKeyName?.trim() || (isEdit ? apiKey?.key_name : "");
         let url: string;
         let method: string;
 
@@ -430,18 +402,27 @@ export default function ApiKeyModal({
             key_name: nameToSubmit,
           }),
         });
-        setCreatedKey((response as { data: ApiKey }).data.key_id);
+        if (isCreate) {
+          setCreatedKey((response as { data: CreatedApiKey }).data.key_id);
+        }
       }
 
-      if (response && (isDelete || (response as { data: ApiKey }).data)) {
+      const updatedKey = (response as { data?: ApiKey } | undefined)?.data;
+
+      if (response && (isDelete || (isEdit && updatedKey))) {
+        // the page shows the confirmation for edit and delete
+        modalRef.current?.toggleModal(undefined, false);
+        onClose();
+        onApiKeyUpdated(updatedKey);
+      } else if (updatedKey) {
         setSuccess(true);
-        onApiKeyUpdated();
+        onApiKeyUpdated(updatedKey);
       } else {
         console.error("API response missing data:", response);
         setApiError(true);
       }
     } catch (error) {
-      if (isCreate && isDuplicateNameError(error)) {
+      if (!isDelete && isDuplicateNameError(error)) {
         setValidationError(t("duplicateNameError"));
         return;
       }
@@ -454,27 +435,18 @@ export default function ApiKeyModal({
       setLoading(false);
     }
   }, [
-    apiKeyName,
+    nameToSubmit,
     deleteConfirmation,
     apiKey,
-    user?.user_id,
+    user?.isLoggedIn,
     clientFetch,
     onApiKeyUpdated,
+    onClose,
     isCreate,
     isEdit,
     isDelete,
     t,
   ]);
-
-  const onClose = useCallback(() => {
-    setValidationError(undefined);
-    setApiError(false);
-    setLoading(false);
-    setSuccess(false);
-    setApiKeyName("");
-    setCreatedKey(undefined);
-    setDeleteConfirmation("");
-  }, []);
 
   const modalId = isCreate
     ? "create-api-key"
@@ -490,7 +462,7 @@ export default function ApiKeyModal({
   } else if (isEdit) {
     titleText = t("editTitle", { keyName: apiKey?.key_name ?? "" });
   } else {
-    titleText = t("deleteTitle");
+    titleText = t("deleteTitle", { keyName: apiKey?.key_name ?? "" });
   }
 
   // Default trigger button configurations
@@ -511,18 +483,30 @@ export default function ApiKeyModal({
     edit: {
       className: "padding-1 hover:bg-base-lightest",
       children: (
-        <USWDSIcon name="edit" className="usa-icon--size-3 margin-right-05" />
+        <>
+          <USWDSIcon name="edit" className="usa-icon margin-right-05" />
+          {t("editTriggerText")}{" "}
+          {/* every row has the same visible label, so name the key for screen readers and voice control */}
+          <span className="usa-sr-only">
+            {t("editTriggerKeyName", { keyName: apiKey?.key_name ?? "" })}
+          </span>
+        </>
       ),
       unstyled: true,
       "data-testid": `open-edit-api-key-modal-button-${apiKey?.api_key_id ?? "unknown"}`,
     },
     delete: {
-      className: "padding-1 hover:bg-base-lightest",
+      className: "padding-1 hover:bg-base-lightest text-error-dark",
       children: (
-        <USWDSIcon className="usa-icon--size-3 margin-right-05" name="delete" />
+        <>
+          <USWDSIcon name="delete" className="usa-icon margin-right-05" />
+          {t("deleteTriggerText")}{" "}
+          <span className="usa-sr-only">
+            {t("deleteTriggerKeyName", { keyName: apiKey?.key_name ?? "" })}
+          </span>
+        </>
       ),
       unstyled: true,
-      title: t("deleteTitle"),
       "data-testid": `open-delete-api-key-modal-button-${apiKey?.api_key_id ?? "unknown"}`,
     },
   };
@@ -559,6 +543,7 @@ export default function ApiKeyModal({
           handleSubmit().catch(console.error);
         }}
         onClose={onClose}
+        onOpen={hideAlert}
       >
         {success && isCreate ? (
           <CreateSuccessContent
@@ -568,135 +553,91 @@ export default function ApiKeyModal({
             keyName={apiKeyName?.trim() || ""}
             createdKey={createdKey || ""}
           />
-        ) : success && !isCreate ? (
-          <SuccessContent
-            modalRef={modalRef}
-            modalId={modalId}
-            onClose={onClose}
-            mode={mode}
-            keyName={apiKeyName || apiKey?.key_name || ""}
-            originalName={originalName}
-          />
         ) : (
           <>
-            {isCreate && apiError && (
+            {apiError && (
               <Alert
                 type="error"
                 headingLevel="h3"
-                heading={t("createErrorHeading")}
+                heading={
+                  isCreate
+                    ? t("createErrorHeading")
+                    : isEdit
+                      ? t("editErrorHeading")
+                      : t("deleteErrorHeading")
+                }
                 role="alert"
                 className="margin-top-2"
               >
-                {t("createErrorMessage")}
+                {isCreate
+                  ? t("createErrorMessage")
+                  : isEdit
+                    ? t("editErrorMessage")
+                    : t("deleteErrorMessage")}
               </Alert>
             )}
 
-            {isDelete ? (
-              <>
-                <p>{t("deleteDescription")}</p>
-                <p className="font-sans-md text-bold margin-y-2">
-                  &quot;{apiKey?.key_name}&quot;
-                </p>
-              </>
-            ) : (
-              <p>{isCreate ? t("createDescription") : t("editDescription")}</p>
-            )}
-
-            {!isCreate && apiError && (
-              <SimplerAlert
-                alertClick={() => setApiError(false)}
-                buttonId="apiKeyModalApiError"
-                messageText={
-                  isEdit ? t("editErrorMessage") : t("deleteErrorMessage")
-                }
-                type="error"
-              />
-            )}
+            <p>
+              {isDelete ? t("deleteDescription") : t("apiKeyNameDescription")}
+            </p>
 
             {isDelete ? (
               <DeleteConfirmationInput
+                inputId={`${modalId}-confirmation`}
                 validationError={validationError}
+                deleteConfirmation={deleteConfirmation ?? ""}
                 updateDeleteConfirmation={setDeleteConfirmation}
               />
-            ) : isCreate ? (
-              <CreateApiKeyInput
-                validationError={validationError}
-                apiKeyName={apiKeyName ?? ""}
-                updateApiKeyName={setApiKeyName}
-              />
             ) : (
-              <ApiKeyInput
+              <ApiKeyNameInput
+                inputId={`${modalId}-name`}
                 validationError={validationError}
+                apiKeyName={
+                  apiKeyName ?? (isEdit ? (apiKey?.key_name ?? "") : "")
+                }
                 updateApiKeyName={setApiKeyName}
-                defaultValue={isEdit ? apiKey?.key_name : ""}
-                mode={mode}
               />
             )}
 
             <ModalFooter>
-              {isCreate ? (
-                <>
-                  <Button
-                    type="button"
-                    className="position-relative"
-                    disabled={loading}
-                    aria-busy={loading}
-                    onClick={() => {
-                      handleSubmit().catch(console.error);
-                    }}
-                    data-testid="create-api-key-submit-button"
-                  >
-                    {/* label stays rendered while loading so the button keeps its size */}
-                    <span
-                      className={clsx({ "opacity-0": loading })}
-                      aria-hidden={loading}
-                    >
-                      {t("createSubmitButtonText")}
-                    </span>
-                    {loading && (
-                      <span className="position-absolute top-0 bottom-0 left-0 right-0 display-flex flex-justify-center flex-align-center">
-                        <Spinner className="margin-0" />
-                        <span className="usa-sr-only">{t("creating")}</span>
-                      </span>
-                    )}
-                  </Button>
-                  <ModalToggleButton
-                    modalRef={modalRef}
-                    closer
-                    unstyled
-                    className="padding-105 text-center"
-                    onClick={onClose}
-                  >
-                    {t("cancel")}
-                  </ModalToggleButton>
-                </>
-              ) : loading ? (
-                <LoadingButton
-                  id={`${mode}-api-key-button`}
-                  message={isEdit ? t("saving") : t("deleting")}
-                />
-              ) : (
-                <>
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      handleSubmit().catch(console.error);
-                    }}
-                    data-testid={`${mode}-api-key-submit-button`}
-                  >
-                    {isEdit ? t("saveChanges") : t("deleteButtonText")}
-                  </Button>
-                  <ModalToggleButton
-                    modalRef={modalRef}
-                    closer
-                    unstyled
-                    className="padding-105 text-center"
-                    onClick={onClose}
-                  >
-                    {t("cancel")}
-                  </ModalToggleButton>
-                </>
-              )}
+              <SubmitButton
+                loading={loading}
+                loadingText={
+                  isCreate
+                    ? t("creating")
+                    : isEdit
+                      ? t("saving")
+                      : t("deleting")
+                }
+                onClick={() => {
+                  handleSubmit().catch(console.error);
+                }}
+                className={clsx({ "usa-button--accent-warm": isDelete })}
+                testId={`${mode}-api-key-submit-button`}
+              >
+                {isCreate ? (
+                  t("createSubmitButtonText")
+                ) : isEdit ? (
+                  t("saveChanges")
+                ) : (
+                  <>
+                    <USWDSIcon
+                      className="usa-icon margin-right-05 position-relative top-2px"
+                      name="delete"
+                    />
+                    {t("deleteButtonText")}
+                  </>
+                )}
+              </SubmitButton>
+              <ModalToggleButton
+                modalRef={modalRef}
+                closer
+                unstyled
+                className="padding-105 text-center"
+                onClick={onClose}
+              >
+                {t("cancel")}
+              </ModalToggleButton>
             </ModalFooter>
           </>
         )}

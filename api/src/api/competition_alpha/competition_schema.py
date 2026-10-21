@@ -117,7 +117,21 @@ class CompetitionAlphaSchema(Schema):
     )
 
     is_open = fields.Boolean(
-        metadata={"description": "Whether the competition is open and accepting applications"}
+        metadata={
+            "description": "Whether the competition is open and accepting applications on Simpler.Grants.gov"
+        }
+    )
+
+    has_open_date = fields.Boolean(
+        metadata={
+            "description": "Whether today in US Eastern time is within the competition's application window, from the opening date through the closing date plus any grace period, regardless of whether the competition is enabled on Simpler.Grants.gov"
+        }
+    )
+
+    is_legacy_package = fields.Boolean(
+        metadata={
+            "description": "Whether the competition is an application package from Grants.gov"
+        }
     )
 
     is_simpler_grants_enabled = fields.Boolean(

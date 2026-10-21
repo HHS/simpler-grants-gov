@@ -1,0 +1,67 @@
+---
+import { getCollection } from "astro:content";
+import { TOTAL_APPS } from "../../content.config";
+
+const forms = await getCollection("forms");
+const totalForms = forms.length;
+const families = new Set(forms.flatMap((f) => f.data.family));
+const migrated = forms.filter((f) => f.data.status === "migrated");
+const migratedCount = migrated.length;
+
+const inProgressStatuses = ["in_progress", "migrated"];
+const inProgressForms = forms.filter((f) =>
+  inProgressStatuses.includes(f.data.status),
+);
+const inProgressApps = inProgressForms.reduce(
+  (sum, f) => sum + f.data.apps_count,
+  0,
+);
+const inProgressPct = ((inProgressApps / TOTAL_APPS) * 100).toFixed(2);
+
+const prioritizedStatuses = ["prioritized", "in_progress", "migrated"];
+const prioritizedForms = forms.filter((f) =>
+  prioritizedStatuses.includes(f.data.status),
+);
+const prioritizedApps = prioritizedForms.reduce(
+  (sum, f) => sum + f.data.apps_count,
+  0,
+);
+const prioritizedPct = ((prioritizedApps / TOTAL_APPS) * 100).toFixed(2);
+
+const stats = [
+  {
+    label: "Total forms",
+    value: totalForms.toString(),
+    detail: `Across ${families.size} families`,
+    valueClass: "",
+  },
+  {
+    label: "Migrated",
+    value: migratedCount.toString(),
+    detail: `${migratedCount} of ${totalForms} forms`,
+    valueClass: "stat-value--primary",
+  },
+  {
+    label: "Apps covered (in progress)",
+    value: `${inProgressPct}%`,
+    detail: `${inProgressApps.toLocaleString()} of ${TOTAL_APPS.toLocaleString()}`,
+    valueClass: "stat-value--secondary",
+  },
+  {
+    label: "Apps covered (prioritized+)",
+    value: `${prioritizedPct}%`,
+    detail: `${prioritizedApps.toLocaleString()} of ${TOTAL_APPS.toLocaleString()}`,
+    valueClass: "",
+  },
+];
+---
+
+<ul class="stats-grid">
+  {stats.map((stat) => (
+    <li class="stat-card">
+      <div class="stat-label">{stat.label}</div>
+      <div class:list={["stat-value", stat.valueClass]}>{stat.value}</div>
+      <div class="stat-detail">{stat.detail}</div>
+    </li>
+  ))}
+</ul>

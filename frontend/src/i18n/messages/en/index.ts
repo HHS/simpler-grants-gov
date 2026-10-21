@@ -106,12 +106,14 @@ export const messages = {
       save: "Save",
       saved: "Saved",
       loading: "Updating",
+      accessibleContext: "opportunity: {title}",
     },
     saveMessage: {
-      save: "This opportunity was saved to <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
-      unsave: "This opportunity was unsaved.",
-      errorSave: "Error saving. Please try again.",
-      errorUnsave: "Error undoing save. Please try again.",
+      save: "<srOnly>This opportunity was saved. </srOnly>Manage notifications in <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
+      unsave: "This opportunity was removed.",
+      errorSave: "Opportunity could not be saved. Please try again.",
+      errorUnsave: "Opportunity could not be unsaved. Please try again.",
+      dismiss: "Dismiss message",
     },
     saveloginModal: {
       button: "Sign in with Login.gov",
@@ -183,10 +185,27 @@ export const messages = {
           "You can apply as an individual or organization. To apply as part of an organization you must:",
       },
     },
+    header: {
+      agency: "Agency:",
+      assistanceListings: "Assistance Listings",
+      assistanceListingsUnavailable:
+        "Assistance listing number is not available.",
+      lastUpdated: "Last Updated:",
+      applyOnGrantsGov: "Apply on Grants.gov",
+      status: {
+        posted: "Open",
+        forecasted: "Forecasted",
+        closed: "Closed",
+        archived: "Archived",
+      },
+      statusAccessible: {
+        posted: "Open opportunity",
+        forecasted: "Forecasted opportunity",
+        closed: "Closed opportunity",
+        archived: "Archived opportunity",
+      },
+    },
     intro: {
-      agency: "Agency: ",
-      assistanceListings: "Assistance Listings:",
-      lastUpdated: "Last Updated: ",
       versionHistory: "View version history on Grants.gov",
     },
     description: {
@@ -795,42 +814,33 @@ export const messages = {
     ],
   },
   ApiDashboard: {
-    pageTitle: "API dashboard | Simpler.Grants.gov",
+    pageTitle: "API keys | Simpler.Grants.gov",
     metaDescription: "Manage your API keys for Simpler.Grants.gov",
-    heading: "API dashboard",
+    heading: "API keys",
     errorLoadingKeys: "Failed to load API keys",
+    deleteSuccessMessage: 'API key "{keyName}" has been deleted successfully.',
+    renameSuccessMessage: 'API key "{originalName}" renamed to "{keyName}".',
     table: {
       headers: {
-        apiKey: "Name",
-        status: "Status",
-        secret: "Secret",
+        keyName: "Key name",
         created: "Created",
         lastUsed: "Last used",
-        modify: "Modify",
-      },
-      statuses: {
-        active: "Active",
-        inactive: "Inactive",
+        actions: "Actions",
       },
       dateLabels: {
-        created: "Created:",
-        lastUsed: "Last used:",
-        never: "Never",
+        never: "Never used",
       },
-      deleteButton: "Delete Key",
-      deleteButtonTitle: "Delete this API key",
-      emptyState:
-        "You don't have any API keys yet. Create your first API key to get started.",
+      emptyStateHeading: "You don't have any API keys.",
+      emptyStateDescription:
+        "Create an API key to authenticate your requests with the Simpler.Grants.gov API.",
     },
     modal: {
-      apiKeyNameLabel: "Name <required>(required)</required>",
-      createApiKeyNameLabel: "API key name <required>(required)</required>",
-      createNameHint: "e.g. Staging, iOS App, Production",
-      createTitle: "Create a new API key",
-      createDescription:
+      apiKeyNameLabel: "API key name <required>(required)</required>",
+      apiKeyNameHint: "e.g. Staging, iOS App, Production",
+      apiKeyNameDescription:
         "Enter a descriptive name to identify how this key will be used. Your key name must be unique.",
+      createTitle: "Create a new API key",
       createSubmitButtonText: "Create key",
-      editDescription: "Change the name of your Simpler.Grants.gov API key",
       createSuccessHeading: "API key created",
       createSuccessAlertHeading: "Copy and save this key now",
       createSuccessAlertMessage:
@@ -840,41 +850,36 @@ export const messages = {
       copyKey: "Copy key",
       copied: "Copied",
       done: "Done",
-      editSuccessHeading: "API Key Renamed Successfully",
-      editSuccessMessage:
-        'Your API key has been renamed from "{originalName}" to "{keyName}".',
-      close: "Close",
       createErrorHeading: "Unable to create API key",
       createErrorMessage:
         "Something went wrong on our end. Please try again in a few minutes.",
+      editErrorHeading: "Unable to rename API key",
       editErrorMessage:
-        "There was an error renaming your API key. Please try again.",
+        "Something went wrong on our end. Please try again in a few minutes.",
       nameRequiredError: "Enter a name for your API key.",
       duplicateNameError:
         "A key with this name already exists. Enter a different name.",
-      nameChangedError: "Please enter a different name",
-      editTitle: "Rename API Key",
-      createButtonText: "Create API Key",
-      editNameButtonText: "Edit Name",
+      editTitle: 'Edit "{keyName}" API key name',
+      editTriggerText: "Edit name",
+      editTriggerKeyName: 'for "{keyName}" API key',
+      createButtonText: "Create API key",
       creating: "Creating...",
       saving: "Saving...",
-      saveChanges: "Save Changes",
+      saveChanges: "Save changes",
       cancel: "Cancel",
-      deleteTitle: "Delete API Key",
+      deleteTitle: 'Delete "{keyName}" API key?',
+      deleteTriggerText: "Delete",
+      deleteTriggerKeyName: '"{keyName}" API key',
       deleteDescription:
-        'To confirm deletion, type "delete" in the field below:',
+        "Any application or service using this key will immediately lose access to the API. This action cannot be undone.",
       deleteConfirmationLabel:
         'Type "delete" to confirm <required>(required)</required>',
-      deleteConfirmationPlaceholder: "delete",
-      deleteConfirmationError: 'Please type "delete" to confirm deletion',
-      deleteSuccessHeading: "API Key Deleted Successfully",
-      deleteSuccessMessage:
-        'Your API key "{keyName}" has been deleted successfully.',
+      deleteConfirmationError: "Text does not match.",
+      deleteErrorHeading: "Unable to delete API key",
       deleteErrorMessage:
-        "There was an error deleting your API key. Please try again.",
-      deleteButtonText: "Delete Key",
+        "Something went wrong on our end. Please try again in a few minutes.",
+      deleteButtonText: "Delete key",
       deleting: "Deleting...",
-      copyApiKey: "Copy API key",
     },
   },
   Header: {
@@ -988,6 +993,8 @@ export const messages = {
     authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
+    signIn: "Sign in",
+    createAccount: "Create account",
     unauthorizedExplanation: "This content is not available",
   },
   Search: {

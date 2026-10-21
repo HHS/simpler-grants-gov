@@ -3,7 +3,7 @@ import { testApplicationId } from "src/constants/auth";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
-// links directly to a test application, only used in local environments when logged in as specific test user
+// links directly to a test application, only used in local environments when logged in
 export const TestApplicationLink = () => {
   const t = useTranslations("Header.navLinks");
   return (

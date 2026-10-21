@@ -32,6 +32,33 @@ def test_send_email_success(ses_client):
     assert sent_email.body == message_body
 
 
+def test_send_email_with_email_tags(ses_client, sent_email_tags):
+    """Email tags are passed to SES as EmailTags"""
+    send_email(
+        to_address="recipient@example.com",
+        subject="Test Subject",
+        message="This is a test email message",
+        ses_client=ses_client,
+        email_tags={"email_type": "closing_date_reminder"},
+    )
+
+    assert len(sent_email_tags) == 1
+    assert sent_email_tags[0].email_tags == {"email_type": "closing_date_reminder"}
+
+
+def test_send_email_without_email_tags(ses_client, sent_email_tags):
+    """EmailTags is omitted when no tags are given"""
+    send_email(
+        to_address="recipient@example.com",
+        subject="Test Subject",
+        message="This is a test email message",
+        ses_client=ses_client,
+    )
+
+    assert len(sent_email_tags) == 1
+    assert sent_email_tags[0].email_tags == {}
+
+
 def test_send_email_html_special_characters(ses_client):
     """Test sending emails with HTML content and special characters in subject and body"""
     to_email = "recipient@example.com"

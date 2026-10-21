@@ -26,7 +26,7 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;
 
 // Environment-specific opportunity IDs
@@ -45,7 +45,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "SF-LLL - error validation on empty save",
-  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+  { tag: [APPLY_FORMS, FULL_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

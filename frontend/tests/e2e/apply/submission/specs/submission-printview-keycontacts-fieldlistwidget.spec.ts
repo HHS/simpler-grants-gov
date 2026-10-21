@@ -38,8 +38,7 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, FULL_REGRESSION, GRANTEE } =
-  VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
@@ -67,7 +66,7 @@ test.describe("Key Contacts FieldList", () => {
     test(
       testName,
       {
-        tag: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+        tag: [APPLY_FORMS, FULL_REGRESSION],
       },
       async (
         { page, context }: { page: Page; context: BrowserContext },

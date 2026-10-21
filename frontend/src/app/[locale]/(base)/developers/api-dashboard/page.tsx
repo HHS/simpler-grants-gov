@@ -1,3 +1,7 @@
+import {
+  ApiKeyAlert,
+  ApiKeyAlertProvider,
+} from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyAlertProvider";
 import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
 import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
 import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
@@ -38,13 +42,17 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
   }
 
   return (
-    <div className="grid-container margin-y-5">
-      <div className="flex-justify margin-bottom-4">
+    // wraps the whole page so opening any API key modal clears the API key confirmation
+    <ApiKeyAlertProvider>
+      <div className="grid-container margin-y-5">
         <h1>{t("heading")}</h1>
-        <CreateApiKeyButton />
-      </div>
+        <div className="margin-bottom-4">
+          <CreateApiKeyButton />
+        </div>
 
-      <ApiKeyTable apiKeys={apiKeyResponse.data} />
-    </div>
+        <ApiKeyAlert />
+        <ApiKeyTable apiKeys={apiKeyResponse.data} />
+      </div>
+    </ApiKeyAlertProvider>
   );
 }
