@@ -16,6 +16,7 @@ from moto.core import DEFAULT_ACCOUNT_ID
 from moto.ses.models import ses_backends
 from sqlalchemy import select, text
 
+import src.adapters.aws.ses_adapter as ses_adapter
 import src.adapters.db as db
 import src.adapters.oauth.login_gov.login_gov_jwt as login_gov_jwt
 import src.app as app_entry
@@ -651,6 +652,26 @@ def get_sent_emails():
         return ses_backend.sent_messages
 
     return func
+
+
+@pytest.fixture
+def sent_email_tags(ses_client, monkeypatch):
+    """Record the EmailTags of each SES send, since moto does not store them on sent messages"""
+    sent = []
+    real_send_email = ses_client.send_email
+
+    def send_email(**kwargs):
+        sent.append(
+            SimpleNamespace(
+                to_address=kwargs["Destination"]["ToAddresses"][0],
+                email_tags={tag["Name"]: tag["Value"] for tag in kwargs.get("EmailTags", [])},
+            )
+        )
+        return real_send_email(**kwargs)
+
+    monkeypatch.setattr(ses_client, "send_email", send_email)
+    monkeypatch.setattr(ses_adapter, "get_ses_client", lambda session=None: ses_client)
+    return sent
 
 
 ####################

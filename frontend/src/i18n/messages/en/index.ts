@@ -814,34 +814,25 @@ export const messages = {
     ],
   },
   ApiDashboard: {
-    pageTitle: "API dashboard | Simpler.Grants.gov",
+    pageTitle: "API keys | Simpler.Grants.gov",
     metaDescription: "Manage your API keys for Simpler.Grants.gov",
-    heading: "API dashboard",
+    heading: "API keys",
     errorLoadingKeys: "Failed to load API keys",
     deleteSuccessMessage: 'API key "{keyName}" has been deleted successfully.',
     renameSuccessMessage: 'API key "{originalName}" renamed to "{keyName}".',
     table: {
       headers: {
-        apiKey: "Name",
-        status: "Status",
-        secret: "Secret",
+        keyName: "Key name",
         created: "Created",
         lastUsed: "Last used",
-        modify: "Modify",
-      },
-      statuses: {
-        active: "Active",
-        inactive: "Inactive",
+        actions: "Actions",
       },
       dateLabels: {
-        created: "Created:",
-        lastUsed: "Last used:",
-        never: "Never",
+        never: "Never used",
       },
-      deleteButton: "Delete Key",
-      deleteButtonTitle: "Delete this API key",
-      emptyState:
-        "You don't have any API keys yet. Create your first API key to get started.",
+      emptyStateHeading: "You don't have any API keys.",
+      emptyStateDescription:
+        "Create an API key to authenticate your requests with the Simpler.Grants.gov API.",
     },
     modal: {
       apiKeyNameLabel: "API key name <required>(required)</required>",
@@ -869,14 +860,16 @@ export const messages = {
       duplicateNameError:
         "A key with this name already exists. Enter a different name.",
       editTitle: 'Edit "{keyName}" API key name',
-      editTriggerTitle: 'Edit "{keyName}" API key name',
-      createButtonText: "Create API Key",
+      editTriggerText: "Edit name",
+      editTriggerKeyName: 'for "{keyName}" API key',
+      createButtonText: "Create API key",
       creating: "Creating...",
       saving: "Saving...",
       saveChanges: "Save changes",
       cancel: "Cancel",
       deleteTitle: 'Delete "{keyName}" API key?',
-      deleteTriggerTitle: 'Delete "{keyName}" API key',
+      deleteTriggerText: "Delete",
+      deleteTriggerKeyName: '"{keyName}" API key',
       deleteDescription:
         "Any application or service using this key will immediately lose access to the API. This action cannot be undone.",
       deleteConfirmationLabel:
@@ -887,7 +880,6 @@ export const messages = {
         "Something went wrong on our end. Please try again in a few minutes.",
       deleteButtonText: "Delete key",
       deleting: "Deleting...",
-      copyApiKey: "Copy API key",
     },
   },
   Header: {

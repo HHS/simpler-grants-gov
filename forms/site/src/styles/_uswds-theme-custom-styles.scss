@@ -1,0 +1,1594 @@
+@use "uswds-core" as *;
+
+// Layout: sticky footer
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+main#main-content {
+  flex: 1 0 auto;
+}
+
+// Reset list styles for grid/card lists
+.stats-grid,
+.kanban-cards,
+.form-card-grid,
+.filter-chips {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+// Header — match SGG: border-bottom accent, USWDS indicator with color override
+.usa-header.usa-header--basic {
+  border-bottom: 2px solid color("primary-vivid");
+  box-shadow: none;
+
+  .usa-nav-container {
+    align-items: flex-end;
+  }
+
+  .usa-nav {
+    padding-bottom: 0;
+  }
+}
+
+.usa-logo__text {
+  a {
+    white-space: nowrap;
+  }
+}
+
+.logo-separator {
+  color: color("base");
+  font-weight: 300;
+  margin: 0 6px;
+}
+
+.logo-sub {
+  color: color("primary");
+  font-weight: 600;
+}
+
+// Nav link styling — match SGG
+.usa-nav__primary {
+  padding-bottom: units("05");
+}
+
+.usa-nav__primary > .usa-nav__primary-item > .usa-nav__link {
+  @include u-font("sans", "sm");
+  font-weight: 600;
+  color: color("ink");
+
+  &:hover {
+    color: color("primary-dark");
+  }
+}
+
+// Active indicator color — USWDS handles positioning, just override color to match SGG
+.usa-header--basic .usa-nav__primary-item > .usa-current::after {
+  background-color: color("mint-40");
+}
+
+.usa-nav__primary .usa-current {
+  color: color("primary-darker");
+  font-weight: 700;
+}
+
+// Mobile menu toggle
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: units(1);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: color("ink");
+    border-radius: 1px;
+    transition: transform 0.2s;
+  }
+}
+
+@media (max-width: 63.99em) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .usa-nav {
+    display: none !important;
+  }
+}
+
+// Mobile nav sheet
+.mobile-nav-sheet {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  &.is-open {
+    display: flex;
+  }
+}
+
+.mobile-nav-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.mobile-nav-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 80vw;
+  background: color("white");
+  padding: units(3);
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+}
+
+.mobile-nav-close {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: color("base-dark");
+  padding: units(1);
+  line-height: 1;
+}
+
+.mobile-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: units(2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: units("05");
+
+  a {
+    display: block;
+    padding: units(1) units("105");
+    @include u-font("sans", "sm");
+    font-weight: 600;
+    color: color("ink");
+    text-decoration: none;
+    border-radius: radius("sm");
+
+    &:hover {
+      background: color("base-lightest");
+    }
+
+    &.mobile-nav-current {
+      color: color("primary");
+      background: color("primary-lighter");
+    }
+  }
+}
+
+// Page layout
+.page-header {
+  padding-top: units(4);
+  margin-bottom: units(3);
+}
+
+.page-title {
+  @include u-font("sans", "xl");
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 units("05");
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  @include u-font("sans", "xs");
+  color: color("base");
+  margin: 0;
+}
+
+.page-description {
+  @include u-font("sans", "xs");
+  color: color("base");
+  margin: 0;
+  max-width: 42em;
+}
+
+.section-spacing {
+  margin-bottom: units(5);
+}
+
+// Stats cards
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: units(3);
+}
+
+@media (max-width: 880px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: units(1);
+  }
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid color("base-lighter");
+  border-radius: radius("md");
+  padding: units(3);
+  min-height: 140px;
+
+  @media (max-width: 480px) {
+    padding: units(2);
+    min-height: 100px;
+  }
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color("base");
+  margin-bottom: units("05");
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+
+  @media (max-width: 480px) {
+    font-size: 24px;
+  }
+}
+
+.stat-value--primary {
+  color: color("primary");
+}
+
+.stat-value--secondary {
+  color: color("secondary");
+}
+
+.stat-detail {
+  font-size: 13px;
+  color: color("base");
+  margin-top: auto;
+  padding-top: units(1);
+  font-variant-numeric: tabular-nums;
+}
+
+// KanBan board
+.kanban-section-title {
+  @include u-font("sans", "lg");
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 units(2);
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: units(2);
+  align-items: stretch;
+}
+
+@media (max-width: 880px) {
+  .kanban-board {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: units(2);
+    padding-bottom: units(1);
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: color("base-lightest");
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: color("base-light");
+      border-radius: 3px;
+    }
+  }
+}
+
+.kanban-column {
+  background: color("base-lightest");
+  border-radius: radius("md");
+  padding: units("105");
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 560px;
+
+  @media (max-width: 880px) {
+    min-width: 260px;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+}
+
+.kanban-column__header {
+  display: flex;
+  align-items: center;
+  gap: units(1);
+  margin-bottom: units("105");
+  padding: 0 units("05");
+  flex-shrink: 0;
+}
+
+.kanban-column__indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.kanban-column__indicator--backlog {
+  background: color("base");
+}
+
+.kanban-column__indicator--prioritized {
+  background: color("accent-cool");
+}
+
+.kanban-column__indicator--in-progress {
+  background: color("secondary");
+}
+
+.kanban-column__indicator--migrated {
+  background: color("primary");
+}
+
+.kanban-column__title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: color("base");
+  flex: 1;
+}
+
+.kanban-column__count {
+  font-size: 12px;
+  font-weight: 700;
+  color: color("base");
+  background: color("white");
+  border: 1px solid color("base-lighter");
+  border-radius: 10px;
+  padding: 0 units(1);
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: units(1);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.kanban-card {
+  background: color("white");
+  border: 1px solid color("base-lighter");
+  border-radius: radius("sm");
+  padding: units("105") units(2);
+  text-decoration: none !important;
+  color: inherit !important;
+  display: block;
+  flex-shrink: 0;
+}
+
+.kanban-card:hover {
+  border-color: color("base-light");
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.kanban-card__title {
+  @include u-font("sans", "2xs");
+  font-weight: 600;
+  margin-bottom: units("05");
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.kanban-card__meta {
+  display: flex;
+  align-items: center;
+  gap: units(1);
+  flex-wrap: wrap;
+}
+
+.kanban-card__apps {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: color("base");
+}
+
+.kanban-card__family {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+// One badge color per Grants.gov form family (class from `familySlug` in src/lib/families.ts).
+.family--sf-424 {
+  background: color("primary-lighter");
+  color: color("primary-darker");
+}
+
+.family--r-r {
+  background: color("accent-cool-lighter");
+  color: color("accent-cool-dark");
+}
+
+.family--sf-424-short {
+  background: color("secondary-lighter");
+  color: color("secondary-dark");
+}
+
+.family--sf-424-individual {
+  background: color("accent-warm-lighter");
+  color: color("accent-warm-dark");
+}
+
+.family--sf-424-mandatory {
+  background: color("base-lighter");
+  color: color("base-darker");
+}
+
+.kanban-empty {
+  text-align: center;
+  padding: units(3) units("105");
+  color: color("base");
+  @include u-font("sans", "2xs");
+}
+
+.kanban-view-all {
+  display: block;
+  text-align: center;
+  padding: units(1);
+  @include u-font("sans", "3xs");
+  color: color("primary");
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-top: auto;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Status tags
+.status-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 2px units(1);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.status-badge--in-progress {
+  background: color("secondary-lighter");
+  color: color("secondary-dark");
+}
+
+.status-badge--prioritized {
+  background: color("accent-cool-lighter");
+  color: color("accent-cool-dark");
+}
+
+.status-badge--backlog {
+  background: color("base-lighter");
+  color: color("base-darker");
+}
+
+.status-badge--migrated {
+  background: color("primary-lighter");
+  color: color("primary-darker");
+}
+
+// Forms index — full-bleed cream hero (matches SGG bg-base-lightest)
+.search-hero {
+  background: color("base-lightest");
+  padding-top: units(4);
+  padding-bottom: units(3);
+
+  .page-header {
+    padding-top: 0;
+    margin-bottom: units(2);
+  }
+
+  .filter-chips {
+    margin-top: units("105");
+    margin-bottom: 0;
+  }
+}
+
+.search-results {
+  padding-top: units(3);
+}
+
+.search-controls {
+  display: flex;
+  gap: units(2);
+  align-items: stretch;
+
+  @media (max-width: 639px) {
+    flex-direction: column;
+    gap: units(1);
+  }
+}
+
+.search-bar {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-bar .usa-input {
+  flex: 1;
+  min-width: 0;
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  height: units(6);
+  margin-top: 0;
+  @include u-font("sans", "xs");
+}
+
+.search-bar .usa-button {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  white-space: nowrap;
+  height: units(6);
+  flex-shrink: 0;
+  padding-left: units(3);
+  padding-right: units(3);
+
+  @media (max-width: 639px) {
+    padding-left: units(2);
+    padding-right: units(2);
+    min-width: 0;
+    width: auto;
+    @include u-font("sans", "2xs");
+  }
+}
+
+// Filters button — outlined, next to search bar (matches SGG)
+.filter-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: units("05");
+  padding: 0 units(2);
+  background: color("white");
+  border: 2px solid color("primary");
+  border-radius: radius("sm");
+  cursor: pointer;
+  @include u-font("sans", "xs");
+  font-weight: 600;
+  color: color("primary-darker");
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &::before {
+    content: "\2630";
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: color("primary-lighter");
+  }
+}
+
+@media (max-width: 639px) {
+  .filter-toggle-btn {
+    justify-content: center;
+    padding: units(1) units(2);
+  }
+}
+
+@media (min-width: 640px) {
+  .filter-toggle-btn {
+    display: none;
+  }
+}
+
+// Filter panel
+.filter-panel {
+  border-right: 1px solid color("base-lighter");
+  padding-right: units(3);
+}
+
+@media (max-width: 639px) {
+  .filter-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    border-right: none;
+    padding-right: 0;
+    background: rgba(0, 0, 0, 0.5);
+
+    &.is-open {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+
+  .filter-panel__inner {
+    background: color("white");
+    width: 320px;
+    max-width: 85vw;
+    height: 100%;
+    padding: units(3);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: units("105");
+  margin-bottom: units(2);
+  border-bottom: 1px solid color("base-lighter");
+}
+
+.filter-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  color: color("base-dark");
+  padding: units("05");
+
+  @media (max-width: 639px) {
+    display: block;
+  }
+}
+
+.filter-title {
+  @include u-font("sans", "sm");
+  font-weight: 700;
+}
+
+.filter-clear {
+  @include u-font("sans", "2xs");
+  color: color("primary");
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+
+  &:hover {
+    color: color("primary-dark");
+  }
+}
+
+.filter-section {
+  padding-bottom: units(2);
+  margin-bottom: units(2);
+  border-bottom: 1px solid color("base-lighter");
+}
+
+.filter-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.filter-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: units("05") 0;
+  margin-bottom: units(1);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.filter-section__title {
+  @include u-font("sans", "xs");
+  font-weight: 700;
+}
+
+.filter-section__toggle {
+  @include u-font("sans", "xs");
+  color: color("base-dark");
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.filter-count {
+  @include u-font("sans", "3xs");
+  color: color("base-dark");
+  font-variant-numeric: tabular-nums;
+  margin-left: units(1);
+}
+
+.filter-view-results {
+  display: none;
+  margin-top: auto;
+  padding-top: units(2);
+
+  @media (max-width: 639px) {
+    display: block;
+  }
+
+  button {
+    width: 100%;
+    padding: units("105");
+    background: color("primary");
+    color: color("white");
+    border: none;
+    border-radius: radius("sm");
+    cursor: pointer;
+    @include u-font("sans", "xs");
+    font-weight: 600;
+
+    &:hover {
+      background: color("primary-dark");
+    }
+  }
+}
+
+// Active filter chips
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: units("05");
+  margin-bottom: units(2);
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px units(1);
+  border: 1px solid color("primary");
+  border-radius: 20px;
+  background: color("primary-lighter");
+  @include u-font("sans", "3xs");
+  color: color("primary-darker");
+  white-space: nowrap;
+}
+
+.filter-chip__remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: color("primary-dark");
+  display: flex;
+
+  &:hover {
+    color: color("primary-darker");
+  }
+}
+
+.controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: units(2);
+  padding-bottom: units("105");
+  flex-wrap: wrap;
+  gap: units(1);
+}
+
+h2.results-count {
+  @include u-font("sans", "md");
+  font-weight: 700;
+  color: color("ink");
+  margin: 0;
+}
+
+.sort-group-controls {
+  display: flex;
+  align-items: center;
+  gap: units(2);
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: units("05");
+}
+
+.control-label {
+  @include u-font("sans", "3xs");
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: color("base-dark");
+  white-space: nowrap;
+}
+
+.control-group .usa-select {
+  margin-top: 0;
+  width: auto;
+  min-width: 0;
+  max-width: 180px;
+  height: units(4);
+  @include u-font("sans", "2xs");
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+@media (max-width: 639px) {
+  .controls-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sort-group-controls {
+    width: 100%;
+  }
+
+  .control-group {
+    flex: 1;
+  }
+
+  .control-group .usa-select {
+    flex: 1;
+    max-width: none;
+  }
+}
+
+// Form cards (index page)
+.form-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: units(2);
+
+  // Grid rows already stretch each item; let the card fill it so a row's cards match. The
+  // USWDS list-item margin would make an item that much shorter than its neighbors.
+  > li {
+    display: flex;
+    margin: 0;
+
+    > .form-card {
+      flex: 1;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .form-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-card {
+  display: flex;
+  flex-direction: column;
+  background: color("white");
+  border: 1px solid color("base-lighter");
+  border-radius: radius("md");
+  padding: units("205") units(3);
+  text-decoration: none !important;
+  color: inherit !important;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.form-card:hover {
+  border-color: color("base-light");
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: units(1);
+}
+
+.form-card__title {
+  @include u-font("sans", "sm");
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.form-card__arrow {
+  color: color("base-light");
+  flex-shrink: 0;
+  margin-left: units(1);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.form-card__stats {
+  display: flex;
+  align-items: baseline;
+  gap: units(2);
+  margin-bottom: units("105");
+  @include u-font("sans", "2xs");
+  color: color("base-dark");
+  font-variant-numeric: tabular-nums;
+}
+
+.form-card__stat strong {
+  font-weight: 700;
+  color: color("ink");
+}
+
+.form-card__stat-label {
+  color: color("base-dark");
+}
+
+// Keep the footer on the bottom edge when a card is stretched to its row's height.
+.form-card__footer {
+  display: flex;
+  flex-direction: column;
+  gap: units(1);
+  margin-top: auto;
+}
+
+.form-card__tags {
+  display: flex;
+  align-items: center;
+  gap: units(1);
+  flex-wrap: wrap;
+}
+
+// Families sit on their own labeled row, below a divider, so they read separately from status.
+.form-card__families {
+  padding-top: units(1);
+  border-top: 1px solid color("base-lightest");
+}
+
+.form-card__tags-label {
+  @include u-font("sans", "3xs");
+  color: color("base");
+}
+
+.form-card__tags-none {
+  @include u-font("sans", "3xs");
+  color: color("base");
+  font-style: italic;
+}
+
+// Group headers
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: units(1);
+  cursor: pointer;
+  padding: units("105") 0;
+  list-style: none;
+  font-weight: 700;
+  @include u-font("sans", "sm");
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 6px solid color("base-dark");
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+}
+
+details[open] > .group-header::before {
+  transform: rotate(90deg);
+}
+
+.group-count {
+  @include u-font("sans", "2xs");
+  color: color("base-dark");
+  font-weight: 400;
+}
+
+// Breadcrumb
+.breadcrumb-simple {
+  @include u-font("sans", "2xs");
+  padding: units(2) 0;
+  display: flex;
+  align-items: center;
+  gap: units(1);
+}
+
+.breadcrumb-simple a {
+  color: color("primary");
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.breadcrumb-simple span {
+  color: color("base");
+}
+
+.breadcrumb-simple .breadcrumb-sep {
+  color: color("base-light");
+  font-size: 12px;
+}
+
+// Form detail header
+.form-detail-header {
+  display: flex;
+  align-items: center;
+  gap: units("105");
+  flex-wrap: wrap;
+  margin-bottom: units("05");
+}
+
+// Metadata cards (two-column dl)
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: units(2);
+  margin-bottom: units(4);
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metadata-card {
+  border: 1px solid color("base-lighter");
+  border-radius: radius("md");
+  padding: units(2) units(3);
+}
+
+.metadata-card dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: units("05") units(2);
+  margin: 0;
+  @include u-font("sans", "2xs");
+  align-items: baseline;
+}
+
+.metadata-card dt {
+  font-weight: 600;
+  color: color("base-dark");
+  white-space: nowrap;
+}
+
+.metadata-card dd {
+  margin: 0;
+}
+
+.metadata-card code {
+  font-family: family("mono");
+  @include u-font("mono", "3xs");
+  background-color: color("base-lightest");
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.metadata-links {
+  display: flex;
+  gap: units("105");
+  flex-wrap: wrap;
+}
+
+.metadata-links a {
+  color: color("primary");
+  @include u-font("sans", "3xs");
+
+  &:visited {
+    color: color("primary");
+  }
+
+  &:hover {
+    color: color("primary-dark");
+  }
+}
+
+// Tab bar
+.tab-bar {
+  display: flex;
+  border-bottom: 2px solid color("base-lighter");
+  margin-bottom: units(3);
+  gap: 0;
+}
+
+.tab-bar__tab {
+  padding: units(1) units("205");
+  @include u-font("sans", "2xs");
+  font-weight: 600;
+  color: color("base");
+  text-decoration: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  background: none;
+  font-family: family("sans");
+  white-space: nowrap;
+
+  &:hover {
+    color: color("ink");
+  }
+
+  &--active {
+    color: color("primary");
+    border-bottom-color: color("primary");
+  }
+
+  &--disabled {
+    color: color("base");
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+// Form preview
+.form-preview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: units(1);
+  margin-bottom: units(2);
+
+  .usa-button {
+    margin-right: 0;
+  }
+}
+
+// Apply-form widget styles, copied from frontend/src/styles/_uswds-theme-custom-styles.scss
+// while the preview renders frontend widgets without the frontend's stylesheet (#12695).
+.simpler-apply-form {
+  .usa-checkbox__label {
+    margin-top: 0;
+  }
+}
+
+.field-list-widget {
+  &__entry-controls {
+    border-top: 1px solid color("base-lighter");
+    border-bottom: 1px solid color("base-lighter");
+    padding-bottom: units(2);
+  }
+
+  &__controls {
+    border-top: 1px solid color("base-lighter");
+  }
+
+  &__entry:has(+ .field-list-widget__controls) {
+    .field-list-widget__entry-controls {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
+}
+
+.form-preview__json {
+  max-height: 80vh;
+  overflow: auto;
+  margin: 0;
+  padding: units(2);
+  background: color("base-lightest");
+  border-radius: radius("md");
+  @include u-font("mono", "3xs");
+}
+
+// Plan notes, shown under the field tree
+.plan-notes {
+  @include u-font("sans", "xs");
+
+  li + li {
+    margin-top: units(1);
+  }
+}
+
+// Field tree
+.field-tree {
+  margin-bottom: units(5);
+}
+
+.section-title {
+  @include u-font("sans", "lg");
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 units(2);
+}
+
+// Section-level collapsible
+.field-section {
+  border: 1px solid color("base-lighter");
+  border-radius: radius("md");
+  margin-bottom: units("105");
+  overflow: hidden;
+
+  > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: units(1);
+    padding: units("105") units(2);
+    background: color("base-lightest");
+    cursor: pointer;
+    list-style: none;
+    font-weight: 700;
+    @include u-font("sans", "xs");
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      content: "";
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 6px solid color("base");
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    &:hover {
+      background: color("base-lighter");
+    }
+  }
+
+  &[open] > summary::before {
+    transform: rotate(90deg);
+  }
+}
+
+// A section inside another: a row on a guide line rather than a card of its own.
+.field-section--nested {
+  border: none;
+  // Separates the section from the field after it, as each field row's own border does.
+  border-bottom: 1px solid color("base-lighter");
+  border-radius: 0;
+  margin: 0;
+  // Padding rather than margin, so that border spans the row like a field's.
+  padding-left: units(2);
+  overflow: visible;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  > summary {
+    padding: units("105") units(2) units("05") units("05");
+    background: none;
+    @include u-font("sans", "2xs");
+  }
+
+  > .field-section__body {
+    padding: 0;
+  }
+
+  @media (max-width: 640px) {
+    padding-left: units(1);
+  }
+}
+
+// What a collapsed section holds, on its own line under the summary; its rows replace it once open.
+.section-contents {
+  flex-basis: 100%;
+  padding-left: units(2);
+  @include u-font("sans", "3xs");
+  font-weight: 400;
+  color: color("base");
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  details[open] > summary > & {
+    display: none;
+  }
+}
+
+.section-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px units(1);
+  border: 1px solid color("base-light");
+  border-radius: 999px;
+  background: color("white");
+  @include u-font("sans", "3xs");
+  font-weight: 600;
+  color: color("base-darker");
+}
+
+// A section's help, widget and Details, indented to its label as a field row's are.
+// Set off from the section's children by a line, as each field row is from the next.
+.section-meta {
+  padding: 0 units(2) units(1) units(4);
+  border-bottom: 1px solid color("base-lighter");
+
+  &:empty {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    padding-left: units(2);
+  }
+}
+
+// The summed differences sit at the row's end, where a field row's badges do.
+.section-badges {
+  margin-left: auto;
+}
+
+.section-count {
+  @include u-font("sans", "3xs");
+  font-weight: 600;
+  color: color("base");
+}
+
+.field-section__body {
+  padding: units("05") 0;
+}
+
+// Field rows
+.field-row {
+  padding: units(1) units(2) units(1) units(4);
+  border-bottom: 1px solid color("base-lighter");
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.field-row__primary {
+  display: flex;
+  align-items: baseline;
+  gap: units(1);
+  flex-wrap: wrap;
+}
+
+.field-row__label {
+  @include u-font("sans", "2xs");
+  font-weight: 600;
+}
+
+.field-row__required {
+  @include u-font("sans", "3xs");
+  font-weight: 700;
+  color: color("error");
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.field-row__optional {
+  @include u-font("sans", "3xs");
+  color: color("base");
+}
+
+.field-row__help {
+  @include u-font("sans", "3xs");
+  color: color("base-dark");
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.field-row__tertiary {
+  @include u-font("sans", "3xs");
+  color: color("base");
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.field-row__type {
+  font-family: family("mono");
+  @include u-font("mono", "3xs");
+}
+
+.field-row__sep {
+  color: color("base-light");
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+// Expandable detail
+.field-row__detail {
+  margin-top: units("05");
+
+  > summary {
+    @include u-font("sans", "3xs");
+    color: color("primary");
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      content: "+";
+      font-weight: 700;
+      @include u-font("sans", "3xs");
+    }
+  }
+
+  &[open] > summary::before {
+    content: "\2212";
+  }
+}
+
+.field-detail-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px units(2);
+  @include u-font("sans", "3xs");
+  margin-top: units("05");
+  padding: units(1);
+  background: color("base-lightest");
+  border-radius: radius("sm");
+
+  dt {
+    font-weight: 600;
+    color: color("base-dark");
+    white-space: nowrap;
+  }
+
+  dd {
+    margin: 0;
+    font-family: family("mono");
+    @include u-font("mono", "3xs");
+    word-break: break-all;
+  }
+}
+
+// Nested group inside a section
+.field-group {
+  border-top: 1px solid color("base-lighter");
+
+  > summary {
+    display: flex;
+    align-items: center;
+    gap: units(1);
+    padding: units(1) units(2) units(1) units(3);
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+    @include u-font("sans", "2xs");
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      content: "";
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 5px solid color("base");
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+  }
+
+  &[open] > summary::before {
+    transform: rotate(90deg);
+  }
+
+  .section-type {
+    font-family: family("mono");
+    @include u-font("mono", "3xs");
+    color: color("base");
+  }
+
+  .section-count {
+    @include u-font("sans", "3xs");
+  }
+
+  .field-row {
+    padding-left: units(5);
+  }
+}
+
+// Phase 2 placeholder
+.phase2-placeholder {
+  padding: units(5) units(3);
+  text-align: center;
+  color: color("base");
+  background: color("base-lightest");
+  border-radius: radius("md");
+  border: 1px dashed color("base-light");
+
+  strong {
+    display: block;
+    margin-bottom: units("05");
+    color: color("ink");
+  }
+}
+
+// Responsive overrides
+@media (max-width: 768px) {
+  .page-title {
+    @include u-font("sans", "lg");
+  }
+
+  .field-row {
+    padding-left: units(3);
+  }
+
+  .field-group .field-row {
+    padding-left: units(4);
+  }
+
+  .tab-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
