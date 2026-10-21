@@ -27,6 +27,20 @@ Every command and file in this guide was run as written. The outputs shown are r
 
 See [`parity/README.md`](../parity/README.md) for every check the suite runs.
 
+### Tests and the field tree
+
+The parity tests and the form library's field tree report the same differences, but they count them differently:
+
+| | The tests | The field tree |
+|---|---|---|
+| **What they count** | Checks. Each check compares one thing, such as the plan's labels against the DAT, and fails once, listing every field that differs. | Differences. One for each field, attribute (Label, Help, Format, ...) and source (DAT, XSD or Form) that differs. |
+| **Where to look** | The failing test's name says which comparison failed. The lines under it list the fields. | The tiles count differences and the fields they're in. **Differs in** counts them by attribute. The column (DAT, XSD or Form) says which comparison found each one. |
+
+So the numbers rarely match. In step 5.4, four checks fail, and the field tree shows 20 unrecorded differences in 16 fields: the help text check alone finds 16. Two more things to know:
+
+- **`comparison.test.ts > shows no unrecorded differences` is the field tree's own check.** It fails whenever the field tree would show a **!**, so it fails alongside any other check that finds a difference nothing records.
+- **Some failures don't show in the field tree.** A stale record (step 4.3) fails the suite, but the difference it describes is gone, and the field tree only shows differences.
+
 ## Before you start
 
 You'll need Node 22 or 24, and a network connection the first time you run the parity suite, since it downloads the DAT and XSD from Grants.gov. Step 6 also needs the API and frontend running locally (see [API development](../../documentation/api/development.md)).
@@ -428,6 +442,8 @@ AssertionError: Labels that differ from the DAT:
   label differs: 7-17 -- plan "Zip / Postal Code", source "* Zip / Postal Code"
 ```
 
+In the form library, the **Unrecorded differences** tile shows **2 in 2 fields**: the State and Zip / Postal Code labels, in the DAT column.
+
 This is an **upstream discrepancy**: Grants.gov disagrees with itself. The DAT puts an asterisk on State and Zip / Postal Code, which means required, but its Required column says "No" and the XSD makes both optional. They're only required for a US address. The plan's `"required": "Conditional (when Country = 'USA')"` counts as optional, so the plan can't match the asterisk. You can't fix this in the plan, so record it.
 
 ### 1.4 Record the upstream discrepancy
@@ -487,6 +503,7 @@ Every requirements check passes. The implementation and XML checks are skipped, 
 
 Open `/forms/key-contacts-tutorial/`. The field comparison lists every field beside the DAT, the XSD and the form:
 
+- **Tiles:** the **Unrecorded differences** tile is gone. **Upstream discrepancies** shows 2 in 2 fields, and **Matches every source** shows the other 18 fields.
 - **DAT and XSD:** every cell matches (✓), except the two State and Zip labels, marked **U** (Upstream) with your reason.
 - **Form:** every cell is **–** (Not compared), because there's no form to compare yet.
 - **Form preview tab:** disabled.
@@ -1021,7 +1038,7 @@ Three checks fail:
       Tests  3 failed | 30 passed
 ```
 
-The form no longer does what the plan says, and the comparison sheet flags it too. In the form library, reload the page: First Name's **Form** cells for Label and Help are now **!** (Unrecorded difference).
+The form no longer does what the plan says, and the comparison sheet flags it too. In the form library, reload the page: the **Unrecorded differences** tile shows **2 in 1 field**, First Name's Label and Help in the Form column. Here the counts line up: two parity checks each found one difference, in the same field.
 
 ### 4.2 Record the difference
 
@@ -1074,7 +1091,7 @@ export const DIFF: FormDiff = {
 
 </details>
 
-The record goes in `uiSchema`, the comparison that failed, keyed by `json_path`. Every check passes again. In the form library, the two cells are now **I** (Intentional) and show your reason.
+The record goes in `uiSchema`, the comparison that failed, keyed by `json_path`. Every check passes again. In the form library, the **Intentional differences** tile shows **2 in 1 field**, and First Name's two cells are marked **I** with your reason.
 
 ### 4.3 Change it back
 
@@ -1088,6 +1105,8 @@ AssertionError: Entries in parity/diffs/ that no longer match a difference:
 ```
 
 The record is now **stale**. It describes a difference that doesn't exist anymore, so the suite fails until you delete it. This keeps `parity/diffs/` an accurate list of how the form really differs.
+
+In the form library, nothing looks wrong: the field tree is back to step 3, with **Upstream discrepancies** 2 in 2 fields and **Matches every source** 18 fields. Only the tests can catch a stale record, because the field tree only shows differences that exist.
 
 ### 4.4 Back to baseline
 
@@ -1322,6 +1341,8 @@ npx vitest run parity -t key-contacts-tutorial
 ```
 
 The XML checks still pass. Only the wording changed, and the question bank adds an email format.
+
+In the form library, the **Unrecorded differences** tile shows **20 in 16 fields**, all in the Form column. Four checks fail, but there are 20 differences: 3 labels, 16 help texts and the email format. **Differs in** shows Label 5 (those 3, plus step 1's 2 upstream labels), Help 16 and Format 1.
 
 ### 5.5 Choose: match the DAT, or match the other forms
 
@@ -1679,6 +1700,8 @@ The implementation checks pass. The difference has moved to where it belongs, th
   ... (16 in all)
 ```
 
+In the form library, the **Unrecorded differences** tile shows **19 in 16 fields**, now in the DAT column instead of the Form column. The email format difference is gone: the plan now says `format email`, and formats aren't compared with the DAT.
+
 ### 5.7 Record the differences as intentional
 
 You could pin each field's label and help one by one, as `parity/diffs/key-contacts.ts` does. When every difference has the same cause, `wording` accepts them all at once, with one reason. Add it to `parity/diffs/key-contacts-tutorial.ts`:
@@ -1724,7 +1747,7 @@ npm run test:parity
       Tests  332 passed | 12 todo (344)
 ```
 
-In the form library, the 19 differing labels and help texts show as **I** (Intentional) in the DAT column, each with the question bank reason. The upstream labels from step 1 are still **U**.
+In the form library, the **Intentional differences** tile shows **19 in 16 fields**: the labels and help texts in the DAT column, each with the question bank reason. **Upstream discrepancies** still shows step 1's 2 labels, and **Matches every source** shows the 4 fields that match everywhere.
 
 ---
 
