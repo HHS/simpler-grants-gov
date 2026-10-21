@@ -82,8 +82,8 @@ model TutorialContactName {
   @maxLength(10)
   prefix?: string;
 
-  /** Enter the First Name. This field is required. */
-  @UI.label("First Name")
+  /** Enter the contact's given name. */
+  @UI.label("Given Name")
   @minLength(1)
   @maxLength(35)
   firstName: string;
