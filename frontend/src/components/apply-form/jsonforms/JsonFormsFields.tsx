@@ -1,24 +1,28 @@
 "use client";
 
-import { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
+import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
 import { JsonForms } from "@jsonforms/react";
 import {
   JsonFormsStyleContext,
   vanillaCells,
   vanillaStyles,
 } from "@jsonforms/vanilla-renderers";
-import { RJSFSchema } from "@rjsf/utils";
-import { FormattedFormValidationWarning } from "src/types/applyForm/types";
+import type { RJSFSchema } from "@rjsf/utils";
+import type { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import {
   getRequiredProperties,
   shapeFormData,
 } from "src/utils/applyForm/applyFormUtils";
-import { JsonFormsUiSchema } from "src/utils/applyForm/jsonFormsUiSchema";
+import type { JsonFormsUiSchema } from "src/utils/applyForm/jsonFormsUiSchema";
 
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type FormEvent } from "react";
 
-import { RootBudgetFormContext } from "src/components/apply-form/FormFields";
-import { AdapterContext, AdapterContextValue, renderers } from "./renderers";
+import type { RootBudgetFormContext } from "src/components/apply-form/FormFields";
+import {
+  AdapterContext,
+  renderers,
+  type AdapterContextValue,
+} from "./renderers";
 
 // USWDS classes for the few elements the vanilla fallback renderers draw.
 const uswdsStyles = [
@@ -39,10 +43,6 @@ const NO_EXTRA_RENDERERS: JsonFormsRendererRegistryEntry[] = [];
  * JSON Forms keeps its own copy of the data only to evaluate rules. It is refreshed from
  * the form on every input, so a field enabled by another field's answer changes as soon
  * as that answer does.
- *
- * `extraRenderers` are ranked against the SGG ones, so a renderer ranked higher draws the
- * elements it matches instead. The form library uses this to preview components before they
- * are added here.
  */
 export const JsonFormsFields = ({
   errors,
@@ -61,9 +61,14 @@ export const JsonFormsFields = ({
   formContext?: RootBudgetFormContext;
   isFormLocked?: boolean;
   print?: boolean;
+  /** Renderers to rank against the SGG ones, for widgets only the form library has. */
   extraRenderers?: JsonFormsRendererRegistryEntry[];
 }) => {
   const [ruleData, setRuleData] = useState<object>(formData);
+  const allRenderers = useMemo(
+    () => [...renderers, ...extraRenderers],
+    [extraRenderers],
+  );
 
   const adapterContext = useMemo<AdapterContextValue>(
     () => ({
@@ -77,11 +82,6 @@ export const JsonFormsFields = ({
       print,
     }),
     [schema, formData, errors, uiSchema, formContext, isFormLocked, print],
-  );
-
-  const allRenderers = useMemo(
-    () => [...renderers, ...extraRenderers],
-    [extraRenderers],
   );
 
   const refreshRuleData = useCallback(

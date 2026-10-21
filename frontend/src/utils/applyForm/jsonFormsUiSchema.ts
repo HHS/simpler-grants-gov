@@ -4,8 +4,8 @@ import type {
   Layout,
   UISchemaElement,
 } from "@jsonforms/core";
-import { RJSFSchema } from "@rjsf/utils";
-import {
+import type { RJSFSchema } from "@rjsf/utils";
+import type {
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
