@@ -1,7 +1,11 @@
+import json
+import logging
 import uuid
 from datetime import timedelta
+from unittest import mock
 
 import apiflask.exceptions
+import boto3
 import pytest
 
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, Privilege
@@ -32,8 +36,18 @@ SIMPLE_JSON_SCHEMA = {
 }
 
 
+@pytest.fixture
+def submission_sqs_queue(monkeypatch, mock_sqs):
+    sqs = boto3.client("sqs", region_name="us-east-1")
+    queue = sqs.create_queue(QueueName="test-submission-queue")
+    monkeypatch.setenv("WORKFLOW_QUEUE_URL", queue["QueueUrl"])
+    return queue["QueueUrl"]
+
+
 # Tests for the main submit_application function
-def test_submit_application_success(enable_factory_create, db_session, create_test_form):
+def test_submit_application_success(
+    enable_factory_create, db_session, create_test_form, submission_sqs_queue
+):
     """Test successful submission of an application in IN_PROGRESS state."""
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
@@ -237,7 +251,7 @@ def test_submit_application_organization_required_but_missing(
 
 
 def test_submit_application_signature_post_processing(
-    enable_factory_create, db_session, create_test_form
+    enable_factory_create, db_session, create_test_form, submission_sqs_queue
 ):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
@@ -309,3 +323,99 @@ def test_submit_application_signature_post_processing(
     assert submitted_application2.application_forms[0].application_response == {
         "signature": UNKNOWN_VALUE
     }
+
+
+def test_submit_application_puts_application_message_on_queue(
+    enable_factory_create, db_session, create_test_form, submission_sqs_queue, monkeypatch, caplog
+):
+    caplog.set_level(logging.INFO)
+    today = get_now_us_eastern_date()
+    competition = CompetitionFactory.create(
+        closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
+    )
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
+    )
+    user = UserFactory.create()
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+    sqs = boto3.client("sqs", region_name="us-east-1")
+
+    with db_session.begin():
+        updated_application = submit_application(db_session, application.application_id, user)
+
+    messages = sqs.receive_message(
+        QueueUrl=submission_sqs_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
+    )
+    assert len(messages["Messages"]) == 1
+    body = json.loads(messages["Messages"][0]["Body"])
+    assert body["application_id"] == str(updated_application.application_id)
+    assert body["submitted_by_user_id"] == str(user.user_id)
+    log = next(
+        r
+        for r in caplog.records
+        if r.message == "Successfully sent application submission message to queue"
+    )
+    assert log.application_id == updated_application.application_id
+    assert log.submitted_by_user_id == user.user_id
+
+
+def test_exceptions_raised_by_sending_message_to_queue_are_logged_but_not_raised(
+    enable_factory_create, db_session, create_test_form, submission_sqs_queue, monkeypatch, caplog
+):
+    caplog.set_level(logging.INFO)
+    today = get_now_us_eastern_date()
+    competition = CompetitionFactory.create(
+        closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
+    )
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
+    )
+    user = UserFactory.create()
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+    sqs = boto3.client("sqs", region_name="us-east-1")
+
+    with db_session.begin():
+        with mock.patch(
+            "src.services.applications.submit_application.send_application_submission_message"
+        ) as mock_send_message:
+            mock_send_message.side_effect = Exception("test")
+            updated_application = submit_application(db_session, application.application_id, user)
+
+    messages = sqs.receive_message(
+        QueueUrl=submission_sqs_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
+    )
+    assert messages.get("Messages", None) is None
+    assert updated_application.application_status == ApplicationStatus.SUBMITTED
+    log = next(
+        r
+        for r in caplog.records
+        if r.message
+        == "Failed to queue application submission message - the scheduled submission task will process this application"
+    )
+    assert log.application_id == updated_application.application_id
+    with pytest.raises(StopIteration):
+        next(
+            r
+            for r in caplog.records
+            if r.message == "Successfully sent application submission message to queue"
+        )
