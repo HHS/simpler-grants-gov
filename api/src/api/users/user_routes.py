@@ -642,14 +642,25 @@ def user_create_api_key(
         raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
-        api_key = create_api_key(db_session, user_id, json_data)
+        api_key, key_id = create_api_key(db_session, user_id, json_data)
 
     logger.info(
         "Created API key for user",
         extra=api_key.get_log_extra(),
     )
 
-    return response.ApiResponse(message="Success", data=api_key)
+    # The raw key comes from the handler, not the model, as this
+    # is the only time it can be returned to the user
+    data = {
+        "api_key_id": api_key.api_key_id,
+        "key_name": api_key.key_name,
+        "key_id": key_id,
+        "is_active": api_key.is_active,
+        "last_used": api_key.last_used,
+        "created_at": api_key.created_at,
+    }
+
+    return response.ApiResponse(message="Success", data=data)
 
 
 @user_blueprint.delete("/<uuid:user_id>/api-keys/<uuid:api_key_id>")

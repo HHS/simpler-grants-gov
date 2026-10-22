@@ -1,0 +1,45 @@
+{
+  "name": "@sgg/form-specs",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "emitters/xml",
+    "emitters/sgg"
+  ],
+  "imports": {
+    "#catalogue/*": "./specs/catalogue/*",
+    "#forms/*": "./specs/forms/*",
+    "#questions/*": "./specs/questions/*",
+    "#xsd/*": "./specs/xsd/*",
+    "#mapping/*": "./specs/mapping/*",
+    "#ui/*": "./specs/ui/*"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\"",
+    "precompile": "npm run build",
+    "compile": "tsp compile specs/main.tsp",
+    "sync": "node scripts/sync.mjs",
+    "sync:check": "node scripts/sync.mjs --check",
+    "parity:fetch": "node parity/sources/fetch.ts",
+    "pretest:parity": "npm run parity:fetch",
+    "test:parity": "vitest run",
+    "check:parity": "tsc --noEmit",
+    "test:emitters": "npm test -w emitters/xml"
+  },
+  "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^16.0.3",
+    "@types/node": "^22.20.5",
+    "@typespec/compiler": "^1.16.0",
+    "@typespec/json-schema": "^1.16.0",
+    "@typespec/xml": "^0.86.0",
+    "fast-xml-parser": "^5.11.2",
+    "simpler-forms": "^0.1.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}

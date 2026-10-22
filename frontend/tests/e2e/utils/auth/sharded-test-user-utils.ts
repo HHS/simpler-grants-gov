@@ -73,7 +73,6 @@ const PRIMARY_ORG_ADMIN_POOL_IDS: Partial<Record<SupportedEnvs, string[]>> = {
   // a manual provisioning step, not something this code change can do.
   staging: [getTestUserId("primaryOrgAdmin")],
   grantee1: [getTestUserId("primaryOrgAdmin")],
-  grantee2: [getTestUserId("primaryOrgAdmin")],
   grantor1: [getTestUserId("primaryOrgAdmin")],
   grantor2: [getTestUserId("primaryOrgAdmin")],
 };

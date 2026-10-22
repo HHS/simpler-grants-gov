@@ -1,0 +1,90 @@
+---
+const navItems = [
+  { label: "Dashboard", href: "/" },
+  { label: "Forms", href: "/forms/" },
+];
+const currentPath = Astro.url.pathname;
+
+function isActive(itemHref: string): boolean {
+  if (itemHref === "/") return currentPath === "/";
+  return currentPath.startsWith(itemHref);
+}
+---
+
+<header class="usa-header usa-header--basic">
+  <div class="usa-nav-container">
+    <div class="usa-navbar">
+      <div class="usa-logo">
+        <em class="usa-logo__text">
+          <a href="/" title="SimplerGrants | Form Library">
+            SimplerGrants
+            <span class="logo-separator">|</span>
+            <span class="logo-sub">Form Library</span>
+          </a>
+        </em>
+      </div>
+      <button class="mobile-menu-btn" type="button" aria-label="Open menu" id="mobile-menu-open">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <nav class="usa-nav">
+      <ul class="usa-nav__primary usa-accordion">
+        {navItems.map((item) => (
+          <li class="usa-nav__primary-item">
+            <a
+              class:list={[
+                "usa-nav__link",
+                { "usa-current": isActive(item.href) },
+              ]}
+              href={item.href}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="mobile-nav-sheet" id="mobile-nav-sheet">
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+  <div class="mobile-nav-panel">
+    <button class="mobile-nav-close" type="button" id="mobile-nav-close" aria-label="Close menu">&times;</button>
+    <ul class="mobile-nav-list">
+      {navItems.map((item) => (
+        <li>
+          <a
+            class:list={[{ "mobile-nav-current": isActive(item.href) }]}
+            href={item.href}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
+<script>
+  const openBtn = document.getElementById("mobile-menu-open");
+  const sheet = document.getElementById("mobile-nav-sheet");
+  const closeBtn = document.getElementById("mobile-nav-close");
+  const overlay = document.getElementById("mobile-nav-overlay");
+
+  function openMenu() {
+    sheet?.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMenu() {
+    sheet?.classList.remove("is-open");
+    document.body.style.overflow = "";
+  }
+
+  openBtn?.addEventListener("click", openMenu);
+  closeBtn?.addEventListener("click", closeMenu);
+  overlay?.addEventListener("click", closeMenu);
+</script>
