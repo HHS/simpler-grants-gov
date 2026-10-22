@@ -62,7 +62,8 @@ model RRExpandedKeyPersonProfile {
   currentPendingSupport?: Questions.Research.CurrentPendingSupport;
 }
 
-/** A person on the form, holding their profile as the XSD's `Profile` element does. */
+// Holds the profile as the XSD's `Profile` element does.
+/** A person on the form and their profile. */
 model RRExpandedKeyPersonEntry {
   // `Person` makes the email optional; every key-person profile requires it.
   @Validation.requiredPaths("email")

@@ -10,7 +10,7 @@ using SimplerForms;
 
 namespace Forms.KeyContacts;
 
-/** KEY CONTACTS (Grants.gov FID 683, v2.0) */
+/** KEY CONTACTS, Grants.gov version 2.0. */
 @Meta.form(#{ id: "key-contacts", formName: "KEY CONTACTS" })
 @GrantsGov.form(#{
   legacyFormId: 683,

@@ -51,14 +51,16 @@ model NSFSeniorKeyPersonProfile {
   organizationUei?: Questions.Organizations.OrgUei;
 }
 
-/** A person on the form, holding their profile as the XSD's `Profile` element does. */
+// Holds the profile as the XSD's `Profile` element does.
+/** A person on the form and their profile. */
 model NSFPrincipalInvestigator {
   // `Person` makes the email optional; every key-person profile requires it.
   @Validation.requiredPaths("email")
   profile: NSFPrincipalInvestigatorProfile;
 }
 
-/** A person on the form, holding their profile as the XSD's `Profile` element does. */
+// Holds the profile as the XSD's `Profile` element does.
+/** A person on the form and their profile. */
 model NSFSeniorKeyPerson {
   // `Person` makes the email optional; every key-person profile requires it.
   @Validation.requiredPaths("email")
