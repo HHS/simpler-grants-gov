@@ -34,17 +34,18 @@ labels_, _matches field occurrences_, _matches field constraints_ and _matches h
 whether the plan says what Grants.gov says, so the plan is the subject. Implementation
 checks ask whether what we built does what the plan says, so the artifact is the subject.
 
-| Group          | Comparison                 | Subject      | Checks                                                        | Matched by              |
-| -------------- | -------------------------- | ------------ | ------------------------------------------------------------- | ----------------------- |
-| Requirements   | plan vs DAT                | plan         | missing, extra, order, labels, occurrences, constraints, help | `dat_field`             |
-| Requirements   | plan vs XSD                | plan         | missing, extra, occurrences, constraints                      | `xml_path`              |
-| Implementation | plan vs JSON schema        | JSON schema  | missing, extra, occurrences, constraints                      | `json_path`             |
-| Implementation | plan vs UI schema          | UI schema    | missing, extra, order, labels, help                           | `json_path`             |
-| Implementation | plan vs rules schema       | rules schema | not yet emitted (`it.todo`)                                   |                         |
-| Implementation | plan vs XML mapping        | XML mapping  | missing, extra                                                | `json_path -> xml_path` |
-| XML            | XML mapping vs JSON schema | XML mapping  | missing, extra                                                | `json_path`             |
-| XML            | XML mapping vs XSD         | XML mapping  | missing, extra, order                                         | `xml_path`              |
-| XML            | JSON schema vs XSD         | JSON schema  | occurrences, constraints (the schema may be stricter)         | the plan's link         |
+| Group          | Comparison                  | Subject           | Checks                                                        | Matched by              |
+| -------------- | --------------------------- | ----------------- | ------------------------------------------------------------- | ----------------------- |
+| Requirements   | plan vs DAT                 | plan              | missing, extra, order, labels, occurrences, constraints, help | `dat_field`             |
+| Requirements   | plan vs XSD                 | plan              | missing, extra, occurrences, constraints                      | `xml_path`              |
+| Implementation | plan vs Grants.gov identity | `@GrantsGov.form` | OMB number, OMB expiration date                               | the form                |
+| Implementation | plan vs JSON schema         | JSON schema       | missing, extra, occurrences, constraints                      | `json_path`             |
+| Implementation | plan vs UI schema           | UI schema         | missing, extra, order, labels, help                           | `json_path`             |
+| Implementation | plan vs rules schema        | rules schema      | not yet emitted (`it.todo`)                                   |                         |
+| Implementation | plan vs XML mapping         | XML mapping       | missing, extra                                                | `json_path -> xml_path` |
+| XML            | XML mapping vs JSON schema  | XML mapping       | missing, extra                                                | `json_path`             |
+| XML            | XML mapping vs XSD          | XML mapping       | missing, extra, order                                         | `xml_path`              |
+| XML            | JSON schema vs XSD          | JSON schema       | occurrences, constraints (the schema may be stricter)         | the plan's link         |
 
 The XML mapping comparisons run only for a form with emitted rules, i.e. one whose XSD
 TypeSpec model names it with `@Mapping.from` in the `grantsGovXml` mapping. Plan vs XML mapping matches each field by its

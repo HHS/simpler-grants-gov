@@ -18,6 +18,7 @@ namespace Forms.KeyContacts;
   formVersion: "2.0",
   agencyCode: "SGG",
   ombNumber: "4040-0010",
+  expirationDate: "2029-08-31",
 })
 @example(#{
   applicantOrganizationName: "Acme Corporation",

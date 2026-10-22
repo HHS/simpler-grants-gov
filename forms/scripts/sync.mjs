@@ -178,6 +178,7 @@ async function buildForm(id, { sync, grantsGov }) {
   };
   if (grantsGov.agencyCode) form.agency_code = grantsGov.agencyCode;
   if (grantsGov.ombNumber) form.omb_number = grantsGov.ombNumber;
+  if (grantsGov.expirationDate) form.expiration_date = grantsGov.expirationDate;
   if (grantsGov.legacyFormId !== undefined) form.legacy_form_id = grantsGov.legacyFormId;
   if (xmlMapping) form.json_to_xml_schema = xmlMapping;
   // A parallel directory, so a specification-authored form registers alongside the
