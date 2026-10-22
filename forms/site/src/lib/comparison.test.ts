@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   attributeCounts,
   categoryCounts,
+  countsIn,
   defaultCell,
   fieldCount,
   repeatLabel,
@@ -73,6 +74,48 @@ describe("visibleFields", () => {
   });
 });
 
+describe("unrecorded differences", () => {
+  const BROKEN = field("broken", "unrecorded", "notCompared", "intentional");
+  const WITH_BROKEN = [...FIELDS, BROKEN];
+
+  it("are counted beside the recorded categories", () => {
+    expect(countsIn(BROKEN)).toEqual({
+      unrecorded: 1,
+      gap: 0,
+      upstream: 0,
+      intentional: 1,
+    });
+  });
+
+  it("select a field under their own filter, and never as matching", () => {
+    expect(visibleFields(WITH_BROKEN, ["unrecorded"]).map((f) => f.id)).toEqual(
+      ["broken"],
+    );
+    expect(
+      visibleFields(WITH_BROKEN, ["matches"]).map((f) => f.id),
+    ).not.toContain("broken");
+  });
+
+  it("roll up into their section", () => {
+    const SECTION: ComparisonNode = {
+      kind: "section",
+      section: { kind: "section", label: "Contact" },
+      children: WITH_BROKEN.map((f) => ({ kind: "field", id: f.id })),
+    };
+    const byId = new Map(WITH_BROKEN.map((f) => [f.id, f]));
+    expect(rollupCounts(SECTION, byId).unrecorded).toBe(1);
+    expect(rollupCounts(SECTION, byId, ["gap"]).unrecorded).toBe(0);
+  });
+
+  it("are counted for their tile", () => {
+    expect(categoryCounts(WITH_BROKEN).unrecorded).toEqual({
+      count: 1,
+      fields: 1,
+    });
+    expect(categoryCounts(FIELDS).unrecorded).toEqual({ count: 0, fields: 0 });
+  });
+});
+
 describe("visibleTree", () => {
   const section = (
     label: string,
@@ -130,6 +173,7 @@ describe("rollupCounts", () => {
 
   it("sums every category without a filter", () => {
     expect(rollupCounts(CONTACT, BY_ID)).toEqual({
+      unrecorded: 0,
       gap: 1,
       upstream: 1,
       intentional: 1,
@@ -138,6 +182,7 @@ describe("rollupCounts", () => {
 
   it("sums only the filtered categories", () => {
     expect(rollupCounts(CONTACT, BY_ID, ["gap"])).toEqual({
+      unrecorded: 0,
       gap: 1,
       upstream: 0,
       intentional: 0,
@@ -146,6 +191,7 @@ describe("rollupCounts", () => {
 
   it("sums nothing while only matching fields are shown", () => {
     expect(rollupCounts(CONTACT, BY_ID, ["matches"])).toEqual({
+      unrecorded: 0,
       gap: 0,
       upstream: 0,
       intentional: 0,
@@ -288,6 +334,7 @@ describe("filtering by attribute", () => {
     };
     const byId = new Map(ALL.map((f) => [f.id, f]));
     expect(rollupCounts(SECTION, byId, [], ["position"])).toEqual({
+      unrecorded: 0,
       gap: 0,
       upstream: 0,
       intentional: 1,

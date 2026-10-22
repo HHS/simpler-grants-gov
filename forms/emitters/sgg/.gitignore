@@ -1,0 +1,2 @@
+# The TypeSpec declarations, which the repository-wide `lib/` rule would otherwise ignore.
+!lib/
