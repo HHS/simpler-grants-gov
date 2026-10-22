@@ -918,6 +918,32 @@ FORM_RULE_SCHEMA = {
     },
 }
 
+
+def _budget_row_xml(target: str) -> dict:
+    """XML transform for one ProjectCosts row (columns A, B and C) under the given element."""
+    return {
+        "xml_transform": {"target": target, "type": "nested_object"},
+        "total_cost": {
+            "xml_transform": {
+                "target": "BudgetEstimatedCostAmount",
+                "value_transform": {"type": "currency_format"},
+            }
+        },
+        "non_allowable_cost": {
+            "xml_transform": {
+                "target": "BudgetNonAllowableCostAmount",
+                "value_transform": {"type": "currency_format"},
+            }
+        },
+        "total_allowable_cost": {
+            "xml_transform": {
+                "target": "BudgetTotalAllowableCostAmount",
+                "value_transform": {"type": "currency_format"},
+            }
+        },
+    }
+
+
 # XML Transformation Rules for SF-424C v2.0
 FORM_XML_TRANSFORM_RULES = {
     # Metadata
@@ -957,349 +983,23 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "ProjectCosts",
             "type": "nested_object",
         },
-        "administrative_and_legal_expenses": {
-            "xml_transform": {"target": "AdministrationCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "land_structures_rights_of_way": {
-            "xml_transform": {"target": "LandCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "relocation_expenses": {
-            "xml_transform": {"target": "RelocationCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "architectural_engineering_fees": {
-            "xml_transform": {"target": "ArchitecturalCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "other_architectural_engineering_fees": {
-            "xml_transform": {"target": "OtherArchitecturalCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "project_inspection_fees": {
-            "xml_transform": {"target": "InspectionFeesCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "site_work": {
-            "xml_transform": {"target": "SiteWorkCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "demolition_and_removal": {
-            "xml_transform": {"target": "DemolitionCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "construction": {
-            "xml_transform": {"target": "ConstructionCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "equipment": {
-            "xml_transform": {"target": "EquipmentCost", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "miscellaneous": {
-            "xml_transform": {"target": "Miscellaneous", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
+        "administrative_and_legal_expenses": _budget_row_xml("AdministrationCost"),
+        "land_structures_rights_of_way": _budget_row_xml("LandCost"),
+        "relocation_expenses": _budget_row_xml("RelocationCost"),
+        "architectural_engineering_fees": _budget_row_xml("ArchitecturalCost"),
+        "other_architectural_engineering_fees": _budget_row_xml("OtherArchitecturalCost"),
+        "project_inspection_fees": _budget_row_xml("InspectionFeesCost"),
+        "site_work": _budget_row_xml("SiteWorkCost"),
+        "demolition_and_removal": _budget_row_xml("DemolitionCost"),
+        "construction": _budget_row_xml("ConstructionCost"),
+        "equipment": _budget_row_xml("EquipmentCost"),
+        "miscellaneous": _budget_row_xml("Miscellaneous"),
         # Subtotal rows — calculated by rules engine; same column structure as user-input rows
-        "subtotal_1": {
-            "xml_transform": {
-                "target": "CostSubtotalBeforeContingencies",
-                "type": "nested_object",
-            },
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "contingencies": {
-            "xml_transform": {"target": "Contingencies", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "subtotal_2": {
-            "xml_transform": {
-                "target": "CostSubtotalAfterContingencies",
-                "type": "nested_object",
-            },
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "project_income": {
-            "xml_transform": {"target": "ProgramIncome", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
-        "total_project_costs": {
-            "xml_transform": {"target": "TotalProjectCosts", "type": "nested_object"},
-            "total_cost": {
-                "xml_transform": {
-                    "target": "BudgetEstimatedCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "non_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetNonAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-            "total_allowable_cost": {
-                "xml_transform": {
-                    "target": "BudgetTotalAllowableCostAmount",
-                    "value_transform": {"type": "currency_format"},
-                }
-            },
-        },
+        "subtotal_1": _budget_row_xml("CostSubtotalBeforeContingencies"),
+        "contingencies": _budget_row_xml("Contingencies"),
+        "subtotal_2": _budget_row_xml("CostSubtotalAfterContingencies"),
+        "project_income": _budget_row_xml("ProgramIncome"),
+        "total_project_costs": _budget_row_xml("TotalProjectCosts"),
     },
     # Section 17 - Federal Funding field mappings
     # Note: No xml_transform on federal_funding itself so its children bubble up to root level,

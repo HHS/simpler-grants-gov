@@ -329,14 +329,19 @@ class TestSF424CXMLGeneration:
             assert pc.find(f"{{{NS}}}{element_name}") is not None, f"{element_name} missing"
 
     def test_whole_dollar_amounts_formatted_with_two_decimals(self):
-        """Whole-dollar input ("100") is written as "100.00", matching legacy Grants.gov."""
+        """Every whole-dollar amount ("100") is written as "100.00", matching legacy Grants.gov."""
+        # Pull the rows from the transform rules so a newly added row is covered automatically
+        budget_rows = [
+            row for row in SF424C_TRANSFORM_RULES["budget_information"] if row != "xml_transform"
+        ]
         application_data = {
             "budget_information": {
-                "contingencies": {
-                    "total_cost": "5000",
-                    "non_allowable_cost": "0",
-                    "total_allowable_cost": "5000.00",
-                },
+                row: {
+                    "total_cost": str(index * 100),
+                    "non_allowable_cost": str(index * 10),
+                    "total_allowable_cost": str(index * 90),
+                }
+                for index, row in enumerate(budget_rows)
             },
             "federal_funding": {
                 "federal_percentage_share": 50,
@@ -346,10 +351,12 @@ class TestSF424CXMLGeneration:
         xml_data = _generate(application_data)
         root = lxml_etree.fromstring(xml_data.encode("utf-8"))
 
-        contingencies = root.find(f"{{{NS}}}ProjectCosts/{{{NS}}}Contingencies")
-        assert contingencies.find(f"{{{NS}}}BudgetEstimatedCostAmount").text == "5000.00"
-        assert contingencies.find(f"{{{NS}}}BudgetNonAllowableCostAmount").text == "0.00"
-        assert contingencies.find(f"{{{NS}}}BudgetTotalAllowableCostAmount").text == "5000.00"
+        project_costs = root.find(f"{{{NS}}}ProjectCosts")
+        amounts = [element for element in project_costs.iter() if len(element) == 0]
+        assert len(amounts) == len(budget_rows) * 3
+        for amount in amounts:
+            assert amount.text.endswith(".00"), f"{amount.getparent().tag} {amount.tag}"
+
         assert root.find(f"{{{NS}}}FederalFundingShareValue").text == "2500.00"
         # Percentage is a whole number, not currency
         assert root.find(f"{{{NS}}}FederalFundingPercentageShareValue").text == "50"
