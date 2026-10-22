@@ -30,11 +30,11 @@ export const OpportunityHistoryItem = ({
 const OpportunityHistory = ({
   summary,
   status,
-  legacy_opportunity_id,
+  legacyOpportunityId,
 }: {
   summary: Summary;
   status: OpportunityStatus;
-  legacy_opportunity_id: number;
+  legacyOpportunityId: number;
 }) => {
   const t = useTranslations("OpportunityListing.history");
 
@@ -58,7 +58,7 @@ const OpportunityHistory = ({
           title={t("archiveDate")}
           content={formatHistoryDate(summary.archive_date)}
         />
-        <OpportunityIntro legacy_opportunity_id={legacy_opportunity_id} />
+        <OpportunityIntro legacyOpportunityId={legacyOpportunityId} />
       </div>
     </div>
   );
