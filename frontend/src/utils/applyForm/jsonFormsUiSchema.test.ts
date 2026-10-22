@@ -116,6 +116,29 @@ describe("controlToNodes", () => {
     ]);
   });
 
+  it("describes a field list by the control's description over the schema's", () => {
+    const withDescription: RJSFSchema = {
+      ...schema,
+      properties: {
+        ...schema.properties,
+        contacts: {
+          ...(schema.properties?.contacts as RJSFSchema),
+          description: "From the schema.",
+        },
+      },
+    };
+    const descriptionOf = (extra: Partial<ControlElement>) =>
+      controlToNodes(
+        control("#/properties/contacts", extra),
+        withDescription,
+      ).map((node) => (node.type === "fieldList" ? node.description : null));
+
+    expect(
+      descriptionOf({ options: { description: "From the control." } }),
+    ).toEqual(["From the control."]);
+    expect(descriptionOf({})).toEqual(["From the schema."]);
+  });
+
   it("returns nothing for a control no widget can draw", () => {
     expect(
       controlToNodes(control("#/properties/nested/properties/people"), schema),
