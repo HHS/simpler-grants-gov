@@ -47,6 +47,9 @@ checks ask whether what we built does what the plan says, so the artifact is the
 | XML            | XML mapping vs XSD          | XML mapping       | missing, extra, order                                         | `xml_path`              |
 | XML            | JSON schema vs XSD          | JSON schema       | occurrences, constraints (the schema may be stricter)         | the plan's link         |
 
+Labels and help text are compared ignoring whitespace and case, so a DAT's "Enter the
+Middle Name." matches the question bank's "Enter the middle name.".
+
 The XML mapping comparisons run only for a form with emitted rules, i.e. one whose XSD
 TypeSpec model names it with `@Mapping.from` in the `grantsGovXml` mapping. Plan vs XML mapping matches each field by its
 JSON path and element path together, so a field the mapping writes to a different element
