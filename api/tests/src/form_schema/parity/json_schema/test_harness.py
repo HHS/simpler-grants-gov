@@ -5,15 +5,16 @@ These run them over hand-built `FormInput` dictionaries chosen to break them, so
 is visible on its own.
 
 One class per function under test. `TestInputRules` covers `flatten_schema.inputs()`
-instead, since the way it canonicalizes a rule decides what `rule_differences()` sees, and
-`TestFieldOrder` covers `flatten_ui.field_order()`, which decides what
+instead, since the way it canonicalizes a rule decides what `rule_differences()` sees;
+`TestFieldTexts` covers `flatten_schema.texts()`, which decides what `text_differences()`
+sees; and `TestFieldOrder` covers `flatten_ui.field_order()`, which decides what
 `order_differences()` sees.
 """
 
 import pytest
 
 from tests.src.form_schema.parity.json_schema.harness import compare, flatten_schema, flatten_ui
-from tests.src.form_schema.parity.json_schema.harness.flatten_schema import FormInput
+from tests.src.form_schema.parity.json_schema.harness.flatten_schema import FieldText, FormInput
 from tests.src.form_schema.parity.json_schema.harness.form_diff import FormDiff
 
 NOTHING_DECLARED = FormDiff(generated_module="g", handwritten_module="h")
@@ -33,9 +34,9 @@ def field(required: bool = False, **rules) -> FormInput:
     return FormInput(required=required, rules=rules)
 
 
-def worded(title: str | None = None, description: str | None = None) -> FormInput:
-    """One field and the text beside it. `worded("Email", "Where we will reach you.")`."""
-    return FormInput(required=False, rules={}, title=title, description=description)
+def worded(title: str | None = None, description: str | None = None) -> FieldText:
+    """The text one node shows. `worded("Email", "Where we will reach you.")`."""
+    return FieldText(title=title, description=description)
 
 
 def placed(*names: str) -> list[tuple[str, ...]]:
@@ -172,7 +173,7 @@ class TestRuleDifferences:
 
 
 class TestTextDifferences:
-    """Which matched fields `text_differences()` reports as worded differently."""
+    """Which matched nodes `text_differences()` reports as worded differently."""
 
     @pytest.mark.parametrize(
         ("generated", "handwritten"),
@@ -250,27 +251,38 @@ class TestStaleEntries:
             "recorded difference names no such input"
         ]
 
-    def test_flags_recorded_text_difference_for_unknown_field(self):
+
+class TestStaleTextEntries:
+    """Which `differing_text` entries `stale_text_entries()` reports as describing nothing."""
+
+    def test_flags_entry_for_unknown_field(self):
         diff = declaring(differing_text={"ghost/title": "a reason for a field long gone"})
-        both = inputs("a")
-        assert kinds(compare.stale_entries(diff, both, both)) == [
-            "recorded difference names no such input"
+        both = {("a",): worded("Email")}
+        assert kinds(compare.stale_text_entries(diff, both, both)) == [
+            "recorded difference names no such field"
         ]
 
-    def test_flags_recorded_text_difference_that_no_longer_differs(self):
+    def test_flags_entry_that_no_longer_differs(self):
         """The forms now agree, up to case, so the entry describes nothing."""
         diff = declaring(differing_text={"a/title": "the forms used to disagree"})
         generated = {("a",): worded("Email")}
         handwritten = {("a",): worded("EMAIL")}
-        assert [str(d) for d in compare.stale_entries(diff, generated, handwritten)] == [
+        assert [str(d) for d in compare.stale_text_entries(diff, generated, handwritten)] == [
             "recorded text difference no longer differs: a/title -- the forms used to disagree"
         ]
 
-    def test_keeps_recorded_text_difference_that_still_differs(self):
+    def test_keeps_entry_that_still_differs(self):
         diff = declaring(differing_text={"a/title": "the Grants.gov form labels it E-mail"})
         generated = {("a",): worded("E-mail address")}
         handwritten = {("a",): worded("Email")}
-        assert not compare.stale_entries(diff, generated, handwritten)
+        assert not compare.stale_text_entries(diff, generated, handwritten)
+
+    def test_keeps_entry_for_a_list_heading(self):
+        """A list is not an input, but its heading is recorded under its own path."""
+        diff = declaring(differing_text={"contacts/description": "Grants.gov words it so"})
+        generated = {("contacts",): worded("Contacts", "Up to four.")}
+        handwritten = {("contacts",): worded("Contacts", "Between 1 and 4.")}
+        assert not compare.stale_text_entries(diff, generated, handwritten)
 
 
 class TestInputRules:
@@ -294,17 +306,61 @@ class TestInputRules:
         other_way = flatten_schema.inputs({"properties": {"a": {"enum": ["Y", "X"]}}})
         assert one_way == other_way
 
-    def test_keeps_title_and_description_out_of_the_rules(self):
+    def test_ignores_title_and_description(self):
         """They change what an applicant reads, so `text_differences()` compares them, not
         `rule_differences()`."""
         found = flatten_schema.inputs(
             {"properties": {"a": {"type": "string", "title": "A", "description": "About A."}}}
         )
-        assert found == {
-            ("a",): FormInput(
-                required=False, rules={"type": "string"}, title="A", description="About A."
-            )
+        assert found == {("a",): FormInput(required=False, rules={"type": "string"})}
+
+
+class TestFieldTexts:
+    """Which nodes `flatten_schema.texts()` reads text from, which is what the text
+    comparison sees."""
+
+    SCHEMA = {
+        "title": "Key Contacts",
+        "description": "The form's own introduction.",
+        "properties": {
+            "contacts": {
+                "type": "array",
+                "title": "Contacts",
+                "description": "Enter up to four.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "object",
+                            "title": "Name",
+                            "properties": {"first": {"type": "string", "title": "First"}},
+                        },
+                        "email": {
+                            "allOf": [{"type": "string", "title": "Email"}],
+                            "description": "Where we will reach you.",
+                        },
+                    },
+                },
+            }
+        },
+    }
+
+    def test_reads_lists_and_groups_as_well_as_inputs(self):
+        assert flatten_schema.texts(self.SCHEMA) == {
+            ("contacts",): worded("Contacts", "Enter up to four."),
+            ("contacts", "[]"): worded(),
+            ("contacts", "[]", "name"): worded("Name"),
+            ("contacts", "[]", "name", "first"): worded("First"),
+            ("contacts", "[]", "email"): worded("Email", "Where we will reach you."),
         }
+
+    def test_leaves_out_the_root(self):
+        """The root's title and description are the form's own, not a field's."""
+        assert () not in flatten_schema.texts(self.SCHEMA)
+
+    def test_reaches_every_input(self):
+        """Nothing `inputs()` finds goes unread."""
+        assert set(flatten_schema.inputs(self.SCHEMA)) <= set(flatten_schema.texts(self.SCHEMA))
 
 
 class TestFieldOrder:

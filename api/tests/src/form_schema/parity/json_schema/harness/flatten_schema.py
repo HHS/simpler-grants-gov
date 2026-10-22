@@ -1,4 +1,5 @@
-"""Reads a form's JSON Schema into `{path: FormInput}`.
+"""Reads a form's JSON Schema into `{path: FormInput}`, and the text it shows into
+`{path: FieldText}`.
 
 Two forms that ask for the same things can be written as very different documents. The
 generated SF-424 hoists 50 shared questions into `$defs` and composes with `allOf`; the
@@ -29,8 +30,8 @@ valid, which makes the two comparable. These produce the same result:
                  rules={"format": "email", "maxLength": 60, "type": "string"}, ...)}
 
 `$ref` is resolved upstream by `src.form_schema.jsonschema_resolver`; `allOf` is folded by
-`merge_schema.py`; titles and descriptions are kept apart from the rules, because they
-change what an applicant reads, not what they may submit.
+`merge_schema.py`; titles and descriptions are left to `texts`, because they change what
+an applicant reads, not what they may submit.
 
 Where two forms spell one field differently -- `p.phone` against `p.phone_number` -- the
 `FormInput` values match and only the path differs. `FormDiff.renamed` pairs those up.
@@ -78,15 +79,24 @@ VALIDATION_KEYWORDS = frozenset(
 class FormInput:
     """One field an applicant can fill in, and the rules deciding what they may put in it.
 
-        FormInput(required=True, rules={"maxLength": 60, "type": "string"}, title="Email")
+        FormInput(required=True, rules={"maxLength": 60, "type": "string"})
 
     `rules` holds `VALIDATION_KEYWORDS` with their values canonicalized, so two fields
-    declared differently but permitting the same values compare with `==`. `title` and
-    `description` are what the applicant reads beside the field, as the schema states them.
+    declared differently but permitting the same values compare with `==`.
     """
 
     required: bool
     rules: dict[str, Any]
+
+
+@dataclasses.dataclass(frozen=True)
+class FieldText:
+    """What an applicant reads for one node: a field's label and help, or a list's or
+    group's heading and introduction, as the schema states them.
+
+        FieldText(title="Email", description="Where we will reach you.")
+    """
+
     title: str | None = None
     description: str | None = None
 
@@ -139,12 +149,40 @@ def inputs(schema: dict[str, Any]) -> dict[Path, FormInput]:
             walk(items, (*prefix, ARRAY), bool(merged.get("minItems")))
             return
         if prefix:
-            out[prefix] = FormInput(
-                required=required,
-                rules=_rules(merged),
-                title=merged.get("title"),
-                description=merged.get("description"),
-            )
+            out[prefix] = FormInput(required=required, rules=_rules(merged))
 
     walk(schema, (), False)
+    return out
+
+
+def texts(schema: dict[str, Any]) -> dict[Path, FieldText]:
+    """The title and description of every node an answer lives in or under.
+
+        {"properties": {"contacts": {"title": "Contacts", "type": "array", "items": {
+            "properties": {"email": {"title": "Email"}}}}}}
+        -> {("contacts",): FieldText(title="Contacts"),
+            ("contacts", "[]"): FieldText(),
+            ("contacts", "[]", "email"): FieldText(title="Email")}
+
+    Lists and groups are included as well as inputs, since their headings and
+    introductions are read too. The root is not: its description is the form's own.
+    Follows the same paths as `inputs`, and expects a resolved schema for the same reason.
+    """
+    out: dict[Path, FieldText] = {}
+
+    def walk(node: dict[str, Any], prefix: Path) -> None:
+        merged = merge_allof(node)
+        if prefix:
+            out[prefix] = FieldText(
+                title=merged.get("title"), description=merged.get("description")
+            )
+        if properties := merged.get("properties"):
+            for name, sub in properties.items():
+                walk(sub, (*prefix, name))
+            return
+        items = merged.get("items")
+        if isinstance(items, dict):
+            walk(items, (*prefix, ARRAY))
+
+    walk(schema, ())
     return out

@@ -3,16 +3,19 @@
     match_fields       which generated field is which hand-written field
     unmatched_fields   fields on either side matching nothing
     rule_differences   matched fields governed by different rules
-    text_differences   matched fields labeled or described differently
     stale_entries      FormDiff entries no longer describing a real difference
+
+    text_differences     matched nodes titled or described differently
+    stale_text_entries   `differing_text` entries no longer describing a real difference
 
     order_differences    matched fields placed in a different order
     stale_order_entries  `out_of_order` entries no longer describing a real difference
 
 `match_fields` runs first and the others build on its result. Each takes the same
 three arguments -- the record, and both sides flattened by `flatten_schema.inputs` -- and
-returns `Discrepancy` objects that a `FormDiff` entry can suppress. The two order checks
-take both sides flattened by `flatten_ui.field_order` instead.
+returns `Discrepancy` objects that a `FormDiff` entry can suppress. The two text checks
+take both sides flattened by `flatten_schema.texts` instead, and the two order checks
+both sides flattened by `flatten_ui.field_order`.
 """
 
 from collections.abc import Collection
@@ -21,7 +24,7 @@ from typing import Any
 from ... import paths
 from ...discrepancy import Discrepancy
 from ...paths import Path
-from .flatten_schema import FormInput
+from .flatten_schema import FieldText, FormInput
 from .form_diff import FormDiff
 
 # The text an applicant reads beside a field, each compared on its own.
@@ -145,8 +148,8 @@ def rule_differences(
 
 def _all_text_differences(
     diff: FormDiff,
-    generated: dict[Path, FormInput],
-    handwritten: dict[Path, FormInput],
+    generated: dict[Path, FieldText],
+    handwritten: dict[Path, FieldText],
 ) -> dict[str, Discrepancy]:
     """`"path/attribute"` -> the difference, recorded or not."""
     out = {}
@@ -170,10 +173,11 @@ def _all_text_differences(
 
 def text_differences(
     diff: FormDiff,
-    generated: dict[Path, FormInput],
-    handwritten: dict[Path, FormInput],
+    generated: dict[Path, FieldText],
+    handwritten: dict[Path, FieldText],
 ) -> list[Discrepancy]:
-    """Matched inputs whose title or description reads differently.
+    """Matched nodes whose title or description reads differently: inputs, and the lists
+    and groups holding them, such as `contacts` and `contacts.[].name`.
 
     Returns kind `"title differs"` or `"description differs"`. Case and whitespace are
     ignored, so `"First  name"` and `"First Name"` agree; any other change of wording is
@@ -193,10 +197,10 @@ def stale_entries(
 ) -> list[Discrepancy]:
     """Record entries naming a field that does not exist on the side they claim.
 
-    Covers all five registers: a `renamed` target the handwritten form lacks, a rename to
-    the same path (which the identity match already handles), an `absent_from_*` key
-    neither form has, a `differing_rules` key whose path is gone, and a `differing_text`
-    key whose path is gone or whose text no longer differs.
+    Covers the four registers about inputs: a `renamed` target the handwritten form lacks,
+    a rename to the same path (which the identity match already handles), an
+    `absent_from_*` key neither form has, and a `differing_rules` key whose path is gone.
+    `differing_text` is `stale_text_entries`' business.
     """
     out = []
     for generated_path, handwritten_path in match_fields(diff, generated, handwritten).items():
@@ -223,12 +227,22 @@ def stale_entries(
         path = key.rsplit("/", 1)[0]
         if paths.parse(path) not in generated:
             out.append(Discrepancy("recorded difference names no such input", path))
-    text = _all_text_differences(diff, generated, handwritten)
+    return out
+
+
+def stale_text_entries(
+    diff: FormDiff,
+    generated: dict[Path, FieldText],
+    handwritten: dict[Path, FieldText],
+) -> list[Discrepancy]:
+    """`differing_text` entries whose path is gone, or whose two texts now agree."""
+    found = _all_text_differences(diff, generated, handwritten)
+    out = []
     for key, reason in diff.differing_text.items():
         path = key.rsplit("/", 1)[0]
         if paths.parse(path) not in generated:
-            out.append(Discrepancy("recorded difference names no such input", path))
-        elif key not in text:
+            out.append(Discrepancy("recorded difference names no such field", path))
+        elif key not in found:
             out.append(Discrepancy("recorded text difference no longer differs", key, reason))
     return out
 
