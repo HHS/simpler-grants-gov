@@ -256,6 +256,17 @@ def test_key_contacts_v2_0(key_contacts_v2_0):
         key_contacts_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
+    assert key_contacts_v2_0.sgg_version == "1.0"
+    assert key_contacts_v2_0.form_instruction_id is not None
+
+
+def test_key_contacts_forms_have_distinct_instructions(
+    key_contacts_handwritten_v2_0, key_contacts_generated_v2_0
+):
+    assert (
+        key_contacts_handwritten_v2_0.form_instruction_id
+        != key_contacts_generated_v2_0.form_instruction_id
+    )
 
 
 def test_attachment_form_v1_2(attachment_form_v1_2):
