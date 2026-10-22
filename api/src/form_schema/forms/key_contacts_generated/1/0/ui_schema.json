@@ -1,0 +1,203 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant_organization_name",
+          "label": "Applicant Organization Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/key_contacts",
+          "label": "Key Contact",
+          "options": {
+            "detail": {
+              "type": "Group",
+              "elements": [
+                {
+                  "type": "Group",
+                  "elements": [
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/project_role",
+                      "label": "Project Role"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/title",
+                      "label": "Title"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/organizational_affiliation",
+                      "label": "Organizational Affiliation"
+                    }
+                  ],
+                  "label": "Role",
+                  "options": {
+                    "description": "Enter the contact's role on the project, title and organizational affiliation."
+                  }
+                },
+                {
+                  "type": "Group",
+                  "elements": [
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/name/properties/prefix",
+                      "label": "Prefix"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/name/properties/first_name",
+                      "label": "First Name"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/name/properties/middle_name",
+                      "label": "Middle Name"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/name/properties/last_name",
+                      "label": "Last Name"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/name/properties/suffix",
+                      "label": "Suffix"
+                    }
+                  ],
+                  "label": "Name",
+                  "options": {
+                    "description": "Enter the person's name. First and last name are required."
+                  }
+                },
+                {
+                  "type": "Group",
+                  "elements": [
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/address/properties/street1",
+                      "label": "Street 1"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/address/properties/street2",
+                      "label": "Street 2"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/address/properties/city",
+                      "label": "City"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/address/properties/county",
+                      "label": "County/Parish"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/address/properties/state",
+                      "label": "State",
+                      "rule": {
+                        "effect": "ENABLE",
+                        "condition": {
+                          "scope": "#/properties/address/properties/country",
+                          "schema": {
+                            "const": "USA: UNITED STATES"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/address/properties/province",
+                      "label": "Province",
+                      "rule": {
+                        "effect": "SHOW",
+                        "condition": {
+                          "scope": "#/properties/address/properties/country",
+                          "schema": {
+                            "allOf": [
+                              {
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "const": ""
+                                    },
+                                    {
+                                      "type": "array",
+                                      "maxItems": 0
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "not": {
+                                  "const": "USA: UNITED STATES"
+                                }
+                              }
+                            ]
+                          },
+                          "failWhenUndefined": true
+                        }
+                      }
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/address/properties/country",
+                      "label": "Country"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/address/properties/zip_code",
+                      "label": "Zip / Postal Code"
+                    }
+                  ],
+                  "label": "Address",
+                  "options": {
+                    "description": "Enter the person's complete address."
+                  }
+                },
+                {
+                  "type": "Group",
+                  "elements": [
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/phone",
+                      "label": "Phone Number"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/fax",
+                      "label": "Fax Number"
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/email",
+                      "label": "Email"
+                    }
+                  ],
+                  "label": "Contact Information",
+                  "options": {
+                    "description": "Enter the contact's phone, fax and email. Phone and email are required."
+                  }
+                }
+              ]
+            },
+            "widget": "CollapsibleFieldList",
+            "description": "You may enter up to four (4) Key Contacts. At least 1 (one) contact person is required. Additional contacts are optional."
+          }
+        }
+      ],
+      "label": "Key Contacts"
+    }
+  ],
+  "label": "KEY CONTACTS, Grants.gov version 2.0."
+}
