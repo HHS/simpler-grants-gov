@@ -1525,7 +1525,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "7-10",
               "required": true,
               "type": "Text input",
@@ -1537,7 +1537,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "7-11",
               "required": false,
               "type": "Text input",

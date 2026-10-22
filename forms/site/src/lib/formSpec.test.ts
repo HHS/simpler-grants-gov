@@ -163,7 +163,7 @@ describe("UI layout", () => {
   it("lays out each key contacts entry with its Role group first", async () => {
     const { uischema } = await loadFormSpec("key-contacts");
     const [, contacts] = (uischema as unknown as UiNode).elements ?? [];
-    expect(contacts?.label).toBe("Contact Information");
+    expect(contacts?.label).toBe("Key Contacts");
     const list = contacts?.elements?.[0];
     expect(list?.scope).toBe("#/properties/key_contacts");
     expect(groupLabels(list?.options?.detail ?? { type: "Group" })).toEqual([

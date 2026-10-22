@@ -82,7 +82,7 @@ describe("Key Contacts", () => {
       expect(labels(form.children)).toEqual([
         { "Applicant Information": [] },
         {
-          "Contact Information": [
+          "Key Contacts": [
             { Role: [] },
             { Name: [] },
             { Address: [] },

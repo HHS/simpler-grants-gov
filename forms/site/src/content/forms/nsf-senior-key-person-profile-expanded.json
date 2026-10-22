@@ -202,7 +202,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "1-11",
               "required": true,
               "type": "Text input",
@@ -215,7 +215,7 @@
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "1-12",
               "required": false,
               "type": "Text input",
@@ -587,7 +587,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "2-11",
               "required": "Conditional (required for each senior/key person)",
               "type": "Text input",
@@ -599,7 +599,7 @@
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "2-12",
               "required": false,
               "type": "Text input",

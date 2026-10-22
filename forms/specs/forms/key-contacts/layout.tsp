@@ -17,7 +17,7 @@ model KeyContactsLayout {
   };
 
   /** You may enter up to four (4) key contacts. At least one (1) contact person is required; additional contacts are optional. */
-  @UI.label("Contact Information")
+  @UI.label("Key Contacts")
   @UI.field(KeyContacts.keyContacts)
   keyContacts: {
     /** Enter the contact's role on the project, title and organizational affiliation. */

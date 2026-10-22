@@ -434,9 +434,10 @@ export const DIFF: FormDiff = {
   slug: "epa-key-contacts-form",
   dat: {
     differingLabels: Object.fromEntries(
-      ["B1", "B2", "B3", "B4"].map((block) => [
-        `${block}-18`,
-        standardLabel("Email", "E-mail Address"),
+      ["B1", "B2", "B3", "B4"].flatMap((block) => [
+        [`${block}-10`, standardLabel("Street 1", "Street1")],
+        [`${block}-11`, standardLabel("Street 2", "Street2")],
+        [`${block}-18`, standardLabel("Email", "E-mail Address")],
       ]),
     ),
     differingHelp: help,
