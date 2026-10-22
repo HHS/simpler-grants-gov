@@ -368,7 +368,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Credential, e.g., agency login",
+              "label": "Credential, e.g., Agency Login",
               "dat_field": "1-21",
               "required": false,
               "type": "Text input",
@@ -730,7 +730,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Credential, e.g., agency login",
+              "label": "Credential, e.g., Agency Login",
               "dat_field": "2-21",
               "required": false,
               "type": "Text input",
