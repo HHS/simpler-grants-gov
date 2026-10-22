@@ -45,20 +45,31 @@ def _report(discrepancies) -> str:
 
 @pytest.fixture(scope="module", params=DIFFS, ids=lambda d: d.generated_module)
 def diff(request):
-    """One form pair's record. `forms` and `orders` both read it, so a test taking both
+    """One form pair's record. The fixtures below all read it, so a test taking several
     runs once per form rather than once per combination."""
     return request.param
 
 
 @pytest.fixture(scope="module")
-def forms(diff):
-    """One form pair: its record, and both sides' inputs from their resolved schemas."""
+def schemas(diff):
+    """One form pair's resolved JSON schemas, generated first."""
     generated, handwritten = _modules(diff)
     return (
-        diff,
-        flatten_schema.inputs(resolve_jsonschema(generated.FORM.form_json_schema)),
-        flatten_schema.inputs(resolve_jsonschema(handwritten.FORM_JSON_SCHEMA)),
+        resolve_jsonschema(generated.FORM.form_json_schema),
+        resolve_jsonschema(handwritten.FORM_JSON_SCHEMA),
     )
+
+
+@pytest.fixture(scope="module")
+def forms(diff, schemas):
+    """One form pair: its record, and both sides' inputs."""
+    return (diff, *(flatten_schema.inputs(schema) for schema in schemas))
+
+
+@pytest.fixture(scope="module")
+def wording(diff, schemas):
+    """One form pair: its record, and the title and description of every node on each side."""
+    return (diff, *(flatten_schema.texts(schema) for schema in schemas))
 
 
 @pytest.fixture(scope="module")
@@ -107,9 +118,9 @@ class TestGeneratedVsHandwritten:
         ]
         assert not differing, "the two forms accept different values:\n" + _report(differing)
 
-    def test_generated_form_words_fields_the_same(self, forms):
-        """A label or help text that reads differently, ignoring case and whitespace."""
-        differing = compare.text_differences(*forms)
+    def test_generated_form_words_fields_the_same(self, wording):
+        """A label, heading or help text that reads differently, ignoring case and whitespace."""
+        differing = compare.text_differences(*wording)
         assert not differing, "the two forms word their fields differently:\n" + _report(differing)
 
     def test_generated_form_orders_fields_the_same(self, orders):
@@ -123,7 +134,11 @@ class TestGeneratedVsHandwritten:
 class TestRecordedDifferences:
     """Whether the record still describes real differences between real fields."""
 
-    def test_recorded_differences_are_not_stale(self, forms, orders):
+    def test_recorded_differences_are_not_stale(self, forms, wording, orders):
         """An entry naming a field neither form has makes the rest of the record meaningless."""
-        stale = compare.stale_entries(*forms) + compare.stale_order_entries(*orders)
+        stale = (
+            compare.stale_entries(*forms)
+            + compare.stale_text_entries(*wording)
+            + compare.stale_order_entries(*orders)
+        )
         assert not stale, "recorded differences no longer describe real inputs:\n" + _report(stale)

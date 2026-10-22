@@ -32,7 +32,8 @@ mirrors, with the record in `json_schema/diffs/`:
   other way round
 - corresponding inputs are equally required
 - corresponding inputs are governed by the same validation rules
-- corresponding inputs carry the same title and description, ignoring case and whitespace
+- corresponding inputs, lists and groups carry the same title and description, ignoring
+  case and whitespace
 - the UI schemas place the fields both forms have in the same order, ignoring sections and
   groups
 - every entry in the record still describes a real difference
