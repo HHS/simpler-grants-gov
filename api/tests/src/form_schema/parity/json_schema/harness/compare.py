@@ -3,9 +3,10 @@
     match_fields       which generated field is which hand-written field
     unmatched_fields   fields on either side matching nothing
     rule_differences   matched fields governed by different rules
+    text_differences   matched fields labeled or described differently
     stale_entries      FormDiff entries no longer describing a real difference
 
-`match_fields` runs first and the other three build on its result. Each takes the same
+`match_fields` runs first and the others build on its result. Each takes the same
 three arguments -- the record, and both sides flattened by `flatten_schema.inputs` -- and
 returns `Discrepancy` objects that a `FormDiff` entry can suppress.
 """
@@ -18,10 +19,18 @@ from ...paths import Path
 from .flatten_schema import FormInput
 from .form_diff import FormDiff
 
+# The text an applicant reads beside a field, each compared on its own.
+TEXT_ATTRIBUTES = ("title", "description")
+
 
 def _shown(rules: dict[str, Any], keyword: str) -> str:
     """How a keyword's value reads in a failure message, or `(absent)` if unset."""
     return repr(rules[keyword]) if keyword in rules else "(absent)"
+
+
+def _normalized(text: str | None) -> str:
+    """`"  First   Name "` -> `"First Name"`: whitespace runs collapsed, ends trimmed."""
+    return " ".join((text or "").split())
 
 
 def match_fields(
@@ -86,8 +95,8 @@ def rule_differences(
     the two separately. A keyword one side omits counts as a difference: `maxLength` 60
     against none is reported as `generated 60, handwritten (absent)`.
 
-    Suppressed per keyword by `differing_rules`, keyed `"path/keyword"`. Presentation is
-    not compared -- that belongs to the UI checks.
+    Suppressed per keyword by `differing_rules`, keyed `"path/keyword"`. Titles and
+    descriptions are `text_differences`' business.
     """
     recorded = diff.differing_rules
     out = []
@@ -127,6 +136,49 @@ def rule_differences(
     return out
 
 
+def _all_text_differences(
+    diff: FormDiff,
+    generated: dict[Path, FormInput],
+    handwritten: dict[Path, FormInput],
+) -> dict[str, Discrepancy]:
+    """`"path/attribute"` -> the difference, recorded or not."""
+    out = {}
+    for generated_path, handwritten_path in match_fields(diff, generated, handwritten).items():
+        if generated_path not in generated or handwritten_path not in handwritten:
+            continue
+        where = paths.render(generated_path)
+        for attribute in TEXT_ATTRIBUTES:
+            a = _normalized(getattr(generated[generated_path], attribute))
+            b = _normalized(getattr(handwritten[handwritten_path], attribute))
+            if a.casefold() == b.casefold():
+                continue
+            out[f"{where}/{attribute}"] = Discrepancy(
+                f"{attribute} differs",
+                where,
+                f"generated {repr(a) if a else '(absent)'}, "
+                f"handwritten {repr(b) if b else '(absent)'}",
+            )
+    return out
+
+
+def text_differences(
+    diff: FormDiff,
+    generated: dict[Path, FormInput],
+    handwritten: dict[Path, FormInput],
+) -> list[Discrepancy]:
+    """Matched inputs whose title or description reads differently.
+
+    Returns kind `"title differs"` or `"description differs"`. Case and whitespace are
+    ignored, so `"First  name"` and `"First Name"` agree; any other change of wording is
+    reported, as is text one side states and the other does not.
+
+    Suppressed per attribute by `differing_text`, keyed `"path/title"` or
+    `"path/description"`.
+    """
+    found = _all_text_differences(diff, generated, handwritten)
+    return [d for key, d in found.items() if key not in diff.differing_text]
+
+
 def stale_entries(
     diff: FormDiff,
     generated: dict[Path, FormInput],
@@ -134,9 +186,10 @@ def stale_entries(
 ) -> list[Discrepancy]:
     """Record entries naming a field that does not exist on the side they claim.
 
-    Covers all four registers: a `renamed` target the handwritten form lacks, a rename to
+    Covers all five registers: a `renamed` target the handwritten form lacks, a rename to
     the same path (which the identity match already handles), an `absent_from_*` key
-    neither form has, and a `differing_rules` key whose path is gone.
+    neither form has, a `differing_rules` key whose path is gone, and a `differing_text`
+    key whose path is gone or whose text no longer differs.
     """
     out = []
     for generated_path, handwritten_path in match_fields(diff, generated, handwritten).items():
@@ -163,4 +216,11 @@ def stale_entries(
         path = key.rsplit("/", 1)[0]
         if paths.parse(path) not in generated:
             out.append(Discrepancy("recorded difference names no such input", path))
+    text = _all_text_differences(diff, generated, handwritten)
+    for key, reason in diff.differing_text.items():
+        path = key.rsplit("/", 1)[0]
+        if paths.parse(path) not in generated:
+            out.append(Discrepancy("recorded difference names no such input", path))
+        elif key not in text:
+            out.append(Discrepancy("recorded text difference no longer differs", key, reason))
     return out

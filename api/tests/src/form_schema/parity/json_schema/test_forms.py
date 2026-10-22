@@ -8,6 +8,9 @@ discards is a failure.
 that can see a field one form has and the other lacks: neither schema sets
 `additionalProperties`, so an unexpected field validates cleanly on both.
 
+Titles and descriptions are compared apart from the rules, ignoring case and whitespace,
+since they change what an applicant reads rather than what they may submit.
+
 The rule comparison reads a flattened schema, which is an approximation a validator never
 has to make -- `merge_schema.py` folds `allOf`, and `if`/`then` branches are left where
 they are. It reports every field and keyword that differs in one pass, where a validator
@@ -86,6 +89,11 @@ class TestGeneratedVsHandwritten:
             d for d in compare.rule_differences(*forms) if d.kind != "requiredness differs"
         ]
         assert not differing, "the two forms accept different values:\n" + _report(differing)
+
+    def test_generated_form_words_fields_the_same(self, forms):
+        """A label or help text that reads differently, ignoring case and whitespace."""
+        differing = compare.text_differences(*forms)
+        assert not differing, "the two forms word their fields differently:\n" + _report(differing)
 
 
 class TestRecordedDifferences:
