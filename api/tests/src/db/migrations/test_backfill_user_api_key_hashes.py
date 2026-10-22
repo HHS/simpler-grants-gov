@@ -48,7 +48,7 @@ def test_backfill_user_api_key_hashes(db_session, enable_factory_create, nullabl
     for key in unhashed_keys:
         assert key.key_id_hash == hash_api_key_id(key.key_id, pepper)
         # The lookup auth will use once it reads by hash resolves the backfilled row
-        found_key = auth_handler.get_api_key_by_key_id_hash(hash_api_key_id(key.key_id, pepper))
+        found_key = auth_handler.get_api_key_by_hash(hash_api_key_id(key.key_id, pepper))
         assert found_key is not None
         assert found_key.api_key_id == key.api_key_id
 
