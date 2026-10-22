@@ -5,12 +5,14 @@ These run them over hand-built `FormInput` dictionaries chosen to break them, so
 is visible on its own.
 
 One class per function under test. `TestInputRules` covers `flatten_schema.inputs()`
-instead, since the way it canonicalizes a rule decides what `rule_differences()` sees.
+instead, since the way it canonicalizes a rule decides what `rule_differences()` sees, and
+`TestFieldOrder` covers `flatten_ui.field_order()`, which decides what
+`order_differences()` sees.
 """
 
 import pytest
 
-from tests.src.form_schema.parity.json_schema.harness import compare, flatten_schema
+from tests.src.form_schema.parity.json_schema.harness import compare, flatten_schema, flatten_ui
 from tests.src.form_schema.parity.json_schema.harness.flatten_schema import FormInput
 from tests.src.form_schema.parity.json_schema.harness.form_diff import FormDiff
 
@@ -34,6 +36,11 @@ def field(required: bool = False, **rules) -> FormInput:
 def worded(title: str | None = None, description: str | None = None) -> FormInput:
     """One field and the text beside it. `worded("Email", "Where we will reach you.")`."""
     return FormInput(required=False, rules={}, title=title, description=description)
+
+
+def placed(*names: str) -> list[tuple[str, ...]]:
+    """Fields in the order a UI schema places them, for the order checks."""
+    return [tuple(name.split(".")) for name in names]
 
 
 def matched(diff, generated, handwritten) -> dict[str, str]:
@@ -298,3 +305,212 @@ class TestInputRules:
                 required=False, rules={"type": "string"}, title="A", description="About A."
             )
         }
+
+
+class TestFieldOrder:
+    """How `flatten_ui.field_order()` reads a UI schema, which is what the order check sees.
+
+    Both UI schema formats must flatten to the same paths `flatten_schema.inputs()` uses,
+    and grouping must not survive, or regrouping the same fields reads as a difference.
+    """
+
+    def test_reads_sgg_fields_in_order_through_sections_and_field_lists(self):
+        ui_schema = [
+            {
+                "type": "section",
+                "name": "applicant",
+                "label": "Applicant",
+                "children": [{"type": "field", "definition": "/properties/organization"}],
+            },
+            {
+                "type": "section",
+                "name": "contacts",
+                "label": "Contacts",
+                "children": [
+                    {
+                        "type": "fieldList",
+                        "name": "contacts",
+                        "children": [
+                            {
+                                "type": "field",
+                                "definition": "/properties/contacts/items/properties/name"
+                                "/properties/first_name",
+                            },
+                            {
+                                "type": "field",
+                                "definition": "/properties/contacts/items/properties/email",
+                            },
+                        ],
+                    }
+                ],
+            },
+        ]
+        assert flatten_ui.field_order(ui_schema) == placed(
+            "organization", "contacts.[].name.first_name", "contacts.[].email"
+        )
+
+    @pytest.mark.parametrize("node_type", ["multiField", "text"])
+    def test_refuses_sgg_node_types_it_does_not_read(self, node_type):
+        """A node that might place fields is not silently left out of the order."""
+        ui_schema = [{"type": "section", "children": [{"type": node_type, "name": "budget"}]}]
+        with pytest.raises(ValueError, match=f"'{node_type}' UI node type is not read"):
+            flatten_ui.field_order(ui_schema)
+
+    def test_reads_json_forms_controls_in_order_through_layouts(self):
+        ui_schema = {
+            "type": "Group",
+            "label": "Form",
+            "elements": [
+                {"type": "Control", "scope": "#/properties/organization"},
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {"type": "Control", "scope": "#/properties/name/properties/first_name"},
+                        {"type": "Control", "scope": "#/properties/name/properties/last_name"},
+                    ],
+                },
+            ],
+        }
+        assert flatten_ui.field_order(ui_schema) == placed(
+            "organization", "name.first_name", "name.last_name"
+        )
+
+    def test_rebases_a_list_entry_layout_under_the_list_items(self):
+        """Scopes in `options.detail` are relative to one entry, as the frontend reads them."""
+        ui_schema = {
+            "type": "VerticalLayout",
+            "elements": [
+                {
+                    "type": "Control",
+                    "scope": "#/properties/contacts",
+                    "options": {
+                        "detail": {
+                            "type": "Group",
+                            "label": "Contact",
+                            "elements": [
+                                {"type": "Control", "scope": "#/properties/name"},
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/address/properties/city",
+                                },
+                            ],
+                        }
+                    },
+                }
+            ],
+        }
+        assert flatten_ui.field_order(ui_schema) == placed(
+            "contacts.[].name", "contacts.[].address.city"
+        )
+
+    def test_reads_both_formats_the_same_however_they_group(self):
+        """The SGG form puts both fields in one section, the JSON Forms one in two groups."""
+        sgg = [
+            {
+                "type": "section",
+                "name": "all",
+                "children": [
+                    {"type": "field", "definition": "/properties/a"},
+                    {"type": "field", "definition": "/properties/b"},
+                ],
+            }
+        ]
+        json_forms = {
+            "type": "VerticalLayout",
+            "elements": [
+                {
+                    "type": "Group",
+                    "label": "First",
+                    "elements": [{"type": "Control", "scope": "#/properties/a"}],
+                },
+                {
+                    "type": "Group",
+                    "label": "Second",
+                    "elements": [{"type": "Control", "scope": "#/properties/b"}],
+                },
+            ],
+        }
+        assert flatten_ui.field_order(sgg) == flatten_ui.field_order(json_forms)
+
+
+class TestNeighbors:
+    """How `neighbors()` names a field's position: by the fields beside it, never by index."""
+
+    @pytest.mark.parametrize(
+        ("at", "expected"),
+        [(0, "First · before b"), (1, "After a · before c"), (2, "After b · last")],
+        ids=["first", "middle", "last"],
+    )
+    def test_names_the_fields_either_side(self, at, expected):
+        assert compare.neighbors(["a", "b", "c"], at) == expected
+
+    def test_names_an_only_field_first_and_last(self):
+        assert compare.neighbors(["a"], 0) == "First · last"
+
+
+class TestOrderDifferences:
+    """Which matched fields `order_differences()` reports as placed differently."""
+
+    def test_accepts_fields_in_the_same_order(self):
+        both = placed("a", "b", "c")
+        assert not compare.order_differences(NOTHING_DECLARED, both, both)
+
+    def test_reports_only_the_field_that_moved(self):
+        """Moving `d` ahead of `b` shifts `b` and `c` too, but only `d` needs to move back."""
+        generated = placed("a", "d", "b", "c", "e")
+        handwritten = placed("a", "b", "c", "d", "e")
+        assert [
+            str(d) for d in compare.order_differences(NOTHING_DECLARED, generated, handwritten)
+        ] == ["out of order: d -- generated: After a · before b; handwritten: After c · before e"]
+
+    def test_names_neighbors_relative_to_the_moved_field(self):
+        """Steps a neighbor shares with the field it describes are left off."""
+        generated = placed("c.[].role", "c.[].title", "c.[].name.first", "c.[].name.last")
+        handwritten = placed("c.[].role", "c.[].name.first", "c.[].name.last", "c.[].title")
+        found = compare.order_differences(NOTHING_DECLARED, generated, handwritten)
+        assert [str(d) for d in found] == [
+            "out of order: c.[].title -- generated: After role · before name.first; "
+            "handwritten: After name.last · last"
+        ]
+
+    def test_ignores_a_field_only_one_form_places(self):
+        """`extra` has no counterpart, so it cannot be out of order or push others out."""
+        generated = placed("extra", "a", "b", "c")
+        handwritten = placed("a", "b", "c", "legacy")
+        assert not compare.order_differences(NOTHING_DECLARED, generated, handwritten)
+
+    def test_compares_renamed_fields_by_their_counterpart(self):
+        diff = declaring(renamed={"phone": "phone_number"})
+        generated = placed("phone", "email")
+        handwritten = placed("phone_number", "email")
+        assert not compare.order_differences(diff, generated, handwritten)
+
+    def test_ignores_field_listed_in_out_of_order(self):
+        diff = declaring(out_of_order={"d": "Grants.gov asks for it earlier"})
+        generated = placed("a", "d", "b", "c")
+        handwritten = placed("a", "b", "c", "d")
+        assert not compare.order_differences(diff, generated, handwritten)
+
+
+class TestStaleOrderEntries:
+    """Which `out_of_order` entries `stale_order_entries()` reports as describing nothing."""
+
+    def test_keeps_entry_for_a_field_still_out_of_order(self):
+        diff = declaring(out_of_order={"d": "Grants.gov asks for it earlier"})
+        generated = placed("a", "d", "b", "c")
+        handwritten = placed("a", "b", "c", "d")
+        assert not compare.stale_order_entries(diff, generated, handwritten)
+
+    def test_flags_entry_for_a_field_back_in_order(self):
+        diff = declaring(out_of_order={"d": "Grants.gov asks for it earlier"})
+        both = placed("a", "b", "c", "d")
+        assert [str(d) for d in compare.stale_order_entries(diff, both, both)] == [
+            "recorded order difference no longer differs: d -- Grants.gov asks for it earlier"
+        ]
+
+    def test_flags_entry_for_a_field_neither_form_places(self):
+        diff = declaring(out_of_order={"ghost": "a reason for a field long gone"})
+        both = placed("a", "b")
+        assert kinds(compare.stale_order_entries(diff, both, both)) == [
+            "recorded order difference no longer differs"
+        ]

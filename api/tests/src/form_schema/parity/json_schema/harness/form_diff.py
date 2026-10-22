@@ -26,3 +26,7 @@ class FormDiff(shared.FormDiff):
     #: "path/title" or "path/description" -> why the two forms word the field differently.
     #: e.g. {"key_contacts.[].email/title": "the Grants.gov form labels it E-mail"}
     differing_text: dict[str, str] = dataclasses.field(default_factory=dict)
+
+    #: Generated path -> why the two forms place the field differently.
+    #: e.g. {"key_contacts.[].title": "Grants.gov asks for the role before the name"}
+    out_of_order: dict[str, str] = dataclasses.field(default_factory=dict)

@@ -9,7 +9,9 @@ that can see a field one form has and the other lacks: neither schema sets
 `additionalProperties`, so an unexpected field validates cleanly on both.
 
 Titles and descriptions are compared apart from the rules, ignoring case and whitespace,
-since they change what an applicant reads rather than what they may submit.
+since they change what an applicant reads rather than what they may submit. Field order is
+read from each form's UI schema, with sections and groups dropped, so regrouping the same
+fields is not a difference.
 
 The rule comparison reads a flattened schema, which is an approximation a validator never
 has to make -- `merge_schema.py` folds `allOf`, and `if`/`then` branches are left where
@@ -22,7 +24,7 @@ import importlib
 import pytest
 
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
-from tests.src.form_schema.parity.json_schema.harness import compare, flatten_schema
+from tests.src.form_schema.parity.json_schema.harness import compare, flatten_schema, flatten_ui
 from tests.src.form_schema.parity.json_schema.harness.form_diff import FormDiff
 
 # One record per generated form, from `diffs/`. While it is empty every test below is
@@ -30,12 +32,10 @@ from tests.src.form_schema.parity.json_schema.harness.form_diff import FormDiff
 DIFFS: list[FormDiff] = []
 
 
-def _schemas(diff):
-    generated = importlib.import_module(f"src.form_schema.forms.{diff.generated_module}")
-    handwritten = importlib.import_module(f"src.form_schema.forms.{diff.handwritten_module}")
+def _modules(diff):
     return (
-        resolve_jsonschema(generated.FORM.form_json_schema),
-        resolve_jsonschema(handwritten.FORM_JSON_SCHEMA),
+        importlib.import_module(f"src.form_schema.forms.{diff.generated_module}"),
+        importlib.import_module(f"src.form_schema.forms.{diff.handwritten_module}"),
     )
 
 
@@ -44,14 +44,31 @@ def _report(discrepancies) -> str:
 
 
 @pytest.fixture(scope="module", params=DIFFS, ids=lambda d: d.generated_module)
-def forms(request):
-    """One form pair: its record, both resolved schemas, and both sides' inputs."""
-    diff = request.param
-    generated_schema, handwritten_schema = _schemas(diff)
+def diff(request):
+    """One form pair's record. `forms` and `orders` both read it, so a test taking both
+    runs once per form rather than once per combination."""
+    return request.param
+
+
+@pytest.fixture(scope="module")
+def forms(diff):
+    """One form pair: its record, and both sides' inputs from their resolved schemas."""
+    generated, handwritten = _modules(diff)
     return (
         diff,
-        flatten_schema.inputs(generated_schema),
-        flatten_schema.inputs(handwritten_schema),
+        flatten_schema.inputs(resolve_jsonschema(generated.FORM.form_json_schema)),
+        flatten_schema.inputs(resolve_jsonschema(handwritten.FORM_JSON_SCHEMA)),
+    )
+
+
+@pytest.fixture(scope="module")
+def orders(diff):
+    """One form pair: its record, and both sides' fields in the order their UI places them."""
+    generated, handwritten = _modules(diff)
+    return (
+        diff,
+        flatten_ui.field_order(generated.FORM.form_ui_schema),
+        flatten_ui.field_order(handwritten.FORM_UI_SCHEMA),
     )
 
 
@@ -95,11 +112,18 @@ class TestGeneratedVsHandwritten:
         differing = compare.text_differences(*forms)
         assert not differing, "the two forms word their fields differently:\n" + _report(differing)
 
+    def test_generated_form_orders_fields_the_same(self, orders):
+        """A field met at a different point, ignoring how either form groups its fields."""
+        differing = compare.order_differences(*orders)
+        assert not differing, "the two forms place fields in a different order:\n" + _report(
+            differing
+        )
+
 
 class TestRecordedDifferences:
     """Whether the record still describes real differences between real fields."""
 
-    def test_recorded_differences_are_not_stale(self, forms):
+    def test_recorded_differences_are_not_stale(self, forms, orders):
         """An entry naming a field neither form has makes the rest of the record meaningless."""
-        stale = compare.stale_entries(*forms)
+        stale = compare.stale_entries(*forms) + compare.stale_order_entries(*orders)
         assert not stale, "recorded differences no longer describe real inputs:\n" + _report(stale)
