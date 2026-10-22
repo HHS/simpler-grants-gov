@@ -2,6 +2,7 @@ import { OpportunityDetail } from "src/types/opportunity/opportunityResponseType
 
 import { useTranslations } from "next-intl";
 
+import { ArchivedOpportunityItem } from "./ArchivedOpportunityItem";
 import { ClosedOpportunityItem } from "./ClosedOpportunityItem";
 import { ForecastOpportunityItem } from "./ForecastOpportunityItem";
 import { PostedOpportunityItem } from "./PostedOpportunityItem";
@@ -25,6 +26,9 @@ const OpportunityImportantDates = ({
         )}
         {opportunityStatus === "closed" && (
           <ClosedOpportunityItem detail={detail} />
+        )}
+        {opportunityStatus === "archived" && (
+          <ArchivedOpportunityItem detail={detail} />
         )}
       </div>
     </div>
