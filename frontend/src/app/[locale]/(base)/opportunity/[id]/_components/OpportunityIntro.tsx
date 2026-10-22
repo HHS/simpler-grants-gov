@@ -5,18 +5,18 @@ import { useTranslations } from "next-intl";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type Props = {
-  legacy_opportunity_id: number;
+  legacyOpportunityId: number;
 };
 
 // agency, assistance listings, and last updated date are displayed in the OpportunityHeader
-const OpportunityIntro = ({ legacy_opportunity_id }: Props) => {
+const OpportunityIntro = ({ legacyOpportunityId }: Props) => {
   const t = useTranslations("OpportunityListing.intro");
 
   return (
     <p className="tablet-lg:font-sans-2xs">
       <a
         className="usa-button usa-button--unstyled"
-        href={legacyOpportunityUrl(legacy_opportunity_id)}
+        href={legacyOpportunityUrl(legacyOpportunityId)}
         target="_blank"
         rel="noopener noreferrer"
       >

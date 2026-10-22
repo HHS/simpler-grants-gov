@@ -13,7 +13,7 @@ jest.mock("next-intl", () => ({
       title: "Award details",
       yes: "Yes",
       no: "No",
-      programFunding: "Program Funding",
+      programFunding: "Expected project funding",
       expectedAwards: "Expected awards",
       awardCeiling: "Award Ceiling",
       awardFloor: "Award Floor",
@@ -49,14 +49,16 @@ describe("OpportunityAwardInfo", () => {
     render(<OpportunityAwardInfo opportunityData={mockOpportunityData} />);
 
     // Check the headings
-    expect(screen.getByRole("heading", { level: 2, name: "Award details" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Award details" }),
+    ).toBeInTheDocument();
 
     // Check the main award grid info
-    expect(screen.getByText("Program Funding")).toBeInTheDocument();
-    expect(screen.getByText("$5,000,000")).toBeInTheDocument();
-
-    expect(screen.getByText("Expected awards")).toBeInTheDocument();
-    expect(screen.getByText("10")).toBeInTheDocument();
+    const fundingSummary = screen.getByTestId("opportunity-funding-summary");
+    expect(fundingSummary).toHaveTextContent(
+      "Expected project funding: $5,000,000",
+    );
+    expect(fundingSummary).toHaveTextContent("Expected awards: 10");
 
     expect(screen.getByText("Award Ceiling")).toBeInTheDocument();
     expect(screen.getByText("$1,000,000")).toBeInTheDocument();
@@ -101,5 +103,24 @@ describe("OpportunityAwardInfo", () => {
     expect(
       screen.getByText("Support for education and health initiatives"),
     ).toBeInTheDocument();
+  });
+
+  it("renders fallbacks in the funding summary when values are missing", () => {
+    render(
+      <OpportunityAwardInfo
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            ...mockOpportunityData.summary,
+            estimated_total_program_funding: null,
+            expected_number_of_awards: null,
+          },
+        }}
+      />,
+    );
+
+    const fundingSummary = screen.getByTestId("opportunity-funding-summary");
+    expect(fundingSummary).toHaveTextContent("Expected project funding: $--");
+    expect(fundingSummary).toHaveTextContent("Expected awards: --");
   });
 });

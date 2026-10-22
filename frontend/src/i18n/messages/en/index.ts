@@ -238,7 +238,7 @@ export const messages = {
       title: "Award details",
       yes: "Yes",
       no: "No",
-      programFunding: "Program Funding",
+      programFunding: "Expected project funding",
       expectedAwards: "Expected awards",
       awardCeiling: "Award Maximum",
       awardFloor: "Award Minimum",
@@ -268,6 +268,8 @@ export const messages = {
       closed: "Closed",
       closeDateDescription: "Close Date Description",
       closeDateDescriptionNotAvailable: "Not available",
+      archived: "Archived",
+      notSpecified: "Not specified",
 
       version: "Version",
     },
