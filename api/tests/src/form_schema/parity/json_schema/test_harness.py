@@ -31,6 +31,11 @@ def field(required: bool = False, **rules) -> FormInput:
     return FormInput(required=required, rules=rules)
 
 
+def worded(title: str | None = None, description: str | None = None) -> FormInput:
+    """One field and the text beside it. `worded("Email", "Where we will reach you.")`."""
+    return FormInput(required=False, rules={}, title=title, description=description)
+
+
 def matched(diff, generated, handwritten) -> dict[str, str]:
     return {
         ".".join(k): ".".join(v)
@@ -159,6 +164,56 @@ class TestRuleDifferences:
         assert not compare.rule_differences(NOTHING_DECLARED, generated, handwritten)
 
 
+class TestTextDifferences:
+    """Which matched fields `text_differences()` reports as worded differently."""
+
+    @pytest.mark.parametrize(
+        ("generated", "handwritten"),
+        [
+            ("First Name", "First Name"),
+            ("First Name", "first name"),
+            ("First Name", "  First\n   Name "),
+            (None, ""),
+        ],
+        ids=["identical", "case-only", "whitespace-only", "absent-and-empty"],
+    )
+    def test_ignores_case_and_whitespace(self, generated, handwritten):
+        found = compare.text_differences(
+            NOTHING_DECLARED, {("a",): worded(generated)}, {("a",): worded(handwritten)}
+        )
+        assert not found
+
+    def test_flags_a_change_of_wording(self):
+        generated = {("a",): worded("E-mail address")}
+        handwritten = {("a",): worded("Email")}
+        found = compare.text_differences(NOTHING_DECLARED, generated, handwritten)
+        assert [str(d) for d in found] == [
+            "title differs: a -- generated 'E-mail address', handwritten 'Email'"
+        ]
+
+    def test_flags_text_stated_on_one_form_only(self):
+        generated = {("a",): worded("Email", "Where we will reach you.")}
+        handwritten = {("a",): worded("Email")}
+        found = compare.text_differences(NOTHING_DECLARED, generated, handwritten)
+        assert [str(d) for d in found] == [
+            "description differs: a -- generated 'Where we will reach you.', handwritten (absent)"
+        ]
+
+    def test_ignores_difference_listed_in_differing_text(self):
+        diff = declaring(differing_text={"a/title": "the Grants.gov form labels it E-mail"})
+        generated = {("a",): worded("E-mail address")}
+        handwritten = {("a",): worded("Email")}
+        assert not compare.text_differences(diff, generated, handwritten)
+
+    def test_compares_renamed_fields_under_the_generated_path(self):
+        diff = declaring(renamed={"p.phone": "p.phone_number"})
+        generated = {("p", "phone"): worded("Phone")}
+        handwritten = {("p", "phone_number"): worded("Telephone")}
+        assert [d.path for d in compare.text_differences(diff, generated, handwritten)] == [
+            "p.phone"
+        ]
+
+
 class TestStaleEntries:
     """Which record entries `stale_entries()` reports as no longer describing anything real."""
 
@@ -188,6 +243,28 @@ class TestStaleEntries:
             "recorded difference names no such input"
         ]
 
+    def test_flags_recorded_text_difference_for_unknown_field(self):
+        diff = declaring(differing_text={"ghost/title": "a reason for a field long gone"})
+        both = inputs("a")
+        assert kinds(compare.stale_entries(diff, both, both)) == [
+            "recorded difference names no such input"
+        ]
+
+    def test_flags_recorded_text_difference_that_no_longer_differs(self):
+        """The forms now agree, up to case, so the entry describes nothing."""
+        diff = declaring(differing_text={"a/title": "the forms used to disagree"})
+        generated = {("a",): worded("Email")}
+        handwritten = {("a",): worded("EMAIL")}
+        assert [str(d) for d in compare.stale_entries(diff, generated, handwritten)] == [
+            "recorded text difference no longer differs: a/title -- the forms used to disagree"
+        ]
+
+    def test_keeps_recorded_text_difference_that_still_differs(self):
+        diff = declaring(differing_text={"a/title": "the Grants.gov form labels it E-mail"})
+        generated = {("a",): worded("E-mail address")}
+        handwritten = {("a",): worded("Email")}
+        assert not compare.stale_entries(diff, generated, handwritten)
+
 
 class TestInputRules:
     """How `flatten_schema.inputs()` renders a rule, which is what the comparison sees.
@@ -209,3 +286,15 @@ class TestInputRules:
         one_way = flatten_schema.inputs({"properties": {"a": {"enum": ["X", "Y"]}}})
         other_way = flatten_schema.inputs({"properties": {"a": {"enum": ["Y", "X"]}}})
         assert one_way == other_way
+
+    def test_keeps_title_and_description_out_of_the_rules(self):
+        """They change what an applicant reads, so `text_differences()` compares them, not
+        `rule_differences()`."""
+        found = flatten_schema.inputs(
+            {"properties": {"a": {"type": "string", "title": "A", "description": "About A."}}}
+        )
+        assert found == {
+            ("a",): FormInput(
+                required=False, rules={"type": "string"}, title="A", description="About A."
+            )
+        }

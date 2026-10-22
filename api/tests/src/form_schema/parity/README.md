@@ -32,6 +32,7 @@ mirrors, with the record in `json_schema/diffs/`:
   other way round
 - corresponding inputs are equally required
 - corresponding inputs are governed by the same validation rules
+- corresponding inputs carry the same title and description, ignoring case and whitespace
 - every entry in the record still describes a real difference
 
 The first is the only check that can see a field one form has and the other lacks.
@@ -73,5 +74,9 @@ the one that is wrong goes in `differing_rules`, with a citation naming the XSD,
 and the facet. That is a defect list for Simpler Grants, not permission for the difference
 to exist -- and the stale-entries check fails if an entry stops naming a real input, so
 the record cannot rot.
+
+A wording difference the generated form means to keep goes in `differing_text`, keyed
+`"path/title"` or `"path/description"`. An entry whose two texts come to agree is stale
+too.
 
 Anything else is ours to fix.

@@ -26,11 +26,11 @@ valid, which makes the two comparable. These produce the same result:
 
     both -> {("contact", "email"): FormInput(
                  required=True,
-                 rules={"format": "email", "maxLength": 60, "type": "string"})}
+                 rules={"format": "email", "maxLength": 60, "type": "string"}, ...)}
 
 `$ref` is resolved upstream by `src.form_schema.jsonschema_resolver`; `allOf` is folded by
-`merge_schema.py`; titles and descriptions are dropped because they change what an
-applicant reads, not what they may submit.
+`merge_schema.py`; titles and descriptions are kept apart from the rules, because they
+change what an applicant reads, not what they may submit.
 
 Where two forms spell one field differently -- `p.phone` against `p.phone_number` -- the
 `FormInput` values match and only the path differs. `FormDiff.renamed` pairs those up.
@@ -49,7 +49,7 @@ from .merge_schema import merge_allof
 
 # Every keyword that can make a payload invalid. Anything else a schema carries (title,
 # description, examples, $comment) changes what an applicant reads, not what they may
-# submit, and belongs to the UI checks.
+# submit, and is compared separately if at all.
 VALIDATION_KEYWORDS = frozenset(
     {
         "type",
@@ -78,14 +78,17 @@ VALIDATION_KEYWORDS = frozenset(
 class FormInput:
     """One field an applicant can fill in, and the rules deciding what they may put in it.
 
-        FormInput(required=True, rules={"maxLength": 60, "type": "string"})
+        FormInput(required=True, rules={"maxLength": 60, "type": "string"}, title="Email")
 
     `rules` holds `VALIDATION_KEYWORDS` with their values canonicalized, so two fields
-    declared differently but permitting the same values compare with `==`.
+    declared differently but permitting the same values compare with `==`. `title` and
+    `description` are what the applicant reads beside the field, as the schema states them.
     """
 
     required: bool
     rules: dict[str, Any]
+    title: str | None = None
+    description: str | None = None
 
 
 def _rules(node: dict[str, Any]) -> dict[str, Any]:
@@ -136,7 +139,12 @@ def inputs(schema: dict[str, Any]) -> dict[Path, FormInput]:
             walk(items, (*prefix, ARRAY), bool(merged.get("minItems")))
             return
         if prefix:
-            out[prefix] = FormInput(required=required, rules=_rules(merged))
+            out[prefix] = FormInput(
+                required=required,
+                rules=_rules(merged),
+                title=merged.get("title"),
+                description=merged.get("description"),
+            )
 
     walk(schema, (), False)
     return out
