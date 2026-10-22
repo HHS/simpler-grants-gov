@@ -28,7 +28,8 @@
     "pretest:parity": "npm run parity:fetch",
     "test:parity": "vitest run",
     "check:parity": "tsc --noEmit",
-    "test:emitters": "npm test -w emitters/xml"
+    "test:emitters": "npm test -w emitters/xml",
+    "form": "node parity/cli/index.ts"
   },
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^16.0.3",
