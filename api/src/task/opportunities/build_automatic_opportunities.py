@@ -192,7 +192,6 @@ class BuildAutomaticOpportunitiesTask(Task):
     def run_task(self) -> None:
         if os.getenv("ENVIRONMENT", None) not in [
             "grantee1",
-            "grantee2",
             "grantor1",
             "local",
             "dev",

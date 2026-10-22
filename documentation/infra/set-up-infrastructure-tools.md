@@ -68,7 +68,7 @@ active before you run any AWS CLI, Terraform, or `bin/` command.
 | `infra-dev`, `infra-sgg2`, `infra-sgg3`, `infra-sgg1` | `dev` | `dev` |
 | `infra-staging` | `staging` | `staging` |
 | `infra-training` | `training` | `training` |
-| `prod`, `shared`, `grantee1`, `grantee2`, `grantor1` | `simpler-grants-gov` | `prod` |
+| `prod`, `shared`, `grantee1`, `grantor1` | `simpler-grants-gov` | `prod` |
 
 The source of truth for this mapping is `account_names_by_environment` in
 [`infra/api/app-config/main.tf`](../../infra/api/app-config/main.tf).
