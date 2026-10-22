@@ -4,6 +4,7 @@ import {
   formatDateWithNoPreformattedExpectations,
   isExpired,
   isExpiring,
+  toLongMonthDate,
   toShortMonthDate,
 } from "src/utils/dateUtil";
 
@@ -81,5 +82,15 @@ describe("toShortMonthDate", () => {
   });
   it("returns an empty string if input is invalid", () => {
     expect(toShortMonthDate("January 25th Twenty Twenty FIve")).toEqual("");
+  });
+});
+
+describe("toLongMonthDate", () => {
+  it("converts dates to the `long month` format", () => {
+    expect(toLongMonthDate("2025-01-25")).toEqual("January 25, 2025");
+    expect(toLongMonthDate("01-25-2025")).toEqual("January 25, 2025");
+  });
+  it("returns an empty string if input is invalid", () => {
+    expect(toLongMonthDate("January 25th Twenty Twenty FIve")).toEqual("");
   });
 });

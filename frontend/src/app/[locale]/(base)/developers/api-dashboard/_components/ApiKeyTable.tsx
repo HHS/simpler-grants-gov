@@ -13,11 +13,10 @@ export default function ApiKeyTable({ apiKeys }: ApiKeyTableProps) {
 
   if (!apiKeys.length) {
     return (
-      <div className="usa-alert usa-alert--info">
-        <div className="usa-alert__body">
-          <p className="usa-alert__text">{t("emptyState")}</p>
-        </div>
-      </div>
+      <>
+        <h2>{t("emptyStateHeading")}</h2>
+        <p>{t("emptyStateDescription")}</p>
+      </>
     );
   }
 

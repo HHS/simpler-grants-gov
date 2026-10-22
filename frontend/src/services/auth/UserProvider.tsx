@@ -3,16 +3,14 @@
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
 import { useGetCookie } from "cookies-next";
 import noop from "lodash/noop";
-import { LOGOUT_URL } from "src/constants/auth";
 import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 import { UserContext } from "src/services/auth/useUser";
 import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";
 import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
 import { UserProfile } from "src/types/authTypes";
 import { isExpired, isExpiring } from "src/utils/dateUtil";
-import { storeCurrentPage } from "src/utils/userUtils";
 
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function UserProvider({
@@ -22,6 +20,7 @@ export default function UserProvider({
   featureFlagDefaults: FeatureFlags;
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const getCookie = useGetCookie();
   const cookie = decodeURIComponent(getCookie(FEATURE_FLAGS_KEY) || "{}");
   const [localUser, setLocalUser] = useState<UserProfile>();
@@ -59,12 +58,7 @@ export default function UserProvider({
         setIsLoading(false);
         if (localUser?.isLoggedIn && !fetchedUser.isLoggedIn) {
           setHasBeenLoggedOut(true);
-
-          // Invoke the logout endpoint for explicit logout. This will ensure
-          // the correlation_id cookie is properly removed since the correlation_id
-          // cookie is httpOnly.
-          storeCurrentPage(location.pathname, location.search);
-          redirect(LOGOUT_URL);
+          router.refresh();
         }
         return;
       }
@@ -73,7 +67,7 @@ export default function UserProvider({
       setIsLoading(false);
       setUserFetchError(e as Error);
     }
-  }, [localUser]);
+  }, [localUser, router]);
 
   const logoutLocalUser = useCallback(() => {
     setLocalUser({ ...(localUser as UserProfile), isLoggedIn: false });

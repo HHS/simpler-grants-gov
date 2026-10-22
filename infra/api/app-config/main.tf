@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-sgg1"]
+  environments = ["dev", "staging", "prod", "training", "grantee1", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-sgg1"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -51,7 +51,6 @@ locals {
     dev      = module.dev_config
     staging  = module.staging_config
     grantee1 = module.grantee1_config
-    grantee2 = module.grantee2_config
     grantor1 = module.grantor1_config
     prod     = module.prod_config
     training = module.training_config
@@ -104,7 +103,6 @@ locals {
     shared         = "simpler-grants-gov"
     dev            = "simpler-grants-gov"
     grantee1       = "simpler-grants-gov"
-    grantee2       = "simpler-grants-gov"
     grantor1       = "simpler-grants-gov"
     staging        = "simpler-grants-gov"
     prod           = "simpler-grants-gov"

@@ -50,6 +50,9 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     application.submitted_at = utcnow()
     logger.info("Application successfully submitted")
 
+    # TODO post message to SQS queue
+    # send_application_submission_message(application.application_id, user.user_id if user else None)
+
     # Add application metadata to logs
     add_application_metadata_to_logs(application)
 
