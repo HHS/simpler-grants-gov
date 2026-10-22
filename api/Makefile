@@ -262,6 +262,9 @@ init-mailpit: start-mailpit
 start-mailpit:
 	docker compose up --detach mailpit
 
+preview-new-opportunity-email: start-mailpit ## Send the new opportunity email to Mailpit, read it at http://localhost:8025
+	$(PY_RUN_CMD) python3 -m tool.preview_emails.preview_new_opportunity_email
+
 ##################################################
 # Testing
 ##################################################

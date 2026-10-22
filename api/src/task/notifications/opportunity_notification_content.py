@@ -88,6 +88,9 @@ class OpportunityNotificationContent:
 
     @property
     def submission_period(self) -> str:
+        if not self.summary:
+            return NOT_SPECIFIED
+
         open_date = self.summary.post_date
         close_date = self.summary.close_date
         if self.summary.is_forecast:
