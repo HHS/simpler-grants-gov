@@ -217,9 +217,9 @@ def build_email_body(opportunities: Sequence[Opportunity], frontend_base_url: st
 
     for opportunity in opportunities:
         content = OpportunityNotificationContent(opportunity, frontend_base_url)
-        url = f"{content.opportunity_details_page_url}{UTM_TAG}"
+        url = content.opportunity_details_page_url(UTM_TAG)
         sections.append(
-            f"<b><a href='{url}' target='_blank'>{html.escape(content.title or '')}</a></b><br/>\n"
+            f"<b><a href='{url}' target='_blank'>{html.escape(content.title)}</a></b><br/>\n"
             f"Agency: {html.escape(content.agency_code_with_name)}<br/>\n"
             f"Status: {content.status}<br/>\n"
             f"Submission period: {content.submission_period}<br/>\n"
