@@ -33,6 +33,8 @@ mirrors, with the record in `json_schema/diffs/`:
 - corresponding inputs are equally required
 - corresponding inputs are governed by the same validation rules
 - corresponding inputs carry the same title and description, ignoring case and whitespace
+- the UI schemas place the fields both forms have in the same order, ignoring sections and
+  groups
 - every entry in the record still describes a real difference
 
 The first is the only check that can see a field one form has and the other lacks.
@@ -78,5 +80,9 @@ the record cannot rot.
 A wording difference the generated form means to keep goes in `differing_text`, keyed
 `"path/title"` or `"path/description"`. An entry whose two texts come to agree is stale
 too.
+
+An order difference goes in `out_of_order`, keyed by the generated path. Only the fewest
+fields that restore the hand-written order are reported, each placed by its neighbors on
+both sides, so one moved field is one entry. An entry for a field back in order is stale.
 
 Anything else is ours to fix.

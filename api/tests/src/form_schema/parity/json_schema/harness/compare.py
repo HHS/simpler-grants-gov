@@ -6,11 +6,16 @@
     text_differences   matched fields labeled or described differently
     stale_entries      FormDiff entries no longer describing a real difference
 
+    order_differences    matched fields placed in a different order
+    stale_order_entries  `out_of_order` entries no longer describing a real difference
+
 `match_fields` runs first and the others build on its result. Each takes the same
 three arguments -- the record, and both sides flattened by `flatten_schema.inputs` -- and
-returns `Discrepancy` objects that a `FormDiff` entry can suppress.
+returns `Discrepancy` objects that a `FormDiff` entry can suppress. The two order checks
+take both sides flattened by `flatten_ui.field_order` instead.
 """
 
+from collections.abc import Collection
 from typing import Any
 
 from ... import paths
@@ -35,8 +40,8 @@ def _normalized(text: str | None) -> str:
 
 def match_fields(
     diff: FormDiff,
-    generated: dict[Path, FormInput],
-    handwritten: dict[Path, FormInput],
+    generated: Collection[Path],
+    handwritten: Collection[Path],
 ) -> dict[Path, Path]:
     """Generated path -> handwritten path, for every input that corresponds.
 
@@ -47,6 +52,8 @@ def match_fields(
     target is not also matched to itself: with `renamed={"a": "b"}` and both forms holding
     `a` and `b`, only `a -> b` is returned, and generated `b` and handwritten `a` are left
     for `unmatched_fields` to report.
+
+    Reads only which paths each side has, so it matches inputs and placed fields alike.
     """
     renamed = {paths.parse(k): paths.parse(v) for k, v in diff.renamed.items()}
     taken = set(renamed.values())
@@ -224,3 +231,125 @@ def stale_entries(
         elif key not in text:
             out.append(Discrepancy("recorded text difference no longer differs", key, reason))
     return out
+
+
+def _longest_increasing(values: list[int]) -> set[int]:
+    """Indices of one longest strictly increasing subsequence of `values`.
+
+        [0, 6, 7, 1, 2, 3] -> {0, 3, 4, 5}
+
+    The same choice as `forms/parity/harness/compare.ts`, so both suites report the same
+    fields: the earliest predecessor wins a tie, and the earliest longest run ends it.
+    """
+    length = [1] * len(values)
+    previous = [-1] * len(values)
+    for i in range(len(values)):
+        for j in range(i):
+            if values[j] < values[i] and length[j] + 1 > length[i]:
+                length[i] = length[j] + 1
+                previous[i] = j
+    kept = set()
+    i = length.index(max(length)) if length else -1
+    while i != -1:
+        kept.add(i)
+        i = previous[i]
+    return kept
+
+
+def _relative(path: Path, to: Path) -> str:
+    """`path` without the steps it shares with `to`, keeping at least its last.
+
+    `("contacts", "[]", "name", "suffix")` beside `("contacts", "[]", "title")` reads
+    `name.suffix`.
+    """
+    shared = 0
+    while shared < min(len(path), len(to)) - 1 and path[shared] == to[shared]:
+        shared += 1
+    return paths.render(path[shared:])
+
+
+def neighbors(sequence: list[str], at: int) -> str:
+    """Where `sequence[at]` sits, named by the entries either side of it.
+
+        neighbors(["a", "b", "c"], 1) -> "After a · before c"
+        neighbors(["a", "b", "c"], 0) -> "First · before b"
+        neighbors(["a", "b", "c"], 2) -> "After b · last"
+
+    A position by index would shift whenever a field is added; a neighbor does not.
+    """
+    before = sequence[at - 1] if at > 0 else None
+    after = sequence[at + 1] if at + 1 < len(sequence) else None
+    return " · ".join(
+        [f"After {before}" if before else "First", f"before {after}" if after else "last"]
+    )
+
+
+def _all_order_differences(
+    diff: FormDiff,
+    generated: list[Path],
+    handwritten: list[Path],
+) -> dict[str, Discrepancy]:
+    """Generated path -> the difference, recorded or not."""
+    generated_at = {path: i for i, path in enumerate(generated)}
+    handwritten_at = {path: i for i, path in enumerate(handwritten)}
+    placed = sorted(
+        (
+            (generated_path, handwritten_path)
+            for generated_path, handwritten_path in match_fields(
+                diff, generated_at, handwritten_at
+            ).items()
+            if generated_path in generated_at and handwritten_path in handwritten_at
+        ),
+        key=lambda pair: generated_at[pair[0]],
+    )
+    # Each side's sequence holds only the fields both place, so a neighbor is always a
+    # field the other form has too.
+    generated_sequence = [g for g, _ in placed]
+    handwritten_sequence = sorted((h for _, h in placed), key=handwritten_at.__getitem__)
+    kept = _longest_increasing([handwritten_at[h] for _, h in placed])
+
+    out = {}
+    for i, (generated_path, handwritten_path) in enumerate(placed):
+        if i in kept:
+            continue
+        here = neighbors([_relative(g, generated_path) for g in generated_sequence], i)
+        there = neighbors(
+            [_relative(h, handwritten_path) for h in handwritten_sequence],
+            handwritten_sequence.index(handwritten_path),
+        )
+        where = paths.render(generated_path)
+        out[where] = Discrepancy("out of order", where, f"generated: {here}; handwritten: {there}")
+    return out
+
+
+def order_differences(
+    diff: FormDiff,
+    generated: list[Path],
+    handwritten: list[Path],
+) -> list[Discrepancy]:
+    """The fewest matched fields that, moved, give both forms the same order.
+
+    Only fields both forms place are compared, so a field one side lacks moves nothing, and
+    grouping is not read at all. The fields are taken in the generated form's order, and
+    those whose hand-written positions form one longest increasing run stay put; the rest
+    are reported, so one misplaced field does not flag everything after it. Each is placed
+    by its neighbors on both sides rather than by index.
+
+    Suppressed per field by `out_of_order`, keyed by the generated path.
+    """
+    found = _all_order_differences(diff, generated, handwritten)
+    return [d for key, d in found.items() if key not in diff.out_of_order]
+
+
+def stale_order_entries(
+    diff: FormDiff,
+    generated: list[Path],
+    handwritten: list[Path],
+) -> list[Discrepancy]:
+    """`out_of_order` entries naming a field that is no longer out of order."""
+    found = _all_order_differences(diff, generated, handwritten)
+    return [
+        Discrepancy("recorded order difference no longer differs", path, reason)
+        for path, reason in diff.out_of_order.items()
+        if path not in found
+    ]
