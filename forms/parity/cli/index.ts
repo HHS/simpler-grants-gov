@@ -2,27 +2,29 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { recordingFor, unexpectedIn } from "../harness/compare.ts";
 import type { FormCheck, PairResult } from "../harness/index.ts";
-import { CATEGORIES } from "../harness/model.ts";
-import type { Discrepancy, FormDiff, Recorded } from "../harness/model.ts";
+import {
+  CATEGORIES,
+  COMPARISONS,
+  REGISTER_KINDS,
+  type Comparison,
+} from "../harness/model.ts";
+import type {
+  Discrepancy,
+  FormDiff,
+  Recorded,
+  Value,
+} from "../harness/model.ts";
 
 const VERSION = "0.1.0";
-export const comparisons = [
-  "dat",
-  "xsd",
-  "jsonSchema",
-  "uiSchema",
-  "jsonSchemaVsXsd",
-  "xmlMapping",
-  "xmlMappingVsJsonSchema",
-  "xmlMappingVsXsd",
-] as const;
-type Comparison = (typeof comparisons)[number];
-type Entry = Recorded & { plan?: unknown; source?: unknown };
+export const comparisons = COMPARISONS;
+type Entry = Recorded & { plan?: Value; source?: Value };
 export type Finding = Discrepancy & {
   comparison: string;
   status: "unrecorded" | "recorded" | "stale" | "suite";
   entry?: Entry;
+  recording?: "direct" | "wording";
   fingerprint: string;
   recordable: boolean;
 };
@@ -53,29 +55,27 @@ export function project(diff: FormDiff, check: FormCheck) {
     const register = d.recordAs?.register,
       key = d.recordAs?.key;
     const registers = diff[comparison as Comparison];
-    const entry =
-      accepted ??
-      (register && key ? registers?.[register]?.[key] : undefined) ??
-      (comparison === "dat"
-        ? d.kind === "label differs"
-          ? diff.wording?.labels
-          : d.kind === "help differs"
-            ? diff.wording?.help
-            : undefined
-        : undefined);
+    const recording = recordingFor(
+      {
+        registers: registers ?? {},
+        wording: comparison === "dat" ? diff.wording : undefined,
+      },
+      d,
+    );
+    const entry = accepted ?? recording?.entry;
     const recordable =
       status !== "stale" &&
       status !== "suite" &&
       !!d.recordAs &&
-      (!["differingRules", "differingLabels", "differingHelp"].includes(
-        register!,
-      ) ||
-        !!d.values);
+      key !== "__proto__" &&
+      register !== "renamed" &&
+      (REGISTER_KINDS[register!] !== "pinned" || !!d.values);
     rows.push({
       ...d,
       comparison,
       status,
       entry,
+      recording: recording?.scope,
       recordable,
       fingerprint: digest([
         diff.slug,
@@ -86,22 +86,14 @@ export function project(diff: FormDiff, check: FormCheck) {
         d.values ?? d.detail ?? null,
         status,
         entry ?? null,
+        recording?.scope ?? null,
       ]),
     });
   };
   for (const comparison of comparisons) {
     const result = pairs[comparison];
     if (!result) continue;
-    for (const list of [
-      result.missingFields,
-      result.extraFields,
-      result.fieldOrder,
-      result.fieldLabels,
-      result.fieldConstraints,
-      result.fieldOccurrences,
-      result.helpText,
-    ])
-      for (const d of list) add(comparison, "unrecorded", d);
+    for (const d of unexpectedIn(result)) add(comparison, "unrecorded", d);
     for (const d of result.recorded) add(comparison, "recorded", d, d.entry);
     for (const d of result.stale) add(comparison, "stale", d);
   }
@@ -137,12 +129,13 @@ export function select(
     category: options.category as Recorded["category"],
     reason: options.reason as string,
   };
-  const direct =
-    diff[finding.comparison as Comparison]?.[finding.recordAs!.register]?.[
-      finding.recordAs!.key
-    ];
-  // A retry may prove the desired direct record already exists; this never writes.
-  if (direct && stable(direct) === stable(entry))
+  // Trust the evaluator's value equivalence; a matching direct decision needs no write.
+  if (
+    finding.status === "recorded" &&
+    finding.recording === "direct" &&
+    finding.entry?.category === entry.category &&
+    finding.entry.reason === entry.reason
+  )
     return { finding, entry, noOp: true };
   if (options.expect !== finding.fingerprint)
     throw new Error(
@@ -163,7 +156,7 @@ const help = (command = "form") => ({
       ? "form accept <plan-slug> --comparison <name> --register <name> --key <key> --expect <fingerprint> --category <upstream|intentional|gap> --reason <text> [--replace] [--dry-run] [--format toon|json]"
       : "form findings [plan-slug] [--comparison <name>] [--full] [--include-recorded] [--format toon|json]",
   deferred:
-    "Computed TS registers require a manual edit. Named reasons, prune, adopt-wording and docs updates are not implemented.",
+    "Records use one JSON store with named reasons. Prune, adopt-wording and docs updates are not implemented.",
 });
 
 export function parse(args: string[]) {
@@ -238,14 +231,8 @@ export function parse(args: string[]) {
         "--expect must be the full SHA256 fingerprint from findings.",
       );
     if (
-      ![
-        "absentFromPlan",
-        "absentFromSource",
-        "differingRules",
-        "differingLabels",
-        "differingHelp",
-        "outOfOrder",
-      ].includes(String(options.register))
+      !Object.hasOwn(REGISTER_KINDS, String(options.register)) ||
+      options.register === "renamed"
     )
       throw new Error(
         "Unsupported register; use the finding's recordAs register.",
@@ -299,7 +286,7 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
     return 0;
   }
   try {
-    const { DIFFS } = await import("../diffs/index.ts");
+    const { DIFFS, RECORDS } = await import("../diffs/index.ts");
     if (!form) {
       output(
         {
@@ -354,7 +341,7 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
                     ? `${detail.slice(0, 200)}... (truncated; ${detail.length} characters)`
                     : detail,
                 accept: r.recordable
-                  ? `npm run --silent form -- accept ${shellQuote(form)} --comparison ${shellQuote(r.comparison)} --register ${shellQuote(r.recordAs!.register)} --key ${shellQuote(r.recordAs!.key)} --expect ${shellQuote(r.fingerprint)} --category '<category>' --reason '<reviewed explanation>'`
+                  ? `npm run --silent form -- accept ${shellQuote(form)} --comparison ${shellQuote(r.comparison)} --register ${shellQuote(r.recordAs!.register)} --key ${shellQuote(r.recordAs!.key)} --expect ${shellQuote(r.fingerprint)} --category '<category>' --reason '<reviewed explanation>'${r.entry ? " --replace" : ""}`
                   : "not recordable",
               };
             }),
@@ -378,11 +365,9 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
       return 0;
     }
     const writer = await import("./writer.ts");
-    const { FORMS_ROOT } = await import("../harness/load.ts");
-    const edit = await writer.preview(
-      path.join(FORMS_ROOT, "parity/diffs"),
-      diff,
-      selection.finding.comparison,
+    const edit = writer.preview(
+      RECORDS.find((record) => record.diff.slug === form)!,
+      selection.finding.comparison as Comparison,
       selection.finding.recordAs!,
       selection.entry,
     );
@@ -398,10 +383,7 @@ export async function main(args = process.argv.slice(2)): Promise<number> {
           options.format === "json" ? selection.entry : stable(selection.entry),
         before: digest(edit.before),
         after: digest(edit.after),
-        edits:
-          options.format === "json"
-            ? edit.edits
-            : edit.edits.map((e) => stable(e)),
+        change: options.format === "json" ? edit.change : stable(edit.change),
       },
       options.format === "json",
     );

@@ -122,6 +122,19 @@ export const CATEGORIES = {
 
 export type Category = keyof typeof CATEGORIES;
 
+/** The comparisons the maintained evaluator runs. */
+export const COMPARISONS = [
+  "dat",
+  "xsd",
+  "jsonSchema",
+  "uiSchema",
+  "jsonSchemaVsXsd",
+  "xmlMapping",
+  "xmlMappingVsJsonSchema",
+  "xmlMappingVsXsd",
+] as const satisfies readonly (keyof FormDiff)[];
+export type Comparison = (typeof COMPARISONS)[number];
+
 /** A recorded difference: why it is accepted, and which kind of reason that is. */
 export interface Recorded {
   category: Category;
@@ -167,6 +180,17 @@ export interface Registers {
   differingHelp?: Record<Path, Pinned>;
   outOfOrder?: Record<Path, Recorded>;
 }
+
+/** Runtime shapes for persisted registers; comparison semantics remain in compare.ts. */
+export const REGISTER_KINDS = {
+  absentFromPlan: "recorded",
+  absentFromSource: "recorded",
+  renamed: "renamed",
+  differingRules: "pinned",
+  differingLabels: "pinned",
+  differingHelp: "pinned",
+  outOfOrder: "recorded",
+} as const satisfies Record<keyof Registers, "recorded" | "pinned" | "renamed">;
 
 /**
  * Differences a form accepts wholesale rather than field by field: every label, or every help

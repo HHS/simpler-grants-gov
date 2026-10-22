@@ -1,0 +1,160 @@
+{
+  "slug": "key-contacts",
+  "dat": {
+    "differingLabels": {
+      "7-01": {
+        "plan": "* Project Role",
+        "source": "* Contact 1 Project Role",
+        "reasonRef": "standardLabel"
+      },
+      "7-13": {
+        "plan": "County/Parish",
+        "source": "County",
+        "reasonRef": "standardLabel"
+      },
+      "7-14": {
+        "plan": "State",
+        "source": "* State",
+        "reasonRef": "keyContacts.conditionalStar"
+      },
+      "7-17": {
+        "plan": "Zip / Postal Code",
+        "source": "* Zip / Postal Code",
+        "reasonRef": "keyContacts.conditionalStar"
+      },
+      "7-18": {
+        "plan": "* Phone Number",
+        "source": "* Telephone Number",
+        "reasonRef": "standardLabel"
+      },
+      "7-19": {
+        "plan": "Fax Number",
+        "source": "Fax",
+        "reasonRef": "standardLabel"
+      }
+    },
+    "differingHelp": {
+      "7-01": {
+        "plan": "Enter the individual's role on the project (e.g., project manager, fiscal contact).",
+        "source": "Enter the project role of the contact person (e.g., project manager, fiscal contact). Additional contacts are optional.",
+        "reasonRef": "keyContacts.KEY_CONTACT_HELP"
+      },
+      "7-03": {
+        "plan": "Enter the prefix.",
+        "source": "Select the Prefix from the provided list or enter a new Prefix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "7-04": {
+        "plan": "Enter the first name.",
+        "source": "Enter the First Name. This field is required.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-06": {
+        "plan": "Enter the last name.",
+        "source": "Enter the Last Name. This field is required.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-07": {
+        "plan": "Enter the suffix.",
+        "source": "Select the Suffix from the provided list or enter a new Suffix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "7-09": {
+        "plan": "Enter the contact's organizational affiliation.",
+        "source": "Enter the Organizational Affiliation of the person to contact on matters related to this application.",
+        "reasonRef": "keyContacts.KEY_CONTACT_HELP"
+      },
+      "7-10": {
+        "plan": "Enter the first line of the street address.",
+        "source": "Enter the first line of the Street Address. This field is required.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-12": {
+        "plan": "Enter the city.",
+        "source": "Enter the City. This field is required.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-14": {
+        "plan": "Select the state. This field is required if the country is the United States.",
+        "source": "Select the state, US possession or military code from the provided list. This field is required if Country is the United States.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-16": {
+        "plan": "Select the country.",
+        "source": "Select the Country from the provided list. This field is required.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-17": {
+        "plan": "Enter the zip / postal code. This field is required if the country is the United States.",
+        "source": "Enter the Postal Code (e.g., ZIP code). This field is required if Country is the United States.",
+        "reasonRef": "keyContacts.NINE_DIGIT_HELP"
+      },
+      "7-18": {
+        "plan": "Enter the phone number.",
+        "source": "Enter the daytime Telephone Number. This field is required.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-20": {
+        "plan": "Enter the email address.",
+        "source": "Enter a valid Email Address. This field is required.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-05": {
+        "plan": "Enter the middle name.",
+        "source": "Enter the Middle Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-11": {
+        "plan": "Enter the second line of the street address.",
+        "source": "Enter the second line of the Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-13": {
+        "plan": "Enter the county or parish.",
+        "source": "Enter the County.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-15": {
+        "plan": "Enter the province.",
+        "source": "Enter the Province.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "7-19": {
+        "plan": "Enter the fax number.",
+        "source": "Enter the Fax Number.",
+        "reasonRef": "SHARED_HELP"
+      }
+    },
+    "outOfOrder": {
+      "7-08": {
+        "reasonRef": "keyContacts.ROLE_GROUP"
+      },
+      "7-09": {
+        "reasonRef": "keyContacts.ROLE_GROUP"
+      }
+    }
+  },
+  "notes": [
+    "key-contacts.ts:4: The DAT stars State and Zip but answers \"No\" in its Required column; both are required only for a US address.",
+    "key-contacts.ts:25: Every help text that differs from the DAT, pinned word for word.",
+    "key-contacts.ts:27: key_contacts[].project_role",
+    "key-contacts.ts:34: key_contacts[].name.prefix",
+    "key-contacts.ts:41: key_contacts[].name.first_name",
+    "key-contacts.ts:47: key_contacts[].name.last_name",
+    "key-contacts.ts:53: key_contacts[].name.suffix",
+    "key-contacts.ts:60: key_contacts[].organizational_affiliation",
+    "key-contacts.ts:67: key_contacts[].address.street1",
+    "key-contacts.ts:74: key_contacts[].address.city",
+    "key-contacts.ts:80: key_contacts[].address.state",
+    "key-contacts.ts:87: key_contacts[].address.country",
+    "key-contacts.ts:94: key_contacts[].address.zip_code",
+    "key-contacts.ts:101: key_contacts[].phone",
+    "key-contacts.ts:107: key_contacts[].email",
+    "key-contacts.ts:113: key_contacts[].name.middle_name",
+    "key-contacts.ts:119: key_contacts[].address.street2",
+    "key-contacts.ts:125: key_contacts[].address.county",
+    "key-contacts.ts:131: key_contacts[].address.province",
+    "key-contacts.ts:137: key_contacts[].fax",
+    "key-contacts.ts:145: Title and Organizational Affiliation join Project Role in the Role group, ahead of the name."
+  ]
+}

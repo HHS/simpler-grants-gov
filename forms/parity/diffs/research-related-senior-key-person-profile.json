@@ -1,0 +1,212 @@
+{
+  "slug": "research-related-senior-key-person-profile",
+  "wording": {
+    "labels": {
+      "reasonRef": "BANK_LABELS"
+    },
+    "help": {
+      "reasonRef": "BANK_HELP"
+    }
+  },
+  "dat": {
+    "absentFromPlan": {
+      "1-10": {
+        "reasonRef": "ADDRESS_HEADING"
+      },
+      "2-10": {
+        "reasonRef": "ADDRESS_HEADING"
+      }
+    },
+    "outOfOrder": {
+      "1-07": {
+        "reasonRef": "PROFILE_GROUPS"
+      },
+      "1-22": {
+        "reasonRef": "PROFILE_GROUPS"
+      },
+      "1-23": {
+        "reasonRef": "PROFILE_GROUPS"
+      },
+      "2-07": {
+        "reasonRef": "PROFILE_GROUPS"
+      },
+      "2-22": {
+        "reasonRef": "PROFILE_GROUPS"
+      },
+      "2-23": {
+        "reasonRef": "PROFILE_GROUPS"
+      }
+    },
+    "differingRules": {
+      "2-01/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-02/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-03/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-04/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-05/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-11/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-12/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-13/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-14/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-15/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-15a/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-16/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-17/maxOccurs": {
+        "plan": 7,
+        "source": 1,
+        "reasonRef": "rr.ONCE"
+      },
+      "2-02/required": {
+        "plan": "conditional",
+        "source": "yes",
+        "reasonRef": "rr.EACH_KEY_PERSON"
+      },
+      "2-04/required": {
+        "plan": "conditional",
+        "source": "yes",
+        "reasonRef": "rr.EACH_KEY_PERSON"
+      },
+      "2-11/required": {
+        "plan": "conditional",
+        "source": "yes",
+        "reasonRef": "rr.EACH_KEY_PERSON"
+      },
+      "2-13/required": {
+        "plan": "conditional",
+        "source": "yes",
+        "reasonRef": "rr.EACH_KEY_PERSON"
+      },
+      "2-16/required": {
+        "plan": "conditional",
+        "source": "yes",
+        "reasonRef": "rr.EACH_KEY_PERSON"
+      }
+    }
+  },
+  "xmlMapping": {
+    "absentFromSource": {
+      "principal_investigator.profile.biographical_sketch -> PDPI/Profile/BioSketchsAttached/BioSketchAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "principal_investigator.profile.current_pending_support -> PDPI/Profile/SupportsAttached/SupportAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "senior_key_persons[].profile.biographical_sketch -> KeyPerson/Profile/BioSketchsAttached/BioSketchAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "senior_key_persons[].profile.current_pending_support -> KeyPerson/Profile/SupportsAttached/SupportAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "additional_profiles -> AdditionalProfilesAttached/AdditionalProfileAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "additional_biographical_sketches -> BioSketchsAttached/BioSketchAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "additional_current_pending_support -> SupportsAttached/SupportAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      }
+    }
+  },
+  "xmlMappingVsJsonSchema": {
+    "absentFromPlan": {
+      "principal_investigator.profile.biographical_sketch": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "principal_investigator.profile.current_pending_support": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "senior_key_persons[].profile.biographical_sketch": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "senior_key_persons[].profile.current_pending_support": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "additional_profiles": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "additional_biographical_sketches": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "additional_current_pending_support": {
+        "reasonRef": "ATTACHMENT_XML"
+      }
+    }
+  },
+  "xmlMappingVsXsd": {
+    "absentFromPlan": {
+      "PDPI/Profile/BioSketchsAttached/BioSketchAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "PDPI/Profile/SupportsAttached/SupportAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "KeyPerson/Profile/BioSketchsAttached/BioSketchAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "KeyPerson/Profile/SupportsAttached/SupportAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "AdditionalProfilesAttached/AdditionalProfileAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "BioSketchsAttached/BioSketchAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      },
+      "SupportsAttached/SupportAttached": {
+        "reasonRef": "ATTACHMENT_XML"
+      }
+    }
+  },
+  "notes": [
+    "research-related-senior-key-person-profile.ts:9: Key-person fields the DAT allows once, though the XSD allows 7 key persons.",
+    "research-related-senior-key-person-profile.ts:16: Fields required within each key person, in a section the form can leave empty."
+  ]
+}

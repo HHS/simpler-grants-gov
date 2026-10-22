@@ -8,6 +8,7 @@ import type { FormCheck } from "../harness/index.ts";
 import type { Fields, FormDiff, Registers } from "../harness/model.ts";
 import { digest, parse, project, select } from "./index.ts";
 import { commit, preview } from "./writer.ts";
+import { readRecord, resolve, type StoredForm } from "../diffs/store.ts";
 
 const why = { category: "intentional", reason: "Reviewed wording" } as const;
 const fields = (label: string): Fields =>
@@ -41,13 +42,18 @@ afterEach(async () => {
     await rm(folder, { recursive: true, force: true });
 });
 async function fixture(
-  body = `export const DIFF = { slug: "demo", dat: { differingLabels: {} } };\n`,
+  data: StoredForm = { slug: "demo" },
+  reasons = { shared: why } as Record<string, typeof why>,
 ) {
   const folder = await mkdtemp(path.join(os.tmpdir(), "form-cli-"));
   folders.push(folder);
-  const file = path.join(folder, "demo.ts");
-  await writeFile(file, body);
-  return { folder, file, body };
+  const file = path.join(folder, "demo.json");
+  await writeFile(file, JSON.stringify(data, null, 2) + "\n");
+  await writeFile(
+    path.join(folder, "reasons.json"),
+    JSON.stringify({ notes: "Fixture", reasons }),
+  );
+  return { folder, file, record: readRecord(file) };
 }
 
 describe("maintained findings and selection", () => {
@@ -198,10 +204,29 @@ describe("maintained findings and selection", () => {
   });
 });
 
-describe("conservative authoritative TS writer", () => {
-  it("runs the actual Node accept entry point and validates a dry-run module without a dependency cycle", async () => {
+describe("single authoritative data writer", () => {
+  it("refuses the reserved key in selection and persistence", async () => {
+    const f = await fixture();
+    expect(() =>
+      select({ slug: "demo" }, [], {
+        ...options("0".repeat(64)),
+        key: "__proto__",
+      }),
+    ).toThrow("reserved __proto__");
+    expect(() =>
+      preview(
+        f.record,
+        "dat",
+        { register: "absentFromPlan", key: "__proto__" },
+        why,
+      ),
+    ).toThrow("Unsupported record target");
+    expect(await readFile(f.file, "utf8")).toBe(f.record.before);
+  });
+
+  it("runs the actual Node accept entry point and leaves dry-run inputs untouched", async () => {
     const cli = path.resolve("parity/cli/index.ts");
-    const file = path.resolve("parity/diffs/key-contacts.ts");
+    const file = path.resolve("parity/diffs/key-contacts.json");
     const before = await readFile(file, "utf8");
     const run = (args: string[]) =>
       JSON.parse(
@@ -255,134 +280,192 @@ describe("conservative authoritative TS writer", () => {
     });
     expect(await readFile(file, "utf8")).toBe(before);
   });
-
-  it("inserts one pinned record and preserves bytes outside its AST span and neighboring comments", async () => {
-    const f = await fixture(
-      `// keep header\nexport const DIFF = { slug: "demo", dat: { differingLabels: { /* neighbor */ "other": { plan: "a", source: "b", category: "gap", reason: "keep" } } } };\n// keep footer\n`,
+  it("changes one record, preserves author context and reuses a named reason", async () => {
+    const f = await fixture({
+      slug: "demo",
+      notes: ["Important context"],
+      dat: {
+        differingLabels: {
+          other: { plan: "a", source: "b", reasonRef: "shared" },
+        },
+      },
+    });
+    const edit = preview(
+      f.record,
+      "dat",
+      { register: "differingLabels", key: "7-10" },
+      { plan: 'a "quote"\nnext', source: null, ...why },
     );
+    expect(edit.change.after.reasonRef).toBe("shared");
+    await commit(edit, false);
+    const actual = readRecord(f.file);
+    expect(actual.data.notes).toEqual(["Important context"]);
+    expect(actual.data.dat?.differingLabels?.other).toEqual(
+      f.record.data.dat?.differingLabels?.other,
+    );
+    expect(actual.diff.dat?.differingLabels?.["7-10"]).toEqual({
+      plan: 'a "quote"\nnext',
+      source: null,
+      ...why,
+    });
+    expect(await readFile(actual.reasonFile, "utf8")).toBe(
+      f.record.reasonsBefore,
+    );
+    expect(await readdir(f.folder)).toEqual(["demo.json", "reasons.json"]);
+  });
+  it("preserves an existing reason alias when another definition has the same text", async () => {
+    const f = await fixture(
+      {
+        slug: "demo",
+        dat: {
+          differingLabels: {
+            x: { plan: "a", source: "b", reasonRef: "local" },
+          },
+        },
+      },
+      { shared: why, local: why },
+    );
+    const record = readRecord(f.file);
+    const edit = preview(
+      record,
+      "dat",
+      { register: "differingLabels", key: "x" },
+      { plan: "new", source: "b", ...why },
+    );
+    expect(edit.change.after.reasonRef).toBe("local");
+  });
+  it("dry-run creates no temporary file, including when missing containers are inserted", async () => {
+    const f = await fixture();
+    await commit(
+      preview(
+        f.record,
+        "uiSchema",
+        { register: "differingHelp", key: "x" },
+        { plan: "p", source: "s", ...why },
+      ),
+      true,
+    );
+    expect(await readFile(f.file, "utf8")).toBe(f.record.before);
+    expect(await readdir(f.folder)).toEqual(["demo.json", "reasons.json"]);
+  });
+  it.each(["record", "reasons"])(
+    "refuses a changed %s without replacing it",
+    async (which) => {
+      const f = await fixture();
+      const edit = preview(
+        f.record,
+        "dat",
+        { register: "outOfOrder", key: "x" },
+        why,
+      );
+      const changed = which === "record" ? f.file : f.record.reasonFile;
+      await writeFile(changed, "human edit");
+      await expect(commit(edit, false)).rejects.toThrow("changed");
+      expect(await readFile(changed, "utf8")).toBe("human edit");
+      expect(await readdir(f.folder)).toEqual(["demo.json", "reasons.json"]);
+    },
+  );
+  it("validates malformed data, unknown names, untyped pins and unknown fields", () => {
+    for (const data of [
+      { slug: "demo", oops: {} },
+      {
+        slug: "demo",
+        dat: {
+          differingLabels: {
+            x: { reasonRef: "missing", plan: "p", source: "s" },
+          },
+        },
+      },
+      {
+        slug: "demo",
+        dat: {
+          differingLabels: {
+            x: { reasonRef: "shared", category: "gap", plan: "p", source: "s" },
+          },
+        },
+      },
+      {
+        slug: "demo",
+        dat: {
+          differingLabels: { x: { ...why, plan: { bad: true }, source: "s" } },
+        },
+      },
+      {
+        slug: "demo",
+        dat: {
+          differingHelp: {
+            x: { category: "typo", reason: "x", plan: null, source: null },
+          },
+        },
+      },
+      { slug: "demo", dat: { renamed: { x: { ...why } } } },
+    ])
+      expect(() => resolve(data, { shared: why })).toThrow();
+  });
+});
+
+describe("evaluator-owned no-write equivalence", () => {
+  it("accepts whitespace-equivalent direct pins without replacing their named decision", () => {
     const diff: FormDiff = {
       slug: "demo",
       dat: {
         differingLabels: {
-          other: { plan: "a", source: "b", category: "gap", reason: "keep" },
+          "7-10": { plan: "Street   1", source: "Street1", ...why },
         },
       },
     };
-    const entry = { plan: 'a "quote"\nnext', source: null, ...why };
-    const edit = await preview(
-      f.folder,
-      diff,
-      "dat",
-      { register: "differingLabels", key: "7-10" },
-      entry,
-    );
-    const span = edit.edits[0];
-    expect(edit.after.startsWith(edit.before.slice(0, span.start))).toBe(true);
-    expect(edit.after.endsWith(edit.before.slice(span.end))).toBe(true);
-    expect(edit.after).toContain("/* neighbor */");
-    await commit(edit, false);
-    const actual = JSON.parse(
-      execFileSync(
-        process.execPath,
-        [
-          "--input-type=module",
-          "-e",
-          `console.log(JSON.stringify((await import(${JSON.stringify("file://" + f.file)})).DIFF))`,
-        ],
-        { encoding: "utf8" },
-      ),
-    );
-    expect(Object.hasOwn(actual.dat.differingLabels, "7-10")).toBe(true);
-    expect(actual.dat.differingLabels["7-10"]).toEqual(entry);
-    expect(actual.dat.differingLabels.other.reason).toBe("keep");
+    const rows = project(diff, check(diff.dat)).rows;
+    expect(select(diff, rows, options("0".repeat(64))).noOp).toBe(true);
   });
-  it("inserts missing literal containers; dry run does not change authoritative bytes", async () => {
-    const f = await fixture(`export const DIFF = { slug: "demo" };\n`);
-    const edit = await preview(
-      f.folder,
-      { slug: "demo" },
-      "dat",
-      { register: "differingLabels", key: "7-10" },
-      { plan: "p", source: "s", ...why },
+  it("accepts reordered enum arrays according to the evaluator", () => {
+    const value = (values: string[]): Fields =>
+      new Map([["x", { rules: { enum: values } }]]);
+    const diff: FormDiff = {
+      slug: "demo",
+      xsd: {
+        differingRules: {
+          "x/enum": { plan: ["b", "a"], source: ["d", "c"], ...why },
+        },
+      },
+    };
+    const result = check();
+    result.requirements.xsd = comparePair(
+      {
+        plan: value(["a", "b"]),
+        source: value(["c", "d"]),
+        registers: diff.xsd!,
+      },
+      { subject: "plan", constraints: { keywords: ["enum"], mode: "equal" } },
     );
-    await commit(edit, true, async () => {});
-    expect(await readFile(f.file, "utf8")).toBe(f.body);
-    expect(await readdir(f.folder)).toEqual(["demo.ts"]);
-  });
-  it("replaces one existing initializer without rewriting its surrounding helper or comments", async () => {
-    const f = await fixture(
-      `const helper = () => ({category:"gap",reason:"old"});\nexport const DIFF = { slug: "demo", dat: { differingLabels: { /* preserve */ "7-10": helper() } } };\n`,
-    );
-    const edit = await preview(
-      f.folder,
-      { slug: "demo" },
-      "dat",
-      { register: "differingLabels", key: "7-10" },
-      why,
-    );
-    expect(edit.after).toContain("const helper = () =>");
-    expect(edit.after).toContain("/* preserve */");
-    expect(edit.edits).toHaveLength(1);
-  });
-  it.each([
-    `export const DIFF = {slug:"demo", ...{}, dat:{differingLabels:{}}};`,
-    `const help={}; export const DIFF = {slug:"demo",dat:{differingLabels:help}};`,
-    `export const DIFF = {slug:"demo",dat:{differingLabels:Object.fromEntries([])}};`,
-    `export const DIFF = {slug:"demo",dat:{differingLabels:{"x":{},"x":{}}}};`,
-  ])("refuses ambiguous/computed storage without changing it", async (body) => {
-    const f = await fixture(body);
-    await expect(
-      preview(
-        f.folder,
-        { slug: "demo" },
-        "dat",
-        { register: "differingLabels", key: "x" },
-        why,
-      ),
-    ).rejects.toThrow();
-    expect(await readFile(f.file, "utf8")).toBe(body);
-  });
-  it("refuses the special object-literal __proto__ setter without writing", async () => {
-    const f = await fixture();
-    await expect(
-      preview(
-        f.folder,
-        { slug: "demo" },
-        "dat",
-        { register: "differingLabels", key: "__proto__" },
-        why,
-      ),
-    ).rejects.toThrow("reserved __proto__");
-    expect(await readFile(f.file, "utf8")).toBe(f.body);
-    expect(() =>
-      select({ slug: "demo" }, [], {
+    const rows = project(diff, result).rows;
+    expect(
+      select(diff, rows, {
         ...options("0".repeat(64)),
-        key: "__proto__",
-      }),
-    ).toThrow("reserved __proto__");
+        comparison: "xsd",
+        register: "differingRules",
+        key: "x/enum",
+      }).noOp,
+    ).toBe(true);
   });
-
-  it("refuses concurrent changes and failed candidate validation, cleaning temporary files", async () => {
-    const f = await fixture();
-    const edit = await preview(
-      f.folder,
-      { slug: "demo" },
-      "dat",
-      { register: "differingLabels", key: "x" },
-      why,
+  it("does not mistake wholesale wording for an existing direct record", () => {
+    const diff: FormDiff = { slug: "demo", wording: { labels: why } };
+    const result = check();
+    result.requirements.dat = comparePair(
+      {
+        plan: fields("Street 1"),
+        source: fields("Street1"),
+        registers: {},
+        wording: diff.wording,
+      },
+      { subject: "plan", labels: true },
     );
-    await expect(
-      commit(edit, false, async () => {
-        throw new Error("invalid candidate");
-      }),
-    ).rejects.toThrow("invalid candidate");
-    expect(await readFile(f.file, "utf8")).toBe(f.body);
-    await expect(
-      commit(edit, false, async () => {
-        await writeFile(f.file, "human edit");
-      }),
-    ).rejects.toThrow("changed");
-    expect(await readFile(f.file, "utf8")).toBe("human edit");
-    expect(await readdir(f.folder)).toEqual(["demo.ts"]);
+    const rows = project(diff, result).rows;
+    expect(() => select(diff, rows, options(rows[0].fingerprint))).toThrow(
+      "--replace",
+    );
+    expect(
+      select(diff, rows, { ...options(rows[0].fingerprint), replace: true })
+        .noOp,
+    ).toBe(false);
   });
 });

@@ -89,8 +89,9 @@ schema must accept nothing the XSD rejects, but may be stricter.
 
 ## Adding a form
 
-Write `diffs/<form>.ts` exporting a `FormDiff` whose `slug` is the plan's, and add it to
-`DIFFS` in `diffs/index.ts`. The plan needs `dat_url`, `xsd_url`, and fields with
+Write `diffs/<form>.json` with the plan's `slug`, import it in `diffs/index.ts`, and add
+its filename/data pair to `RECORDS`. The loader validates it and resolves named reasons into
+the unchanged `FormDiff` evaluator contract. The plan needs `dat_url`, `xsd_url`, and fields with
 `dat_field`, `json_path` and `xml_path`. A plan without a `spec_id` gets the requirements
 checks only; the rest are skipped until the form is compiled. A test fails if a plan with a
 `spec_id` is not registered.
@@ -99,7 +100,7 @@ checks only; the rest are skipped until the form is compiled. A test fails if a 
 
 Each failure lists every difference of one kind. For each, either fix the artifact that is
 wrong, or record the difference in the form's `diffs/` file. Every entry has a `category`
-and a `reason`:
+and a `reason`, either inline or through a `reasonRef` to `diffs/reasons.json`:
 
 | `category`    | Shown as               | Meaning                                               |
 | ------------- | ---------------------- | ----------------------------------------------------- |
@@ -113,17 +114,19 @@ differently.
 A difference in a value (a rule, a label or help text) is recorded with the values it was
 accepted at, so it cannot drift unnoticed. Use `null` for a side that states nothing:
 
-```ts
-dat: {
-  differingRules: {
-    "7-01/maxLength": {
-      plan: 6,
-      source: 4,
-      category: "upstream",
-      reason: "The DAT says 4; the XSD's type allows 6.",
-    },
-  },
-},
+```json
+{
+  "dat": {
+    "differingRules": {
+      "7-01/maxLength": {
+        "plan": 6,
+        "source": 4,
+        "category": "upstream",
+        "reason": "The DAT says 4; the XSD's type allows 6."
+      }
+    }
+  }
+}
 ```
 
 If either value later changes, the difference is reported again under its own check, with
@@ -160,25 +163,21 @@ harness/
 
 ## Maintenance CLI prototype
 
-From `forms/`, run `npm run --silent form -- findings` to list registered **plan slugs**,
-then inspect one form:
+From `forms/`, list registered plan slugs and inspect one form:
 
 ```bash
-npm run --silent form -- findings key-contacts
+npm run --silent form -- findings
 npm run --silent form -- findings key-contacts --comparison dat --format json
 npm run --silent form -- findings key-contacts --include-recorded --format json
 ```
 
-This command projects `checkForm` results. It does not run a second checker, retrieve
-sources, compile forms, or parse test output. Fetch and compile explicitly using the
-commands above. Default output is a compact TOON table with readable findings and an
-accept-command template. JSON output preserves complete typed values and prior entries.
-Use `--full` for untruncated human summaries. An empty result explicitly reports zero;
-`notRun` identifies comparisons that were unavailable. This is static parity evidence,
-not runtime verification or production approval.
+`checkForm` owns comparison and normalization. The CLI projects its typed results; it
+neither parses test output nor runs another checker. Fetch and compile inputs explicitly.
+Default output is a TOON table; `--format json` preserves complete values and prior decisions.
+`--full` shows untruncated summaries. Zero counts and `notRun` distinguish a clean check
+from an unavailable comparison. Static parity is not production approval.
 
-Record one reviewed difference using its exact comparison, `recordAs.register`,
-`recordAs.key`, and fingerprint from the finding:
+Record one explicitly reviewed decision using its exact target and current fingerprint:
 
 ```bash
 npm run --silent form -- accept key-contacts \
@@ -187,69 +186,52 @@ npm run --silent form -- accept key-contacts \
   --reason 'The shared address question uses the reviewed standard label.' --dry-run
 ```
 
-Remove `--dry-run` to record it. The preview shows the destination, exact record and
-text edits. A dry run may create a temporary candidate module to validate its actual
-export, then removes it; authoritative files remain unchanged. The CLI pins the exact
-normalized values supplied by the maintained evaluator, including numbers, arrays and
-null. It never infers values from printed descriptions. Nonrecordable suite issues and
-stale entries cannot be accepted; stale removal is a separate manual task for now.
+Remove `--dry-run` to write. The preview names the destination and shows the selected old
+and proposed stored entries. Dry-run creates no temporary file. The checker supplies pin
+values, including numbers, arrays and null; the caller chooses category and rationale.
+Stale entries and suite issues cannot be accepted. `renamed` and the reserved `__proto__`
+key are outside this command's scope.
 
-A fingerprint binds the compared values (or nonvalue finding detail), status and current
-prior disposition. If any of those change, obtain a fresh finding before writing. Updating
-a prior entry requires `--replace`. An exact desired direct record is an idempotent no-op,
-even with its original fingerprint; that shortcut never writes. Existing wholesale
-`wording` policy is retained and never created or broadened by this command. Literal
-`--reason` text is supported initially; existing shared helpers remain untouched outside
-the selected edit. Named reason references are deferred rather than introducing an import
-rewriter.
+Fingerprints bind observations, status and the current decision, including whether it is
+a direct record or wholesale wording. Replacing a prior decision requires `--replace`.
+If a direct record is already accepted by the checker and its category/reason are unchanged,
+retry succeeds without writing, including whitespace-equivalent pins and reordered enum
+arrays. This uses the checker's equivalence; the CLI has no second equality policy.
+Wholesale wording never qualifies for that direct-record shortcut and is never broadened
+by `accept`.
 
-TypeScript remains the **one acceptance store**. The writer uses the existing TypeScript
-parser and changes only a supported expression span. It checks the candidate's actual
-`DIFF` export against the expected one-entry change, rereads the source before replacing
-it, and uses a same-directory temporary file and atomic rename. This is an optimistic
-source-change guard, not a multi-file transaction or operating-system compare-and-swap.
+The five form JSON files are the sole per-form acceptance store. `reasons.json` owns named
+category/reason definitions; entries either reference one or contain an explicit inline
+decision. Existing matching references are retained, and new entries reuse an exact matching
+named reason. Accept never changes a shared definition. Source comments remain as `notes`
+that the loader excludes from the evaluator contract.
 
-The safe subset is deliberate: the exported DIFF and selected comparison/register must
-be literal objects without duplicate, computed, shorthand or spread properties on their
-ancestor path. Existing entry initializers such as `standardLabel(...)` can be replaced
-without rewriting neighbors. Computed dictionaries, helper identifiers and roots with
-spreads are refused with an actionable manual fallback. In the current five-form registry,
-Key Contacts supports its literal registers and EPA supports insertion into missing literal
-registers, while EPA's existing computed label/help dictionaries and the three R&R-family
-spread roots require manual edits. `findings` still reads all five forms. The special object-literal `__proto__` setter key is also refused rather than reporting
-a successful write that creates no own dictionary entry. No unsupported write silently
-succeeds.
+Registration owns each record and its destination; there is no directory scan or inferred
+slug filename. Static JSON imports preserve the site's bundling and dev refresh behavior.
+The writer rereads the selected file and shared reasons, rejects an evaluated-record mismatch,
+checks that resolution changes only the selected entry, and verifies both files' bytes before
+same-directory replacement. No TypeScript source is parsed, rewritten or executed to validate
+a write. Atomic rename is an optimistic guard, not a multi-file transaction or OS compare-and-swap.
 
-A local proof changed the shared Address label from `Street1` to `Street 1`, explicitly
-adopted it in all five plans, and compiled the actual outputs. Key Contacts' CLI record
-matched the manual one-entry `FormDiff` reference; dry-run, write, exact retry and stale
-expectation refusal behaved as documented. EPA's computed DAT labels were refused,
-while a separate help difference could be recorded in its missing literal UI register
-without changing the existing DAT or XML gaps. The exercise restored its source inputs
-afterward; it demonstrates the bounded workflow, not a measured human time saving.
+The data tradeoff is explicit: helper-generated repeated paths, notably the three attachment
+registers, are expanded. Shared rationale stays named, but the old executable grouping is
+not retained. The plan remains the owner of JSON/XML links. This candidate chooses predictable
+writes across all five forms over a growing TypeScript editing subset; it adds no JSON overlay
+or generic group-expression language.
 
-This prototype lives under `parity/cli/` because it adapts that evaluator and storage.
-A full JSON migration was considered: the five executable records currently share reasons
-and compute repeated groups. Migrating them would expand roughly 893 source lines to
-1,162 JSON lines even with named reason references, before adding a loader and preserving
-context comments. A JSON overlay would split acceptance ownership. Neither is needed to
-prove the two initial commands. Writer refusals and real usage can inform a later storage
-choice.
+The local trial wrote a selected decision in each registered form and compared the entire
+resolved export with a manual one-entry reference. A real shared `Street1` to `Street 1`
+change, with 11 explicitly manual plan adoptions, produced five new DAT findings; all five
+were recorded, including EPA's four formerly computed entries. Retries and stale-token refusal
+were exercised. All authored trial inputs were restored. This proves the workflow, not human
+time savings or maintainer acceptance.
 
-Designers/content reviewers can inspect findings and make an explicit category/reason
-decision without understanding the diff-file syntax. Recording `gap` preserves it as a
-known gap; it does not implement a fix or confer policy authority. The existing form-library
-site remains the visual review surface. This prototype adds no browser write API, login,
-comment service, agent hooks or separate hosted tool. Future site controls can call the same
-maintenance operation after its write/authentication model is designed.
+The CLI stays in `parity/cli/`; evaluator policy stays in `parity/harness/`; stored data,
+resolution and registration stay in `parity/diffs/`. No site write API, new framework or agent
+integration is introduced. `prune`, `adopt-wording`, `docs:check` and `docs:update` remain deferred.
+The tutorial's storage examples are updated manually; automatic tutorial maintenance is separate.
 
-`prune`, `adopt-wording`, `docs:check` and `docs:update` remain deferred. They require their
-own exact write boundaries and review decisions; accepting a difference must not silently
-change a plan, question bank, tutorial or source lockfile.
-
-Commands are noninteractive. Exit 0 means successful inspection/write/no-op, 1 means an
-execution/conflict/unsupported-write error, and 2 means invalid arguments. Unknown flags
-fail before artifact evaluation. `--help` is available for each command;
-`node parity/cli/index.ts --version` prints the prototype version without loading the
-checker/compiler. Use the `--silent` npm wrapper, or invoke that Node entry directly, when
-consuming structured stdout.
+Commands are noninteractive. Exit 0 means inspection/write/no-op, 1 means execution/conflict,
+and 2 means invalid arguments. Unknown flags fail before evaluation. Each command supports
+`--help`; `node parity/cli/index.ts --version` prints the prototype version without loading
+the checker/compiler. Use npm's `--silent` wrapper for structured stdout.

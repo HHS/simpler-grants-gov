@@ -28,6 +28,7 @@ import {
 } from "./load.ts";
 import {
   fromXmlPath,
+  type Comparison,
   type Discrepancy,
   type Fields,
   type FormDiff,
@@ -101,7 +102,7 @@ export const SPECS = {
     },
     occurrences: "contains",
   },
-} satisfies Record<string, PairSpec>;
+} satisfies Record<Comparison, PairSpec>;
 
 /** Every comparison for one form, grouped as the tests report them. */
 export interface FormCheck {
