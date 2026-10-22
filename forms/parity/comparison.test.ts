@@ -80,13 +80,16 @@ describe("Key Contacts", () => {
 
     it("nests sections as the plan does", () => {
       expect(labels(form.children)).toEqual([
-        { "Applicant Information": [] },
         {
           "Key Contacts": [
-            { Role: [] },
-            { Name: [] },
-            { Address: [] },
-            { "Contact Information": [] },
+            {
+              "Key Contact": [
+                { Role: [] },
+                { Name: [] },
+                { Address: [] },
+                { "Contact Information": [] },
+              ],
+            },
           ],
         },
       ]);
