@@ -17,6 +17,19 @@ model SyncOptions {
    * valid document yet, e.g. when they leave out required elements.
    */
   xml?: boolean;
+
+  /**
+   * The form's version in Simpler Grants, which the API reports as its legacy form version.
+   * Defaults to `1.0`, where every form starts.
+   */
+  sggVersion?: string;
+
+  /**
+   * The UUID of the form's instructions: a form instruction record in the API, uploaded to
+   * each environment with the API's `update-form-instruction` task. Without it, the form has
+   * no instructions to download.
+   */
+  instructions?: string;
 }
 
 /**

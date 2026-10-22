@@ -175,11 +175,13 @@ async function buildForm(id, { sync, grantsGov }) {
     form_json_schema: schema,
     form_ui_schema: await readJson(resolve(formDir, "ui.json")),
     form_renderer: "jsonforms",
+    sgg_version: sync.sggVersion,
   };
   if (grantsGov.agencyCode) form.agency_code = grantsGov.agencyCode;
   if (grantsGov.ombNumber) form.omb_number = grantsGov.ombNumber;
   if (grantsGov.expirationDate) form.expiration_date = grantsGov.expirationDate;
   if (grantsGov.legacyFormId !== undefined) form.legacy_form_id = grantsGov.legacyFormId;
+  if (sync.instructions) form.form_instruction_id = sync.instructions;
   if (xmlMapping) form.json_to_xml_schema = xmlMapping;
   // A parallel directory, so a specification-authored form registers alongside the
   // hand-written one it mirrors instead of replacing it. Both appear in the registry

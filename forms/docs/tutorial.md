@@ -546,6 +546,7 @@ namespace Forms.KeyContactsTutorial;
   formVersion: "2.0",
   agencyCode: "SGG",
   ombNumber: "4040-0010",
+  expirationDate: "2029-08-31",
 })
 model KeyContactsTutorial {
   /** Enter the legal name of the applicant that will undertake the assistance activity. This field is required. */
@@ -1146,6 +1147,7 @@ namespace Forms.KeyContactsTutorial;
   formVersion: "2.0",
   agencyCode: "SGG",
   ombNumber: "4040-0010",
+  expirationDate: "2029-08-31",
 })
 model KeyContactsTutorial {
   /** Enter the legal name of the applicant that will undertake the assistance activity. This field is required. */
@@ -1772,7 +1774,7 @@ import "simpler-forms-sgg";
   // ...
 ```
 
-`@Sgg.sync` needs `@GrantsGov.form`, which you added in step 2: it's the identity the API registers the form under. `@Sgg.sync(#{ xml: false })` installs a form without its XML rules, while they can't produce a valid document yet.
+`@Sgg.sync` needs `@GrantsGov.form`, which you added in step 2: it's the identity the API registers the form under. `@Sgg.sync(#{ xml: false })` installs a form without its XML rules, while they can't produce a valid document yet. `@Sgg.sync(#{ instructions: "<uuid>" })` points the form at its instructions, a form instruction record uploaded to each environment, and `sggVersion` sets its Simpler Grants version (default `1.0`).
 
 ### 6.2 Sync it into the API
 

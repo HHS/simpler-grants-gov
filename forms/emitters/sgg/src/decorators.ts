@@ -4,14 +4,18 @@ import { stateKeys } from "./lib.js";
 /** How sync installs a form, from `@Sgg.sync`'s options. */
 export interface SyncOptions {
   xml: boolean;
+  sggVersion: string;
+  instructions?: string;
 }
 
 /** `@Sgg.sync`: install this form into the API tree when `npm run sync` runs. */
 export const $sync = (
   ctx: DecoratorContext,
   target: Model,
-  options?: { xml?: boolean },
+  options?: { xml?: boolean; sggVersion?: string; instructions?: string },
 ) =>
-  ctx.program
-    .stateMap(stateKeys.sync)
-    .set(target, { xml: options?.xml ?? true } satisfies SyncOptions);
+  ctx.program.stateMap(stateKeys.sync).set(target, {
+    xml: options?.xml ?? true,
+    sggVersion: options?.sggVersion ?? "1.0",
+    ...(options?.instructions && { instructions: options.instructions }),
+  } satisfies SyncOptions);
