@@ -37,10 +37,13 @@ def test_list_api_keys_single_key(enable_factory_create, db_session, client, use
     api_key_data = response_data[0]
     assert api_key_data["api_key_id"] == str(api_key.api_key_id)
     assert api_key_data["key_name"] == "Test API Key"
-    assert api_key_data["key_id"] == api_key.key_id
     assert api_key_data["is_active"] == api_key.is_active
     assert "created_at" in api_key_data
     assert "last_used" in api_key_data
+
+    # Neither the raw key nor its hash is ever returned when listing
+    assert "key_id" not in api_key_data
+    assert "key_id_hash" not in api_key_data
 
 
 def test_list_api_keys_multiple_keys_ordered_by_created_at(

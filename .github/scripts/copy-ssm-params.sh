@@ -13,7 +13,7 @@
 #
 # Examples:
 #   copy-ssm-params.sh staging grantee1
-#   copy-ssm-params.sh dev grantee2 --dry-run
+#   copy-ssm-params.sh dev grantee1 --dry-run
 #   # Seed grantor1 api secrets from staging, creating only the ones that don't exist:
 #   copy-ssm-params.sh staging grantor1 --app=api --no-overwrite
 
@@ -35,7 +35,7 @@ for arg in "${@:3}"; do
 done
 
 VALID_SOURCES=("dev" "staging")
-VALID_TARGETS=("grantee1" "grantee2" "grantor1")
+VALID_TARGETS=("grantee1" "grantor1")
 
 if [[ ! " ${VALID_SOURCES[*]} " =~ " ${SOURCE_ENV} " ]]; then
   echo "ERROR: source_env must be one of: ${VALID_SOURCES[*]}"
