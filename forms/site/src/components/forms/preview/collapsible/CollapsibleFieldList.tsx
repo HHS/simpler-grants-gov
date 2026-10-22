@@ -8,15 +8,15 @@ import {
   type SummaryItem,
 } from "@/lib/collapsible";
 import type { ControlProps, UISchemaElement } from "@jsonforms/core";
+import { AdapterContext } from "@sgg/frontend/components/apply-form/jsonforms/renderers";
 import { renderWidget } from "@sgg/frontend/components/apply-form/widgets/WidgetRenderers";
 import type { FormattedFormValidationWarning } from "@sgg/frontend/types/applyForm/types";
 import { isFieldRequired } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { getFieldListChildErrors } from "@sgg/frontend/utils/applyForm/fieldListHelpers";
 import { getFieldConfig } from "@sgg/frontend/utils/applyForm/getFieldConfig";
+import { controlToNodes } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
 import { useContext, useId, useRef, useState, type ReactNode } from "react";
 
-import { controlToNodes } from "../../../../vendor/sgg/jsonFormsUiSchema";
-import { AdapterContext } from "../../../../vendor/sgg/renderers";
 import { SectionDepth } from "../sections/SectionDepth";
 import CollapsibleHeader from "./CollapsibleHeader";
 import SummaryList from "./SummaryList";
