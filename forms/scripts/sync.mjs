@@ -17,11 +17,12 @@
  */
 import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const canonicalDir = resolve(root, "dist/canonical/forms");
+const questionBankDir = resolve(root, "dist/canonical/question-bank");
 const sggDir = resolve(root, "dist/sgg/forms");
 const apiFormsDir = resolve(root, "../api/src/form_schema/forms");
 const check = process.argv.includes("--check");
@@ -80,21 +81,21 @@ function wrapRefSiblings(node) {
  * self-contained for the same reason, so each referenced question is pulled into $defs
  * and the ref rewritten to point there.
  *
+ * Each question is keyed by its id, dotted rather than slashed so the key needs no escaping
+ * in a JSON pointer: `person/name` is `person.name`. A form's $defs then name the questions
+ * it asks, and keep their names when the form or the question bank changes.
+ *
  * Questions reference other questions, so this recurses; a question already inlined is
  * reused rather than duplicated.
  */
 async function bundle(schema, formDir) {
   const defs = {};
-  const keyByRef = new Map();
 
-  const keyFor = (ref) => {
-    // ".../question-bank/person/first-name/schema.json" -> "first_name"
-    const parts = ref.replace(/\/schema\.json$/, "").split("/");
-    const base = parts[parts.length - 1].replace(/-/g, "_");
-    let key = base;
-    let n = 2;
-    while (keyByRef.has(key) && keyByRef.get(key) !== ref) key = `${base}_${n++}`;
-    return key;
+  // ".../question-bank/person/first-name/schema.json" -> "person.first-name"
+  const keyFor = (target) => {
+    const id = relative(questionBankDir, dirname(target));
+    if (id.startsWith("..")) throw new Error(`${target} is not a question in the question bank`);
+    return id.split("/").join(".");
   };
 
   const walk = async (node, baseDir) => {
@@ -105,9 +106,8 @@ async function bundle(schema, formDir) {
     for (const [k, v] of Object.entries(node)) {
       if (k === "$ref" && typeof v === "string" && !v.startsWith("#")) {
         const target = resolve(baseDir, v);
-        const key = keyFor(v);
+        const key = keyFor(target);
         if (!(key in defs)) {
-          keyByRef.set(key, v);
           defs[key] = null; // reserve before recursing, so a cycle terminates
           const referenced = await readJson(target);
           const { $schema, $id, $defs: nested, ...body } = referenced;
