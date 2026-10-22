@@ -135,6 +135,7 @@ export const controlToNodes = (
   const options = (control.options ?? {}) as {
     readonly?: boolean;
     widget?: WidgetTypes;
+    description?: string;
   };
   const type = options.readonly ? "null" : "field";
 
@@ -153,7 +154,8 @@ export const controlToNodes = (
           (typeof control.label === "string" ? control.label : undefined) ??
           fieldSchema.title ??
           name,
-        description: fieldSchema.description,
+        // The control's help text is about the list on this form, so it wins over the schema's.
+        description: options.description ?? fieldSchema.description,
         children: layout
           ? entryFields(layout, schema, itemsBase)
           : leafDefinitions(items, itemsBase).map((childDefinition) => ({
