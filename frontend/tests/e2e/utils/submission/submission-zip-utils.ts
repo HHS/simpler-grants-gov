@@ -165,6 +165,17 @@ function textMatches(text: string, item: string | RegExp): boolean {
 }
 
 /**
+ * Text that should never appear in any generated form PDF: template or
+ * serialization leaks and validation messages.
+ */
+export const COMMON_PDF_UNEXPECTED_TEXT: (string | RegExp)[] = [
+  "undefined",
+  "[object Object]",
+  "NaN",
+  /\bis required\b/i,
+];
+
+/**
  * Asserts that the named PDF in the zip exists, has extractable text,
  * contains each expected string or pattern, and contains none of the
  * unexpected ones.
@@ -178,7 +189,7 @@ export async function assertPdfContainsText(
   contents: ZipContents,
   pdfFileName: string,
   expected: (string | RegExp)[],
-  unexpected: (string | RegExp)[] = [],
+  unexpected: (string | RegExp)[] = COMMON_PDF_UNEXPECTED_TEXT,
 ): Promise<void> {
   const pdfText = await readPdfText(contents, pdfFileName);
 

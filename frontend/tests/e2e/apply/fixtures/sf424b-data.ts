@@ -98,14 +98,3 @@ export const SF424B_ZIP_PDF_EXPECTED_TEXT: (string | RegExp)[] = [
   `${fieldDefinitionsSF424B.applicant_organization.field}* ${SF424B_ZIP_ALL_FIELDS_DATA.applicant_organization.value}`,
   SF424B_ZIP_ALL_FIELDS_DATA.SubmittedDate.value,
 ];
-
-/**
- * Text that must NOT appear in SF424B.pdf: template/serialization leaks and
- * validation messages that would mean the form was rendered incorrectly.
- */
-export const SF424B_ZIP_PDF_UNEXPECTED_TEXT: (string | RegExp)[] = [
-  "undefined",
-  "[object Object]",
-  "NaN",
-  /\bis required\b/i,
-];

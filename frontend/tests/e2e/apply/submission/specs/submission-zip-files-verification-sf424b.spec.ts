@@ -16,7 +16,6 @@ import {
   SF424B_ZIP_APPLICATION_PATH,
   SF424B_ZIP_PDF_EXPECTED_TEXT,
   SF424B_ZIP_PDF_NAME,
-  SF424B_ZIP_PDF_UNEXPECTED_TEXT,
 } from "tests/e2e/apply/fixtures/sf424b-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -62,7 +61,6 @@ test(
         contents,
         SF424B_ZIP_PDF_NAME,
         SF424B_ZIP_PDF_EXPECTED_TEXT,
-        SF424B_ZIP_PDF_UNEXPECTED_TEXT,
       );
     });
   },
