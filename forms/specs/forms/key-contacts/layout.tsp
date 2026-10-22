@@ -16,7 +16,7 @@ model KeyContactsLayout {
     applicantOrganizationName: KeyContacts.applicantOrganizationName;
   };
 
-  /** You may enter up to four (4) key contacts. At least one (1) contact person is required; additional contacts are optional. */
+  /** You may enter up to four (4) Key Contacts. At least 1 (one) contact person is required. Additional contacts are optional. */
   @UI.label("Key Contacts")
   @UI.field(KeyContacts.keyContacts)
   keyContacts: {

@@ -32,7 +32,7 @@ model KeyContacts {
   @UI.label("Applicant Organization Name")
   applicantOrganizationName: Questions.Organizations.OrgName;
 
-  /** You may enter up to four (4) Key Contacts. At least 1 (one) contact person is required. Additional contacts are optional. */
+  /** Enter between 1 and 4 key contacts and their role on the project. */
   @UI.label("Key Contacts")
   @minItems(1)
   @maxItems(4)
