@@ -13,6 +13,8 @@ type Props = {
 };
 
 type TranslationKeys =
+  | "programFunding"
+  | "expectedAwards"
   | "costSharing"
   | "fundingInstrument"
   | "opportunityCategory"
@@ -53,11 +55,14 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
     }
   };
 
+  const fundingSummaryInfo = {
+    programFunding:
+      formatCurrency(opportunityData.summary.estimated_total_program_funding) ||
+      "$--",
+    expectedAwards: opportunityData.summary.expected_number_of_awards || "--",
+  };
+
   const awardGridInfo = {
-    programFunding: formatCurrency(
-      opportunityData.summary.estimated_total_program_funding,
-    ),
-    expectedAwards: opportunityData.summary.expected_number_of_awards,
     awardFloor: formatCurrency(opportunityData.summary.award_floor),
     awardCeiling: formatCurrency(opportunityData.summary.award_ceiling),
   };
@@ -75,7 +80,21 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
   return (
     <div className="margin-top-4">
       <h2>{t("title")}</h2>
-      <Grid row className="margin-top-2 grid-gap-2">
+      <div
+        className="border radius-md border-base-lighter padding-x-2 padding-y-1 margin-top-2 margin-bottom-2"
+        data-testid="opportunity-funding-summary"
+      >
+        {Object.entries(fundingSummaryInfo).map(([title, content]) => (
+          <p key={title}>
+            <strong>
+              {t(title as TranslationKeys)}
+              {":"}
+            </strong>{" "}
+            {content}
+          </p>
+        ))}
+      </div>
+      <Grid row className="grid-gap-2">
         {Object.entries(awardGridInfo).map(([title, content], index) => (
           <Grid
             className="margin-bottom-2"
