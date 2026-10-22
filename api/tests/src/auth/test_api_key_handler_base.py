@@ -26,7 +26,7 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session, c
     user = SharedUserFactory.create()
 
     with caplog.at_level("INFO"):
-        api_key = SharedApiKeyHandler(db_session).create_api_key(
+        api_key, key_id = SharedApiKeyHandler(db_session).create_api_key(
             user_id=user.shared_user_id,
             key_name="Test API Key",
         )
@@ -37,14 +37,14 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session, c
     assert api_key.shared_api_key_id is not None
     assert api_key.shared_user_id == user.shared_user_id
     assert api_key.key_name == "Test API Key"
-    assert api_key.key_id is not None
-    assert len(api_key.key_id) == 25  # Auto-generated key_id should be 25 characters
+    assert len(key_id) == 25  # Auto-generated key_id should be 25 characters
+    assert api_key.key_id_hash == hash_api_key_id(key_id, ApiKeyConfig().pepper)
     assert api_key.is_active is True
     assert api_key.last_used is None
 
     # Verify the key_id contains only alphanumeric characters
     allowed_chars = string.ascii_letters + string.digits
-    assert all(c in allowed_chars for c in api_key.key_id)
+    assert all(c in allowed_chars for c in key_id)
 
     # Verify it was persisted to the database
     db_session.commit()
@@ -65,15 +65,14 @@ def test_create_api_key_generates_unique_key_ids(enable_factory_create, db_sessi
     """Test that create_api_key generates unique key_ids for each API key."""
     user = SharedUserFactory.create()
 
-    api_keys = []
+    key_ids = []
     for i in range(3):
-        api_key = SharedApiKeyHandler(db_session).create_api_key(
+        _, key_id = SharedApiKeyHandler(db_session).create_api_key(
             user_id=user.shared_user_id,
             key_name=f"Key {i}",
         )
-        api_keys.append(api_key)
+        key_ids.append(key_id)
 
-    key_ids = [key.key_id for key in api_keys]
     assert len(set(key_ids)) == len(key_ids), "All key_ids should be unique"
 
     assert all(len(key_id) == 25 for key_id in key_ids)
@@ -97,28 +96,28 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
             "UNIQUE_TEST_KEY_123456789",
         ]
 
-        api_key = SharedApiKeyHandler(db_session).create_api_key(
+        _, key_id = SharedApiKeyHandler(db_session).create_api_key(
             user_id=user.shared_user_id,
             key_name="New Key",
         )
 
-        assert api_key.key_id == "UNIQUE_TEST_KEY_123456789"
+        assert key_id == "UNIQUE_TEST_KEY_123456789"
         assert mock_generate.call_count == 2
 
 
 def test_create_api_key_stores_key_id_hash(enable_factory_create, db_session: db.Session):
-    """New keys store the raw key_id and its hash side by side."""
+    """New keys store the hash of the raw key_id that is returned."""
     user = SharedUserFactory.create()
 
-    api_key = SharedApiKeyHandler(db_session).create_api_key(
+    api_key, key_id = SharedApiKeyHandler(db_session).create_api_key(
         user_id=user.shared_user_id,
         key_name="Hashed Key",
     )
     db_session.commit()
     db_session.refresh(api_key)
 
-    assert api_key.key_id_hash == hash_api_key_id(api_key.key_id, ApiKeyConfig().pepper)
-    assert api_key.key_id_hash != api_key.key_id
+    assert api_key.key_id_hash == hash_api_key_id(key_id, ApiKeyConfig().pepper)
+    assert api_key.key_id_hash != key_id
 
 
 def test_create_api_key_sends_raw_key_to_api_gateway(enable_factory_create, db_session: db.Session):
@@ -126,7 +125,7 @@ def test_create_api_key_sends_raw_key_to_api_gateway(enable_factory_create, db_s
     user = SharedUserFactory.create()
 
     _clear_mock_import_responses()
-    api_key = SharedApiKeyHandler(db_session).create_api_key(
+    api_key, key_id = SharedApiKeyHandler(db_session).create_api_key(
         user_id=user.shared_user_id,
         key_name="Gateway Key",
     )
@@ -134,7 +133,7 @@ def test_create_api_key_sends_raw_key_to_api_gateway(enable_factory_create, db_s
     mock_responses = _get_mock_import_responses()
     assert len(mock_responses) == 1
     request_data, _ = mock_responses[0]
-    assert request_data["api_key"] == api_key.key_id
+    assert request_data["api_key"] == key_id
     assert request_data["api_key"] != api_key.key_id_hash
 
 
@@ -154,12 +153,12 @@ def test_create_api_key_collision_checked_on_hash(enable_factory_create, db_sess
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
         mock_generate.side_effect = [taken_key_id, "FRESH_HASH_TEST_KEY_123456"]
 
-        api_key = SharedApiKeyHandler(db_session).create_api_key(
+        _, key_id = SharedApiKeyHandler(db_session).create_api_key(
             user_id=user.shared_user_id,
             key_name="New Key",
         )
 
-    assert api_key.key_id == "FRESH_HASH_TEST_KEY_123456"
+    assert key_id == "FRESH_HASH_TEST_KEY_123456"
     assert mock_generate.call_count == 2
 
 
@@ -217,7 +216,7 @@ def test_create_api_key_aws_gateway_error_handling(
 
     # This should succeed using the built-in mock system
     with caplog.at_level("INFO"):
-        api_key = SharedApiKeyHandler(db_session).create_api_key(
+        api_key, _ = SharedApiKeyHandler(db_session).create_api_key(
             user_id=user.shared_user_id,
             key_name="Test API Key",
         )
@@ -250,7 +249,7 @@ def test_create_api_key_database_rollback_on_gateway_failure(
     initial_count = len(initial_count)
 
     # This should succeed with the built-in mock system
-    api_key = SharedApiKeyHandler(db_session).create_api_key(
+    api_key, _ = SharedApiKeyHandler(db_session).create_api_key(
         user_id=user.shared_user_id,
         key_name="Test API Key",
     )
@@ -279,12 +278,12 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     """Test that the same user can have multiple API keys with different names."""
     user = SharedUserFactory.create()
 
-    api_key1 = SharedApiKeyHandler(db_session).create_api_key(
+    api_key1, key_id1 = SharedApiKeyHandler(db_session).create_api_key(
         user_id=user.shared_user_id,
         key_name="Production Key",
     )
 
-    api_key2 = SharedApiKeyHandler(db_session).create_api_key(
+    api_key2, key_id2 = SharedApiKeyHandler(db_session).create_api_key(
         user_id=user.shared_user_id,
         key_name="Development Key",
     )
@@ -292,7 +291,7 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     assert api_key1.shared_user_id == api_key2.shared_user_id
     assert api_key1.key_name != api_key2.key_name
     assert api_key1.shared_api_key_id != api_key2.shared_api_key_id
-    assert api_key1.key_id != api_key2.key_id
+    assert key_id1 != key_id2
 
 
 def test_delete_api_key_success(enable_factory_create, db_session: db.Session, caplog):
