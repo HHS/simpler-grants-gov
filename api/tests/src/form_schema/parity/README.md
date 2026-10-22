@@ -112,3 +112,43 @@ reason:
 
 An entry that stops describing a real difference fails the recorded differences check,
 so remove it once the difference is fixed.
+
+## The XML mapping checks
+
+`xml/test_forms.py` holds each form's XML transform rules against the Grants.gov XSD
+they target, hand-written forms included. `RecursiveXMLTransformer` walks the rules,
+not the answers, so a field with no rule never reaches the submission -- and since most
+Grants.gov elements are `minOccurs="0"`, the document still validates.
+
+The rules, the XSD under `src/services/xml_generation/xsds/` and the form's own JSON
+Schema are read into paths and held against the record in `xml/diffs/`:
+
+- every target names an element the XSD declares
+- every element the XSD requires has a source
+- siblings are emitted in `xs:sequence` order
+- every form field reaches an element, and every rule reads a field the form has
+- the form offers no enum member, and accepts no length or range, the element cannot
+  carry
+- a field whose JSON type differs from its element's declares the `value_transform` that
+  converts it
+- every entry in the record still describes a real difference
+
+The checks against the XSD alone have no register: an undeclared target or an unsourced
+required element fails with no way to record it. A mapping that builds its structure at
+run time rather than declaring it, as SF-424A's does, is listed in `unreadable` and
+skipped by the structural checks.
+
+`xml/test_harness.py` runs the comparisons over small hand-built inputs.
+
+### Adding a form
+
+Write `xml/diffs/<form>.py` with a `FormDiff` naming the package under
+`src.form_schema.forms`, and add it to `DIFFS` in `xml/test_forms.py`.
+
+### When a check fails
+
+A field no rule reads goes in `absent_from_definition`, a rule reading a field the form
+lacks in `absent_from_source`, and a form looser than its element in `differing_rules`,
+keyed `"element path/keyword"`, citing the XSD type and facet and saying whether an
+applicant can reach the value. As above, these are defects to fix, and an entry the
+comparison no longer finds with the record set aside is stale.
