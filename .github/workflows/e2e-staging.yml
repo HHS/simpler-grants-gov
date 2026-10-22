@@ -14,7 +14,6 @@ on:
         options:
           - staging
           - grantee1
-          - grantee2
           - grantor1
           - grantor2
       playwright_tags:
@@ -88,7 +87,7 @@ jobs:
           fi
       - name: Check target environment
         run: |
-          if [[ "${{ env.defaulted_target }}" != "staging" && "${{ env.defaulted_target }}" != "grantee1" && "${{ env.defaulted_target }}" != "grantee2" && "${{ env.defaulted_target }}" != "grantor1" && "${{ env.defaulted_target }}" != "grantor2" ]]; then
+          if [[ "${{ env.defaulted_target }}" != "staging" && "${{ env.defaulted_target }}" != "grantee1" && "${{ env.defaulted_target }}" != "grantor1" && "${{ env.defaulted_target }}" != "grantor2" ]]; then
             echo "Unsupported target environment"
             exit 1
           fi

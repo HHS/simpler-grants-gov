@@ -1,6 +1,7 @@
 emit:
   - simpler-forms
   - form-library-xml
+  - simpler-forms-sgg
 options:
   simpler-forms:
     emitter-output-dir: "{project-root}/dist/canonical"
@@ -9,3 +10,5 @@ options:
     emitter-output-dir: "{project-root}/dist/canonical"
     mapping-targets: [grantsGovXml]
     property-casing: snake
+  simpler-forms-sgg:
+    emitter-output-dir: "{project-root}/dist/sgg"
