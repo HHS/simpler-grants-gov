@@ -90,6 +90,8 @@ function wrapRefSiblings(node) {
  */
 async function bundle(schema, formDir) {
   const defs = {};
+  // The question each hoisted nested def came from, to name both sides of a conflict.
+  const hoistedFrom = new Map();
 
   // ".../question-bank/person/first-name/schema.json" -> "person.first-name"
   const keyFor = (target) => {
@@ -114,10 +116,18 @@ async function bundle(schema, formDir) {
           // A question carries its own $defs -- a shared enum such as StateCode. Those
           // are hoisted to the form's $defs, because the internal `#/$defs/...` pointers
           // in the inlined body resolve against the document root, which is now the form.
+          // Each question carries its own copy under the type's bare name, so a name seen
+          // twice must mean the same schema: two different types sharing a name would
+          // otherwise leave every reference pointing at whichever was hoisted first.
           for (const [nestedKey, nestedSchema] of Object.entries(nested ?? {})) {
+            const walked = await walk(nestedSchema, dirname(target));
             if (!(nestedKey in defs)) {
-              defs[nestedKey] = null;
-              defs[nestedKey] = await walk(nestedSchema, dirname(target));
+              defs[nestedKey] = walked;
+              hoistedFrom.set(nestedKey, key);
+            } else if (JSON.stringify(defs[nestedKey]) !== JSON.stringify(walked)) {
+              throw new Error(
+                `${key} and ${hoistedFrom.get(nestedKey)} each define a different $defs/${nestedKey}`,
+              );
             }
           }
           defs[key] = await walk(body, dirname(target));
