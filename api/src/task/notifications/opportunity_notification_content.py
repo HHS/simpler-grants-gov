@@ -23,8 +23,6 @@ class OpportunityNotificationContent:
         self.opportunity = opportunity
         self.frontend_url = frontend_url
         self.agency = self.opportunity.agency_record
-        self.competitions = self.opportunity.competitions if self.opportunity.competitions else []
-        self.is_multi_competition = len(self.competitions) > 1
         self.summary = None
         if self.opportunity.current_opportunity_summary is not None:
             self.summary = self.opportunity.current_opportunity_summary.opportunity_summary
@@ -76,9 +74,8 @@ class OpportunityNotificationContent:
             return "Yes" if self.summary.is_cost_sharing else "No"
         return NOT_SPECIFIED
 
-    @property
-    def opportunity_details_page_url(self) -> str:
-        return f"{self.frontend_url}/opportunity/{self.opportunity.opportunity_id}"
+    def opportunity_details_page_url(self, utm_tag: str | None = "") -> str:
+        return f"{self.frontend_url}/opportunity/{self.opportunity.opportunity_id}{utm_tag}"
 
     @property
     def status(self) -> str:
@@ -91,13 +88,17 @@ class OpportunityNotificationContent:
 
     @property
     def submission_period(self) -> str:
-        if len(self.competitions) == 0 or (self.summary and self.summary.is_forecast):
-            return "To be announced"
-        if self.is_multi_competition:
-            return "Multiple competitions (see opportunity details)"
-        competition = self.competitions[0]
-        open_date = competition.opening_date if competition.opening_date else None
-        close_date = competition.closing_date if competition.closing_date else None
+        if not self.summary:
+            return NOT_SPECIFIED
+
+        open_date = self.summary.post_date
+        close_date = self.summary.close_date
+        if self.summary.is_forecast:
+            open_date = self.summary.forecasted_post_date
+            close_date = self.summary.forecasted_close_date
+            if open_date is None and close_date is None:
+                return "To be announced"
+
         if open_date is not None and close_date is not None:
             return f"{fmt_date(open_date)}–{fmt_date(close_date)}"
         if open_date is not None:
@@ -107,5 +108,9 @@ class OpportunityNotificationContent:
         return NOT_SPECIFIED
 
     @property
-    def title(self) -> str | None:
-        return self.opportunity.opportunity_title
+    def title(self) -> str:
+        # Every opportunity in prod with a current summary has this field populated.
+        # Adding failsafe here just in case.
+        if title := self.opportunity.opportunity_title:
+            return title
+        return NOT_SPECIFIED

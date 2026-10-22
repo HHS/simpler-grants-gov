@@ -326,14 +326,9 @@ class TestBuildEmail:
             agency_id=agency.agency_id,
             is_posted_summary=True,
         )
-        opportunity.competitions = [
-            factories.CompetitionFactory.build(
-                opportunity=opportunity,
-                opening_date=date(2026, 1, 2),
-                closing_date=date(2026, 3, 4),
-            )
-        ]
         summary = opportunity.summary
+        summary.post_date = date(2026, 1, 2)
+        summary.close_date = date(2026, 3, 4)
         summary.award_floor = 0
         summary.award_ceiling = 1234567
         summary.expected_number_of_awards = 5
@@ -342,8 +337,8 @@ class TestBuildEmail:
         email_body = build_email_body([opportunity], "http://frontend.test")
 
         assert (
-            f"<a href='http://frontend.test/opportunity/{opportunity.opportunity_id}?utm_source="
-            in email_body
+            f"<a href='http://frontend.test/opportunity/{opportunity.opportunity_id}"
+            f"{new_opportunity_notification.UTM_TAG}' target='_blank'>" in email_body
         )
         assert "Research &amp; &lt;Development&gt;" in email_body
         assert f"Agency: {agency.agency_code} - {agency.agency_name}<br/>" in email_body
@@ -356,11 +351,14 @@ class TestBuildEmail:
 
     def test_build_email_body_with_missing_values(self, enable_factory_create, agency):
         opportunity = factories.OpportunityFactory.create(
+            opportunity_title=None,
             agency_code=agency.agency_code,
             agency_id=agency.agency_id,
             is_forecasted_summary=True,
         )
         summary = opportunity.summary
+        summary.forecasted_post_date = None
+        summary.forecasted_close_date = None
         summary.award_floor = None
         summary.award_ceiling = None
         summary.expected_number_of_awards = None
@@ -368,8 +366,38 @@ class TestBuildEmail:
 
         email_body = build_email_body([opportunity], "http://frontend.test")
 
+        assert "target='_blank'>Not specified</a>" in email_body
         assert "Status: Forecasted<br/>" in email_body
         assert "Submission period: To be announced<br/>" in email_body
         assert "Award range: Not specified<br/>" in email_body
         assert "Expected awards: Not specified<br/>" in email_body
         assert "Cost sharing: Not specified<br/>" in email_body
+
+    def test_build_email_body_uses_forecasted_dates(self, enable_factory_create, agency):
+        opportunity = factories.OpportunityFactory.create(
+            agency_code=agency.agency_code,
+            agency_id=agency.agency_id,
+            is_forecasted_summary=True,
+        )
+        summary = opportunity.summary
+        summary.forecasted_post_date = date(2026, 5, 1)
+        summary.forecasted_close_date = date(2026, 6, 30)
+
+        email_body = build_email_body([opportunity], "http://frontend.test")
+
+        assert "Submission period: 05/01/2026–06/30/2026<br/>" in email_body
+
+    def test_build_email_body_with_multiple_opportunities(self, enable_factory_create, agency):
+        opportunities = [
+            factories.OpportunityFactory.create(
+                agency_code=agency.agency_code,
+                agency_id=agency.agency_id,
+                is_posted_summary=True,
+            )
+            for _ in range(3)
+        ]
+
+        email_body = build_email_body(opportunities, "http://frontend.test")
+
+        for opportunity in opportunities:
+            assert str(opportunity.opportunity_id) in email_body
