@@ -2,7 +2,7 @@ import type { JsonSchema } from "@jsonforms/core";
 import { processFormSchema } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { unadaptableScopes } from "../vendor/sgg/jsonFormsUiSchema";
+import { findUnsupportedControls } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
 import { loadFormSpec, type FormSpec } from "./formSpec";
 import { createAjv } from "./validation";
 
@@ -73,7 +73,7 @@ describe.each([
 
   it("draws every control with an SGG widget", () => {
     const { formSchema } = processFormSchema(spec.schema);
-    expect(unadaptableScopes(spec.uischema, formSchema)).toEqual([]);
+    expect(findUnsupportedControls(spec.uischema, formSchema)).toEqual([]);
   });
 
   it("has an example from the TypeSpec that passes validation", () => {

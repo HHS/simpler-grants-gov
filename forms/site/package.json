@@ -27,7 +27,6 @@
     "@apidevtools/json-schema-ref-parser": "^16.0.3",
     "@jsonforms/core": "^3.8.0",
     "@jsonforms/react": "^3.8.0",
-    "@jsonforms/vanilla-renderers": "^3.8.0",
     "@nanostores/react": "^0.8.4",
     "@rjsf/utils": "^5.24.13",
     "@trussworks/react-uswds": "^11.2.0",

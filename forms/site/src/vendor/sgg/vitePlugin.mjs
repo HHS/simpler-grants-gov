@@ -28,7 +28,6 @@ const STUBBED = {
 const PREBUNDLE = [
   "@jsonforms/core",
   "@jsonforms/react",
-  "@jsonforms/vanilla-renderers",
   "@nanostores/react",
   "@rjsf/utils",
   "@trussworks/react-uswds",
