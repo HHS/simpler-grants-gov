@@ -13,9 +13,9 @@ forms/
             └── form_json.py  # form definition: FORM_JSON_SCHEMA, FORM_UI_SCHEMA, FORM_RULE_SCHEMA, FORM_XML_TRANSFORM_RULES, and the Form object
 ```
 
-A version may declare itself as a `form.json` instead of a `form_json.py`, which is what
-the specification-authored forms in [`../../../../forms`](../../../../forms) emit. That
-form keeps its large documents in sibling files:
+A version may instead declare itself as a `form.json`, which is what the forms in
+[`../../../../forms`](../../../../forms) generate. It keeps its large documents in sibling
+schema files:
 
 ```
 forms/
@@ -25,18 +25,13 @@ forms/
             ├── form.json           # scalars: form_id, form_name, form_version, agency_code, ...
             ├── json_schema.json    # form_json_schema
             ├── ui_schema.json      # form_ui_schema
-            ├── rule_schema.json    # form_rule_schema     (optional)
-            └── xml_transform.json  # json_to_xml_schema   (optional)
+            ├── rule_schema.json    # form_rule_schema
+            └── xml_transform.json  # json_to_xml_schema
 ```
 
-`_loader.py` folds the schema files into the `form.json` on load, so both formats produce
-the same module surface. Each schema file is optional; a `form.json` that declares
-everything inline is still valid. Declaring a field both inline and in its schema file is an
-error, since the two would drift and preferring one silently would hide that the other is
-stale.
-
-A version directory must declare exactly one of `form_json.py` or `form.json` — the schema
-files are not a definition on their own.
+- A version has exactly one of `form_json.py` or `form.json`.
+- Each schema file is optional. A field can't be declared both inline in `form.json` and in its schema file.
+- The version checksum covers the schema files.
 
 All existing forms are version `1/0` in this structure. The `forms/__init__.py` at
 this level collects all forms and exposes `get_active_forms()`.
