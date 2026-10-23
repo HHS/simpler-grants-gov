@@ -54,14 +54,14 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     # Add application metadata to logs
     add_application_metadata_to_logs(application)
 
-    _queue_application_submission(application, user)
-
     add_audit_event(
         db_session=db_session,
         application=application,
         user=user,
         audit_event=ApplicationAuditEvent.APPLICATION_SUBMITTED,
     )
+
+    _queue_application_submission(application, user)
 
     return application
 

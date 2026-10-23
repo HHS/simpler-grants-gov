@@ -2,7 +2,6 @@ import json
 import logging
 import uuid
 from datetime import timedelta
-from unittest import mock
 
 import apiflask.exceptions
 import boto3
@@ -354,7 +353,7 @@ def test_submit_application_puts_application_message_on_queue(
         updated_application = submit_application(db_session, application.application_id, user)
 
     messages = sqs.receive_message(
-        QueueUrl=submission_sqs_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
+        QueueUrl=submission_sqs_queue, MaxNumberOfMessages=10, VisibilityTimeout=0
     )
     assert len(messages["Messages"]) == 1
     body = json.loads(messages["Messages"][0]["Body"])
@@ -392,17 +391,14 @@ def test_exceptions_raised_by_sending_message_to_queue_are_logged_but_not_raised
         application_user=ApplicationUserFactory.create(user=user, application=application),
         role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
     )
+    monkeypatch.setenv("WORKFLOW_QUEUE_URL", "QueueDoesNotExist.com")
     sqs = boto3.client("sqs", region_name="us-east-1")
 
     with db_session.begin():
-        with mock.patch(
-            "src.services.applications.submit_application.send_application_submission_message"
-        ) as mock_send_message:
-            mock_send_message.side_effect = Exception("test")
-            updated_application = submit_application(db_session, application.application_id, user)
+        updated_application = submit_application(db_session, application.application_id, user)
 
     messages = sqs.receive_message(
-        QueueUrl=submission_sqs_queue, MaxNumberOfMessages=1, VisibilityTimeout=0
+        QueueUrl=submission_sqs_queue, MaxNumberOfMessages=10, VisibilityTimeout=0
     )
     assert messages.get("Messages", None) is None
     assert updated_application.application_status == ApplicationStatus.SUBMITTED
