@@ -10,7 +10,7 @@ using SimplerForms;
 
 namespace Forms.KeyContacts;
 
-/** KEY CONTACTS (Grants.gov FID 683, v2.0) */
+/** KEY CONTACTS, Grants.gov version 2.0. */
 @Meta.form(#{ id: "key-contacts", formName: "KEY CONTACTS" })
 @GrantsGov.form(#{
   legacyFormId: 683,
@@ -18,6 +18,7 @@ namespace Forms.KeyContacts;
   formVersion: "2.0",
   agencyCode: "SGG",
   ombNumber: "4040-0010",
+  expirationDate: "2029-08-31",
 })
 @example(#{
   applicantOrganizationName: "Acme Corporation",
@@ -31,7 +32,7 @@ model KeyContacts {
   @UI.label("Applicant Organization Name")
   applicantOrganizationName: Questions.Organizations.OrgName;
 
-  /** You may enter up to four (4) Key Contacts. At least 1 (one) contact person is required. Additional contacts are optional. */
+  /** Enter between 1 and 4 key contacts and their role on the project. */
   @UI.label("Key Contacts")
   @minItems(1)
   @maxItems(4)

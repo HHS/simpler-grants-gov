@@ -36,7 +36,7 @@ The parity tests and the form library's field tree report the same differences, 
 | **What they count** | Checks. Each check compares one thing, such as the plan's labels against the DAT, and fails once, listing every field that differs. | Differences. One for each field, attribute (Label, Help, Format, ...) and source (DAT, XSD or Form) that differs. |
 | **Where to look** | The failing test's name says which comparison failed. The lines under it list the fields. | The tiles count differences and the fields they're in. **Differs in** counts them by attribute. The column (DAT, XSD or Form) says which comparison found each one. |
 
-So the numbers rarely match. In step 5.4, four checks fail, and the field tree shows 20 unrecorded differences in 16 fields: the help text check alone finds 16. Two more things to know:
+So the numbers rarely match. In step 5.4, four checks fail, and the field tree shows 18 unrecorded differences in 14 fields: the help text check alone finds 12. Two more things to know:
 
 - **`comparison.test.ts > shows no unrecorded differences` is the field tree's own check.** It fails whenever the field tree would show a **!**, so it fails alongside any other check that finds a difference nothing records.
 - **Some failures don't show in the field tree.** A stale record (step 4.3) fails the suite, but the difference it describes is gone, and the field tree only shows differences.
@@ -58,7 +58,7 @@ Everything should pass before you start:
 
 ```text
  Test Files  11 passed (11)
-      Tests  293 passed | 10 todo (303)
+      Tests  305 passed | 10 todo (315)
 ```
 
 Keep the form library running in a second terminal while you work. Starting it deletes `dist/` and compiles every form from scratch. After that, nothing compiles on its own: reload the page after a change to a plan or a `parity/diffs/` file, and run `npm run compile` first after a change to a form specification. `npm run compile` only adds to `dist/`, so after deleting or renaming a form, run `npm run clean && npm run compile`.
@@ -546,6 +546,7 @@ namespace Forms.KeyContactsTutorial;
   formVersion: "2.0",
   agencyCode: "SGG",
   ombNumber: "4040-0010",
+  expirationDate: "2029-08-31",
 })
 model KeyContactsTutorial {
   /** Enter the legal name of the applicant that will undertake the assistance activity. This field is required. */
@@ -776,6 +777,8 @@ npx vitest run parity -t key-contacts-tutorial
 The compile writes `dist/canonical/forms/key-contacts-tutorial/` (`schema.json`, `ui.json`, `index.json` and `manifest.json`). It reports 3 warnings, which come from the Key Person forms. The implementation checks now run, and pass:
 
 ```text
+✓ Implementation checks > plan vs Grants.gov identity > identity matches the OMB number
+✓ Implementation checks > plan vs Grants.gov identity > identity matches the OMB expiration date
 ✓ Implementation checks > plan vs JSON schema > JSON schema has no missing fields
 ✓ Implementation checks > plan vs JSON schema > JSON schema has no extra fields
 ✓ Implementation checks > plan vs JSON schema > JSON schema matches field occurrences
@@ -785,7 +788,7 @@ The compile writes `dist/canonical/forms/key-contacts-tutorial/` (`schema.json`,
 ✓ Implementation checks > plan vs UI schema > UI schema matches field order
 ✓ Implementation checks > plan vs UI schema > UI schema matches field labels
 ✓ Implementation checks > plan vs UI schema > UI schema matches help text
-      Tests  26 passed
+      Tests  28 passed
 ```
 
 ### See it in the form library
@@ -995,7 +998,7 @@ The compile now also writes `xml-transform.json`, and the XML checks run and pas
 ✓ XML checks > XML mapping vs XSD > XML mapping matches field order
 ✓ XML checks > JSON schema vs XSD > JSON schema matches field occurrences
 ✓ XML checks > JSON schema vs XSD > JSON schema matches field constraints
-      Tests  33 passed
+      Tests  35 passed
 ```
 
 `xsdModels.test.ts` checks your XSD model against the real XSD: element names, order, requiredness, occurrences and namespaces.
@@ -1035,7 +1038,7 @@ Three checks fail:
   label differs: key_contacts[].name.first_name -- plan "First Name", source "Given Name"
  FAIL  ... > Implementation checks > plan vs UI schema > UI schema matches help text
   help differs: key_contacts[].name.first_name -- plan "Enter the First Name. This field is required.", source "Enter the contact's given name."
-      Tests  3 failed | 30 passed
+      Tests  3 failed | 32 passed
 ```
 
 The form no longer does what the plan says, and the comparison sheet flags it too. In the form library, reload the page: the **Unrecorded differences** tile shows **2 in 1 field**, First Name's Label and Help in the Form column. Here the counts line up: two parity checks each found one difference, in the same field.
@@ -1146,6 +1149,7 @@ namespace Forms.KeyContactsTutorial;
   formVersion: "2.0",
   agencyCode: "SGG",
   ombNumber: "4040-0010",
+  expirationDate: "2029-08-31",
 })
 model KeyContactsTutorial {
   /** Enter the legal name of the applicant that will undertake the assistance activity. This field is required. */
@@ -1331,18 +1335,20 @@ npx vitest run parity -t key-contacts-tutorial
  FAIL  ... > plan vs JSON schema > JSON schema matches field constraints
   format differs: key_contacts[].email -- plan none, source "email"
  FAIL  ... > plan vs UI schema > UI schema matches field labels
+  label differs: key_contacts[].address.street1 -- plan "Street1", source "Street 1"
+  label differs: key_contacts[].address.street2 -- plan "Street2", source "Street 2"
   label differs: key_contacts[].address.county -- plan "County", source "County/Parish"
   label differs: key_contacts[].phone -- plan "Telephone Number", source "Phone Number"
   label differs: key_contacts[].fax -- plan "Fax", source "Fax Number"
  FAIL  ... > plan vs UI schema > UI schema matches help text
   help differs: key_contacts[].name.prefix -- plan "Select the Prefix from the provided list or enter a new Prefix not provided on the list.", source "Enter the prefix."
   help differs: key_contacts[].name.first_name -- plan "Enter the First Name. This field is required.", source "Enter the first name."
-  ... (16 in all)
+  ... (12 in all)
 ```
 
 The XML checks still pass. Only the wording changed, and the question bank adds an email format.
 
-In the form library, the **Unrecorded differences** tile shows **20 in 16 fields**, all in the Form column. Four checks fail, but there are 20 differences: 3 labels, 16 help texts and the email format. **Differs in** shows Label 5 (those 3, plus step 1's 2 upstream labels), Help 16 and Format 1.
+In the form library, the **Unrecorded differences** tile shows **18 in 14 fields**, all in the Form column. Four checks fail, but there are 18 differences: 5 labels, 12 help texts and the email format. **Differs in** shows Label 7 (those 5, plus step 1's 2 upstream labels), Help 12 and Format 1.
 
 ### 5.5 Choose: match the DAT, or match the other forms
 
@@ -1523,7 +1529,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "7-10",
               "required": true,
               "type": "Text input",
@@ -1535,7 +1541,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "7-11",
               "required": false,
               "type": "Text input",
@@ -1672,7 +1678,9 @@ These are the fields that change:
 | `key_contacts[].name.middle_name` | `help_text` | Enter the middle name. |
 | `key_contacts[].name.last_name` | `help_text` | Enter the last name. |
 | `key_contacts[].name.suffix` | `help_text` | Enter the suffix. |
+| `key_contacts[].address.street1` | `label` | Street 1 |
 | `key_contacts[].address.street1` | `help_text` | Enter the first line of the street address. |
+| `key_contacts[].address.street2` | `label` | Street 2 |
 | `key_contacts[].address.street2` | `help_text` | Enter the second line of the street address. |
 | `key_contacts[].address.city` | `help_text` | Enter the city. |
 | `key_contacts[].address.county` | `label` | County/Parish |
@@ -1693,14 +1701,16 @@ The implementation checks pass. The difference has moved to where it belongs, th
 ```text
  FAIL  parity/comparison.test.ts > key-contacts-tutorial > shows no unrecorded differences
  FAIL  ... > Requirements checks > plan vs DAT > plan matches field labels
+  label differs: 7-10 -- plan "* Street 1", source "* Street1"
+  label differs: 7-11 -- plan "Street 2", source "Street2"
   label differs: 7-13 -- plan "County/Parish", source "County"
   label differs: 7-18 -- plan "* Phone Number", source "* Telephone Number"
   label differs: 7-19 -- plan "Fax Number", source "Fax"
  FAIL  ... > Requirements checks > plan vs DAT > plan matches help text
-  ... (16 in all)
+  ... (12 in all)
 ```
 
-In the form library, the **Unrecorded differences** tile shows **19 in 16 fields**, now in the DAT column instead of the Form column. The email format difference is gone: the plan now says `format email`, and formats aren't compared with the DAT.
+In the form library, the **Unrecorded differences** tile shows **17 in 14 fields**, now in the DAT column instead of the Form column. The email format difference is gone: the plan now says `format email`, and formats aren't compared with the DAT.
 
 ### 5.7 Record the differences as intentional
 
@@ -1744,10 +1754,10 @@ npm run test:parity
 
 ```text
  Test Files  11 passed (11)
-      Tests  332 passed | 12 todo (344)
+      Tests  346 passed | 12 todo (358)
 ```
 
-In the form library, the **Intentional differences** tile shows **19 in 16 fields**: the labels and help texts in the DAT column, each with the question bank reason. **Upstream discrepancies** still shows step 1's 2 labels, and **Matches every source** shows the 4 fields that match everywhere.
+In the form library, the **Intentional differences** tile shows **17 in 14 fields**: the labels and help texts in the DAT column, each with the question bank reason. **Upstream discrepancies** still shows step 1's 2 labels, and **Matches every source** shows the 6 fields that match everywhere.
 
 ---
 
@@ -1772,7 +1782,7 @@ import "simpler-forms-sgg";
   // ...
 ```
 
-`@Sgg.sync` needs `@GrantsGov.form`, which you added in step 2: it's the identity the API registers the form under. `@Sgg.sync(#{ xml: false })` installs a form without its XML rules, while they can't produce a valid document yet.
+`@Sgg.sync` needs `@GrantsGov.form`, which you added in step 2: it's the identity the API registers the form under. `@Sgg.sync(#{ xml: false })` installs a form without its XML rules, while they can't produce a valid document yet. `@Sgg.sync(#{ instructions: "<uuid>" })` points the form at its instructions, a form instruction record uploaded to each environment, and `sggVersion` sets its Simpler Grants version (default `1.0`).
 
 ### 6.2 Sync it into the API
 

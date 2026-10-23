@@ -20,6 +20,12 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`@Sgg.${"decorator"} applies to a form, and ${"name"} has no @Meta.form.`,
       },
     },
+    "invalid-instructions": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"name"} has @Sgg.sync instructions "${"value"}", which is not a UUID: it names the form instruction record the API serves.`,
+      },
+    },
     "sync-without-identity": {
       severity: "error",
       messages: {

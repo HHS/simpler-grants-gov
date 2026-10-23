@@ -2,6 +2,7 @@ import type { FormDiff, Recorded } from "../harness/model.ts";
 import {
   ADDRESS_HEADING,
   BANK_WORDING,
+  emailMinLength,
   unmappedAttachments,
   PROFILE_GROUPS,
 } from "./common.ts";
@@ -44,6 +45,18 @@ export const DIFF: FormDiff = {
           "The DAT marks Synergistic Activities required. The XSD requires it only for each key person entered, and key persons are optional.",
       },
     },
+  },
+  xsd: {
+    differingRules: emailMinLength([
+      "PDPI/Profile/Email",
+      "KeyPerson/Profile/Email",
+    ]),
+  },
+  jsonSchemaVsXsd: {
+    differingRules: emailMinLength([
+      "principal_investigator.profile.email",
+      "senior_key_persons[].profile.email",
+    ]),
   },
   ...unmappedAttachments([
     [

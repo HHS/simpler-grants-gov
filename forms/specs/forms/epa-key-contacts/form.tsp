@@ -20,6 +20,7 @@ namespace Forms.EPAKeyContacts;
   formVersion: "2.0",
   agencyCode: "SGG",
   ombNumber: "2030-0020",
+  expirationDate: "2029-02-28",
 })
 @example(#{
   authorizedRepresentative: Questions.People.Examples.usContact,

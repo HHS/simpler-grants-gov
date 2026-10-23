@@ -22,6 +22,7 @@ namespace Forms.NSFKeyPersonExpanded;
   formVersion: "3.3",
   agencyCode: "SGG",
   ombNumber: "3145-0058",
+  expirationDate: "2026-11-30",
 })
 @example(#{
   principalInvestigator: #{
