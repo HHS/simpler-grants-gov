@@ -9,7 +9,7 @@ import {
   shapeFormData,
 } from "src/utils/applyForm/applyFormUtils";
 
-import { useCallback, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type { RenderFieldNodeProps } from "src/components/apply-form/FormFields";
 import type { JsonFormsUiSchema } from "./convertUiSchema";
@@ -70,8 +70,12 @@ export const JsonFormsFields = ({
     [schema, formData, errors, uiSchema, formContext, isFormLocked, print],
   );
 
+  // Most inputs fire both onInput and onChange for one native event; refresh once.
+  const lastEvent = useRef<Event | null>(null);
   const refreshRuleData = useCallback(
     (event: FormEvent<HTMLDivElement>) => {
+      if (event.nativeEvent === lastEvent.current) return;
+      lastEvent.current = event.nativeEvent;
       const form = event.currentTarget.closest("form");
       if (form) setRuleData(shapeFormData(new FormData(form), schema));
     },
