@@ -1,5 +1,6 @@
 ---
 import type { FieldNode } from "../../content.config";
+import FieldHelp from "./FieldHelp";
 
 interface Props {
   field: FieldNode;
@@ -27,9 +28,7 @@ const requiredLabel =
     )}
   </div>
 
-  {field.help_text && (
-    <div class="field-row__help">{field.help_text}</div>
-  )}
+  {field.help_text && <FieldHelp text={field.help_text} />}
 
   <div class="field-row__tertiary">
     <span class="field-row__type">{field.type}</span>

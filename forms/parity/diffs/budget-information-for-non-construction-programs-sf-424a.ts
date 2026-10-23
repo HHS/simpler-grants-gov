@@ -1,19 +1,15 @@
 import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
 
 /** Literal per-field pins; source or plan edits invalidate the corresponding entry. */
-const label = (
-  id: string,
-  plan: string | null,
-  source: string | null,
-): Pinned => ({
+const label = (plan: string | null, source: string | null): Pinned => ({
   category: "intentional",
-  reason: `DAT FID241 v1.0 ${id}: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.`,
+  reason: `DAT FID241 v1.0: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.`,
   plan,
   source,
 });
-const order = (id: string): Recorded => ({
+const order = (): Recorded => ({
   category: "intentional",
-  reason: `DAT FID241 v1.0 ${id}: Proposed activity-by-activity budget categories follow the DAT B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.`,
+  reason: `DAT FID241 v1.0: Proposed activity-by-activity budget categories follow the DAT B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.`,
 });
 const rules = (
   plan: import("../harness/model.ts").Value,
@@ -194,10 +190,7 @@ export const DIFF: FormDiff = {
         ["F-0-1", "Direct Charges", "21. Direct Charges"],
         ["F-0-2", "Indirect Charges", "22. Indirect Charges"],
         ["F-0-3", "Remarks", "23. Remarks"],
-      ].map(([id, plan, source]) => [
-        id as string,
-        label(id as string, plan, source),
-      ]),
+      ].map(([id, plan, source]) => [id as string, label(plan, source)]),
     ),
     outOfOrder: Object.fromEntries(
       [
@@ -256,7 +249,7 @@ export const DIFF: FormDiff = {
         "D-3-5",
         "D-2-6",
         "D-3-6",
-      ].map((id) => [id, order(id)]),
+      ].map((id) => [id, order()]),
     ),
   },
   xsd: {

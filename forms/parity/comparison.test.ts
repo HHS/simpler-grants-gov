@@ -188,3 +188,16 @@ describe("SF-424A finite DAT cells", () => {
     }
   });
 });
+
+it("SF-424A DAT range reports the numeric bounds actually checked by parity", async () => {
+  const view = (await compareForm(
+    PLANS.get("budget-information-for-non-construction-programs-sf-424a")!,
+  ))!;
+  const field = view.fields.find(
+    (f) => f.id === "summary.activities[].estimated_federal",
+  )!;
+  const cell = field.rows.find((r) => r.attribute === "range")!.cells.dat;
+  expect(cell.status).toBe("match");
+  expect(cell.value).toContain("-99999999999.99");
+  expect(cell.value).toContain("999999999999.99");
+});

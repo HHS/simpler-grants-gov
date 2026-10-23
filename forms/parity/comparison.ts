@@ -153,8 +153,7 @@ const NOT_COMPARED: Partial<
   dat: {
     xmlMapping: "The DAT names no XML elements.",
     format:
-      "The DAT is compared on maximum length only, not on patterns or formats.",
-    range: "The DAT is compared on maximum length only, not on numeric ranges.",
+      "The DAT is compared on text length and numeric value bounds, not on patterns or formats.",
     options:
       "The DAT's list of values is not compared. The XSD's code list is, and the form's values are compared with it.",
   },
