@@ -357,7 +357,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "pre_populated": "SF424(R&R) field 14-13 (deferred)",
               "json_path": "principal_investigator.profile.email",
               "xml_path": "RR_KeyPersonExpanded_4_0:PDPI/RR_KeyPersonExpanded_4_0:Profile/RR_KeyPersonExpanded_4_0:Email"
@@ -744,7 +744,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "senior_key_persons[].profile.email",
               "xml_path": "RR_KeyPersonExpanded_4_0:KeyPerson/RR_KeyPersonExpanded_4_0:Profile/RR_KeyPersonExpanded_4_0:Email"
             }

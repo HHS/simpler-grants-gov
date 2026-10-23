@@ -1,5 +1,10 @@
 import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
-import { FREE_TEXT_HELP, SHARED_HELP, standardLabel } from "./common.ts";
+import {
+  emailMinLength,
+  FREE_TEXT_HELP,
+  SHARED_HELP,
+  standardLabel,
+} from "./common.ts";
 
 /** The DAT stars State and Zip but answers "No" in its Required column; both are required only for a US address. */
 const conditionalStar = (label: string): Pinned => ({
@@ -141,4 +146,6 @@ export const DIFF: FormDiff = {
     differingHelp: help,
     outOfOrder: { "7-08": ROLE_GROUP, "7-09": ROLE_GROUP },
   },
+  xsd: { differingRules: emailMinLength(["RoleOnProject/ContactEmail"]) },
+  jsonSchemaVsXsd: { differingRules: emailMinLength(["key_contacts[].email"]) },
 };

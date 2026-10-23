@@ -240,7 +240,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "authorized_representative.email",
               "xml_path": "EPA_KeyContacts_2_0:AuthorizedRepresentative/globLib:Email"
             }
@@ -466,7 +466,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "payee.email",
               "xml_path": "EPA_KeyContacts_2_0:Payee/globLib:Email"
             }
@@ -692,7 +692,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "administrative_contact.email",
               "xml_path": "EPA_KeyContacts_2_0:AdminstrativeContact/globLib:Email"
             }
@@ -918,7 +918,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "project_manager.email",
               "xml_path": "EPA_KeyContacts_2_0:ProjectManager/globLib:Email"
             }

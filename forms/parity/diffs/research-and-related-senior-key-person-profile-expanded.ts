@@ -2,6 +2,7 @@ import type { FormDiff } from "../harness/model.ts";
 import {
   ADDRESS_HEADING,
   BANK_WORDING,
+  emailMinLength,
   unmappedAttachments,
   PROFILE_GROUPS,
 } from "./common.ts";
@@ -29,7 +30,14 @@ export const DIFF: FormDiff = {
         reason:
           "The DAT requires the PD/PI's biographical sketch (1-26); the XSD makes every sketch optional. The form follows the DAT.",
       },
+      ...emailMinLength(["PDPI/Profile/Email", "KeyPerson/Profile/Email"]),
     },
+  },
+  jsonSchemaVsXsd: {
+    differingRules: emailMinLength([
+      "principal_investigator.profile.email",
+      "senior_key_persons[].profile.email",
+    ]),
   },
   ...unmappedAttachments([
     [

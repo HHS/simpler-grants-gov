@@ -1,5 +1,10 @@
 import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
-import { FREE_TEXT_HELP, SHARED_HELP, standardLabel } from "./common.ts";
+import {
+  emailMinLength,
+  FREE_TEXT_HELP,
+  SHARED_HELP,
+  standardLabel,
+} from "./common.ts";
 
 const ROLES = [
   "authorized_representative",
@@ -446,6 +451,10 @@ export const DIFF: FormDiff = {
     absentFromPlan: notAsked(
       (role, field) => `${XSD_ROLES[role]}/Address/${field}`,
     ),
+    differingRules: emailMinLength(XSD_ROLES.map((role) => `${role}/Email`)),
+  },
+  jsonSchemaVsXsd: {
+    differingRules: emailMinLength(ROLES.map((role) => `${role}.email`)),
   },
   jsonSchema: {
     absentFromPlan: notAsked(
