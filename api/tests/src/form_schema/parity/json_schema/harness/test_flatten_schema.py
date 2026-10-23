@@ -49,9 +49,9 @@ class TestInputs:
         assert one_way == other_way
 
     def test_leaves_out_title_and_description(self):
-        found = flatten_schema.inputs({
-            "properties": {"a": {"type": "string", "title": "A", "description": "About A."}}
-        })
+        found = flatten_schema.inputs(
+            {"properties": {"a": {"type": "string", "title": "A", "description": "About A."}}}
+        )
         assert found == {("a",): FormInput(required=False, rules={"type": "string"})}
 
     def test_requires_list_items_when_list_sets_min_items(self):

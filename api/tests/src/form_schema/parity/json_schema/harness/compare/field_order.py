@@ -57,10 +57,12 @@ def neighbors(sequence: list[str], at: int) -> str:
     """
     before = sequence[at - 1] if at > 0 else None
     after = sequence[at + 1] if at + 1 < len(sequence) else None
-    return " · ".join([
-        f"After {before}" if before else "First",
-        f"before {after}" if after else "last",
-    ])
+    return " · ".join(
+        [
+            f"After {before}" if before else "First",
+            f"before {after}" if after else "last",
+        ]
+    )
 
 
 # =============================================================================
@@ -86,7 +88,7 @@ def _all_differences(
         ),
         key=lambda pair: generated_at[pair[0]],
     )
-    # Each side's sequence holds only the fields both show, so a neighbor is always a
+    # Each side's sequence only includes the fields both show, so a neighbor is always a
     # field the other form has too.
     generated_sequence = [g for g, _ in placed]
     handwritten_sequence = sorted((h for _, h in placed), key=handwritten_at.__getitem__)
