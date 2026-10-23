@@ -163,35 +163,35 @@ export const DIFF: FormDiff = {
       "08-1-1": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-1: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
+          "DAT FID768 v5.0: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
         plan: "Revision Reasons",
         source: "A. Increase Award",
       },
       "08-1-2": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-2: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
+          "DAT FID768 v5.0: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
         plan: "Revision Reasons",
         source: "B. Decrease Award",
       },
       "08-1-3": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-3: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
+          "DAT FID768 v5.0: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
         plan: "Revision Reasons",
         source: "C. Increase Duration",
       },
       "08-1-4": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-4: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
+          "DAT FID768 v5.0: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
         plan: "Revision Reasons",
         source: "D. Decrease Duration",
       },
       "08-1-5": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-5: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
+          "DAT FID768 v5.0: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
         plan: "Revision Reasons",
         source: "E. Other",
       },
@@ -489,35 +489,35 @@ export const DIFF: FormDiff = {
       "08-1-1": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-1: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
+          "DAT FID768 v5.0: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
         plan: "Select A (Increase Award), B (Decrease Award), C (Increase Duration), D (Decrease Duration), or E (Other). The XSD permits A, B, C, D, E, AC, AD, BC and BD. Enable only for Revision; require an explanation for E.",
         source: "A. Increase Award May select more than one.",
       },
       "08-1-2": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-2: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
+          "DAT FID768 v5.0: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
         plan: "Select A (Increase Award), B (Decrease Award), C (Increase Duration), D (Decrease Duration), or E (Other). The XSD permits A, B, C, D, E, AC, AD, BC and BD. Enable only for Revision; require an explanation for E.",
         source: "B. Decrease Award May select more than one.",
       },
       "08-1-3": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-3: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
+          "DAT FID768 v5.0: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
         plan: "Select A (Increase Award), B (Decrease Award), C (Increase Duration), D (Decrease Duration), or E (Other). The XSD permits A, B, C, D, E, AC, AD, BC and BD. Enable only for Revision; require an explanation for E.",
         source: "C. Increase Duration May select more than one.",
       },
       "08-1-4": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-4: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
+          "DAT FID768 v5.0: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
         plan: "Select A (Increase Award), B (Decrease Award), C (Increase Duration), D (Decrease Duration), or E (Other). The XSD permits A, B, C, D, E, AC, AD, BC and BD. Enable only for Revision; require an explanation for E.",
         source: "D. Decrease Duration May select more than one.",
       },
       "08-1-5": {
         category: "intentional",
         reason:
-          "DAT FID768 v5.0 08-1-5: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
+          "DAT FID768 v5.0: one revision-answer instruction states all five choice labels, admitted combinations, activation and Other explanation; this source row describes only its individual checkbox.",
         plan: "Select A (Increase Award), B (Decrease Award), C (Increase Duration), D (Decrease Duration), or E (Other). The XSD permits A, B, C, D, E, AC, AD, BC and BD. Enable only for Revision; require an explanation for E.",
         source:
           'E. Other If "Other" is selected, please specify in text box provided.',
