@@ -58,7 +58,7 @@ const renderFields = (formData: object = {}) =>
   );
 
 describe("JsonFormsFields", () => {
-  it("draws each control with the widget and field name the SGG renderer would use", () => {
+  it("renders each control with the widget and field name the SGG renderer would use", () => {
     renderFields({ title: "Saved title" });
 
     const title = screen.getByTestId("title");
@@ -151,7 +151,7 @@ describe("JsonFormsFields", () => {
     expect(screen.queryByText(/No applicable/)).not.toBeInTheDocument();
   });
 
-  it("draws an element with an extra renderer ranked above the SGG ones", () => {
+  it("renders an element with an extra renderer ranked above the SGG ones", () => {
     const groups: JsonFormsRendererRegistryEntry[] = [
       {
         tester: rankWith(20, uiTypeIs("Group")),

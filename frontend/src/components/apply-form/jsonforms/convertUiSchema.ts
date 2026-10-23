@@ -17,7 +17,7 @@ import { getByPointer } from "src/utils/formData/formDataUtils";
 /*
   A form whose `form_renderer` is "jsonforms" arrives with a JSON Forms UI schema instead of
   the section/field tree the rest of the apply-form code reads. JSON Forms lays the form out
-  and evaluates its rules, but every control it draws is still one of our widgets, reached
+  and evaluates its rules, but every control it renders is still one of our widgets, reached
   through the same `getFieldConfig` -> `renderWidget` path as any other form.
 
   The functions here translate between the two shapes, so warnings, navigation, print and
@@ -163,7 +163,7 @@ const findUnsupportedControls = (
 ): string[] => {
   if (isControlElement(uiSchema)) {
     if (!controlToNodes(uiSchema, schema).length) return [uiSchema.scope];
-    // A list's entries are laid out by its detail; report a field there no widget draws.
+    // A list's entries are laid out by its detail; report a field there no widget renders.
     const layout = entryLayout(uiSchema);
     const definition = scopeToDefinition(uiSchema.scope);
     return layout && definition
