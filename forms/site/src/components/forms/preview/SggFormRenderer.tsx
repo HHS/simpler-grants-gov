@@ -4,6 +4,8 @@ import {
   processFormSchema,
   shapeFormData,
 } from "@sgg/frontend/utils/applyForm/applyFormUtils";
+import { JsonFormsFields } from "@sgg/frontend/components/apply-form/jsonforms/JsonFormsFields";
+import { convertJsonFormsUiSchema } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
 import { useEffect, useMemo, useRef, type FormEvent } from "react";
 
 import {
@@ -11,8 +13,6 @@ import {
   toValidationWarnings,
   uniqueWarnings,
 } from "../../../lib/validation";
-import { JsonFormsFields } from "../../../vendor/sgg/JsonFormsFields";
-import { jsonFormsToUiSchema } from "../../../vendor/sgg/jsonFormsUiSchema";
 import { previewRenderers } from "./renderers";
 import type { FormRendererProps } from "./types";
 
@@ -37,7 +37,7 @@ export const SggFormRenderer = ({
     [schema],
   );
   const sggUiSchema = useMemo(
-    () => jsonFormsToUiSchema(uischema, formSchema),
+    () => convertJsonFormsUiSchema(uischema, formSchema).uiSchema,
     [uischema, formSchema],
   );
   const validate = useMemo(() => createAjv().compile(schema), [schema]);

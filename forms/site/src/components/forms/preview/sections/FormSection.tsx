@@ -1,10 +1,10 @@
 import { crumbAttributes, headingTag } from "@/lib/breadcrumbs";
 import type { GroupLayout, LayoutProps } from "@jsonforms/core";
 import { JsonFormsDispatch } from "@jsonforms/react";
+import { AdapterContext } from "@sgg/frontend/components/apply-form/jsonforms/renderers";
+import { groupName } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
 import { useContext, useId } from "react";
 
-import { groupName } from "../../../../vendor/sgg/jsonFormsUiSchema";
-import { AdapterContext } from "../../../../vendor/sgg/renderers";
 import { SectionDepth } from "./SectionDepth";
 
 /**
