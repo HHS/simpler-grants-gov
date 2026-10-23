@@ -5,7 +5,7 @@ from pathlib import Path
 
 import click
 
-from src.form_schema.forms._loader import form_source_files
+from src.form_schema.forms._loader import version_files
 from src.task.task_blueprint import task_blueprint
 from src.util.local import error_if_not_local
 
@@ -27,7 +27,7 @@ def compute_version_hash(form_dir: Path, version_dir: Path) -> str:
         raise FileNotFoundError(f"config.py not found: {config_path}")
 
     h = hashlib.sha256()
-    for path in form_source_files(version_dir):
+    for path in version_files(version_dir):
         h.update(path.read_bytes())
     h.update(config_path.read_bytes())
     return h.hexdigest()
