@@ -72,8 +72,8 @@ Constraints are requiredness plus the keywords each comparison reads (`SPECS` in
 `harness/index.ts`). Requiredness is always from the form's root, so a field inside an
 optional section is optional. A plan's `Conditional (...)` counts as optional.
 
-The DAT is compared on `maxLength` for text and `minimum`/`maximum` for numeric values. Its minimum is 0 for every optional field and 1
-for every required one, so it restates requiredness; the XSD is the authority on
+The DAT is compared on `maxLength` for text and `minimum`/`maximum` for numeric values. For text, its minimum characters are 0 for optional fields and 1
+for required ones, so that text minimum restates requiredness; the XSD is the authority on
 `minLength`. A DAT list shown as a popup is a fixed code list, so its "max chars" is not a
 length rule. An exact length is stated in a plan as `minLength 12, maxLength 12`.
 
