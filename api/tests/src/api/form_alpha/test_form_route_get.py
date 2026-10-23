@@ -103,7 +103,7 @@ def test_form_get_401_unauthorized(client, enable_factory_create, seed_form_regi
 def test_form_get_with_new_fields_200(
     client, user_api_key_id, enable_factory_create, seed_form_registry
 ):
-    """Test getting a form with form_type, sgg_version, and is_deprecated fields"""
+    """Test getting a form with form_type, sgg_version, is_deprecated and form_renderer fields"""
     # SF424_v4_0 has form_type=SF424, sgg_version="1.0", is_deprecated=False
     resp = client.get(f"/alpha/forms/{SF424_v4_0.form_id}", headers={"X-API-Key": user_api_key_id})
 
