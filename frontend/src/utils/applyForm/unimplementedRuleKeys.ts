@@ -1,6 +1,7 @@
 /*
-  Finds the rules an SGG UI schema declares that the renderer doesn't act on, so
-  getFormData can log them.
+  Finds UI schema rules that the SGG renderer can't (yet) apply to a form widget.
+  This lets us skip those rules so they don't show up as errors to the applicant,
+  while getFormData still logs them.
 */
 
 /** Node keys this renderer reads. Anything else object-valued on a node is a rule it ignores. */
@@ -40,7 +41,7 @@ export const unimplementedRuleKeys = (data: unknown): string[] => {
     if (!node || typeof node !== "object") return;
     for (const [key, value] of Object.entries(node)) {
       if (Array.isArray(value)) {
-        // A node's children are nodes; nothing else holds one.
+        // Only a node's children can be nodes.
         if (key === "children") value.forEach(visitNode);
         continue;
       }
