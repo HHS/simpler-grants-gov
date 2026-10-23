@@ -61,9 +61,15 @@ export async function saveOpportunityViaSearch(
   await page.getByRole("button", { name: "Search", exact: true }).click();
 
   // Open the opportunity detail page from search results
-  await page.getByRole("link", { name: title }).first().click();
-
-  await page.waitForURL(/opportunity|opportunities/);
+  // On Webkit the click can land before results are hydrated and is silently
+  // ignored, so retry the click until we actually land on the detail page.
+  const resultLink = page.getByRole("link", { name: title }).first();
+  await expect(async () => {
+    if (!/\/opportunity\//.test(page.url())) {
+      await resultLink.click({ timeout: 5000 });
+    }
+    await page.waitForURL(/\/opportunity\//, { timeout: 8000 });
+  }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000, 3000] });
 
   // Save the opportunity via the save button
   await page.getByTestId("simpler-save-button").click();
