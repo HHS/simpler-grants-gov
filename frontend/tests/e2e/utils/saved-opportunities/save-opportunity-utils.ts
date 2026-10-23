@@ -1,6 +1,5 @@
 import { expect, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
-import { waitForURLChange } from "tests/e2e/playwrightUtils";
 
 const { targetEnv } = playwrightEnv;
 
@@ -48,7 +47,7 @@ export async function saveOpportunityViaSearch(
   // Navigate directly to Search - avoids mobile hamburger nav state
 
   await page.goto("/search");
-  await waitForURLChange(page, (url) => !!url.match(/\/search/));
+  await page.waitForURL(/\/search/);
 
   // Search for the opportunity by title
   const searchBox = page.getByRole("searchbox", {
@@ -64,11 +63,7 @@ export async function saveOpportunityViaSearch(
   // Open the opportunity detail page from search results
   await page.getByRole("link", { name: title }).first().click();
 
-  await waitForURLChange(
-    page,
-
-    (url) => !!url.match(/opportunity|opportunities/),
-  );
+  await page.waitForURL(/opportunity|opportunities/);
 
   // Save the opportunity via the save button
   await page.getByTestId("simpler-save-button").click();
@@ -78,7 +73,7 @@ export async function saveOpportunityViaSearch(
 
   // Return to Saved Opportunities via direct navigation - avoids mobile nav state
   await page.goto("/saved-opportunities");
-  await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
+  await page.waitForURL(/saved-opportunities/);
 
   // Confirm the page has settled and the opportunity link is visible
   await assertSavedOpportunitiesPageReady(page, title);

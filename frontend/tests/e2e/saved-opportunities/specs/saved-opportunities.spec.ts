@@ -103,6 +103,9 @@ test.describe("Saved Opportunities", () => {
     "Logged-in user can view saved opportunities and navigate to opportunity detail page",
     { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page, context }, { project }) => {
+      // This test can search for and save the opportunity first, which on Webkit
+      // exceeded the default 75s local timeout.
+      test.setTimeout(150_000);
       const isMobile = project.name.match(/[Mm]obile/);
 
       // Given the user is authenticated
