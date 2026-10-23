@@ -95,7 +95,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: isCi ? 3 : 0,
   /* ci-frontend-e2e.yml — no workers passed → defaults to 10, sharding works as normal
-     e2e-staging.yml — passes workers: 1 → PLAYWRIGHT_WORKERS=1, so each shard runs
+     e2e-deployed-env.yml — passes workers: 1 → PLAYWRIGHT_WORKERS=1, so each shard runs
      its own tests sequentially and concurrency comes from the shard matrix instead.
      Deployed targets share a handful of static test users (see utils/auth/test-users.ts),
      so in-process parallelism against one environment is riskier. */

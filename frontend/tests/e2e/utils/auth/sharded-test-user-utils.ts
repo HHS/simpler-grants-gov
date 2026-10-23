@@ -10,7 +10,7 @@
  *    PLAYWRIGHT_WORKERS=10 (the default) against one seeded database.
  *    Playwright sets TEST_PARALLEL_INDEX (0-based, bounded by the worker
  *    count) uniquely per concurrently-running worker *within* that run.
- *  - Staging (e2e-staging.yml): 6 separate Chrome shards run as
+ *  - Staging (e2e-deployed-env.yml): 6 separate Chrome shards run as
  *    concurrent CI jobs against the same shared staging environment, each
  *    with PLAYWRIGHT_WORKERS=1. TEST_PARALLEL_INDEX is always 0 there
  *    (only one worker per job), so it can't differentiate the 6 shards -
@@ -83,7 +83,7 @@ function parseNonNegativeInt(value: string | undefined): number {
 }
 
 /**
- * 0-based shard offset. CURRENT_SHARD (set by e2e-staging.yml's matrix) is
+ * 0-based shard offset. CURRENT_SHARD (set by e2e-deployed-env.yml's matrix) is
  * 1-based when present; unset (local/ordinary CI) is treated as shard 0.
  */
 function getShardIndex(): number {
