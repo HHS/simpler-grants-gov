@@ -4,6 +4,8 @@ import { eligbilityValueToGroup } from "src/constants/opportunity";
 import { eligibilityOptions } from "src/constants/searchFilterOptions";
 import { getFilterOptionLabel } from "src/utils/search/filterUtils";
 
+import { useTranslations } from "next-intl";
+
 export const applicantTypesToGroups = (applicantTypes: string[]) =>
   applicantTypes.reduce(
     (groupedApplicantTypes, applicantType) => {
@@ -30,8 +32,10 @@ export const OpportunityEligibility = ({
 }: {
   applicantTypes: string[];
 }) => {
+  const t = useTranslations("OpportunityListing.description");
+
   if (!applicantTypes || !applicantTypes.length) {
-    return <div>--</div>;
+    return <div>{t("notSpecified")}</div>;
   }
 
   return (

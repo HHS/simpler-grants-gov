@@ -9,29 +9,21 @@ type Props = {
   detail: OpportunityDetail;
 };
 
-const formatHistoryDate = (date: string | null) => {
-  return date === null ? "--" : formatDate(date);
-};
-
 export const PostedOpportunityItem = ({ detail }: Props) => {
   const t = useTranslations("OpportunityListing.history");
 
+  const formatHistoryDate = (date: string | null) =>
+    date ? formatDate(date) : t("notSpecified");
+
   return (
-    <div>
-      <div className="padding-05">
+    <div className="padding-05">
+      <ul className="usa-list usa-list--unstyled">
         <OpportunityHistoryItem
           title={t("closing")}
           content={formatHistoryDate(detail.summary.close_date)}
+          description={detail.summary.close_date_description}
         />
-        <OpportunityHistoryItem
-          title={t("closeDateDescription")}
-          content={
-            detail.summary.close_date_description
-              ? detail.summary.close_date_description
-              : t("closeDateDescriptionNotAvailable")
-          }
-        />
-      </div>
+      </ul>
     </div>
   );
 };

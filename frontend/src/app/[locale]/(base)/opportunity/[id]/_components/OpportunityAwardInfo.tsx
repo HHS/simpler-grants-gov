@@ -34,32 +34,31 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
       case "boolean":
         return content ? t("yes") : t("no");
       case "string":
-        return (
-          <p className="line-height-sans-1">
-            {formatStringReturnValue(content)}
-          </p>
-        );
+        return formatStringReturnValue(content);
       case "object":
-        if (Array.isArray(content)) {
-          return content.length
-            ? content.map((content, index) => (
-                <p className="line-height-sans-1" key={`contentList-${index}`}>
-                  {formatStringReturnValue(content)}
-                </p>
-              ))
-            : "--";
+        if (Array.isArray(content) && content.length) {
+          return (
+            <ul className="usa-list margin-y-0">
+              {content.map((item, index) => (
+                <li key={`contentList-${index}`}>
+                  {formatStringReturnValue(item)}
+                </li>
+              ))}
+            </ul>
+          );
         }
-        return "--";
+        return t("notSpecified");
       default:
-        return "--";
+        return t("notSpecified");
     }
   };
 
   const fundingSummaryInfo = {
     programFunding:
       formatCurrency(opportunityData.summary.estimated_total_program_funding) ||
-      "$--",
-    expectedAwards: opportunityData.summary.expected_number_of_awards || "--",
+      t("notSpecified"),
+    expectedAwards:
+      opportunityData.summary.expected_number_of_awards || t("notSpecified"),
   };
 
   const awardGridInfo = {
@@ -84,15 +83,17 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
         className="border radius-md border-base-lighter padding-x-2 padding-y-1 margin-top-2 margin-bottom-2"
         data-testid="opportunity-funding-summary"
       >
-        {Object.entries(fundingSummaryInfo).map(([title, content]) => (
-          <p key={title}>
-            <strong>
-              {t(title as TranslationKeys)}
-              {":"}
-            </strong>{" "}
-            {content}
-          </p>
-        ))}
+        <ul className="usa-list usa-list--unstyled">
+          {Object.entries(fundingSummaryInfo).map(([title, content]) => (
+            <li key={title} className="margin-y-1">
+              <strong>
+                {t(title as TranslationKeys)}
+                {":"}
+              </strong>{" "}
+              {content}
+            </li>
+          ))}
+        </ul>
       </div>
       <Grid row className="grid-gap-2">
         {Object.entries(awardGridInfo).map(([title, content], index) => (
@@ -108,16 +109,18 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
           </Grid>
         ))}
       </Grid>
-      <div className="border radius-md border-base-lighter padding-x-2">
-        {Object.entries(awardSubInfo).map(([title, content], index) => (
-          <div key={`awardInfo-${index}`}>
-            <p className={"text-bold"}>
-              {t(`${title as TranslationKeys}`)}
-              {":"}
-            </p>
-            <div>{formatSubContent(content)}</div>
-          </div>
-        ))}
+      <div className="border radius-md border-base-lighter padding-x-2 padding-y-1">
+        <ul className="usa-list usa-list--unstyled">
+          {Object.entries(awardSubInfo).map(([title, content]) => (
+            <li key={title} className="margin-y-105">
+              <span className="display-block text-bold">
+                {t(`${title as TranslationKeys}`)}
+                {":"}
+              </span>
+              {formatSubContent(content)}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
