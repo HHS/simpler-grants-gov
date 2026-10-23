@@ -54,7 +54,7 @@ PRIMITIVES = {
 }
 
 #: A money pattern: up to N digits and an optional two-digit decimal, e.g.
-#: `^\d{1,14}([.]\d{2})?$`. Forms hold money as strings, so their range is in the pattern.
+#: `^\d{1,14}([.]\d{2})?$`. Forms store money as strings, so their range is in the pattern.
 DIGIT_BOUNDED = re.compile(r"^\^\\d\{1,(\d+)\}\(\[\.\]\\d\{2\}\)\?\$$")
 
 
@@ -69,7 +69,7 @@ class Element:
     required: bool
     #: Position among its siblings, or -1 for an attribute, which has no order.
     position: int
-    #: The XSD primitive type of its value, or None if it holds other elements.
+    #: The XSD primitive type of its value, or None if it contains other elements.
     primitive: str | None = None
     #: Constraints keyed by JSON Schema keyword. `enum` is a frozenset.
     rules: dict[str, object] = dataclasses.field(default_factory=dict)
@@ -165,7 +165,7 @@ def _constraints(declaration: Any) -> tuple[str | None, dict[str, object]]:
 
 
 def _children(declaration: Any) -> XsdGroup | None:
-    """Return the group holding an element's child elements, or None if it has none."""
+    """Return the group containing an element's child elements, or None if it has none."""
     content = getattr(declaration.type, "content", None)
     return content if isinstance(content, XsdGroup) else None
 
@@ -176,8 +176,8 @@ def _in_order(group: XsdGroup) -> list[tuple[Any, bool]]:
     A member of an `xs:choice` is never required on its own, since any one of the choices
     satisfies the schema.
 
-    Raises `NotImplementedError` on a group nested more than one level deep, which no
-    Grants.gov schema uses.
+    Raises `NotImplementedError` on a group nested more than one level deep, which Grants.gov
+    schemas don't use.
     """
     out: list[tuple[Any, bool]] = []
     for item in group.iter_model():

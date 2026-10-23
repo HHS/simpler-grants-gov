@@ -16,7 +16,7 @@ class FormDiff:
     #: Package under `src.form_schema.forms` that exports the form.
     module: str
 
-    #: Form field -> why no mapping rule reads it, so its answer isn't submitted.
+    #: Form field -> why the mapping doesn't read it, so its answer isn't submitted.
     #: e.g. {"applicant_id": "no rule targets ApplicantID"}
     unmapped_fields: dict[str, str] = dataclasses.field(default_factory=dict)
 
@@ -24,7 +24,7 @@ class FormDiff:
     #: e.g. {"fax_number": "the form's field is `fax`"}
     unknown_sources: dict[str, str] = dataclasses.field(default_factory=dict)
 
-    #: "element path/keyword" -> why the form accepts a value the element can't carry.
+    #: "element path/keyword" -> why the form accepts a value the element doesn't allow.
     #: e.g. {"Applicant.Country/enum": "the form offers CIV with a straight apostrophe"}
     differing_rules: dict[str, str] = dataclasses.field(default_factory=dict)
 

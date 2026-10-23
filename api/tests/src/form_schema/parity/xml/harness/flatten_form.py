@@ -55,10 +55,6 @@ class FlatForm:
 def load(diff: FormDiff) -> FlatForm:
     """Import the form `diff.module` names and flatten it."""
     module = importlib.import_module(f"src.form_schema.forms.{diff.module}")
-    # A hand-written form exports module-level constants. A generated one exports a `Form`.
-    generated = getattr(module, "FORM", None)
-    if generated is not None:
-        return flatten(diff, generated.json_to_xml_schema, generated.form_json_schema)
     return flatten(diff, module.FORM_XML_TRANSFORM_RULES, module.FORM_JSON_SCHEMA)
 
 

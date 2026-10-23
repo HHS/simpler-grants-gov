@@ -1,6 +1,6 @@
 """Check that a form's XML mapping reads every form field, and only fields the form has.
 
-A field no rule reads is left out of the XML. Most Grants.gov elements are optional, so
+A field the mapping doesn't read is left out of the XML. Most Grants.gov elements are optional, so
 the XML still validates and nothing else catches it.
 """
 
@@ -13,7 +13,7 @@ from ..flatten_form import FlatForm
 
 
 def unmatched_fields(flat: FlatForm) -> list[Discrepancy]:
-    """Return form fields no rule reads (`UNMAPPED_FORM_FIELD`), and fields rules read that
+    """Return form fields the mapping doesn't read (`UNMAPPED_FORM_FIELD`), and fields rules read that
     the form doesn't have (`UNKNOWN_RULE_SOURCE`).
 
     Fields listed in `unmapped_fields` and `unknown_sources` are left out.
