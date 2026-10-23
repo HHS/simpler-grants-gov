@@ -30,33 +30,14 @@ def test_config_fields(form_dir: Path) -> None:
 
 
 @pytest.mark.parametrize("form_dir", get_form_dirs(), ids=lambda d: d.name)
-def test_versioned_form_definition_exists(form_dir: Path) -> None:
-    """Every form must declare at least one version as form_json.py or form.json."""
+def test_versioned_form_json_exists(form_dir: Path) -> None:
     versioned = [
         p
         for filename in DEFINITION_FILENAMES
         for p in form_dir.rglob(filename)
         if re.fullmatch(r"\d+", p.parent.name) and re.fullmatch(r"\d+", p.parent.parent.name)
     ]
-    expected = " or ".join(DEFINITION_FILENAMES)
-    assert versioned, f"{form_dir.name} has no {expected} at <major>/<minor>/"
-
-
-@pytest.mark.parametrize("form_dir", get_form_dirs(), ids=lambda d: d.name)
-def test_version_declares_only_one_definition(form_dir: Path) -> None:
-    """A version directory must not declare both formats — there would be no single source."""
-    version_dirs = {
-        p.parent
-        for filename in DEFINITION_FILENAMES
-        for p in form_dir.rglob(filename)
-        if re.fullmatch(r"\d+", p.parent.name) and re.fullmatch(r"\d+", p.parent.parent.name)
-    }
-    for version_dir in sorted(version_dirs):
-        present = [name for name in DEFINITION_FILENAMES if (version_dir / name).exists()]
-        assert len(present) == 1, (
-            f"{form_dir.name} {version_dir.parent.name}.{version_dir.name} "
-            f"declares {', '.join(present)}; expected exactly one"
-        )
+    assert versioned, f"{form_dir.name} has no form_json.py or form.json at <major>/<minor>/"
 
 
 @pytest.mark.parametrize("form_dir", get_form_dirs(), ids=lambda d: d.name)

@@ -15,11 +15,9 @@ FORMS_DIR = Path(__file__).parents[2] / "form_schema" / "forms"
 
 
 def compute_version_hash(form_dir: Path, version_dir: Path) -> str:
-    """Return the SHA-256 hex digest of the form definition + config.py for a version directory.
+    """Return the SHA-256 hex digest of the version's files + config.py for a version directory.
 
-    The form definition is whichever of form_json.py or form.json the version declares, plus
-    any schema files a form.json keeps beside it. Always hashes the definition files first,
-    then config.py, so the digest is stable.
+    Always hashes the version's files first, then config.py, so the digest is stable.
     """
     config_path = form_dir / "config.py"
 
@@ -52,7 +50,7 @@ def get_version_dir(form_name: str, version: str) -> tuple[Path, Path]:
 
 @task_blueprint.cli.command(
     "lock-form-version",
-    help="Hash the form definition + config.py for a form version and write to a checksum file.",
+    help="Hash the version's files + config.py for a form version and write to a checksum file.",
 )
 @click.option("--form", required=True, help="Form directory name, e.g. sf424")
 @click.option("--version", required=True, help="Version in MAJOR.MINOR format, e.g. 1.0")
