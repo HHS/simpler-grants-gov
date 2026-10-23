@@ -36,11 +36,6 @@ jest.mock("src/services/auth/session", () => ({
 jest.mock("src/services/fetch/fetchers/opportunityFetcher");
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher");
 
-jest.mock("./_components/OpportunityIntro", () => ({
-  __esModule: true,
-  default: () => <div data-testid="opportunity-intro" />,
-}));
-
 jest.mock("./_components/OpportunityDescription", () => ({
   __esModule: true,
   default: () => <div />,
@@ -56,12 +51,12 @@ jest.mock("./_components/OpportunityLink", () => ({
   default: () => <div />,
 }));
 
-jest.mock("./_components/OpportunityStatusWidget", () => ({
+jest.mock("./_components/OpportunityContact", () => ({
   __esModule: true,
   default: () => <div />,
 }));
 
-jest.mock("./_components/OpportunityCTA", () => ({
+jest.mock("./_components/OpportunityImportantDates", () => ({
   __esModule: true,
   default: () => <div />,
 }));
