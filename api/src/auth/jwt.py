@@ -10,6 +10,7 @@ import src.util.datetime_util as datetime_util
 from src.auth.auth_errors import JwtValidationError
 from src.auth.auth_handler_base import AbstractAuthHandler
 from src.db.models.auth_base_models import BaseUser, BaseUserTokenSession
+from src.db.models.user_models import User, UserTokenSession
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -83,24 +84,20 @@ def generate_jwt(
     return jwt.encode(payload, config.private_key, algorithm="RS256")
 
 
-class JwtAuth[USER: BaseUser, USER_TOKEN_SESSION: BaseUserTokenSession]:
-    """Generic JWT creation/parsing flow.
-
-    The DB interactions go through the injected :class:`AbstractAuthHandler`, so this flow
-    can be reused across systems by binding the concrete user / token-session models.
-    """
+class JwtAuth:
+    """JWT creation/parsing flow. DB interactions go through the injected auth handler."""
 
     def __init__(
         self,
-        auth_handler: AbstractAuthHandler[USER, Any, Any, Any, USER_TOKEN_SESSION],
+        auth_handler: AbstractAuthHandler[User, Any, Any, Any, UserTokenSession],
         config: ApiJwtConfig | None = None,
     ):
         self.auth_handler = auth_handler
         self.config = config if config is not None else get_config()
 
     def create_jwt_for_user(
-        self, user: USER, email: str | None = None
-    ) -> tuple[str, USER_TOKEN_SESSION]:
+        self, user: User, email: str | None = None
+    ) -> tuple[str, UserTokenSession]:
         # Always do all time checks in UTC for consistency
         current_time = datetime_util.utcnow()
         expiration_time = current_time + timedelta(minutes=self.config.token_expiration_minutes)
@@ -122,7 +119,7 @@ class JwtAuth[USER: BaseUser, USER_TOKEN_SESSION: BaseUserTokenSession]:
         )
         return jwt_str, user_token_session
 
-    def parse_jwt_for_user(self, token: str) -> USER_TOKEN_SESSION:
+    def parse_jwt_for_user(self, token: str) -> UserTokenSession:
         """Handle processing a jwt token, and connecting it to a user token session in our DB"""
         current_timestamp = datetime_util.utcnow()
 
