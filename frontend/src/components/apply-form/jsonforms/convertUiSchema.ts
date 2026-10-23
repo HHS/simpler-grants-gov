@@ -15,13 +15,8 @@ import type {
 import { getByPointer } from "src/utils/formData/formDataUtils";
 
 /*
-  A form whose `form_renderer` is "jsonforms" arrives with a JSON Forms UI schema instead of
-  the section/field tree the rest of the apply-form code reads. JSON Forms lays the form out
-  and evaluates its rules, but every control it renders is still one of our widgets, reached
-  through the same `getFieldConfig` -> `renderWidget` path as any other form.
-
-  The functions here translate between the two shapes, so warnings, navigation, print and
-  the UI schema validator all keep working off the tree they already understand.
+  Converts a JSON Forms UI schema to the section/field tree that navigation, warnings, print
+  and the UI schema validator read.
 */
 
 // --------------------------------------------------
