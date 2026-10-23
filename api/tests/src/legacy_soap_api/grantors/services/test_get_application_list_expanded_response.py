@@ -106,10 +106,17 @@ def make_soap_request(request_xml, soap_client_certificate):
     )
 
 
-def make_request_xml(tracking_number=None):
+def make_request_xml(tracking_number=None, filter_type=None, filter_value=None):
     filter_block = ""
+    if filter_type and filter_value is not None:
+        filter_block += (
+            "<gran:ExpandedApplicationFilter>"
+            f"<gran:FilterType>{filter_type}</gran:FilterType>"
+            f"<gran:FilterValue>{filter_value}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+        )
     if tracking_number:
-        filter_block = (
+        filter_block += (
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             f"<gran:FilterValue>{tracking_number}</gran:FilterValue>"
@@ -131,6 +138,7 @@ def make_request_xml(tracking_number=None):
 
 class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response(self, db_session, enable_factory_create):
+        """Full field-level assertion on a well-formed submission with SAM.gov entity data."""
         agency = AgencyFactory.create()
         sam_gov_entity = SamGovEntityFactory.create(
             has_debt_subject_to_offset=True, has_exclusion_status=True
@@ -229,6 +237,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_fails_if_user_does_not_have_legacy_agency_viewer_privilege(
         self, db_session, enable_factory_create
     ):
+        """A cert without LEGACY_AGENCY_VIEWER privilege is rejected before any DB query."""
         agency = AgencyFactory.create()
         submission = setup_application_submission(agency)
         db_session.commit()
@@ -253,6 +262,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_no_filter_returns_only_agency_submissions(
         self, db_session, enable_factory_create
     ):
+        """With no filter, only submissions belonging to the cert's agency are returned."""
         agency = AgencyFactory.create()
         other_agency = AgencyFactory.create()
         submission = setup_application_submission(agency)
@@ -286,6 +296,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_filters_by_tracking_number(
         self, db_session, enable_factory_create
     ):
+        """GrantsGovTrackingNumber filter returns exactly the matching submission."""
         agency = AgencyFactory.create()
         submission = setup_application_submission(agency)
         setup_application_submission(agency)
@@ -318,6 +329,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_filters_by_cfda_number(
         self, db_session, enable_factory_create
     ):
+        """CFDANumber filter returns only the submission whose assistance listing matches."""
         agency = AgencyFactory.create()
         submission = setup_application_submission(agency)
         setup_application_submission(agency)
@@ -366,6 +378,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_filters_by_status(
         self, db_session, enable_factory_create
     ):
+        """Status filter "Validated" maps to ApplicationStatus.ACCEPTED and excludes other statuses."""
         agency = AgencyFactory.create()
         accepted_submission = setup_application_submission(
             agency, application_status=ApplicationStatus.ACCEPTED
@@ -455,6 +468,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_fails_if_privileges_are_not_set_on_config(
         self, db_session, enable_factory_create, caplog
     ):
+        """A SOAPOperationConfig with no privileges raises and logs a config misconfiguration warning."""
         caplog.set_level(logging.INFO)
         agency = AgencyFactory.create()
         submission = setup_application_submission(agency)
@@ -488,6 +502,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_fails_if_no_agency_on_cert(
         self, db_session, enable_factory_create, caplog
     ):
+        """A certificate with no associated agency raises SOAPClientCertificateLookupError."""
         caplog.set_level(logging.INFO)
         agency = AgencyFactory.create()
         submission = setup_application_submission(agency)
@@ -524,6 +539,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_no_filter_returns_two_submissions_sorted_by_date(
         self, db_session, enable_factory_create
     ):
+        """With no filter, all agency submissions are returned sorted most-recent first; other agencies excluded."""
         agency = AgencyFactory.create(is_multilevel_agency=False)
         other_agency = AgencyFactory.create(is_multilevel_agency=False)
 
@@ -575,6 +591,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_multi_level_agency_sees_sub_agency_submissions(
         self, db_session, enable_factory_create
     ):
+        """A multilevel agency cert returns submissions from both the parent and its sub-agencies."""
         agency = AgencyFactory.create(is_multilevel_agency=True)
         # Sub-agency code must start with "{parent_code}-" to match the LIKE filter
         sub_agency = AgencyFactory.create(
@@ -621,6 +638,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_tracking_number_last_one_wins(
         self, db_session, enable_factory_create
     ):
+        """When multiple GrantsGovTrackingNumber filters are provided, the last one wins."""
         agency = AgencyFactory.create()
         submission_1 = setup_application_submission(
             agency, legacy_package_id="PKG00118065", application_status=ApplicationStatus.SUBMITTED
@@ -674,6 +692,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_cfda_last_one_wins(
         self, db_session, enable_factory_create
     ):
+        """When multiple CFDANumber filters are provided, the last one wins."""
         agency = AgencyFactory.create()
         submission_1 = setup_application_submission(
             agency, legacy_package_id="PKG00118065", application_status=ApplicationStatus.SUBMITTED
@@ -733,6 +752,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_opportunity_id_last_one_wins(
         self, db_session, enable_factory_create
     ):
+        """When multiple OpportunityID filters are provided, the last one wins."""
         agency = AgencyFactory.create()
         submission_1 = setup_application_submission(
             agency, legacy_package_id="PKG00118065", application_status=ApplicationStatus.SUBMITTED
@@ -791,6 +811,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_filters_by_funding_opportunity_number(
         self, db_session, enable_factory_create
     ):
+        """FundingOpportunityNumber filter returns only the submission whose opportunity number matches."""
         agency = AgencyFactory.create()
         submission = setup_application_submission(
             agency, legacy_package_id="PKG00118065", application_status=ApplicationStatus.SUBMITTED
@@ -840,6 +861,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_filters_by_opportunity_id(
         self, db_session, enable_factory_create
     ):
+        """OpportunityID filter returns only the submission whose legacy opportunity ID matches."""
         agency = AgencyFactory.create()
         submission = setup_application_submission(
             agency, legacy_package_id="PKG00118065", application_status=ApplicationStatus.SUBMITTED
@@ -892,6 +914,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_cross_agency_tracking_number_returns_empty(
         self, db_session, enable_factory_create
     ):
+        """A tracking number belonging to a different agency returns no results for the requesting cert."""
         agency_1 = AgencyFactory.create()
         agency_2 = AgencyFactory.create()
         submission = setup_application_submission(
@@ -926,6 +949,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_handles_competition_with_no_opportunity_assistance_listing(
         self, db_session, enable_factory_create
     ):
+        """A competition with no assistance listing returns empty when filtered by CFDANumber."""
         agency = AgencyFactory.create()
         submission = setup_application_submission(
             agency,
@@ -978,6 +1002,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_excludes_sam_gov_entity_data_if_no_organization(
         self, db_session, enable_factory_create
     ):
+        """DelinquentFederalDebt and ActiveExclusions are absent when the application has no organization."""
         agency = AgencyFactory.create()
         submission = setup_application_submission(
             agency,
@@ -1058,14 +1083,17 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_application_list_expanded_response_unrecognized_status_ignores_filter(
+    def test_get_application_list_expanded_response_unrecognized_status_returns_no_results(
         self, db_session, enable_factory_create
     ):
-        """An unrecognized Status value (e.g. "XYZ") is not mapped to any Simpler status,
-        so the status filter is silently ignored and all agency submissions are returned."""
+        """Simpler returns no results for a Status value it cannot map to an internal application status.
+        The proxy may still contribute results — this test verifies the proxy's entry IS included
+        while Simpler's DB entries are not."""
         agency = AgencyFactory.create()
-        setup_application_submission(agency, application_status=ApplicationStatus.SUBMITTED)
-        setup_application_submission(
+        simpler_submission_1 = setup_application_submission(
+            agency, application_status=ApplicationStatus.SUBMITTED
+        )
+        simpler_submission_2 = setup_application_submission(
             agency, legacy_package_id="PKG00000001", application_status=ApplicationStatus.ACCEPTED
         )
 
@@ -1089,7 +1117,22 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
         request_schema = schemas.GetApplicationListExpandedRequest(
             **get_soap_operation_dict(request_xml, "GetApplicationListExpandedRequest")
         )
-        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+
+        # Proxy returns one application that matched on its side (e.g. Status "XYZ" is a
+        # legacy-only status value). Simpler ignores it because there is no DB equivalent.
+        legacy_only_tracking_number = "GRANT00839196"
+        proxy_data = (
+            b'<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+            b"<soap:Body>"
+            b'<Response xmlns:ns2="http://apply.grants.gov/system/ApplicantWebServices-V2.0">'
+            b"<ns2:ExpandedApplicationInfo>"
+            b"<GrantsGovTrackingNumber>GRANT00839196</GrantsGovTrackingNumber>"
+            b"</ns2:ExpandedApplicationInfo>"
+            b"</Response>"
+            b"</soap:Body>"
+            b"</soap:Envelope>"
+        )
+        proxy_response = SOAPResponse(data=proxy_data, status_code=200, headers={})
 
         simpler_applications = get_application_list_expanded(
             db_session=db_session,
@@ -1097,16 +1140,93 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
             soap_request=soap_request,
             soap_config=make_soap_config(),
         )
+        # Simpler returns [] because "XYZ" is unrecognized
+        assert simpler_applications == []
+
         result = get_application_list_expanded_response(
             simpler_applications=simpler_applications,
             proxy_response=proxy_response,
         )
-        # Filter ignored → all 2 agency submissions returned
-        assert result.available_application_number == 2
+        tracking_numbers = {
+            app.grants_gov_tracking_number for app in result.expanded_application_info
+        }
+        # Proxy result IS returned
+        assert legacy_only_tracking_number in tracking_numbers
+        # Simpler DB submissions are NOT returned
+        assert f"GRANT{simpler_submission_1.legacy_tracking_number}" not in tracking_numbers
+        assert f"GRANT{simpler_submission_2.legacy_tracking_number}" not in tracking_numbers
+        assert result.available_application_number == 1
+
+    @pytest.mark.parametrize(
+        "filter_type,filter_value",
+        [
+            ("Status", "XYZ"),
+            ("GrantsGovTrackingNumber", "GRANT9999999999"),
+            ("CFDANumber", "99.999"),
+            ("FundingOpportunityNumber", "FON-DOES-NOT-EXIST"),
+            ("OpportunityID", "9999999"),
+        ],
+    )
+    def test_get_application_list_expanded_no_results_when_filter_matches_nothing(
+        self, db_session, enable_factory_create, filter_type, filter_value
+    ):
+        """AC: When no applications meet the filtering criteria, return no applications.
+        This covers all supported filter types — whether the value is gibberish (e.g. Status='XYZ')
+        or simply doesn't match any data in the DB."""
+        agency = AgencyFactory.create()
+        setup_application_submission(agency, application_status=ApplicationStatus.ACCEPTED)
+
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml = make_request_xml(filter_type=filter_type, filter_value=filter_value)
+        soap_request = make_soap_request(request_xml, soap_client_certificate)
+        request_schema = schemas.GetApplicationListExpandedRequest(
+            **get_soap_operation_dict(request_xml, "GetApplicationListExpandedRequest")
+        )
+
+        simpler_applications = get_application_list_expanded(
+            db_session=db_session,
+            request=request_schema,
+            soap_request=soap_request,
+            soap_config=make_soap_config(),
+        )
+        assert simpler_applications == []
+
+    def test_get_application_list_expanded_unrecognized_status_ignored_when_other_filters_present(
+        self, db_session, enable_factory_create
+    ):
+        """When Status is unrecognized but other filters are present, Status is ignored and the
+        other filters apply normally. Verified against the live Grants.gov training endpoint."""
+        agency = AgencyFactory.create()
+        matching_submission = setup_application_submission(
+            agency, application_status=ApplicationStatus.ACCEPTED
+        )
+        setup_application_submission(agency, application_status=ApplicationStatus.ACCEPTED)
+
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        tracking_number = f"GRANT{matching_submission.legacy_tracking_number}"
+        request_xml = make_request_xml(
+            filter_type="Status",
+            filter_value="XYZ",
+            tracking_number=tracking_number,
+        )
+        soap_request = make_soap_request(request_xml, soap_client_certificate)
+        request_schema = schemas.GetApplicationListExpandedRequest(
+            **get_soap_operation_dict(request_xml, "GetApplicationListExpandedRequest")
+        )
+
+        simpler_applications = get_application_list_expanded(
+            db_session=db_session,
+            request=request_schema,
+            soap_request=soap_request,
+            soap_config=make_soap_config(),
+        )
+        assert len(simpler_applications) == 1
+        assert simpler_applications[0].grants_gov_tracking_number == tracking_number
 
     def test_get_application_list_expanded_response_logs_competition_id_filter(
         self, db_session, enable_factory_create, caplog
     ):
+        """CompetitionID is an unsupported filter — it is logged but not applied to the DB query."""
         caplog.set_level(logging.INFO)
         agency = AgencyFactory.create()
         submission = setup_application_submission(
@@ -1156,6 +1276,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_logs_package_id_filter(
         self, db_session, enable_factory_create, caplog
     ):
+        """PackageID is an unsupported filter — it is logged but not applied to the DB query."""
         caplog.set_level(logging.INFO)
         agency = AgencyFactory.create()
         submission = setup_application_submission(
@@ -1205,6 +1326,7 @@ class TestLegacySoapApiGrantorGetApplicationListExpanded:
     def test_get_application_list_expanded_response_logs_submission_title_filter(
         self, db_session, enable_factory_create, caplog
     ):
+        """SubmissionTitle is an unsupported filter — it is logged but not applied to the DB query."""
         caplog.set_level(logging.INFO)
         agency = AgencyFactory.create()
         setup_application_submission(agency, application_status=ApplicationStatus.SUBMITTED)
