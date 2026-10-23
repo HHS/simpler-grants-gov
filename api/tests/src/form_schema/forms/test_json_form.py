@@ -1,0 +1,203 @@
+"""Tests for building a Form from a form.json and its schema files."""
+
+import dataclasses
+import json
+import uuid
+from datetime import date, datetime
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from src.constants.lookup_constants import FormRenderer, FormType
+from src.db.models.competition_models import Form, FormInstruction
+from src.form_schema.forms._json_form import (
+    JSON_FORM_FILENAME,
+    build_form_from_dict,
+    load_json_form,
+)
+from src.form_schema.forms.sf424 import SF424_v4_0
+
+# Where each large Form document goes when a form.json is split into schema files.
+SCHEMA_FILENAMES = {
+    "form_json_schema": "json_schema.json",
+    "form_ui_schema": "ui_schema.json",
+    "form_rule_schema": "rule_schema.json",
+    "json_to_xml_schema": "xml_transform.json",
+}
+
+MINIMAL_FORM: dict[str, Any] = {
+    "form_id": "1623b310-85be-496a-b84b-34bdee22a68a",
+    "form_name": "Example",
+    "short_form_name": "Example_1_0",
+    "form_version": "1.0",
+    "agency_code": "SGG",
+    "form_json_schema": {},
+    "form_ui_schema": [],
+}
+
+
+def _json_default(value: Any) -> str:
+    if isinstance(value, uuid.UUID):
+        return str(value)
+    if isinstance(value, (datetime, date)):
+        return value.isoformat()
+    raise TypeError(f"cannot serialize {type(value)!r}")
+
+
+def _form_to_json_dict(form: Form) -> dict[str, Any]:
+    """Serialize a Form the way an emitter would, dropping runtime-populated fields."""
+    data = dataclasses.asdict(form)
+    data.pop("form_instruction", None)
+    return json.loads(json.dumps(data, default=_json_default))
+
+
+def _without_runtime_state(form: Form) -> Form:
+    """Clear form_instruction, which get_form() sets on the shared registry Form."""
+    return dataclasses.replace(form, form_instruction=None)
+
+
+def _write_inline(tmp_path: Path, data: dict[str, Any] | str, name: str = "inline") -> Path:
+    """Write a form.json with every field inline, and return its path."""
+    version_dir = tmp_path / name
+    version_dir.mkdir(parents=True, exist_ok=True)
+    contents = data if isinstance(data, str) else json.dumps(data)
+    (version_dir / JSON_FORM_FILENAME).write_text(contents)
+    return version_dir / JSON_FORM_FILENAME
+
+
+def _write_split(tmp_path: Path, data: dict[str, Any], name: str = "split") -> Path:
+    """Write a form.json with each large document in its schema file, and return its path."""
+    version_dir = tmp_path / name
+    version_dir.mkdir(parents=True, exist_ok=True)
+
+    envelope = dict(data)
+    for field, filename in SCHEMA_FILENAMES.items():
+        if field in envelope:
+            (version_dir / filename).write_text(json.dumps(envelope.pop(field)))
+    (version_dir / JSON_FORM_FILENAME).write_text(json.dumps(envelope))
+
+    return version_dir / JSON_FORM_FILENAME
+
+
+class TestLoadJsonForm:
+    def test_real_form_round_trips(self, tmp_path: Path) -> None:
+        form_path = _write_inline(tmp_path, _form_to_json_dict(SF424_v4_0))
+
+        form = load_json_form(form_path)
+
+        assert _without_runtime_state(form) == _without_runtime_state(SF424_v4_0)
+
+    def test_round_trip_ignores_form_instruction(self, tmp_path: Path) -> None:
+        """get_form() sets form_instruction on the shared registry Form, so a test that
+        ran earlier may have set it. The round trip must hold either way."""
+        form_path = _write_inline(tmp_path, _form_to_json_dict(SF424_v4_0))
+
+        original = SF424_v4_0.form_instruction
+        try:
+            SF424_v4_0.form_instruction = FormInstruction(  # type: ignore[assignment]
+                form_instruction_id=uuid.uuid4()
+            )
+            form = load_json_form(form_path)
+            assert _without_runtime_state(form) == _without_runtime_state(SF424_v4_0)
+        finally:
+            SF424_v4_0.form_instruction = original
+
+    def test_split_form_matches_inline_form(self, tmp_path: Path) -> None:
+        data = _form_to_json_dict(SF424_v4_0)
+
+        inline = load_json_form(_write_inline(tmp_path, data))
+        split = load_json_form(_write_split(tmp_path, data))
+
+        assert _without_runtime_state(split) == _without_runtime_state(inline)
+
+    def test_absent_schema_file_leaves_field_unset(self, tmp_path: Path) -> None:
+        form = load_json_form(_write_split(tmp_path, MINIMAL_FORM))
+
+        assert form.form_json_schema == {}
+        assert form.form_rule_schema is None
+        assert form.json_to_xml_schema is None
+
+    def test_field_both_inline_and_in_schema_file_rejected(self, tmp_path: Path) -> None:
+        form_path = _write_inline(tmp_path, MINIMAL_FORM)
+        (form_path.parent / "json_schema.json").write_text('{"type": "string"}')
+
+        with pytest.raises(ValueError, match="declared both inline"):
+            load_json_form(form_path)
+
+    def test_malformed_schema_file_named_in_error(self, tmp_path: Path) -> None:
+        data = {k: v for k, v in MINIMAL_FORM.items() if k != "form_json_schema"}
+        form_path = _write_inline(tmp_path, data)
+        (form_path.parent / "json_schema.json").write_text("{not json")
+
+        with pytest.raises(ValueError, match=r"json_schema\.json: invalid JSON"):
+            load_json_form(form_path)
+
+    def test_malformed_form_json_rejected(self, tmp_path: Path) -> None:
+        with pytest.raises(ValueError, match="invalid JSON"):
+            load_json_form(_write_inline(tmp_path, "{not json"))
+
+    def test_non_object_form_json_rejected(self, tmp_path: Path) -> None:
+        with pytest.raises(ValueError, match="expected a JSON object"):
+            load_json_form(_write_inline(tmp_path, "[]"))
+
+
+class TestBuildFormFromDict:
+    def test_uuid_fields_coerced(self) -> None:
+        form = build_form_from_dict(
+            MINIMAL_FORM | {"form_instruction_id": "bf48a93f-d445-426f-a8fb-289bf93a2434"},
+            Path("form.json"),
+        )
+        assert form.form_id == uuid.UUID("1623b310-85be-496a-b84b-34bdee22a68a")
+        assert form.form_instruction_id == uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434")
+
+    def test_form_type_coerced_to_enum(self) -> None:
+        form = build_form_from_dict(MINIMAL_FORM | {"form_type": "SF424"}, Path("form.json"))
+        assert form.form_type is FormType.SF424
+
+    def test_form_renderer_coerced_to_enum(self) -> None:
+        form = build_form_from_dict(
+            MINIMAL_FORM | {"form_renderer": "jsonforms"}, Path("form.json")
+        )
+        assert form.form_renderer is FormRenderer.JSON_FORMS
+
+    def test_form_renderer_defaults_to_sgg(self) -> None:
+        form = build_form_from_dict(MINIMAL_FORM, Path("form.json"))
+        assert form.form_renderer is FormRenderer.SGG
+
+    def test_datetime_fields_coerced(self) -> None:
+        form = build_form_from_dict(
+            MINIMAL_FORM | {"active_at": "2026-01-15T00:00:00"}, Path("form.json")
+        )
+        assert form.active_at == datetime(2026, 1, 15, 0, 0, 0)
+
+    def test_date_fields_coerced(self) -> None:
+        form = build_form_from_dict(
+            MINIMAL_FORM | {"expiration_date": "2029-03-31"}, Path("form.json")
+        )
+        assert form.expiration_date == date(2029, 3, 31)
+
+    def test_unknown_field_rejected(self) -> None:
+        with pytest.raises(ValueError, match="unknown field"):
+            build_form_from_dict(MINIMAL_FORM | {"form_nmae": "typo"}, Path("form.json"))
+
+    def test_missing_required_field_rejected(self) -> None:
+        data = {k: v for k, v in MINIMAL_FORM.items() if k != "form_name"}
+        with pytest.raises(ValueError, match="form_name"):
+            build_form_from_dict(data, Path("form.json"))
+
+    def test_invalid_uuid_rejected(self) -> None:
+        with pytest.raises(ValueError, match="not a valid UUID"):
+            build_form_from_dict(MINIMAL_FORM | {"form_id": "not-a-uuid"}, Path("form.json"))
+
+    def test_unknown_form_type_rejected(self) -> None:
+        with pytest.raises(ValueError, match="not a known FormType"):
+            build_form_from_dict(MINIMAL_FORM | {"form_type": "NotAForm"}, Path("form.json"))
+
+    def test_unknown_form_renderer_rejected(self) -> None:
+        with pytest.raises(ValueError, match="not a known FormRenderer"):
+            build_form_from_dict(MINIMAL_FORM | {"form_renderer": "rjsf"}, Path("form.json"))
+
+    def test_invalid_datetime_rejected(self) -> None:
+        with pytest.raises(ValueError, match="not a valid ISO 8601"):
+            build_form_from_dict(MINIMAL_FORM | {"active_at": "the fifteenth"}, Path("form.json"))
