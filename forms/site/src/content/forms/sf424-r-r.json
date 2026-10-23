@@ -1653,7 +1653,7 @@
     },
     {
       "label": "Corrected revision with non-US addresses",
-      "description": "Synthetic corrected revision: exact XSD correction code, previous tracking/award IDs, revision E and its explanation, Other applicant type and other-agency explanation. Four non-US addresses omit inactive state fields and use province/postal values; PD/PI and AOR defaults are overwritten independently. The inactive small-business and state-review-date fields are omitted. Attachment and submission-owned fields remain outside this draft.",
+      "description": "Synthetic corrected revision: exact XSD correction code, previous tracking/award IDs, revision E and its explanation, Other applicant type and other-agency explanation. Four non-US addresses omit inactive state fields and use province/postal values; PD/PI and AOR defaults are overwritten independently. The inactive small-business and state-review-date fields are omitted. Attachment and submission-owned fields remain outside this draft. The non-US applicant uses the DAT-prescribed EIN placeholder 44-4444444.",
       "data": {
         "submission_type_code": "Change/Corrected Application",
         "submitted_date": "2026-10-23",
@@ -1700,7 +1700,7 @@
             "email": "alex.rivera@example.org"
           }
         },
-        "employer_id": "12-3456789",
+        "employer_id": "44-4444444",
         "applicant_type": {
           "applicant_type_code": "X: Other (specify)",
           "applicant_type_code_other_explanation": "Illustrative research consortium"
