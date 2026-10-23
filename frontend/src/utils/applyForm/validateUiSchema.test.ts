@@ -1,11 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { UiSchema } from "src/types/applyForm/types";
 
-import {
-  unimplementedRuleKeys,
-  validateJsonBySchema,
-  validateUiSchema,
-} from "./validateUiSchema";
+import { validateJsonBySchema, validateUiSchema } from "./validateUiSchema";
 
 describe("validateFormData", () => {
   it("should return false for valid form data", () => {
@@ -663,39 +659,6 @@ describe("validateFormData", () => {
       ] as unknown as UiSchema;
 
       expect(Array.isArray(validateUiSchema(uiSchema))).toBe(true);
-    });
-  });
-
-  describe("unimplementedRuleKeys", () => {
-    it("should name the rules present in a UI schema that the renderer ignores", () => {
-      const uiSchema = [
-        {
-          type: "section",
-          label: "Key Contacts",
-          name: "key_contacts",
-          children: [
-            {
-              type: "field",
-              definition: "/properties/address/properties/state",
-              conditional: { then: { interaction: "enabled" } },
-            },
-          ],
-        },
-      ] as unknown as UiSchema;
-
-      expect(unimplementedRuleKeys(uiSchema)).toEqual(["conditional"]);
-    });
-
-    it("should name nothing for a UI schema the renderer fully implements", () => {
-      const uiSchema = [
-        {
-          type: "field",
-          definition: "/properties/applicant_organization_name",
-          widget: "Text",
-        },
-      ] as unknown as UiSchema;
-
-      expect(unimplementedRuleKeys(uiSchema)).toEqual([]);
     });
   });
 });

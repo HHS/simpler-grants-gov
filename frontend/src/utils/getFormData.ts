@@ -18,10 +18,8 @@ import { FormDetail, FormRenderer } from "src/types/formResponseTypes";
 import { JsonFormsUiSchema } from "src/components/apply-form/jsonforms/convertUiSchema";
 import { prepareJsonFormsUiSchema } from "src/components/apply-form/jsonforms/prepareUiSchema";
 import { processFormSchema } from "./applyForm/applyFormUtils";
-import {
-  unimplementedRuleKeys,
-  validateUiSchema,
-} from "./applyForm/validateUiSchema";
+import { unimplementedRuleKeys } from "./applyForm/unimplementedRuleKeys";
+import { validateUiSchema } from "./applyForm/validateUiSchema";
 
 // either return error or data, not both
 type FormDataResult =
