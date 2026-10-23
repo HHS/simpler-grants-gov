@@ -120,7 +120,8 @@
     "sharp": "^0.35.5",
     "source-map-js": "^1.2.2",
     "postcss": "8.5.23",
-    "undici": "^7.29.1"
+    "undici": "^7.29.1",
+    "dompurify": "^3.4.17"
   },
   "devEngines": {
     "packageManager": {
