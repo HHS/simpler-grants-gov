@@ -458,18 +458,5 @@ describe("getFormData", () => {
         },
       ]);
     });
-
-    it("warns about each control no widget can render, since it won't be shown", async () => {
-      await getFormData({ applicationId: "app1", appFormId: "form1" });
-
-      expect(mockLoggerWarn).toHaveBeenCalledWith(
-        {
-          formId: "form1",
-          formName: "Test",
-          control: "#/properties/missing",
-        },
-        expect.stringContaining("won't be shown"),
-      );
-    });
   });
 });

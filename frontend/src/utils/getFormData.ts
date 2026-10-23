@@ -15,12 +15,8 @@ import { FormValidationWarning, UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail, FormRenderer } from "src/types/formResponseTypes";
 
-import {
-  findIgnoredListRules,
-  findUnsupportedControls,
-  jsonFormsToUiSchema,
-  JsonFormsUiSchema,
-} from "src/components/apply-form/jsonforms/convertUiSchema";
+import { JsonFormsUiSchema } from "src/components/apply-form/jsonforms/convertUiSchema";
+import { prepareJsonFormsUiSchema } from "src/components/apply-form/jsonforms/prepareUiSchema";
 import { processFormSchema } from "./applyForm/applyFormUtils";
 import {
   unimplementedRuleKeys,
@@ -174,27 +170,12 @@ export default async function getFormData({
   if (formRenderer === "jsonforms") {
     jsonFormsUiSchema = form_ui_schema as JsonFormsUiSchema;
     try {
-      const { formSchema } = processFormSchema(form_json_schema);
-      formUiSchema = jsonFormsToUiSchema(jsonFormsUiSchema, formSchema);
-      // A control no widget can render is skipped, so the applicant never sees it and no
-      // answer is collected for it.
-      for (const control of findUnsupportedControls(
-        jsonFormsUiSchema,
-        formSchema,
-      )) {
-        logger.warn(
-          { formId, formName, control },
-          "Form has a control that can't be rendered by any widget. It won't be shown, and no answer will be collected for it",
-        );
-      }
-      // The field-list widget renders a list's entries itself, so JSON Forms never applies
-      // the rules on the fields inside them.
-      for (const control of findIgnoredListRules(jsonFormsUiSchema)) {
-        logger.warn(
-          { formId, formName, control },
-          "Form has a rule on a field inside a list that won't be applied. The field will always be shown and enabled",
-        );
-      }
+      formUiSchema = prepareJsonFormsUiSchema({
+        formId,
+        formName,
+        uiSchema: jsonFormsUiSchema,
+        jsonSchema: form_json_schema,
+      });
     } catch (e) {
       logger.error({ err: e, formId }, "Error converting JSON Forms ui schema");
       return { error: "TopLevelError" };

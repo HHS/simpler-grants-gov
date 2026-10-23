@@ -30,6 +30,15 @@ import { getByPointer } from "src/utils/formData/formDataUtils";
 
 export type JsonFormsUiSchema = UISchemaElement;
 
+/** A JSON Forms UI schema's section/field equivalent, and what the conversion drops. */
+export type ConvertedUiSchema = {
+  uiSchema: UiSchema;
+  /** Controls no widget can render, which are skipped. */
+  unsupportedControls: string[];
+  /** Rules on fields inside a list, which the field-list widget doesn't apply. */
+  ignoredListRules: string[];
+};
+
 type FieldNode = UiSchemaField | UiSchemaFieldList;
 type Definition = `/properties/${string}`;
 type EntryField = UiSchemaFieldList["children"][number];
@@ -42,12 +51,25 @@ const ROOT_PROPERTY = /^\/properties\/([^/]+)$/;
 // --------------------------------------------------
 
 /**
+ * Converts a JSON Forms UI schema to the section/field tree, and lists what the tree leaves
+ * out, so the caller can log it.
+ */
+export const convertJsonFormsUiSchema = (
+  uiSchema: JsonFormsUiSchema,
+  schema: RJSFSchema,
+): ConvertedUiSchema => ({
+  uiSchema: jsonFormsToUiSchema(uiSchema, schema),
+  unsupportedControls: findUnsupportedControls(uiSchema, schema),
+  ignoredListRules: findIgnoredListRules(uiSchema),
+});
+
+/**
  * The section/field tree equivalent to a JSON Forms UI schema, for the code that reads
  * that tree: warning formatting, navigation, and the UI schema validator. The root layout
  * is the form itself, whose title the page already shows, so its elements become the top
  * level.
  */
-export const jsonFormsToUiSchema = (
+const jsonFormsToUiSchema = (
   uiSchema: JsonFormsUiSchema,
   schema: RJSFSchema,
 ): UiSchema =>
@@ -135,7 +157,7 @@ export const groupName = (label: string): string =>
 // --------------------------------------------------
 
 /** Scopes of the controls no widget can render, which are skipped. */
-export const findUnsupportedControls = (
+const findUnsupportedControls = (
   uiSchema: JsonFormsUiSchema,
   schema: RJSFSchema,
 ): string[] => {
@@ -162,7 +184,7 @@ export const findUnsupportedControls = (
  * `<list scope> -> <field scope>`. Logged so a conditionally disabled field that renders
  * enabled is not a silent difference.
  */
-export const findIgnoredListRules = (uiSchema: JsonFormsUiSchema): string[] => {
+const findIgnoredListRules = (uiSchema: JsonFormsUiSchema): string[] => {
   const ruled = (element: UISchemaElement): string[] => [
     ...(element.rule && isControlElement(element) ? [element.scope] : []),
     ...(isLayout(element) ? element.elements.flatMap(ruled) : []),
