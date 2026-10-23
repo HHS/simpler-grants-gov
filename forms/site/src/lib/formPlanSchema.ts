@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { undeclaredExamplePaths } from "./planExamplePaths.ts";
+
 const widgets = z.enum([
   "TextWidget",
   "SelectWidget",
@@ -66,42 +68,69 @@ const sectionNode = nodeBase.extend({
 
 const formNode = z.discriminatedUnion("kind", [fieldNode, sectionNode]);
 
-export const formSchema = z.object({
-  title: z.string(),
-  slug: z.string(),
-  omb_number: z.string().optional().default(""),
-  expiration_date: z.string().optional().default(""),
-  fid_url: z.url().optional(),
-  pdf_url: z.url().optional(),
-  xsd_url: z.url().optional(),
-  xsd_root: z.string().min(1).optional(),
-  dat_url: z.url().optional(),
-  apps_count: z.number().optional().default(0),
-  status: z.enum([
-    "backlog",
-    "prioritized",
-    "in_progress",
-    "migrated",
-    "ready",
-  ]),
-  /** Grants.gov form families, e.g. ["R&R"]; empty for forms outside any family. */
-  family: z.array(z.string()).default([]),
-  category: z.string().optional(),
-  widgets: z.array(z.string()).optional().default([]),
-  sgg_form_id: z.string().nullable().optional().default(null),
-  /** Id of the compiled TypeSpec form in forms/dist/canonical/forms/, if one exists. */
-  spec_id: z.string().optional(),
-  description: z.string().optional().default(""),
-  new_concepts: z.array(widgets).optional(),
-  /** The plan's top-level nodes, nested the way the form nests them. */
-  children: z.array(formNode).optional().default([]),
-  /**
-   * Narrative context nothing verifies. Deviations from Grants.gov that can be verified are
-   * recorded in `forms/parity/diffs/` instead.
-   */
-  notes: z.array(z.string()).optional(),
-  risks: z.array(z.string()).optional(),
+const example = z.object({
+  label: z.string().min(1),
+  description: z.string().min(1),
+  data: z.record(z.string(), z.json()),
 });
+
+export const formSchema = z
+  .object({
+    title: z.string(),
+    slug: z.string(),
+    omb_number: z.string().optional().default(""),
+    expiration_date: z.string().optional().default(""),
+    fid_url: z.url().optional(),
+    pdf_url: z.url().optional(),
+    xsd_url: z.url().optional(),
+    xsd_root: z.string().min(1).optional(),
+    dat_url: z.url().optional(),
+    apps_count: z.number().optional().default(0),
+    status: z.enum([
+      "backlog",
+      "prioritized",
+      "in_progress",
+      "migrated",
+      "ready",
+    ]),
+    /** Grants.gov form families, e.g. ["R&R"]; empty for forms outside any family. */
+    family: z.array(z.string()).default([]),
+    category: z.string().optional(),
+    widgets: z.array(z.string()).optional().default([]),
+    sgg_form_id: z.string().nullable().optional().default(null),
+    /** Id of the compiled TypeSpec form in forms/dist/canonical/forms/, if one exists. */
+    spec_id: z.string().optional(),
+    /** Illustrative answers for plan review, independent of a compiled definition. */
+    examples: z.array(example).optional(),
+    /** Pinned existing payloads for comparison; these use the existing SGG contract. */
+    existing_sgg: z
+      .object({
+        source_url: z.url(),
+        examples: z.array(example).min(1),
+      })
+      .optional(),
+    description: z.string().optional().default(""),
+    new_concepts: z.array(widgets).optional(),
+    /** The plan's top-level nodes, nested the way the form nests them. */
+    children: z.array(formNode).optional().default([]),
+    /**
+     * Narrative context nothing verifies. Deviations from Grants.gov that can be verified are
+     * recorded in `forms/parity/diffs/` instead.
+     */
+    notes: z.array(z.string()).optional(),
+    risks: z.array(z.string()).optional(),
+  })
+  .superRefine((form, ctx) => {
+    for (const [index, example] of (form.examples ?? []).entries()) {
+      for (const path of undeclaredExamplePaths(form.children, example.data)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["examples", index, "data"],
+          message: `Example answer has no declared field path: ${path}`,
+        });
+      }
+    }
+  });
 
 export type FormData = z.infer<typeof formSchema>;
 export type FormNode = z.infer<typeof formNode>;
