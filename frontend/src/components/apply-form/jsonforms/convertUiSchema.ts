@@ -41,6 +41,28 @@ type EntryField = UiSchemaFieldList["children"][number];
 /** A top-level property, the only place a field list may sit. */
 const ROOT_PROPERTY = /^\/properties\/([^/]+)$/;
 
+/**
+ * The SGG widgets `options.widget` may name on a field. Any other name is left off the
+ * field, since the UI schema validator would reject it. A custom JSON Forms widget is picked
+ * by its own tester, so the field doesn't need its name.
+ */
+const FIELD_WIDGETS: ReadonlySet<string> = new Set<WidgetTypes>([
+  "Attachment",
+  "AttachmentArray",
+  "Checkbox",
+  "Text",
+  "TextArea",
+  "Radio",
+  "Select",
+  "MultiSelect",
+  "Budget424aSectionA",
+  "Budget424aSectionB",
+  "Budget424aSectionC",
+  "Budget424aSectionD",
+  "Budget424aSectionE",
+  "Budget424aSectionF",
+]);
+
 // --------------------------------------------------
 // Conversion
 // --------------------------------------------------
@@ -92,7 +114,7 @@ export const controlToNodes = (
 
   const options = (control.options ?? {}) as {
     readonly?: boolean;
-    widget?: WidgetTypes;
+    widget?: string;
     description?: string;
   };
   const type = options.readonly ? "null" : "field";
@@ -135,7 +157,9 @@ export const controlToNodes = (
     {
       type,
       definition,
-      ...(options.widget ? { widget: options.widget } : {}),
+      ...(options.widget && FIELD_WIDGETS.has(options.widget)
+        ? { widget: options.widget as WidgetTypes }
+        : {}),
     },
   ];
 };

@@ -36,6 +36,3 @@ A custom JSON Forms widget ranked above the SGG adapter (rank 10) takes over wha
    - **Field names:** Render inputs with the same HTML field names the SGG widgets use (e.g. `address--city`, from `getFieldNameForHtml`). Otherwise the answers aren't saved.
    - **Validation warnings:** Read warnings from `AdapterContext` to show them on the widget's fields.
    - **Print mode:** Check `print` in the same context so the print view works.
-
-> [!WARNING]
-> Don't opt a single field into a custom JSON Forms widget with `options.widget` yet. The name is copied into the converted SGG UI schema, which `validateUiSchema` rejects, so the form shows an error page. Use a different option key until [#12853](https://github.com/HHS/simpler-grants-gov/issues/12853) is fixed. Lists aren't affected.

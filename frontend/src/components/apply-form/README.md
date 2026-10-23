@@ -167,7 +167,7 @@ In this README, "renderer" means the form-level renderer: the SGG renderer, or t
 | --------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | Control on a scalar                     | One `field`                                                                                       |
 | Control with `options.readonly: true`   | One `null` field (rendered disabled)                                                              |
-| Control with `options.widget`           | One `field` with that `widget`                                                                    |
+| Control with `options.widget`           | One `field` with that `widget`, if it names an SGG widget                                         |
 | Control on an object                    | One `field` per leaf of the object                                                                |
 | Control on a top-level array of objects | One `fieldList`, whose fields follow `options.detail` when it's set and the item schema otherwise |
 | `Group` with a `label`                  | A `section` named with `groupName(label)`                                                         |
