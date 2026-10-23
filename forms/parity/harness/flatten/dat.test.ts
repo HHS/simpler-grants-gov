@@ -64,6 +64,19 @@ describe("datFields", () => {
     expect(dat.get("7-14")?.rules).toEqual({ maxOccurs: 4 });
   });
 
+  it.each(["$", "INTEGER"])(
+    "does not reinterpret %s value bounds as character lengths",
+    (type) => {
+      const dat = datFields(
+        workbook([
+          HEADER,
+          ["01-a", "$", "No", type, 9999999999.99, 1, "Field", ""],
+        ]),
+      );
+      expect(dat.get("01-a")?.rules).toEqual({ maxOccurs: 1 });
+    },
+  );
+
   it("keeps asterisk on required labels", () => {
     const dat = datFields(
       workbook([

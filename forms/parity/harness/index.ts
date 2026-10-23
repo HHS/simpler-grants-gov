@@ -58,6 +58,7 @@ export const SPECS = {
         "pattern",
         "minimum",
         "maximum",
+        "multipleOf",
         "enumType",
       ],
       mode: "equal",
@@ -74,6 +75,7 @@ export const SPECS = {
         "format",
         "minimum",
         "maximum",
+        "multipleOf",
       ],
       mode: "equal",
     },
@@ -95,6 +97,7 @@ export const SPECS = {
         "pattern",
         "minimum",
         "maximum",
+        "multipleOf",
         "enum",
       ],
       mode: "contains",
@@ -201,7 +204,7 @@ function indexDisagreements(
  * the asterisk and the plan's requiredness agree, the labels compare as plain text; where
  * they disagree, the label comparison reports it.
  */
-const withAsterisk = (fields: Fields): Fields =>
+export const withAsterisk = (fields: Fields): Fields =>
   new Map(
     [...fields].map(([path, field]) => [
       path,

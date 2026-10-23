@@ -97,7 +97,7 @@ export interface FormComparison<F extends PlanField = PlanField> {
 const KEYWORDS: Partial<Record<Attribute, readonly string[]>> = {
   length: ["minLength", "maxLength"],
   format: ["pattern", "format"],
-  range: ["minimum", "maximum"],
+  range: ["minimum", "maximum", "multipleOf"],
   options: ["enumType", "enum"],
 };
 
@@ -192,7 +192,9 @@ function showLength(field: FlatField | undefined): string | null {
 
 function showRules(
   field: FlatField | undefined,
-  keywords: readonly ("pattern" | "format" | "minimum" | "maximum")[],
+  keywords: readonly (
+    "pattern" | "format" | "minimum" | "maximum" | "multipleOf"
+  )[],
 ): string | null {
   const stated = keywords.flatMap((keyword) => {
     const value = field?.rules[keyword];
@@ -486,7 +488,7 @@ function buildField<F extends PlanField>(
       case "format":
         return showRules(rules, ["pattern", "format"]);
       case "range":
-        return showRules(rules, ["minimum", "maximum"]);
+        return showRules(rules, ["minimum", "maximum", "multipleOf"]);
       case "options":
         return showOptions(rules);
       case "position":
@@ -517,7 +519,7 @@ function buildField<F extends PlanField>(
       case "format":
         return showRules(planFlat, ["pattern", "format"]);
       case "range":
-        return showRules(planFlat, ["minimum", "maximum"]);
+        return showRules(planFlat, ["minimum", "maximum", "multipleOf"]);
       case "options":
         return showOptions(planFlat);
       case "position":

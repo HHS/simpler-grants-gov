@@ -72,7 +72,8 @@ export function readRequired(
   return word as Requiredness | undefined;
 }
 
-const NUMERIC = /^(minLength|maxLength|minimum|maximum)\s+(-?\d+(?:\.\d+)?)$/;
+const NUMERIC =
+  /^(minLength|maxLength|minimum|maximum|multipleOf)\s+(-?\d+(?:\.\d+)?)$/;
 
 /**
  * A plan's `constraints`, e.g. `minLength 1, maxLength 10` or `StateCodeDataType enumeration`.
@@ -83,7 +84,10 @@ export function readConstraints(text: string): Rules | undefined {
   for (const item of text.split(",").map((part) => part.trim())) {
     let match: RegExpExecArray | null;
     if ((match = NUMERIC.exec(item))) {
-      rules[match[1] as "minLength"] = Number(match[2]);
+      const value = Number(match[2]);
+      if (!Number.isFinite(value) || (match[1] === "multipleOf" && value <= 0))
+        return undefined;
+      rules[match[1] as "minLength"] = value;
     } else if ((match = /^format\s+(\S+)$/.exec(item))) {
       rules.format = match[1];
     } else if ((match = /^pattern\s+(\S+)$/.exec(item))) {

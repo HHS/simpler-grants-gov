@@ -61,6 +61,15 @@ function rulesOf(node: Json): Rules {
     "maximum",
   ] as const)
     if (typeof node[keyword] === "number") rules[keyword] = node[keyword];
+  // Numeric keywords do not constrain decimal strings. Leave that representation gap visible.
+  if (
+    (node.type === "number" || node.type === "integer") &&
+    typeof node.multipleOf === "number"
+  ) {
+    if (!Number.isFinite(node.multipleOf) || node.multipleOf <= 0)
+      throw new Error("multipleOf must be a positive finite number");
+    rules.multipleOf = node.multipleOf;
+  }
   if (typeof node.pattern === "string") rules.pattern = node.pattern;
   if (typeof node.format === "string") rules.format = node.format;
   if ("const" in node) rules.enum = [String(node.const)];

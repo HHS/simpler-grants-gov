@@ -141,3 +141,19 @@ describe("form without parity record", () => {
     expect(await compareForm(plan)).toBeNull();
   });
 });
+
+describe("precision visibility", () => {
+  it("shows a precision difference in the existing range row", async () => {
+    const plan = structuredClone(PLANS.get("key-contacts")!);
+    delete plan.spec_id;
+    const { walkFields } = await import("./harness/flatten/plan.ts");
+    const field = walkFields(plan.children)[0].field;
+    field.constraints = `${field.constraints}, multipleOf 0.01`;
+    const comparison = (await compareForm(plan))!;
+    const range = comparison.fields[0].rows.find(
+      (row) => row.attribute === "range",
+    )!;
+    expect(range.plan).toContain("multipleOf 0.01");
+    expect(range.cells.xsd.status).toBe("unrecorded");
+  });
+});

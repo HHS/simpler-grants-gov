@@ -128,12 +128,7 @@ class Schemas {
   }
 }
 
-const IGNORED_FACETS = new Set([
-  "totalDigits",
-  "fractionDigits",
-  "whiteSpace",
-  "annotation",
-]);
+const IGNORED_FACETS = new Set(["totalDigits", "whiteSpace", "annotation"]);
 
 type MaxOccurs = number | "unbounded";
 
@@ -193,7 +188,13 @@ class Walker {
         rules.minLength = rules.maxLength = Number(value);
       else if (kind === "minInclusive") rules.minimum = Number(value);
       else if (kind === "maxInclusive") rules.maximum = Number(value);
-      else if (kind === "pattern") rules.pattern = value;
+      else if (kind === "fractionDigits") {
+        const digits = Number(value);
+        const step = Number(`1e-${digits}`);
+        if (!/^\d+$/.test(value) || !Number.isSafeInteger(digits) || step <= 0)
+          throw new Error(`unsupported fractionDigits ${value}`);
+        rules.multipleOf = step;
+      } else if (kind === "pattern") rules.pattern = value;
       else if (!IGNORED_FACETS.has(kind))
         throw new Error(`unsupported facet xs:${kind}`);
     }
@@ -279,7 +280,10 @@ class Walker {
       );
     const type = this.schemas.find("complexTypes", declared.type, schema);
     if (!type) throw new Error(`unknown type ${declared.type} on ${path}`);
-    if (type.schema.targetNamespace === ATTACHMENTS && type.name === ATTACHED_FILE)
+    if (
+      type.schema.targetNamespace === ATTACHMENTS &&
+      type.name === ATTACHED_FILE
+    )
       return this.leaf(path, own, {});
     this.complex(type.node, type.schema, path, own);
   }

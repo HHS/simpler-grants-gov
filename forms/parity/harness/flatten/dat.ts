@@ -8,6 +8,16 @@ const NOT_INPUTS = new Set(["label", "button"]);
 /** Implementations whose list is fixed, so its "Max # of Chars" is not a length limit. */
 const FIXED_LISTS = new Set(["popup"]);
 
+/** In these rows the shared DAT column means a maximum value, not character length. */
+const NUMERIC_TYPES = new Set([
+  "$",
+  "integer",
+  "number",
+  "numeric",
+  "decimal",
+  "currency",
+]);
+
 /**
  * `*  Contact 1 Project Role:` -> `* Contact 1 Project Role`. The asterisk the DAT prints on
  * a required field is kept, so the label comparison can check it against the plan.
@@ -78,7 +88,11 @@ export function datFields(workbook: Uint8Array): Fields {
     if (!id || NOT_INPUTS.has(implementation)) continue;
     const rules: Rules = {};
     const max = Number(row[at.max]);
-    if (String(row[at.max]).trim() && !FIXED_LISTS.has(implementation))
+    if (
+      String(row[at.max]).trim() &&
+      !FIXED_LISTS.has(implementation) &&
+      !NUMERIC_TYPES.has(header(row[at.dataType]))
+    )
       rules.maxLength = max;
     const maxOccurs = occurrences(row[at.maxOccurs]);
     if (maxOccurs !== undefined) rules.maxOccurs = maxOccurs;

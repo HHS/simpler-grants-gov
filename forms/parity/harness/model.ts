@@ -73,6 +73,7 @@ export const KEYWORDS = [
   "maxLength",
   "minimum",
   "maximum",
+  "multipleOf",
   "pattern",
   "format",
   "enum",

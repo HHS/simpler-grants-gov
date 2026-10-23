@@ -161,3 +161,22 @@ harness/
   compare.ts          comparePair(): the six checks, with recorded differences applied
   model.ts            paths, fields, discrepancies, recorded differences (+ model.test.ts)
 ```
+
+### Decimal precision
+
+`multipleOf` is compared with numeric bounds and displayed on the range row. Plans can
+state `minimum 0, maximum 9999999999.99, multipleOf 0.01`; XSD `fractionDigits 2`
+provides the matching numeric step. Containment requires the implementation's step to
+be an exact decimal multiple of the source step: `0.1` is stricter than `0.01`, while
+`0.03` does not satisfy `0.02`.
+
+JSON Schema precision is read for explicit numeric types. A decimal string constrained
+by a pattern is a different representation; a numeric `multipleOf` keyword does not
+constrain it. Such a path still reports missing numeric precision, rather than claiming
+string-pattern equivalence. `totalDigits` and `whiteSpace` remain outside this comparison;
+`fractionDigits` does not establish full XSD equivalence. DAT numeric maximum values are
+not character lengths; numeric DAT ranges remain unchecked by the DAT comparison.
+
+The plan schema is importable from `site/src/lib/formPlanSchema.ts` without Astro. The
+site's content collection uses that same schema. External orchestration should import
+the maintained schema and parity functions rather than duplicate them.
