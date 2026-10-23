@@ -9,7 +9,7 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
 import OpportunityContact from "./_components/OpportunityContact";
@@ -145,32 +145,30 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         opportunitySaved={opportunitySaved}
       />
       <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6">
-        <Grid row gap={true}>
-          <div className="grid-row grid-gap" id="opportunity-detail-content">
-            <div className="desktop:grid-col-4 grid-col-12 desktop:order-last margin-bottom-4 desktop:margin-bottom-0">
-              <OpportunityImportantDates detail={opportunityData} />
-              <OpportunityAwardInfo opportunityData={opportunityData} />
-              <OpportunityHistory
-                summary={opportunityData.summary}
-                status={opportunityData.opportunity_status}
-                legacyOpportunityId={opportunityData.legacy_opportunity_id}
-              />
-            </div>
-
-            <div className="desktop:grid-col-8 grid-col-12">
-              <OpportunityDescription
-                summary={opportunityData.summary}
-                attachments={opportunityData.attachments}
-              />
-              <OpportunityDocuments
-                documents={opportunityData.attachments}
-                opportunityId={opportunityData.opportunity_id}
-              />
-              <OpportunityContact summary={opportunityData.summary} />
-              <OpportunityLink opportunityData={opportunityData} />
-            </div>
+        <div className="grid-row grid-gap" id="opportunity-detail-content">
+          <div className="desktop:grid-col-4 grid-col-12 desktop:order-last margin-bottom-4 desktop:margin-bottom-0">
+            <OpportunityImportantDates detail={opportunityData} />
+            <OpportunityAwardInfo opportunityData={opportunityData} />
+            <OpportunityHistory
+              summary={opportunityData.summary}
+              status={opportunityData.opportunity_status}
+              legacyOpportunityId={opportunityData.legacy_opportunity_id}
+            />
           </div>
-        </Grid>
+
+          <div className="desktop:grid-col-8 grid-col-12">
+            <OpportunityDescription
+              summary={opportunityData.summary}
+              attachments={opportunityData.attachments}
+            />
+            <OpportunityDocuments
+              documents={opportunityData.attachments}
+              opportunityId={opportunityData.opportunity_id}
+            />
+            <OpportunityContact summary={opportunityData.summary} />
+            <OpportunityLink opportunityData={opportunityData} />
+          </div>
+        </div>
       </GridContainer>
     </div>
   );

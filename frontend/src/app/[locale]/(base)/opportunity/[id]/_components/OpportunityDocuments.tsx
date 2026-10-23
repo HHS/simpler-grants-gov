@@ -79,20 +79,20 @@ const OpportunityDocuments = ({
   return (
     <Grid
       row
-      className="margin-top-6 simpler-page-anchor-offset"
+      className="margin-top-6 simpler-page-anchor-offset flex-justify flex-align-center"
       id="opportunity-documents"
     >
-      <Grid col={8}>
+      <Grid col="auto" className="margin-right-3 margin-bottom-1">
         <h2>{t("title")}</h2>
       </Grid>
       {documents.length > 0 ? (
         <>
-          <Grid col={4} className="text-right">
+          <Grid col="auto" className="margin-bottom-2">
             <ZipDownloadButton
               opportunityId={opportunityId}
             ></ZipDownloadButton>
           </Grid>
-          <Table className="width-full overflow-wrap">
+          <Table className="width-full overflow-wrap" stackedStyle="default">
             <DocumentTable
               documents={documents}
               opportunityId={opportunityId}
