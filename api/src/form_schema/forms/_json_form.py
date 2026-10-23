@@ -3,6 +3,7 @@
 import dataclasses
 import json
 import uuid
+from collections.abc import Callable
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -15,12 +16,27 @@ JSON_FORM_FILENAME = "form.json"
 # Set by the get_form service on each request, so a form.json never declares it.
 _EXCLUDED_FIELDS = frozenset({"form_instruction"})
 
-_UUID_FIELDS = frozenset({"form_id", "form_instruction_id"})
-_DATETIME_FIELDS = frozenset({"active_at", "inactive_at"})
-_DATE_FIELDS = frozenset({"expiration_date"})
-_ENUM_FIELDS: dict[str, type[FormType] | type[FormRenderer]] = {
-    "form_type": FormType,
-    "form_renderer": FormRenderer,
+
+class _FieldParser(NamedTuple):
+    """How to parse a Form field that JSON stores as a string."""
+
+    parse: Callable[[str], Any]
+    expected: str  # what the value should be, for the error message
+
+
+def _enum_parser(enum: type[FormType] | type[FormRenderer]) -> _FieldParser:
+    valid = ", ".join(member.value for member in enum)
+    return _FieldParser(enum, f"a known {enum.__name__} ({valid})")
+
+
+_FIELD_PARSERS = {
+    "form_id": _FieldParser(uuid.UUID, "a valid UUID"),
+    "form_instruction_id": _FieldParser(uuid.UUID, "a valid UUID"),
+    "active_at": _FieldParser(datetime.fromisoformat, "a valid ISO 8601 datetime"),
+    "inactive_at": _FieldParser(datetime.fromisoformat, "a valid ISO 8601 datetime"),
+    "expiration_date": _FieldParser(date.fromisoformat, "a valid ISO 8601 date"),
+    "form_type": _enum_parser(FormType),
+    "form_renderer": _enum_parser(FormRenderer),
 }
 
 
@@ -65,45 +81,13 @@ def build_form_from_dict(data: dict[str, Any], path: Path) -> Form:
 
     kwargs = dict(data)
 
-    for field in _UUID_FIELDS:
+    for field, parser in _FIELD_PARSERS.items():
         value = kwargs.get(field)
         if isinstance(value, str):
             try:
-                kwargs[field] = uuid.UUID(value)
+                kwargs[field] = parser.parse(value)
             except ValueError as err:
-                raise ValueError(f"{path}: {field} is not a valid UUID: {value!r}") from err
-
-    for field in _DATETIME_FIELDS:
-        value = kwargs.get(field)
-        if isinstance(value, str):
-            try:
-                kwargs[field] = datetime.fromisoformat(value)
-            except ValueError as err:
-                raise ValueError(
-                    f"{path}: {field} is not a valid ISO 8601 datetime: {value!r}"
-                ) from err
-
-    for field in _DATE_FIELDS:
-        value = kwargs.get(field)
-        if isinstance(value, str):
-            try:
-                kwargs[field] = date.fromisoformat(value)
-            except ValueError as err:
-                raise ValueError(
-                    f"{path}: {field} is not a valid ISO 8601 date: {value!r}"
-                ) from err
-
-    for field, enum in _ENUM_FIELDS.items():
-        value = kwargs.get(field)
-        if isinstance(value, str):
-            try:
-                kwargs[field] = enum(value)
-            except ValueError as err:
-                valid = ", ".join(t.value for t in enum)
-                raise ValueError(
-                    f"{path}: {field} {value!r} is not a known {enum.__name__}. "
-                    f"Valid values: {valid}"
-                ) from err
+                raise ValueError(f"{path}: {field} is not {parser.expected}: {value!r}") from err
 
     try:
         return Form(**kwargs)
