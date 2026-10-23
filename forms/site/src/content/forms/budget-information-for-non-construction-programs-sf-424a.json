@@ -105,7 +105,7 @@
               "json_path": "summary.activities[].estimated_federal",
               "xml_path": "BudgetSummary/SummaryLineItem/BudgetFederalEstimatedUnobligatedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "summary.activities",
                 "dat": [
@@ -141,7 +141,7 @@
               "json_path": "summary.activities[].estimated_non_federal",
               "xml_path": "BudgetSummary/SummaryLineItem/BudgetNonFederalEstimatedUnobligatedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "summary.activities",
                 "dat": [
@@ -177,7 +177,7 @@
               "json_path": "summary.activities[].new_federal",
               "xml_path": "BudgetSummary/SummaryLineItem/BudgetFederalNewOrRevisedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "summary.activities",
                 "dat": [
@@ -213,7 +213,7 @@
               "json_path": "summary.activities[].new_non_federal",
               "xml_path": "BudgetSummary/SummaryLineItem/BudgetNonFederalNewOrRevisedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "summary.activities",
                 "dat": [
@@ -250,7 +250,7 @@
               "xml_path": "BudgetSummary/SummaryLineItem/BudgetTotalNewOrRevisedAmount",
               "widget": "TextWidget",
               "post_populated": "A-1-7: Calculated to be the sum of the row, however value may be overwritten.; A-2-7: Calculated to be the sum of the row, however value may be overwritten.; A-3-7: Calculated to be the sum of the row, however value may be overwritten.; A-4-7: Calculated to be the sum of the row, however value may be overwritten.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "summary.activities",
                 "dat": [
@@ -296,7 +296,7 @@
               "widget": "TextWidget",
               "dat_field": "A-5-2",
               "post_populated": "A-5-2: Calculated, read-only. Sum of the column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -309,7 +309,7 @@
               "widget": "TextWidget",
               "dat_field": "A-5-3",
               "post_populated": "A-5-3: Calculated, read-only. Sum of the column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -322,7 +322,7 @@
               "widget": "TextWidget",
               "dat_field": "A-5-4",
               "post_populated": "A-5-4: Calculated, read-only. Sum of the column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -335,7 +335,7 @@
               "widget": "TextWidget",
               "dat_field": "A-5-5",
               "post_populated": "A-5-5: Calculated, read-only. Sum of the column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -348,7 +348,7 @@
               "widget": "TextWidget",
               "post_populated": "A-5-6: Calculated, read-only. Sum of the column.",
               "dat_field": "A-5-6",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             }
           ]
@@ -408,7 +408,7 @@
               "json_path": "categories.activities[].personnel",
               "xml_path": "BudgetCategories/CategorySet/BudgetPersonnelRequestedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -444,7 +444,7 @@
               "json_path": "categories.activities[].fringe_benefits",
               "xml_path": "BudgetCategories/CategorySet/BudgetFringeBenefitsRequestedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -480,7 +480,7 @@
               "json_path": "categories.activities[].travel",
               "xml_path": "BudgetCategories/CategorySet/BudgetTravelRequestedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -516,7 +516,7 @@
               "json_path": "categories.activities[].equipment",
               "xml_path": "BudgetCategories/CategorySet/BudgetEquipmentRequestedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -552,7 +552,7 @@
               "json_path": "categories.activities[].supplies",
               "xml_path": "BudgetCategories/CategorySet/BudgetSuppliesRequestedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -588,7 +588,7 @@
               "json_path": "categories.activities[].contractual",
               "xml_path": "BudgetCategories/CategorySet/BudgetContractualRequestedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -624,7 +624,7 @@
               "json_path": "categories.activities[].construction",
               "xml_path": "BudgetCategories/CategorySet/BudgetConstructionRequestedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -660,7 +660,7 @@
               "json_path": "categories.activities[].other",
               "xml_path": "BudgetCategories/CategorySet/BudgetOtherRequestedAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -697,7 +697,7 @@
               "xml_path": "BudgetCategories/CategorySet/BudgetTotalDirectChargesAmount",
               "widget": "TextWidget",
               "post_populated": "B-09-1: Calculated, read-only. Sum of the column (a-h).; B-09-2: Calculated, read-only. Sum of the column (a-h).; B-09-3: Calculated, read-only. Sum of the column (a-h).; B-09-4: Calculated, read-only. Sum of the column (a-h).",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -733,7 +733,7 @@
               "json_path": "categories.activities[].indirect",
               "xml_path": "BudgetCategories/CategorySet/BudgetIndirectChargesAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -770,7 +770,7 @@
               "xml_path": "BudgetCategories/CategorySet/BudgetTotalAmount",
               "widget": "TextWidget",
               "post_populated": "B-11-1: Calculated, read-only. Sum of i and j in this column.; B-11-2: Calculated, read-only. Sum of i and j in this column.; B-11-3: Calculated, read-only. Sum of i and j in this column.; B-11-4: Calculated, read-only. Sum of i and j in this column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -806,7 +806,7 @@
               "json_path": "categories.activities[].program_income",
               "xml_path": "BudgetCategories/CategorySet/ProgramIncomeAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "categories.activities",
                 "dat": [
@@ -852,7 +852,7 @@
               "widget": "TextWidget",
               "dat_field": "B-01-5",
               "post_populated": "B-01-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -865,7 +865,7 @@
               "widget": "TextWidget",
               "dat_field": "B-02-5",
               "post_populated": "B-02-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -878,7 +878,7 @@
               "widget": "TextWidget",
               "dat_field": "B-03-5",
               "post_populated": "B-03-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -891,7 +891,7 @@
               "widget": "TextWidget",
               "dat_field": "B-04-5",
               "post_populated": "B-04-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -904,7 +904,7 @@
               "widget": "TextWidget",
               "dat_field": "B-05-5",
               "post_populated": "B-05-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -917,7 +917,7 @@
               "widget": "TextWidget",
               "dat_field": "B-06-5",
               "post_populated": "B-06-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -930,7 +930,7 @@
               "widget": "TextWidget",
               "dat_field": "B-07-5",
               "post_populated": "B-07-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -943,7 +943,7 @@
               "widget": "TextWidget",
               "dat_field": "B-08-5",
               "post_populated": "B-08-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -956,7 +956,7 @@
               "widget": "TextWidget",
               "dat_field": "B-09-5",
               "post_populated": "B-09-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total Direct Charges"
             },
             {
@@ -969,7 +969,7 @@
               "widget": "TextWidget",
               "dat_field": "B-10-5",
               "post_populated": "B-10-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             },
             {
@@ -982,7 +982,7 @@
               "widget": "TextWidget",
               "dat_field": "B-11-5",
               "post_populated": "B-11-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total (sum of 6i and 6j)"
             },
             {
@@ -995,7 +995,7 @@
               "widget": "TextWidget",
               "dat_field": "B-12-5",
               "post_populated": "B-12-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "Total"
             }
           ]
@@ -1055,7 +1055,7 @@
               "json_path": "resources.activities[].applicant",
               "xml_path": "NonFederalResources/ResourceLineItem/BudgetApplicantContributionAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "resources.activities",
                 "dat": [
@@ -1091,7 +1091,7 @@
               "json_path": "resources.activities[].state",
               "xml_path": "NonFederalResources/ResourceLineItem/BudgetStateContributionAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "resources.activities",
                 "dat": [
@@ -1127,7 +1127,7 @@
               "json_path": "resources.activities[].other_sources",
               "xml_path": "NonFederalResources/ResourceLineItem/BudgetOtherContributionAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "resources.activities",
                 "dat": [
@@ -1164,7 +1164,7 @@
               "xml_path": "NonFederalResources/ResourceLineItem/BudgetTotalContributionAmount",
               "widget": "TextWidget",
               "post_populated": "C-1-5: Calculated, read-only. Sum of the row.; C-2-5: Calculated, read-only. Sum of the row.; C-3-5: Calculated, read-only. Sum of the row.; C-4-5: Calculated, read-only. Sum of the row.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "resources.activities",
                 "dat": [
@@ -1210,7 +1210,7 @@
               "widget": "TextWidget",
               "dat_field": "C-5-2",
               "post_populated": "C-5-2: Calculated, read-only. Sum of the column (8-11).",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "(b) Applicant Total (sum of lines 8-11)"
             },
             {
@@ -1223,7 +1223,7 @@
               "widget": "TextWidget",
               "dat_field": "C-5-3",
               "post_populated": "C-5-3: Calculated, read-only. Sum of the column (8-11).",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "(c) State Total (sum of lines 8-11)"
             },
             {
@@ -1236,7 +1236,7 @@
               "widget": "TextWidget",
               "dat_field": "C-5-4",
               "post_populated": "C-5-4: Calculated, read-only. Sum of the column (8-11).",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "(d)  Other Sources Total (sum of lines 8-11)"
             },
             {
@@ -1249,7 +1249,7 @@
               "widget": "TextWidget",
               "dat_field": "C-5-5",
               "post_populated": "C-5-5: Calculated, read-only. Sum of the column (8-11).",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "(e)TOTALS - Total (sum of lines 8-11)"
             }
           ]
@@ -1270,7 +1270,7 @@
           "widget": "TextWidget",
           "dat_field": "D-2-2",
           "post_populated": "D-2-2: Calculated, read-only. Sum of the row.",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Total for 1st Year"
         },
         {
@@ -1283,7 +1283,7 @@
           "widget": "TextWidget",
           "dat_field": "D-3-2",
           "post_populated": "D-3-2: Calculated, read-only. Sum of the row.",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Total for 1st Year"
         },
         {
@@ -1296,7 +1296,7 @@
           "widget": "TextWidget",
           "post_populated": "D-4-2: Calculated, read-only. Sum of the column.",
           "dat_field": "D-4-2",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Total for 1st Year"
         },
         {
@@ -1308,7 +1308,7 @@
           "xml_path": "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetFederalForecastedAmount",
           "widget": "TextWidget",
           "dat_field": "D-2-3",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Enter the forecasted cash needs from federal sources for the first quarter of the first program year"
         },
         {
@@ -1320,7 +1320,7 @@
           "xml_path": "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetNonFederalForecastedAmount",
           "widget": "TextWidget",
           "dat_field": "D-3-3",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Enter the forecasted cash needs from non-federal sources for the first quarter of the first program year"
         },
         {
@@ -1333,7 +1333,7 @@
           "widget": "TextWidget",
           "dat_field": "D-4-3",
           "post_populated": "D-4-3: Calculated, read-only. Sum of the column.",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "1st Quarter Total (sum of lines 13 and 14)"
         },
         {
@@ -1345,7 +1345,7 @@
           "xml_path": "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetFederalForecastedAmount",
           "widget": "TextWidget",
           "dat_field": "D-2-4",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Enter the forecasted cash needs from federal sources for the second quarter of the first program year"
         },
         {
@@ -1357,7 +1357,7 @@
           "xml_path": "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetNonFederalForecastedAmount",
           "widget": "TextWidget",
           "dat_field": "D-3-4",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Enter the forecasted cash needs from non-federal sources for the second quarter of the first program year"
         },
         {
@@ -1370,7 +1370,7 @@
           "widget": "TextWidget",
           "dat_field": "D-4-4",
           "post_populated": "D-4-4: Calculated, read-only. Sum of the column.",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Second Quarter Total (sum of lines 13 and 14)"
         },
         {
@@ -1382,7 +1382,7 @@
           "xml_path": "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetFederalForecastedAmount",
           "widget": "TextWidget",
           "dat_field": "D-2-5",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Enter the forecasted cash needs from federal sources for the third quarter of the first program year"
         },
         {
@@ -1394,7 +1394,7 @@
           "xml_path": "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetNonFederalForecastedAmount",
           "widget": "TextWidget",
           "dat_field": "D-3-5",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Enter the forecasted cash needs from non-federal sources for the third quarter of the first program year"
         },
         {
@@ -1407,7 +1407,7 @@
           "widget": "TextWidget",
           "dat_field": "D-4-5",
           "post_populated": "D-4-5: Calculated, read-only. Sum of the column.",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "3rd Quarter Total (sum of lines 13 and 14)"
         },
         {
@@ -1419,7 +1419,7 @@
           "xml_path": "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetFederalForecastedAmount",
           "widget": "TextWidget",
           "dat_field": "D-2-6",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Enter the forecasted cash needs from federal sources for the fourth quarter of the first program year"
         },
         {
@@ -1431,7 +1431,7 @@
           "xml_path": "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetNonFederalForecastedAmount",
           "widget": "TextWidget",
           "dat_field": "D-3-6",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "Enter the forecasted cash needs from non-federal sources for the fourth quarter of the first program year"
         },
         {
@@ -1444,7 +1444,7 @@
           "widget": "TextWidget",
           "dat_field": "D-4-6",
           "post_populated": "D-4-6: Calculated, read-only. Sum of the column.",
-          "constraints": "multipleOf 0.01",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
           "help_text": "4th Quarter Total (sum of lines 13 and 14)"
         }
       ]
@@ -1502,7 +1502,7 @@
               "json_path": "future_funds.activities[].year1",
               "xml_path": "FederalFundsNeeded/FundsLineItem/BudgetFirstYearAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "future_funds.activities",
                 "dat": [
@@ -1538,7 +1538,7 @@
               "json_path": "future_funds.activities[].year2",
               "xml_path": "FederalFundsNeeded/FundsLineItem/BudgetSecondYearAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "future_funds.activities",
                 "dat": [
@@ -1574,7 +1574,7 @@
               "json_path": "future_funds.activities[].year3",
               "xml_path": "FederalFundsNeeded/FundsLineItem/BudgetThirdYearAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "future_funds.activities",
                 "dat": [
@@ -1610,7 +1610,7 @@
               "json_path": "future_funds.activities[].year4",
               "xml_path": "FederalFundsNeeded/FundsLineItem/BudgetFourthYearAmount",
               "widget": "TextWidget",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "source_bindings": {
                 "at": "future_funds.activities",
                 "dat": [
@@ -1656,7 +1656,7 @@
               "widget": "TextWidget",
               "dat_field": "E-5-2",
               "post_populated": "E-5-2: Calculated, read-only. Sum of the column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "(b)First - Total (sum of lines 16 - 19)"
             },
             {
@@ -1669,7 +1669,7 @@
               "widget": "TextWidget",
               "dat_field": "E-5-3",
               "post_populated": "E-5-3: Calculated, read-only. Sum of the column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "(c) Second - Total (sum of lines 16 - 19)"
             },
             {
@@ -1682,7 +1682,7 @@
               "widget": "TextWidget",
               "dat_field": "E-5-4",
               "post_populated": "E-5-4: Calculated, read-only. Sum of the column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "(d) Third - Total (sum of lines 16 - 19)"
             },
             {
@@ -1695,7 +1695,7 @@
               "widget": "TextWidget",
               "dat_field": "E-5-5",
               "post_populated": "E-5-5: Calculated, read-only. Sum of the column.",
-              "constraints": "multipleOf 0.01",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
               "help_text": "(e) Fourth - Total (sum of lines 16 - 19)"
             }
           ]
@@ -1751,6 +1751,7 @@
     "Section C and E activity titles default from the corresponding section A row but may be overwritten (DAT C-1-1\u2026C-4-1 and E-1-1\u2026E-4-1). They are distinct answers, not one shared activity identity. Any section B title forwarding remains a source-population obligation.",
     "DAT business rules require an entry somewhere on the form except A-1-7\u2026A-4-7, C-1-1\u2026C-4-1 and E-1-1\u2026E-4-1. On submission, blank activity titles become N/A according to the row-specific rule. These cross-field/submission rules are not represented as unconditional required fields.",
     "Amounts are signed decimals. The imported Global-V1.0 DecimalMin1Max14Places2Type has totalDigits14 and fractionDigits2. multipleOf0.01 records precision; the harness does not certify totalDigits or a JavaScript-number representation. Decide numeric representation and boundary tests before implementation.",
+    "Preserve the DAT numeric value bounds, including its different negative minima for editable amounts (-99999999999.99) and many calculated outputs (-999999999999.99), with maximum999999999999.99. The XSD only limits totalDigits14/fractionDigits2; these stricter DAT bounds are individually recorded source discrepancies for review, not silently broadened.",
     "Preserve all DAT Calculated/read-only formulas and validation messages. Section A new/revised totals, section B category/direct/overall totals, section C contributions, section D cash forecasts and section E future-funding totals must not become editable applicant inputs merely because they are optional in XSD.",
     "Wire assembly must supply glob:FormVersionIdentifier for edition1.0, fixed programType Non-Construction and fixed coreSchemaVersion1.0. These are document metadata/constants, not additional applicant questions. The XSD schema version is1.0; its instance FormVersionIdentifier is not fixed by XSD.",
     "Contextual field labels replace PDF-dependent row numbers, dollar signs and column positions. Every differing source value is recorded individually for review; this is a proposed presentation choice, not approval."

@@ -46,7 +46,10 @@ export const SPECS = {
     order: true,
     labels: true,
     help: true,
-    constraints: { keywords: ["maxLength"], mode: "equal" },
+    constraints: {
+      keywords: ["maxLength", "minimum", "maximum"],
+      mode: "equal",
+    },
     occurrences: "equal",
   },
   xsd: {

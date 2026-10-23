@@ -87,14 +87,22 @@ export function datFields(workbook: Uint8Array): Fields {
     const implementation = header(row[at.implementation]);
     if (!id || NOT_INPUTS.has(implementation)) continue;
     const rules: Rules = {};
-    const max = Number(row[at.max]);
-    if (
-      String(row[at.max]).trim() &&
-      !FIXED_LISTS.has(implementation) &&
-      !NUMERIC_TYPES.has(header(row[at.dataType])) &&
-      !/^decimal\(\d+\)$/.test(header(row[at.dataType]))
-    )
-      rules.maxLength = max;
+    const numeric =
+      NUMERIC_TYPES.has(header(row[at.dataType])) ||
+      /^decimal\(\d+\)$/.test(header(row[at.dataType]));
+    if (numeric) {
+      for (const [key, index] of [
+        ["minimum", names.indexOf("min # of chars or min value")],
+        ["maximum", at.max],
+      ] as const) {
+        if (index < 0 || String(row[index]).trim() === "") continue;
+        const value = Number(row[index]);
+        if (!Number.isFinite(value))
+          throw new Error(`unreadable DAT numeric ${key} at ${id}`);
+        rules[key] = value;
+      }
+    } else if (String(row[at.max]).trim() && !FIXED_LISTS.has(implementation))
+      rules.maxLength = Number(row[at.max]);
     const maxOccurs = occurrences(row[at.maxOccurs]);
     if (maxOccurs !== undefined) rules.maxOccurs = maxOccurs;
     const required = header(row[at.required]);

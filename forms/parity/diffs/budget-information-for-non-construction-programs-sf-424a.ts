@@ -1,1429 +1,263 @@
-import type { FormDiff } from "../harness/model.ts";
+import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
 
-/** Proposed source-backed presentation choices, not human approval. */
+/** Literal per-field pins; source or plan edits invalidate the corresponding entry. */
+const label = (
+  id: string,
+  plan: string | null,
+  source: string | null,
+): Pinned => ({
+  category: "intentional",
+  reason: `DAT FID241 v1.0 ${id}: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.`,
+  plan,
+  source,
+});
+const order = (id: string): Recorded => ({
+  category: "intentional",
+  reason: `DAT FID241 v1.0 ${id}: Proposed activity-by-activity budget categories follow the DAT B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.`,
+});
+const rules = (
+  plan: import("../harness/model.ts").Value,
+  source: import("../harness/model.ts").Value,
+): Pinned => ({
+  category: "upstream",
+  reason:
+    "FID241 v1.0 DAT numeric bounds are stricter than the imported Global-V1.0 XSD type, which states totalDigits14/fractionDigits2 without minInclusive/maxInclusive. Preserve the DAT bound pending source review.",
+  plan,
+  source,
+});
+
 export const DIFF: FormDiff = {
   slug: "budget-information-for-non-construction-programs-sf-424a",
   dat: {
-    differingLabels: {
-      "A-1-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-1-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "1.",
-      },
-      "A-1-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-1-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Assistance Listing Number",
-        source: null,
-      },
-      "A-1-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-1-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Federal Unobligated",
-        source: "$",
-      },
-      "A-1-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-1-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Non-Federal Unobligated",
-        source: "$",
-      },
-      "A-1-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-1-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Federal",
-        source: "$",
-      },
-      "A-1-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-1-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Non-Federal",
-        source: "$",
-      },
-      "A-1-7": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-1-7: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Total",
-        source: "$",
-      },
-      "A-2-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-2-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "2.",
-      },
-      "A-2-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-2-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Assistance Listing Number",
-        source: null,
-      },
-      "A-2-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-2-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Federal Unobligated",
-        source: null,
-      },
-      "A-2-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-2-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Non-Federal Unobligated",
-        source: null,
-      },
-      "A-2-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-2-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Federal",
-        source: null,
-      },
-      "A-2-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-2-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Non-Federal",
-        source: null,
-      },
-      "A-2-7": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-2-7: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Total",
-        source: null,
-      },
-      "A-3-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-3-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "3.",
-      },
-      "A-3-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-3-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Assistance Listing Number",
-        source: null,
-      },
-      "A-3-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-3-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Federal Unobligated",
-        source: null,
-      },
-      "A-3-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-3-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Non-Federal Unobligated",
-        source: null,
-      },
-      "A-3-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-3-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Federal",
-        source: null,
-      },
-      "A-3-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-3-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Non-Federal",
-        source: null,
-      },
-      "A-3-7": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-3-7: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Total",
-        source: null,
-      },
-      "A-4-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-4-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "4.",
-      },
-      "A-4-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-4-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Assistance Listing Number",
-        source: null,
-      },
-      "A-4-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-4-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Federal Unobligated",
-        source: null,
-      },
-      "A-4-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-4-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Non-Federal Unobligated",
-        source: null,
-      },
-      "A-4-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-4-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Federal",
-        source: null,
-      },
-      "A-4-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-4-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Non-Federal",
-        source: null,
-      },
-      "A-4-7": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-4-7: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Total",
-        source: null,
-      },
-      "A-5-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-5-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Federal Unobligated",
-        source: "$",
-      },
-      "A-5-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-5-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Estimated Non-Federal Unobligated",
-        source: "$",
-      },
-      "A-5-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-5-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Federal",
-        source: "$",
-      },
-      "A-5-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-5-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Non-Federal",
-        source: "$",
-      },
-      "A-5-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 A-5-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "New or Revised Total",
-        source: "$",
-      },
-      "B-00-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-00-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "(1)",
-      },
-      "B-01-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Personnel",
-        source: "$",
-      },
-      "B-02-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fringe Benefits",
-        source: null,
-      },
-      "B-03-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Travel",
-        source: null,
-      },
-      "B-04-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Equipment",
-        source: null,
-      },
-      "B-05-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Supplies",
-        source: null,
-      },
-      "B-06-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Contractual",
-        source: null,
-      },
-      "B-07-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Construction",
-        source: null,
-      },
-      "B-08-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other",
-        source: null,
-      },
-      "B-09-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total Direct Charges",
-        source: null,
-      },
-      "B-10-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Indirect Charges",
-        source: null,
-      },
-      "B-11-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "B-12-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-12-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Program Income",
-        source: "$",
-      },
-      "B-00-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-00-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "(2)",
-      },
-      "B-01-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Personnel",
-        source: "$",
-      },
-      "B-02-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fringe Benefits",
-        source: null,
-      },
-      "B-03-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Travel",
-        source: null,
-      },
-      "B-04-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Equipment",
-        source: null,
-      },
-      "B-05-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Supplies",
-        source: null,
-      },
-      "B-06-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Contractual",
-        source: null,
-      },
-      "B-07-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Construction",
-        source: null,
-      },
-      "B-08-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other",
-        source: null,
-      },
-      "B-09-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total Direct Charges",
-        source: null,
-      },
-      "B-10-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Indirect Charges",
-        source: null,
-      },
-      "B-11-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "B-12-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-12-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Program Income",
-        source: "$",
-      },
-      "B-00-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-00-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "(3)",
-      },
-      "B-01-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Personnel",
-        source: "$",
-      },
-      "B-02-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fringe Benefits",
-        source: null,
-      },
-      "B-03-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Travel",
-        source: null,
-      },
-      "B-04-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Equipment",
-        source: null,
-      },
-      "B-05-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Supplies",
-        source: null,
-      },
-      "B-06-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Contractual",
-        source: null,
-      },
-      "B-07-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Construction",
-        source: null,
-      },
-      "B-08-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other",
-        source: null,
-      },
-      "B-09-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total Direct Charges",
-        source: null,
-      },
-      "B-10-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Indirect Charges",
-        source: null,
-      },
-      "B-11-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "B-12-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-12-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Program Income",
-        source: "$",
-      },
-      "B-00-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-00-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "(4)",
-      },
-      "B-01-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Personnel",
-        source: "$",
-      },
-      "B-02-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fringe Benefits",
-        source: null,
-      },
-      "B-03-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Travel",
-        source: null,
-      },
-      "B-04-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Equipment",
-        source: null,
-      },
-      "B-05-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Supplies",
-        source: null,
-      },
-      "B-06-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Contractual",
-        source: null,
-      },
-      "B-07-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Construction",
-        source: null,
-      },
-      "B-08-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other",
-        source: null,
-      },
-      "B-09-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total Direct Charges",
-        source: null,
-      },
-      "B-10-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Indirect Charges",
-        source: null,
-      },
-      "B-11-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "B-12-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-12-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Program Income",
-        source: "$",
-      },
-      "B-01-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Personnel",
-        source: "$",
-      },
-      "B-02-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fringe Benefits",
-        source: null,
-      },
-      "B-03-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Travel",
-        source: null,
-      },
-      "B-04-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Equipment",
-        source: null,
-      },
-      "B-05-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Supplies",
-        source: null,
-      },
-      "B-06-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Contractual",
-        source: null,
-      },
-      "B-07-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Construction",
-        source: null,
-      },
-      "B-08-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other",
-        source: null,
-      },
-      "B-09-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total Direct Charges",
-        source: "$",
-      },
-      "B-10-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Indirect Charges",
-        source: "$",
-      },
-      "B-11-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "B-12-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-12-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Program Income",
-        source: "$",
-      },
-      "C-1-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-1-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "8.",
-      },
-      "C-1-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-1-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Applicant",
-        source: "$",
-      },
-      "C-1-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-1-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "State",
-        source: "$",
-      },
-      "C-1-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-1-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other Sources",
-        source: "$",
-      },
-      "C-1-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-1-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "C-2-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-2-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "9.",
-      },
-      "C-2-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-2-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Applicant",
-        source: null,
-      },
-      "C-2-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-2-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "State",
-        source: null,
-      },
-      "C-2-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-2-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other Sources",
-        source: null,
-      },
-      "C-2-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-2-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: null,
-      },
-      "C-3-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-3-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "10.",
-      },
-      "C-3-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-3-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Applicant",
-        source: null,
-      },
-      "C-3-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-3-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "State",
-        source: null,
-      },
-      "C-3-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-3-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other Sources",
-        source: null,
-      },
-      "C-3-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-3-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: null,
-      },
-      "C-4-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-4-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "11.",
-      },
-      "C-4-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-4-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Applicant",
-        source: null,
-      },
-      "C-4-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-4-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "State",
-        source: null,
-      },
-      "C-4-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-4-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other Sources",
-        source: null,
-      },
-      "C-4-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-4-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: null,
-      },
-      "C-5-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-5-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Applicant",
-        source: "$",
-      },
-      "C-5-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-5-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "State",
-        source: "$",
-      },
-      "C-5-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-5-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Other Sources",
-        source: "$",
-      },
-      "C-5-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 C-5-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "D-2-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Federal",
-        source: "$",
-      },
-      "D-3-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Non-Federal",
-        source: "$",
-      },
-      "D-4-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-4-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "D-2-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Federal",
-        source: "$",
-      },
-      "D-3-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Non-Federal",
-        source: null,
-      },
-      "D-4-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-4-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "D-2-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Federal",
-        source: "$",
-      },
-      "D-3-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Non-Federal",
-        source: null,
-      },
-      "D-4-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-4-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "D-2-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Federal",
-        source: "$",
-      },
-      "D-3-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Non-Federal",
-        source: null,
-      },
-      "D-4-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-4-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "D-2-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Federal",
-        source: "$",
-      },
-      "D-3-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Non-Federal",
-        source: null,
-      },
-      "D-4-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-4-6: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Total",
-        source: "$",
-      },
-      "E-1-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-1-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "16.",
-      },
-      "E-1-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-1-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "First Year",
-        source: "$",
-      },
-      "E-1-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-1-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Second Year",
-        source: "$",
-      },
-      "E-1-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-1-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Third Year",
-        source: "$",
-      },
-      "E-1-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-1-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fourth Year",
-        source: "$",
-      },
-      "E-2-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-2-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "17.",
-      },
-      "E-2-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-2-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "First Year",
-        source: null,
-      },
-      "E-2-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-2-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Second Year",
-        source: null,
-      },
-      "E-2-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-2-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Third Year",
-        source: null,
-      },
-      "E-2-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-2-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fourth Year",
-        source: null,
-      },
-      "E-3-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-3-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "18.",
-      },
-      "E-3-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-3-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "First Year",
-        source: null,
-      },
-      "E-3-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-3-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Second Year",
-        source: null,
-      },
-      "E-3-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-3-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Third Year",
-        source: null,
-      },
-      "E-3-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-3-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fourth Year",
-        source: null,
-      },
-      "E-4-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-4-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Activity Title",
-        source: "19.",
-      },
-      "E-4-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-4-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "First Year",
-        source: null,
-      },
-      "E-4-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-4-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Second Year",
-        source: null,
-      },
-      "E-4-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-4-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Third Year",
-        source: null,
-      },
-      "E-4-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-4-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fourth Year",
-        source: null,
-      },
-      "E-5-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-5-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "First Year",
-        source: "$",
-      },
-      "E-5-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-5-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Second Year",
-        source: "$",
-      },
-      "E-5-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-5-4: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Third Year",
-        source: "$",
-      },
-      "E-5-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 E-5-5: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Fourth Year",
-        source: "$",
-      },
-      "F-0-1": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 F-0-1: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Direct Charges",
-        source: "21. Direct Charges",
-      },
-      "F-0-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 F-0-2: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Indirect Charges",
-        source: "22. Indirect Charges",
-      },
-      "F-0-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 F-0-3: proposed label names its budget concept rather than a PDF column/row marker; source value is retained here for review.",
-        plan: "Remarks",
-        source: "23. Remarks",
-      },
-    },
-    outOfOrder: {
-      "B-00-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-00-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-01-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-02-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-03-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-04-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-05-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-06-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-07-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-08-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-09-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-10-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-11-2": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-2: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-00-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-00-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-01-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-02-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-03-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-04-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-05-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-06-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-07-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-08-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-09-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-10-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-11-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-00-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-00-6: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-01-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-02-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-03-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-04-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-05-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-06-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-07-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-08-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-09-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-10-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-11-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-01-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-01-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-02-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-02-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-03-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-03-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-04-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-04-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-05-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-05-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-06-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-06-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-07-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-07-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-08-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-08-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-09-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-09-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-10-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-10-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "B-11-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 B-11-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "D-2-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "D-3-3": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-3: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "D-2-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "D-3-4": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-4: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "D-2-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "D-3-5": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-5: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "D-2-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-2-6: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-      "D-3-6": {
-        category: "intentional",
-        reason:
-          "DAT FID241 v1.0 D-3-6: proposed activity-by-activity budget categories follow the B-01-0 column-first tab-order instruction; spreadsheet rows list category-by-category. Review this navigation choice.",
-      },
-    },
+    differingLabels: Object.fromEntries(
+      [
+        ["A-1-1", "Activity Title", "1."],
+        ["A-1-2", "Assistance Listing Number", null],
+        ["A-1-3", "Estimated Federal Unobligated", "$"],
+        ["A-1-4", "Estimated Non-Federal Unobligated", "$"],
+        ["A-1-5", "New or Revised Federal", "$"],
+        ["A-1-6", "New or Revised Non-Federal", "$"],
+        ["A-1-7", "New or Revised Total", "$"],
+        ["A-2-1", "Activity Title", "2."],
+        ["A-2-2", "Assistance Listing Number", null],
+        ["A-2-3", "Estimated Federal Unobligated", null],
+        ["A-2-4", "Estimated Non-Federal Unobligated", null],
+        ["A-2-5", "New or Revised Federal", null],
+        ["A-2-6", "New or Revised Non-Federal", null],
+        ["A-2-7", "New or Revised Total", null],
+        ["A-3-1", "Activity Title", "3."],
+        ["A-3-2", "Assistance Listing Number", null],
+        ["A-3-3", "Estimated Federal Unobligated", null],
+        ["A-3-4", "Estimated Non-Federal Unobligated", null],
+        ["A-3-5", "New or Revised Federal", null],
+        ["A-3-6", "New or Revised Non-Federal", null],
+        ["A-3-7", "New or Revised Total", null],
+        ["A-4-1", "Activity Title", "4."],
+        ["A-4-2", "Assistance Listing Number", null],
+        ["A-4-3", "Estimated Federal Unobligated", null],
+        ["A-4-4", "Estimated Non-Federal Unobligated", null],
+        ["A-4-5", "New or Revised Federal", null],
+        ["A-4-6", "New or Revised Non-Federal", null],
+        ["A-4-7", "New or Revised Total", null],
+        ["A-5-2", "Estimated Federal Unobligated", "$"],
+        ["A-5-3", "Estimated Non-Federal Unobligated", "$"],
+        ["A-5-4", "New or Revised Federal", "$"],
+        ["A-5-5", "New or Revised Non-Federal", "$"],
+        ["A-5-6", "New or Revised Total", "$"],
+        ["B-00-3", "Activity Title", "(1)"],
+        ["B-01-1", "Personnel", "$"],
+        ["B-02-1", "Fringe Benefits", null],
+        ["B-03-1", "Travel", null],
+        ["B-04-1", "Equipment", null],
+        ["B-05-1", "Supplies", null],
+        ["B-06-1", "Contractual", null],
+        ["B-07-1", "Construction", null],
+        ["B-08-1", "Other", null],
+        ["B-09-1", "Total Direct Charges", null],
+        ["B-10-1", "Indirect Charges", null],
+        ["B-11-1", "Total", "$"],
+        ["B-12-1", "Program Income", "$"],
+        ["B-00-4", "Activity Title", "(2)"],
+        ["B-01-2", "Personnel", "$"],
+        ["B-02-2", "Fringe Benefits", null],
+        ["B-03-2", "Travel", null],
+        ["B-04-2", "Equipment", null],
+        ["B-05-2", "Supplies", null],
+        ["B-06-2", "Contractual", null],
+        ["B-07-2", "Construction", null],
+        ["B-08-2", "Other", null],
+        ["B-09-2", "Total Direct Charges", null],
+        ["B-10-2", "Indirect Charges", null],
+        ["B-11-2", "Total", "$"],
+        ["B-12-2", "Program Income", "$"],
+        ["B-00-5", "Activity Title", "(3)"],
+        ["B-01-3", "Personnel", "$"],
+        ["B-02-3", "Fringe Benefits", null],
+        ["B-03-3", "Travel", null],
+        ["B-04-3", "Equipment", null],
+        ["B-05-3", "Supplies", null],
+        ["B-06-3", "Contractual", null],
+        ["B-07-3", "Construction", null],
+        ["B-08-3", "Other", null],
+        ["B-09-3", "Total Direct Charges", null],
+        ["B-10-3", "Indirect Charges", null],
+        ["B-11-3", "Total", "$"],
+        ["B-12-3", "Program Income", "$"],
+        ["B-00-6", "Activity Title", "(4)"],
+        ["B-01-4", "Personnel", "$"],
+        ["B-02-4", "Fringe Benefits", null],
+        ["B-03-4", "Travel", null],
+        ["B-04-4", "Equipment", null],
+        ["B-05-4", "Supplies", null],
+        ["B-06-4", "Contractual", null],
+        ["B-07-4", "Construction", null],
+        ["B-08-4", "Other", null],
+        ["B-09-4", "Total Direct Charges", null],
+        ["B-10-4", "Indirect Charges", null],
+        ["B-11-4", "Total", "$"],
+        ["B-12-4", "Program Income", "$"],
+        ["B-01-5", "Personnel", "$"],
+        ["B-02-5", "Fringe Benefits", null],
+        ["B-03-5", "Travel", null],
+        ["B-04-5", "Equipment", null],
+        ["B-05-5", "Supplies", null],
+        ["B-06-5", "Contractual", null],
+        ["B-07-5", "Construction", null],
+        ["B-08-5", "Other", null],
+        ["B-09-5", "Total Direct Charges", "$"],
+        ["B-10-5", "Indirect Charges", "$"],
+        ["B-11-5", "Total", "$"],
+        ["B-12-5", "Program Income", "$"],
+        ["C-1-1", "Activity Title", "8."],
+        ["C-1-2", "Applicant", "$"],
+        ["C-1-3", "State", "$"],
+        ["C-1-4", "Other Sources", "$"],
+        ["C-1-5", "Total", "$"],
+        ["C-2-1", "Activity Title", "9."],
+        ["C-2-2", "Applicant", null],
+        ["C-2-3", "State", null],
+        ["C-2-4", "Other Sources", null],
+        ["C-2-5", "Total", null],
+        ["C-3-1", "Activity Title", "10."],
+        ["C-3-2", "Applicant", null],
+        ["C-3-3", "State", null],
+        ["C-3-4", "Other Sources", null],
+        ["C-3-5", "Total", null],
+        ["C-4-1", "Activity Title", "11."],
+        ["C-4-2", "Applicant", null],
+        ["C-4-3", "State", null],
+        ["C-4-4", "Other Sources", null],
+        ["C-4-5", "Total", null],
+        ["C-5-2", "Applicant", "$"],
+        ["C-5-3", "State", "$"],
+        ["C-5-4", "Other Sources", "$"],
+        ["C-5-5", "Total", "$"],
+        ["D-2-2", "Federal", "$"],
+        ["D-3-2", "Non-Federal", "$"],
+        ["D-4-2", "Total", "$"],
+        ["D-2-3", "Federal", "$"],
+        ["D-3-3", "Non-Federal", null],
+        ["D-4-3", "Total", "$"],
+        ["D-2-4", "Federal", "$"],
+        ["D-3-4", "Non-Federal", null],
+        ["D-4-4", "Total", "$"],
+        ["D-2-5", "Federal", "$"],
+        ["D-3-5", "Non-Federal", null],
+        ["D-4-5", "Total", "$"],
+        ["D-2-6", "Federal", "$"],
+        ["D-3-6", "Non-Federal", null],
+        ["D-4-6", "Total", "$"],
+        ["E-1-1", "Activity Title", "16."],
+        ["E-1-2", "First Year", "$"],
+        ["E-1-3", "Second Year", "$"],
+        ["E-1-4", "Third Year", "$"],
+        ["E-1-5", "Fourth Year", "$"],
+        ["E-2-1", "Activity Title", "17."],
+        ["E-2-2", "First Year", null],
+        ["E-2-3", "Second Year", null],
+        ["E-2-4", "Third Year", null],
+        ["E-2-5", "Fourth Year", null],
+        ["E-3-1", "Activity Title", "18."],
+        ["E-3-2", "First Year", null],
+        ["E-3-3", "Second Year", null],
+        ["E-3-4", "Third Year", null],
+        ["E-3-5", "Fourth Year", null],
+        ["E-4-1", "Activity Title", "19."],
+        ["E-4-2", "First Year", null],
+        ["E-4-3", "Second Year", null],
+        ["E-4-4", "Third Year", null],
+        ["E-4-5", "Fourth Year", null],
+        ["E-5-2", "First Year", "$"],
+        ["E-5-3", "Second Year", "$"],
+        ["E-5-4", "Third Year", "$"],
+        ["E-5-5", "Fourth Year", "$"],
+        ["F-0-1", "Direct Charges", "21. Direct Charges"],
+        ["F-0-2", "Indirect Charges", "22. Indirect Charges"],
+        ["F-0-3", "Remarks", "23. Remarks"],
+      ].map(([id, plan, source]) => [
+        id as string,
+        label(id as string, plan, source),
+      ]),
+    ),
+    outOfOrder: Object.fromEntries(
+      [
+        "B-00-4",
+        "B-01-2",
+        "B-02-2",
+        "B-03-2",
+        "B-04-2",
+        "B-05-2",
+        "B-06-2",
+        "B-07-2",
+        "B-08-2",
+        "B-09-2",
+        "B-10-2",
+        "B-11-2",
+        "B-00-5",
+        "B-01-3",
+        "B-02-3",
+        "B-03-3",
+        "B-04-3",
+        "B-05-3",
+        "B-06-3",
+        "B-07-3",
+        "B-08-3",
+        "B-09-3",
+        "B-10-3",
+        "B-11-3",
+        "B-00-6",
+        "B-01-4",
+        "B-02-4",
+        "B-03-4",
+        "B-04-4",
+        "B-05-4",
+        "B-06-4",
+        "B-07-4",
+        "B-08-4",
+        "B-09-4",
+        "B-10-4",
+        "B-11-4",
+        "B-01-5",
+        "B-02-5",
+        "B-03-5",
+        "B-04-5",
+        "B-05-5",
+        "B-06-5",
+        "B-07-5",
+        "B-08-5",
+        "B-09-5",
+        "B-10-5",
+        "B-11-5",
+        "D-2-3",
+        "D-3-3",
+        "D-2-4",
+        "D-3-4",
+        "D-2-5",
+        "D-3-5",
+        "D-2-6",
+        "D-3-6",
+      ].map((id) => [id, order(id)]),
+    ),
   },
   xsd: {
     absentFromPlan: {
@@ -1433,5 +267,659 @@ export const DIFF: FormDiff = {
           "Required Global-V1.0 document metadata, supplied during wire assembly for edition1.0 rather than collected as a separate applicant answer. Plan notes preserve this obligation; no XML implementation is claimed.",
       },
     },
+    differingRules: Object.fromEntries(
+      [
+        [
+          "BudgetSummary/SummaryLineItem/BudgetFederalEstimatedUnobligatedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetFederalEstimatedUnobligatedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetNonFederalEstimatedUnobligatedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetNonFederalEstimatedUnobligatedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetFederalNewOrRevisedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetFederalNewOrRevisedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetNonFederalNewOrRevisedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetNonFederalNewOrRevisedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetTotalNewOrRevisedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryLineItem/BudgetTotalNewOrRevisedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetFederalEstimatedUnobligatedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetFederalEstimatedUnobligatedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetNonFederalEstimatedUnobligatedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetNonFederalEstimatedUnobligatedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetFederalNewOrRevisedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetFederalNewOrRevisedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetNonFederalNewOrRevisedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetNonFederalNewOrRevisedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetTotalNewOrRevisedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetSummary/SummaryTotals/BudgetTotalNewOrRevisedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetPersonnelRequestedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetPersonnelRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetFringeBenefitsRequestedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetFringeBenefitsRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetTravelRequestedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetTravelRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetEquipmentRequestedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetEquipmentRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetSuppliesRequestedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetSuppliesRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetContractualRequestedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetContractualRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetConstructionRequestedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetConstructionRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetOtherRequestedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetOtherRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetTotalDirectChargesAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetTotalDirectChargesAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetIndirectChargesAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetIndirectChargesAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetTotalAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/BudgetTotalAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/ProgramIncomeAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategorySet/ProgramIncomeAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetPersonnelRequestedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetPersonnelRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetFringeBenefitsRequestedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetFringeBenefitsRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetTravelRequestedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetTravelRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetEquipmentRequestedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetEquipmentRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetSuppliesRequestedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetSuppliesRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetContractualRequestedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetContractualRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetConstructionRequestedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetConstructionRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetOtherRequestedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetOtherRequestedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetTotalDirectChargesAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetTotalDirectChargesAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetIndirectChargesAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetIndirectChargesAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetTotalAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/BudgetTotalAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/ProgramIncomeAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetCategories/CategoryTotals/ProgramIncomeAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceLineItem/BudgetApplicantContributionAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceLineItem/BudgetApplicantContributionAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceLineItem/BudgetStateContributionAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceLineItem/BudgetStateContributionAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceLineItem/BudgetOtherContributionAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceLineItem/BudgetOtherContributionAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceLineItem/BudgetTotalContributionAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceLineItem/BudgetTotalContributionAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceTotals/BudgetApplicantContributionAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceTotals/BudgetApplicantContributionAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceTotals/BudgetStateContributionAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceTotals/BudgetStateContributionAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceTotals/BudgetOtherContributionAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceTotals/BudgetOtherContributionAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceTotals/BudgetTotalContributionAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "NonFederalResources/ResourceTotals/BudgetTotalContributionAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetFederalForecastedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetNonFederalForecastedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetNonFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetTotalForecastedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetTotalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetFederalForecastedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetNonFederalForecastedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetNonFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetTotalForecastedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetTotalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetFederalForecastedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetNonFederalForecastedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetNonFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetTotalForecastedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetTotalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetFederalForecastedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetNonFederalForecastedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetNonFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetTotalForecastedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetTotalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetFederalForecastedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetNonFederalForecastedAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetNonFederalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetTotalForecastedAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetTotalForecastedAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsLineItem/BudgetFirstYearAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsLineItem/BudgetFirstYearAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsLineItem/BudgetSecondYearAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsLineItem/BudgetSecondYearAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsLineItem/BudgetThirdYearAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsLineItem/BudgetThirdYearAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsLineItem/BudgetFourthYearAmount/minimum",
+          -99999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsLineItem/BudgetFourthYearAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsTotals/BudgetFirstYearAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsTotals/BudgetFirstYearAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsTotals/BudgetSecondYearAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsTotals/BudgetSecondYearAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsTotals/BudgetThirdYearAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsTotals/BudgetThirdYearAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsTotals/BudgetFourthYearAmount/minimum",
+          -999999999999.99,
+          null,
+        ],
+        [
+          "FederalFundsNeeded/FundsTotals/BudgetFourthYearAmount/maximum",
+          999999999999.99,
+          null,
+        ],
+      ].map(([key, plan, source]) => [key as string, rules(plan, source)]),
+    ),
   },
 };
