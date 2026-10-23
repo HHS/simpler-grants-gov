@@ -53,7 +53,7 @@ const COLUMNS = {
 /**
  * The answers a Grants.gov Data Attribute Table (DAT) workbook describes, keyed by `Field #`.
  *
- * Only `maxLength` and `maxOccurs` are read as rules. The DAT's minimum characters and
+ * Text length, numeric value bounds and `maxOccurs` are read as rules. The DAT's minimum characters and
  * minimum occurrences are 0 for every optional field and 1 for every required one, so they
  * restate requiredness; the XSD is the authority on `minLength`.
  */

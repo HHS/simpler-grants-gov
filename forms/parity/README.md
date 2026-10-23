@@ -72,7 +72,7 @@ Constraints are requiredness plus the keywords each comparison reads (`SPECS` in
 `harness/index.ts`). Requiredness is always from the form's root, so a field inside an
 optional section is optional. A plan's `Conditional (...)` counts as optional.
 
-The DAT is compared on `maxLength` only. Its minimum is 0 for every optional field and 1
+The DAT is compared on `maxLength` for text and `minimum`/`maximum` for numeric values. Its minimum is 0 for every optional field and 1
 for every required one, so it restates requiredness; the XSD is the authority on
 `minLength`. A DAT list shown as a popup is a fixed code list, so its "max chars" is not a
 length rule. An exact length is stated in a plan as `minLength 12, maxLength 12`.
@@ -215,3 +215,8 @@ SF-424A is the proving plan. Its73 semantic fields map all163 DAT cells. Its lab
 activity-first Section B order are proposals with individual source values/reasons in the
 difference register. Wire metadata, totalDigits, formula execution, submission defaults and
 human approval remain separate obligations; a green static comparison does not certify them.
+
+Numeric DAT types, including `DECIMAL(n)`, expose signed value bounds rather than character
+lengths. Empty minima stay unstated; non-numeric bounds refuse instead of becoming NaN.
+SF-424A preserves the DAT's narrower signed bounds and records their difference from the
+XSD's precision-only type at literal values. Rounding and arithmetic are still unexecuted.

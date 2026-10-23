@@ -34,8 +34,8 @@ import {
 } from "./model.ts";
 
 /**
- * What each comparison checks, as the tests name it. The DAT is compared on `maxLength`
- * only (see `datFields`); `enum` is compared only between the two artifacts that list values.
+ * What each comparison checks, as the tests name it. The DAT is compared on text length and numeric value bounds
+ * (see `datFields`); `enum` is compared only between the two artifacts that list values.
  * JSON schema vs XSD compares only fields the plan links, and lets the schema be stricter.
  * Labels compared with the DAT carry the asterisk it prints on a required field (see
  * `withAsterisk`).
