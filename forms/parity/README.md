@@ -243,7 +243,9 @@ A scalar code assembled from several DAT choice controls can instead declare:
 
 Choice bindings need unique source coordinates/code values, one scalar answer and no
 `dat_field` shorthand. Each declared value is checked against the linked XSD enumeration.
-This checks source correspondence; it does not implement allowed checkbox combinations or
+This checks coordinate ownership and XSD enum membership. The meaning of each DAT
+control-to-code association still requires explicit source review; membership alone would
+not detect swapped valid codes. It does not implement allowed checkbox combinations or
 an XML encoder. SF-424 R&R is the proving plan, with all five actual revision controls,
 all106 semantic fields and110 logical DAT entries. The13 unbound radio-option rows remain
 accounted for under their group answers in the source-reconciliation packet.
