@@ -138,7 +138,7 @@ describe("controlToNodes", () => {
     expect(descriptionOf({})).toEqual(["From the schema."]);
   });
 
-  it("returns nothing for a control no widget can draw", () => {
+  it("returns nothing for a control no widget can render", () => {
     expect(
       controlToNodes(control("#/properties/nested/properties/people"), schema),
     ).toEqual([]);
@@ -308,7 +308,7 @@ describe("convertJsonFormsUiSchema", () => {
     ).toBeFalsy();
   });
 
-  it("lists every control no widget can draw", () => {
+  it("lists every control no widget can render", () => {
     const uiSchema = {
       type: "Group",
       elements: [

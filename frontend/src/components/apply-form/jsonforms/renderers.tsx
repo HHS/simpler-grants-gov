@@ -35,7 +35,7 @@ import {
 } from "./convertUiSchema";
 
 /*
-  JSON Forms supplies layout and rule evaluation; everything it draws is one of our widgets.
+  JSON Forms supplies layout and rule evaluation; everything it renders is one of our widgets.
   The props a widget needs -- saved values, warnings, the form context -- are ours rather
   than JSON Forms', so they travel through this context instead of JSON Forms' own state.
 */
@@ -61,7 +61,7 @@ const useAdapterContext = (): AdapterContextValue => {
 };
 
 /**
- * A JSON Forms control, drawn by the widget the equivalent section/field node would get.
+ * A JSON Forms control, rendered by the widget the equivalent section/field node would get.
  * `visible` and `enabled` are JSON Forms' evaluation of the control's rule.
  */
 const AdaptedControl = ({ uischema, visible, enabled }: ControlProps) => {
@@ -91,7 +91,7 @@ const AdaptedControl = ({ uischema, visible, enabled }: ControlProps) => {
 };
 
 /**
- * A layout. A labeled group is a section, drawn with the same fieldset the SGG renderer
+ * A layout. A labeled group is a section, rendered with the same fieldset the SGG renderer
  * uses; the root layout is the form itself, whose title the page already shows.
  */
 const AdaptedLayout = ({
