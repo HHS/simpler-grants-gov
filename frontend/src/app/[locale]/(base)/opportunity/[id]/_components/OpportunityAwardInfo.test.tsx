@@ -148,4 +148,27 @@ describe("OpportunityAwardInfo", () => {
     expect(screen.queryByText("Education")).not.toBeInTheDocument();
     expect(screen.getAllByText("notSpecified")).toHaveLength(baseline + 1);
   });
+
+  it("renders zero amounts as values, not as missing", () => {
+    render(
+      <OpportunityAwardInfo
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            ...mockOpportunityData.summary,
+            estimated_total_program_funding: 0,
+            expected_number_of_awards: 0,
+            award_floor: 0,
+            award_ceiling: 0,
+          },
+        }}
+      />,
+    );
+
+    const fundingSummary = screen.getByTestId("opportunity-funding-summary");
+    expect(fundingSummary).toHaveTextContent("Expected project funding: $0");
+    expect(fundingSummary).toHaveTextContent("Expected awards: 0");
+    // the funding summary line plus the award min and max cards
+    expect(screen.getAllByText("$0")).toHaveLength(3);
+  });
 });

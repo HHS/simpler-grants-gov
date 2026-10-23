@@ -1,9 +1,11 @@
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
-import { formatDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 
-import { OpportunityHistoryItem } from "./OpportunityHistory";
+import {
+  OpportunityHistoryItem,
+  useFormatHistoryDate,
+} from "./OpportunityHistoryItem";
 
 type Props = {
   detail: OpportunityDetail;
@@ -12,8 +14,7 @@ type Props = {
 export const ForecastOpportunityItem = ({ detail }: Props) => {
   const t = useTranslations("OpportunityListing.history");
 
-  const formatHistoryDate = (date: string | null) =>
-    date ? formatDate(date) : t("notSpecified");
+  const formatHistoryDate = useFormatHistoryDate();
 
   return (
     <div className="padding-05">
