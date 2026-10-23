@@ -12,15 +12,19 @@ export type FormInstruction = {
   updated_at: RegexMatchedString<typeof iso8601Date>;
 };
 
-export interface FormDetail {
+interface FormDetailFields {
   form_id: string;
   form_instruction: FormInstruction;
   form_name: string;
   form_json_schema: RJSFSchema;
-  // A JSON Forms UI schema when form_renderer is "jsonforms", a section/field tree otherwise.
-  form_ui_schema: UiSchema | JsonFormsUiSchema;
-  form_renderer?: FormRenderer;
 }
+
+// The UI schema's shape depends on the renderer, so checking form_renderer narrows it.
+export type FormDetail = FormDetailFields &
+  (
+    | { form_renderer?: "sgg"; form_ui_schema: UiSchema }
+    | { form_renderer: "jsonforms"; form_ui_schema: JsonFormsUiSchema }
+  );
 
 export type FormRenderer = "sgg" | "jsonforms";
 
