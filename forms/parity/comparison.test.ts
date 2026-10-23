@@ -157,3 +157,34 @@ describe("precision visibility", () => {
     expect(range.cells.xsd.status).toBe("unrecorded");
   });
 });
+
+describe("SF-424A finite DAT cells", () => {
+  const slug = "budget-information-for-non-construction-programs-sf-424a";
+  it("shows every source cell for a repeated answer and keeps all four bindings visible", async () => {
+    const view = (await compareForm(PLANS.get(slug)!))!;
+    const amount = view.fields.find(
+      (f) => f.id === "summary.activities[].activity_title",
+    )!;
+    const cell = amount.rows.find((r) => r.attribute === "matchedBy")!.cells
+      .dat;
+    for (const id of ["A-1-1", "A-2-1", "A-3-1", "A-4-1"])
+      expect(cell.value).toContain(id);
+    expect(cell.status).toBe("match");
+  });
+  it("does not hide an unrecorded difference in the last slot behind matching earlier slots", async () => {
+    const diff = DIFFS.find((d) => d.slug === slug)!;
+    const entry = diff.dat!.differingLabels!["A-4-1"];
+    delete diff.dat!.differingLabels!["A-4-1"];
+    try {
+      const view = (await compareForm(PLANS.get(slug)!))!;
+      const amount = view.fields.find(
+        (f) => f.id === "summary.activities[].activity_title",
+      )!;
+      expect(
+        amount.rows.find((r) => r.attribute === "label")!.cells.dat.status,
+      ).toBe("unrecorded");
+    } finally {
+      diff.dat!.differingLabels!["A-4-1"] = entry;
+    }
+  });
+});

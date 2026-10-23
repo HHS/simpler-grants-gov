@@ -22,6 +22,7 @@ const { form } = Astro.props;
 const spec = form.data.spec_id ? await loadFormSpec(form.data.spec_id) : undefined;
 const comparison = await compareForm<FieldNode>(form.data);
 const notes = form.data.notes ?? [];
+const risks = form.data.risks ?? [];
 
 const STATUS_LABELS: Record<string, string> = {
   backlog: "Backlog",
@@ -95,6 +96,13 @@ const STATUS_LABELS: Record<string, string> = {
                   <li>{note}</li>
                 ))}
               </ul>
+            </>
+          )}
+          {risks.length > 0 && (
+            <>
+              <h2 class="section-title margin-top-4">Risks and open questions</h2>
+              <p class="text-base">Planning issues for review. Passing comparisons do not resolve them.</p>
+              <ul class="plan-notes">{risks.map((risk) => <li>{risk}</li>)}</ul>
             </>
           )}
         </div>
