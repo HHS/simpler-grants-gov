@@ -25,19 +25,17 @@ def declaring(**registers) -> FormDiff:
 
 def flat(**overrides) -> compare.FlatForm:
     """A form with nothing in it, so each test declares only what it is about."""
-    return compare.FlatForm(
-        **{
-            "diff": NOTHING_DECLARED,
-            "targets": {},
-            "unreadable": {},
-            "declared": {},
-            "attachments": frozenset(),
-            "by_path": {},
-            "inputs": frozenset(),
-            "transformed": {},
-            **overrides,
-        }
-    )
+    return compare.FlatForm(**{
+        "diff": NOTHING_DECLARED,
+        "targets": {},
+        "unreadable": {},
+        "declared": {},
+        "attachments": frozenset(),
+        "by_path": {},
+        "inputs": frozenset(),
+        "transformed": {},
+        **overrides,
+    })
 
 
 def element(required=False, position=0, primitive=None, **rules) -> flatten_xsd.Element:
@@ -52,7 +50,7 @@ def field(required: bool = False, **rules) -> FormInput:
 
 
 def kinds(found) -> list[str]:
-    return [d.kind for d in found]
+    return [d.label for d in found]
 
 
 class TestUndeclaredTargets:
@@ -347,7 +345,7 @@ class TestStaleEntries:
             ),
             declared={("Value",): element(minLength=1)},
         )
-        assert kinds(compare.stale_entries(form)) == ["element declares no maxLength"]
+        assert kinds(compare.stale_entries(form)) == ["element declares no such keyword"]
 
     def test_accepts_recorded_rule_the_form_still_breaks(self):
         form = flat(
