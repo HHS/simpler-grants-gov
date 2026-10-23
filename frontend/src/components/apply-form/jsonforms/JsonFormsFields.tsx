@@ -8,11 +8,11 @@ import {
   getRequiredProperties,
   shapeFormData,
 } from "src/utils/applyForm/applyFormUtils";
-import type { JsonFormsUiSchema } from "src/utils/applyForm/jsonFormsUiSchema";
 
 import { useCallback, useMemo, useState, type FormEvent } from "react";
 
 import type { RootBudgetFormContext } from "src/components/apply-form/FormFields";
+import type { JsonFormsUiSchema } from "./convertUiSchema";
 import {
   AdapterContext,
   renderers,

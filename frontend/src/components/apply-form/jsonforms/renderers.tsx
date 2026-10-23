@@ -20,11 +20,6 @@ import {
 import type { RJSFSchema } from "@rjsf/utils";
 import type { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
-import {
-  controlToNodes,
-  groupName,
-  type JsonFormsUiSchema,
-} from "src/utils/applyForm/jsonFormsUiSchema";
 
 import { createContext, useContext } from "react";
 
@@ -33,6 +28,11 @@ import {
   type RootBudgetFormContext,
 } from "src/components/apply-form/FormFields";
 import { wrapSection } from "src/components/apply-form/widgets/WidgetRenderers";
+import {
+  controlToNodes,
+  groupName,
+  type JsonFormsUiSchema,
+} from "./convertUiSchema";
 
 /*
   JSON Forms supplies layout and rule evaluation; everything it draws is one of our widgets.
