@@ -34,7 +34,7 @@ valid, which makes the two comparable. These produce the same result:
 an applicant reads, not what they may submit.
 
 Where two forms spell one field differently -- `p.phone` against `p.phone_number` -- the
-`FormInput` values match and only the path differs. `FormDiff.renamed` pairs those up.
+`FormInput` values match and only the path differs. `FormDiff.mapped` pairs those up.
 
 One array keyword is not read: `prefixItems`, which gives item 0 a different shape from
 items 1+. A path ends in one `[]` step describing every item, so a positional difference

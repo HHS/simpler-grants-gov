@@ -4,7 +4,7 @@
     -> {"type": "string", "maxLength": 60}
 
     {"allOf": [{"maxLength": 60}, {"maxLength": 200}]}
-    -> AmbiguousComposition
+    -> ConflictingKeywordsError
 
 A validator applies every branch, so two `maxLength` values behave as the smaller. A
 flattener has no payload and would have to pick one; picking 200 silently accepts values
@@ -40,7 +40,7 @@ ANNOTATION = frozenset(
 )
 
 
-class AmbiguousComposition(Exception):
+class ConflictingKeywordsError(Exception):
     """Two branches declare the same constraining keyword with different values."""
 
 
@@ -53,7 +53,7 @@ def merge_allof(schema: Any, path: str = "") -> Any:
 
     `path` is used only to locate a conflict in the raised message.
 
-    Raises `AmbiguousComposition` if two branches, or a branch and the node itself, declare
+    Raises `ConflictingKeywordsError` if two branches, or a branch and the node itself, declare
     the same constraining keyword with different values.
     """
     if isinstance(schema, list):
@@ -102,7 +102,7 @@ def merge_allof(schema: Any, path: str = "") -> Any:
             elif key in COMBINING:
                 merged[key] = {**value, **merged[key]}
             elif merged[key] != value:
-                raise AmbiguousComposition(
+                raise ConflictingKeywordsError(
                     f"{path or '<root>'}: `{key}` is declared as {merged[key]!r} and {value!r}. "
                     "Flattening would have to choose, and choosing wrong changes what is valid. "
                     "The validator does not choose -- it applies both."

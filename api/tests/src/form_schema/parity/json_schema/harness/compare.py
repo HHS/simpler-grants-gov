@@ -49,21 +49,21 @@ def match_fields(
     """Generated path -> handwritten path, for every input that corresponds.
 
         both have `agency_name`              -> {("agency_name",): ("agency_name",)}
-        renamed={"p.phone": "p.phone_number"} -> {("p", "phone"): ("p", "phone_number")}
+        mapped={"p.phone": "p.phone_number"} -> {("p", "phone"): ("p", "phone_number")}
 
     A declared rename wins over the identity match. A path already used as a rename's
-    target is not also matched to itself: with `renamed={"a": "b"}` and both forms holding
+    target is not also matched to itself: with `mapped={"a": "b"}` and both forms holding
     `a` and `b`, only `a -> b` is returned, and generated `b` and handwritten `a` are left
     for `unmatched_fields` to report.
 
     Reads only which paths each side has, so it matches inputs and placed fields alike.
     """
-    renamed = {paths.parse(k): paths.parse(v) for k, v in diff.renamed.items()}
-    taken = set(renamed.values())
+    mapped = {paths.split(k): paths.split(v) for k, v in diff.mapped.items()}
+    taken = set(mapped.values())
 
-    out = dict(renamed)
+    out = dict(mapped)
     for path in generated:
-        if path in renamed or path in taken or path not in handwritten:
+        if path in mapped or path in taken or path not in handwritten:
             continue
         out[path] = path
     return out
@@ -80,17 +80,17 @@ def unmatched_fields(
     callers in `test_forms.py` filter on which. An unaccounted handwritten input is a field
     an applicant can fill in on the form that ships and cannot on the generated one.
     """
-    declared_generated = {paths.parse(p) for p in diff.absent_from_source}
-    declared_handwritten = {paths.parse(p) for p in diff.absent_from_definition}
+    declared_generated = {paths.split(p) for p in diff.absent_from_source}
+    declared_handwritten = {paths.split(p) for p in diff.absent_from_definition}
     corresponding = match_fields(diff, generated, handwritten)
     matched_generated = set(corresponding)
     matched_handwritten = set(corresponding.values())
 
     out = []
     for path in sorted(set(generated) - matched_generated - declared_generated):
-        out.append(Discrepancy("generated input is unmapped", paths.render(path)))
+        out.append(Discrepancy("generated input is unmapped", paths.join(path)))
     for path in sorted(set(handwritten) - matched_handwritten - declared_handwritten):
-        out.append(Discrepancy("handwritten input is unmapped", paths.render(path)))
+        out.append(Discrepancy("handwritten input is unmapped", paths.join(path)))
     return out
 
 
@@ -115,7 +115,7 @@ def rule_differences(
             continue
         generated_rules = generated[generated_path]
         handwritten_rules = handwritten[handwritten_path]
-        where = paths.render(generated_path)
+        where = paths.join(generated_path)
 
         if (
             generated_rules.required != handwritten_rules.required
@@ -156,7 +156,7 @@ def _all_text_differences(
     for generated_path, handwritten_path in match_fields(diff, generated, handwritten).items():
         if generated_path not in generated or handwritten_path not in handwritten:
             continue
-        where = paths.render(generated_path)
+        where = paths.join(generated_path)
         for attribute in TEXT_ATTRIBUTES:
             a = _normalized(getattr(generated[generated_path], attribute))
             b = _normalized(getattr(handwritten[handwritten_path], attribute))
@@ -197,7 +197,7 @@ def stale_entries(
 ) -> list[Discrepancy]:
     """Record entries naming a field that does not exist on the side they claim.
 
-    Covers the four registers about inputs: a `renamed` target the handwritten form lacks,
+    Covers the four registers about inputs: a `mapped` target the handwritten form lacks,
     a rename to the same path (which the identity match already handles), an
     `absent_from_*` key neither form has, and a `differing_rules` key whose path is gone.
     `differing_text` is `stale_text_entries`' business.
@@ -205,10 +205,10 @@ def stale_entries(
     out = []
     for generated_path, handwritten_path in match_fields(diff, generated, handwritten).items():
         if generated_path not in generated:
-            out.append(Discrepancy("no such generated input", paths.render(generated_path)))
+            out.append(Discrepancy("no such generated input", paths.join(generated_path)))
         if handwritten_path not in handwritten:
-            out.append(Discrepancy("no such handwritten input", paths.render(handwritten_path)))
-    for generated_path, handwritten_path in diff.renamed.items():
+            out.append(Discrepancy("no such handwritten input", paths.join(handwritten_path)))
+    for generated_path, handwritten_path in diff.mapped.items():
         if generated_path == handwritten_path:
             out.append(
                 Discrepancy(
@@ -218,14 +218,14 @@ def stale_entries(
                 )
             )
     for path, reason in diff.absent_from_source.items():
-        if paths.parse(path) not in generated:
+        if paths.split(path) not in generated:
             out.append(Discrepancy("declared absent but not a generated input", path, reason))
     for path, reason in diff.absent_from_definition.items():
-        if paths.parse(path) not in handwritten:
+        if paths.split(path) not in handwritten:
             out.append(Discrepancy("declared absent but not a handwritten input", path, reason))
     for key in diff.differing_rules:
         path = key.rsplit("/", 1)[0]
-        if paths.parse(path) not in generated:
+        if paths.split(path) not in generated:
             out.append(Discrepancy("recorded difference names no such input", path))
     return out
 
@@ -240,7 +240,7 @@ def stale_text_entries(
     out = []
     for key, reason in diff.differing_text.items():
         path = key.rsplit("/", 1)[0]
-        if paths.parse(path) not in generated:
+        if paths.split(path) not in generated:
             out.append(Discrepancy("recorded difference names no such field", path))
         elif key not in found:
             out.append(Discrepancy("recorded text difference no longer differs", key, reason))
@@ -279,7 +279,7 @@ def _relative(path: Path, to: Path) -> str:
     shared = 0
     while shared < min(len(path), len(to)) - 1 and path[shared] == to[shared]:
         shared += 1
-    return paths.render(path[shared:])
+    return paths.join(path[shared:])
 
 
 def neighbors(sequence: list[str], at: int) -> str:
@@ -331,7 +331,7 @@ def _all_order_differences(
             [_relative(h, handwritten_path) for h in handwritten_sequence],
             handwritten_sequence.index(handwritten_path),
         )
-        where = paths.render(generated_path)
+        where = paths.join(generated_path)
         out[where] = Discrepancy("out of order", where, f"generated: {here}; handwritten: {there}")
     return out
 

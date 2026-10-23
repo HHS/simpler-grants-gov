@@ -13,12 +13,12 @@ Path = tuple[str, ...]
 ARRAY = "[]"
 
 
-def render(path: Path) -> str:
+def join(path: Path) -> str:
     """`("applicant", "street1")` -> `"applicant.street1"`."""
     return ".".join(path)
 
 
-def parse(text: str) -> Path:
+def split(text: str) -> Path:
     """`"applicant.street1"` -> `("applicant", "street1")`."""
     return tuple(text.split("."))
 
