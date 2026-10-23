@@ -48,7 +48,7 @@ on:
 # Runs queue instead of cancelling: the suite shares a handful of static test
 # users, so two concurrent runs against one target would collide.
 concurrency:
-  group: e2e-staging-${{ inputs.target || 'staging' }}
+  group: e2e-deployed-env-${{ inputs.target || 'staging' }}
   cancel-in-progress: false
 
 jobs:

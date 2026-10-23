@@ -95,7 +95,7 @@ jobs:
     concurrency:
       group: staging-e2e-post-deploy
       cancel-in-progress: true
-    uses: ./.github/workflows/e2e-staging.yml
+    uses: ./.github/workflows/e2e-deployed-env.yml
     secrets: inherit
     with:
       version: ${{ inputs.version || github.sha }}
