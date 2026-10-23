@@ -72,4 +72,11 @@ describe("OpportunityAwardGridRow", () => {
     const contentElement = screen.getByText("notSpecified");
     expect(contentElement).toBeInTheDocument();
   });
+
+  it("renders a content of 0 instead of the fallback", () => {
+    render(<OpportunityAwardGridRow title="expectedAwards" content={0} />);
+
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.queryByText("notSpecified")).not.toBeInTheDocument();
+  });
 });
