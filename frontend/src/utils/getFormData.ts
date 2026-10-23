@@ -13,9 +13,12 @@ import {
 } from "src/types/applicationResponseTypes";
 import { FormValidationWarning, UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
-import { FormDetail } from "src/types/formResponseTypes";
+import { FormDetail, FormRenderer } from "src/types/formResponseTypes";
 
+import { JsonFormsUiSchema } from "src/components/apply-form/jsonforms/convertUiSchema";
+import { prepareJsonFormsUiSchema } from "src/components/apply-form/jsonforms/prepareUiSchema";
 import { processFormSchema } from "./applyForm/applyFormUtils";
+import { unimplementedRuleKeys } from "./applyForm/unimplementedRuleKeys";
 import { validateUiSchema } from "./applyForm/validateUiSchema";
 
 // either return error or data, not both
@@ -30,6 +33,10 @@ type FormDataResult =
         formName: string;
         formSchema: RJSFSchema;
         formUiSchema: UiSchema;
+        formRenderer: FormRenderer;
+        // Present when formRenderer is "jsonforms"; formUiSchema is then its equivalent
+        // section/field tree, for warnings and navigation.
+        jsonFormsUiSchema?: JsonFormsUiSchema;
         formValidationWarnings: FormValidationWarning[] | null;
         applicationAttachments: Attachment[];
         createdAt?: string;
@@ -148,12 +155,28 @@ export default async function getFormData({
 
   const applicationResponse = applicationFormData.application_response || {};
 
-  const {
-    form_id: formId,
-    form_name: formName,
-    form_json_schema,
-    form_ui_schema: formUiSchema,
-  } = formData;
+  const { form_id: formId, form_name: formName, form_json_schema } = formData;
+  const formRenderer: FormRenderer = formData.form_renderer ?? "sgg";
+
+  let formUiSchema: UiSchema;
+  let jsonFormsUiSchema: JsonFormsUiSchema | undefined;
+  if (formData.form_renderer === "jsonforms") {
+    jsonFormsUiSchema = formData.form_ui_schema;
+    try {
+      formUiSchema = prepareJsonFormsUiSchema({
+        formId,
+        formName,
+        uiSchema: jsonFormsUiSchema,
+        jsonSchema: form_json_schema,
+      });
+    } catch (e) {
+      logger.error({ err: e, formId }, "Error converting JSON Forms ui schema");
+      return { error: "TopLevelError" };
+    }
+  } else {
+    formUiSchema = formData.form_ui_schema;
+  }
+
   const schemaErrors = validateUiSchema(formUiSchema);
   if (schemaErrors) {
     logger.error(
@@ -161,6 +184,17 @@ export default async function getFormData({
       "Error validating form ui schema",
     );
     return { error: "TopLevelError" };
+  }
+
+  // Rules the UI schema declares and this renderer does not act on. Logged rather than
+  // ignored silently: a conditionally disabled field renders enabled, and the applicant has
+  // no way to tell that the form asked for anything else.
+  const ignoredRules = unimplementedRuleKeys(formUiSchema);
+  if (ignoredRules.length) {
+    logger.warn(
+      { formId, formName, rules: ignoredRules },
+      "Form has UI rules the SGG renderer doesn't support yet. The fields they apply to will always be shown and enabled",
+    );
   }
 
   try {
@@ -174,6 +208,8 @@ export default async function getFormData({
         formName,
         formSchema: result.formSchema,
         formUiSchema,
+        formRenderer,
+        jsonFormsUiSchema,
         formValidationWarnings,
         createdAt: applicationFormData.created_at,
         updatedAt: applicationFormData.updated_at,
