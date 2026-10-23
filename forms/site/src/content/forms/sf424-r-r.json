@@ -2,7 +2,9 @@
   "title": "SF424 (R & R)",
   "slug": "sf424-r-r",
   "status": "prioritized",
-  "family": ["R&R"],
+  "family": [
+    "R&R"
+  ],
   "category": "Key Personnel & Contact Forms",
   "omb_number": "4040-0001",
   "expiration_date": "01/31/2029",
@@ -22,7 +24,7 @@
   "notes": [
     "Plan-first review proposal for FID768 v5.0; no compiled form or renderer implementation is included. Corrected source paths use GlobalLibrary-V2.0 OrganizationInfo/Department and Division.",
     "Contact-person email is optional in both DAT05-9 and XSD. PD/PI and AOR emails are required. AOR title is required; contact-person and PD/PI titles are optional. Shared contact/name/address questions must preserve these role-specific constraints.",
-    "DAT radio option rows belong to their named Radio Group answer; they are not independent applicant fields. Revision DAT08-1-1\u202608-1-5 are five checkboxes contributing to one RevisionCode answer, with explicit choice-to-code bindings. XSD permits A, B, C, D, E, AC, AD, BC, BD; the combination/activation behavior is an implementation obligation, not five independent YesNo XML elements.",
+    "DAT radio option rows belong to their named Radio Group answer; they are not independent applicant fields. Revision DAT08-1-1…08-1-5 are five checkboxes contributing to one RevisionCode answer, with explicit choice-to-code bindings. XSD permits A, B, C, D, E, AC, AD, BC, BD; the combination/activation behavior is an implementation obligation, not five independent YesNo XML elements.",
     "For all four address roles, Country=USA requires State and ZIP. Preserve the DAT US ZIP minLength9 rule in addition to XSD minLength1/maxLength30. Province is optional and enabled for non-US countries; activation is not requiredness. Country defaults are role-specific DAT population rules, not a reason to erase a supplied value.",
     "Submitted/received dates, federal identifier, previous tracking identifier, applicant-type Other explanation, revision Other explanation, other-agency explanation and state-review date retain their DAT ownership and conditional rules. Start date must not follow end date.",
     "The four required funding amounts use the exact XSD BudgetTotalAmountDataType bounds and precision. DAT15-3 asks the applicant to enter the combined total; it does not mark that field calculated/read-only. Any proposed auto-calculation or consistency validation must be reviewed rather than silently changing its ownership.",
@@ -30,7 +32,7 @@
     "The imported OrganizationDataTypeV5 includes optional OrganizationInfo/EIN, but this form DAT/PDF asks for EIN/TIN only once at06-0, mapped to root EmployerID. Proposed plan omits the unused optional imported EIN slot rather than collecting a second tax identifier; record the source discrepancy and review this choice.",
     "SmallBusinessOrganizationType is optional and nillable in XSD. Nillability permits XML nil but does not require JSON null. Propose omitting the inactive container when ApplicantType is not Small Business; preserve the two distinct eligibility answers when active.",
     "The three attachments remain distinct purposes: lobbying/explanatory documentation, pre-application and cover letter. Reuse upload capture without inventing document-service IDs or conflating the answers. Confirm source conditions and ownership during implementation.",
-    "SubmissionTypeCode uses the exact XSD code \"Change/Corrected Application\", while the DAT/PDF display label spells \"Changed/Corrected Application\". Preserve the source display-to-code distinction. DAT01-1\u202601-3 require the previous tracking ID for a correction and limit post-deadline changes to agency requests.",
+    "SubmissionTypeCode uses the exact XSD code \"Change/Corrected Application\", while the DAT/PDF display label spells \"Changed/Corrected Application\". Preserve the source display-to-code distinction. DAT01-1…01-3 require the previous tracking ID for a correction and limit post-deadline changes to agency requests.",
     "DAT08-0 option help distinguishes New (first submission), Resubmission (previously unfunded), Renewal (competing subsequent award period), Continuation (non-competing additional period) and Revision (change to an existing award). They are five options of one answer, not independent booleans.",
     "DAT16-2/16-5/16-6 are three state-review radio options. Preserve the agency-announcement/SPOC instructions with the covered-program option and condition the review date on Y: Yes. Static tests compare optionality but do not decide whether a particular program is covered."
   ],
@@ -220,7 +222,7 @@
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Enter first line of the street address for the applicant in \u201cStreet1\u201d field.  This field is required.",
+          "help_text": "Enter first line of the street address for the applicant in “Street1” field.  This field is required.",
           "constraints": "minLength 1, maxLength 55",
           "json_path": "applicant_info.organization_info.address.street1",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:Street1"
@@ -232,7 +234,7 @@
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Enter second line of the street address for the applicant in \u201cStreet2\u201d field. This field is optional.",
+          "help_text": "Enter second line of the street address for the applicant in “Street2” field. This field is optional.",
           "constraints": "minLength 1, maxLength 55",
           "json_path": "applicant_info.organization_info.address.street2",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:Street2"
@@ -944,7 +946,7 @@
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Enter the\u00a0city for address of the PD/PI.  This field is required.",
+          "help_text": "Enter the city for address of the PD/PI.  This field is required.",
           "constraints": "minLength 1, maxLength 35",
           "json_path": "pdpi_contact_info.address.city",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:City",
@@ -1293,7 +1295,7 @@
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Enter first line of the street address for the Authorized Representative in the \u201cStreet1\u201d field.  This field is required.",
+          "help_text": "Enter first line of the street address for the Authorized Representative in the “Street1” field.  This field is required.",
           "constraints": "minLength 1, maxLength 55",
           "json_path": "aor_info.address.street1",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:Street1",
@@ -1306,7 +1308,7 @@
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Enter second line of the street address for the Authorized Representative in the \u201cStreet2\u201d field.This field is optional.",
+          "help_text": "Enter second line of the street address for the Authorized Representative in the “Street2” field.This field is optional.",
           "constraints": "minLength 1, maxLength 55",
           "json_path": "aor_info.address.street2",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:Street2",
@@ -1495,5 +1497,303 @@
       ]
     }
   ],
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/RR_SF424_5_0-V5.0_F768.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/RR_SF424_5_0-V5.0_F768.xls",
+  "examples": [
+    {
+      "label": "A small draft",
+      "description": "A deliberately incomplete synthetic draft for reading the proposed nesting. Missing required answers are expected; this is not a minimum valid submission.",
+      "data": {
+        "submission_type_code": "Application",
+        "applicant_info": {
+          "organization_info": {
+            "organization_name": "Example Research Cooperative"
+          }
+        },
+        "application_type": {
+          "application_type_code": "New",
+          "is_other_agency_submission": "N: No"
+        },
+        "project_title": "Community Research Demonstration"
+      }
+    },
+    {
+      "label": "Populated US new application",
+      "description": "Synthetic small-business application with separate applicant-contact, PD/PI and AOR answers; four US addresses and nine-digit ZIP codes. Funding amounts are illustrative decimal strings. Inactive revision/Other fields, attachments and submission-owned signature/date are omitted. This is a planning example, not a validated application.",
+      "data": {
+        "submission_type_code": "Application",
+        "submitted_date": "2026-10-23",
+        "applicant_id": "EXAMPLE-RR-2026-01",
+        "state_received_date": "2026-10-20",
+        "state_id": "EXAMPLE-STATE-01",
+        "agency_routing_number": "EXAMPLE-ROUTING-01",
+        "applicant_info": {
+          "organization_info": {
+            "sam_uei": "ABCDEF123456",
+            "organization_name": "Example Research Cooperative",
+            "department": "Research Administration",
+            "division": "Community Science",
+            "address": {
+              "street1": "100 Example Research Way",
+              "street2": "Suite 200",
+              "city": "Boston",
+              "county": "Suffolk",
+              "state": "MA: Massachusetts",
+              "country": "USA: UNITED STATES",
+              "zip_code": "021080001"
+            }
+          },
+          "contact_person": {
+            "name": {
+              "prefix": "Mx.",
+              "first_name": "Alex",
+              "middle_name": "Jordan",
+              "last_name": "Rivera",
+              "suffix": "II"
+            },
+            "title": "Application Coordinator",
+            "address": {
+              "street1": "110 Example Research Way",
+              "street2": "Office 4",
+              "city": "Boston",
+              "county": "Suffolk",
+              "state": "MA: Massachusetts",
+              "country": "USA: UNITED STATES",
+              "zip_code": "021080001"
+            },
+            "phone": "202-555-0101",
+            "fax": "202-555-0102",
+            "email": "alex.rivera@example.org"
+          }
+        },
+        "employer_id": "12-3456789",
+        "applicant_type": {
+          "applicant_type_code": "R: Small Business",
+          "small_business_organization_type": {
+            "is_women_owned": "Y: Yes",
+            "is_socially_economically_disadvantaged": "N: No"
+          }
+        },
+        "application_type": {
+          "application_type_code": "New",
+          "is_other_agency_submission": "N: No"
+        },
+        "federal_agency_name": "Example Federal Research Agency",
+        "cfda_number": "00.000",
+        "activity_title": "Illustrative Community Research Program",
+        "project_title": "Community Research Demonstration — Synthetic Example",
+        "proposed_project_period": {
+          "start_date": "2027-01-01",
+          "end_date": "2027-12-31"
+        },
+        "congressional_district": {
+          "applicant": "MA-007"
+        },
+        "pdpi_contact_info": {
+          "name": {
+            "prefix": "Dr.",
+            "first_name": "Morgan",
+            "middle_name": "Lee",
+            "last_name": "Chen",
+            "suffix": "Jr."
+          },
+          "title": "Principal Investigator",
+          "organization_name": "Example Research Cooperative",
+          "department": "Research Programs",
+          "division": "Community Science",
+          "address": {
+            "street1": "120 Example Research Way",
+            "street2": "Lab 3",
+            "city": "Boston",
+            "county": "Suffolk",
+            "state": "MA: Massachusetts",
+            "country": "USA: UNITED STATES",
+            "zip_code": "021080001"
+          },
+          "phone": "202-555-0103",
+          "fax": "202-555-0104",
+          "email": "morgan.chen@example.org"
+        },
+        "estimated_project_funding": {
+          "total_estimated_amount": "100000.25",
+          "total_nonfed_requested": "25000.50",
+          "total_fed_nonfed_requested": "125000.75",
+          "estimated_program_income": "0.00"
+        },
+        "state_review": {
+          "state_review_code_type": "Y: Yes",
+          "state_review_date": "2026-10-20"
+        },
+        "trust_agree": "Y: Yes",
+        "aor_info": {
+          "name": {
+            "prefix": "Ms.",
+            "first_name": "Taylor",
+            "middle_name": "Avery",
+            "last_name": "Patel",
+            "suffix": "III"
+          },
+          "title": "Authorized Organizational Representative",
+          "organization_name": "Example Research Cooperative",
+          "department": "Sponsored Programs",
+          "division": "Administration",
+          "address": {
+            "street1": "130 Example Research Way",
+            "street2": "Office 8",
+            "city": "Boston",
+            "county": "Suffolk",
+            "state": "MA: Massachusetts",
+            "country": "USA: UNITED STATES",
+            "zip_code": "021080001"
+          },
+          "phone": "202-555-0105",
+          "fax": "202-555-0106",
+          "email": "taylor.patel@example.org"
+        }
+      }
+    },
+    {
+      "label": "Corrected revision with non-US addresses",
+      "description": "Synthetic corrected revision: exact XSD correction code, previous tracking/award IDs, revision E and its explanation, Other applicant type and other-agency explanation. Four non-US addresses omit inactive state fields and use province/postal values; PD/PI and AOR defaults are overwritten independently. The inactive small-business and state-review-date fields are omitted. Attachment and submission-owned fields remain outside this draft.",
+      "data": {
+        "submission_type_code": "Change/Corrected Application",
+        "submitted_date": "2026-10-23",
+        "applicant_id": "EXAMPLE-RR-2026-02",
+        "state_received_date": "2026-10-20",
+        "state_id": "EXAMPLE-STATE-01",
+        "agency_routing_number": "EXAMPLE-ROUTING-01",
+        "applicant_info": {
+          "organization_info": {
+            "sam_uei": "ABCDEF123456",
+            "organization_name": "Example Research Cooperative",
+            "department": "Research Administration",
+            "division": "Community Science",
+            "address": {
+              "street1": "200 Example Research Road",
+              "street2": "Suite 1",
+              "city": "Ottawa",
+              "county": "Example County",
+              "province": "Ontario",
+              "country": "CAN: CANADA",
+              "zip_code": "K1A 0B1"
+            }
+          },
+          "contact_person": {
+            "name": {
+              "prefix": "Mx.",
+              "first_name": "Alex",
+              "middle_name": "Jordan",
+              "last_name": "Rivera",
+              "suffix": "II"
+            },
+            "title": "Application Coordinator",
+            "address": {
+              "street1": "210 Example Research Road",
+              "street2": "Suite 2",
+              "city": "Ottawa",
+              "county": "Example County",
+              "province": "Ontario",
+              "country": "CAN: CANADA",
+              "zip_code": "K1A 0B1"
+            },
+            "phone": "202-555-0101",
+            "fax": "202-555-0102",
+            "email": "alex.rivera@example.org"
+          }
+        },
+        "employer_id": "12-3456789",
+        "applicant_type": {
+          "applicant_type_code": "X: Other (specify)",
+          "applicant_type_code_other_explanation": "Illustrative research consortium"
+        },
+        "application_type": {
+          "application_type_code": "Revision",
+          "revision_code": "E",
+          "revision_code_other_explanation": "Change research scope without changing award",
+          "is_other_agency_submission": "Y: Yes",
+          "other_agency_submission_explanation": "Example Agency B"
+        },
+        "federal_agency_name": "Example Federal Research Agency",
+        "cfda_number": "00.000",
+        "activity_title": "Illustrative Community Research Program",
+        "project_title": "Corrected Research Scope — Synthetic Example",
+        "proposed_project_period": {
+          "start_date": "2027-01-01",
+          "end_date": "2027-12-31"
+        },
+        "congressional_district": {
+          "applicant": "00-000"
+        },
+        "pdpi_contact_info": {
+          "name": {
+            "prefix": "Dr.",
+            "first_name": "Morgan",
+            "middle_name": "Lee",
+            "last_name": "Chen",
+            "suffix": "Jr."
+          },
+          "title": "Principal Investigator",
+          "organization_name": "Example Research Partner",
+          "department": "Research Programs",
+          "division": "Community Science",
+          "address": {
+            "street1": "220 Example Research Road",
+            "street2": "Suite 3",
+            "city": "Ottawa",
+            "county": "Example County",
+            "province": "Ontario",
+            "country": "CAN: CANADA",
+            "zip_code": "K1A 0B1"
+          },
+          "phone": "202-555-0103",
+          "fax": "202-555-0104",
+          "email": "morgan.chen@example.org"
+        },
+        "estimated_project_funding": {
+          "total_estimated_amount": "100000.25",
+          "total_nonfed_requested": "25000.50",
+          "total_fed_nonfed_requested": "125000.75",
+          "estimated_program_income": "0.00"
+        },
+        "state_review": {
+          "state_review_code_type": "Program is not covered by E.O. 12372"
+        },
+        "trust_agree": "Y: Yes",
+        "aor_info": {
+          "name": {
+            "prefix": "Ms.",
+            "first_name": "Taylor",
+            "middle_name": "Avery",
+            "last_name": "Patel",
+            "suffix": "III"
+          },
+          "title": "Authorized Organizational Representative",
+          "organization_name": "Example Research Consortium",
+          "department": "Sponsored Programs",
+          "division": "Administration",
+          "address": {
+            "street1": "230 Example Research Road",
+            "street2": "Suite 4",
+            "city": "Ottawa",
+            "county": "Example County",
+            "province": "Ontario",
+            "country": "CAN: CANADA",
+            "zip_code": "K1A 0B1"
+          },
+          "phone": "202-555-0105",
+          "fax": "202-555-0106",
+          "email": "taylor.patel@example.org"
+        },
+        "federal_id": "EXAMPLE-AWARD-2026-01",
+        "gg_tracking_id": "GRANT12345678"
+      }
+    },
+    {
+      "label": "Submission-owned signature fields only",
+      "description": "An isolated illustration of values supplied by the later signing/submission process. These two fields are not editable applicant-draft answers; this is neither an authenticated signature nor a complete submission. Attachment IDs/descriptors are deliberately not invented.",
+      "data": {
+        "aor_signature": "Taylor Avery Patel — illustrative submission value",
+        "aor_signed_date": "2026-10-23"
+      }
+    }
+  ]
 }
