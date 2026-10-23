@@ -5,7 +5,7 @@ includes every answer, which includes:
   element, and each parent's children in the XSD's order?
 - Mapping vs form schema: Does the mapping read every form field, and only fields the form
   has?
-- Form schema vs XSD: Does each field accept only values its element can carry?
+- Form schema vs XSD: Does each field only accept values its element allows?
 - Recorded differences: Does the `FormDiff` list every rule the checks can't read, and
   does every difference it records still exist?
 """
@@ -60,17 +60,18 @@ class TestMappingVsXsd:
     def test_xml_mapping_not_missing_required_elements(self, form):
         _skip_unchecked(form)
         found = mapping_vs_xsd.unsourced_elements(form)
-        assert not found, (
-            f"{form.diff.module}: the mapping doesn't produce these required elements:\n"
-            + _report(found)
+        assert (
+            not found
+        ), f"{form.diff.module}: the mapping doesn't produce these required elements:\n" + _report(
+            found
         )
 
     def test_xml_mapping_follows_xsd_element_order(self, form):
         _skip_unchecked(form)
         found = mapping_vs_xsd.out_of_order_elements(form)
-        assert not found, (
-            f"{form.diff.module}: the mapping produces elements out of order:\n" + _report(found)
-        )
+        assert (
+            not found
+        ), f"{form.diff.module}: the mapping produces elements out of order:\n" + _report(found)
 
 
 class TestMappingVsFormSchema:
@@ -84,7 +85,7 @@ class TestMappingVsFormSchema:
             if d.kind == DiscrepancyKind.UNMAPPED_FORM_FIELD
         ]
         assert not found, (
-            f"{form.diff.module}: no rule reads these fields, so their answers aren't "
+            f"{form.diff.module}: the mapping doesn't read these fields, so their answers aren't "
             f"submitted:\n" + _report(found)
         )
 
@@ -95,31 +96,32 @@ class TestMappingVsFormSchema:
             for d in mapping_vs_form_schema.unmatched_fields(form)
             if d.kind == DiscrepancyKind.UNKNOWN_RULE_SOURCE
         ]
-        assert not found, (
-            f"{form.diff.module}: rules read fields the form doesn't have:\n" + _report(found)
-        )
+        assert (
+            not found
+        ), f"{form.diff.module}: rules read fields the form doesn't have:\n" + _report(found)
 
 
 class TestFormSchemaVsXsd:
-    """Does each field accept only values its XSD element can carry?"""
+    """Does each field only accept values its XSD element allows?"""
 
     def test_form_does_not_offer_values_outside_xsd_enums(self, form):
         _skip_unchecked(form)
         found = [d for d in form_schema_vs_xsd.rule_differences(form) if d.keyword == "enum"]
-        assert not found, (
-            f"{form.diff.module}: fields offer values their elements don't list:\n" + _report(found)
-        )
+        assert (
+            not found
+        ), f"{form.diff.module}: fields offer values their elements don't list:\n" + _report(found)
 
     def test_form_does_not_accept_values_outside_xsd_bounds(self, form):
         _skip_unchecked(form)
         found = [
             d
             for d in form_schema_vs_xsd.rule_differences(form)
-            if d.keyword in form_schema_vs_xsd.LOOSER or d.kind == DiscrepancyKind.RANGE_UNREADABLE
+            if d.keyword in form_schema_vs_xsd.LOOSER
+            or d.kind == DiscrepancyKind.RANGE_NOT_IN_PATTERN
         ]
         assert not found, (
-            f"{form.diff.module}: fields accept lengths or amounts their elements can't "
-            f"carry:\n" + _report(found)
+            f"{form.diff.module}: fields accept lengths or amounts their elements don't "
+            f"allow:\n" + _report(found)
         )
 
     def test_form_field_types_match_xsd_element_types(self, form):

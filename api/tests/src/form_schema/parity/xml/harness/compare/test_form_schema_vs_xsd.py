@@ -67,7 +67,7 @@ class TestRuleDifferences:
             {"maximum": Decimal("999999999999.99")},
         )
         assert [d.kind for d in form_schema_vs_xsd.rule_differences(form)] == [
-            DiscrepancyKind.RANGE_UNREADABLE
+            DiscrepancyKind.RANGE_NOT_IN_PATTERN
         ]
 
     def test_flags_type_element_does_not_expect(self):

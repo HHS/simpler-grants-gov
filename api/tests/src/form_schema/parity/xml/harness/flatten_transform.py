@@ -86,8 +86,8 @@ def read(mapping: dict[str, Any]) -> tuple[dict[Path, str | None], dict[str, str
             if field in attachments:
                 # The element and everything under it are built from the upload.
                 arity = attachments[field].get("type")
-                held = f"{source}.{ARRAY}" if arity == "multiple" else source
-                targets[*level, attachments[field]["xml_element"]] = held
+                attachment_source = f"{source}.{ARRAY}" if arity == "multiple" else source
+                targets[*level, attachments[field]["xml_element"]] = attachment_source
                 continue
 
             if target is None:

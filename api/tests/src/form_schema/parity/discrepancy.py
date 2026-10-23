@@ -41,7 +41,7 @@ class DiscrepancyKind(StrEnum):
     UNKNOWN_RULE_SOURCE = "rule source is unknown"
 
     # XML mapping parity: form schema vs XSD (also RULE_DIFFERS, above)
-    RANGE_UNREADABLE = "range unreadable"
+    RANGE_NOT_IN_PATTERN = "range not found in pattern"
 
     # XML mapping parity: recorded differences
     UNMAPPED_FIELD_NOW_MAPPED = "recorded unmapped field is now mapped"

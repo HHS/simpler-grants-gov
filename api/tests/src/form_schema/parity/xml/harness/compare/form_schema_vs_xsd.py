@@ -1,7 +1,9 @@
-"""Check that each form field accepts only values the XSD element it fills can carry.
+"""Check that each form field only accepts values that are valid against the
+corresponding XSD element.
 
-A field stricter than its element passes. A field that sets no bound where its element
-sets one is looser.
+A field stricter than its element passes. A field that accepts a value that may be
+rejected by the XSD (e.g. a field with a greater `maxLength` than its equivalent XSD)
+fails.
 """
 
 from collections.abc import Iterator
@@ -35,10 +37,10 @@ class MappedField(NamedTuple):
 
 
 def rule_differences(flat: FlatForm) -> list[Discrepancy]:
-    """Return each enum value, bound or type a field accepts that its element can't carry.
+    """Return each enum value, bound or type a field accepts that its element doesn't allow.
 
     Returns `RULE_DIFFERS` with `keyword` set to `enum`, a bound or `type`, or
-    `RANGE_UNREADABLE` for a money field whose pattern doesn't state a range. Differences
+    `RANGE_NOT_IN_PATTERN` for a money field whose pattern doesn't state a range. Differences
     listed in `differing_rules`, or that a declared `value_transform` accounts for, are
     left out.
     """
@@ -117,7 +119,7 @@ def _findings(flat: FlatForm, use_diff: bool = True) -> Iterator[tuple[str, Disc
                     yield (
                         keyword,
                         Discrepancy(
-                            DiscrepancyKind.RANGE_UNREADABLE,
+                            DiscrepancyKind.RANGE_NOT_IN_PATTERN,
                             where,
                             f"{feeds}: the element's {keyword} is {limit}, and the field's "
                             f"pattern {rules.get('pattern', '(none)')!r} doesn't state a range",

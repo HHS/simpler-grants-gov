@@ -74,8 +74,8 @@ field neither form has, or a difference that's been fixed, fails.
 `xml/test_forms.py` checks each form's XML mapping (`json_to_xml_schema`, or
 `FORM_XML_TRANSFORM_RULES` on a hand-written form) against the form's JSON Schema and the
 Grants.gov XSD it targets, vendored under `src/services/xml_generation/xsds/`. The XML is
-built by walking the mapping's rules, not the applicant's answers, so a field no rule
-reads is left out of the XML. Most Grants.gov elements are optional, so the XML still
+built by walking the mapping's rules, not the applicant's answers, so a field the mapping
+doesn't read is left out of the XML. Most Grants.gov elements are optional, so the XML still
 validates and nothing else catches it.
 
 `xml/harness/flatten_form.py` reads all three into one `FlatForm`: the elements
@@ -112,8 +112,9 @@ missing field still produces an element, so the XSD checks don't catch it.
 
 #### Form schema vs XSD
 
-Does each field accept only values the element it fills can carry? A field stricter than
-its element passes, and a field with no bound where its element has one is looser. Money
+Does each field only accept values that are valid against its XSD element? A field
+stricter than its element passes, and a field without a bound where its element has one
+is looser. Money
 fields are strings, so their range is read from their pattern. A difference that the
 rule's `value_transform` accounts for, such as `boolean_to_yes_no` for a boolean filling
 a `YesNoDataType`, passes.
@@ -172,7 +173,7 @@ wrong. In those cases, record the difference in the form's `FormDiff` with the r
 - **Field order:** an order difference goes in `out_of_order`, keyed by the generated
   path.
 - **Mapping vs XSD:** can't be recorded. Fix the mapping.
-- **Mapping vs form schema:** a field no rule reads goes in `unmapped_fields`, and a field
+- **Mapping vs form schema:** a field the mapping doesn't read goes in `unmapped_fields`, and a field
   a rule reads that the form doesn't have goes in `unknown_sources`.
 - **Form schema vs XSD:** a field looser than its element goes in `differing_rules`,
   keyed `"element path/keyword"`, saying whether it's a bug or intentional.
