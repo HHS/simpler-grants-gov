@@ -35,21 +35,39 @@ const nodeBase = z.object({
 const fieldNode = nodeBase.extend({
   kind: z.literal("field"),
   source_bindings: z
-    .object({
-      at: z.string().min(1),
-      dat: z
-        .array(
-          z
-            .object({
-              kind: z.literal("slot"),
-              path: z.string().min(1),
-              index: z.number().int().nonnegative(),
-            })
-            .strict(),
-        )
-        .min(1),
-    })
-    .strict()
+    .union([
+      z
+        .object({
+          at: z.string().min(1),
+          dat: z
+            .array(
+              z
+                .object({
+                  kind: z.literal("slot"),
+                  path: z.string().min(1),
+                  index: z.number().int().nonnegative(),
+                })
+                .strict(),
+            )
+            .min(1),
+        })
+        .strict(),
+      z
+        .object({
+          dat: z
+            .array(
+              z
+                .object({
+                  kind: z.literal("choice"),
+                  path: z.string().min(1),
+                  value: z.string().min(1),
+                })
+                .strict(),
+            )
+            .min(1),
+        })
+        .strict(),
+    ])
     .optional(),
   required: z.union([z.boolean(), z.string()]),
   type: z.string(),

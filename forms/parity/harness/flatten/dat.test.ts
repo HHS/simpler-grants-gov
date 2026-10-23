@@ -57,6 +57,65 @@ describe("datFields", () => {
     ]);
   });
 
+  it("keeps a radio group answer but not its unbound option controls", () => {
+    const header = [...HEADER, "Agency Field Name", "Field Type"];
+    const fields = datFields(
+      workbook([
+        header,
+        [
+          "1",
+          "Submission type",
+          "Yes",
+          "LIST",
+          "",
+          1,
+          "Radio Group",
+          "",
+          "SubmissionTypeCode",
+          "Radio Group",
+        ],
+        ["1-a", "Application", "No", "", "", 1, "Radio", "", "", "Radio Group"],
+        [
+          "2",
+          "Bound radio",
+          "No",
+          "",
+          "",
+          1,
+          "Radio",
+          "",
+          "OwnField",
+          "Radio Group",
+        ],
+      ]),
+    );
+    expect([...fields.keys()]).toEqual(["1", "2"]);
+  });
+
+  it("retains bound system-populated labels as wire answers while skipping ordinary labels", () => {
+    const header = [...HEADER, "Agency Field Name", "Field Type"];
+    const fields = datFields(
+      workbook([
+        header,
+        [
+          "s",
+          "Signature",
+          "Yes",
+          "AN",
+          144,
+          1,
+          "Label",
+          "Completed on submission",
+          "AOR_Signature",
+          "Post-Populated",
+        ],
+        ["h", "Section heading", "No", "", "", 1, "Label", "", "", ""],
+      ]),
+    );
+    expect([...fields.keys()]).toEqual(["s"]);
+    expect(fields.get("s")?.rules.maxLength).toBe(144);
+  });
+
   it("reads no length from fixed lists", () => {
     const dat = datFields(
       workbook([HEADER, ["7-14", "State:", "No", "LIST", 55, 4, "Popup", ""]]),

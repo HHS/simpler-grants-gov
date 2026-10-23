@@ -1,3 +1,4 @@
+import { choiceValueProblems } from "../sourceBindings.ts";
 /**
  * The harness's entry point: `checkForm` runs every comparison for one form.
  *
@@ -254,6 +255,13 @@ export async function formPairs(
     (url) => readSource(url).toString("utf8"),
     plan.xsd_root,
   );
+  for (const { field } of walkFields(plan.children))
+    planProblems.push(
+      ...choiceValueProblems(
+        field,
+        field.xml_path ? xsdSource.get(fromXmlPath(field.xml_path)) : undefined,
+      ),
+    );
   const dat = {
     ...pair(
       diff.dat,
