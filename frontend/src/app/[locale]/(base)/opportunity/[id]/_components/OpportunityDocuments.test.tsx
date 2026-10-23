@@ -38,6 +38,18 @@ describe("OpportunityDocuments", () => {
     expect(otherLink).toHaveAttribute("href", "https://example.com");
   });
 
+  it("stacks the table into labelled rows on narrow screens", () => {
+    render(
+      <OpportunityDocuments
+        opportunityId="63588df8-f2d1-44ed-a201-5804abba696a"
+        documents={mockData}
+      />,
+    );
+
+    expect(screen.getByRole("table")).toHaveClass("usa-table--stacked");
+    expect(screen.getAllByText("tableColFileName")).not.toHaveLength(0);
+  });
+
   it("sends a user event beacon when a document link is clicked", async () => {
     const sendBeaconMock = jest.fn();
     Object.defineProperty(navigator, "sendBeacon", {
