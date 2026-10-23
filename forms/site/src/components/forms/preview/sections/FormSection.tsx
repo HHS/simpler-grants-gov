@@ -1,8 +1,8 @@
 import { crumbAttributes, headingTag } from "@/lib/breadcrumbs";
 import type { GroupLayout, LayoutProps } from "@jsonforms/core";
 import { JsonFormsDispatch } from "@jsonforms/react";
+import { groupName } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
 import { AdapterContext } from "@sgg/frontend/components/apply-form/jsonforms/renderers";
-import { groupName } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
 import { useContext, useId } from "react";
 
 import { SectionDepth } from "./SectionDepth";
