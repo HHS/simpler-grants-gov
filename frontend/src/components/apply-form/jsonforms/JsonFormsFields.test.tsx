@@ -128,7 +128,7 @@ describe("JsonFormsFields", () => {
     expect(screen.getByText("Saved title")).toBeInTheDocument();
   });
 
-  it("skips a control no widget can render", () => {
+  it("skips a control a widget can't render", () => {
     const nestedListSchema: RJSFSchema = {
       type: "object",
       properties: {

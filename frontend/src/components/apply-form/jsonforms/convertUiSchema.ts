@@ -28,7 +28,7 @@ export type JsonFormsUiSchema = UISchemaElement;
 /** A JSON Forms UI schema's section/field equivalent, and what the conversion drops. */
 export type ConvertedUiSchema = {
   uiSchema: UiSchema;
-  /** Controls no widget can render, which are skipped. */
+  /** Controls a widget can't render, which are skipped. */
   unsupportedControls: string[];
   /** Rules on fields inside a list, which the field-list widget doesn't apply. */
   ignoredListRules: string[];
@@ -176,7 +176,7 @@ export const groupName = (label: string): string =>
 // What the conversion drops
 // --------------------------------------------------
 
-/** Scopes of the controls no widget can render, which are skipped. */
+/** Scopes of the controls a widget can't render, which are skipped. */
 const findUnsupportedControls = (
   uiSchema: JsonFormsUiSchema,
   schema: RJSFSchema,

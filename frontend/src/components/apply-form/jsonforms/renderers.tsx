@@ -134,7 +134,7 @@ const AdaptedLayout = ({
 const ADAPTER_RANK = 10;
 
 /*
-  Ranked below the adapter, so it only matches a control no widget can render, and skips it
+  Ranked below the adapter, so it only matches a control that other widgets can't render, and skips it
   instead of showing "No applicable renderer found". prepareJsonFormsUiSchema logs each one.
 */
 const SKIP_RANK = 1;

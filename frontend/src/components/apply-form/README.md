@@ -136,6 +136,6 @@ In the widget, the data is available as a combined `value` object.
 
 ## Rules in the SGG UI schema
 
-A node in an SGG UI schema can carry rules, such as `conditional`, which the form spec emitter writes to describe when a field is enabled, disabled or read-only. The SGG renderer doesn't act on these rules yet, so the fields they govern render unconditionally.
+A node in an SGG UI schema can include rules, such as `conditional`, which the form spec emitter writes to describe when a field is enabled, disabled or read-only. The SGG renderer doesn't act on these rules yet, so the fields they govern render unconditionally.
 
 UI schema validation accepts any unknown _object-valued_ key on a node as a rule, so new rules can ship before the renderer supports them without breaking the form. Unknown string keys, like a mistyped `label` or `widget`, still fail validation. `getFormData` logs the rules a form declares that the renderer ignores (`unimplementedRuleKeys`).
