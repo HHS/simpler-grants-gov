@@ -1,0 +1,390 @@
+// The form library preview's own rendering (components/forms/preview): flat sections with
+// headings sized by depth, the breadcrumb that names them, and the collapsible list whose
+// entries collapse to a read-only list of their answers.
+@use "uswds-core" as *;
+
+.collapsible {
+  margin-top: units(2);
+  border: 1px solid color("base-lighter");
+  border-radius: radius("md");
+  background: color("white");
+  min-width: 0;
+  padding: 0;
+}
+
+.collapsible--error {
+  border: 2px solid color("error-dark");
+}
+
+.collapsible__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: units(1) units("105");
+  min-height: units(6);
+  padding: 0 units("105") 0 units(2);
+  background: color("base-lightest");
+  border-radius: radius("md");
+
+  .collapsible--open > & {
+    border-bottom: 1px solid color("base-lighter");
+    border-radius: radius("md") radius("md") 0 0;
+  }
+}
+
+.collapsible__toggle {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: units("105");
+  min-height: units(5);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: color("ink");
+  text-align: left;
+  cursor: pointer;
+}
+
+.collapsible__caret {
+  flex-shrink: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid color("base-darker");
+  transition: transform 0.15s;
+
+  [aria-expanded="true"] > & {
+    transform: rotate(90deg);
+  }
+}
+
+.collapsible__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: units(3);
+  height: units(3);
+  padding: 0 units("05");
+  border-radius: 999px;
+  background: color("base-lighter");
+  @include u-font("sans", "3xs");
+}
+
+.collapsible__action {
+  min-height: units(5);
+  margin: 0;
+}
+
+.collapsible__action--danger {
+  color: color("error-dark");
+}
+
+.collapsible__errors {
+  display: inline-flex;
+  align-items: center;
+  gap: units("05");
+  @include u-font("sans", "2xs");
+  font-weight: 700;
+  color: color("error-dark");
+
+  &::before {
+    content: "!";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: units("205");
+    height: units("205");
+    border-radius: 50%;
+    background: color("error-dark");
+    color: color("white");
+    @include u-font("sans", "3xs");
+  }
+}
+
+.collapsible__body {
+  padding: 0 units(2) units(2);
+}
+
+// A collapsed entry's answers, under its groups' headings.
+.collapsible__summary {
+  padding: units(1) units(3) units(2) units(5);
+
+  @media (max-width: 640px) {
+    padding: units(1) units(2) units(2);
+  }
+}
+
+.collapsible__summary-section + .collapsible__summary-section {
+  margin-top: units("105");
+}
+
+.collapsible__summary-heading {
+  margin: 0 0 units("05");
+  @include u-font("sans", "3xs");
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color("base-dark");
+}
+
+// Laid out like .metadata-card: each label beside its answer.
+.collapsible__summary-list {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: units("05") units(2);
+  margin: 0;
+  @include u-font("sans", "2xs");
+  align-items: baseline;
+
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+  }
+}
+
+.collapsible__summary-row {
+  display: contents;
+
+  dt {
+    font-weight: 600;
+    color: color("base-dark");
+    white-space: nowrap;
+
+    @media (max-width: 640px) {
+      white-space: normal;
+    }
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.collapsible__value--blank {
+  color: color("base");
+}
+
+.collapsible__value--missing {
+  font-weight: 600;
+  color: color("error-dark");
+}
+
+.collapsible__not-started {
+  margin: 0;
+  padding: units(1) units(3) units("105") units(5);
+  font-style: italic;
+  color: color("base");
+}
+
+.collapsible-list__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: units("05") units("105");
+}
+
+.collapsible-list__count {
+  @include u-font("sans", "2xs");
+  color: color("base");
+}
+
+// The entry heading wraps the toggle; the toggle carries the heading's size.
+.collapsible__heading {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+// Sections: flat, with a heading sized to how deep the section sits (FormSection).
+.form-section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.form-section__heading {
+  margin: units(5) 0 units("05");
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.form-section__heading--1 {
+  @include u-font("sans", "lg");
+}
+
+.form-section__heading--2 {
+  @include u-font("sans", "md");
+}
+
+.form-section__heading--3 {
+  @include u-font("sans", "sm");
+  margin-top: units(4);
+}
+
+.form-section__heading--4 {
+  @include u-font("sans", "xs");
+  margin-top: units(3);
+  color: color("base-darker");
+}
+
+// A section's description: a hint under its heading, smaller and quieter than a field's text.
+.form-section__description {
+  margin: 0 0 units(1);
+  max-width: measure(4);
+  @include u-font("sans", "2xs");
+}
+
+// Where the reader is in the form: sticks to the top of the window while the form scrolls.
+.section-breadcrumb {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  min-height: units(6);
+  margin: units(2) 0 0;
+  padding: 0 units(1);
+  background: color("white");
+  border-bottom: 1px solid color("base-lighter");
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.section-breadcrumb__top {
+  padding: 0 units(1);
+  @include u-font("sans", "2xs");
+  color: color("base-dark");
+}
+
+.section-breadcrumb__list {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Each crumb centered in its own row, so the bold current one lines up with the rest.
+.section-breadcrumb__item {
+  display: flex;
+  align-items: center;
+}
+
+.section-breadcrumb__item + .section-breadcrumb__item::before {
+  content: "›";
+  padding: 0 units("05");
+  color: color("base");
+}
+
+.section-breadcrumb__crumb {
+  display: inline-flex;
+  align-items: center;
+  min-height: units(5);
+  padding: 0 units("05");
+  border: 0;
+  border-radius: radius("sm");
+  background: none;
+  font: inherit;
+  @include u-font("sans", "2xs");
+  color: color("primary");
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+
+  &:hover {
+    background: color("primary-lightest");
+  }
+
+  &:focus-visible {
+    outline: 3px solid color("blue-40v");
+    outline-offset: 0;
+  }
+}
+
+// Still a link back to its heading, so it keeps the link's color and underline.
+.section-breadcrumb__crumb--current {
+  font-weight: 700;
+}
+
+// The form beside its outline, as the apply form lays out its in-page navigation.
+.form-preview__main {
+  min-width: 0;
+}
+
+// The outline nests each section's own under it, which the frontend's flat list does not.
+// Only the top level keeps the USWDS rail; a nested list is set off by its indent alone.
+// Each depth starts one step in from its parent's caret.
+.usa-in-page-nav__list.form-outline__sublist {
+  margin-left: units(2);
+  border-left: none;
+}
+
+// Narrower than USWDS's in-page nav, so the form keeps most of the panel.
+.usa-in-page-nav.form-outline {
+  flex: 0 0 auto;
+  width: 12rem;
+  margin-right: units(3);
+}
+
+// A section's caret, which shows or hides its sections, then its link. A section with none of
+// its own gets the caret's space, so every title at one depth lines up.
+.form-outline__row {
+  display: flex;
+  align-items: center;
+  gap: units("05");
+}
+
+.form-outline__row--leaf::before {
+  content: "";
+  flex: 0 0 units(3);
+}
+
+// The title sits right after its caret rather than after the link's usual padding. Scoped
+// under the outline to outrank USWDS's `.usa-in-page-nav__list a:not(.usa-button)` padding.
+.form-outline .form-outline__row > .usa-in-page-nav__link {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: units("05");
+}
+
+.form-outline__toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: units(3);
+  height: units(3);
+  padding: 0;
+  border: 0;
+  border-radius: radius("sm");
+  background: none;
+  cursor: pointer;
+
+  &:hover {
+    background: color("base-lightest");
+  }
+
+  &:focus-visible {
+    outline: 3px solid color("blue-40v");
+    outline-offset: 0;
+  }
+}
+
+.form-outline__caret {
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid color("base-dark");
+  transition: transform 0.15s;
+
+  [aria-expanded="true"] > & {
+    transform: rotate(90deg);
+  }
+}
+
+// The sections the reader is in, not only the current one, so the path reads at a glance.
+.form-outline__link--inside {
+  font-weight: 700;
+}

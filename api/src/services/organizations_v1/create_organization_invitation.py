@@ -5,9 +5,10 @@ from uuid import UUID, uuid4
 from sqlalchemy import desc, select
 
 from src.adapters import db
-from src.adapters.aws.ses_adapter import send_email
+from src.adapters.aws.ses_adapter import build_email_tags, send_email
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
@@ -61,6 +62,7 @@ def _send_invitation_email(
             to_address=invitee_email,
             subject=subject,
             message=content,
+            email_tags=build_email_tags(EmailType.ORG_INVITATION),
         )
         logger.info(
             "Invitation email sent successfully",
