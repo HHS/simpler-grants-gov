@@ -6,8 +6,16 @@ import {
 } from "@jsonforms/core";
 import { RJSFSchema } from "@rjsf/utils";
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { shapeFormData } from "src/utils/applyForm/applyFormUtils";
 
 import { JsonFormsFields } from "src/components/apply-form/jsonforms/JsonFormsFields";
+
+jest.mock("src/utils/applyForm/applyFormUtils", () => {
+  const actual = jest.requireActual<
+    typeof import("src/utils/applyForm/applyFormUtils")
+  >("src/utils/applyForm/applyFormUtils");
+  return { ...actual, shapeFormData: jest.fn(actual.shapeFormData) };
+});
 
 const schema: RJSFSchema = {
   type: "object",
@@ -91,6 +99,17 @@ describe("JsonFormsFields", () => {
     fireEvent.input(hasPartner, { target: { value: "yes" } });
 
     expect(screen.getByTestId("partner_name")).toBeEnabled();
+  });
+
+  it("rebuilds the rule data once per keystroke", () => {
+    renderFields();
+    jest.mocked(shapeFormData).mockClear();
+
+    fireEvent.input(screen.getByTestId("has_partner"), {
+      target: { value: "y" },
+    });
+
+    expect(shapeFormData).toHaveBeenCalledTimes(1);
   });
 
   it("uses the print widgets when printing", () => {
