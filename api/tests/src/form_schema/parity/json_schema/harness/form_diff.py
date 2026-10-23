@@ -1,4 +1,4 @@
-"""The record of accepted differences between a generated form and the one it mirrors."""
+"""Accepted differences between a generated form and the hand-written form it mirrors."""
 
 import dataclasses
 
@@ -7,20 +7,17 @@ from ... import form_diff as shared
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class FormDiff(shared.FormDiff):
-    """Accepted differences between the generated form and the hand-written one.
+    """A generated form's accepted differences from the hand-written form it mirrors.
 
-    The definition is the generated form, the source the hand-written form it mirrors.
-    Fields at the same path correspond automatically; anything else needs an entry.
-
-    A `differing_rules` entry cites the Grants.gov schema showing the hand-written form is
-    the one that disagrees with it. These are defects for Simpler Grants to fix.
+    The generated form is the "form" in the inherited fields, and the hand-written form is
+    the "source". Fields at the same path match without an entry.
     """
 
     generated_module: str
     handwritten_module: str
 
-    #: Generated path -> the handwritten path meaning the same thing, where the two forms
-    #: spell one field differently. e.g. {"p.phone": "p.phone_number"}
+    #: Generated path -> the hand-written path of the same field, where the two differ.
+    #: e.g. {"contact.phone": "contact.phone_number"}
     mapped: dict[str, str] = dataclasses.field(default_factory=dict)
 
     #: "path/title" or "path/description" -> why the two forms word the field differently.

@@ -1,60 +1,52 @@
-"""Folds `allOf` branches into one schema, or raises.
+"""Merge the `allOf` branches of a JSON Schema into a single schema.
 
     {"allOf": [{"type": "string"}, {"maxLength": 60}]}
     -> {"type": "string", "maxLength": 60}
 
     {"allOf": [{"maxLength": 60}, {"maxLength": 200}]}
-    -> ConflictingKeywordsError
+    -> raises ConflictingKeywordsError
 
-A validator applies every branch, so two `maxLength` values behave as the smaller. A
-flattener has no payload and would have to pick one; picking 200 silently accepts values
-the schema rejects. Rather than implement precedence, this raises. No form in `diffs/`
-declares a keyword twice, so nothing currently raises.
-
-`if`/`then`/`else` branches are left in place, since which applies depends on the payload.
-
-`allof-merge` and `json-schema-merge-allof` do this off the shelf. They resolve a conflict
-by choosing a winner, which is the behavior this cannot have.
+Conditional branches (`if`/`then`/`else`) are left in `allOf`, since which one applies
+depends on the response.
 """
 
 from typing import Any
 
 CONDITIONAL = frozenset({"if", "then", "else"})
 
-# Keywords whose values combine rather than collide, so seeing them twice is not ambiguous.
+# Keywords whose values from several branches are combined.
 COMBINING = frozenset({"properties", "required", "allOf", "$defs", "definitions"})
 
-# Keywords that describe rather than constrain, so two values are not a contradiction.
-# The node's own wins: a form overriding a shared question's label is the ordinary case.
-ANNOTATION = frozenset(
-    {
-        "title",
-        "description",
-        "examples",
-        "default",
-        "$comment",
-        "deprecated",
-        "readOnly",
-        "writeOnly",
-    }
-)
+# Keywords that describe a field rather than constrain it. When branches disagree, the
+# node's own value wins, e.g. a form overriding the label of a shared question.
+ANNOTATION = frozenset({
+    "title",
+    "description",
+    "examples",
+    "default",
+    "$comment",
+    "deprecated",
+    "readOnly",
+    "writeOnly",
+})
 
 
 class ConflictingKeywordsError(Exception):
-    """Two branches declare the same constraining keyword with different values."""
+    """Two `allOf` branches give the same validation keyword different values."""
 
 
-def _is_conditional(branch: Any) -> bool:
-    return isinstance(branch, dict) and bool(CONDITIONAL & set(branch))
+# =============================================================================
+# PUBLIC FUNCTIONS
+# =============================================================================
 
 
 def merge_allof(schema: Any, path: str = "") -> Any:
-    """The schema with its non-conditional `allOf` branches folded in, recursively.
+    """Return `schema` with its non-conditional `allOf` branches merged in, recursively.
 
-    `path` is used only to locate a conflict in the raised message.
+    `path` locates a conflict in the error message.
 
-    Raises `ConflictingKeywordsError` if two branches, or a branch and the node itself, declare
-    the same constraining keyword with different values.
+    Raises `ConflictingKeywordsError` if two branches, or a branch and the node itself,
+    give the same validation keyword different values.
     """
     if isinstance(schema, list):
         return [merge_allof(item, path) for item in schema]
@@ -80,8 +72,8 @@ def merge_allof(schema: Any, path: str = "") -> Any:
             if key not in merged:
                 merged[key] = value
             elif key == "properties":
-                # Per property, not per properties-object: a form adding a description to
-                # one member of a composed question must not replace that member.
+                # Merge each property rather than replacing the whole object, so a branch
+                # that only adds a description to one property keeps the rest of it.
                 for name, sub in value.items():
                     merged[key][name] = (
                         merge_allof({"allOf": [sub, merged[key][name]]}, f"{path}.{name}")
@@ -91,23 +83,28 @@ def merge_allof(schema: Any, path: str = "") -> Any:
             elif key == "required":
                 merged[key] = sorted({*merged[key], *value})
             elif key == "allOf":
-                # Conditionals both branches kept back. They are a conjunction, so the two
-                # lists concatenate; treating them as mappings assumes a shape `allOf` never
-                # has. Reached when a question carries an `if`/`then` of its own and the
-                # occurrence composing it adds another, as an address does when the question
-                # and the form each make a field conditionally required.
+                # Conditionals kept back by both sides, e.g. an address question and the
+                # form using it each making a field conditionally required. All of them
+                # apply, so the lists are concatenated.
                 merged[key] = [*merged[key], *value]
             elif key in ANNOTATION:
-                pass  # the node's own already sits in `merged`, and it wins
+                pass  # the node's own value is already in `merged`
             elif key in COMBINING:
                 merged[key] = {**value, **merged[key]}
             elif merged[key] != value:
                 raise ConflictingKeywordsError(
-                    f"{path or '<root>'}: `{key}` is declared as {merged[key]!r} and {value!r}. "
-                    "Flattening would have to choose, and choosing wrong changes what is valid. "
-                    "The validator does not choose -- it applies both."
+                    f"{path or '<root>'}: `{key}` is declared as {merged[key]!r} and {value!r}"
                 )
 
     if conditional:
         merged["allOf"] = conditional
     return merged
+
+
+# =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+
+
+def _is_conditional(branch: Any) -> bool:
+    return isinstance(branch, dict) and bool(CONDITIONAL & set(branch))
