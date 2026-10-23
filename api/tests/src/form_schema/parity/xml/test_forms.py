@@ -12,6 +12,7 @@ Each form declares a `FormDiff` in `diffs/` recording its known gaps, and
 
 import pytest
 
+from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
 from tests.src.form_schema.parity.xml.diffs import key_contacts
 from tests.src.form_schema.parity.xml.harness import compare
 
@@ -79,7 +80,11 @@ class TestMappingVsFormSchema:
         """Everything an applicant can fill in ends up somewhere in the submission."""
         _skip_unreadable(form)
 
-        found = [d for d in compare.unmatched_fields(form) if d.kind == "form field is unmapped"]
+        found = [
+            d
+            for d in compare.unmatched_fields(form)
+            if d.kind == DiscrepancyKind.UNMAPPED_FORM_FIELD
+        ]
         assert not found, (
             f"{form.diff.module}: {len(found)} response field(s) reach no XML element, so "
             f"an applicant's answer would not be submitted:\n" + _report(found)
@@ -89,7 +94,11 @@ class TestMappingVsFormSchema:
         """A rule reading a field that does not exist contributes nothing, silently."""
         _skip_unreadable(form)
 
-        found = [d for d in compare.unmatched_fields(form) if d.kind == "rule source is unknown"]
+        found = [
+            d
+            for d in compare.unmatched_fields(form)
+            if d.kind == DiscrepancyKind.UNKNOWN_RULE_SOURCE
+        ]
         assert not found, (
             f"{form.diff.module}: {len(found)} rule(s) read a field this form does not "
             f"have:\n" + _report(found)
@@ -107,7 +116,7 @@ class TestFormSchemaVsXsd:
         """
         _skip_unreadable(form)
 
-        found = [d for d in compare.rule_differences(form) if d.kind == "enum differs"]
+        found = [d for d in compare.rule_differences(form) if d.keyword == "enum"]
         assert not found, (
             f"{form.diff.module}: {len(found)} field(s) offer a value the element does not "
             f"list, so choosing it would produce a submission Grants.gov rejects:\n"
@@ -122,8 +131,11 @@ class TestFormSchemaVsXsd:
         """
         _skip_unreadable(form)
 
-        bounds = {f"{keyword} differs" for keyword in compare.LOOSER} | {"range unreadable"}
-        found = [d for d in compare.rule_differences(form) if d.kind in bounds]
+        found = [
+            d
+            for d in compare.rule_differences(form)
+            if d.keyword in compare.LOOSER or d.kind == DiscrepancyKind.RANGE_UNREADABLE
+        ]
         assert not found, (
             f"{form.diff.module}: {len(found)} field(s) accept more than the element "
             f"carries, so an applicant could fill in something unsubmittable:\n" + _report(found)
@@ -137,7 +149,7 @@ class TestFormSchemaVsXsd:
         """
         _skip_unreadable(form)
 
-        found = [d for d in compare.rule_differences(form) if d.kind == "type differs"]
+        found = [d for d in compare.rule_differences(form) if d.keyword == "type"]
         assert not found, (
             f"{form.diff.module}: {len(found)} field(s) would reach serialization as the "
             f"wrong type:\n" + _report(found)
@@ -160,8 +172,7 @@ class TestRecordedDifferences:
         _skip_unreadable(form)
 
         found = compare.stale_entries(form)
-        assert (
-            not found
-        ), f"{form.diff.module}: recorded differences no longer describe real ones:\n" + _report(
-            found
+        assert not found, (
+            f"{form.diff.module}: recorded differences no longer describe real ones:\n"
+            + _report(found)
         )

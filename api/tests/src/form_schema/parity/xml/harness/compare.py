@@ -18,9 +18,8 @@ import dataclasses
 import importlib
 import itertools
 
-from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from tests.src.form_schema.parity import paths
-from tests.src.form_schema.parity.discrepancy import Discrepancy
+from tests.src.form_schema.parity.discrepancy import Discrepancy, DiscrepancyKind
 from tests.src.form_schema.parity.json_schema.harness import flatten_schema
 from tests.src.form_schema.parity.json_schema.harness.flatten_schema import FormInput
 from tests.src.form_schema.parity.paths import Path
@@ -87,10 +86,8 @@ def flatten(diff: FormDiff) -> FlatForm:
             flatten_transform.xsd_of(mapping), flatten_transform.root_of(mapping)
         ),
         attachments=flatten_transform.attachment_elements(mapping),
-        by_path=flatten_schema.inputs(resolve_jsonschema(module.FORM_JSON_SCHEMA)),
-        inputs=frozenset(
-            paths.render(p) for p in flatten_schema.inputs(resolve_jsonschema(own_schema))
-        ),
+        by_path=flatten_schema.inputs(module.FORM_JSON_SCHEMA),
+        inputs=frozenset(paths.join(p) for p in flatten_schema.inputs(own_schema)),
         transformed=flatten_transform.transformed(mapping),
     )
 
@@ -116,7 +113,7 @@ def _governed(flat: FlatForm):
     for path, source in flat.targets.items():
         if source is None:
             continue
-        governed = flat.by_path.get(paths.parse(source))
+        governed = flat.by_path.get(paths.split(source))
         element = flat.declared.get(path)
         if governed is None or element is None:
             continue
@@ -136,7 +133,7 @@ def _reconciled(flat: FlatForm, path: Path, keyword: str) -> bool:
 
 def _recorded(flat: FlatForm, path: Path, keyword: str) -> bool:
     """Whether `differing_rules` holds an entry for this element and keyword."""
-    return f"{paths.render(path)}/{keyword}" in flat.diff.differing_rules
+    return f"{paths.join(path)}/{keyword}" in flat.diff.differing_rules
 
 
 def _from_attachment(path: Path, attachments: frozenset[str]) -> bool:
@@ -154,7 +151,7 @@ def undeclared_targets(flat: FlatForm) -> list[Discrepancy]:
     revision renamed or removed.
     """
     return [
-        Discrepancy("target names no element", paths.render(path))
+        Discrepancy(DiscrepancyKind.UNDECLARED_TARGET, paths.join(path))
         for path in sorted(flat.targets)
         if path not in flat.declared
     ]
@@ -166,7 +163,7 @@ def unsourced_elements(flat: FlatForm) -> list[Discrepancy]:
     Attachment subtrees are exempt: they come from the uploaded file, not the mapping.
     """
     return [
-        Discrepancy("required element has no source", paths.render(path))
+        Discrepancy(DiscrepancyKind.UNSOURCED_REQUIRED_ELEMENT, paths.join(path))
         for path, element in sorted(flat.declared.items())
         if element.required
         and path not in flat.targets
@@ -192,8 +189,8 @@ def out_of_order_elements(flat: FlatForm) -> list[Discrepancy]:
         if as_mapped != as_declared:
             out.append(
                 Discrepancy(
-                    "elements out of sequence",
-                    paths.render(parent) or "(root)",
+                    DiscrepancyKind.ELEMENTS_OUT_OF_SEQUENCE,
+                    paths.join(parent) or "(root)",
                     f"mapped {[p[-1] for p in as_mapped]}, "
                     f"schema declares {[p[-1] for p in as_declared]}",
                 )
@@ -215,12 +212,12 @@ def unmatched_fields(flat: FlatForm) -> list[Discrepancy]:
     Suppressed by `absent_from_definition` and `absent_from_source` respectively.
     """
     out = [
-        Discrepancy("form field is unmapped", field)
+        Discrepancy(DiscrepancyKind.UNMAPPED_FORM_FIELD, field)
         for field in sorted(flat.inputs)
         if not _reaches(field, flat.sources) and field not in flat.diff.absent_from_definition
     ]
     out += [
-        Discrepancy("rule source is unknown", source)
+        Discrepancy(DiscrepancyKind.UNKNOWN_RULE_SOURCE, source)
         for source in sorted(flat.sources)
         if not any(field == source or field.startswith(source + ".") for field in flat.inputs)
         and source not in flat.diff.absent_from_source
@@ -234,8 +231,8 @@ def unmatched_fields(flat: FlatForm) -> list[Discrepancy]:
 def rule_differences(flat: FlatForm) -> list[Discrepancy]:
     """Where the form permits something the element it feeds cannot carry.
 
-    Returns kinds `"enum differs"`, `"<bound> differs"`, `"range unreadable"` and
-    `"type differs"`, so a caller can report the three comparisons separately.
+    Returns `RULE_DIFFERS` with `keyword` set to `enum`, a bound or `type`, or
+    `RANGE_UNREADABLE`, so a caller can report the three comparisons separately.
 
     Containment, not equality -- a form stricter than the wire passes. Declaring no bound
     where the element declares one counts as looser. A money field is a string, so its
@@ -255,7 +252,7 @@ def _rule_findings(flat: FlatForm, consult_record: bool = True):
         return consult_record and _recorded(flat, path, keyword)
 
     for path, source, governed, element in _governed(flat):
-        where, feeds = paths.render(path), f"<- {source}"
+        where, feeds = paths.join(path), f"<- {source}"
 
         listed = element.rules.get("enum")
         if (
@@ -265,7 +262,12 @@ def _rule_findings(flat: FlatForm, consult_record: bool = True):
             and not recorded(path, "enum")
         ):
             if extra := sorted(set(governed["enum"]) - listed):
-                yield "enum", Discrepancy("enum differs", where, f"{feeds}: {extra}")
+                yield (
+                    "enum",
+                    Discrepancy(
+                        DiscrepancyKind.RULE_DIFFERS, where, f"{feeds}: {extra}", keyword="enum"
+                    ),
+                )
 
         for keyword, direction in LOOSER.items():
             limit = element.rules.get(keyword)
@@ -282,23 +284,38 @@ def _rule_findings(flat: FlatForm, consult_record: bool = True):
             if keyword in FROM_PATTERN and governed.get("type") == "string":
                 permitted = flatten_xsd.implied_range(governed.get("pattern", ""))
                 if permitted is None:
-                    yield keyword, Discrepancy(
-                        "range unreadable",
-                        where,
-                        f"{feeds}: the element bounds {keyword} at {limit}, the field is a "
-                        f"string, and its pattern {governed.get('pattern', '(none)')!r} does "
-                        f"not say what range it permits -- so nothing checks it",
+                    yield (
+                        keyword,
+                        Discrepancy(
+                            DiscrepancyKind.RANGE_UNREADABLE,
+                            where,
+                            f"{feeds}: the element bounds {keyword} at {limit}, the field is a "
+                            f"string, and its pattern {governed.get('pattern', '(none)')!r} does "
+                            f"not say what range it permits -- so nothing checks it",
+                        ),
                     )
                     continue
                 declared = permitted[0] if keyword == "minimum" else permitted[1]
 
             if declared is None:
-                yield keyword, Discrepancy(
-                    f"{keyword} differs", where, f"{feeds}: none, element {limit}"
+                yield (
+                    keyword,
+                    Discrepancy(
+                        DiscrepancyKind.RULE_DIFFERS,
+                        where,
+                        f"{feeds}: none, element {limit}",
+                        keyword=keyword,
+                    ),
                 )
             elif (declared > limit) if direction == "above" else (declared < limit):
-                yield keyword, Discrepancy(
-                    f"{keyword} differs", where, f"{feeds}: {declared} against element {limit}"
+                yield (
+                    keyword,
+                    Discrepancy(
+                        DiscrepancyKind.RULE_DIFFERS,
+                        where,
+                        f"{feeds}: {declared} against element {limit}",
+                        keyword=keyword,
+                    ),
                 )
 
         expected = flatten_xsd.PRIMITIVES.get(element.primitive or "")
@@ -310,11 +327,15 @@ def _rule_findings(flat: FlatForm, consult_record: bool = True):
             and not _reconciled(flat, path, "type")
             and not recorded(path, "type")
         ):
-            yield "type", Discrepancy(
-                "type differs",
-                where,
-                f"{feeds}: form {declared_type}, element xs:{element.primitive}, "
-                f"no value_transform declared",
+            yield (
+                "type",
+                Discrepancy(
+                    DiscrepancyKind.RULE_DIFFERS,
+                    where,
+                    f"{feeds}: form {declared_type}, element xs:{element.primitive}, "
+                    f"no value_transform declared",
+                    keyword="type",
+                ),
             )
 
 
@@ -329,29 +350,37 @@ def stale_entries(flat: FlatForm) -> list[Discrepancy]:
     or one the form now satisfies.
     """
     out = [
-        Discrepancy("now mapped", field, "remove from `absent_from_definition`")
+        Discrepancy(
+            DiscrepancyKind.ABSENT_FIELD_NOW_MAPPED, field, "remove from `absent_from_definition`"
+        )
         for field in sorted(flat.diff.absent_from_definition)
         if _reaches(field, flat.sources)
     ]
     out += [
-        Discrepancy("no longer a field on this form", field, "remove from `absent_from_definition`")
+        Discrepancy(
+            DiscrepancyKind.ABSENT_FIELD_NOT_ON_FORM, field, "remove from `absent_from_definition`"
+        )
         for field in sorted(flat.diff.absent_from_definition)
         if field not in flat.inputs
     ]
     out += [
-        Discrepancy("now names a real field", source, "remove from `absent_from_source`")
+        Discrepancy(
+            DiscrepancyKind.UNKNOWN_SOURCE_NOW_EXISTS, source, "remove from `absent_from_source`"
+        )
         for source in sorted(flat.diff.absent_from_source)
         if any(field == source or field.startswith(source + ".") for field in flat.inputs)
     ]
     out += [
-        Discrepancy("no longer a rule source", source, "remove from `absent_from_source`")
+        Discrepancy(
+            DiscrepancyKind.UNKNOWN_SOURCE_NOT_READ, source, "remove from `absent_from_source`"
+        )
         for source in sorted(flat.diff.absent_from_source)
         if source not in flat.sources
     ]
 
     # A recorded rule difference has to still name a mapped element and a rule it declares,
     # and the comparison has to still find it with the record set aside.
-    by_element = {paths.render(path): element for path, element in flat.declared.items()}
+    by_element = {paths.join(path): element for path, element in flat.declared.items()}
     differing = {
         f"{found.path}/{keyword}" for keyword, found in _rule_findings(flat, consult_record=False)
     }
@@ -359,19 +388,35 @@ def stale_entries(flat: FlatForm) -> list[Discrepancy]:
         element, _, keyword = entry.rpartition("/")
         declared = by_element.get(element)
         if declared is None:
-            out.append(Discrepancy("no such element", entry, "remove from `differing_rules`"))
+            out.append(
+                Discrepancy(
+                    DiscrepancyKind.RULE_ENTRY_NAMES_NO_ELEMENT,
+                    entry,
+                    "remove from `differing_rules`",
+                )
+            )
         elif keyword == "type" and declared.primitive is None:
             out.append(
-                Discrepancy("element has no simple type", entry, "remove from `differing_rules`")
+                Discrepancy(
+                    DiscrepancyKind.RULE_ENTRY_ELEMENT_HAS_NO_TYPE,
+                    entry,
+                    "remove from `differing_rules`",
+                )
             )
         elif keyword != "type" and keyword not in declared.rules:
             out.append(
                 Discrepancy(
-                    f"element declares no {keyword}", entry, "remove from `differing_rules`"
+                    DiscrepancyKind.RULE_ENTRY_KEYWORD_NOT_DECLARED,
+                    entry,
+                    "remove from `differing_rules`",
                 )
             )
         elif entry not in differing:
-            out.append(Discrepancy("no longer differs", entry, "remove from `differing_rules`"))
+            out.append(
+                Discrepancy(
+                    DiscrepancyKind.RULE_NO_LONGER_DIFFERS, entry, "remove from `differing_rules`"
+                )
+            )
     return out
 
 
@@ -383,12 +428,12 @@ def unrecorded_skips(flat: FlatForm) -> list[Discrepancy]:
     structural check, and a record cannot keep claiming a rule that now reads fine.
     """
     out = [
-        Discrepancy("underivable and unrecorded", rule, why)
+        Discrepancy(DiscrepancyKind.UNREADABLE_RULE_NOT_RECORDED, rule, why)
         for rule, why in sorted(flat.unreadable.items())
         if rule not in flat.diff.unreadable
     ]
     out += [
-        Discrepancy("recorded but now reads fine", rule, why)
+        Discrepancy(DiscrepancyKind.RECORDED_RULE_NOW_READABLE, rule, why)
         for rule, why in sorted(flat.diff.unreadable.items())
         if rule not in flat.unreadable
     ]

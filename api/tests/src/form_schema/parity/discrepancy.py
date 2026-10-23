@@ -31,6 +31,30 @@ class DiscrepancyKind(StrEnum):
     TEXT_NO_LONGER_DIFFERS = "recorded text difference no longer differs"
     ORDER_NO_LONGER_DIFFERS = "recorded order difference no longer differs"
 
+    # XML mapping parity: mapping vs XSD
+    UNDECLARED_TARGET = "target names no element"
+    UNSOURCED_REQUIRED_ELEMENT = "required element has no source"
+    ELEMENTS_OUT_OF_SEQUENCE = "elements out of sequence"
+
+    # XML mapping parity: mapping vs form schema
+    UNMAPPED_FORM_FIELD = "form field is unmapped"
+    UNKNOWN_RULE_SOURCE = "rule source is unknown"
+
+    # XML mapping parity: form schema vs XSD (also RULE_DIFFERS, above)
+    RANGE_UNREADABLE = "range unreadable"
+
+    # XML mapping parity: recorded differences
+    ABSENT_FIELD_NOW_MAPPED = "now mapped"
+    ABSENT_FIELD_NOT_ON_FORM = "no longer a field on this form"
+    UNKNOWN_SOURCE_NOW_EXISTS = "now names a real field"
+    UNKNOWN_SOURCE_NOT_READ = "no longer a rule source"
+    RULE_ENTRY_NAMES_NO_ELEMENT = "no such element"
+    RULE_ENTRY_ELEMENT_HAS_NO_TYPE = "element has no simple type"
+    RULE_ENTRY_KEYWORD_NOT_DECLARED = "element declares no such keyword"
+    RULE_NO_LONGER_DIFFERS = "no longer differs"
+    UNREADABLE_RULE_NOT_RECORDED = "underivable and unrecorded"
+    RECORDED_RULE_NOW_READABLE = "recorded but now reads fine"
+
 
 @dataclasses.dataclass(frozen=True)
 class Discrepancy:
@@ -48,6 +72,10 @@ class Discrepancy:
     detail: str = ""
     keyword: str | None = None
 
+    @property
+    def label(self) -> str:
+        """The kind as it reads in a report, e.g. `"maxLength differs"` for `RULE_DIFFERS`."""
+        return f"{self.keyword} differs" if self.keyword else self.kind
+
     def __str__(self) -> str:
-        label = f"{self.keyword} differs" if self.keyword else self.kind
-        return f"{label}: {self.path}{f' -- {self.detail}' if self.detail else ''}"
+        return f"{self.label}: {self.path}{f' -- {self.detail}' if self.detail else ''}"
