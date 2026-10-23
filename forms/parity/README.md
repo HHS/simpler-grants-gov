@@ -174,8 +174,9 @@ JSON Schema precision is read for explicit numeric types. A decimal string const
 by a pattern is a different representation; a numeric `multipleOf` keyword does not
 constrain it. Such a path still reports missing numeric precision, rather than claiming
 string-pattern equivalence. `totalDigits` and `whiteSpace` remain outside this comparison;
-`fractionDigits` does not establish full XSD equivalence. DAT numeric maximum values are
-not character lengths; numeric DAT ranges remain unchecked by the DAT comparison.
+`fractionDigits` does not establish full XSD equivalence. DAT numeric bounds are
+value bounds, not character lengths; the DAT comparison checks each stated minimum and
+maximum. Arithmetic and rounding remain outside this static comparison.
 
 The plan schema is importable from `site/src/lib/formPlanSchema.ts` without Astro. The
 site's content collection uses that same schema. External orchestration should import
