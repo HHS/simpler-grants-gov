@@ -4,14 +4,15 @@ import {
   type UISchemaElement,
 } from "@jsonforms/core";
 import { RJSFSchema } from "@rjsf/utils";
+import { validateUiSchema } from "src/utils/applyForm/validateUiSchema";
+
 import {
   controlToNodes,
   findIgnoredListRules,
   findUnsupportedControls,
   groupName,
   jsonFormsToUiSchema,
-} from "src/utils/applyForm/jsonFormsUiSchema";
-import { validateUiSchema } from "src/utils/applyForm/validateUiSchema";
+} from "src/components/apply-form/jsonforms/convertUiSchema";
 
 const schema: RJSFSchema = {
   type: "object",

@@ -24,95 +24,36 @@ import { getByPointer } from "src/utils/formData/formDataUtils";
   the UI schema validator all keep working off the tree they already understand.
 */
 
+// --------------------------------------------------
+// Types and constants
+// --------------------------------------------------
+
 export type JsonFormsUiSchema = UISchemaElement;
 
 type FieldNode = UiSchemaField | UiSchemaFieldList;
 type Definition = `/properties/${string}`;
-
-const isLayout = (element: UISchemaElement): element is Layout =>
-  Array.isArray((element as Layout).elements);
-
-const isControlElement = (
-  element: UISchemaElement,
-): element is ControlElement => element.type === "Control";
-
-/** `#/properties/a/properties/b` -> `/properties/a/properties/b` */
-const scopeToDefinition = (scope: string): Definition | undefined =>
-  scope.startsWith("#/properties/")
-    ? (scope.slice(1) as Definition)
-    : undefined;
-
-const schemaAt = (
-  schema: RJSFSchema,
-  definition: string,
-): RJSFSchema | undefined => {
-  try {
-    const found = getByPointer(schema, definition);
-    return found && typeof found === "object" ? found : undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-const isObjectSchema = (schema: RJSFSchema): boolean =>
-  !!schema.properties && typeof schema.properties === "object";
-
-const itemSchema = (schema: RJSFSchema): RJSFSchema | undefined =>
-  schema.type === "array" &&
-  schema.items &&
-  typeof schema.items === "object" &&
-  !Array.isArray(schema.items)
-    ? schema.items
-    : undefined;
-
-/** Every leaf beneath an object, in declaration order, as definition pointers. */
-const leafDefinitions = (schema: RJSFSchema, base: Definition): Definition[] =>
-  isObjectSchema(schema)
-    ? Object.entries(schema.properties as Record<string, RJSFSchema>).flatMap(
-        ([name, child]) => leafDefinitions(child, `${base}/properties/${name}`),
-      )
-    : [base];
+type EntryField = UiSchemaFieldList["children"][number];
 
 /** A top-level property, the only place a field list may sit. */
 const ROOT_PROPERTY = /^\/properties\/([^/]+)$/;
 
-/** A list control's layout for one entry, when the UI schema gives one. */
-const entryLayout = (control: ControlElement): UISchemaElement | undefined => {
-  const detail = (control.options as { detail?: unknown } | undefined)?.detail;
-  return detail && typeof detail === "object" && "type" in detail
-    ? (detail as UISchemaElement)
-    : undefined;
-};
-
-type EntryField = UiSchemaFieldList["children"][number];
+// --------------------------------------------------
+// Conversion
+// --------------------------------------------------
 
 /**
- * A list entry's fields, in the order its `options.detail` lays them out.
- *
- * Scopes inside the detail are relative to one entry, so each control is rebased beneath
- * the list's `items` and then read like any other control. A list nested inside the entry
- * has no field-list equivalent and is left out; `findIgnoredListRules` and
- * `findUnsupportedControls` report what this drops.
+ * The section/field tree equivalent to a JSON Forms UI schema, for the code that reads
+ * that tree: warning formatting, navigation, and the UI schema validator. The root layout
+ * is the form itself, whose title the page already shows, so its elements become the top
+ * level.
  */
-const entryFields = (
-  element: UISchemaElement,
+export const jsonFormsToUiSchema = (
+  uiSchema: JsonFormsUiSchema,
   schema: RJSFSchema,
-  itemsBase: Definition,
-): EntryField[] => {
-  if (isControlElement(element)) {
-    if (!element.scope.startsWith("#/")) return [];
-    const rebased = {
-      ...element,
-      scope: `#${itemsBase}${element.scope.slice(1)}`,
-    };
-    return controlToNodes(rebased, schema).filter(
-      (node): node is EntryField => node.type !== "fieldList",
-    );
-  }
-  return isLayout(element)
-    ? element.elements.flatMap((child) => entryFields(child, schema, itemsBase))
-    : [];
-};
+): UiSchema =>
+  isLayout(uiSchema)
+    ? uiSchema.elements.flatMap((element) => convertElement(element, schema))
+    : convertElement(uiSchema, schema);
 
 /**
  * The field nodes one JSON Forms control stands for.
@@ -189,38 +130,9 @@ export const groupName = (label: string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-const groupLabel = (element: UISchemaElement): string | undefined =>
-  element.type === "Group" ? (element as GroupLayout).label : undefined;
-
-const convertElement = (
-  element: UISchemaElement,
-  schema: RJSFSchema,
-): UiSchemaNode[] => {
-  if (isControlElement(element)) return controlToNodes(element, schema);
-  if (!isLayout(element)) return [];
-
-  const children = element.elements.flatMap((child) =>
-    convertElement(child, schema),
-  );
-  const label = groupLabel(element);
-  return label
-    ? [{ type: "section", name: groupName(label), label, children }]
-    : children;
-};
-
-/**
- * The section/field tree equivalent to a JSON Forms UI schema, for the code that reads
- * that tree: warning formatting, navigation, and the UI schema validator. The root layout
- * is the form itself, whose title the page already shows, so its elements become the top
- * level.
- */
-export const jsonFormsToUiSchema = (
-  uiSchema: JsonFormsUiSchema,
-  schema: RJSFSchema,
-): UiSchema =>
-  isLayout(uiSchema)
-    ? uiSchema.elements.flatMap((element) => convertElement(element, schema))
-    : convertElement(uiSchema, schema);
+// --------------------------------------------------
+// What the conversion drops
+// --------------------------------------------------
 
 /** Scopes of the controls no widget can render, which are skipped. */
 export const findUnsupportedControls = (
@@ -245,23 +157,6 @@ export const findUnsupportedControls = (
     : [];
 };
 
-const droppedEntryScopes = (
-  element: UISchemaElement,
-  schema: RJSFSchema,
-  itemsBase: Definition,
-): string[] => {
-  if (isControlElement(element)) {
-    return entryFields(element, schema, itemsBase).length
-      ? []
-      : [element.scope];
-  }
-  return isLayout(element)
-    ? element.elements.flatMap((child) =>
-        droppedEntryScopes(child, schema, itemsBase),
-      )
-    : [];
-};
-
 /**
  * Rules on fields inside a list, which the field-list widget renders without applying, as
  * `<list scope> -> <field scope>`. Logged so a conditionally disabled field that renders
@@ -282,3 +177,123 @@ export const findIgnoredListRules = (uiSchema: JsonFormsUiSchema): string[] => {
     ? uiSchema.elements.flatMap(findIgnoredListRules)
     : [];
 };
+
+// --------------------------------------------------
+// Helpers
+// --------------------------------------------------
+
+const convertElement = (
+  element: UISchemaElement,
+  schema: RJSFSchema,
+): UiSchemaNode[] => {
+  if (isControlElement(element)) return controlToNodes(element, schema);
+  if (!isLayout(element)) return [];
+
+  const children = element.elements.flatMap((child) =>
+    convertElement(child, schema),
+  );
+  const label = groupLabel(element);
+  return label
+    ? [{ type: "section", name: groupName(label), label, children }]
+    : children;
+};
+
+const groupLabel = (element: UISchemaElement): string | undefined =>
+  element.type === "Group" ? (element as GroupLayout).label : undefined;
+
+/**
+ * A list entry's fields, in the order its `options.detail` lays them out.
+ *
+ * Scopes inside the detail are relative to one entry, so each control is rebased beneath
+ * the list's `items` and then read like any other control. A list nested inside the entry
+ * has no field-list equivalent and is left out; `findIgnoredListRules` and
+ * `findUnsupportedControls` report what this drops.
+ */
+const entryFields = (
+  element: UISchemaElement,
+  schema: RJSFSchema,
+  itemsBase: Definition,
+): EntryField[] => {
+  if (isControlElement(element)) {
+    if (!element.scope.startsWith("#/")) return [];
+    const rebased = {
+      ...element,
+      scope: `#${itemsBase}${element.scope.slice(1)}`,
+    };
+    return controlToNodes(rebased, schema).filter(
+      (node): node is EntryField => node.type !== "fieldList",
+    );
+  }
+  return isLayout(element)
+    ? element.elements.flatMap((child) => entryFields(child, schema, itemsBase))
+    : [];
+};
+
+const droppedEntryScopes = (
+  element: UISchemaElement,
+  schema: RJSFSchema,
+  itemsBase: Definition,
+): string[] => {
+  if (isControlElement(element)) {
+    return entryFields(element, schema, itemsBase).length
+      ? []
+      : [element.scope];
+  }
+  return isLayout(element)
+    ? element.elements.flatMap((child) =>
+        droppedEntryScopes(child, schema, itemsBase),
+      )
+    : [];
+};
+
+/** A list control's layout for one entry, when the UI schema gives one. */
+const entryLayout = (control: ControlElement): UISchemaElement | undefined => {
+  const detail = (control.options as { detail?: unknown } | undefined)?.detail;
+  return detail && typeof detail === "object" && "type" in detail
+    ? (detail as UISchemaElement)
+    : undefined;
+};
+
+const isLayout = (element: UISchemaElement): element is Layout =>
+  Array.isArray((element as Layout).elements);
+
+const isControlElement = (
+  element: UISchemaElement,
+): element is ControlElement => element.type === "Control";
+
+/** `#/properties/a/properties/b` -> `/properties/a/properties/b` */
+const scopeToDefinition = (scope: string): Definition | undefined =>
+  scope.startsWith("#/properties/")
+    ? (scope.slice(1) as Definition)
+    : undefined;
+
+const schemaAt = (
+  schema: RJSFSchema,
+  definition: string,
+): RJSFSchema | undefined => {
+  try {
+    const found = getByPointer(schema, definition);
+    return found && typeof found === "object" ? found : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const isObjectSchema = (schema: RJSFSchema): boolean =>
+  !!schema.properties && typeof schema.properties === "object";
+
+const itemSchema = (schema: RJSFSchema): RJSFSchema | undefined =>
+  schema.type === "array" &&
+  schema.items &&
+  typeof schema.items === "object" &&
+  !Array.isArray(schema.items)
+    ? schema.items
+    : undefined;
+
+/** Every leaf beneath an object, in declaration order, as definition pointers. */
+const leafDefinitions = (schema: RJSFSchema, base: Definition): Definition[] =>
+  isObjectSchema(schema)
+    ? Object.entries(schema.properties as Record<string, RJSFSchema>).flatMap(
+        ([name, child]) => leafDefinitions(child, `${base}/properties/${name}`),
+      )
+    : [base];

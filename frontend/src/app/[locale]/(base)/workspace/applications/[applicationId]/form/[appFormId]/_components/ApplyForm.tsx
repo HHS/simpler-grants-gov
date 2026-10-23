@@ -12,7 +12,6 @@ import {
 } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { getFieldsForNav } from "src/utils/applyForm/applyFormUtils";
-import { JsonFormsUiSchema } from "src/utils/applyForm/jsonFormsUiSchema";
 import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFieldListWarningsAfterDelete";
 import {
   formatTimestamp,
@@ -25,6 +24,7 @@ import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 import { Alert, FormGroup } from "@trussworks/react-uswds";
 
 import { FormFields } from "src/components/apply-form/FormFields";
+import { JsonFormsUiSchema } from "src/components/apply-form/jsonforms/convertUiSchema";
 import { JsonFormsFields } from "src/components/apply-form/jsonforms/JsonFormsFields";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import ApplyFormActionButtons from "./ApplyFormActionButtons";

@@ -4,9 +4,9 @@ import { RJSFSchema } from "@rjsf/utils";
 import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import { UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
-import { JsonFormsUiSchema } from "src/utils/applyForm/jsonFormsUiSchema";
 
 import { FormFields } from "src/components/apply-form/FormFields";
+import { JsonFormsUiSchema } from "src/components/apply-form/jsonforms/convertUiSchema";
 import { JsonFormsFields } from "src/components/apply-form/jsonforms/JsonFormsFields";
 
 export default function PrintForm({

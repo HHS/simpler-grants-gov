@@ -15,13 +15,13 @@ import { FormValidationWarning, UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail, FormRenderer } from "src/types/formResponseTypes";
 
-import { processFormSchema } from "./applyForm/applyFormUtils";
 import {
   findIgnoredListRules,
   findUnsupportedControls,
   jsonFormsToUiSchema,
   JsonFormsUiSchema,
-} from "./applyForm/jsonFormsUiSchema";
+} from "src/components/apply-form/jsonforms/convertUiSchema";
+import { processFormSchema } from "./applyForm/applyFormUtils";
 import {
   unimplementedRuleKeys,
   validateUiSchema,
