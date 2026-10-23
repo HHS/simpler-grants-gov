@@ -1,0 +1,89 @@
+{
+  "notes": "A label the form library standardized across forms, where this form's DAT words it differently.\n\nHelp text a shared question words once for every form, where this form's DAT words it differently.\n\nPrefix and Suffix, which Grants.gov offers as a list and the form does not.\n\nLabels and help text taken from the question bank rather than worded after the DAT.\n\nThe DAT's address heading rows, which have no answer of their own.\n\nFields the key-person forms' groups place differently from the DAT.\n\nAttachments, which the XML transform rules cannot write yet.\n\nThe XML registers for attachments the rules leave out, from each one's JSON path and element\npath as the plan links them.",
+  "reasons": {
+    "ADDRESS_HEADING": {
+      "category": "upstream",
+      "reason": "The DAT numbers the Address heading as a field. It has no answer of its own and no element in the XSD; its fields follow it."
+    },
+    "ATTACHMENT_XML": {
+      "category": "gap",
+      "reason": "Each attachment sits in a wrapper element (e.g. BioSketchsAttached) with no field of its own, which the API's XML transform rules, keyed by the response's properties, cannot write. A rule format keyed by XML path would; until then the emitter leaves them out."
+    },
+    "FREE_TEXT_HELP": {
+      "category": "intentional",
+      "reason": "Grants.gov offers a list of prefixes and suffixes alongside free text. The form uses a free-text field only, so its help does not mention a list."
+    },
+    "PROFILE_GROUPS": {
+      "category": "intentional",
+      "reason": "Every key-person form lays a profile out in the same groups: Name, Role, Address, Contact Information, Credentials, Attachments. Role puts the organization before the department and the project role after the division, where the DAT lists them elsewhere."
+    },
+    "SHARED_HELP": {
+      "category": "intentional",
+      "reason": "Shared questions use one help text across forms, written in the question bank, so it does not follow this DAT's wording: role names, “Please”, or “This field is required.” (the form marks required fields itself)."
+    },
+    "standardLabel": {
+      "category": "intentional",
+      "reason": "Shared questions use one label across forms. The DATs word these fields several ways; the form library standardizes on the most common or clearest."
+    },
+    "BANK_LABELS": {
+      "category": "intentional",
+      "reason": "The form takes its labels from the question bank, which words each question once for every form that asks it."
+    },
+    "BANK_HELP": {
+      "category": "intentional",
+      "reason": "The form takes its help text from the question bank, which words each question once for every form that asks it."
+    },
+    "keyContacts.conditionalStar": {
+      "category": "upstream",
+      "reason": "The DAT stars State and Zip / Postal Code but marks them not required, and its help text requires them only when Country is the United States. The plan treats them as conditional, so it does not star them."
+    },
+    "keyContacts.KEY_CONTACT_HELP": {
+      "category": "intentional",
+      "reason": "The Key Contact question words this help more briefly than the DAT. For Project Role it also leaves out “Additional contacts are optional.”"
+    },
+    "keyContacts.NINE_DIGIT_HELP": {
+      "category": "intentional",
+      "reason": "The shared Address question's help follows the SF-424 DATs (“nine-digit Postal Code”), which the Key Contacts DAT does not use."
+    },
+    "keyContacts.ROLE_GROUP": {
+      "category": "intentional",
+      "reason": "The form's layout groups Project Role, Title and Organizational Affiliation under a Role heading, so Title and Organizational Affiliation come before the name. The DAT and XSD list them after it, as the data does."
+    },
+    "epa.addressOrder": {
+      "category": "intentional",
+      "reason": "The PDF, DAT and current SGG form put ZIP/Postal Code before Country. The spec reuses the shared Address question, which puts Country first (as Key Contacts does), rather than reordering address fields per form."
+    },
+    "epa.NOT_ASKED": {
+      "category": "intentional",
+      "reason": "ContactPersonDataTypeV3 permits County and Province, but neither appears on the official PDF or in the current SGG form, so the form does not ask for them."
+    },
+    "epa.US_ZIP_HELP": {
+      "category": "intentional",
+      "reason": "The shared Person question requires Zip / Postal Code for a US address, and the Address question's help says so. The EPA DAT neither states nor marks that rule."
+    },
+    "rr.ONCE": {
+      "category": "upstream",
+      "reason": "The DAT gives the key person's name and address fields 1 occurrence. The XSD allows 7 key persons, as the DAT's other key-person fields do."
+    },
+    "rr.EACH_KEY_PERSON": {
+      "category": "upstream",
+      "reason": "The DAT marks these required. The XSD requires them only for each key person entered, and key persons are optional."
+    },
+    "rrExpanded.PI_SKETCH_REQUIRED": {
+      "category": "upstream",
+      "reason": "The DAT requires the PD/PI's biographical sketch (1-26); the XSD makes every sketch optional. The form follows the DAT."
+    },
+    "nsfExpanded.ONCE": {
+      "category": "upstream",
+      "reason": "The DAT gives this key-person field 1 occurrence. The XSD allows 99 key persons, as the DAT's other key-person fields do."
+    },
+    "nsfExpanded.NSF_ID_LENGTH": {
+      "category": "upstream",
+      "reason": "The DAT gives NSF ID a maximum of 9 characters. The XSD sets its length with the pattern [0-9A-Z]{9} and states no maximum, and the plan follows the XSD."
+    },
+    "nsfExpanded.KEY_PERSON_SYNERGISTIC_REQUIRED": {
+      "category": "upstream",
+      "reason": "The DAT marks Synergistic Activities required. The XSD requires it only for each key person entered, and key persons are optional."
+    }
+  }
+}

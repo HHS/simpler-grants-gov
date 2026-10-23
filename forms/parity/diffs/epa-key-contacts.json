@@ -1,0 +1,493 @@
+{
+  "slug": "epa-key-contacts-form",
+  "dat": {
+    "differingLabels": {
+      "B1-18": {
+        "plan": "Email",
+        "source": "E-mail Address",
+        "reasonRef": "standardLabel"
+      },
+      "B2-18": {
+        "plan": "Email",
+        "source": "E-mail Address",
+        "reasonRef": "standardLabel"
+      },
+      "B3-18": {
+        "plan": "Email",
+        "source": "E-mail Address",
+        "reasonRef": "standardLabel"
+      },
+      "B4-18": {
+        "plan": "Email",
+        "source": "E-mail Address",
+        "reasonRef": "standardLabel"
+      }
+    },
+    "differingHelp": {
+      "B1-03": {
+        "plan": "Enter the prefix.",
+        "source": "Please select the Authorized Representative's Prefix from the provided list or enter a new Prefix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "B1-04": {
+        "plan": "Enter the first name.",
+        "source": "Please enter the Authorized Representative's First Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-05": {
+        "plan": "Enter the middle name.",
+        "source": "Please enter the Authorized Representative's Middle Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-06": {
+        "plan": "Enter the last name.",
+        "source": "Please enter the Authorized Representative's Last Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-07": {
+        "plan": "Enter the suffix.",
+        "source": "Please select the Authorized Representative's Suffix from the provided list or enter a new Suffix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "B1-08": {
+        "plan": "Enter the position title.",
+        "source": "Please enter the Authorized Representative's Title.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-10": {
+        "plan": "Enter the first line of the street address.",
+        "source": "Please enter the first line of the Authorized Representative's Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-11": {
+        "plan": "Enter the second line of the street address.",
+        "source": "Please enter the second line of the Authorized Representative's Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-12": {
+        "plan": "Enter the city.",
+        "source": "Please enter the Authorized Representative's City.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-13": {
+        "plan": "Select the state. This field is required if the country is the United States.",
+        "source": "Please enter the Authorized Representative's State. Select from the pull down menu.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-14": {
+        "plan": "Enter the zip / postal code. This field is required if the country is the United States.",
+        "source": "Please enter the Authorized Representative's Zip / Postal Code.",
+        "reasonRef": "epa.US_ZIP_HELP"
+      },
+      "B1-15": {
+        "plan": "Select the country.",
+        "source": "Please enter the Authorized Representative's Country. Select from the pull down menu.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-16": {
+        "plan": "Enter the phone number.",
+        "source": "Please enter the Authorized Representative's Phone Number.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-17": {
+        "plan": "Enter the fax number.",
+        "source": "Please enter the Authorized Representative's Fax Number.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B1-18": {
+        "plan": "Enter the email address.",
+        "source": "Please enter the Authorized Representative's E-mail Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-03": {
+        "plan": "Enter the prefix.",
+        "source": "Please select the Payee's Prefix from the provided list or enter a new Prefix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "B2-04": {
+        "plan": "Enter the first name.",
+        "source": "Please enter the Payee's First Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-05": {
+        "plan": "Enter the middle name.",
+        "source": "Please enter the Payee's Middle Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-06": {
+        "plan": "Enter the last name.",
+        "source": "Please enter the Payee's Last Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-07": {
+        "plan": "Enter the suffix.",
+        "source": "Please select the Payee's Suffix from the provided list or enter a new Suffix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "B2-08": {
+        "plan": "Enter the position title.",
+        "source": "Please enter the Payee's Title.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-10": {
+        "plan": "Enter the first line of the street address.",
+        "source": "Please enter the first line of the Payee's Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-11": {
+        "plan": "Enter the second line of the street address.",
+        "source": "Please enter the second line of the Payee's Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-12": {
+        "plan": "Enter the city.",
+        "source": "Please enter the Payee's City.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-13": {
+        "plan": "Select the state. This field is required if the country is the United States.",
+        "source": "Please enter the Payee's State. Select from the pull down menu.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-14": {
+        "plan": "Enter the zip / postal code. This field is required if the country is the United States.",
+        "source": "Please enter the Payee's Zip / Postal Code.",
+        "reasonRef": "epa.US_ZIP_HELP"
+      },
+      "B2-15": {
+        "plan": "Select the country.",
+        "source": "Please enter the Payee's Country. Select from the pull down menu.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-16": {
+        "plan": "Enter the phone number.",
+        "source": "Please enter the Payee's Phone Number.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-17": {
+        "plan": "Enter the fax number.",
+        "source": "Please enter the Payee's Fax Number.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B2-18": {
+        "plan": "Enter the email address.",
+        "source": "Please enter the Payee's E-mail Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-03": {
+        "plan": "Enter the prefix.",
+        "source": "Please select the Administrative Contact's Prefix from the provided list or enter a new Prefix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "B3-04": {
+        "plan": "Enter the first name.",
+        "source": "Please enter the Administrative Contact's First Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-05": {
+        "plan": "Enter the middle name.",
+        "source": "Please enter the Administrative Contact's Middle Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-06": {
+        "plan": "Enter the last name.",
+        "source": "Please enter the Administrative Contact's Last Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-07": {
+        "plan": "Enter the suffix.",
+        "source": "Please select the Administrative Contact's Suffix from the provided list or enter a new Suffix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "B3-08": {
+        "plan": "Enter the position title.",
+        "source": "Please enter the Administrative Contact's Title.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-10": {
+        "plan": "Enter the first line of the street address.",
+        "source": "Please enter the first line of the Administrative Contact's Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-11": {
+        "plan": "Enter the second line of the street address.",
+        "source": "Please enter the second line of the Administrative Contact's Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-12": {
+        "plan": "Enter the city.",
+        "source": "Please enter the Administrative Contact's City.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-13": {
+        "plan": "Select the state. This field is required if the country is the United States.",
+        "source": "Please enter the Administrative Contact's State. Select from the pull down menu.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-14": {
+        "plan": "Enter the zip / postal code. This field is required if the country is the United States.",
+        "source": "Please enter the Administrative Contact's Zip / Postal Code.",
+        "reasonRef": "epa.US_ZIP_HELP"
+      },
+      "B3-15": {
+        "plan": "Select the country.",
+        "source": "Please enter the Administrative Contact's Country. Select from the pull down menu.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-16": {
+        "plan": "Enter the phone number.",
+        "source": "Please enter the Administrative Contact's Phone Number.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-17": {
+        "plan": "Enter the fax number.",
+        "source": "Please enter the Administrative Contact's Fax Number.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B3-18": {
+        "plan": "Enter the email address.",
+        "source": "Please enter the Administrative Contact's E-mail Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-03": {
+        "plan": "Enter the prefix.",
+        "source": "Please select the Project Manager's Prefix from the provided list or enter a new Prefix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "B4-04": {
+        "plan": "Enter the first name.",
+        "source": "Please enter the Project Manager's First Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-05": {
+        "plan": "Enter the middle name.",
+        "source": "Please enter the Project Manager's Middle Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-06": {
+        "plan": "Enter the last name.",
+        "source": "Please enter the Project Manager's Last Name.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-07": {
+        "plan": "Enter the suffix.",
+        "source": "Please select the Project Manager's Suffix from the provided list or enter a new Suffix not provided on the list.",
+        "reasonRef": "FREE_TEXT_HELP"
+      },
+      "B4-08": {
+        "plan": "Enter the position title.",
+        "source": "Please enter the Project Manager's Title.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-10": {
+        "plan": "Enter the first line of the street address.",
+        "source": "Please enter the first line of the Project Manager's Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-11": {
+        "plan": "Enter the second line of the street address.",
+        "source": "Please enter the second line of the Project Manager's Street Address.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-12": {
+        "plan": "Enter the city.",
+        "source": "Please enter the Project Manager's City.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-13": {
+        "plan": "Select the state. This field is required if the country is the United States.",
+        "source": "Please enter the Project Manager's State. Select from the pull down menu.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-14": {
+        "plan": "Enter the zip / postal code. This field is required if the country is the United States.",
+        "source": "Please enter the Project Manager's Zip / Postal Code.",
+        "reasonRef": "epa.US_ZIP_HELP"
+      },
+      "B4-15": {
+        "plan": "Select the country.",
+        "source": "Please enter the Project Manager's Country. Select from the pull down menu.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-16": {
+        "plan": "Enter the phone number.",
+        "source": "Please enter the Project Manager's Phone Number.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-17": {
+        "plan": "Enter the fax number.",
+        "source": "Please enter the Project Manager's Fax Number.",
+        "reasonRef": "SHARED_HELP"
+      },
+      "B4-18": {
+        "plan": "Enter the email address.",
+        "source": "Please enter the Project Manager's E-mail Address.",
+        "reasonRef": "SHARED_HELP"
+      }
+    }
+  },
+  "xsd": {
+    "absentFromPlan": {
+      "AuthorizedRepresentative/Address/County": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "AuthorizedRepresentative/Address/Province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "Payee/Address/County": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "Payee/Address/Province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "AdminstrativeContact/Address/County": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "AdminstrativeContact/Address/Province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "ProjectManager/Address/County": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "ProjectManager/Address/Province": {
+        "reasonRef": "epa.NOT_ASKED"
+      }
+    }
+  },
+  "jsonSchema": {
+    "absentFromPlan": {
+      "authorized_representative.address.county": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "authorized_representative.address.province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "payee.address.county": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "payee.address.province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "administrative_contact.address.county": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "administrative_contact.address.province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "project_manager.address.county": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "project_manager.address.province": {
+        "reasonRef": "epa.NOT_ASKED"
+      }
+    }
+  },
+  "xmlMapping": {
+    "absentFromPlan": {
+      "authorized_representative.address.county -> AuthorizedRepresentative/Address/County": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "authorized_representative.address.province -> AuthorizedRepresentative/Address/Province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "payee.address.county -> Payee/Address/County": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "payee.address.province -> Payee/Address/Province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "administrative_contact.address.county -> AdminstrativeContact/Address/County": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "administrative_contact.address.province -> AdminstrativeContact/Address/Province": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "project_manager.address.county -> ProjectManager/Address/County": {
+        "reasonRef": "epa.NOT_ASKED"
+      },
+      "project_manager.address.province -> ProjectManager/Address/Province": {
+        "reasonRef": "epa.NOT_ASKED"
+      }
+    }
+  },
+  "uiSchema": {
+    "outOfOrder": {
+      "authorized_representative.address.country": {
+        "reasonRef": "epa.addressOrder"
+      },
+      "payee.address.country": {
+        "reasonRef": "epa.addressOrder"
+      },
+      "administrative_contact.address.country": {
+        "reasonRef": "epa.addressOrder"
+      },
+      "project_manager.address.country": {
+        "reasonRef": "epa.addressOrder"
+      }
+    }
+  },
+  "notes": [
+    "epa-key-contacts.ts:28: County and Province for every role, keyed by `path(role, field)`.",
+    "epa-key-contacts.ts:49: Every help text that differs from the DAT, pinned word for word.",
+    "epa-key-contacts.ts:51: authorized_representative.name.prefix",
+    "epa-key-contacts.ts:58: authorized_representative.name.first_name",
+    "epa-key-contacts.ts:64: authorized_representative.name.middle_name",
+    "epa-key-contacts.ts:70: authorized_representative.name.last_name",
+    "epa-key-contacts.ts:76: authorized_representative.name.suffix",
+    "epa-key-contacts.ts:83: authorized_representative.title",
+    "epa-key-contacts.ts:89: authorized_representative.address.street1",
+    "epa-key-contacts.ts:96: authorized_representative.address.street2",
+    "epa-key-contacts.ts:103: authorized_representative.address.city",
+    "epa-key-contacts.ts:109: authorized_representative.address.state",
+    "epa-key-contacts.ts:116: authorized_representative.address.zip_code",
+    "epa-key-contacts.ts:122: authorized_representative.address.country",
+    "epa-key-contacts.ts:129: authorized_representative.phone",
+    "epa-key-contacts.ts:135: authorized_representative.fax",
+    "epa-key-contacts.ts:141: authorized_representative.email",
+    "epa-key-contacts.ts:147: payee.name.prefix",
+    "epa-key-contacts.ts:154: payee.name.first_name",
+    "epa-key-contacts.ts:160: payee.name.middle_name",
+    "epa-key-contacts.ts:166: payee.name.last_name",
+    "epa-key-contacts.ts:172: payee.name.suffix",
+    "epa-key-contacts.ts:179: payee.title",
+    "epa-key-contacts.ts:185: payee.address.street1",
+    "epa-key-contacts.ts:191: payee.address.street2",
+    "epa-key-contacts.ts:197: payee.address.city",
+    "epa-key-contacts.ts:203: payee.address.state",
+    "epa-key-contacts.ts:209: payee.address.zip_code",
+    "epa-key-contacts.ts:215: payee.address.country",
+    "epa-key-contacts.ts:221: payee.phone",
+    "epa-key-contacts.ts:227: payee.fax",
+    "epa-key-contacts.ts:233: payee.email",
+    "epa-key-contacts.ts:239: administrative_contact.name.prefix",
+    "epa-key-contacts.ts:246: administrative_contact.name.first_name",
+    "epa-key-contacts.ts:252: administrative_contact.name.middle_name",
+    "epa-key-contacts.ts:258: administrative_contact.name.last_name",
+    "epa-key-contacts.ts:264: administrative_contact.name.suffix",
+    "epa-key-contacts.ts:271: administrative_contact.title",
+    "epa-key-contacts.ts:277: administrative_contact.address.street1",
+    "epa-key-contacts.ts:284: administrative_contact.address.street2",
+    "epa-key-contacts.ts:291: administrative_contact.address.city",
+    "epa-key-contacts.ts:297: administrative_contact.address.state",
+    "epa-key-contacts.ts:304: administrative_contact.address.zip_code",
+    "epa-key-contacts.ts:310: administrative_contact.address.country",
+    "epa-key-contacts.ts:317: administrative_contact.phone",
+    "epa-key-contacts.ts:323: administrative_contact.fax",
+    "epa-key-contacts.ts:329: administrative_contact.email",
+    "epa-key-contacts.ts:335: project_manager.name.prefix",
+    "epa-key-contacts.ts:342: project_manager.name.first_name",
+    "epa-key-contacts.ts:348: project_manager.name.middle_name",
+    "epa-key-contacts.ts:354: project_manager.name.last_name",
+    "epa-key-contacts.ts:360: project_manager.name.suffix",
+    "epa-key-contacts.ts:367: project_manager.title",
+    "epa-key-contacts.ts:373: project_manager.address.street1",
+    "epa-key-contacts.ts:380: project_manager.address.street2",
+    "epa-key-contacts.ts:387: project_manager.address.city",
+    "epa-key-contacts.ts:393: project_manager.address.state",
+    "epa-key-contacts.ts:400: project_manager.address.zip_code",
+    "epa-key-contacts.ts:406: project_manager.address.country",
+    "epa-key-contacts.ts:413: project_manager.phone",
+    "epa-key-contacts.ts:419: project_manager.fax",
+    "epa-key-contacts.ts:425: project_manager.email"
+  ]
+}

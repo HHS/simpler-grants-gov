@@ -256,6 +256,23 @@ const sameValue = (a: Value, b: Value) =>
 const isPinned = (entry: unknown): entry is Pinned =>
   typeof entry === "object" && entry !== null && "plan" in entry;
 
+/** The evaluator's direct-record precedence over wholesale DAT wording. */
+export function recordingFor(
+  pair: Pick<Pair, "registers" | "wording">,
+  d: Discrepancy,
+) {
+  const direct =
+    d.recordAs && pair.registers[d.recordAs.register]?.[d.recordAs.key];
+  if (direct) return { entry: direct, scope: "direct" as const };
+  const entry =
+    d.kind === TEXT.label.kind
+      ? pair.wording?.labels
+      : d.kind === TEXT.help.kind
+        ? pair.wording?.help
+        : undefined;
+  return entry && { entry, scope: "wording" as const };
+}
+
 /**
  * Splits found differences into recorded and unexpected, and finds stale entries. A
  * difference whose values no longer match its pinned entry is unexpected again, reported
@@ -263,19 +280,10 @@ const isPinned = (entry: unknown): entry is Pinned =>
  */
 function settle(pair: Pair, found: readonly Discrepancy[]): Settled {
   const { registers } = pair;
-  const wholesale = (d: Discrepancy) =>
-    d.kind === TEXT.label.kind
-      ? pair.wording?.labels
-      : d.kind === TEXT.help.kind
-        ? pair.wording?.help
-        : undefined;
-  const entryFor = (d: Discrepancy) =>
-    (d.recordAs && registers[d.recordAs.register]?.[d.recordAs.key]) ??
-    wholesale(d);
   const accepted: Accepted[] = [];
   const unexpected: Discrepancy[] = [];
   for (const d of found) {
-    const entry = entryFor(d);
+    const entry = recordingFor(pair, d)?.entry;
     if (entry === undefined) {
       unexpected.push(d);
     } else if (
@@ -372,6 +380,17 @@ export interface PairResult {
   /** Recorded differences that no longer exist. */
   stale: Discrepancy[];
 }
+
+/** Unrecorded findings, in the same order for CLI and site presentation. */
+export const unexpectedIn = (result: PairResult): Discrepancy[] => [
+  ...result.missingFields,
+  ...result.extraFields,
+  ...result.fieldOrder,
+  ...result.fieldLabels,
+  ...result.fieldConstraints,
+  ...result.fieldOccurrences,
+  ...result.helpText,
+];
 
 const OCCURRENCES_KIND = "maxOccurs differs";
 

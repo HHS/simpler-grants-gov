@@ -1,3 +1,4 @@
+import { unexpectedIn } from "./harness/compare.ts";
 /**
  * Each plan field beside the same field in the DAT, the XSD and the compiled form, as the form
  * library's comparison sheet shows it.
@@ -235,16 +236,6 @@ interface Side {
   /** Plan keys in the source's order, for position. */
   sourceOrder: string[];
 }
-
-const unexpectedIn = (result: PairResult): Discrepancy[] => [
-  ...result.missingFields,
-  ...result.extraFields,
-  ...result.fieldOrder,
-  ...result.fieldLabels,
-  ...result.fieldConstraints,
-  ...result.fieldOccurrences,
-  ...result.helpText,
-];
 
 /** `attributeFor` names the row each discrepancy is shown on; by default, the one its kind concerns. */
 function side(

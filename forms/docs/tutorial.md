@@ -11,7 +11,7 @@ By the end you'll have:
 5. Swapped your contact fields for the **question bank's** standard ones, and handled the trade-off that creates.
 6. **Installed** the form into the API with `@Sgg.sync`, and opened it in the frontend.
 
-Every command and file in this guide was run as written. The outputs shown are real, trimmed to the relevant lines.
+The original walkthrough produced the outputs shown, trimmed to the relevant lines. The recorded-difference examples now use JSON and named reasons; those snippets were revalidated against the data loader. The full install and frontend walkthrough has not been replayed for this storage revision, and aggregate counts below reflect the earlier run.
 
 ## Concepts
 
@@ -23,7 +23,7 @@ Every command and file in this guide was run as written. The outputs shown are r
 | **Form specification** | The form itself, in TypeSpec: its data model (`form.tsp`), how it's laid out (`layout.tsp`) and how it maps to the XSD (`xsd.tsp`). | `specs/forms/<id>/` |
 | **Question bank** | Reusable questions, like a person's name or address, shared across forms so they're worded and validated the same way everywhere. | `specs/questions/` |
 | **Parity checks** | Tests that compare the plan with the DAT and XSD (*requirements*), the compiled form with the plan (*implementation*), and the XML mapping with the XSD (*XML*). | `parity/` |
-| **Recorded differences** | Known, accepted differences, each with a category (`upstream`, `intentional` or `gap`) and a reason. | `parity/diffs/<slug>.ts` |
+| **Recorded differences** | Known, accepted differences, each with a category (`upstream`, `intentional` or `gap`) and a reason. | `parity/diffs/<slug>.json` |
 
 See [`parity/README.md`](../parity/README.md) for every check the suite runs.
 
@@ -398,32 +398,21 @@ Every label and help text is copied from the DAT word for word, and the fields a
 
 ### 1.2 Register the plan with the parity suite
 
-Create `parity/diffs/key-contacts-tutorial.ts`, the record of this form's known differences:
+Create `parity/diffs/key-contacts-tutorial.json`, the record of this form's known differences:
 
-```bash
-touch parity/diffs/key-contacts-tutorial.ts
+```json
+{
+  "slug": "key-contacts-tutorial"
+}
 ```
 
-Paste this in. It records no differences yet:
+Import it in `parity/diffs/index.ts`, then add its filename/data pair to `RECORDS`:
 
 ```ts
-import type { FormDiff } from "../harness/model.ts";
+import keyContactsTutorial from "./key-contacts-tutorial.json" with { type: "json" };
 
-export const DIFF: FormDiff = {
-  slug: "key-contacts-tutorial",
-};
-```
-
-Then add it to `DIFFS` in `parity/diffs/index.ts`:
-
-```ts
-import { DIFF as keyContactsTutorial } from "./key-contacts-tutorial.ts";
-
-export const DIFFS: FormDiff[] = [
-  keyContacts,
-  keyContactsTutorial,
-  // ...
-];
+// Add this tuple to the existing RECORDS array, before its .map call:
+["key-contacts-tutorial", keyContactsTutorial],
 ```
 
 ### 1.3 Run the checks
@@ -448,29 +437,37 @@ This is an **upstream discrepancy**: Grants.gov disagrees with itself. The DAT p
 
 ### 1.4 Record the upstream discrepancy
 
-Replace `parity/diffs/key-contacts-tutorial.ts` with:
+Add this named entry inside the `reasons` object in `parity/diffs/reasons.json`:
 
-```ts
-import type { FormDiff, Pinned } from "../harness/model.ts";
+```json
+{
+  "TUTORIAL_CONDITIONAL_STAR": {
+    "category": "upstream",
+    "reason": "The DAT stars State and Zip / Postal Code but marks them not required, and the XSD makes them optional. Its help text requires them only when Country is the United States, so the plan treats them as conditional."
+  }
+}
+```
 
-/** The DAT stars State and Zip / Postal Code, but its Required column and the XSD make them optional. */
-const conditionalStar = (label: string): Pinned => ({
-  plan: label,
-  source: `* ${label}`,
-  category: "upstream",
-  reason:
-    "The DAT stars State and Zip / Postal Code but marks them not required, and the XSD makes them optional. Its help text requires them only when Country is the United States, so the plan treats them as conditional.",
-});
+Replace `parity/diffs/key-contacts-tutorial.json` with:
 
-export const DIFF: FormDiff = {
-  slug: "key-contacts-tutorial",
-  dat: {
-    differingLabels: {
-      "7-14": conditionalStar("State"),
-      "7-17": conditionalStar("Zip / Postal Code"),
-    },
-  },
-};
+```json
+{
+  "slug": "key-contacts-tutorial",
+  "dat": {
+    "differingLabels": {
+      "7-14": {
+        "plan": "State",
+        "source": "* State",
+        "reasonRef": "TUTORIAL_CONDITIONAL_STAR"
+      },
+      "7-17": {
+        "plan": "Zip / Postal Code",
+        "source": "* Zip / Postal Code",
+        "reasonRef": "TUTORIAL_CONDITIONAL_STAR"
+      }
+    }
+  }
+}
 ```
 
 A **pinned** record like this stores both values (`plan` and `source`). If either one changes later, the difference is reported again instead of staying hidden.
@@ -1042,51 +1039,56 @@ The form no longer does what the plan says, and the comparison sheet flags it to
 
 ### 4.2 Record the difference
 
-When a failure is a mistake, fix whichever side is wrong. When it's a deliberate choice, record it. Replace `parity/diffs/key-contacts-tutorial.ts` with:
+When a failure is a mistake, fix whichever side is wrong. When it is deliberate, record it. Add this entry inside the shared `reasons` object:
+
+```json
+{
+  "TUTORIAL_GIVEN_NAME": {
+    "category": "intentional",
+    "reason": "Tutorial step 4: the form asks for a given name, which reads more naturally to applicants whose family name comes first."
+  }
+}
+```
+
+Replace `parity/diffs/key-contacts-tutorial.json` with:
 
 <details>
-<summary><code>key-contacts-tutorial.ts</code> with the step 4 record</summary>
+<summary><code>key-contacts-tutorial.json</code> with the step 4 record</summary>
 
-```ts
-import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
-
-/** The DAT stars State and Zip / Postal Code, but its Required column and the XSD make them optional. */
-const conditionalStar = (label: string): Pinned => ({
-  plan: label,
-  source: `* ${label}`,
-  category: "upstream",
-  reason:
-    "The DAT stars State and Zip / Postal Code but marks them not required, and the XSD makes them optional. Its help text requires them only when Country is the United States, so the plan treats them as conditional.",
-});
-
-/** Tutorial step 4: the form renames First Name, which the plan still words as the DAT does. */
-const GIVEN_NAME: Recorded = {
-  category: "intentional",
-  reason:
-    "Tutorial step 4: the form asks for a given name, which reads more naturally to applicants whose family name comes first.",
-};
-
-export const DIFF: FormDiff = {
-  slug: "key-contacts-tutorial",
-  dat: {
-    differingLabels: {
-      "7-14": conditionalStar("State"),
-      "7-17": conditionalStar("Zip / Postal Code"),
-    },
-  },
-  uiSchema: {
-    differingLabels: {
-      "key_contacts[].name.first_name": { ...GIVEN_NAME, plan: "First Name", source: "Given Name" },
-    },
-    differingHelp: {
-      "key_contacts[].name.first_name": {
-        ...GIVEN_NAME,
-        plan: "Enter the First Name. This field is required.",
-        source: "Enter the contact's given name.",
+```json
+{
+  "slug": "key-contacts-tutorial",
+  "dat": {
+    "differingLabels": {
+      "7-14": {
+        "plan": "State",
+        "source": "* State",
+        "reasonRef": "TUTORIAL_CONDITIONAL_STAR"
       },
-    },
+      "7-17": {
+        "plan": "Zip / Postal Code",
+        "source": "* Zip / Postal Code",
+        "reasonRef": "TUTORIAL_CONDITIONAL_STAR"
+      }
+    }
   },
-};
+  "uiSchema": {
+    "differingLabels": {
+      "key_contacts[].name.first_name": {
+        "reasonRef": "TUTORIAL_GIVEN_NAME",
+        "plan": "First Name",
+        "source": "Given Name"
+      }
+    },
+    "differingHelp": {
+      "key_contacts[].name.first_name": {
+        "reasonRef": "TUTORIAL_GIVEN_NAME",
+        "plan": "Enter the First Name. This field is required.",
+        "source": "Enter the contact's given name."
+      }
+    }
+  }
+}
 ```
 
 </details>
@@ -1110,7 +1112,7 @@ In the form library, nothing looks wrong: the field tree is back to step 3, with
 
 ### 4.4 Back to baseline
 
-Restore `parity/diffs/key-contacts-tutorial.ts` to its step 1 version (the two upstream labels only). Every check passes again.
+Restore `parity/diffs/key-contacts-tutorial.json` to its step 1 version (the two upstream labels only). Every check passes again.
 
 ---
 
@@ -1704,35 +1706,37 @@ In the form library, the **Unrecorded differences** tile shows **19 in 16 fields
 
 ### 5.7 Record the differences as intentional
 
-You could pin each field's label and help one by one, as `parity/diffs/key-contacts.ts` does. When every difference has the same cause, `wording` accepts them all at once, with one reason. Add it to `parity/diffs/key-contacts-tutorial.ts`:
+You could pin each field's label and help one by one, as `parity/diffs/key-contacts.json` does. When every difference has the same cause, `wording` accepts them all at once. Replace the tutorial record with:
 
-```ts
-import type { FormDiff, Pinned } from "../harness/model.ts";
-import { BANK_WORDING } from "./common.ts";
-
-/** The DAT stars State and Zip / Postal Code, but its Required column and the XSD make them optional. */
-const conditionalStar = (label: string): Pinned => ({
-  plan: label,
-  source: `* ${label}`,
-  category: "upstream",
-  reason:
-    "The DAT stars State and Zip / Postal Code but marks them not required, and the XSD makes them optional. Its help text requires them only when Country is the United States, so the plan treats them as conditional.",
-});
-
-export const DIFF: FormDiff = {
-  slug: "key-contacts-tutorial",
-  // Step 5: the contact fields come from the question bank's Person, so the plan uses its wording.
-  wording: BANK_WORDING,
-  dat: {
-    differingLabels: {
-      "7-14": conditionalStar("State"),
-      "7-17": conditionalStar("Zip / Postal Code"),
+```json
+{
+  "slug": "key-contacts-tutorial",
+  "wording": {
+    "labels": {
+      "reasonRef": "BANK_LABELS"
     },
+    "help": {
+      "reasonRef": "BANK_HELP"
+    }
   },
-};
+  "dat": {
+    "differingLabels": {
+      "7-14": {
+        "plan": "State",
+        "source": "* State",
+        "reasonRef": "TUTORIAL_CONDITIONAL_STAR"
+      },
+      "7-17": {
+        "plan": "Zip / Postal Code",
+        "source": "* Zip / Postal Code",
+        "reasonRef": "TUTORIAL_CONDITIONAL_STAR"
+      }
+    }
+  }
+}
 ```
 
-`BANK_WORDING` is shared by every form that takes its wording from the question bank (see `parity/diffs/common.ts`). Each difference is still compared and shown, with both values side by side.
+`BANK_LABELS` and `BANK_HELP` are shared definitions in `parity/diffs/reasons.json`. Each difference is still compared and shown with both values. The tutorial's conditional-star record remains explicit.
 
 ### Check
 
@@ -1857,10 +1861,10 @@ npm run dev
 The tutorial form shouldn't be committed. From the repository root, remove everything it added:
 
 ```bash
-git restore forms/specs/main.tsp forms/parity/diffs/index.ts api/src/form_schema/forms/__init__.py
+git restore forms/specs/main.tsp forms/parity/diffs/index.ts forms/parity/diffs/reasons.json api/src/form_schema/forms/__init__.py
 rm -r forms/specs/forms/key-contacts-tutorial \
   forms/site/src/content/forms/key-contacts-tutorial.json \
-  forms/parity/diffs/key-contacts-tutorial.ts \
+  forms/parity/diffs/key-contacts-tutorial.json \
   api/src/form_schema/forms/key_contacts_tutorial_generated
 (cd forms && npm run clean && npm run compile && npm run sync:check && npm run test:parity)
 ```

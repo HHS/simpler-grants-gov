@@ -89,8 +89,9 @@ schema must accept nothing the XSD rejects, but may be stricter.
 
 ## Adding a form
 
-Write `diffs/<form>.ts` exporting a `FormDiff` whose `slug` is the plan's, and add it to
-`DIFFS` in `diffs/index.ts`. The plan needs `dat_url`, `xsd_url`, and fields with
+Write `diffs/<form>.json` with the plan's `slug`, import it in `diffs/index.ts`, and add
+its filename/data pair to `RECORDS`. The loader validates it and resolves named reasons into
+the unchanged `FormDiff` evaluator contract. The plan needs `dat_url`, `xsd_url`, and fields with
 `dat_field`, `json_path` and `xml_path`. A plan without a `spec_id` gets the requirements
 checks only; the rest are skipped until the form is compiled. A test fails if a plan with a
 `spec_id` is not registered.
@@ -99,7 +100,7 @@ checks only; the rest are skipped until the form is compiled. A test fails if a 
 
 Each failure lists every difference of one kind. For each, either fix the artifact that is
 wrong, or record the difference in the form's `diffs/` file. Every entry has a `category`
-and a `reason`:
+and a `reason`, either inline or through a `reasonRef` to `diffs/reasons.json`:
 
 | `category`    | Shown as               | Meaning                                               |
 | ------------- | ---------------------- | ----------------------------------------------------- |
@@ -113,17 +114,19 @@ differently.
 A difference in a value (a rule, a label or help text) is recorded with the values it was
 accepted at, so it cannot drift unnoticed. Use `null` for a side that states nothing:
 
-```ts
-dat: {
-  differingRules: {
-    "7-01/maxLength": {
-      plan: 6,
-      source: 4,
-      category: "upstream",
-      reason: "The DAT says 4; the XSD's type allows 6.",
-    },
-  },
-},
+```json
+{
+  "dat": {
+    "differingRules": {
+      "7-01/maxLength": {
+        "plan": 6,
+        "source": 4,
+        "category": "upstream",
+        "reason": "The DAT says 4; the XSD's type allows 6."
+      }
+    }
+  }
+}
 ```
 
 If either value later changes, the difference is reported again under its own check, with
@@ -157,3 +160,78 @@ harness/
   compare.ts          comparePair(): the six checks, with recorded differences applied
   model.ts            paths, fields, discrepancies, recorded differences (+ model.test.ts)
 ```
+
+## Maintenance CLI prototype
+
+From `forms/`, list registered plan slugs and inspect one form:
+
+```bash
+npm run --silent form -- findings
+npm run --silent form -- findings key-contacts --comparison dat --format json
+npm run --silent form -- findings key-contacts --include-recorded --format json
+```
+
+`checkForm` owns comparison and normalization. The CLI projects its typed results; it
+neither parses test output nor runs another checker. Fetch and compile inputs explicitly.
+Default output is a TOON table; `--format json` preserves complete values and prior decisions.
+`--full` shows untruncated summaries. Zero counts and `notRun` distinguish a clean check
+from an unavailable comparison. Static parity is not production approval.
+
+Record one explicitly reviewed decision using its exact target and current fingerprint:
+
+```bash
+npm run --silent form -- accept key-contacts \
+  --comparison dat --register differingLabels --key 7-10 \
+  --expect '<fingerprint>' --category intentional \
+  --reason 'The shared address question uses the reviewed standard label.' --dry-run
+```
+
+Remove `--dry-run` to write. The preview names the destination and shows the selected old
+and proposed stored entries. Dry-run creates no temporary file. The checker supplies pin
+values, including numbers, arrays and null; the caller chooses category and rationale.
+Stale entries and suite issues cannot be accepted. `renamed` and the reserved `__proto__`
+key are outside this command's scope.
+
+Fingerprints bind observations, status and the current decision, including whether it is
+a direct record or wholesale wording. Replacing a prior decision requires `--replace`.
+If a direct record is already accepted by the checker and its category/reason are unchanged,
+retry succeeds without writing, including whitespace-equivalent pins and reordered enum
+arrays. This uses the checker's equivalence; the CLI has no second equality policy.
+Wholesale wording never qualifies for that direct-record shortcut and is never broadened
+by `accept`.
+
+The five form JSON files are the sole per-form acceptance store. `reasons.json` owns named
+category/reason definitions; entries either reference one or contain an explicit inline
+decision. Existing matching references are retained, and new entries reuse an exact matching
+named reason. Accept never changes a shared definition. Source comments remain as `notes`
+that the loader excludes from the evaluator contract.
+
+Registration owns each record and its destination; there is no directory scan or inferred
+slug filename. Static JSON imports preserve the site's bundling and dev refresh behavior.
+The writer rereads the selected file and shared reasons, rejects an evaluated-record mismatch,
+checks that resolution changes only the selected entry, and verifies both files' bytes before
+same-directory replacement. No TypeScript source is parsed, rewritten or executed to validate
+a write. Atomic rename is an optimistic guard, not a multi-file transaction or OS compare-and-swap.
+
+The data tradeoff is explicit: helper-generated repeated paths, notably the three attachment
+registers, are expanded. Shared rationale stays named, but the old executable grouping is
+not retained. The plan remains the owner of JSON/XML links. This candidate chooses predictable
+writes across all five forms over a growing TypeScript editing subset; it adds no JSON overlay
+or generic group-expression language.
+
+The local trial wrote a selected decision in each registered form and compared the entire
+resolved export with a manual one-entry reference. A real shared `Street1` to `Street 1`
+change, with 11 explicitly manual plan adoptions, produced five new DAT findings; all five
+were recorded, including EPA's four formerly computed entries. Retries and stale-token refusal
+were exercised. All authored trial inputs were restored. This proves the workflow, not human
+time savings or maintainer acceptance.
+
+The CLI stays in `parity/cli/`; evaluator policy stays in `parity/harness/`; stored data,
+resolution and registration stay in `parity/diffs/`. No site write API, new framework or agent
+integration is introduced. `prune`, `adopt-wording`, `docs:check` and `docs:update` remain deferred.
+The tutorial's storage examples are updated manually; automatic tutorial maintenance is separate.
+
+Commands are noninteractive. Exit 0 means inspection/write/no-op, 1 means execution/conflict,
+and 2 means invalid arguments. Unknown flags fail before evaluation. Each command supports
+`--help`; `node parity/cli/index.ts --version` prints the prototype version without loading
+the checker/compiler. Use npm's `--silent` wrapper for structured stdout.
