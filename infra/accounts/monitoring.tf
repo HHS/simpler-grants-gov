@@ -20,7 +20,7 @@ locals {
 }
 
 module "newrelic-aws-cloud-integrations" {
-  source = "github.com/newrelic/terraform-provider-newrelic//examples/modules/cloud-integrations/aws?ref=v3.58.1"
+  source = "github.com/newrelic/terraform-provider-newrelic//examples/modules/cloud-integrations/aws?ref=v3.101.3"
 
   newrelic_account_id     = data.aws_ssm_parameter.newrelic_account_id.value
   newrelic_account_region = "US"
