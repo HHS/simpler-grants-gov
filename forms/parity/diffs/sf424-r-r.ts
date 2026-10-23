@@ -209,13 +209,7 @@ export const DIFF: FormDiff = {
         plan: "* Is This Application Being Submitted to Other Agencies?",
         source: "Is this application being submitted to other agencies?",
       },
-      "08-2-3": {
-        category: "intentional",
-        reason:
-          "DAT FID768 v5.0 08-2-3: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
-        plan: "What Other Agencies?",
-        source: "What other Agencies?",
-      },
+
       "09-0": {
         category: "intentional",
         reason:
@@ -230,13 +224,7 @@ export const DIFF: FormDiff = {
         plan: "Assistance Listing Number",
         source: "10. ASSISTANCE LISTING NUMBER",
       },
-      "10-2": {
-        category: "intentional",
-        reason:
-          "DAT FID768 v5.0 10-2: proposed field/group context replaces the PDF-dependent label. Individual choice controls retain their source meaning through the explicit choice-to-code binding.",
-        plan: "Assistance Listing Title",
-        source: "ASSISTANCE LISTING TITLE",
-      },
+
       "11-0": {
         category: "intentional",
         reason:
