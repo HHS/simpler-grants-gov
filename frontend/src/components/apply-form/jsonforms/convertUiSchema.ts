@@ -117,6 +117,7 @@ export const controlToNodes = (
     widget?: string;
     description?: string;
   };
+  // "null" is the SGG field type for a read-only field, which getFieldConfig renders disabled.
   const type = options.readonly ? "null" : "field";
 
   const items = itemSchema(fieldSchema);
