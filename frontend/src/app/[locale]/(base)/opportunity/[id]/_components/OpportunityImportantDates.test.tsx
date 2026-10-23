@@ -56,10 +56,17 @@ describe("OpportunityImportantDates", () => {
     },
   );
 
-  it("renders the forecast item for a forecast summary", () => {
-    renderDates("forecasted", true);
+  it("renders the forecast item for a forecasted opportunity", () => {
+    renderDates("forecasted");
 
     expect(screen.getByTestId("forecast-item")).toBeInTheDocument();
     expect(screen.queryByTestId("posted-item")).not.toBeInTheDocument();
+  });
+
+  it("does not render the forecast item for a closed opportunity even if the summary is flagged as a forecast", () => {
+    renderDates("closed", true);
+
+    expect(screen.getByTestId("closed-item")).toBeInTheDocument();
+    expect(screen.queryByTestId("forecast-item")).not.toBeInTheDocument();
   });
 });

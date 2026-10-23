@@ -209,7 +209,7 @@ export const messages = {
       versionHistory: "View version history on Grants.gov",
     },
     importantDates: {
-      title: "Important Dates",
+      title: "Important dates",
     },
     description: {
       title: "Summary",
@@ -256,13 +256,11 @@ export const messages = {
       history: "History",
       postedDate: "Posted date",
       forecastPostedDate: "Forecast posted date",
-      closingDate: "Original closing date for applications",
       archiveDate: "Archive date",
       forecastedAwardDate: "Forecasted award date",
       forecastedPostDate: "Forecasted post date",
       forecastedCloseDate: "Forecasted application due date",
       forecastedProjectStartDate: "Forecasted project start date",
-      forecastedLastUpdated: "Last Updated Date",
       fiscalYear: "Fiscal Year",
       closing: "Closing",
       closed: "Closed",
@@ -274,18 +272,6 @@ export const messages = {
     link: {
       title: "Link to additional information",
       noAdditionalInfo: "No additional information is available",
-    },
-    statusWidget: {
-      archived: "Archived: ",
-      closed: "Closed: ",
-      closing: "Closing: ",
-      forecasted: "Forecasted",
-    },
-    cta: {
-      applyTitle: "Application process",
-      applyContent:
-        "This site is a work in progress. Go to www.grants.gov to apply, track application status, and subscribe to updates.",
-      buttonContent: "View on Grants.gov",
     },
     genericErrorCta: "Please try refreshing the page.",
   },

@@ -13,14 +13,15 @@ const OpportunityImportantDates = ({
   detail: OpportunityDetail;
 }) => {
   const t = useTranslations("OpportunityListing.importantDates");
-  const isForcasted = detail.summary.is_forecast;
   const opportunityStatus = detail.opportunity_status;
 
   return (
     <div>
       <h2>{t("title")}</h2>
       <div className="border radius-md border-base-lighter padding-x-2">
-        {isForcasted && <ForecastOpportunityItem detail={detail} />}
+        {opportunityStatus === "forecasted" && (
+          <ForecastOpportunityItem detail={detail} />
+        )}
         {opportunityStatus === "posted" && (
           <PostedOpportunityItem detail={detail} />
         )}

@@ -53,17 +53,21 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
     }
   };
 
+  // formatCurrency returns an empty string for 0, which is a real amount
+  const formatAmount = (amount: number | null) =>
+    amount === 0 ? "$0" : formatCurrency(amount);
+
   const fundingSummaryInfo = {
     programFunding:
-      formatCurrency(opportunityData.summary.estimated_total_program_funding) ||
+      formatAmount(opportunityData.summary.estimated_total_program_funding) ||
       t("notSpecified"),
     expectedAwards:
-      opportunityData.summary.expected_number_of_awards || t("notSpecified"),
+      opportunityData.summary.expected_number_of_awards ?? t("notSpecified"),
   };
 
   const awardGridInfo = {
-    awardFloor: formatCurrency(opportunityData.summary.award_floor),
-    awardCeiling: formatCurrency(opportunityData.summary.award_ceiling),
+    awardFloor: formatAmount(opportunityData.summary.award_floor),
+    awardCeiling: formatAmount(opportunityData.summary.award_ceiling),
   };
 
   const awardSubInfo = {
