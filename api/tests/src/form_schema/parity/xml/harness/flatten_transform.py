@@ -1,32 +1,29 @@
-"""Reads a form's `json_to_xml_schema` into `{element path: response field}`.
+"""Flatten a form's XML transform rules (`json_to_xml_schema`) into the XML elements they
+produce and the form fields that fill them.
 
     {"applicant": {"xml_transform": {"type": "nested_object", "target": "Applicant"},
                    "street1": {"xml_transform": {"target": "Street1"}}}}
     -> ({("Applicant",): None, ("Applicant", "Street1"): "applicant.street1"}, {})
 
-Three details of the format:
-
-- A container takes no value, so `nested_object`, `array` and `static_value` map to None.
-- An attachment is named twice. `xml_transform.target` holds a lowercase placeholder that
-  only fixes sequence position; the element emitted is in `_xml_config.attachment_fields`.
-- Not every mapping is tree-shaped. SF-424A builds structure from data at run time, so
-  those rules come back in the second return value and the checks skip the form.
+A container (`nested_object`, `array`) or a `static_value` takes no value from the form, so
+its field is None. An attachment's `xml_transform.target` is a placeholder that only fixes
+its position; the element it produces is named in `_xml_config.attachment_fields`.
 """
 
 from typing import Any
 
 from ...paths import ARRAY, Path
 
-#: `xml_transform.type` values whose wire structure follows from the declaration.
-READABLE = frozenset({"nested_object", "array", "attribute", "conditional"})
+#: `xml_transform.type` values the checks can read.
+CHECKED_TYPES = frozenset({"nested_object", "array", "attribute", "conditional"})
 
-#: The one `conditional_transform` shape whose element count is declared rather than
-#: derived from the applicant's data.
-READABLE_CONDITIONALS = frozenset({"one_to_many"})
+#: `conditional_transform.type` values the checks can read. A `one_to_many` rule declares
+#: how many elements it produces; other conditionals derive them from the applicant's data.
+CHECKED_CONDITIONALS = frozenset({"one_to_many"})
 
-#: Which of the five registered transforms can reconcile a difference in which rule.
-#: The empty entries matter: nothing clamps a number into a range, so a form accepting an
-#: amount the wire cannot carry is a finding whatever transform is declared.
+#: Rule keyword -> the `value_transform` types that can account for a difference in it,
+#: e.g. `boolean_to_yes_no` for a boolean field feeding a `YesNoDataType` element. Nothing
+#: accounts for a length or range bound.
 RECONCILED_BY: dict[str, frozenset[str]] = {
     "enum": frozenset({"map_values", "string_case", "boolean_to_yes_no"}),
     "type": frozenset({"boolean_to_yes_no", "currency_format"}),
@@ -36,17 +33,22 @@ RECONCILED_BY: dict[str, frozenset[str]] = {
     "minimum": frozenset(),
 }
 
+# =============================================================================
+# PUBLIC FUNCTIONS
+# =============================================================================
+
 
 def read(mapping: dict[str, Any]) -> tuple[dict[Path, str | None], dict[str, str]]:
-    """Flatten one mapping into `({element path: response field}, {rule: why not read})`.
+    """Return the element each rule produces, keyed by element path, with the form field it's
+    filled from, and the rules that can't be checked, with the reason.
 
-    The response field is None where the element takes no value from the applicant.
+    The field is None where the element takes no value from the form.
     """
     config = mapping.get("_xml_config", {})
     attachments = config.get("attachment_fields", {})
 
     targets: dict[Path, str | None] = {}
-    unreadable: dict[str, str] = {}
+    unchecked: dict[str, str] = {}
 
     def descend(node: dict[str, Any], level: Path, prefix: str) -> None:
         for field, rule in node.items():
@@ -60,17 +62,17 @@ def read(mapping: dict[str, Any]) -> tuple[dict[Path, str | None], dict[str, str
             kind = transform.get("type")
             target = transform.get("target")
 
-            if kind is not None and kind not in READABLE:
-                unreadable[source] = f"xml_transform.type {kind!r}"
+            if kind is not None and kind not in CHECKED_TYPES:
+                unchecked[source] = f"xml_transform.type {kind!r}"
                 continue
 
             if kind == "conditional":
                 conditional = transform.get("conditional_transform", {})
                 shape = conditional.get("type")
-                if shape not in READABLE_CONDITIONALS:
-                    unreadable[source] = f"conditional_transform.type {shape!r}"
+                if shape not in CHECKED_CONDITIONALS:
+                    unchecked[source] = f"conditional_transform.type {shape!r}"
                     continue
-                # The declaration names the array; the values come from its items.
+                # The rule names the array, and each numbered element takes one item.
                 items = (
                     f"{prefix}.{conditional['source_field']}"
                     if prefix
@@ -82,15 +84,14 @@ def read(mapping: dict[str, Any]) -> tuple[dict[Path, str | None], dict[str, str
                 continue
 
             if field in attachments:
-                # The transformer builds the subtree from the upload, so the field is the
-                # source for the element and everything under it.
+                # The element and everything under it are built from the upload.
                 arity = attachments[field].get("type")
                 held = f"{source}.{ARRAY}" if arity == "multiple" else source
                 targets[*level, attachments[field]["xml_element"]] = held
                 continue
 
             if target is None:
-                unreadable[source] = "no xml_transform.target"
+                unchecked[source] = "no xml_transform.target"
                 continue
 
             if kind == "attribute":
@@ -105,51 +106,43 @@ def read(mapping: dict[str, Any]) -> tuple[dict[Path, str | None], dict[str, str
             elif kind == "array":
                 items_rules = rule.get("items")
                 if not isinstance(items_rules, dict):
-                    unreadable[source] = "array with no items rules"
+                    unchecked[source] = "array with no items rules"
                     continue
-                # One path describes every item, using the shared `[]` step so this
-                # lines up with what `json_schema/flatten_schema.py` produces.
+                # One `[]` path covers every item, as in `flatten_schema.inputs()`.
                 descend(items_rules, (*level, target), f"{source}.{ARRAY}")
 
     descend({k: v for k, v in mapping.items() if k != "_xml_config"}, (), "")
-    return targets, unreadable
+    return targets, unchecked
 
 
 def root_of(mapping: dict[str, Any]) -> str:
+    """Return the name of the XML document's root element."""
     return mapping.get("_xml_config", {}).get("xml_structure", {}).get("root_element", "")
 
 
 def xsd_of(mapping: dict[str, Any]) -> str:
+    """Return the file name of the XSD the mapping targets."""
     return mapping.get("_xml_config", {}).get("xsd_url", "").split("/")[-1]
 
 
 def attachment_elements(mapping: dict[str, Any]) -> frozenset[str]:
-    """Elements the attachment transformer builds. Their children come from the uploaded
-    file rather than the mapping, so the checks stop at the element itself."""
+    """Return the elements built from uploaded files rather than from the mapping."""
     attachments = mapping.get("_xml_config", {}).get("attachment_fields", {})
     return frozenset(config["xml_element"] for config in attachments.values())
 
 
 def transformed(mapping: dict[str, Any]) -> dict[Path, frozenset[str]]:
-    """Which `value_transform` types each element's rule declares.
+    """Return the `value_transform` types each element's rule declares, keyed by element path.
 
-    A declared transform is what makes a difference between the two sides legitimate.
-    SF-424 Short's `application_certification` is a form boolean and a `YesNoDataType`
-    string on the wire, and it works only because the rule says `boolean_to_yes_no`;
-    SF-424's `state_review` offers three options the XSD spells with a capital S, and a
-    `map_values` transform corrects them on the way out. Omit either declaration and the
-    wrong value reaches serialization.
+        {"state_review": {"xml_transform": {"target": "StateReview",
+                                            "value_transform": {"type": "map_values", ...}}}}
+        -> {("StateReview",): frozenset({"map_values"})}
 
-    The type is returned rather than a bare "yes" so a caller can ask whether the declared
-    transform is the kind that could account for the difference it is looking at -- see
-    `RECONCILED_BY`.
-
-    `item_value_transform` counts too: a `one_to_many` expansion declares it once for the
-    items it distributes across the numbered elements.
+    A `one_to_many` rule's `item_value_transform` applies to every element it produces.
     """
     out: dict[Path, frozenset[str]] = {}
 
-    def kinds(*declarations) -> frozenset[str]:
+    def kinds(*declarations: Any) -> frozenset[str]:
         return frozenset(d["type"] for d in declarations if isinstance(d, dict) and "type" in d)
 
     def descend(node: dict[str, Any], level: Path) -> None:
@@ -161,7 +154,7 @@ def transformed(mapping: dict[str, Any]) -> dict[Path, frozenset[str]]:
                 continue
 
             conditional = transform.get("conditional_transform", {})
-            if conditional.get("type") in READABLE_CONDITIONALS:
+            if conditional.get("type") in CHECKED_CONDITIONALS:
                 declared = kinds(
                     conditional.get("item_value_transform"), transform.get("value_transform")
                 )
