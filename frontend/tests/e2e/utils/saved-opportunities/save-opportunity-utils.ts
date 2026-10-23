@@ -72,10 +72,16 @@ export async function saveOpportunityViaSearch(
   }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000, 3000] });
 
   // Save the opportunity via the save button
-  await page.getByTestId("simpler-save-button").click();
-
-  // Wait for the UI to confirm the save completed before navigating away.
-  await expect(page.getByTestId("simpler-save-button")).toContainText(/saved/i);
+  // Webkit can ignore a click made before hydration, so re-click only while the
+  // button still shows the unsaved state (never toggles an already-saved item).
+  const saveButton = page.getByTestId("simpler-save-button");
+  await expect(async () => {
+    const text = (await saveButton.textContent()) ?? "";
+    if (!/saved/i.test(text)) {
+      await saveButton.click({ timeout: 5000 });
+    }
+    await expect(saveButton).toContainText(/saved/i, { timeout: 5000 });
+  }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000, 3000] });
 
   // Return to Saved Opportunities via direct navigation - avoids mobile nav state
   await page.goto("/saved-opportunities");
