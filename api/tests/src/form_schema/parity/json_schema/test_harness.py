@@ -65,9 +65,9 @@ class TestFieldMatching:
             "applicant.street1": "applicant.street1",
         }
 
-    def test_matches_renamed_field_to_declared_target(self):
+    def test_matches_mapped_field_to_declared_target(self):
         """The generated form spells it `p.phone`, the hand-written form `p.phone_number`."""
-        diff = declaring(renamed={"p.phone": "p.phone_number"})
+        diff = declaring(mapped={"p.phone": "p.phone_number"})
         assert matched(diff, inputs("p.phone"), inputs("p.phone_number")) == {
             "p.phone": "p.phone_number"
         }
@@ -76,7 +76,7 @@ class TestFieldMatching:
         """Both forms have `a` and `b`, and the record renames `a` to `b`. Matching `b` to
         itself as well would give `b` two meanings, so only the declared pair is matched."""
         both = inputs("a", "b")
-        assert matched(declaring(renamed={"a": "b"}), both, both) == {"a": "b"}
+        assert matched(declaring(mapped={"a": "b"}), both, both) == {"a": "b"}
 
 
 class TestUnmatchedFields:
@@ -106,14 +106,14 @@ class TestUnmatchedFields:
         assert not compare.unmatched_fields(diff, inputs("a", "extra"), inputs("a"))
 
     def test_ignores_both_ends_of_declared_rename(self):
-        diff = declaring(renamed={"p.phone": "p.phone_number"})
+        diff = declaring(mapped={"p.phone": "p.phone_number"})
         assert not compare.unmatched_fields(diff, inputs("p.phone"), inputs("p.phone_number"))
 
     def test_reports_both_ends_of_ambiguous_rename(self):
         """The leftovers from `test_refuses_to_match_a_field_two_ways`: generated `b` and
         hand-written `a` matched nothing, so the ambiguity has to be declared."""
         both = inputs("a", "b")
-        found = compare.unmatched_fields(declaring(renamed={"a": "b"}), both, both)
+        found = compare.unmatched_fields(declaring(mapped={"a": "b"}), both, both)
         assert [str(d) for d in found] == [
             "generated input is unmapped: b",
             "handwritten input is unmapped: a",
@@ -213,8 +213,8 @@ class TestTextDifferences:
         handwritten = {("a",): worded("Email")}
         assert not compare.text_differences(diff, generated, handwritten)
 
-    def test_compares_renamed_fields_under_the_generated_path(self):
-        diff = declaring(renamed={"p.phone": "p.phone_number"})
+    def test_compares_mapped_fields_under_the_generated_path(self):
+        diff = declaring(mapped={"p.phone": "p.phone_number"})
         generated = {("p", "phone"): worded("Phone")}
         handwritten = {("p", "phone_number"): worded("Telephone")}
         assert [d.path for d in compare.text_differences(diff, generated, handwritten)] == [
@@ -226,14 +226,14 @@ class TestStaleEntries:
     """Which record entries `stale_entries()` reports as no longer describing anything real."""
 
     def test_flags_rename_to_field_that_does_not_exist(self):
-        diff = declaring(renamed={"p.phone": "p.phone_number"})
+        diff = declaring(mapped={"p.phone": "p.phone_number"})
         found = compare.stale_entries(diff, inputs("p.phone"), inputs("p.other"))
         assert [str(d) for d in found] == ["no such handwritten input: p.phone_number"]
 
     def test_flags_rename_to_same_path(self):
         """A redundant entry would imply a difference that is not there."""
         both = inputs("a")
-        assert kinds(compare.stale_entries(declaring(renamed={"a": "a"}), both, both)) == [
+        assert kinds(compare.stale_entries(declaring(mapped={"a": "a"}), both, both)) == [
             "rename to the same path"
         ]
 
@@ -535,8 +535,8 @@ class TestOrderDifferences:
         handwritten = placed("a", "b", "c", "legacy")
         assert not compare.order_differences(NOTHING_DECLARED, generated, handwritten)
 
-    def test_compares_renamed_fields_by_their_counterpart(self):
-        diff = declaring(renamed={"phone": "phone_number"})
+    def test_compares_mapped_fields_by_their_counterpart(self):
+        diff = declaring(mapped={"phone": "phone_number"})
         generated = placed("phone", "email")
         handwritten = placed("phone_number", "email")
         assert not compare.order_differences(diff, generated, handwritten)

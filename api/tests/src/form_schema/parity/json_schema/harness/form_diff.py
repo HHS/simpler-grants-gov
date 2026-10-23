@@ -21,7 +21,7 @@ class FormDiff(shared.FormDiff):
 
     #: Generated path -> the handwritten path meaning the same thing, where the two forms
     #: spell one field differently. e.g. {"p.phone": "p.phone_number"}
-    renamed: dict[str, str] = dataclasses.field(default_factory=dict)
+    mapped: dict[str, str] = dataclasses.field(default_factory=dict)
 
     #: "path/title" or "path/description" -> why the two forms word the field differently.
     #: e.g. {"key_contacts.[].email/title": "the Grants.gov form labels it E-mail"}

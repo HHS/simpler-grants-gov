@@ -13,7 +13,7 @@ stops describing a real difference fails the suite. An entry records a defect to
 an exemption from fixing it.
 
 Each comparison subclasses this to name the documents it reads and add what it alone
-needs: `json_schema/` adds `renamed`.
+needs: `json_schema/` adds `mapped`.
 """
 
 import dataclasses

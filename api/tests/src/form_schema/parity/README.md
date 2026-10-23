@@ -64,7 +64,7 @@ Catching that needs values drawn from each field's declared facets.
 A form contributes a record and nothing else -- no test code, no fixture, no seed. Write
 `json_schema/diffs/<form>.py` with a `FormDiff` naming the two modules, add it to `DIFFS`
 in `json_schema/test_forms.py`, and it inherits every check. Fields at the same path
-correspond on their own; `renamed` pairs up the ones the two forms spell differently.
+correspond on their own; `mapped` pairs up the ones the two forms spell differently.
 
 The record is deliberately hand-written: it is a claim about two forms that someone should
 have to defend, and the checks then hold it to both schemas so it cannot be quietly tuned
