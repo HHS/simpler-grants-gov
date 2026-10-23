@@ -183,6 +183,13 @@ class FormType(StrEnum):
     PROJECT_PERFORMANCE_SITE_LOCATION = "ProjectPerformanceSiteLocation"
 
 
+class FormRenderer(StrEnum):
+    """The frontend renderer a form uses."""
+
+    SGG = "sgg"
+    JSON_FORMS = "jsonforms"
+
+
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"

@@ -1300,6 +1300,7 @@ def test_application_form_get_success(
     )
     # Verify application_status field is included and has the expected value
     assert response.json["data"]["application_status"] == ApplicationStatus.IN_PROGRESS
+    assert response.json["data"]["form"]["form_renderer"] == application_form.form.form_renderer
 
 
 def test_application_form_get_application_not_found(

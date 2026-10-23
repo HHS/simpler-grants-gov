@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from src.form_schema.forms._loader import DEFINITION_FILENAMES
+
 FORMS_ROOT = Path(__file__).parents[4] / "src" / "form_schema" / "forms"
 SKIP = {"__pycache__"}
 
@@ -31,10 +33,11 @@ def test_config_fields(form_dir: Path) -> None:
 def test_versioned_form_json_exists(form_dir: Path) -> None:
     versioned = [
         p
-        for p in form_dir.rglob("form_json.py")
+        for filename in DEFINITION_FILENAMES
+        for p in form_dir.rglob(filename)
         if re.fullmatch(r"\d+", p.parent.name) and re.fullmatch(r"\d+", p.parent.parent.name)
     ]
-    assert versioned, f"{form_dir.name} has no form_json.py at <major>/<minor>/form_json.py"
+    assert versioned, f"{form_dir.name} has no form_json.py or form.json at <major>/<minor>/"
 
 
 @pytest.mark.parametrize("form_dir", get_form_dirs(), ids=lambda d: d.name)

@@ -13,6 +13,26 @@ forms/
             └── form_json.py  # form definition: FORM_JSON_SCHEMA, FORM_UI_SCHEMA, FORM_RULE_SCHEMA, FORM_XML_TRANSFORM_RULES, and the Form object
 ```
 
+A version may instead declare itself as a `form.json`, which is what the forms in
+[`../../../../forms`](../../../../forms) generate. It keeps its large documents in sibling
+schema files:
+
+```
+forms/
+└── <form_name>/
+    └── <major>/
+        └── <minor>/
+            ├── form.json           # scalars: form_id, form_name, form_version, agency_code, ...
+            ├── json_schema.json    # form_json_schema
+            ├── ui_schema.json      # form_ui_schema
+            ├── rule_schema.json    # form_rule_schema
+            └── xml_transform.json  # json_to_xml_schema
+```
+
+- A version has exactly one of `form_json.py` or `form.json`.
+- Each schema file is optional. A field can't be declared both inline in `form.json` and in its schema file.
+- The version checksum covers the schema files.
+
 All existing forms are version `1/0` in this structure. The `forms/__init__.py` at
 this level collects all forms and exposes `get_active_forms()`.
 
