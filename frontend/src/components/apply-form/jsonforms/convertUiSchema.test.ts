@@ -8,10 +8,8 @@ import { validateUiSchema } from "src/utils/applyForm/validateUiSchema";
 
 import {
   controlToNodes,
-  findIgnoredListRules,
-  findUnsupportedControls,
+  convertJsonFormsUiSchema,
   groupName,
-  jsonFormsToUiSchema,
 } from "src/components/apply-form/jsonforms/convertUiSchema";
 
 const schema: RJSFSchema = {
@@ -147,122 +145,128 @@ describe("controlToNodes", () => {
     expect(controlToNodes(control("#/properties/absent"), schema)).toEqual([]);
     expect(controlToNodes(control("#"), schema)).toEqual([]);
   });
-});
 
-describe("a list control with options.detail", () => {
-  const listSchema: RJSFSchema = {
-    type: "object",
-    properties: {
-      contacts: {
-        type: "array",
-        title: "Contacts",
-        items: {
-          type: "object",
-          properties: {
-            role: { type: "string" },
-            name: {
-              type: "object",
-              properties: {
-                first: { type: "string" },
-                last: { type: "string" },
-              },
-            },
-            phones: {
-              type: "array",
-              items: {
+  describe("on a list with options.detail", () => {
+    const listSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        contacts: {
+          type: "array",
+          title: "Contacts",
+          items: {
+            type: "object",
+            properties: {
+              role: { type: "string" },
+              name: {
                 type: "object",
-                properties: { number: { type: "string" } },
+                properties: {
+                  first: { type: "string" },
+                  last: { type: "string" },
+                },
+              },
+              phones: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: { number: { type: "string" } },
+                },
               },
             },
           },
         },
       },
-    },
-  };
+    };
 
-  const list = (elements: UISchemaElement[]) =>
-    control("#/properties/contacts", {
-      options: { detail: { type: "Group", elements } },
+    const list = (elements: UISchemaElement[]) =>
+      control("#/properties/contacts", {
+        options: { detail: { type: "Group", elements } },
+      });
+
+    const childDefinitions = (listControl: ControlElement) => {
+      const [node] = controlToNodes(listControl, listSchema);
+      return node.type === "fieldList"
+        ? node.children.map((child) => [child.type, child.definition])
+        : [];
+    };
+
+    it("orders the entry's fields by the detail rather than the item schema", () => {
+      expect(
+        childDefinitions(
+          list([
+            control("#/properties/name/properties/last"),
+            control("#/properties/role", { options: { readonly: true } }),
+            control("#/properties/name/properties/first"),
+          ]),
+        ),
+      ).toEqual([
+        ["field", "/properties/contacts/items/properties/name/properties/last"],
+        ["null", "/properties/contacts/items/properties/role"],
+        [
+          "field",
+          "/properties/contacts/items/properties/name/properties/first",
+        ],
+      ]);
     });
 
-  const childDefinitions = (listControl: ControlElement) => {
-    const [node] = controlToNodes(listControl, listSchema);
-    return node.type === "fieldList"
-      ? node.children.map((child) => [child.type, child.definition])
-      : [];
-  };
-
-  it("orders the entry's fields by the detail rather than the item schema", () => {
-    expect(
-      childDefinitions(
-        list([
-          control("#/properties/name/properties/last"),
-          control("#/properties/role", { options: { readonly: true } }),
-          control("#/properties/name/properties/first"),
-        ]),
-      ),
-    ).toEqual([
-      ["field", "/properties/contacts/items/properties/name/properties/last"],
-      ["null", "/properties/contacts/items/properties/role"],
-      ["field", "/properties/contacts/items/properties/name/properties/first"],
-    ]);
-  });
-
-  it("reads nested groups in the detail and expands a control on an object", () => {
-    expect(
-      childDefinitions(
-        list([
-          {
-            type: "Group",
-            label: "Name",
-            elements: [control("#/properties/name")],
-          },
-          control("#/properties/role"),
-        ]),
-      ),
-    ).toEqual([
-      ["field", "/properties/contacts/items/properties/name/properties/first"],
-      ["field", "/properties/contacts/items/properties/name/properties/last"],
-      ["field", "/properties/contacts/items/properties/role"],
-    ]);
-  });
-
-  it("leaves out a list nested in the entry, and reports it", () => {
-    const listControl = list([
-      control("#/properties/role"),
-      control("#/properties/phones"),
-    ]);
-
-    expect(childDefinitions(listControl)).toEqual([
-      ["field", "/properties/contacts/items/properties/role"],
-    ]);
-    expect(findUnsupportedControls(listControl, listSchema)).toEqual([
-      "#/properties/contacts -> #/properties/phones",
-    ]);
-  });
-
-  it("reports the rules on the entry's fields, which the field list does not apply", () => {
-    const uiSchema = {
-      type: "Group",
-      elements: [
-        list([
-          control("#/properties/role", {
-            rule: {
-              effect: RuleEffect.ENABLE,
-              condition: { scope: "#/properties/name", schema: {} },
+    it("reads nested groups in the detail and expands a control on an object", () => {
+      expect(
+        childDefinitions(
+          list([
+            {
+              type: "Group",
+              label: "Name",
+              elements: [control("#/properties/name")],
             },
-          }),
-        ]),
-      ],
-    } as UISchemaElement;
+            control("#/properties/role"),
+          ]),
+        ),
+      ).toEqual([
+        [
+          "field",
+          "/properties/contacts/items/properties/name/properties/first",
+        ],
+        ["field", "/properties/contacts/items/properties/name/properties/last"],
+        ["field", "/properties/contacts/items/properties/role"],
+      ]);
+    });
 
-    expect(findIgnoredListRules(uiSchema)).toEqual([
-      "#/properties/contacts -> #/properties/role",
-    ]);
+    it("leaves out a list nested in the entry, and reports it", () => {
+      const listControl = list([
+        control("#/properties/role"),
+        control("#/properties/phones"),
+      ]);
+
+      expect(childDefinitions(listControl)).toEqual([
+        ["field", "/properties/contacts/items/properties/role"],
+      ]);
+      expect(
+        convertJsonFormsUiSchema(listControl, listSchema).unsupportedControls,
+      ).toEqual(["#/properties/contacts -> #/properties/phones"]);
+    });
+
+    it("reports the rules on the entry's fields, which the field list does not apply", () => {
+      const uiSchema = {
+        type: "Group",
+        elements: [
+          list([
+            control("#/properties/role", {
+              rule: {
+                effect: RuleEffect.ENABLE,
+                condition: { scope: "#/properties/name", schema: {} },
+              },
+            }),
+          ]),
+        ],
+      } as UISchemaElement;
+
+      expect(
+        convertJsonFormsUiSchema(uiSchema, listSchema).ignoredListRules,
+      ).toEqual(["#/properties/contacts -> #/properties/role"]);
+    });
   });
 });
 
-describe("jsonFormsToUiSchema", () => {
+describe("convertJsonFormsUiSchema", () => {
   const uiSchema: UISchemaElement = {
     type: "Group",
     label: "The Form Itself",
@@ -284,7 +288,7 @@ describe("jsonFormsToUiSchema", () => {
   };
 
   it("drops the root layout, turns labeled groups into sections and flattens the rest", () => {
-    const tree = jsonFormsToUiSchema(uiSchema, schema);
+    const tree = convertJsonFormsUiSchema(uiSchema, schema).uiSchema;
 
     expect(tree.map((node) => node.type)).toEqual([
       "field",
@@ -299,11 +303,11 @@ describe("jsonFormsToUiSchema", () => {
   });
 
   it("produces a tree the UI schema validator accepts", () => {
-    expect(validateUiSchema(jsonFormsToUiSchema(uiSchema, schema))).toBeFalsy();
+    expect(
+      validateUiSchema(convertJsonFormsUiSchema(uiSchema, schema).uiSchema),
+    ).toBeFalsy();
   });
-});
 
-describe("findUnsupportedControls", () => {
   it("lists every control no widget can draw", () => {
     const uiSchema = {
       type: "Group",
@@ -313,9 +317,9 @@ describe("findUnsupportedControls", () => {
       ],
     } as UISchemaElement;
 
-    expect(findUnsupportedControls(uiSchema, schema)).toEqual([
-      "#/properties/nested/properties/people",
-    ]);
+    expect(
+      convertJsonFormsUiSchema(uiSchema, schema).unsupportedControls,
+    ).toEqual(["#/properties/nested/properties/people"]);
   });
 });
 
