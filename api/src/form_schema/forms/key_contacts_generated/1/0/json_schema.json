@@ -802,7 +802,6 @@
     },
     "person.email": {
       "type": "string",
-      "minLength": 1,
       "maxLength": 60,
       "format": "email",
       "description": "Enter a valid email address.",
