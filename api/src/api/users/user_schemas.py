@@ -458,12 +458,6 @@ class UserApiKeySchema(Schema):
             "example": "Production API Key",
         }
     )
-    key_id = fields.String(
-        metadata={
-            "description": "The actual API key identifier to use for authentication",
-            "example": "k8w2Xd9Zq1mN3pR7sT5vY4uI",
-        }
-    )
     is_active = fields.Boolean(
         metadata={"description": "Whether the API key is currently active", "example": True}
     )
@@ -479,8 +473,20 @@ class UserApiKeySchema(Schema):
     )
 
 
+class CreatedUserApiKeySchema(UserApiKeySchema):
+    # Only returned when a key is created, the raw key can't be read back after that
+    key_id = fields.String(
+        metadata={
+            "description": "The actual API key to use for authentication. This is only returned once, when the key is created",
+            "example": "k8w2Xd9Zq1mN3pR7sT5vY4uI",
+        }
+    )
+
+
 class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(UserApiKeySchema, metadata={"description": "The newly created API key"})
+    data = fields.Nested(
+        CreatedUserApiKeySchema, metadata={"description": "The newly created API key"}
+    )
 
 
 class UserApiKeyDeleteResponseSchema(AbstractResponseSchema):

@@ -5,18 +5,18 @@ import { useUser } from "src/services/auth/useUser";
 import { PropsWithChildren } from "react";
 
 const debouncedUserFetcherMock = jest.fn();
-const redirectMock = jest.fn();
+const routerRefreshMock = jest.fn();
+const mockRouter = { refresh: () => routerRefreshMock() as unknown };
 
 jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
   debouncedUserFetcher: () => debouncedUserFetcherMock() as unknown,
 }));
 
 jest.mock("next/navigation", () => ({
-  redirect: (location: string) => redirectMock(location) as unknown,
+  useRouter: () => mockRouter,
 }));
 
 jest.mock("src/constants/auth", () => ({
-  LOGOUT_URL: "fake-logout-url",
   clientTokenRefreshInterval: 10 * 60 * 1000,
   clientTokenExpirationInterval: 15 * 60 * 1000,
 }));
@@ -85,7 +85,7 @@ describe("useUser", () => {
     expect(userDisplay).toBeEmptyDOMElement();
     expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
   });
-  it("sets user as logged out if second fetch for user comes back logged out", async () => {
+  it("sets user as logged out and refreshes the router if second fetch for user comes back logged out", async () => {
     debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true });
     const wrapper = ({ children }: PropsWithChildren) => (
       <UserProvider featureFlagDefaults={{}}>{children}</UserProvider>
@@ -106,8 +106,24 @@ describe("useUser", () => {
       expect(result.current.user?.isLoggedIn).toEqual(false);
     });
     expect(result.current.hasBeenLoggedOut).toEqual(true);
-    // clears the correlation id cookie server-side, mirroring explicit logout
-    expect(redirectMock).toHaveBeenCalledWith("fake-logout-url");
+    expect(routerRefreshMock).toHaveBeenCalledTimes(1);
+  });
+  it("does not refresh the router when the user remains logged in", async () => {
+    debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true });
+    const { result } = renderHook(() => useUser(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.user?.isLoggedIn).toEqual(true);
+    });
+
+    await result.current.refreshUser();
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toEqual(false);
+    });
+    expect(result.current.user?.isLoggedIn).toEqual(true);
+    expect(result.current.hasBeenLoggedOut).toEqual(false);
+    expect(routerRefreshMock).not.toHaveBeenCalled();
   });
   it("does not clear the correlation id when an anonymous user remains logged out", async () => {
     debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
@@ -126,6 +142,28 @@ describe("useUser", () => {
     expect(fetchMock).not.toHaveBeenCalledWith("/api/auth/logout", {
       method: "POST",
     });
+    expect(routerRefreshMock).not.toHaveBeenCalled();
+  });
+  it("keeps a logged in user when a session refresh fails with a network or server error", async () => {
+    debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true });
+    const { result } = renderHook(() => useUser(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.user?.isLoggedIn).toEqual(true);
+    });
+
+    debouncedUserFetcherMock.mockRejectedValue(
+      new Error("Unable to fetch user: 500"),
+    );
+
+    await result.current.refreshUser();
+
+    await waitFor(() => {
+      expect(result.current.error).toBeDefined();
+    });
+    expect(result.current.user?.isLoggedIn).toEqual(true);
+    expect(result.current.hasBeenLoggedOut).toEqual(false);
+    expect(routerRefreshMock).not.toHaveBeenCalled();
   });
   describe("logoutLocalUser", () => {
     it("marks the user as logged out", async () => {
