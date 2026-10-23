@@ -11,7 +11,7 @@ import {
 
 import { useCallback, useMemo, useState, type FormEvent } from "react";
 
-import type { RootBudgetFormContext } from "src/components/apply-form/FormFields";
+import type { RenderFieldNodeProps } from "src/components/apply-form/FormFields";
 import type { JsonFormsUiSchema } from "./convertUiSchema";
 import {
   AdapterContext,
@@ -44,7 +44,7 @@ export const JsonFormsFields = ({
   formData: object;
   schema: RJSFSchema;
   uiSchema: JsonFormsUiSchema;
-  formContext?: RootBudgetFormContext;
+  formContext?: RenderFieldNodeProps["formContext"];
   isFormLocked?: boolean;
   print?: boolean;
   /** Renderers to rank against the SGG ones, for widgets only the form library has. */

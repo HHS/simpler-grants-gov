@@ -17,7 +17,7 @@ import { Alert } from "@trussworks/react-uswds";
 
 import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 
-export type RootBudgetFormContext = {
+type RootBudgetFormContext = {
   rootSchema: RJSFSchema;
   rootFormData: unknown;
 };
@@ -85,10 +85,20 @@ const renderTextNode = (node: UiSchemaText): JSX.Element => (
   </div>
 );
 
+export type RenderFieldNodeProps = {
+  node: UiSchemaField | UiSchemaFieldList;
+  schema: RJSFSchema;
+  errors: FormattedFormValidationWarning[] | null;
+  formData: object;
+  requiredFieldPaths: string[];
+  formContext?: RootBudgetFormContext;
+  isFormLocked?: boolean;
+  disabled?: boolean;
+};
+
 /**
- * Renders one field node through the shared widget pipeline: requiredness from the schema,
- * then `getFieldConfig` -> `renderWidget`. Exported so the JSON Forms adapter draws its
- * controls with exactly the widgets and props a section/field UI schema would produce.
+ * Renders one field node with the widget getFieldConfig picks for it. Also used by the
+ * JSON Forms renderer.
  */
 export const renderFieldNode = ({
   node,
@@ -99,22 +109,13 @@ export const renderFieldNode = ({
   formContext,
   isFormLocked,
   disabled,
-}: {
-  node: UiSchemaField | UiSchemaFieldList;
-  schema: RJSFSchema;
-  errors: FormattedFormValidationWarning[] | null;
-  formData: object;
-  requiredFieldPaths: string[];
-  formContext?: RootBudgetFormContext;
-  isFormLocked?: boolean;
-  disabled?: boolean;
-}) => {
-  // FieldList is a renderable composite widget and does not have its own
-  // field definition path in the same way a standard field node does.
-  //
+}: RenderFieldNodeProps) => {
   // Some renderable UiSchema nodes are definition-based and do not include an
   // inline `schema` object. Use optional chaining here so required-field checks
   // can safely fall back to the schema title only when it exists.
+  //
+  // FieldList is a renderable composite widget and does not have its own
+  // field definition path in the same way a standard field node does.
   const requiredField =
     node.type === "fieldList"
       ? false
@@ -171,7 +172,7 @@ export const FormFields = ({
   isFormLocked?: boolean;
 }) => {
   let renderedFields: JSX.Element[] = [];
-  let requiredFieldPaths: string[] = [];
+  let requiredFieldPaths = [];
 
   try {
     requiredFieldPaths = getRequiredProperties(schema);

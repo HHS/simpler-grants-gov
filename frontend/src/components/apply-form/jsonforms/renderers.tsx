@@ -25,7 +25,7 @@ import { createContext, useContext } from "react";
 
 import {
   renderFieldNode,
-  type RootBudgetFormContext,
+  type RenderFieldNodeProps,
 } from "src/components/apply-form/FormFields";
 import { wrapSection } from "src/components/apply-form/widgets/WidgetRenderers";
 import {
@@ -45,7 +45,7 @@ export type AdapterContextValue = {
   errors: FormattedFormValidationWarning[] | null;
   requiredFieldPaths: string[];
   rootUiSchema: JsonFormsUiSchema;
-  formContext?: RootBudgetFormContext;
+  formContext?: RenderFieldNodeProps["formContext"];
   isFormLocked?: boolean;
   print?: boolean;
 };
