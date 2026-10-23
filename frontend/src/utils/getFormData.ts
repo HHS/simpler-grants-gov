@@ -155,18 +155,13 @@ export default async function getFormData({
 
   const applicationResponse = applicationFormData.application_response || {};
 
-  const {
-    form_id: formId,
-    form_name: formName,
-    form_json_schema,
-    form_ui_schema,
-    form_renderer: formRenderer = "sgg",
-  } = formData;
+  const { form_id: formId, form_name: formName, form_json_schema } = formData;
+  const formRenderer: FormRenderer = formData.form_renderer ?? "sgg";
 
   let formUiSchema: UiSchema;
   let jsonFormsUiSchema: JsonFormsUiSchema | undefined;
-  if (formRenderer === "jsonforms") {
-    jsonFormsUiSchema = form_ui_schema as JsonFormsUiSchema;
+  if (formData.form_renderer === "jsonforms") {
+    jsonFormsUiSchema = formData.form_ui_schema;
     try {
       formUiSchema = prepareJsonFormsUiSchema({
         formId,
@@ -179,7 +174,7 @@ export default async function getFormData({
       return { error: "TopLevelError" };
     }
   } else {
-    formUiSchema = form_ui_schema as UiSchema;
+    formUiSchema = formData.form_ui_schema;
   }
 
   const schemaErrors = validateUiSchema(formUiSchema);
