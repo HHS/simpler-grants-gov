@@ -91,7 +91,8 @@ export function datFields(workbook: Uint8Array): Fields {
     if (
       String(row[at.max]).trim() &&
       !FIXED_LISTS.has(implementation) &&
-      !NUMERIC_TYPES.has(header(row[at.dataType]))
+      !NUMERIC_TYPES.has(header(row[at.dataType])) &&
+      !/^decimal\(\d+\)$/.test(header(row[at.dataType]))
     )
       rules.maxLength = max;
     const maxOccurs = occurrences(row[at.maxOccurs]);

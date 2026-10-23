@@ -32,6 +32,23 @@ const nodeBase = z.object({
 
 const fieldNode = nodeBase.extend({
   kind: z.literal("field"),
+  source_bindings: z
+    .object({
+      at: z.string().min(1),
+      dat: z
+        .array(
+          z
+            .object({
+              kind: z.literal("slot"),
+              path: z.string().min(1),
+              index: z.number().int().nonnegative(),
+            })
+            .strict(),
+        )
+        .min(1),
+    })
+    .strict()
+    .optional(),
   required: z.union([z.boolean(), z.string()]),
   type: z.string(),
   constraints: z.string().optional(),
@@ -57,6 +74,7 @@ export const formSchema = z.object({
   fid_url: z.url().optional(),
   pdf_url: z.url().optional(),
   xsd_url: z.url().optional(),
+  xsd_root: z.string().min(1).optional(),
   dat_url: z.url().optional(),
   apps_count: z.number().optional().default(0),
   status: z.enum([

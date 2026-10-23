@@ -249,6 +249,7 @@ export async function formPairs(
   const xsdSource = xsdFields(
     required(plan.xsd_url, `xsd_url in plan ${diff.slug}`),
     (url) => readSource(url).toString("utf8"),
+    plan.xsd_root,
   );
   const dat = {
     ...pair(

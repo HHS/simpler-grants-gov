@@ -64,7 +64,7 @@ describe("datFields", () => {
     expect(dat.get("7-14")?.rules).toEqual({ maxOccurs: 4 });
   });
 
-  it.each(["$", "INTEGER"])(
+  it.each(["$", "INTEGER", "DECIMAL(2)"])(
     "does not reinterpret %s value bounds as character lengths",
     (type) => {
       const dat = datFields(

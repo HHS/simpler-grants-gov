@@ -47,6 +47,8 @@ interface Schema {
   simpleTypes: Map<string, XNode>;
   complexTypes: Map<string, XNode>;
   elements: Map<string, XNode>;
+  groups: Map<string, XNode>;
+  attributes: Map<string, XNode>;
 }
 
 /** A named declaration and the schema it was declared in, for resolving its own references. */
@@ -82,6 +84,8 @@ class Schemas {
       simpleTypes: new Map(),
       complexTypes: new Map(),
       elements: new Map(),
+      groups: new Map(),
+      attributes: new Map(),
     };
     if (this.byNamespace.has(schema.targetNamespace))
       return this.byNamespace.get(schema.targetNamespace)!;
@@ -94,6 +98,8 @@ class Schemas {
       } else if (kind === "simpleType") schema.simpleTypes.set(name, child);
       else if (kind === "complexType") schema.complexTypes.set(name, child);
       else if (kind === "element") schema.elements.set(name, child);
+      else if (kind === "group") schema.groups.set(name, child);
+      else if (kind === "attribute") schema.attributes.set(name, child);
       else if (kind !== "annotation" && kind !== "attribute")
         throw new Error(`unsupported top-level xs:${kind} in ${url}`);
     }
@@ -116,7 +122,8 @@ class Schemas {
   }
 
   find(
-    table: "simpleTypes" | "complexTypes" | "elements",
+    table:
+      "simpleTypes" | "complexTypes" | "elements" | "groups" | "attributes",
     qname: string,
     from: Schema,
   ): Declared | undefined {
@@ -145,6 +152,7 @@ class Walker {
   private readonly schemas: Schemas;
   /** How many times the element being walked can appear in one form. */
   private repeats: MaxOccurs = 1;
+  private readonly activeGroups = new Set<XNode>();
   /** The namespace of the element being walked; empty for an unqualified one. */
   private namespace = "";
 
@@ -293,6 +301,8 @@ class Walker {
       const kind = localOf(tagOf(child));
       if (kind === "sequence" || kind === "choice")
         this.group(child, schema, path, required, kind === "choice");
+      else if (kind === "group")
+        this.groupReference(child, schema, path, required);
       else if (kind === "attribute")
         this.attribute(child, schema, path, required);
       else if (kind === "complexContent")
@@ -318,12 +328,40 @@ class Walker {
         // A member of a choice is never required on its own: another member can stand in.
         const member = own && !choice;
         if (kind === "element") this.element(child, schema, path, member);
+        else if (kind === "group")
+          this.groupReference(child, schema, path, member);
         else if (kind === "sequence" || kind === "choice")
           this.group(child, schema, path, member, kind === "choice");
         else if (kind !== "annotation")
           throw new Error(`unsupported xs:${kind} in ${path}`);
       }
     });
+  }
+
+  private groupReference(
+    node: XNode,
+    schema: Schema,
+    path: Path,
+    required: boolean,
+  ) {
+    const ref = attrs(node).ref;
+    const declared = ref && this.schemas.find("groups", ref, schema);
+    if (!declared) throw new Error(`unknown group ${ref} in ${path}`);
+    if (this.activeGroups.has(declared.node))
+      throw new Error(`recursive group ${ref}`);
+    this.activeGroups.add(declared.node);
+    try {
+      this.repeating(attrs(node).maxOccurs, () =>
+        this.complex(
+          declared.node,
+          declared.schema,
+          path,
+          required && Number(attrs(node).minOccurs ?? 1) > 0,
+        ),
+      );
+    } finally {
+      this.activeGroups.delete(declared.node);
+    }
   }
 
   extension(node: XNode, schema: Schema, path: Path, required: boolean) {
@@ -363,8 +401,22 @@ class Walker {
         this.attribute(child, schema, path, required);
   }
 
-  attribute(node: XNode, schema: Schema, path: Path, required: boolean) {
-    const { name, type, use, fixed } = attrs(node);
+  attribute(node: XNode, schema: Schema, path: Path, required: boolean): void {
+    const own = attrs(node);
+    if (own.ref) {
+      const declared = this.schemas.find("attributes", own.ref, schema);
+      if (!declared) throw new Error(`unknown attribute ${own.ref}`);
+      return this.attribute(
+        {
+          ...declared.node,
+          ":@": { ...attrs(declared.node), ...own, ref: undefined },
+        },
+        declared.schema,
+        path,
+        required,
+      );
+    }
+    const { name, type, use, fixed } = own;
     if (fixed !== undefined) return;
     const named =
       type && !this.schemas.isBuiltin(type, schema)
@@ -383,18 +435,29 @@ class Walker {
  * Flattens the form XSD at `url`, reading it and every schema it imports through `read`.
  * Elements and attributes with a `fixed` value are constants, not answers, and are left out.
  */
-export function xsdFields(url: string, read: (url: string) => string): Fields {
+export function xsdFields(
+  url: string,
+  read: (url: string) => string,
+  rootElement?: string,
+): Fields {
   const schemas = new Schemas(read);
   const schema = schemas.load(url);
-  const roots = [...schema.elements.values()];
+  const roots = rootElement
+    ? [schema.elements.get(rootElement)].filter((n): n is XNode => Boolean(n))
+    : [...schema.elements.values()];
   if (roots.length !== 1)
     throw new Error(
-      `expected one root element in ${url}, found ${roots.length}`,
+      `expected one selected root element in ${url}, found ${roots.length}`,
     );
   const walker = new Walker(schemas);
   const complex = childNamed(roots[0], "complexType");
-  if (!complex)
-    throw new Error(`root element of ${url} has no inline complex type`);
-  walker.complex(complex, schema, "", true);
+  if (complex) walker.complex(complex, schema, "", true);
+  else {
+    const type = attrs(roots[0]).type;
+    const declared = type && schemas.find("complexTypes", type, schema);
+    if (!declared)
+      throw new Error(`root element of ${url} has no complex type`);
+    walker.complex(declared.node, declared.schema, "", true);
+  }
   return walker.fields;
 }

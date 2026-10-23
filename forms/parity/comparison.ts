@@ -1,3 +1,4 @@
+import { sourceCoordinates } from "./sourceBindings.ts";
 /**
  * Each plan field beside the same field in the DAT, the XSD and the compiled form, as the form
  * library's comparison sheet shows it.
@@ -688,6 +689,58 @@ function buildField<F extends PlanField>(
   };
 }
 
+/** A repeated answer has several DAT cells; no last-cell mismatch may disappear in the summary. */
+function buildBoundField<F extends PlanField>(
+  field: F,
+  maxItems: import("./harness/flatten/plan.ts").MaxItems,
+  fallback: string,
+  sides: Sides,
+  labels: Record<Source, Map<string, string>>,
+): FieldComparison<F> {
+  if (!field.source_bindings) return buildField(field, fallback, sides, labels);
+  const coordinates = sourceCoordinates(field, maxItems, "dat");
+  const copies = coordinates.map((c) =>
+    buildField({ ...field, dat_field: c.path }, fallback, sides, labels),
+  );
+  const base = copies[0] ?? buildField(field, fallback, sides, labels);
+  const rows = base.rows.map((row) => {
+    const cells = copies
+      .map((copy, index) => ({
+        path: coordinates[index].path,
+        cell: copy.rows.find((r) => r.attribute === row.attribute)?.cells.dat,
+      }))
+      .filter((x): x is { path: string; cell: Cell } => Boolean(x.cell));
+    if (!cells.length) return row;
+    const ranks = [...RANK, "notCompared" as const];
+    const status = ranks.find((rank) =>
+      cells.some((x) => x.cell.status === rank),
+    )!;
+    const values = [...new Set(cells.map((x) => x.cell.value))];
+    const value =
+      values.length === 1 && row.attribute !== "matchedBy"
+        ? values[0]
+        : cells
+            .map((x) => `${x.path}: ${x.cell.value ?? "not stated"}`)
+            .join(" | ");
+    const reason = [
+      ...new Set(cells.flatMap((x) => (x.cell.reason ? [x.cell.reason] : []))),
+    ].join(" ");
+    return {
+      ...row,
+      cells: {
+        ...row.cells,
+        dat: { status, value, ...(reason ? { reason } : {}) },
+      },
+    };
+  });
+  const counts: CategoryCounts = { intentional: 0, upstream: 0, gap: 0 };
+  for (const row of rows)
+    for (const source of SOURCES)
+      if (row.cells[source].status in counts)
+        counts[row.cells[source].status as Category]++;
+  return { ...base, field, rows, counts };
+}
+
 /**
  * Every field of a plan compared with its sources, or null for a form the parity suite does
  * not check. Needs the compiled forms (`npm run compile`) and cached sources
@@ -720,14 +773,24 @@ export async function compareForm<F extends PlanField>(
       ),
       xsd: side(mapping.xsd, SPECS.xmlMappingVsXsd, () => "xmlMapping"),
     };
-  const all = walkFields(plan.children).map(({ field }) => field);
+  const walked = walkFields(plan.children);
+  const all = walked.map(({ field }) => field);
+  const maxItemsByField = new Map(
+    walked.map(({ field, maxItems }) => [field, maxItems]),
+  );
   const labels = Object.fromEntries(
     SOURCES.map((source) => [
       source,
       new Map(
         all.flatMap((f) => {
           const key = KEYS[source].key(f);
-          return key ? [[key, f.label] as const] : [];
+          return source === "dat" && f.source_bindings
+            ? sourceCoordinates(f, maxItemsByField.get(f)!, "dat").map(
+                (c) => [c.path, f.label] as const,
+              )
+            : key
+              ? [[key, f.label] as const]
+              : [];
         }),
       ),
     ]),
@@ -745,7 +808,13 @@ export async function compareForm<F extends PlanField>(
           children: compare(children, position),
         };
       }
-      const field = buildField(node, position.join("."), sides, labels);
+      const field = buildBoundField(
+        node,
+        maxItemsByField.get(node)!,
+        position.join("."),
+        sides,
+        labels,
+      );
       fields.push(field);
       return { kind: "field", id: field.id };
     });
