@@ -1,10 +1,30 @@
-"""Tests for SF-424D XML generation."""
+"""Tests for SF-424D XML generation.
 
+XSD Reference: https://apply07.grants.gov/apply/forms/schemas/SF424D-V1.1.xsd
+"""
+
+from datetime import date
+from pathlib import Path
+
+import pytest
 from lxml import etree as lxml_etree
 
 from src.form_schema.forms.sf424d import FORM_XML_TRANSFORM_RULES as SF424D_TRANSFORM_RULES
+from src.form_schema.forms.sf424d import SF424d_v1_1
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
+from src.services.xml_generation.validation.xsd_validator import XSDValidator
+from tests.src.db.models.factories import (
+    AgencyFactory,
+    ApplicationFactory,
+    ApplicationFormFactory,
+    ApplicationSubmissionFactory,
+    CompetitionFactory,
+    CompetitionFormFactory,
+    OpportunityAssistanceListingFactory,
+    OpportunityFactory,
+)
 
 
 class TestSF424DXMLGeneration:
@@ -204,3 +224,244 @@ class TestSF424DXMLGeneration:
         submitted_date = root.find("SF424D:SubmittedDate", namespaces)
         assert submitted_date is not None
         assert submitted_date.text == "2026-02-07"
+
+    def test_generate_sf424d_xml_with_only_signature(self):
+        """Test SF-424D XML generation with only signature field (no title)."""
+        application_data = {
+            "signature": "Alice Johnson",
+            "applicant_organization": "Research Institute",
+            "date_signed": "2026-04-15",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=SF424D_TRANSFORM_RULES
+        )
+
+        response = service.generate_xml(request)
+
+        assert response.success is True
+        root = lxml_etree.fromstring(response.xml_data.encode("utf-8"))
+
+        namespaces = {
+            "SF424D": "http://apply.grants.gov/forms/SF424D-V1.1",
+        }
+
+        # AuthorizedRepresentative should be present with only RepresentativeName
+        auth_rep = root.find("SF424D:AuthorizedRepresentative", namespaces)
+        assert auth_rep is not None, "AuthorizedRepresentative should exist with signature"
+
+        rep_name = auth_rep.find("SF424D:RepresentativeName", namespaces)
+        assert rep_name is not None, "RepresentativeName should exist"
+        assert rep_name.text == "Alice Johnson"
+
+        # RepresentativeTitle should not be present (no title provided)
+        rep_title = auth_rep.find("SF424D:RepresentativeTitle", namespaces)
+        assert rep_title is None, "RepresentativeTitle should not exist without title"
+
+        org_name = root.find("SF424D:ApplicantOrganizationName", namespaces)
+        assert org_name is not None
+        assert org_name.text == "Research Institute"
+
+        submitted_date = root.find("SF424D:SubmittedDate", namespaces)
+        assert submitted_date is not None
+        assert submitted_date.text == "2026-04-15"
+
+    def test_generate_sf424d_xml_without_signature_or_title(self):
+        """Test that AuthorizedRepresentative is omitted when both signature and title are absent.
+
+        compose_object returns None when none of its mapped fields are present, so the
+        wrapper element should be excluded entirely rather than emitted empty.
+        """
+        application_data = {
+            "applicant_organization": "Test Organization",
+            "date_signed": "2026-02-07",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=SF424D_TRANSFORM_RULES
+        )
+
+        response = service.generate_xml(request)
+
+        assert response.success is True
+        xml_data = response.xml_data
+        root = lxml_etree.fromstring(xml_data.encode("utf-8"))
+
+        namespaces = {
+            "SF424D": "http://apply.grants.gov/forms/SF424D-V1.1",
+        }
+
+        assert root.find("SF424D:AuthorizedRepresentative", namespaces) is None
+        assert "AuthorizedRepresentative" not in xml_data
+
+        # Remaining elements are still emitted in XSD order
+        child_tags = [child.tag for child in root]
+        assert child_tags == [
+            "{http://apply.grants.gov/system/Global-V1.0}FormVersionIdentifier",
+            "{http://apply.grants.gov/forms/SF424D-V1.1}ApplicantOrganizationName",
+            "{http://apply.grants.gov/forms/SF424D-V1.1}SubmittedDate",
+        ]
+
+    def test_generate_sf424d_xml_without_date_signed(self):
+        """Test that SubmittedDate is excluded when date_signed is absent."""
+        application_data = {
+            "signature": "MH",
+            "title": "M",
+            "applicant_organization": "Org",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=SF424D_TRANSFORM_RULES
+        )
+
+        response = service.generate_xml(request)
+
+        assert response.success is True
+        xml_data = response.xml_data
+        root = lxml_etree.fromstring(xml_data.encode("utf-8"))
+
+        namespaces = {
+            "SF424D": "http://apply.grants.gov/forms/SF424D-V1.1",
+        }
+
+        assert root.find("SF424D:SubmittedDate", namespaces) is None
+        assert "SubmittedDate" not in xml_data
+
+
+class TestSF424DXSDValidation:
+    """XSD validation tests for SF-424D form XML."""
+
+    SF424D_XSD_URL = "https://apply07.grants.gov/apply/forms/schemas/SF424D-V1.1.xsd"
+    SF424D_NS = "{http://apply.grants.gov/forms/SF424D-V1.1}"
+    GRANT_NS = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+
+    @pytest.fixture
+    def xsd_validator(self):
+        """Create XSD validator with directory."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
+        sf424d_xsd_path = xsd_dir / "SF424D-V1.1.xsd"
+        if not sf424d_xsd_path.exists():
+            pytest.skip(
+                "SF424D-V1.1.xsd not found. Run 'flask task fetch-xsds' to download schemas."
+            )
+        return XSDValidator(xsd_dir)
+
+    def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
+        """Convert XSD URL to file path."""
+        xsd_filename = xsd_url.split("/")[-1]
+        return xsd_validator.xsd_dir / xsd_filename
+
+    def _create_sf424d_application(self, suffix: str, application_response: dict):
+        """Create an application containing an SF-424D form with the given response."""
+        agency = AgencyFactory.create()
+
+        opportunity = OpportunityFactory.create(
+            opportunity_number=f"TEST-SF424D-{suffix}",
+            opportunity_title=f"SF-424D Test Opportunity {suffix}",
+            agency_code=agency.agency_code,
+        )
+
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="11.001"
+        )
+
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id=f"TEST-SF424D-COMP-{suffix}",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
+        )
+
+        application = ApplicationFactory.create(
+            competition=competition, application_name=f"SF-424D Test Application {suffix}"
+        )
+
+        competition_form = CompetitionFormFactory.create(competition=competition, form=SF424d_v1_1)
+
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response=application_response,
+        )
+
+        return application
+
+    def _extract_sf424d_xml(self, application, legacy_tracking_number: int) -> str:
+        """Generate the full submission XML and return just the SF-424D Assurances element."""
+        application_submission = ApplicationSubmissionFactory.create(
+            application=application,
+            legacy_tracking_number=legacy_tracking_number,
+        )
+
+        assembler = SubmissionXMLAssembler(application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        assert xml_string is not None
+        assert len(xml_string) > 0
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        forms_element = root.find(".//grant:Forms", namespaces=self.GRANT_NS)
+        assert forms_element is not None, "Forms element not found in submission XML"
+
+        sf424d_elements = forms_element.findall(f".//{self.SF424D_NS}Assurances")
+        assert len(sf424d_elements) == 1, "Expected exactly one SF424D Assurances element"
+
+        return lxml_etree.tostring(sf424d_elements[0], encoding="unicode")
+
+    def test_sf424d_submission_xml_validates_against_xsd(
+        self, enable_factory_create, seed_form_registry, xsd_validator
+    ):
+        """Test that complete SF-424D submission XML validates against XSD schema."""
+        application = self._create_sf424d_application(
+            "001",
+            {
+                "signature": "Emily R. Chen, PhD",
+                "title": "Principal Investigator",
+                "applicant_organization": "National Construction Foundation",
+                "date_signed": "2025-01-15",
+            },
+        )
+
+        sf424d_xml = self._extract_sf424d_xml(application, legacy_tracking_number=77777777)
+
+        xsd_path = self._get_xsd_file_path(xsd_validator, self.SF424D_XSD_URL)
+        validation_result = xsd_validator.validate_xml(sf424d_xml, xsd_path)
+
+        assert validation_result["valid"], (
+            f"SF-424D XSD validation failed:\n"
+            f"Error: {validation_result['error_message']}\n"
+            f"Generated XML:\n{sf424d_xml[:2000]}"
+        )
+
+    def test_sf424d_minimal_data_validates_against_xsd(
+        self, enable_factory_create, seed_form_registry, xsd_validator
+    ):
+        """Test that SF-424D with minimal required data validates against XSD."""
+        # Minimal data - only fields required by the form JSON schema (all XSD elements are optional)
+        application = self._create_sf424d_application(
+            "MIN-001",
+            {
+                "applicant_organization": "Minimal Test Org",
+                "title": "Director",
+            },
+        )
+
+        sf424d_xml = self._extract_sf424d_xml(application, legacy_tracking_number=88888888)
+
+        xsd_path = self._get_xsd_file_path(xsd_validator, self.SF424D_XSD_URL)
+        validation_result = xsd_validator.validate_xml(sf424d_xml, xsd_path)
+
+        assert validation_result["valid"], (
+            f"SF-424D minimal validation failed:\n"
+            f"Error: {validation_result['error_message']}\n"
+            f"Generated XML:\n{sf424d_xml}"
+        )
