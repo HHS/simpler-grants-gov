@@ -24,8 +24,8 @@ from typing import Any
 
 from ...paths import ARRAY, Path
 
-# The SGG node types that hold other nodes. Any type other than these and `field` raises,
-# since an unknown node could hold fields and leaving them out would hide an order
+# The SGG node types that contain other nodes. Any type other than these and `field` raises,
+# since an unknown node could contain fields and leaving them out would hide an order
 # difference.
 SGG_CONTAINERS = frozenset({"section", "fieldList"})
 

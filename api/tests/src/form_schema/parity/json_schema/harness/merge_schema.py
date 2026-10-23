@@ -19,16 +19,18 @@ COMBINING = frozenset({"properties", "required", "allOf", "$defs", "definitions"
 
 # Keywords that describe a field rather than constrain it. When branches disagree, the
 # node's own value wins, e.g. a form overriding the label of a shared question.
-ANNOTATION = frozenset({
-    "title",
-    "description",
-    "examples",
-    "default",
-    "$comment",
-    "deprecated",
-    "readOnly",
-    "writeOnly",
-})
+ANNOTATION = frozenset(
+    {
+        "title",
+        "description",
+        "examples",
+        "default",
+        "$comment",
+        "deprecated",
+        "readOnly",
+        "writeOnly",
+    }
+)
 
 
 class ConflictingKeywordsError(Exception):

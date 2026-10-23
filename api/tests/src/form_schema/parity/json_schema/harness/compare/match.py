@@ -21,7 +21,7 @@ def match_fields(
         mapped={"p.phone": "p.phone_number"} -> {("p", "phone"): ("p", "phone_number")}
 
     A path that is already the target of a mapping isn't also matched to itself. With
-    `mapped={"a": "b"}` and both forms holding `a` and `b`, only `a -> b` is returned.
+    `mapped={"a": "b"}` and both forms having `a` and `b`, only `a -> b` is returned.
     """
     mapped = {paths.split(k): paths.split(v) for k, v in diff.mapped.items()}
     taken = set(mapped.values())

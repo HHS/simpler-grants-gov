@@ -22,7 +22,7 @@ def unmatched_fields(
     generated: dict[Path, FormInput],
     handwritten: dict[Path, FormInput],
 ) -> list[Discrepancy]:
-    """Return fields on either form that match no field on the other.
+    """Return fields on either form that don't match a field on the other.
 
     Fields listed in `absent_from_source` (generated) or `absent_from_definition`
     (hand-written) are left out.

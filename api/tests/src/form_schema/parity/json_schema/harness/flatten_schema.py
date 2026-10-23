@@ -28,26 +28,28 @@ from ...paths import ARRAY, Path
 from .merge_schema import merge_allof
 
 # Every keyword that can make a response invalid.
-VALIDATION_KEYWORDS = frozenset({
-    "type",
-    "enum",
-    "const",
-    "format",
-    "pattern",
-    "maxLength",
-    "minLength",
-    "maximum",
-    "minimum",
-    "exclusiveMaximum",
-    "exclusiveMinimum",
-    "multipleOf",
-    "maxItems",
-    "minItems",
-    "uniqueItems",
-    "maxProperties",
-    "minProperties",
-    "dependentRequired",
-})
+VALIDATION_KEYWORDS = frozenset(
+    {
+        "type",
+        "enum",
+        "const",
+        "format",
+        "pattern",
+        "maxLength",
+        "minLength",
+        "maximum",
+        "minimum",
+        "exclusiveMaximum",
+        "exclusiveMinimum",
+        "multipleOf",
+        "maxItems",
+        "minItems",
+        "uniqueItems",
+        "maxProperties",
+        "minProperties",
+        "dependentRequired",
+    }
+)
 
 
 @dataclasses.dataclass(frozen=True)
