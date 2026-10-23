@@ -72,6 +72,16 @@ describe("controlToNodes", () => {
     ]);
   });
 
+  it("leaves off a widget name the SGG renderer doesn't have, so the tree stays valid", () => {
+    const nodes = controlToNodes(
+      control("#/properties/title", { options: { widget: "CustomWidget" } }),
+      schema,
+    );
+
+    expect(nodes).toEqual([{ type: "field", definition: "/properties/title" }]);
+    expect(validateUiSchema(nodes)).toBeFalsy();
+  });
+
   it("maps a readonly control to a disabled field", () => {
     expect(
       controlToNodes(
