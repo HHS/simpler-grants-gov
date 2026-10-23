@@ -78,8 +78,8 @@ describe("OpportunityAwardInfo", () => {
 
     // Check funding instrument type
     expect(screen.getByText("Funding instrument type:")).toBeInTheDocument();
-    expect(screen.getByText("Grant")).toBeInTheDocument();
-    expect(screen.getByText("Cooperative Agreement")).toBeInTheDocument();
+    expect(screen.getByText("Grant").tagName).toBe("LI");
+    expect(screen.getByText("Cooperative Agreement").tagName).toBe("LI");
 
     // Check opportunity category and explanation
     expect(screen.getByText("Opportunity Category:")).toBeInTheDocument();
@@ -96,8 +96,8 @@ describe("OpportunityAwardInfo", () => {
     expect(
       screen.getByText("Category of Funding Activity:"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Education")).toBeInTheDocument();
-    expect(screen.getByText("Health")).toBeInTheDocument();
+    expect(screen.getByText("Education").tagName).toBe("LI");
+    expect(screen.getByText("Health").tagName).toBe("LI");
 
     expect(screen.getByText("Category Explanation:")).toBeInTheDocument();
     expect(
@@ -120,7 +120,32 @@ describe("OpportunityAwardInfo", () => {
     );
 
     const fundingSummary = screen.getByTestId("opportunity-funding-summary");
-    expect(fundingSummary).toHaveTextContent("Expected project funding: $--");
-    expect(fundingSummary).toHaveTextContent("Expected awards: --");
+    expect(fundingSummary).toHaveTextContent(
+      "Expected project funding: notSpecified",
+    );
+    expect(fundingSummary).toHaveTextContent("Expected awards: notSpecified");
+  });
+
+  it("falls back to not specified when there are no funding activities", () => {
+    const { unmount } = render(
+      <OpportunityAwardInfo opportunityData={mockOpportunityData} />,
+    );
+    const baseline = screen.queryAllByText("notSpecified").length;
+    unmount();
+
+    render(
+      <OpportunityAwardInfo
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            ...mockOpportunityData.summary,
+            funding_categories: [],
+          },
+        }}
+      />,
+    );
+
+    expect(screen.queryByText("Education")).not.toBeInTheDocument();
+    expect(screen.getAllByText("notSpecified")).toHaveLength(baseline + 1);
   });
 });

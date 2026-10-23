@@ -22,8 +22,7 @@ const OpportunityDescription = ({
   const t = useTranslations("OpportunityListing.description");
 
   const additionalInformationOnEligibility =
-    summary.applicant_eligibility_description ?? "--";
-
+    summary.applicant_eligibility_description ?? "";
   return (
     <div data-testid="opportunity-description">
       <div className="display-block tablet:display-flex flex-align-end margin-bottom-2">
@@ -34,6 +33,7 @@ const OpportunityDescription = ({
         textContent={summary.summary_description || ""}
         showCallToAction={t("showDescription")}
         hideCallToAction={t("hideSummaryDescription")}
+        emptyText={t("notSpecified")}
       />
       <h2>{t("eligibility")}</h2>
       <div className="padding-left-6">
@@ -44,7 +44,9 @@ const OpportunityDescription = ({
       <h3>{t("additionalInfo")}</h3>
       <div
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(additionalInformationOnEligibility),
+          __html: DOMPurify.sanitize(
+            additionalInformationOnEligibility || t("notSpecified"),
+          ),
         }}
       />
     </div>
