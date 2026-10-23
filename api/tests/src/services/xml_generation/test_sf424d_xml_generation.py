@@ -465,3 +465,115 @@ class TestSF424DXSDValidation:
             f"Error: {validation_result['error_message']}\n"
             f"Generated XML:\n{sf424d_xml}"
         )
+
+    def _generate_and_validate(self, xsd_validator: XSDValidator, application_data: dict):
+        """Generate SF-424D XML directly from form data and validate it against the XSD."""
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=SF424D_TRANSFORM_RULES
+        )
+        response = service.generate_xml(request)
+        assert response.success is True
+
+        xsd_path = self._get_xsd_file_path(xsd_validator, self.SF424D_XSD_URL)
+        return response.xml_data, xsd_validator.validate_xml(response.xml_data, xsd_path)
+
+    # XSD maxLength for each field: SignatureDataType (144), HumanTitleDataType (45),
+    # OrganizationNameDataType (60) in GlobalLibrary-V2.0
+    MAX_LENGTHS = {
+        "signature": 144,
+        "title": 45,
+        "applicant_organization": 60,
+    }
+
+    @pytest.mark.parametrize("field,max_length", MAX_LENGTHS.items())
+    def test_sf424d_field_at_max_length_validates_against_xsd(
+        self, xsd_validator, field, max_length
+    ):
+        """A value at exactly the XSD maximum length is accepted."""
+        application_data = {
+            "signature": "MH",
+            "title": "M",
+            "applicant_organization": "Org",
+            "date_signed": "2026-02-07",
+        } | {field: "a" * max_length}
+
+        xml_data, validation_result = self._generate_and_validate(xsd_validator, application_data)
+
+        assert validation_result["valid"], (
+            f"SF-424D {field} at max length {max_length} failed XSD validation:\n"
+            f"Error: {validation_result['error_message']}\n"
+            f"Generated XML:\n{xml_data}"
+        )
+
+    @pytest.mark.parametrize("field,max_length", MAX_LENGTHS.items())
+    def test_sf424d_field_over_max_length_fails_xsd(self, xsd_validator, field, max_length):
+        """A value one character over the XSD maximum length is rejected.
+
+        XML generation does not enforce lengths itself (JSON schema validation does
+        that upstream), so this confirms the XSD acts as a backstop.
+        """
+        application_data = {
+            "signature": "MH",
+            "title": "M",
+            "applicant_organization": "Org",
+            "date_signed": "2026-02-07",
+        } | {field: "a" * (max_length + 1)}
+
+        _, validation_result = self._generate_and_validate(xsd_validator, application_data)
+
+        assert validation_result["valid"] is False
+        assert "length" in validation_result["error_message"].lower()
+
+    def test_sf424d_invalid_date_fails_xsd(self, xsd_validator):
+        """A non-date SubmittedDate passes through generation but is rejected by the XSD."""
+        application_data = {
+            "signature": "MH",
+            "title": "M",
+            "applicant_organization": "Org",
+            "date_signed": "not-a-date",
+        }
+
+        _, validation_result = self._generate_and_validate(xsd_validator, application_data)
+
+        assert validation_result["valid"] is False
+        assert "SubmittedDate" in validation_result["error_message"]
+
+    def test_sf424d_xml_escaping(self, xsd_validator):
+        """Characters requiring XML escaping are serialized correctly and still validate."""
+        application_data = {
+            "signature": "O'Brien & Sons",
+            "title": 'VP "R&D"',
+            "applicant_organization": "Smith & Co <Construction>",
+            "date_signed": "2026-02-07",
+        }
+
+        xml_data, validation_result = self._generate_and_validate(xsd_validator, application_data)
+
+        # Raw XML contains escaped entities, never the bare characters inside text
+        assert "Smith &amp; Co &lt;Construction&gt;" in xml_data
+        assert "<Construction>" not in xml_data
+        # Guard against double-escaping
+        assert "&amp;amp;" not in xml_data
+
+        # Parsed values round-trip to the original input
+        root = lxml_etree.fromstring(xml_data.encode("utf-8"))
+        namespaces = {"SF424D": "http://apply.grants.gov/forms/SF424D-V1.1"}
+        assert (
+            root.find("SF424D:AuthorizedRepresentative/SF424D:RepresentativeName", namespaces).text
+            == "O'Brien & Sons"
+        )
+        assert (
+            root.find("SF424D:AuthorizedRepresentative/SF424D:RepresentativeTitle", namespaces).text
+            == 'VP "R&D"'
+        )
+        assert (
+            root.find("SF424D:ApplicantOrganizationName", namespaces).text
+            == "Smith & Co <Construction>"
+        )
+
+        assert validation_result["valid"], (
+            f"SF-424D escaped XML failed XSD validation:\n"
+            f"Error: {validation_result['error_message']}\n"
+            f"Generated XML:\n{xml_data}"
+        )
