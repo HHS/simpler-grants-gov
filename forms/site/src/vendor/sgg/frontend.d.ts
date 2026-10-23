@@ -89,7 +89,7 @@ declare module "@sgg/frontend/i18n/messages/en/index" {
   export const messages: Record<string, unknown>;
 }
 
-declare module "@sgg/frontend/utils/applyForm/jsonFormsUiSchema" {
+declare module "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema" {
   import type { ControlElement, UISchemaElement } from "@jsonforms/core";
   import type { RJSFSchema } from "@rjsf/utils";
   import type { UiSchema, UiSchemaField } from "@sgg/frontend/types/applyForm/types";
@@ -100,20 +100,21 @@ declare module "@sgg/frontend/utils/applyForm/jsonFormsUiSchema" {
     schema: RJSFSchema,
   ) => UiSchemaField[];
   export const groupName: (label: string) => string;
-  export const jsonFormsToUiSchema: (
+  export type ConvertedUiSchema = {
+    uiSchema: UiSchema;
+    unsupportedControls: string[];
+    ignoredListRules: string[];
+  };
+  export const convertJsonFormsUiSchema: (
     uiSchema: JsonFormsUiSchema,
     schema: RJSFSchema,
-  ) => UiSchema;
-  export const findUnsupportedControls: (
-    uiSchema: JsonFormsUiSchema,
-    schema: RJSFSchema,
-  ) => string[];
+  ) => ConvertedUiSchema;
 }
 
 declare module "@sgg/frontend/components/apply-form/jsonforms/renderers" {
   import type { RJSFSchema } from "@rjsf/utils";
   import type { FormattedFormValidationWarning } from "@sgg/frontend/types/applyForm/types";
-  import type { JsonFormsUiSchema } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
+  import type { JsonFormsUiSchema } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
   import type { Context } from "react";
 
   export type AdapterContextValue = {
@@ -133,7 +134,7 @@ declare module "@sgg/frontend/components/apply-form/jsonforms/JsonFormsFields" {
   import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
   import type { RJSFSchema } from "@rjsf/utils";
   import type { FormattedFormValidationWarning } from "@sgg/frontend/types/applyForm/types";
-  import type { JsonFormsUiSchema } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
+  import type { JsonFormsUiSchema } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
   import type { JSX } from "react";
 
   export const JsonFormsFields: (props: {

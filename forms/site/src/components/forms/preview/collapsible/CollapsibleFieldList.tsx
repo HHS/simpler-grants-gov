@@ -14,7 +14,7 @@ import type { FormattedFormValidationWarning } from "@sgg/frontend/types/applyFo
 import { isFieldRequired } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { getFieldListChildErrors } from "@sgg/frontend/utils/applyForm/fieldListHelpers";
 import { getFieldConfig } from "@sgg/frontend/utils/applyForm/getFieldConfig";
-import { controlToNodes } from "@sgg/frontend/utils/applyForm/jsonFormsUiSchema";
+import { controlToNodes } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
 import { useContext, useId, useRef, useState, type ReactNode } from "react";
 
 import { SectionDepth } from "../sections/SectionDepth";
