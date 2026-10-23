@@ -90,7 +90,7 @@ class TestLoadJsonForm:
 
     def test_round_trip_ignores_form_instruction(self, tmp_path: Path) -> None:
         """get_form() sets form_instruction on the shared registry Form, so a test that
-        ran earlier may have set it. The round trip must hold either way."""
+        ran earlier may have set it. The round trip should work either way."""
         form_path = _write_inline(tmp_path, _form_to_json_dict(SF424_v4_0))
 
         original = SF424_v4_0.form_instruction
