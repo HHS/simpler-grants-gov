@@ -1,4 +1,5 @@
 # Overview
+
 This folder contains files for processing a JSON rule schema.
 
 These rule schemas are run in addition to our JSON Schema for a user's
@@ -6,13 +7,15 @@ JSON response to a form. We put logic here that either cannot go into
 JSON Schema or would be more confusing to
 
 This schema can handle:
-* Pre-populating and post-populating fields in a users response
-* Running validation rules that couldn't be done in JSON Schema
+
+- Pre-populating and post-populating fields in a users response
+- Running validation rules that couldn't be done in JSON Schema
 
 Schemas are defined as JSON in the same shape as the JSON response,
 with rules defined at the value level.
 
 For example, let us assume we have the following JSON response.
+
 ```json
 {
   "info": {
@@ -20,7 +23,9 @@ For example, let us assume we have the following JSON response.
   }
 }
 ```
+
 If we wanted to define a rule for this, we would do:
+
 ```json
 {
   "info": {
@@ -32,6 +37,7 @@ If we wanted to define a rule for this, we would do:
   }
 }
 ```
+
 There are two parts to the rule, first which group the rule belongs to
 (eg. pre-population, post-population, or validation). Then inside of that
 we define a rule, which will map to some bit of logic for how to handle it.
@@ -39,6 +45,7 @@ If a rule specifically needs additional configuration, we can put that alongside
 the rule.
 
 ## Arrays
+
 If a field in the JSON represents an array, we can add a type in path
 to let the processing logic know it should apply the rule to all values in that array.
 For example, with data that looks like:
@@ -46,12 +53,14 @@ For example, with data that looks like:
 ```json
 {
   "my_array_field": [
-    {"x":  "ABC", "y": "XYZ"},
-    {"x":  "abc", "y": "xyz"}
+    { "x": "ABC", "y": "XYZ" },
+    { "x": "abc", "y": "xyz" }
   ]
 }
 ```
+
 We could write a rule that applies to all elements of the `my_array_field` field like so:
+
 ```json
 {
   "my_array_field": {
@@ -64,20 +73,24 @@ We could write a rule that applies to all elements of the `my_array_field` field
   }
 }
 ```
+
 Which upon running would produce something like:
+
 ```json
 {
   "my_array_field": [
-    {"x":  "ABC", "y": "XYZ", "z": "my-opportunity-number"},
-    {"x":  "abc", "y": "xyz", "z": "my-opportunity-number"}
+    { "x": "ABC", "y": "XYZ", "z": "my-opportunity-number" },
+    { "x": "abc", "y": "xyz", "z": "my-opportunity-number" }
   ]
 }
 ```
+
 Note that this array logic is setup in a way that does not ever
 add or modify how many items are in an array, if the data were null
 or an empty array, this sort of rule would do nothing (eg. `{"my_array_field": []}` would not be updated by this rule).
 
 # Pre/post Population
+
 Pre and post-population both are used for fields that we want our
 system to populate automatically for a user. Pre-population fields
 are those that get populated when a user first creates the application form
@@ -86,36 +99,41 @@ Post-population occurs when a user submits their application.
 
 For pre-population, this rule group is `gg_pre_population` with the following
 rules currently implemented:
-* `opportunity_number` - from the opportunity
-* `opportunity_title` - from the opportunity
-* `agency_name` - from the agency connected to the opportunity
-* `uei` - the UEI from the application's organization, `00000000INDV` if the application is from an individual
-* `assistance_listing_number` - from the competition
-* `assistance_listing_program_title` - from the competition
-* `public_competition_id` - from the competition
-* `competition_title` - from the competition
-* `sum_monetary` - calculated based on other fields in the JSON, see Monetary Summation section below for further details
-* `multiply_by_percentage` - a monetary amount multiplied by a whole-number percentage, see Multiply by Percentage section below for further details
-* `subtract_monetary` - calculated based on other fields in the JSON, see Monetary Subtraction section below for further details
+
+- `opportunity_number` - from the opportunity
+- `opportunity_title` - from the opportunity
+- `agency_name` - from the agency connected to the opportunity
+- `uei` - the UEI from the application's organization, `00000000INDV` if the application is from an individual
+- `assistance_listing_number` - from the competition
+- `assistance_listing_program_title` - from the competition
+- `public_competition_id` - from the competition
+- `competition_title` - from the competition
+- `sum_monetary` - calculated based on other fields in the JSON, see Monetary Summation section below for further details
+- `multiply_by_percentage` - a monetary amount multiplied by a whole-number percentage, see Multiply by Percentage section below for further details
+- `subtract_monetary` - calculated based on other fields in the JSON, see Monetary Subtraction section below for further details
 
 For post-population, this rule group is `gg_post_population` with the following
 rules currently implemented:
-* `current_date` - The current date in the US EST timezone
-* `signature` - The name of the creator of the application - NOTE - currently defaults to a random application user's email due to not having names in our system yet.
+
+- `current_date` - The current date in the US EST timezone
+- `signature` - The name of the creator of the application - NOTE - currently defaults to a random application user's email due to not having names in our system yet.
 
 ## Null Population
+
 Several of our rules like `public_competition_id` and `competition_title` can be
 null due to them being nullable in their corresponding DB tables. We don't generally
 configure our JSON schema to allow null values, instead preferring a value to be excluded
 if there is no value (eg. We want `{}` over `{"my_field": null}`). However, if the rule
 returns null, we have to do something. For that reason, all pre/post population rules
 can take in an optional `null_population` rule with the following values:
-* `exclude_value` (the default if no rule configured) - This will not add the value to the JSON schema AND remove any existing values.
-* `set_as_null` - This will set the value as null, behaving the same as any other population
+
+- `exclude_value` (the default if no rule configured) - This will not add the value to the JSON schema AND remove any existing values.
+- `set_as_null` - This will set the value as null, behaving the same as any other population
 
 The default assumes we don't want null values in our JSON schema.
 
 ### Caveats of Null Population when using `exclude_value`
+
 If a field is an array of values, (eg. `[1, 2, 3]`) we will not update those values. This is because
 removing values from the array could have consequences on our logic. If we remove records from an array
 list, then our indexing logic would be made incredibly complex. As we are unlikely to pre/post populate
@@ -126,8 +144,10 @@ that would work as we can change the values in the objects within an array uneve
 want to be adding or removing items themselves from the array. This would result in `{"my_array": [{}, {}]}`
 
 ## Monetary Summation
+
 We support the ability to sum monetary amounts together. This rule requires that you
 specify which fields to sum together like so:
+
 ```json
 {
   "my_field": {
@@ -142,17 +162,19 @@ specify which fields to sum together like so:
 For details on how the fields parameter works, see the Fields section below.
 
 A few important details about our summation logic:
-* We will always populate the configured field, if no fields fetched are populated, "0.00" will be populated.
-* Any null-field is treated as "0.00".
 
+- We will always populate the configured field, if no fields fetched are populated, "0.00" will be populated.
+- Any null-field is treated as "0.00".
 
 NOTE: Only monetary summation is supported right now. All math done by this summing
 logic assumes the input values are strings of the format "0.00". If we need to support
 summing integers or other numeric types, we'll need to add a separate rule for those.
 
 ## Multiply by Percentage
+
 We support multiplying a monetary amount by a whole-number percentage. This is
 used for cells like SF424C line 17 (federal share). The rule takes two paths:
+
 ```json
 {
   "my_field": {
@@ -174,13 +196,16 @@ For details on how the `amount`/`percentage` paths work, see the Fields section
 below (single paths are resolved the same way as `sum_monetary`'s fields).
 
 A few important details:
-* A missing `amount` or `percentage` is treated as zero, producing `"0.00"`.
-* Invalid data (a non-string amount, a non-integer percentage, or an unparseable
+
+- A missing `amount` or `percentage` is treated as zero, producing `"0.00"`.
+- Invalid data (a non-string amount, a non-integer percentage, or an unparseable
   value) raises a validation error rather than populating a bogus value.
 
 ## Monetary Subtraction
+
 We support the ability to subtract monetary amounts from each other. This rule
 requires that you specify which fields to subtract like so:
+
 ```json
 {
   "my_field": {
@@ -192,12 +217,13 @@ requires that you specify which fields to subtract like so:
 }
 ```
 
-This mirrors `sum_monetary`, but every subsequent field is subtracted from the first. 
+This mirrors `sum_monetary`, but every subsequent field is subtracted from the first.
 The example above produces `a - b`, and fields of `["a", "b", "c"]` would produce `a - b - c`.
 
 For details on how the fields parameter works, see the Fields section below.
 
 ## Fields
+
 Some rules like our `sum_monetary` rule allow you to specify fields that
 serve as the input to the rule. These fields can be specified as either
 absolute or relative paths. Additionally, the fields can contain
@@ -209,15 +235,18 @@ not yet populated, or an array is empty, it will return nothing. How the
 rules use that can vary.
 
 ### Absolute Fields
+
 These are defined as the full path from the root of the object to whatever
 field you want to fetch. All of the following would be absolute fields:
-* `x.y.z`
-* `my_array[*].a.b`
-* `a[*].b[*].c[*].d`
+
+- `x.y.z`
+- `my_array[*].a.b`
+- `a[*].b[*].c[*].d`
 
 Absolute fields work as you expect, and should handle most simple cases.
 
 ### Relative Fields
+
 A relative field is relative to the value where the rule is configured.
 You can specify a relative field by starting it with `@THIS` to indicate
 that you want the path defined as relative to wherever you are in the schema.
@@ -230,9 +259,9 @@ For example assume the following data and rule:
 ```json
 {
   "my_array": [
-    {"my_nested_obj":  {"x": "100.00", "y": "200.00"}},
-    {"my_nested_obj":  {"x": "300.00", "y": "400.00"}},
-    {"my_nested_obj":  {"x": "500.00", "y": "600.00"}}
+    { "my_nested_obj": { "x": "100.00", "y": "200.00" } },
+    { "my_nested_obj": { "x": "300.00", "y": "400.00" } },
+    { "my_nested_obj": { "x": "500.00", "y": "600.00" } }
   ]
 }
 ```
@@ -252,15 +281,17 @@ For example assume the following data and rule:
   }
 }
 ```
+
 Specifying it with relative paths lets us make each array item calculate
 its own separate sum. Without relative paths, we wouldn't have a good way
 to specify what amounts to:
-* `my_array[0].my_nested_obj.x` + `my_array[0].my_nested_obj.y`
-* `my_array[1].my_nested_obj.x` + `my_array[1].my_nested_obj.y`
-* `my_array[2].my_nested_obj.x` + `my_array[2].my_nested_obj.y`
 
+- `my_array[0].my_nested_obj.x` + `my_array[0].my_nested_obj.y`
+- `my_array[1].my_nested_obj.x` + `my_array[1].my_nested_obj.y`
+- `my_array[2].my_nested_obj.x` + `my_array[2].my_nested_obj.y`
 
 # Validation
+
 Validation is used for validating things about the data that are too complex
 or impractical to put in our JSON Schema. If at all possible, we should try
 and put all validation rules into our JSON Schema for clarity. We should only
@@ -272,11 +303,24 @@ we'll add it to a list of validation issues.
 
 For validation, this rule group is `gg_validation` with the following
 rules currently implemented:
-* `attachment` - verifies that the field representing an attachment ID corresponds to an attachment ID on the application itself.
 
-# Future Work
+- `attachment` - verifies that the field representing an attachment ID corresponds to an attachment ID on the application itself.
+- `date_after` - verifies that a date is after another date on the form, see Date After section below.
 
-## Cross-field Validation
-We likely want some form of cross-field validation. I don't think
-JSON Schema supports a way to validate dates are in order for something
-like start/end dates.
+## Date After
+
+JSON Schema can't compare two fields, so this rule checks that dates like a
+project's start and end are in order. Set it on the later date, with `field`
+pointing at the earlier one (absolute or `@THIS.` relative path):
+
+```json
+{
+  "project_end_date": {
+    "gg_validation": { "rule": "date_after", "field": "project_start_date" }
+  }
+}
+```
+
+The same date on both is flagged too, matching the legacy form. If either
+date is missing or isn't a valid date, the rule doesn't add an issue, since
+required and format checks are handled by the JSON schema.

@@ -84,9 +84,10 @@ FORM_JSON_SCHEMA = {
             "type": "object",
             "required": ["name", "title", "address", "phone_number", "email"],
             "properties": {
+                # No title on purpose: the frontend prefixes required messages with the
+                # parent's title, which would read "Name First Name is required".
                 "name": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
-                    "title": "Name",
                     "description": "Enter the name.",
                 },
                 "title": {
@@ -476,6 +477,8 @@ FORM_RULE_SCHEMA = {
     "funding_opportunity_number": {"gg_pre_population": {"rule": "opportunity_number"}},
     "funding_opportunity_title": {"gg_pre_population": {"rule": "opportunity_title"}},
     "sam_uei": {"gg_pre_population": {"rule": "uei"}},
+    ##### VALIDATION RULES
+    "project_end_date": {"gg_validation": {"rule": "date_after", "field": "project_start_date"}},
     ##### POST-POPULATION RULES
     "date_received": {"gg_post_population": {"rule": "current_date"}},
     "aor_signature": {"gg_post_population": {"rule": "signature"}},

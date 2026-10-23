@@ -678,3 +678,53 @@ def test_sf424_short_v3_0_post_population(
     assert app_json["date_received"] == "2023-02-20"
     assert app_json["authorized_representative_date_signed"] == "2023-02-20"
     assert app_json["aor_signature"] == "mynewmail@example.com"
+
+
+@pytest.mark.parametrize("group", ["project_director", "contact_person"])
+def test_sf424_short_v3_0_contact_name_has_no_title(sf424_short_v3_0, group):
+    """Without a title, required errors read "First Name is required" rather than
+    "Name First Name is required"."""
+    group_schema = sf424_short_v3_0.form_json_schema["properties"][group]["allOf"][0]
+    name_schema = group_schema["properties"]["name"]
+
+    assert all("title" not in part for part in [name_schema, *name_schema.get("allOf", [])])
+
+
+def test_sf424_short_v3_0_project_end_date_after_start_date(
+    enable_factory_create, valid_json_v3_0, sf424_short_v3_0
+):
+    valid_json_v3_0["project_start_date"] = "2026-01-01"
+    valid_json_v3_0["project_end_date"] = "2026-01-02"
+    application_form = setup_application_for_form_validation(
+        valid_json_v3_0,
+        json_schema=sf424_short_v3_0.form_json_schema,
+        rule_schema=sf424_short_v3_0.form_rule_schema,
+    )
+
+    assert validate_application_form(application_form, ApplicationAction.MODIFY) == []
+
+
+@pytest.mark.parametrize("action", [ApplicationAction.MODIFY, ApplicationAction.SUBMIT])
+@pytest.mark.parametrize("end_date", ["2026-01-01", "2026-01-02"])
+def test_sf424_short_v3_0_project_end_date_not_after_start_date(
+    enable_factory_create, valid_json_v3_0, sf424_short_v3_0, action, end_date
+):
+    """Flagged as a warning on save and blocks submit, like the legacy form's date check.
+    The same date on both is flagged too, as legacy requires the end date to be after."""
+    valid_json_v3_0["project_start_date"] = "2026-01-02"
+    valid_json_v3_0["project_end_date"] = end_date
+    application_form = setup_application_for_form_validation(
+        valid_json_v3_0,
+        json_schema=sf424_short_v3_0.form_json_schema,
+        rule_schema=sf424_short_v3_0.form_rule_schema,
+    )
+
+    issues = validate_application_form(application_form, action)
+
+    assert [(issue.field, issue.type, issue.message) for issue in issues] == [
+        (
+            "$.project_end_date",
+            "invalid_date_order",
+            "The end date must be after the start date",
+        )
+    ]
