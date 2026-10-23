@@ -1434,6 +1434,8 @@ class TestSimplerSOAPGetSubmissionListExpanded:
     def test_get_simpler_soap_response_returns_valid_submission_info_from_proxy_and_skips_invalid(
         self, db_session, enable_factory_create, mock_s3_bucket, caplog
     ):
+        """Invalid SubmissionInfo records from the proxy are skipped and logged; valid records
+        and Simpler submissions are still returned."""
         agency = AgencyFactory.create()
         sam_gov_entity = SamGovEntityFactory.create(
             has_debt_subject_to_offset=True, has_exclusion_status=True
@@ -1888,11 +1890,11 @@ class TestSimplerSOAPGetApplicationListExpanded:
             assert b"ExpandedApplicationInfo" in response_xml
             assert "Failed to parse application list XML response" in caplog.messages
 
-    def test_get_simpler_soap_response_skips_invalid_proxy_elements_and_returns_valid_ones(
+    def test_get_simpler_soap_response_returns_valid_expanded_application_info_from_proxy_and_skips_invalid(
         self, db_session, enable_factory_create, mock_s3_bucket, caplog
     ):
-        """Invalid individual ExpandedApplicationInfo elements from the proxy are skipped and logged;
-        valid elements and Simpler applications are still returned."""
+        """Invalid ExpandedApplicationInfo records from the proxy are skipped and logged; valid
+        records and Simpler applications are still returned."""
         agency = AgencyFactory.create()
         sam_gov_entity = SamGovEntityFactory.create(
             has_debt_subject_to_offset=True, has_exclusion_status=True
@@ -1950,7 +1952,7 @@ class TestSimplerSOAPGetApplicationListExpanded:
             response_xml = result.data if isinstance(result.data, bytes) else b"".join(result.data)
             # Simpler application present
             assert f"GRANT{submission.legacy_tracking_number}".encode() in response_xml
-            # Valid proxy element present
+            # Valid proxy record present; only the invalid record is skipped
             assert b"GRANT00839196" in response_xml
             assert "Skipping invalid submission due to validation error" in caplog.messages
 
@@ -2584,6 +2586,8 @@ class TestSimplerSOAPGetSubmissionList:
     def test_get_simpler_soap_response_returns_valid_submission_info_from_proxy_and_skips_invalid(
         self, db_session, enable_factory_create, mock_s3_bucket, caplog
     ):
+        """Invalid SubmissionInfo records from the proxy are skipped and logged; valid records
+        and Simpler submissions are still returned."""
         agency = AgencyFactory.create()
         sam_gov_entity = SamGovEntityFactory.create(
             has_debt_subject_to_offset=True, has_exclusion_status=True
