@@ -6,6 +6,8 @@ This component takes form and UI schemas to create a form. The form schema confo
 
 The UI schema is custom for this project. It was inspired by [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form). RJSF was not chosen because it doesn't work with server actions, it doesn't support hierarchical UI layouts natively, and the validation will move to the API which reduces the value of the tightly coupled validation in RJSF. There is a [plugin for layouts](https://github.com/audibene-labs/react-jsonschema-form-layout), however it hasn't been updated in 4 years and still requires a lot of abstraction. This component provides most of the UI rendering with a ~100 line recursive function and uses the same library for validation. The widgets however are patterned after the RJSF widgets.
 
+A form can use a [JSON Forms](https://jsonforms.io/docs/) UI schema instead. See the [JSON Forms renderer README](./jsonforms/README.md).
+
 ## UI Template
 
 File adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/templates/BaseInputTemplate.tsx
@@ -137,61 +139,3 @@ In the widget, the data is available as a combined `value` object.
 A node in an SGG UI schema can carry rules, such as `conditional`, which the form spec emitter writes to describe when a field is enabled, disabled or read-only. The SGG renderer doesn't act on these rules yet, so the fields they govern render unconditionally.
 
 UI schema validation accepts any unknown _object-valued_ key on a node as a rule, so new rules can ship before the renderer supports them without breaking the form. Unknown string keys, like a mistyped `label` or `widget`, still fail validation. `getFormData` logs the rules a form declares that the renderer ignores (`unimplementedRuleKeys`).
-
-## JSON Forms UI schema
-
-Instead of the SGG UI schema described above, a form can use a [JSON Forms](https://jsonforms.io/docs/) UI schema. To opt in, the form's API response sets `form_renderer` to `"jsonforms"`. When `form_renderer` is `"sgg"` or missing, the form uses the SGG UI schema.
-
-### Terminology
-
-A field in a JSON Forms form can be rendered by two kinds of widget:
-
-| Term                         | What it is                                                                                                                                   | Where it's used                                                                          |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **SGG widget**               | One of the existing USWDS widgets in `widgets/`, patterned after RJSF widgets and registered in `widgetComponents`                           | Every field in an SGG form, and every field the SGG adapter can map in a JSON Forms form |
-| **Custom JSON Forms widget** | A component we write with JSON Forms' API (a tester plus `withJsonFormsControlProps` or `withJsonFormsLayoutProps`) instead of an SGG widget | The form library's sections and collapsible list. The apply form doesn't use any yet     |
-
-The **SGG adapter** (`AdaptedControl`, `AdaptedLayout`) is what lets JSON Forms render a control with an SGG widget.
-
-In this README, "renderer" means the form-level renderer: the SGG renderer, or the JSON Forms renderer in `JsonFormsFields`. JSON Forms' own API calls individual widgets "renderers" (e.g. the `renderers` and `extraRenderers` lists), but we call them widgets to keep the two apart.
-
-### How it works
-
-- **Layout and rules:** JSON Forms handles the layout and the rules that show, hide, enable or disable fields. Every field is still rendered by an SGG widget, through the same `renderFieldNode` → `getFieldConfig` → `renderWidget` path the SGG renderer uses.
-- **Conversion:** `getFormData` converts the JSON Forms UI schema into an SGG UI schema with `jsonFormsToUiSchema`. Navigation, validation warnings and the UI schema validator all read the converted SGG UI schema. `JsonFormsFields` receives the original JSON Forms UI schema and uses it to render the form.
-- **Saving and validation:** These work the same way as for SGG forms. Every widget submits under its SGG field name in the HTML `<form>`. JSON Forms runs with `validationMode="NoValidation"` and only evaluates rules, against a copy of the answers that's refreshed from the `<form>` on every input.
-
-### How controls map to SGG UI schema nodes
-
-| JSON Forms element                      | SGG UI schema node(s)                                                                             |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Control on a scalar                     | One `field`                                                                                       |
-| Control with `options.readonly: true`   | One `null` field (rendered disabled)                                                              |
-| Control with `options.widget`           | One `field` with that `widget`, if it names an SGG widget                                         |
-| Control on an object                    | One `field` per leaf of the object                                                                |
-| Control on a top-level array of objects | One `fieldList`, whose fields follow `options.detail` when it's set and the item schema otherwise |
-| `Group` with a `label`                  | A `section` named with `groupName(label)`                                                         |
-| Any other layout                        | Its children, flattened into the parent                                                           |
-
-### How widgets are picked
-
-`JsonFormsFields` picks a widget for each element by rank. Each widget is registered with a tester that scores how well it matches an element, and the highest score wins. A control that no SGG widget can render is skipped, so the applicant doesn't see it, and the server logs a warning for it:
-
-| Rank     | Widgets                                                                  | Used for                                             |
-| -------- | ------------------------------------------------------------------------ | ---------------------------------------------------- |
-| 1        | `SkipControl`                                                            | Controls no SGG widget can render, which are skipped |
-| 10       | The SGG adapter (`AdaptedControl`, `AdaptedLayout`)                      | Everything else                                      |
-| Above 10 | Custom JSON Forms widgets, registered in `renderers` or `extraRenderers` | Whatever their tester matches                        |
-
-See [Adding a new widget](./widgets/README.md#adding-a-new-widget) for how to add one.
-
-### Known limitations
-
-These limitations come from the SGG widgets, not from JSON Forms. The SGG field-list widget renders each list entry itself, outside of JSON Forms, so JSON Forms never processes what's inside an entry:
-
-- **Rules on fields inside a list aren't applied.** Those fields always show.
-- **A list nested inside an object or a list entry isn't supported.** For example, a budget's line items (`budget.line_items`) or each key contact's phone numbers (`contacts[].phones`). It's skipped, so the applicant doesn't see it and no answer is collected for it.
-
-The server logs a warning when a form uses either one.
-
-JSON Forms itself supports both. Its own list components render each entry through JSON Forms at that entry's path (e.g. `contacts.0`). A rule's condition is resolved relative to that path, so rules inside an entry are evaluated against that entry. A nested list inside an entry is rendered the same way. Replacing the SGG field-list widget with a custom JSON Forms list widget would remove both limitations.
