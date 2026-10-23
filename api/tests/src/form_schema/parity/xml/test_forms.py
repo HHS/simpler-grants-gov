@@ -1,20 +1,26 @@
-"""Whether a form's XML mapping agrees with the Grants.gov schema it targets.
+"""Validates whether a form's XML mapping produces XML that matches the Grants.gov XSD and
+includes every answer, which includes:
 
-`RecursiveXMLTransformer` iterates over the mapping's rules, not over the applicant's
-answers, so a response field with no rule is never visited and does not appear in the
-submission. Most Grants.gov elements are `minOccurs="0"`, so the document still validates
-and neither `xmllint` nor a snapshot notices.
-
-The comparisons are in `harness/compare.py`, covered by fixtures in `test_harness.py`.
-Each form declares a `FormDiff` in `diffs/` recording its known gaps, and
-`TestRecordedDifferences` fails if an entry stops describing one.
+- Mapping vs XSD: Does the mapping produce only elements the XSD declares, every required
+  element, and each parent's children in the XSD's order?
+- Mapping vs form schema: Does the mapping read every form field, and only fields the form
+  has?
+- Form schema vs XSD: Does each field accept only values its element can carry?
+- Recorded differences: Does the `FormDiff` list every rule the checks can't read, and
+  does every difference it records still exist?
 """
 
 import pytest
 
 from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
 from tests.src.form_schema.parity.xml.diffs import key_contacts
-from tests.src.form_schema.parity.xml.harness import compare
+from tests.src.form_schema.parity.xml.harness import flatten_form
+from tests.src.form_schema.parity.xml.harness.compare import (
+    form_schema_vs_xsd,
+    mapping_vs_form_schema,
+    mapping_vs_xsd,
+    unchecked_rules,
+)
 
 DIFFS = [
     key_contacts.DIFF,
@@ -23,16 +29,16 @@ DIFFS = [
 
 @pytest.fixture(scope="module", params=DIFFS, ids=lambda d: d.module)
 def form(request):
-    """One form's mapping, flattened beside the two documents it is held against."""
-    return compare.flatten(request.param)
+    """One form, flattened. Module-scoped, so each form is read once."""
+    return flatten_form.load(request.param)
 
 
-def _skip_unreadable(form) -> None:
-    """Skip a form whose mapping builds its structure at run time rather than declaring it."""
-    if form.diff.unreadable:
+def _skip_unchecked(form) -> None:
+    """Skip a check for a form with rules the checks can't read."""
+    if form.diff.unchecked_rules:
         pytest.skip(
-            f"{form.diff.module}: mapping is not read structurally -- "
-            + "; ".join(f"{k}: {why}" for k, why in sorted(form.diff.unreadable.items()))
+            f"{form.diff.module} has unchecked rules: "
+            + "; ".join(f"{k}: {why}" for k, why in sorted(form.diff.unchecked_rules.items()))
         )
 
 
@@ -41,138 +47,104 @@ def _report(found) -> str:
 
 
 class TestMappingVsXsd:
-    """Every element the XSD declares, sourced and in sequence order."""
+    """Does the mapping produce only declared elements, every required one, in order?"""
 
     def test_xml_mapping_does_not_emit_undeclared_elements(self, form):
-        """An element Grants.gov never declared would make the whole document invalid."""
-        _skip_unreadable(form)
-
-        found = compare.undeclared_targets(form)
+        _skip_unchecked(form)
+        found = mapping_vs_xsd.undeclared_targets(form)
         assert not found, (
-            f"{form.diff.module}: {len(found)} target(s) name nothing in this form's "
-            f"schema:\n" + _report(found)
+            f"{form.diff.module}: the mapping produces elements the XSD doesn't declare:\n"
+            + _report(found)
         )
 
     def test_xml_mapping_not_missing_required_elements(self, form):
-        """Nothing Grants.gov demands is left without a source."""
-        _skip_unreadable(form)
-
-        found = compare.unsourced_elements(form)
+        _skip_unchecked(form)
+        found = mapping_vs_xsd.unsourced_elements(form)
         assert not found, (
-            f"{form.diff.module}: {len(found)} required element(s) have no source, so a "
-            f"submission would omit them:\n" + _report(found)
+            f"{form.diff.module}: the mapping doesn't produce these required elements:\n"
+            + _report(found)
         )
 
     def test_xml_mapping_follows_xsd_element_order(self, form):
-        """Grants.gov declares `xs:sequence`, so order is load-bearing."""
-        _skip_unreadable(form)
-
-        found = compare.out_of_order_elements(form)
-        assert not found, f"{form.diff.module}: elements are emitted out of order:\n" + _report(
-            found
+        _skip_unchecked(form)
+        found = mapping_vs_xsd.out_of_order_elements(form)
+        assert not found, (
+            f"{form.diff.module}: the mapping produces elements out of order:\n" + _report(found)
         )
 
 
 class TestMappingVsFormSchema:
-    """Every response field mapped to an element, and every rule reading a real field."""
+    """Does the mapping read every form field, and only fields the form has?"""
 
     def test_no_form_field_is_missing_from_xml_mapping(self, form):
-        """Everything an applicant can fill in ends up somewhere in the submission."""
-        _skip_unreadable(form)
-
+        _skip_unchecked(form)
         found = [
             d
-            for d in compare.unmatched_fields(form)
+            for d in mapping_vs_form_schema.unmatched_fields(form)
             if d.kind == DiscrepancyKind.UNMAPPED_FORM_FIELD
         ]
         assert not found, (
-            f"{form.diff.module}: {len(found)} response field(s) reach no XML element, so "
-            f"an applicant's answer would not be submitted:\n" + _report(found)
+            f"{form.diff.module}: no rule reads these fields, so their answers aren't "
+            f"submitted:\n" + _report(found)
         )
 
     def test_xml_mapping_does_not_read_unknown_form_fields(self, form):
-        """A rule reading a field that does not exist contributes nothing, silently."""
-        _skip_unreadable(form)
-
+        _skip_unchecked(form)
         found = [
             d
-            for d in compare.unmatched_fields(form)
+            for d in mapping_vs_form_schema.unmatched_fields(form)
             if d.kind == DiscrepancyKind.UNKNOWN_RULE_SOURCE
         ]
         assert not found, (
-            f"{form.diff.module}: {len(found)} rule(s) read a field this form does not "
-            f"have:\n" + _report(found)
+            f"{form.diff.module}: rules read fields the form doesn't have:\n" + _report(found)
         )
 
 
 class TestFormSchemaVsXsd:
-    """Whether the form is at least as strict as the elements it feeds."""
+    """Does each field accept only values its XSD element can carry?"""
 
     def test_form_does_not_offer_values_outside_xsd_enums(self, form):
-        """Every option a form lists is a member of the element's enumeration.
-
-        Set comparison settles a 261-member code list at once, where sampling would need
-        hundreds of draws to reach any particular member.
-        """
-        _skip_unreadable(form)
-
-        found = [d for d in compare.rule_differences(form) if d.keyword == "enum"]
+        _skip_unchecked(form)
+        found = [d for d in form_schema_vs_xsd.rule_differences(form) if d.keyword == "enum"]
         assert not found, (
-            f"{form.diff.module}: {len(found)} field(s) offer a value the element does not "
-            f"list, so choosing it would produce a submission Grants.gov rejects:\n"
-            + _report(found)
+            f"{form.diff.module}: fields offer values their elements don't list:\n" + _report(found)
         )
 
     def test_form_does_not_accept_values_outside_xsd_bounds(self, form):
-        """Containment, not equality: a form stricter than the wire is fine.
-
-        A money field holds a decimal as a string, so its range comes from its pattern; a
-        pattern the reader cannot parse is reported too, since nothing then checks it.
-        """
-        _skip_unreadable(form)
-
+        _skip_unchecked(form)
         found = [
             d
-            for d in compare.rule_differences(form)
-            if d.keyword in compare.LOOSER or d.kind == DiscrepancyKind.RANGE_UNREADABLE
+            for d in form_schema_vs_xsd.rule_differences(form)
+            if d.keyword in form_schema_vs_xsd.LOOSER or d.kind == DiscrepancyKind.RANGE_UNREADABLE
         ]
         assert not found, (
-            f"{form.diff.module}: {len(found)} field(s) accept more than the element "
-            f"carries, so an applicant could fill in something unsubmittable:\n" + _report(found)
+            f"{form.diff.module}: fields accept lengths or amounts their elements can't "
+            f"carry:\n" + _report(found)
         )
 
     def test_form_field_types_match_xsd_element_types(self, form):
-        """Where a field's JSON type differs from its element's, a transform is declared.
-
-        A boolean reaching a `YesNoDataType` string needs `boolean_to_yes_no`; omitting it
-        is invisible until a document is generated with that field populated.
-        """
-        _skip_unreadable(form)
-
-        found = [d for d in compare.rule_differences(form) if d.keyword == "type"]
+        _skip_unchecked(form)
+        found = [d for d in form_schema_vs_xsd.rule_differences(form) if d.keyword == "type"]
         assert not found, (
-            f"{form.diff.module}: {len(found)} field(s) would reach serialization as the "
-            f"wrong type:\n" + _report(found)
+            f"{form.diff.module}: fields have a different type from their elements, with no "
+            f"value_transform to convert them:\n" + _report(found)
         )
 
 
 class TestRecordedDifferences:
-    """Whether every register entry is usable and still describes something real."""
+    """Does the `FormDiff` match what the checks find?"""
 
-    def test_skipped_forms_match_recorded_reasons(self, form):
-        """A form is skipped for the reasons its record gives, and no others."""
-        found = compare.unrecorded_skips(form)
+    def test_unchecked_rules_are_recorded(self, form):
+        """Runs for every form, including those that skip the other checks."""
+        found = unchecked_rules.unrecorded(form) + unchecked_rules.stale_entries(form)
         assert not found, (
-            f"{form.diff.module}: what the reader can derive and what the record claims "
-            f"have diverged:\n" + _report(found)
+            f"{form.diff.module}: the rules the checks can't read don't match "
+            f"`unchecked_rules`:\n" + _report(found)
         )
 
     def test_recorded_differences_are_not_stale(self, form):
-        """A recorded gap cannot outlive the problem it describes."""
-        _skip_unreadable(form)
-
-        found = compare.stale_entries(form)
-        assert not found, (
-            f"{form.diff.module}: recorded differences no longer describe real ones:\n"
-            + _report(found)
+        _skip_unchecked(form)
+        found = mapping_vs_form_schema.stale_entries(form) + form_schema_vs_xsd.stale_entries(form)
+        assert not found, f"{form.diff.module}: recorded differences no longer exist:\n" + _report(
+            found
         )

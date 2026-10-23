@@ -1,43 +1,35 @@
-"""The record of known gaps in one form's XML mapping.
-
-The definition is the form's `json_to_xml_schema`. The source the three inherited
-registers speak of is the form's own JSON Schema.
-
-The Grants.gov XSD, the other document this side reads, has no register: a target naming
-an element the schema does not declare, or a required element nothing feeds, fails with
-no way to record an exception.
-"""
+"""Differences between a form's XML mapping, its JSON Schema and the Grants.gov XSD that have
+been reviewed and accepted."""
 
 import dataclasses
 
-from ...form_diff import FormDiff as _Base
-
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class FormDiff(_Base):
-    """Known gaps between one form's XML mapping and the documents it is held against.
+class FormDiff:
+    """A form's accepted differences between its XML mapping, its JSON Schema and the
+    Grants.gov XSD.
 
-    The inherited registers, in this side's terms:
-
-        absent_from_definition  a form field no rule reads, so the answer never reaches
-                                the submission. Every such element is optional in the XSD,
-                                so the document still validates and XSD checking cannot
-                                see it.   e.g. {"applicant_id": "no rule targets ..."}
-
-        absent_from_source      a rule reading a field the form does not have. The element
-                                it targets is mapped, so the XSD-side checks see nothing.
-                                e.g. {"fax_number": "no such field -- it is `fax`"}
-
-        differing_rules         keyed "element path/keyword", citing the form permitting
-                                something the element cannot carry.
-                                e.g. {"Applicant.Country/enum": "..."}
+    Differences between the mapping and the XSD alone (undeclared elements, required
+    elements with no source, element order) can't be recorded, so they always fail.
     """
 
-    #: Package under `src.form_schema.forms` exporting `FORM_JSON_SCHEMA` and
-    #: `FORM_XML_TRANSFORM_RULES`.
+    #: Package under `src.form_schema.forms` that exports the form.
     module: str
 
-    #: Rule key -> why its wire structure cannot be derived from the declaration. A form
-    #: with any of these is skipped by the structural checks.
+    #: Form field -> why no mapping rule reads it, so its answer isn't submitted.
+    #: e.g. {"applicant_id": "no rule targets ApplicantID"}
+    unmapped_fields: dict[str, str] = dataclasses.field(default_factory=dict)
+
+    #: Field a mapping rule reads -> why the form doesn't have it.
+    #: e.g. {"fax_number": "the form's field is `fax`"}
+    unknown_sources: dict[str, str] = dataclasses.field(default_factory=dict)
+
+    #: "element path/keyword" -> why the form accepts a value the element can't carry.
+    #: e.g. {"Applicant.Country/enum": "the form offers CIV with a straight apostrophe"}
+    differing_rules: dict[str, str] = dataclasses.field(default_factory=dict)
+
+    #: Rule key -> why the parity checks can't read it, e.g. its XML structure depends on
+    #: the applicant's data. A form with any of these skips the structural checks, so every
+    #: entry needs a reason.
     #: e.g. {"budget_sections": "conditional_transform.type 'array_decomposition'"}
-    unreadable: dict[str, str] = dataclasses.field(default_factory=dict)
+    unchecked_rules: dict[str, str] = dataclasses.field(default_factory=dict)

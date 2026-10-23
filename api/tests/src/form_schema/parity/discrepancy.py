@@ -32,7 +32,7 @@ class DiscrepancyKind(StrEnum):
     ORDER_NO_LONGER_DIFFERS = "recorded order difference no longer differs"
 
     # XML mapping parity: mapping vs XSD
-    UNDECLARED_TARGET = "target names no element"
+    UNDECLARED_TARGET = "target isn't declared in the XSD"
     UNSOURCED_REQUIRED_ELEMENT = "required element has no source"
     ELEMENTS_OUT_OF_SEQUENCE = "elements out of sequence"
 
@@ -44,16 +44,16 @@ class DiscrepancyKind(StrEnum):
     RANGE_UNREADABLE = "range unreadable"
 
     # XML mapping parity: recorded differences
-    ABSENT_FIELD_NOW_MAPPED = "now mapped"
-    ABSENT_FIELD_NOT_ON_FORM = "no longer a field on this form"
-    UNKNOWN_SOURCE_NOW_EXISTS = "now names a real field"
-    UNKNOWN_SOURCE_NOT_READ = "no longer a rule source"
-    RULE_ENTRY_NAMES_NO_ELEMENT = "no such element"
-    RULE_ENTRY_ELEMENT_HAS_NO_TYPE = "element has no simple type"
-    RULE_ENTRY_KEYWORD_NOT_DECLARED = "element declares no such keyword"
-    RULE_NO_LONGER_DIFFERS = "no longer differs"
-    UNREADABLE_RULE_NOT_RECORDED = "underivable and unrecorded"
-    RECORDED_RULE_NOW_READABLE = "recorded but now reads fine"
+    UNMAPPED_FIELD_NOW_MAPPED = "recorded unmapped field is now mapped"
+    UNMAPPED_FIELD_NOT_ON_FORM = "recorded unmapped field isn't on the form"
+    UNKNOWN_SOURCE_NOW_ON_FORM = "recorded unknown source is now a form field"
+    UNKNOWN_SOURCE_NOT_READ = "recorded unknown source is no longer read"
+    RULE_ENTRY_NAMES_NO_ELEMENT = "recorded rule difference names no such element"
+    RULE_ENTRY_ELEMENT_HAS_NO_TYPE = "recorded type difference names an element with no type"
+    RULE_ENTRY_KEYWORD_NOT_DECLARED = "recorded rule difference names an undeclared keyword"
+    RULE_NO_LONGER_DIFFERS = "recorded rule difference no longer differs"
+    UNCHECKED_RULE_NOT_RECORDED = "unchecked rule not recorded"
+    UNCHECKED_RULE_NOW_CHECKED = "recorded unchecked rule is now checked"
 
 
 @dataclasses.dataclass(frozen=True)
