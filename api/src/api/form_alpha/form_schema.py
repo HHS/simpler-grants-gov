@@ -134,7 +134,7 @@ class FormAlphaSchema(Schema):
     form_renderer = fields.Enum(
         FormRenderer,
         metadata={
-            "description": "Which frontend renderer draws the form, and so the shape of form_ui_schema",
+            "description": "The frontend renderer the form uses, which sets the format of form_ui_schema",
             "example": FormRenderer.SGG.value,
         },
     )

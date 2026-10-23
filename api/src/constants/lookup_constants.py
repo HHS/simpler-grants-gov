@@ -184,10 +184,10 @@ class FormType(StrEnum):
 
 
 class FormRenderer(StrEnum):
-    """Which frontend renderer draws a form, and so which shape its UI schema takes."""
+    """The frontend renderer a form uses."""
 
-    SGG = "sgg"  # the bespoke renderer, reading a section/field UI schema
-    JSON_FORMS = "jsonforms"  # JSON Forms, reading a JSON Forms UI schema
+    SGG = "sgg"
+    JSON_FORMS = "jsonforms"
 
 
 class CompetitionOpenToApplicant(StrEnum):
