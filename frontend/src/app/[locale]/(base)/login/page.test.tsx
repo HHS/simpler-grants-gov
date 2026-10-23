@@ -2,74 +2,63 @@ import { render } from "@testing-library/react";
 import LoginPage from "src/app/[locale]/(base)/login/page";
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
-import * as React from "react";
-
 const mockPush = jest.fn();
-
-jest.mock("react", () => {
-  const actualModule = jest.requireActual<typeof React>("react");
-  return {
-    ...actualModule,
-  };
-});
+const mockReplace = jest.fn();
+const mockUseSearchParams = jest.fn();
+const mockRouter = { push: mockPush, replace: mockReplace };
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => mockRouter,
+  useSearchParams: () => mockUseSearchParams() as unknown,
 }));
 
 const mockGetItem = jest.spyOn(SessionStorage, "getItem");
+const mockSetItem = jest.spyOn(SessionStorage, "setItem");
 const mockRemoveItem = jest.spyOn(SessionStorage, "removeItem");
 
 describe("Login Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
   });
 
-  it("should redirect to stored URL from session storage", () => {
+  it("should replace to the stored URL from session storage", () => {
     mockGetItem.mockReturnValue("/test-redirect-path");
 
     render(<LoginPage />);
 
-    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
-    expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
-    expect(mockPush).toHaveBeenCalledWith("/test-redirect-path");
-    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith("/test-redirect-path");
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it("should redirect to home if no redirect URL is stored", () => {
-    mockGetItem.mockReturnValue(null);
+  it.each([null, "", "https://malicious-site.com"])(
+    "should replace to home once when the stored URL is %p",
+    (saved) => {
+      mockGetItem.mockReturnValue(saved);
+
+      render(<LoginPage />);
+
+      expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith("/");
+      expect(mockPush).not.toHaveBeenCalled();
+    },
+  );
+
+  it("should flag the PIV error when returning with pivError", () => {
+    mockGetItem.mockReturnValue("/newsletter");
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams({ pivError: "true" }),
+    );
 
     render(<LoginPage />);
 
-    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
-    expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
-    expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledTimes(2);
-  });
-
-  it("should redirect to home if redirect URL is empty", () => {
-    mockGetItem.mockReturnValue("");
-
-    render(<LoginPage />);
-
-    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
-    expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
-    expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledTimes(2);
-  });
-
-  it("should redirect to home if redirect URL doesn't start with /", () => {
-    mockGetItem.mockReturnValue("https://malicious-site.com");
-
-    render(<LoginPage />);
-
-    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
-    expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
-    expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledTimes(2);
+    expect(mockSetItem).toHaveBeenCalledWith("showPivError", "true");
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith("/newsletter");
   });
 
   it("should display 'Redirecting...' text", () => {
@@ -77,7 +66,6 @@ describe("Login Page", () => {
 
     const { container } = render(<LoginPage />);
 
-    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(container).toHaveTextContent("Redirecting...");
   });
 });
