@@ -10,9 +10,10 @@ import OpportunityAwardInfo from "./OpportunityAwardInfo";
 jest.mock("next-intl", () => ({
   useTranslations: jest.fn().mockReturnValue((key: string) => {
     const translations: { [key: string]: string } = {
+      title: "Award details",
       yes: "Yes",
       no: "No",
-      programFunding: "Program Funding",
+      programFunding: "Expected project funding",
       expectedAwards: "Expected awards",
       awardCeiling: "Award Ceiling",
       awardFloor: "Award Floor",
@@ -48,14 +49,16 @@ describe("OpportunityAwardInfo", () => {
     render(<OpportunityAwardInfo opportunityData={mockOpportunityData} />);
 
     // Check the headings
-    expect(screen.getByText("Award")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Award details" }),
+    ).toBeInTheDocument();
 
     // Check the main award grid info
-    expect(screen.getByText("Program Funding")).toBeInTheDocument();
-    expect(screen.getByText("$5,000,000")).toBeInTheDocument();
-
-    expect(screen.getByText("Expected awards")).toBeInTheDocument();
-    expect(screen.getByText("10")).toBeInTheDocument();
+    const fundingSummary = screen.getByTestId("opportunity-funding-summary");
+    expect(fundingSummary).toHaveTextContent(
+      "Expected project funding: $5,000,000",
+    );
+    expect(fundingSummary).toHaveTextContent("Expected awards: 10");
 
     expect(screen.getByText("Award Ceiling")).toBeInTheDocument();
     expect(screen.getByText("$1,000,000")).toBeInTheDocument();
@@ -75,8 +78,8 @@ describe("OpportunityAwardInfo", () => {
 
     // Check funding instrument type
     expect(screen.getByText("Funding instrument type:")).toBeInTheDocument();
-    expect(screen.getByText("Grant")).toBeInTheDocument();
-    expect(screen.getByText("Cooperative Agreement")).toBeInTheDocument();
+    expect(screen.getByText("Grant").tagName).toBe("LI");
+    expect(screen.getByText("Cooperative Agreement").tagName).toBe("LI");
 
     // Check opportunity category and explanation
     expect(screen.getByText("Opportunity Category:")).toBeInTheDocument();
@@ -93,12 +96,79 @@ describe("OpportunityAwardInfo", () => {
     expect(
       screen.getByText("Category of Funding Activity:"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Education")).toBeInTheDocument();
-    expect(screen.getByText("Health")).toBeInTheDocument();
+    expect(screen.getByText("Education").tagName).toBe("LI");
+    expect(screen.getByText("Health").tagName).toBe("LI");
 
     expect(screen.getByText("Category Explanation:")).toBeInTheDocument();
     expect(
       screen.getByText("Support for education and health initiatives"),
     ).toBeInTheDocument();
+  });
+
+  it("renders fallbacks in the funding summary when values are missing", () => {
+    render(
+      <OpportunityAwardInfo
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            ...mockOpportunityData.summary,
+            estimated_total_program_funding: null,
+            expected_number_of_awards: null,
+          },
+        }}
+      />,
+    );
+
+    const fundingSummary = screen.getByTestId("opportunity-funding-summary");
+    expect(fundingSummary).toHaveTextContent(
+      "Expected project funding: notSpecified",
+    );
+    expect(fundingSummary).toHaveTextContent("Expected awards: notSpecified");
+  });
+
+  it("falls back to not specified when there are no funding activities", () => {
+    const { unmount } = render(
+      <OpportunityAwardInfo opportunityData={mockOpportunityData} />,
+    );
+    const baseline = screen.queryAllByText("notSpecified").length;
+    unmount();
+
+    render(
+      <OpportunityAwardInfo
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            ...mockOpportunityData.summary,
+            funding_categories: [],
+          },
+        }}
+      />,
+    );
+
+    expect(screen.queryByText("Education")).not.toBeInTheDocument();
+    expect(screen.getAllByText("notSpecified")).toHaveLength(baseline + 1);
+  });
+
+  it("renders zero amounts as values, not as missing", () => {
+    render(
+      <OpportunityAwardInfo
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            ...mockOpportunityData.summary,
+            estimated_total_program_funding: 0,
+            expected_number_of_awards: 0,
+            award_floor: 0,
+            award_ceiling: 0,
+          },
+        }}
+      />,
+    );
+
+    const fundingSummary = screen.getByTestId("opportunity-funding-summary");
+    expect(fundingSummary).toHaveTextContent("Expected project funding: $0");
+    expect(fundingSummary).toHaveTextContent("Expected awards: 0");
+    // the funding summary line plus the award min and max cards
+    expect(screen.getAllByText("$0")).toHaveLength(3);
   });
 });
