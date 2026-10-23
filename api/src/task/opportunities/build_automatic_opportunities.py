@@ -36,6 +36,7 @@ from src.form_schema.forms import (
     EPA_KEY_CONTACT_v2_0,
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
+    KeyContactsGenerated_v2_0,
     OtherNarrativeAttachment_v1_2,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -50,6 +51,7 @@ from src.form_schema.forms import (
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
     get_active_forms,
+    get_forms_for_all_forms_competition,
 )
 from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
 from src.task.ecs_background_task import ecs_background_task
@@ -233,7 +235,13 @@ class BuildAutomaticOpportunitiesTask(Task):
                 opportunity_title=f"Opportunity with ALL forms - {datetime_util.get_now_us_eastern_date().isoformat()}",
                 opportunity_number=f"SGG-ALL-Forms-{datetime_util.get_now_us_eastern_date().isoformat()}",
             ),
-            competitions=[CompetitionContainer(optional_form_ids=[form.form_id for form in forms])],
+            competitions=[
+                CompetitionContainer(
+                    optional_form_ids=[
+                        form.form_id for form in get_forms_for_all_forms_competition(forms)
+                    ]
+                )
+            ],
         )
 
         # Create various other specific scenarios
@@ -603,6 +611,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Key Contacts Form",
                 KeyContacts_v2_0.form_id,
                 "3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31",
+            ),
+            (
+                "E2E-KCG",
+                "Key Contacts Form (Generated)",
+                KeyContactsGenerated_v2_0.form_id,
+                "1954f7d4-9d41-4d52-b7fc-c97d28815a9b",
             ),
             (
                 "E2E-ONA",

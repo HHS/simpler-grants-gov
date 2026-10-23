@@ -15,7 +15,11 @@ from src.constants.lookup_constants import CompetitionOpenToApplicant
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
-from src.form_schema.forms import get_active_forms, init_form_registry
+from src.form_schema.forms import (
+    get_active_forms,
+    get_forms_for_all_forms_competition,
+    init_form_registry,
+)
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_agencies_and_users import _build_agencies_and_users
@@ -600,6 +604,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "7c9e2b4a-1f6d-4a83-95b2-3d8e6f1c9a47",
         ),
         (
+            "Key_Contacts_Generated",
+            "E2E-KCG",
+            "Key Contacts (Generated)",
+            "1954f7d4-9d41-4d52-b7fc-c97d28815a9b",
+            "6eb15876-482c-499c-a8c5-e17588eae192",
+        ),
+        (
             "OtherNarrativeAttachments",
             "E2E-ONA",
             "Other Narrative Attachments",
@@ -737,14 +748,15 @@ def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> C
     _build_custom_test_competitions(forms_map)
 
     forms = list(forms_map.values())
+    all_form_competition_forms = get_forms_for_all_forms_competition(forms)
 
     static_all_form_competition = _build_static_competition_with_all_forms(
         db_session,
-        forms,
+        all_form_competition_forms,
         static_opportunity_id=uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
         static_competition_id=uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"),
     )
-    all_form_competition = _build_competition_with_all_forms(forms)
+    all_form_competition = _build_competition_with_all_forms(all_form_competition_forms)
     competition_container = CompetitionContainer(
         static_competition_with_all_forms=static_all_form_competition,
         competition_with_all_forms=all_form_competition,
