@@ -8,9 +8,6 @@ type Props = {
   content: string | number | null;
 };
 
-const defaultContentByType = (type: AwardDataKeys) =>
-  type === "expectedAwards" ? "--" : "$--";
-
 const OpportunityAwardGridRow = ({ title, content }: Props) => {
   const t = useTranslations("OpportunityListing.awardInfo");
 
@@ -19,7 +16,7 @@ const OpportunityAwardGridRow = ({ title, content }: Props) => {
       <p className="desktop-lg:font-sans-sm margin-bottom-0 text-bold">
         {t(`${title}`)}
       </p>
-      <p className="font-sans-sm">{content || defaultContentByType(title)}</p>
+      <p className="font-sans-sm">{content || t("notSpecified")}</p>
     </div>
   );
 };

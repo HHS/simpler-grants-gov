@@ -66,6 +66,6 @@ describe("OpportunityContact", () => {
     );
 
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
-    expect(screen.getByText("--")).toBeInTheDocument();
+    expect(screen.getByText("notSpecified")).toBeInTheDocument();
   });
 });

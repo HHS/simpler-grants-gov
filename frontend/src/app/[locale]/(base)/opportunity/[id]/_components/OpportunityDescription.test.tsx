@@ -134,10 +134,12 @@ describe("OpportunityDescription", () => {
 
     const additionalInfoHeading = screen.getByText("additionalInfo");
     // eslint-disable-next-line testing-library/no-node-access
-    expect(additionalInfoHeading.nextElementSibling).toHaveTextContent("--");
+    expect(additionalInfoHeading.nextElementSibling).toHaveTextContent(
+      "notSpecified",
+    );
 
     // summary, eligible applicants and additional information all fall back
-    const allEmpty = screen.getAllByText("--");
+    const allEmpty = screen.getAllByText("notSpecified");
     expect(allEmpty).toHaveLength(3);
   });
 });

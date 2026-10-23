@@ -24,7 +24,7 @@ const OpportunityContact = ({ summary }: OpportunityContactProps) => {
             {summary.agency_email_address}
           </a>
         ) : (
-          "--"
+          t("notSpecified")
         )}
       </p>
       {summary.agency_email_address_description && (
