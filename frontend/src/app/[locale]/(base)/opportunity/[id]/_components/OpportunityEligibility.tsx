@@ -44,7 +44,7 @@ export const OpportunityEligibility = ({
         ([groupName, applicantTypes]) => {
           return (
             <div key={`eligibility-group${groupName}`}>
-              <h4>{upperFirst(groupName)}</h4>
+              <h3 className="font-sans-md">{upperFirst(groupName)}</h3>
               <ul>
                 {applicantTypes.map((display, i) => (
                   <li

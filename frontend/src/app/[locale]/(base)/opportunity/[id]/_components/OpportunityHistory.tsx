@@ -2,29 +2,14 @@ import {
   OpportunityStatus,
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
-import { formatDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 
+import {
+  OpportunityHistoryItem,
+  useFormatHistoryDate,
+} from "./OpportunityHistoryItem";
 import OpportunityIntro from "./OpportunityIntro";
-
-export const OpportunityHistoryItem = ({
-  title,
-  content,
-  description,
-}: {
-  title: string;
-  content: string;
-  description?: string | null;
-}) => {
-  return (
-    <li className="margin-y-1">
-      <span className="text-bold text-no-wrap">{title}:</span>{" "}
-      <span>{content}</span>
-      {description && <p className="margin-bottom-0">{description}</p>}
-    </li>
-  );
-};
 
 const OpportunityHistory = ({
   summary,
@@ -39,8 +24,7 @@ const OpportunityHistory = ({
 
   const isForecasted = status === "forecasted";
 
-  const formatHistoryDate = (date: string | null) =>
-    date ? formatDate(date) : t("notSpecified");
+  const formatHistoryDate = useFormatHistoryDate();
 
   return (
     <div className="margin-top-4">

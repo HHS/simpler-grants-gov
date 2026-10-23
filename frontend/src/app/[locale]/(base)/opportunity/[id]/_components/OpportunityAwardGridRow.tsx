@@ -16,7 +16,9 @@ const OpportunityAwardGridRow = ({ title, content }: Props) => {
       <p className="desktop-lg:font-sans-sm margin-bottom-0 text-bold">
         {t(`${title}`)}
       </p>
-      <p className="font-sans-sm">{content || t("notSpecified")}</p>
+      <p className="font-sans-sm">
+        {content === null || content === "" ? t("notSpecified") : content}
+      </p>
     </div>
   );
 };
