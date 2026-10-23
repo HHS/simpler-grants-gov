@@ -31,6 +31,30 @@ class DiscrepancyKind(StrEnum):
     TEXT_NO_LONGER_DIFFERS = "recorded text difference no longer differs"
     ORDER_NO_LONGER_DIFFERS = "recorded order difference no longer differs"
 
+    # XML mapping parity: mapping vs XSD
+    UNDECLARED_TARGET = "target isn't declared in the XSD"
+    UNSOURCED_REQUIRED_ELEMENT = "required element has no source"
+    ELEMENTS_OUT_OF_SEQUENCE = "elements out of sequence"
+
+    # XML mapping parity: mapping vs form schema
+    UNMAPPED_FORM_FIELD = "form field is unmapped"
+    UNKNOWN_RULE_SOURCE = "rule source is unknown"
+
+    # XML mapping parity: form schema vs XSD (also RULE_DIFFERS, above)
+    RANGE_NOT_IN_PATTERN = "range not found in pattern"
+
+    # XML mapping parity: recorded differences
+    UNMAPPED_FIELD_NOW_MAPPED = "recorded unmapped field is now mapped"
+    UNMAPPED_FIELD_NOT_ON_FORM = "recorded unmapped field isn't on the form"
+    UNKNOWN_SOURCE_NOW_ON_FORM = "recorded unknown source is now a form field"
+    UNKNOWN_SOURCE_NOT_READ = "recorded unknown source is no longer read"
+    RULE_ENTRY_NAMES_NO_ELEMENT = "recorded rule difference names no such element"
+    RULE_ENTRY_ELEMENT_HAS_NO_TYPE = "recorded type difference names an element with no type"
+    RULE_ENTRY_KEYWORD_NOT_DECLARED = "recorded rule difference names an undeclared keyword"
+    RULE_NO_LONGER_DIFFERS = "recorded rule difference no longer differs"
+    UNCHECKED_RULE_NOT_RECORDED = "unchecked rule not recorded"
+    UNCHECKED_RULE_NOW_CHECKED = "recorded unchecked rule is now checked"
+
 
 @dataclasses.dataclass(frozen=True)
 class Discrepancy:
@@ -48,6 +72,10 @@ class Discrepancy:
     detail: str = ""
     keyword: str | None = None
 
+    @property
+    def label(self) -> str:
+        """The kind as it reads in a report, e.g. `"maxLength differs"` for `RULE_DIFFERS`."""
+        return f"{self.keyword} differs" if self.keyword else self.kind
+
     def __str__(self) -> str:
-        label = f"{self.keyword} differs" if self.keyword else self.kind
-        return f"{label}: {self.path}{f' -- {self.detail}' if self.detail else ''}"
+        return f"{self.label}: {self.path}{f' -- {self.detail}' if self.detail else ''}"
