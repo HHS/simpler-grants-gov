@@ -143,39 +143,46 @@ class TestLoadJsonForm:
 
 
 class TestBuildFormFromDict:
-    def test_uuid_fields_coerced(self) -> None:
-        form = build_form_from_dict(
-            MINIMAL_FORM | {"form_instruction_id": "bf48a93f-d445-426f-a8fb-289bf93a2434"},
-            Path("form.json"),
-        )
-        assert form.form_id == uuid.UUID("1623b310-85be-496a-b84b-34bdee22a68a")
-        assert form.form_instruction_id == uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434")
+    @pytest.mark.parametrize(
+        ("field", "value", "expected"),
+        [
+            (
+                "form_id",
+                "bf48a93f-d445-426f-a8fb-289bf93a2434",
+                uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434"),
+            ),
+            (
+                "form_instruction_id",
+                "bf48a93f-d445-426f-a8fb-289bf93a2434",
+                uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434"),
+            ),
+            ("active_at", "2026-01-15T00:00:00", datetime(2026, 1, 15)),
+            ("expiration_date", "2029-03-31", date(2029, 3, 31)),
+            ("form_type", "SF424", FormType.SF424),
+            ("form_renderer", "jsonforms", FormRenderer.JSON_FORMS),
+        ],
+    )
+    def test_string_field_parsed(self, field: str, value: str, expected: Any) -> None:
+        form = build_form_from_dict(MINIMAL_FORM | {field: value}, Path("form.json"))
+        assert getattr(form, field) == expected
 
-    def test_form_type_coerced_to_enum(self) -> None:
-        form = build_form_from_dict(MINIMAL_FORM | {"form_type": "SF424"}, Path("form.json"))
-        assert form.form_type is FormType.SF424
-
-    def test_form_renderer_coerced_to_enum(self) -> None:
-        form = build_form_from_dict(
-            MINIMAL_FORM | {"form_renderer": "jsonforms"}, Path("form.json")
-        )
-        assert form.form_renderer is FormRenderer.JSON_FORMS
+    @pytest.mark.parametrize(
+        ("field", "value", "error"),
+        [
+            ("form_id", "not-a-uuid", "not a valid UUID"),
+            ("active_at", "the fifteenth", "not a valid ISO 8601 datetime"),
+            ("expiration_date", "March", "not a valid ISO 8601 date"),
+            ("form_type", "NotAForm", "not a known FormType"),
+            ("form_renderer", "rjsf", r"not a known FormRenderer \(sgg, jsonforms\)"),
+        ],
+    )
+    def test_unparseable_field_rejected(self, field: str, value: str, error: str) -> None:
+        with pytest.raises(ValueError, match=error):
+            build_form_from_dict(MINIMAL_FORM | {field: value}, Path("form.json"))
 
     def test_form_renderer_defaults_to_sgg(self) -> None:
         form = build_form_from_dict(MINIMAL_FORM, Path("form.json"))
         assert form.form_renderer is FormRenderer.SGG
-
-    def test_datetime_fields_coerced(self) -> None:
-        form = build_form_from_dict(
-            MINIMAL_FORM | {"active_at": "2026-01-15T00:00:00"}, Path("form.json")
-        )
-        assert form.active_at == datetime(2026, 1, 15, 0, 0, 0)
-
-    def test_date_fields_coerced(self) -> None:
-        form = build_form_from_dict(
-            MINIMAL_FORM | {"expiration_date": "2029-03-31"}, Path("form.json")
-        )
-        assert form.expiration_date == date(2029, 3, 31)
 
     def test_unknown_field_rejected(self) -> None:
         with pytest.raises(ValueError, match="unknown field"):
@@ -185,19 +192,3 @@ class TestBuildFormFromDict:
         data = {k: v for k, v in MINIMAL_FORM.items() if k != "form_name"}
         with pytest.raises(ValueError, match="form_name"):
             build_form_from_dict(data, Path("form.json"))
-
-    def test_invalid_uuid_rejected(self) -> None:
-        with pytest.raises(ValueError, match="not a valid UUID"):
-            build_form_from_dict(MINIMAL_FORM | {"form_id": "not-a-uuid"}, Path("form.json"))
-
-    def test_unknown_form_type_rejected(self) -> None:
-        with pytest.raises(ValueError, match="not a known FormType"):
-            build_form_from_dict(MINIMAL_FORM | {"form_type": "NotAForm"}, Path("form.json"))
-
-    def test_unknown_form_renderer_rejected(self) -> None:
-        with pytest.raises(ValueError, match="not a known FormRenderer"):
-            build_form_from_dict(MINIMAL_FORM | {"form_renderer": "rjsf"}, Path("form.json"))
-
-    def test_invalid_datetime_rejected(self) -> None:
-        with pytest.raises(ValueError, match="not a valid ISO 8601"):
-            build_form_from_dict(MINIMAL_FORM | {"active_at": "the fifteenth"}, Path("form.json"))
