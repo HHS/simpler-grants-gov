@@ -18,7 +18,7 @@ export interface FormUnderTest {
 /**
  * Repeats a spec's scenarios once for each form, so one spec covers every version.
  *
- * Each returned scenario's `testName` is prefixed with the form's label, and it carries
+ * Each returned scenario's `testName` is prefixed with the form's label, and it includes
  * the opportunity to apply to and the form's resolved config.
  *
  * @throws if a form's opportunity does not offer a form with its formKey
