@@ -35,13 +35,13 @@ In these READMEs, "renderer" means the form-level renderer: the SGG renderer, or
 
 ## How widgets are picked
 
-`JsonFormsFields` picks a widget for each element by rank. Each widget is registered with a tester that scores how well it matches an element, and the highest score wins. A control that no SGG widget can render is skipped, so the applicant doesn't see it, and the server logs a warning for it:
+`JsonFormsFields` picks a widget for each element by rank. Each widget is registered with a tester that scores how well it matches an element, and the highest score wins. A control that can't be rendered by an existing SGG widget is skipped, so the applicant doesn't see it, and the server logs a warning for it:
 
-| Rank     | Widgets                                                                  | Used for                                             |
-| -------- | ------------------------------------------------------------------------ | ---------------------------------------------------- |
-| 1        | `SkipControl`                                                            | Controls no SGG widget can render, which are skipped |
-| 10       | The SGG adapter (`AdaptedControl`, `AdaptedLayout`)                      | Everything else                                      |
-| Above 10 | Custom JSON Forms widgets, registered in `renderers` or `extraRenderers` | Whatever their tester matches                        |
+| Rank     | Widgets                                                                  | Used for                                                                     |
+| -------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| 1        | `SkipControl`                                                            | Controls that can't be rendered by an existing SGG widget, which are skipped |
+| 10       | The SGG adapter (`AdaptedControl`, `AdaptedLayout`)                      | Everything else                                                              |
+| Above 10 | Custom JSON Forms widgets, registered in `renderers` or `extraRenderers` | Whatever their tester matches                                                |
 
 See [Adding a new widget](../widgets/README.md#adding-a-new-widget) for an SGG widget, and [Adding a custom JSON Forms widget](#adding-a-custom-json-forms-widget) below.
 

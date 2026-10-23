@@ -67,7 +67,7 @@ describe("prepareJsonFormsUiSchema", () => {
     expect(prepare().map((node) => node.type)).toEqual(["field", "fieldList"]);
   });
 
-  it("warns about each control no widget can render, since it won't be shown", () => {
+  it("warns about each control a widget can't render, since it won't be shown", () => {
     prepare();
 
     expect(mockLoggerWarn).toHaveBeenCalledWith(

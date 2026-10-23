@@ -2,7 +2,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import Ajv, { ValidateFunction } from "ajv";
 import addFormats from "ajv-formats";
 
-// Lets a node carry rules (object-valued keys) the renderer ignores; see unimplementedRuleKeys.
+// Lets a node include rules (object-valued keys) the renderer ignores; see unimplementedRuleKeys.
 const RULE_EXTENSION = { type: "object" } as const;
 
 // JSON Schema for the UiSchema, accepts a "field", "fieldList", "multiField", or "section"
