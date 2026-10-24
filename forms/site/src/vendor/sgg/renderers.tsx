@@ -47,7 +47,7 @@ export type AdapterContextValue = {
   formContext?: RootBudgetFormContext;
   isFormLocked?: boolean;
   print?: boolean;
-  /** The native FieldList's draft-value callback; only top-level lists are supported here. */
+  /** The preview lists' draft-value callback; only top-level lists are supported here. */
   onFieldListChange?: (name: string, values: unknown[]) => void;
 };
 

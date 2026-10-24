@@ -65,16 +65,22 @@ example path is a failure even when its schema accepts it.
 The SGG preview uses the frontend's native FormData collector. Disabled controls are absent
 from FormData, so the preview retains only schema-declared, unconditional read-only values
 from the explicitly loaded context. Clearing a sample clears that context. This is not
-application prefill, authorization or signing. Editable arrays remain native-collector owned.
+application prefill, authorization or signing. Repeating lists own their draft arrays through
+the callback described below; ordinary inputs use the native collector.
 No row-identity reconciliation or restoration of read-only descendants in those rows is claimed.
 Conditional ownership is outside this small preview adapter. Read-only objects are copied
 as supplied; validation still owns their allowed contents.
 
-### Native repeating-list drafts
+### Repeating-list drafts
 
-The preview forwards the native FieldList's existing change callback for add, delete and child
-edits. Only that widget owns its draft arrays; its bubbling DOM events do not become a second
-writer. Ordinary fields and existing collapsible lists retain native FormData collection.
+The preview forwards the existing list change callback for add, delete and child edits from
+the native FieldList and the library's CollapsibleFieldList. Each owns its draft arrays; its
+bubbling DOM events do not become a second writer. Collapsing or expanding an entry changes
+only the view. Ordinary fields retain native FormData collection.
 Sibling edits retain explicitly callback-owned lists, including blank draft rows; external
 Clear/sample resets replace their context. JSON Forms reads current parent data in this live
 preview mode. No mapper, row-identity policy, widget copy or submission service is introduced.
+
+The collapsible list is a library preview component, not a replacement for the SGG widget.
+It retains the same answer paths and existing child widgets. This callback repair does not
+resolve the native FieldList identity defect tracked in #12925 or change a form's widget choice.

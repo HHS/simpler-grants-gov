@@ -2,7 +2,7 @@
 // so the form library can render with the SGG form widgets before the JSON Forms renderer
 // lands in the frontend. Only import paths are changed, plus `extraRenderers`, which lets the
 // form library preview its own widgets beside the SGG ones. It also supports the live
-// preview's native FieldList callback. Reconcile this delta with #12695.
+// preview's list-value callback. Reconcile this delta with #12695.
 import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
 import { JsonForms } from "@jsonforms/react";
 import {
