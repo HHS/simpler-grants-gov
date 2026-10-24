@@ -94,7 +94,7 @@
   ],
   "new_concepts": [],
   "description": "Select an evidence level and describe the studies supporting the proposed project. Illustrative examples do not establish eligibility or scientific validity.",
-  "widgets": ["RadioWidget", "TextAreaWidget", "FieldListWidget"],
+  "widgets": ["RadioWidget", "TextAreaWidget", "CollapsibleFieldList"],
   "sgg_form_id": null,
   "omb_number": "1894-0001",
   "expiration_date": "08/31/2028",

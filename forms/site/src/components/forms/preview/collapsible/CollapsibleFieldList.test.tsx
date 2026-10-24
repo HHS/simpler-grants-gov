@@ -15,6 +15,7 @@ vi.mock("@sgg/frontend/components/apply-form/widgets/WidgetRenderers", () => ({
       key={String(props.id)}
       name={String(props.name)}
       defaultValue={String(props.value ?? "")}
+      disabled={Boolean(props.disabled)}
       onInput={(event) =>
         (props.onChange as (value: string) => void)(event.currentTarget.value)
       }
@@ -48,19 +49,18 @@ describe("collapsible list draft ownership", () => {
   const report = vi.fn();
   const bubblingInput = vi.fn();
 
-  beforeEach(async () => {
-    host = document.createElement("div");
-    document.body.append(host);
-    root = createRoot(host);
-    report.mockClear();
-    bubblingInput.mockClear();
+  const renderList = async (
+    formData = { people: [{ name: "A" }, { name: "B" }] },
+    isFormLocked = false,
+  ) => {
     await act(async () => {
       root.render(
         <div onInput={bubblingInput}>
           <AdapterContext.Provider
             value={{
               schema,
-              formData: { people: [{ name: "A" }, { name: "B" }] },
+              formData,
+              isFormLocked,
               errors: null,
               requiredFieldPaths: [],
               rootUiSchema: control,
@@ -68,6 +68,7 @@ describe("collapsible list draft ownership", () => {
             }}
           >
             <CollapsibleListControl
+              key={isFormLocked ? "locked" : "editable"}
               uischema={control}
               visible={true}
               enabled={true}
@@ -84,6 +85,15 @@ describe("collapsible list draft ownership", () => {
         </div>,
       );
     });
+  };
+
+  beforeEach(async () => {
+    host = document.createElement("div");
+    document.body.append(host);
+    root = createRoot(host);
+    report.mockClear();
+    bubblingInput.mockClear();
+    await renderList();
   });
 
   afterEach(async () => {
@@ -162,6 +172,19 @@ describe("collapsible list draft ownership", () => {
       host.querySelector<HTMLInputElement>('input[name="people[0]--name"]')!
         .value,
     ).toBe(answer);
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("lets a reader open full long answers while the form is locked", async () => {
+    const answer = "Z".repeat(4000);
+    await renderList({ people: [{ name: answer }] }, true);
+    await click("Edit");
+    const input = host.querySelector<HTMLInputElement>(
+      'input[name="people[0]--name"]',
+    )!;
+    expect(input.value).toBe(answer);
+    expect(input.disabled).toBe(true);
+    expect(buttons("Add entry")[0].disabled).toBe(true);
     expect(report).not.toHaveBeenCalled();
   });
 

@@ -4,6 +4,7 @@ import {
 } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import plan from "../content/forms/evidence-form.json";
 import { loadFormSpec, type FormSpec } from "./formSpec";
 import { createAjv } from "./validation";
 
@@ -112,6 +113,9 @@ describe("ED Evidence source and actual collector contract", () => {
     ).toMatchObject({
       options: { widget: "CollapsibleFieldList" },
     });
+    expect(plan.widgets).toContain("CollapsibleFieldList");
+    expect(plan.widgets).not.toContain("FieldListWidget");
+    expect(plan.children[1].widget).toBe("CollapsibleFieldList");
     expect(spec.example?.citations).toBeInstanceOf(Array);
   });
 

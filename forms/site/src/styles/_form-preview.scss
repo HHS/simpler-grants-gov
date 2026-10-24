@@ -32,8 +32,14 @@
   }
 }
 
+.collapsible__title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .collapsible__toggle {
   display: inline-flex;
+  max-width: 100%;
   flex: 1 1 auto;
   align-items: center;
   gap: units("105");
@@ -62,6 +68,7 @@
 
 .collapsible__number {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   min-width: units(3);
@@ -197,6 +204,7 @@
 // The entry heading wraps the toggle; the toggle carries the heading's size.
 .collapsible__heading {
   flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
 }
 
