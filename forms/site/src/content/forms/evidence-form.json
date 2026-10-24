@@ -1,7 +1,7 @@
 {
   "title": "Evidence Form",
   "slug": "evidence-form",
-  "status": "in_progress",
+  "status": "ready",
   "family": ["SF-424"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 2877,
@@ -87,10 +87,10 @@
     "ED_Evidence is the proposed unversioned registration short name, following maintained examples; source XML root/namespace ED_Evidence_2_0 and form version2.0 remain exact. Application registration still requires integration review."
   ],
   "risks": [
-    "This library pilot selects the existing CollapsibleFieldList with bounded long-answer previews and full answers available by opening each entry. Production SGG must explicitly support that component; its native FieldList defect (HHS/simpler-grants-gov#12925) remains unresolved and is not patched here.",
+    "The library selects the existing CollapsibleFieldList with bounded long-answer previews and full answers available by opening each entry. Production SGG must explicitly support that component; its native FieldList defect (HHS/simpler-grants-gov#12925) remains unresolved and is not patched here.",
     "Required? versus business-rule/XSD completion conflict is explicitly recorded. Review complete-row treatment and blank-row omission before implementation.",
     "Choosing an evidence category and entering text does not verify scientific validity, applicability or funding eligibility. No such assessment is claimed.",
-    "Existing component availability is not demonstrated runtime parity. Current source-policy questions and implementation ownership must remain visible in the review packet."
+    "Library checks cover synthetic draft editing and original-XSD output. Production renderer support, application services, accessibility review and source-policy questions remain separate review and integration work."
   ],
   "new_concepts": [],
   "description": "Select an evidence level and describe the studies supporting the proposed project. Illustrative examples do not establish eligibility or scientific validity.",
