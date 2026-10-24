@@ -201,3 +201,32 @@ it("SF-424A DAT range reports the numeric bounds actually checked by parity", as
   expect(cell.value).toContain("-99999999999.99");
   expect(cell.value).toContain("999999999999.99");
 });
+
+describe("SF-424 R&R choice mapping", () => {
+  const slug = "sf424-r-r";
+  it("shows every revision control against one answer", async () => {
+    const view = (await compareForm(PLANS.get(slug)!))!;
+    const field = view.fields.find(
+      (f) => f.id === "application_type.revision_code",
+    )!;
+    const matched = field.rows.find((r) => r.attribute === "matchedBy")!.cells
+      .dat;
+    for (let i = 1; i <= 5; i++) expect(matched.value).toContain(`08-1-${i}`);
+    expect(matched.status).toBe("match");
+  });
+  it("exposes invalid choice codes in the comparison as well as suite diagnostics", async () => {
+    const plan = structuredClone(PLANS.get(slug)!);
+    const walk = (nodes: any[]): any[] =>
+      nodes.flatMap((n) => (n.kind === "section" ? walk(n.children) : [n]));
+    const field = walk(plan.children!).find(
+      (f) => f.json_path === "application_type.revision_code",
+    );
+    field.source_bindings.dat[4].value = "Z";
+    const view = (await compareForm(plan))!;
+    expect(
+      view.fields
+        .find((f) => f.id === field.json_path)!
+        .rows.find((r) => r.attribute === "options")!.cells.xsd.status,
+    ).toBe("unrecorded");
+  });
+});

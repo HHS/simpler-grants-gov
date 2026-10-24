@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { sourceCoordinates } from "./sourceBindings.ts";
+import { choiceValueProblems, sourceCoordinates } from "./sourceBindings.ts";
 import {
   planFields,
   type PlanField,
   type Plan,
 } from "./harness/flatten/plan.ts";
-const field = (): PlanField => ({
+const field = (): PlanField & {
+  source_bindings: {
+    at: string;
+    dat: { kind: "slot"; path: string; index: number }[];
+  };
+} => ({
   kind: "field",
   label: "Amount",
   required: false,
@@ -91,5 +96,50 @@ describe("finite DAT slots", () => {
     expect(problems.some((p) => p.kind === "duplicate source coordinate")).toBe(
       true,
     );
+  });
+});
+
+describe("DAT choice controls for one scalar code", () => {
+  const choice = (): PlanField => ({
+    kind: "field",
+    label: "Reason",
+    required: false,
+    json_path: "revision_code",
+    xml_path: "RevisionCode",
+    source_bindings: {
+      dat: [
+        { kind: "choice", path: "1-a", value: "A" },
+        { kind: "choice", path: "1-b", value: "B" },
+      ],
+    },
+  });
+  it("projects both controls without duplicating the answer", () => {
+    const p: Plan = { slug: "test", children: [choice()] };
+    expect([...planFields(p, "json_path").keys()]).toEqual(["revision_code"]);
+    expect([...planFields(p, "dat_field").keys()]).toEqual(["1-a", "1-b"]);
+  });
+  it("refuses codes outside the linked XSD enumeration", () => {
+    expect(
+      choiceValueProblems(choice(), { rules: { enum: ["A", "B", "AB"] } }),
+    ).toEqual([]);
+    expect(
+      choiceValueProblems(choice(), { rules: { enum: ["A"] } }).map(
+        (p) => p.path,
+      ),
+    ).toEqual(["1-b"]);
+    expect(choiceValueProblems(choice(), undefined)).toHaveLength(2);
+  });
+  it("refuses duplicate choice codes and repeated owners", () => {
+    const f = choice();
+    f.source_bindings = {
+      dat: [
+        { kind: "choice", path: "1-a", value: "A" },
+        { kind: "choice", path: "1-b", value: "A" },
+      ],
+    };
+    const problems: any[] = [];
+    expect(sourceCoordinates(f, 1, "dat", problems)).toEqual([]);
+    expect(problems).not.toHaveLength(0);
+    expect(sourceCoordinates(choice(), 2, "dat", [])).toEqual([]);
   });
 });

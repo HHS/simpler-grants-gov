@@ -221,3 +221,31 @@ Numeric DAT types, including `DECIMAL(n)`, expose signed value bounds rather tha
 lengths. Empty minima stay unstated; non-numeric bounds refuse instead of becoming NaN.
 SF-424A preserves the DAT's narrower signed bounds and records their difference from the
 XSD's precision-only type at literal values. Rounding and arithmetic are still unexecuted.
+
+DAT radio options without an XML binding belong to the declared Radio Group answer, so
+those display controls are not additional fields. Bound Post-Populated labels remain wire
+answers even though applicants cannot edit them. The distinction uses the DAT's actual
+Field Type/Agency Field Name columns, not form-specific IDs.
+
+A scalar code assembled from several DAT choice controls can instead declare:
+
+```json
+{
+  "json_path": "revision_code",
+  "source_bindings": {
+    "dat": [
+      { "kind": "choice", "path": "08-1-1", "value": "A" },
+      { "kind": "choice", "path": "08-1-2", "value": "B" }
+    ]
+  }
+}
+```
+
+Choice bindings need unique source coordinates/code values, one scalar answer and no
+`dat_field` shorthand. Each declared value is checked against the linked XSD enumeration.
+This checks coordinate ownership and XSD enum membership. The meaning of each DAT
+control-to-code association still requires explicit source review; membership alone would
+not detect swapped valid codes. It does not implement allowed checkbox combinations or
+an XML encoder. SF-424 R&R is the proving plan, with all five actual revision controls,
+all106 semantic fields and110 logical DAT entries. The13 unbound radio-option rows remain
+accounted for under their group answers in the source-reconciliation packet.

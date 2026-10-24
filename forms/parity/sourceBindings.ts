@@ -2,10 +2,9 @@
 import type { PlanField, MaxItems } from "./harness/flatten/plan.ts";
 import { fromXmlPath, type Discrepancy } from "./harness/model.ts";
 
-export interface SourceBindings {
-  at: string;
-  dat: { kind: "slot"; path: string; index: number }[];
-}
+export type SourceBindings =
+  | { at: string; dat: { kind: "slot"; path: string; index: number }[] }
+  | { dat: { kind: "choice"; path: string; value: string }[] };
 export interface SourceCoordinate {
   path: string;
   maxItems: MaxItems;
@@ -31,6 +30,36 @@ export function sourceCoordinates(
           },
         ]
       : [];
+  if (!("at" in binding)) {
+    const rows = binding.dat;
+    const valid =
+      !shorthand &&
+      Boolean(field.json_path) &&
+      !field.json_path!.includes("[]") &&
+      maxItems === 1 &&
+      Array.isArray(rows) &&
+      rows.length > 0 &&
+      rows.every(
+        (b) =>
+          b.kind === "choice" &&
+          typeof b.path === "string" &&
+          b.path.trim() !== "" &&
+          typeof b.value === "string" &&
+          b.value.trim() !== "",
+      ) &&
+      new Set(rows.map((b) => b.path)).size === rows.length &&
+      new Set(rows.map((b) => b.value)).size === rows.length;
+    if (!valid) {
+      problems.push({
+        kind: "source binding invalid",
+        path: field.json_path ?? field.label,
+        detail:
+          "DAT choices require unique controls and code values for one scalar answer, without shorthand",
+      });
+      return [];
+    }
+    return rows.map((b) => ({ path: b.path, maxItems: 1 }));
+  }
   const path = field.json_path,
     owner = binding.at;
   const valid =
@@ -72,4 +101,25 @@ export function sourceCoordinates(
     index: b.index,
     maxItems: 1,
   }));
+}
+
+/** Every bound choice code must be a value the linked XSD enumeration permits. */
+export function choiceValueProblems(
+  field: PlanField,
+  xsd: import("./harness/model.ts").FlatField | undefined,
+): Discrepancy[] {
+  const bindings = field.source_bindings;
+  if (!bindings || "at" in bindings) return [];
+  const allowed = xsd?.rules.enum;
+  return bindings.dat.flatMap((b) =>
+    Array.isArray(allowed) && allowed.includes(b.value)
+      ? []
+      : [
+          {
+            kind: "choice code outside XSD",
+            path: b.path,
+            detail: "declared DAT choice is not in the linked XSD enumeration",
+          },
+        ],
+  );
 }

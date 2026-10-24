@@ -1,4 +1,4 @@
-import { sourceCoordinates } from "./sourceBindings.ts";
+import { choiceValueProblems, sourceCoordinates } from "./sourceBindings.ts";
 /**
  * Each plan field beside the same field in the DAT, the XSD and the compiled form, as the form
  * library's comparison sheet shows it.
@@ -732,6 +732,22 @@ function buildBoundField<F extends PlanField>(
       },
     };
   });
+  const choiceProblems = choiceValueProblems(
+    field,
+    field.xml_path
+      ? sides.xsd.pair.source.get(fromXmlPath(field.xml_path))
+      : undefined,
+  );
+  if (choiceProblems.length) {
+    const options = rows.find((row) => row.attribute === "options");
+    if (options)
+      options.cells.xsd = {
+        ...options.cells.xsd,
+        status: "unrecorded",
+        reason:
+          "The maintained source-binding check reports a choice code outside the linked XSD enumeration.",
+      };
+  }
   const counts: CategoryCounts = { intentional: 0, upstream: 0, gap: 0 };
   for (const row of rows)
     for (const source of SOURCES)

@@ -85,7 +85,21 @@ export function datFields(workbook: Uint8Array): Fields {
   for (const row of rows.slice(start + 1)) {
     const id = String(row[at.field]).trim();
     const implementation = header(row[at.implementation]);
-    if (!id || NOT_INPUTS.has(implementation)) continue;
+    const agency = names.indexOf("agency field name"),
+      fieldType = names.indexOf("field type");
+    const bound = agency >= 0 && String(row[agency]).trim() !== "";
+    const radioOption =
+      implementation === "radio" &&
+      !bound &&
+      fieldType >= 0 &&
+      header(row[fieldType]) === "radio group";
+    const populated =
+      implementation === "label" &&
+      bound &&
+      fieldType >= 0 &&
+      header(row[fieldType]) === "post-populated";
+    if (!id || (NOT_INPUTS.has(implementation) && !populated) || radioOption)
+      continue;
     const rules: Rules = {};
     const numeric =
       NUMERIC_TYPES.has(header(row[at.dataType])) ||
