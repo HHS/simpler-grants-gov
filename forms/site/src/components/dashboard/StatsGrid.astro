@@ -7,8 +7,9 @@ const totalForms = forms.length;
 const families = new Set(forms.flatMap((f) => f.data.family));
 const migrated = forms.filter((f) => f.data.status === "migrated");
 const migratedCount = migrated.length;
+const libraryReadyCount = forms.filter((f) => f.data.status === "ready").length;
 
-const inProgressStatuses = ["in_progress", "migrated"];
+const inProgressStatuses = ["in_progress", "ready", "migrated"];
 const inProgressForms = forms.filter((f) =>
   inProgressStatuses.includes(f.data.status),
 );
@@ -18,7 +19,7 @@ const inProgressApps = inProgressForms.reduce(
 );
 const inProgressPct = ((inProgressApps / TOTAL_APPS) * 100).toFixed(2);
 
-const prioritizedStatuses = ["prioritized", "in_progress", "migrated"];
+const prioritizedStatuses = ["prioritized", "in_progress", "ready", "migrated"];
 const prioritizedForms = forms.filter((f) =>
   prioritizedStatuses.includes(f.data.status),
 );
@@ -36,19 +37,25 @@ const stats = [
     valueClass: "",
   },
   {
-    label: "Migrated",
+    label: "Library ready",
+    value: libraryReadyCount.toString(),
+    detail: "Awaiting SGG integration",
+    valueClass: "stat-value--secondary",
+  },
+  {
+    label: "Migrated to SGG",
     value: migratedCount.toString(),
     detail: `${migratedCount} of ${totalForms} forms`,
     valueClass: "stat-value--primary",
   },
   {
-    label: "Apps covered (in progress)",
+    label: "Form usage (in progress+)",
     value: `${inProgressPct}%`,
     detail: `${inProgressApps.toLocaleString()} of ${TOTAL_APPS.toLocaleString()}`,
     valueClass: "stat-value--secondary",
   },
   {
-    label: "Apps covered (prioritized+)",
+    label: "Form usage (prioritized+)",
     value: `${prioritizedPct}%`,
     detail: `${prioritizedApps.toLocaleString()} of ${TOTAL_APPS.toLocaleString()}`,
     valueClass: "",

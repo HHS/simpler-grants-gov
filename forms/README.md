@@ -30,7 +30,7 @@ These commands require Node 22 or 24 and should be run from `forms/`.
 npm ci
 npm run compile        # build the emitters, then compile every form into dist/
 npm run clean          # delete dist/, e.g. after deleting or renaming a form
-npm run test:parity    # download the Grants.gov sources, then run the parity tests
+npm run test:parity    # clean/compile, download sources, then run parity tests
 npm run test:emitters  # run the emitters' own tests
 npm run sync           # copy each form marked @Sgg.sync into the API
 npm run sync:check     # fail if a form in the API doesn't match its compiled output
@@ -40,8 +40,31 @@ npm run sync:check     # fail if a form in the API doesn't match its compiled ou
 
 ## Adding a form
 
+The library backlog distinguishes `ready` (definitions and local source, preview,
+sample and XML checks complete and ready for review) from `migrated` (integrated
+into SGG). A compiled `spec_id` alone does not establish either state. The Library
+ready dashboard count is the current stage awaiting integration, not a cumulative
+count of all forms ever prepared. Review, merge and application acceptance remain
+separate evidence. Usage percentages sum per-form uses and are not deduplicated
+application coverage.
+
 1. **Outline the requirements** in a form plan at `site/src/content/forms/<slug>.json`. The plan lists each field's label, help text and constraints, and links it to the matching DAT field and XSD element.
 2. **Validate the requirements** with `npm run test:parity`, which checks the plan against the DAT and XSD.
 3. **Define the form** in TypeSpec under `specs/forms/<id>/`, then import it from `specs/main.tsp`.
 4. **Preview and validate the form** by running `npm run compile`, then `npm run test:parity` again. The form library site (`cd site && npm run dev`) shows the form alongside its requirements.
 5. **Register the form in the API** by adding `@Sgg.sync` to it and running `npm run sync`. This writes the compiled artifacts to `api/src/form_schema/forms/<id>_generated/`. The form still has to be added to `_ALL_FORMS` by hand.
+
+### Fresh validation and preview context
+
+`npm run test:parity` cleans and compiles before source fetching and comparison, so a failed
+compile cannot validate stale artifacts. Direct `vitest` runs require an explicit fresh compile.
+The site consumer tests discover compiled forms from the existing plan `spec_id` values and
+check every authored example against schema and declared answer locations; an unsupported
+example path is a failure even when its schema accepts it.
+
+The SGG preview uses the frontend's native FormData collector. Disabled controls are absent
+from FormData, so the preview retains only schema-declared, unconditional read-only values
+from the explicitly loaded context. Clearing a sample clears that context. This is not
+application prefill, authorization or signing. Editable arrays remain native-collector owned. No row-identity reconciliation or restoration
+of read-only descendants in those rows is claimed. Conditional ownership is outside this small preview adapter. Read-only objects are copied
+as supplied; validation still owns their allowed contents.

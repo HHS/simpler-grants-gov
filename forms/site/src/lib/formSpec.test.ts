@@ -1,9 +1,11 @@
 import type { JsonSchema } from "@jsonforms/core";
+import { loadPlans } from "@parity/harness/load";
 import { processFormSchema } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { unadaptableScopes } from "../vendor/sgg/jsonFormsUiSchema";
 import { loadFormSpec, type FormSpec } from "./formSpec";
+import { undeclaredExamplePaths } from "./planExamplePaths";
 import { createAjv } from "./validation";
 
 type UiNode = {
@@ -43,13 +45,16 @@ const groupLabels = (node: UiNode): string[] => [
 
 const clone = <T>(value: T): T => structuredClone(value);
 
-describe.each([
-  "key-contacts",
-  "epa-key-contacts",
-  "rr-key-person",
-  "rr-key-person-expanded",
-  "nsf-key-person-expanded",
-])("loadFormSpec(%s)", (specId) => {
+const plans = [...loadPlans().values()];
+const specIds = [
+  ...new Set(plans.flatMap((plan) => (plan.spec_id ? [plan.spec_id] : []))),
+];
+
+it("has compiled forms to exercise through the real preview loader", () => {
+  expect(specIds.length).toBeGreaterThan(0);
+});
+
+describe.each(specIds)("loadFormSpec(%s)", (specId) => {
   let spec: FormSpec;
   beforeAll(async () => {
     spec = await loadFormSpec(specId);
@@ -80,6 +85,21 @@ describe.each([
     expect(spec.example).toBeDefined();
     const validate = createAjv().compile(spec.schema);
     expect(validate(spec.example), JSON.stringify(validate.errors)).toBe(true);
+  });
+
+  it("checks every declared example against the schema and plan answer paths", () => {
+    const examples = (spec.schema as JsonSchema & { examples?: unknown[] })
+      .examples;
+    expect(examples?.length).toBeGreaterThan(0);
+    const validate = createAjv().compile(spec.schema);
+    for (const example of examples ?? []) {
+      expect(validate(example), JSON.stringify(validate.errors)).toBe(true);
+      for (const plan of plans.filter((plan) => plan.spec_id === specId))
+        expect(
+          undeclaredExamplePaths(plan.children ?? [], example),
+          plan.slug,
+        ).toEqual([]);
+    }
   });
 });
 
@@ -184,6 +204,16 @@ describe("UI layout", () => {
         "Project Manager",
       ]),
     );
+  });
+
+  it("rejects the unsupported EPA province example path instead of treating it as previewed data", () => {
+    const plan = plans.find((plan) => plan.slug === "epa-key-contacts-form");
+    expect(plan).toBeDefined();
+    expect(
+      undeclaredExamplePaths(plan!.children ?? [], {
+        project_manager: { address: { province: "Illustrative province" } },
+      }),
+    ).toEqual(["project_manager.address.province"]);
   });
 
   it("leaves County and Province out of each EPA contact's address", async () => {

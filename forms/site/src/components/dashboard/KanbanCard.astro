@@ -15,7 +15,7 @@ const pct = ((form.data.apps_count / TOTAL_APPS) * 100).toFixed(2);
   <div class="kanban-card__title">{form.data.title}</div>
   <div class="kanban-card__meta">
     <span class="kanban-card__apps">
-      {form.data.apps_count.toLocaleString()} apps ({pct}%)
+      {form.data.apps_count.toLocaleString()} form uses ({pct}%)
     </span>
     {form.data.family.map((family) => (
       <span class={`kanban-card__family family--${familySlug(family)}`}>

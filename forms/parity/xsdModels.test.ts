@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { compile, NodeHost } from "@typespec/compiler";
+import { compile, NodeHost, resolveEncodedName } from "@typespec/compiler";
 import { xsdRoots } from "form-library-xml";
 import { describe, expect, it } from "vitest";
 
@@ -61,7 +61,11 @@ describe.each(ROOTS)("$name vs $url", ({ model, url }) => {
     {
       registers: {},
       plan: xsdModelFields(program, model),
-      source: xsdFields(url, (source) => readSource(source).toString("utf8")),
+      source: xsdFields(
+        url,
+        (source) => readSource(source).toString("utf8"),
+        resolveEncodedName(program, model, "application/xml"),
+      ),
     },
     SPEC,
   );

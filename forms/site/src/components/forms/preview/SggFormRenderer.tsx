@@ -2,10 +2,10 @@ import type { RJSFSchema } from "@rjsf/utils";
 import {
   buildWarningTree,
   processFormSchema,
-  shapeFormData,
 } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { useEffect, useMemo, useRef, type FormEvent } from "react";
 
+import { collectPreviewData } from "../../../lib/collectPreviewData";
 import {
   createAjv,
   toValidationWarnings,
@@ -80,7 +80,11 @@ export const SggFormRenderer = ({
   useEffect(() => report(data), [generation.current, formSchema]);
 
   const handleInput = (event: FormEvent<HTMLFormElement>) => {
-    const next = shapeFormData(new FormData(event.currentTarget), formSchema);
+    const next = collectPreviewData(
+      new FormData(event.currentTarget),
+      formSchema,
+      reported.current,
+    );
     reported.current = next;
     report(next);
   };

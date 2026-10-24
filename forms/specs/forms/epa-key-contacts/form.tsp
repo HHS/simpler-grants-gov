@@ -26,7 +26,7 @@ namespace Forms.EPAKeyContacts;
   authorizedRepresentative: Questions.People.Examples.usContact,
   payee: Questions.People.Examples.usContactNoEmail,
   administrativeContact: Questions.People.Examples.usContact,
-  projectManager: Questions.People.Examples.internationalContact,
+  projectManager: Questions.People.Examples.usContact,
 })
 model EPAKeyContacts {
   /** Original awards and amendments will be sent to this individual for review and acceptance, unless otherwise indicated. */

@@ -216,7 +216,7 @@ main#main-content {
 // Stats cards
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: units(3);
 }
 
@@ -294,7 +294,7 @@ main#main-content {
 
 .kanban-board {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: units(2);
   align-items: stretch;
 }
@@ -370,6 +370,10 @@ main#main-content {
 
 .kanban-column__indicator--migrated {
   background: color("primary");
+}
+
+.kanban-column__indicator--ready {
+  background: color("success");
 }
 
 .kanban-column__title {
