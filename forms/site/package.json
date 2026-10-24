@@ -59,6 +59,7 @@
     "@typescript-eslint/parser": "^8.30.1",
     "eslint": "^9.25.0",
     "eslint-config-prettier": "^10.1.2",
+    "jsdom": "^28.1.0",
     "prettier": "^3.5.3",
     "sass": "^1.87.0",
     "typescript": "^5.8.3",

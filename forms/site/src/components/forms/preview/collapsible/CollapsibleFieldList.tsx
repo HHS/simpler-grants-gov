@@ -47,6 +47,7 @@ interface ListProps {
   requiredFields?: string[];
   detail?: UISchemaElement;
   disabled?: boolean;
+  onChange?: (values: Value[]) => void;
   /** How many sections enclose the list, which sets its heading levels. */
   depth: number;
 }
@@ -108,6 +109,7 @@ function CollapsibleFieldList({
   requiredFields = [],
   detail,
   disabled = false,
+  onChange,
   depth,
 }: ListProps) {
   const headingId = useId();
@@ -122,8 +124,12 @@ function CollapsibleFieldList({
     while (saved.length < minItems) saved.push(entry({}));
     return saved;
   });
-  const update = (id: number, change: (entry: Entry) => Entry) =>
-    setEntries((current) => current.map((e) => (e.id === id ? change(e) : e)));
+  const currentEntries = useRef(entries);
+  const commit = (next: Entry[]) => {
+    currentEntries.current = next;
+    setEntries(next);
+    onChange?.(next.map((e) => e.value));
+  };
 
   const layout = entryLayout(detail, groupDefinition);
   const listPath = `$.${name}`;
@@ -167,17 +173,24 @@ function CollapsibleFieldList({
           requiredFields={requiredFields}
           disabled={disabled}
           canDelete={canDelete}
-          onToggle={() =>
-            update(current.id, (e) => ({ ...e, collapsed: !e.collapsed }))
-          }
+          onToggle={() => {
+            const next = currentEntries.current.map((e) =>
+              e.id === current.id ? { ...e, collapsed: !e.collapsed } : e,
+            );
+            currentEntries.current = next;
+            setEntries(next);
+          }}
           onChange={(path, next) =>
-            update(current.id, (e) => ({
-              ...e,
-              value: withValueAt(e.value, path, next),
-            }))
+            commit(
+              currentEntries.current.map((e) =>
+                e.id === current.id
+                  ? { ...e, value: withValueAt(e.value, path, next) }
+                  : e,
+              ),
+            )
           }
           onDelete={() =>
-            setEntries((all) => all.filter((e) => e.id !== current.id))
+            commit(currentEntries.current.filter((e) => e.id !== current.id))
           }
         />
       ))}
@@ -187,7 +200,10 @@ function CollapsibleFieldList({
         className="usa-button usa-button--outline margin-top-2"
         disabled={!canAdd}
         onClick={() =>
-          setEntries((all) => [...all, { ...entry({}), collapsed: false }])
+          commit([
+            ...currentEntries.current,
+            { ...entry({}), collapsed: false },
+          ])
         }
       >
         Add entry
@@ -388,7 +404,7 @@ export function CollapsibleListControl({
   const props = Object.fromEntries(
     Object.entries(config.props).filter(([name]) => name !== "key"),
   );
-  return (
+  const rendered = (
     <CollapsibleFieldList
       {...(props as unknown as Omit<ListProps, "depth">)}
       detail={
@@ -396,6 +412,22 @@ export function CollapsibleListControl({
       }
       disabled={!enabled || !!context.isFormLocked}
       depth={depth}
+      onChange={
+        context.onFieldListChange
+          ? (values) => context.onFieldListChange!(node.name, values)
+          : undefined
+      }
     />
+  );
+  // The list's callback owns its values, as for the native FieldList adapter.
+  return context.onFieldListChange ? (
+    <div
+      onInput={(event) => event.stopPropagation()}
+      onChange={(event) => event.stopPropagation()}
+    >
+      {rendered}
+    </div>
+  ) : (
+    rendered
   );
 }
