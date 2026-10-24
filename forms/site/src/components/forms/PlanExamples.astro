@@ -1,0 +1,67 @@
+---
+import type { FormData } from "../../lib/formPlanSchema";
+
+interface Props {
+  slug: string;
+  examples: NonNullable<FormData["examples"]>;
+  existingSgg?: FormData["existing_sgg"];
+}
+
+const { slug, examples, existingSgg } = Astro.props;
+const groups = [
+  {
+    title: "Proposed sample data",
+    description: "Illustrative answers for reviewing this plan before its implementation. Answer paths are checked against the plan; values, calculations and submission validity are not yet verified.",
+    prefix: "proposed",
+    examples,
+    source: undefined,
+  },
+  {
+    title: "Existing SGG reference",
+    description: "Payloads from the existing SGG test fixtures. Compare their structure with the proposal above; these use a different contract and do not establish parity with this plan.",
+    prefix: "existing-sgg",
+    examples: existingSgg?.examples ?? [],
+    source: existingSgg?.source_url,
+  },
+].filter((group) => group.examples.length > 0);
+---
+
+{
+  groups.map((group) => (
+    <section>
+      <h2 class="section-title">{group.title}</h2>
+      <p class="text-base">{group.description}</p>
+      {group.source && <p><a href={group.source}>View pinned SGG fixtures</a></p>}
+      {group.examples.map((example, index) => {
+        const json = JSON.stringify(example.data, null, 2) + "\n";
+        return (
+          <details class="plan-example" open={group.prefix === "proposed" && index === 0}>
+            <summary>{example.label}</summary>
+            <p>{example.description}</p>
+            <a
+              class="usa-button usa-button--outline"
+              href={`data:application/json;charset=utf-8,${encodeURIComponent(json)}`}
+              download={`${slug}-${group.prefix}-${index + 1}.json`}
+              aria-label={`Download ${example.label} as JSON`}
+            >Download JSON</a>
+            <pre class="form-preview__json">{json}</pre>
+          </details>
+        );
+      })}
+    </section>
+  ))
+}
+
+<style>
+  .plan-example {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid #dfe1e2;
+    border-radius: 0.25rem;
+  }
+  summary {
+    cursor: pointer;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+</style>

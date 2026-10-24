@@ -141,3 +141,63 @@ describe("form without parity record", () => {
     expect(await compareForm(plan)).toBeNull();
   });
 });
+
+describe("precision visibility", () => {
+  it("shows a precision difference in the existing range row", async () => {
+    const plan = structuredClone(PLANS.get("key-contacts")!);
+    delete plan.spec_id;
+    const { walkFields } = await import("./harness/flatten/plan.ts");
+    const field = walkFields(plan.children)[0].field;
+    field.constraints = `${field.constraints}, multipleOf 0.01`;
+    const comparison = (await compareForm(plan))!;
+    const range = comparison.fields[0].rows.find(
+      (row) => row.attribute === "range",
+    )!;
+    expect(range.plan).toContain("multipleOf 0.01");
+    expect(range.cells.xsd.status).toBe("unrecorded");
+  });
+});
+
+describe("SF-424A finite DAT cells", () => {
+  const slug = "budget-information-for-non-construction-programs-sf-424a";
+  it("shows every source cell for a repeated answer and keeps all four bindings visible", async () => {
+    const view = (await compareForm(PLANS.get(slug)!))!;
+    const amount = view.fields.find(
+      (f) => f.id === "summary.activities[].activity_title",
+    )!;
+    const cell = amount.rows.find((r) => r.attribute === "matchedBy")!.cells
+      .dat;
+    for (const id of ["A-1-1", "A-2-1", "A-3-1", "A-4-1"])
+      expect(cell.value).toContain(id);
+    expect(cell.status).toBe("match");
+  });
+  it("does not hide an unrecorded difference in the last slot behind matching earlier slots", async () => {
+    const diff = DIFFS.find((d) => d.slug === slug)!;
+    const entry = diff.dat!.differingLabels!["A-4-1"];
+    delete diff.dat!.differingLabels!["A-4-1"];
+    try {
+      const view = (await compareForm(PLANS.get(slug)!))!;
+      const amount = view.fields.find(
+        (f) => f.id === "summary.activities[].activity_title",
+      )!;
+      expect(
+        amount.rows.find((r) => r.attribute === "label")!.cells.dat.status,
+      ).toBe("unrecorded");
+    } finally {
+      diff.dat!.differingLabels!["A-4-1"] = entry;
+    }
+  });
+});
+
+it("SF-424A DAT range reports the numeric bounds actually checked by parity", async () => {
+  const view = (await compareForm(
+    PLANS.get("budget-information-for-non-construction-programs-sf-424a")!,
+  ))!;
+  const field = view.fields.find(
+    (f) => f.id === "summary.activities[].estimated_federal",
+  )!;
+  const cell = field.rows.find((r) => r.attribute === "range")!.cells.dat;
+  expect(cell.status).toBe("match");
+  expect(cell.value).toContain("-99999999999.99");
+  expect(cell.value).toContain("999999999999.99");
+});

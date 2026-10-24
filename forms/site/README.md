@@ -3,6 +3,27 @@
 An Astro site listing every form's plan and, for a form with a spec, its field tree,
 its comparison with the DAT and XSD, and a preview of the compiled form.
 
+## Sample data before a preview
+
+A plan can include optional `examples`, each with a `label`, `description` and `data`
+object containing illustrative answers. These appear in the **Data** tab and can be
+downloaded as JSON without a `spec_id` or TypeSpec definition. No schema is generated
+from an example. Use synthetic values and state any proposed representation choices.
+
+For an already implemented form, `existing_sgg` can hold a pinned `source_url` and
+`examples` from maintained SGG fixtures. Data displays these separately for comparison;
+their paths follow the existing contract, so they are not checked against the proposal.
+Keep the source revision in the URL and distinguish test fixtures from realistic samples.
+
+The shared plan validator checks that example answers use declared field `json_path`s,
+including repeated `[]` entries. It does not validate values, requiredness, cardinality,
+calculations, submission defaults or XML. Those need the actual definition and runtime
+checks. Keep examples independent from the compiled preview's live answer store; on a
+form with both, Data shows proposed samples and live preview data separately.
+
+SF-424A is the first example; its [existing-SGG comparison](../docs/sf424a-plan-review.md)
+records the proposed path changes and behaviors to reconcile before implementation.
+
 ```bash
 npm ci
 npm run dev       # http://localhost:4321

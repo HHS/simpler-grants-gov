@@ -64,6 +64,55 @@ describe("datFields", () => {
     expect(dat.get("7-14")?.rules).toEqual({ maxOccurs: 4 });
   });
 
+  it.each(["$", "INTEGER", "DECIMAL(2)"])(
+    "does not reinterpret %s value bounds as character lengths",
+    (type) => {
+      const dat = datFields(
+        workbook([
+          HEADER,
+          ["01-a", "$", "No", type, 9999999999.99, 1, "Field", ""],
+        ]),
+      );
+      expect(dat.get("01-a")?.rules).toEqual({
+        maximum: 9999999999.99,
+        maxOccurs: 1,
+      });
+    },
+  );
+
+  it("preserves signed numeric minima and refuses malformed numeric bounds", () => {
+    const header = [...HEADER, "Min # of Chars or Min Value"];
+    const fields = datFields(
+      workbook([
+        header,
+        ["m", "Amount", "No", "DECIMAL(2)", 999.99, 1, "Field", "", -999.99],
+      ]),
+    );
+    expect(fields.get("m")?.rules).toEqual({
+      minimum: -999.99,
+      maximum: 999.99,
+      maxOccurs: 1,
+    });
+    expect(() =>
+      datFields(
+        workbook([
+          header,
+          [
+            "m",
+            "Amount",
+            "No",
+            "DECIMAL(2)",
+            "unknown",
+            1,
+            "Field",
+            "",
+            -999.99,
+          ],
+        ]),
+      ),
+    ).toThrow("numeric maximum");
+  });
+
   it("keeps asterisk on required labels", () => {
     const dat = datFields(
       workbook([

@@ -28,7 +28,9 @@ const readLock = (): Lock =>
 /** XSD `schemaLocation`s, resolved against the importing schema's URL. */
 const importsOf = (xsd: string, url: string): string[] =>
   [
-    ...xsd.matchAll(/<xs:(?:import|include)\b[^>]*\bschemaLocation="([^"]+)"/g),
+    ...xsd.matchAll(
+      /<(?:xs|xsd):(?:import|include)\b[^>]*\bschemaLocation="([^"]+)"/g,
+    ),
   ].map((match) => new URL(match[1], url).href);
 
 const update = process.argv.includes("--update");

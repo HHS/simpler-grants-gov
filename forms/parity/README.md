@@ -72,8 +72,8 @@ Constraints are requiredness plus the keywords each comparison reads (`SPECS` in
 `harness/index.ts`). Requiredness is always from the form's root, so a field inside an
 optional section is optional. A plan's `Conditional (...)` counts as optional.
 
-The DAT is compared on `maxLength` only. Its minimum is 0 for every optional field and 1
-for every required one, so it restates requiredness; the XSD is the authority on
+The DAT is compared on `maxLength` for text and `minimum`/`maximum` for numeric values. For text, its minimum characters are 0 for optional fields and 1
+for required ones, so that text minimum restates requiredness; the XSD is the authority on
 `minLength`. A DAT list shown as a popup is a fixed code list, so its "max chars" is not a
 length rule. An exact length is stated in a plan as `minLength 12, maxLength 12`.
 
@@ -161,3 +161,63 @@ harness/
   compare.ts          comparePair(): the six checks, with recorded differences applied
   model.ts            paths, fields, discrepancies, recorded differences (+ model.test.ts)
 ```
+
+### Decimal precision
+
+`multipleOf` is compared with numeric bounds and displayed on the range row. Plans can
+state `minimum 0, maximum 9999999999.99, multipleOf 0.01`; XSD `fractionDigits 2`
+provides the matching numeric step. Containment requires the implementation's step to
+be an exact decimal multiple of the source step: `0.1` is stricter than `0.01`, while
+`0.03` does not satisfy `0.02`.
+
+JSON Schema precision is read for explicit numeric types. A decimal string constrained
+by a pattern is a different representation; a numeric `multipleOf` keyword does not
+constrain it. Such a path still reports missing numeric precision, rather than claiming
+string-pattern equivalence. `totalDigits` and `whiteSpace` remain outside this comparison;
+`fractionDigits` does not establish full XSD equivalence. DAT numeric bounds are
+value bounds, not character lengths; the DAT comparison checks each stated minimum and
+maximum. Arithmetic and rounding remain outside this static comparison.
+
+The plan schema is importable from `site/src/lib/formPlanSchema.ts` without Astro. The
+site's content collection uses that same schema. External orchestration should import
+the maintained schema and parity functions rather than duplicate them.
+
+## Finite DAT cells and older XSDs
+
+A repeated answer can be printed as several fixed DAT cells. Keep the one semantic array
+and bind each physical cell explicitly on its field:
+
+```json
+{
+  "json_path": "activities[].amount",
+  "source_bindings": {
+    "at": "activities",
+    "dat": [
+      { "kind": "slot", "path": "A-1", "index": 0 },
+      { "kind": "slot", "path": "A-2", "index": 1 }
+    ]
+  }
+}
+```
+
+Its containing section declares `max_items: 2`. Slots must cover exactly that one finite
+array, with unique coordinates/indices and no simultaneous `dat_field` shorthand. Missing,
+overlapping, nested or unbounded slot mappings fail. DAT occurrences are one per physical
+cell; the XSD and proposed JSON still describe the repeated answer. The comparison view
+aggregates every bound cell and preserves the most severe finding rather than choosing one.
+Legacy single-coordinate fields retain their behavior.
+
+For an older XSD with multiple global elements, `xsd_root` explicitly selects the form root;
+there is no guessed root. Named root types, referenced model groups and global attributes
+are resolved by the same XSD reader. Fixed attributes remain constants, not answers.
+`parity:fetch` follows both `xs:` and `xsd:` import/include declarations.
+
+SF-424A is the proving plan. Its73 semantic fields map all163 DAT cells. Its labels and
+activity-first Section B order are proposals with individual source values/reasons in the
+difference register. Wire metadata, totalDigits, formula execution, submission defaults and
+human approval remain separate obligations; a green static comparison does not certify them.
+
+Numeric DAT types, including `DECIMAL(n)`, expose signed value bounds rather than character
+lengths. Empty minima stay unstated; non-numeric bounds refuse instead of becoming NaN.
+SF-424A preserves the DAT's narrower signed bounds and records their difference from the
+XSD's precision-only type at literal values. Rounding and arithmetic are still unexecuted.

@@ -34,8 +34,8 @@ import {
 } from "./model.ts";
 
 /**
- * What each comparison checks, as the tests name it. The DAT is compared on `maxLength`
- * only (see `datFields`); `enum` is compared only between the two artifacts that list values.
+ * What each comparison checks, as the tests name it. The DAT is compared on text length and numeric value bounds
+ * (see `datFields`); `enum` is compared only between the two artifacts that list values.
  * JSON schema vs XSD compares only fields the plan links, and lets the schema be stricter.
  * Labels compared with the DAT carry the asterisk it prints on a required field (see
  * `withAsterisk`).
@@ -46,7 +46,10 @@ export const SPECS = {
     order: true,
     labels: true,
     help: true,
-    constraints: { keywords: ["maxLength"], mode: "equal" },
+    constraints: {
+      keywords: ["maxLength", "minimum", "maximum"],
+      mode: "equal",
+    },
     occurrences: "equal",
   },
   xsd: {
@@ -58,6 +61,7 @@ export const SPECS = {
         "pattern",
         "minimum",
         "maximum",
+        "multipleOf",
         "enumType",
       ],
       mode: "equal",
@@ -74,6 +78,7 @@ export const SPECS = {
         "format",
         "minimum",
         "maximum",
+        "multipleOf",
       ],
       mode: "equal",
     },
@@ -95,6 +100,7 @@ export const SPECS = {
         "pattern",
         "minimum",
         "maximum",
+        "multipleOf",
         "enum",
       ],
       mode: "contains",
@@ -201,7 +207,7 @@ function indexDisagreements(
  * the asterisk and the plan's requiredness agree, the labels compare as plain text; where
  * they disagree, the label comparison reports it.
  */
-const withAsterisk = (fields: Fields): Fields =>
+export const withAsterisk = (fields: Fields): Fields =>
   new Map(
     [...fields].map(([path, field]) => [
       path,
@@ -246,6 +252,7 @@ export async function formPairs(
   const xsdSource = xsdFields(
     required(plan.xsd_url, `xsd_url in plan ${diff.slug}`),
     (url) => readSource(url).toString("utf8"),
+    plan.xsd_root,
   );
   const dat = {
     ...pair(

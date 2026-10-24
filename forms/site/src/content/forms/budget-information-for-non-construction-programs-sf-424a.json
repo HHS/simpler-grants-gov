@@ -1,12 +1,2117 @@
 {
   "title": "Budget Information for Non-Construction Programs (SF-424A)",
   "slug": "budget-information-for-non-construction-programs-sf-424a",
-  "status": "backlog",
-  "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Individual", "SF-424 Mandatory"],
+  "status": "prioritized",
+  "family": [
+    "SF-424",
+    "R&R",
+    "SF-424 Short",
+    "SF-424 Individual",
+    "SF-424 Mandatory"
+  ],
   "category": "Core Application Forms",
   "apps_count": 79929,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/241",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/SF424A-V1.0_F241.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/SF424A-V1.0_F241.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/SF424A-V1.0_F241.xls",
+  "children": [
+    {
+      "kind": "section",
+      "label": "A. Budget Summary",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Activities",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Activity Title",
+              "required": false,
+              "type": "Text input",
+              "json_path": "summary.activities[].activity_title",
+              "xml_path": "BudgetSummary/SummaryLineItem/@activityTitle",
+              "widget": "TextWidget",
+              "constraints": "minLength 1, maxLength 120",
+              "source_bindings": {
+                "at": "summary.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "A-1-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-2-1",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-3-1",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-4-1",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter the name of the activity or function.",
+              "pre_populated": "A-1-1: One entry is required in any field on any page except for fields A-1-7, A-2-7, A-3-7, A-4-7, C-1-1 to C-4-1 and E-1-1 to E-4-1. If no entry is made, this field will populate with 'N/A' upon submission.; A-2-1: If no entry is made, this field will populate with 'N/A' upon submission.; A-3-1: If no entry is made, this field will populate with 'N/A' upon submission.; A-4-1: If no entry is made, this field will populate with 'N/A' upon submission."
+            },
+            {
+              "kind": "field",
+              "label": "Assistance Listing Number",
+              "required": false,
+              "type": "Text input",
+              "json_path": "summary.activities[].assistance_listing",
+              "xml_path": "BudgetSummary/SummaryLineItem/CFDANumber",
+              "widget": "TextWidget",
+              "constraints": "minLength 1, maxLength 15",
+              "source_bindings": {
+                "at": "summary.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "A-1-2",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-2-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-3-2",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-4-2",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter the listing number."
+            },
+            {
+              "kind": "field",
+              "label": "Estimated Federal Unobligated",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.activities[].estimated_federal",
+              "xml_path": "BudgetSummary/SummaryLineItem/BudgetFederalEstimatedUnobligatedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "summary.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "A-1-3",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-2-3",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-3-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-4-3",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Lines 1-4, Columns (c) through (g)\n\nFor new applications, leave Column (c) and (d) blank. For each line entry in Columns (a) and (b), enter in Columns (e), (f), and (g) the appropriate amounts of funds needed to support the project for the first funding period (usually a year).\n\nFor continuing grant program applications, submit these forms before the end of each funding period as required by the grantor agency. Enter in Columns (c) and (d) the estimated amounts of funds which will remain unobligated at the end of the grant funding period only if the Federal grantor agency instructions provide for this. Otherwise, leave these columns blank. Enter in columns (e) and (f) the amounts of funds needed for the upcoming period. The amount(s) in Column (g) should be the sum of amounts in Columns (e) and (f).\n\nFor supplemental grants and changes to existing grants, do not use Columns (c) and (d). Enter in Column (e) the amount of the increase or decrease of Federal funds and enter in Column (f) the amount of the increase or decrease of non-Federal funds. In Column (g) enter the new total budgeted amount (Federal and non-Federal) which includes the total previous authorized budgeted amounts plus or minus, as appropriate, the amounts shown in Columns (e) and (f). The amount(s) in Column (g) should not equal the sum of amounts in Columns (e) and (f)."
+            },
+            {
+              "kind": "field",
+              "label": "Estimated Non-Federal Unobligated",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.activities[].estimated_non_federal",
+              "xml_path": "BudgetSummary/SummaryLineItem/BudgetNonFederalEstimatedUnobligatedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "summary.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "A-1-4",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-2-4",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-3-4",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-4-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Lines 1-4, Columns (c) through (g)\n\nFor new applications, leave Column (c) and (d) blank. For each line entry in Columns (a) and (b), enter in Columns (e), (f), and (g) the appropriate amounts of funds needed to support the project for the first funding period (usually a year).\n\nFor continuing grant program applications, submit these forms before the end of each funding period as required by the grantor agency. Enter in Columns (c) and (d) the estimated amounts of funds which will remain unobligated at the end of the grant funding period only if the Federal grantor agency instructions provide for this. Otherwise, leave these columns blank. Enter in columns (e) and (f) the amounts of funds needed for the upcoming period. The amount(s) in Column (g) should be the sum of amounts in Columns (e) and (f).\n\nFor supplemental grants and changes to existing grants, do not use Columns (c) and (d). Enter in Column (e) the amount of the increase or decrease of Federal funds and enter in Column (f) the amount of the increase or decrease of non-Federal funds. In Column (g) enter the new total budgeted amount (Federal and non-Federal) which includes the total previous authorized budgeted amounts plus or minus, as appropriate, the amounts shown in Columns (e) and (f). The amount(s) in Column (g) should not equal the sum of amounts in Columns (e) and (f)."
+            },
+            {
+              "kind": "field",
+              "label": "New or Revised Federal",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.activities[].new_federal",
+              "xml_path": "BudgetSummary/SummaryLineItem/BudgetFederalNewOrRevisedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "summary.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "A-1-5",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-2-5",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-3-5",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-4-5",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Lines 1-4, Columns (c) through (g)\n\nFor new applications, leave Column (c) and (d) blank. For each line entry in Columns (a) and (b), enter in Columns (e), (f), and (g) the appropriate amounts of funds needed to support the project for the first funding period (usually a year).\n\nFor continuing grant program applications, submit these forms before the end of each funding period as required by the grantor agency. Enter in Columns (c) and (d) the estimated amounts of funds which will remain unobligated at the end of the grant funding period only if the Federal grantor agency instructions provide for this. Otherwise, leave these columns blank. Enter in columns (e) and (f) the amounts of funds needed for the upcoming period. The amount(s) in Column (g) should be the sum of amounts in Columns (e) and (f).\n\nFor supplemental grants and changes to existing grants, do not use Columns (c) and (d). Enter in Column (e) the amount of the increase or decrease of Federal funds and enter in Column (f) the amount of the increase or decrease of non-Federal funds. In Column (g) enter the new total budgeted amount (Federal and non-Federal) which includes the total previous authorized budgeted amounts plus or minus, as appropriate, the amounts shown in Columns (e) and (f). The amount(s) in Column (g) should not equal the sum of amounts in Columns (e) and (f)."
+            },
+            {
+              "kind": "field",
+              "label": "New or Revised Non-Federal",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.activities[].new_non_federal",
+              "xml_path": "BudgetSummary/SummaryLineItem/BudgetNonFederalNewOrRevisedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "summary.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "A-1-6",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-2-6",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-3-6",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-4-6",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Lines 1-4, Columns (c) through (g)\n\nFor new applications, leave Column (c) and (d) blank. For each line entry in Columns (a) and (b), enter in Columns (e), (f), and (g) the appropriate amounts of funds needed to support the project for the first funding period (usually a year).\n\nFor continuing grant program applications, submit these forms before the end of each funding period as required by the grantor agency. Enter in Columns (c) and (d) the estimated amounts of funds which will remain unobligated at the end of the grant funding period only if the Federal grantor agency instructions provide for this. Otherwise, leave these columns blank. Enter in columns (e) and (f) the amounts of funds needed for the upcoming period. The amount(s) in Column (g) should be the sum of amounts in Columns (e) and (f).\n\nFor supplemental grants and changes to existing grants, do not use Columns (c) and (d). Enter in Column (e) the amount of the increase or decrease of Federal funds and enter in Column (f) the amount of the increase or decrease of non-Federal funds. In Column (g) enter the new total budgeted amount (Federal and non-Federal) which includes the total previous authorized budgeted amounts plus or minus, as appropriate, the amounts shown in Columns (e) and (f). The amount(s) in Column (g) should not equal the sum of amounts in Columns (e) and (f)."
+            },
+            {
+              "kind": "field",
+              "label": "New or Revised Total",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.activities[].new_total",
+              "xml_path": "BudgetSummary/SummaryLineItem/BudgetTotalNewOrRevisedAmount",
+              "widget": "TextWidget",
+              "post_populated": "A-1-7: Calculated to be the sum of the row, however value may be overwritten.; A-2-7: Calculated to be the sum of the row, however value may be overwritten.; A-3-7: Calculated to be the sum of the row, however value may be overwritten.; A-4-7: Calculated to be the sum of the row, however value may be overwritten.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "summary.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "A-1-7",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-2-7",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-3-7",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "A-4-7",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Total"
+            }
+          ],
+          "max_items": 4,
+          "json_path": "summary.activities"
+        },
+        {
+          "kind": "section",
+          "label": "Totals",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Estimated Federal Unobligated",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.totals.estimated_federal",
+              "xml_path": "BudgetSummary/SummaryTotals/BudgetFederalEstimatedUnobligatedAmount",
+              "widget": "TextWidget",
+              "dat_field": "A-5-2",
+              "post_populated": "A-5-2: Calculated, read-only. Sum of the column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Estimated Non-Federal Unobligated",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.totals.estimated_non_federal",
+              "xml_path": "BudgetSummary/SummaryTotals/BudgetNonFederalEstimatedUnobligatedAmount",
+              "widget": "TextWidget",
+              "dat_field": "A-5-3",
+              "post_populated": "A-5-3: Calculated, read-only. Sum of the column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "New or Revised Federal",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.totals.new_federal",
+              "xml_path": "BudgetSummary/SummaryTotals/BudgetFederalNewOrRevisedAmount",
+              "widget": "TextWidget",
+              "dat_field": "A-5-4",
+              "post_populated": "A-5-4: Calculated, read-only. Sum of the column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "New or Revised Non-Federal",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.totals.new_non_federal",
+              "xml_path": "BudgetSummary/SummaryTotals/BudgetNonFederalNewOrRevisedAmount",
+              "widget": "TextWidget",
+              "dat_field": "A-5-5",
+              "post_populated": "A-5-5: Calculated, read-only. Sum of the column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "New or Revised Total",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "summary.totals.new_total",
+              "xml_path": "BudgetSummary/SummaryTotals/BudgetTotalNewOrRevisedAmount",
+              "widget": "TextWidget",
+              "post_populated": "A-5-6: Calculated, read-only. Sum of the column.",
+              "dat_field": "A-5-6",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "B. Budget Categories",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Activities",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Activity Title",
+              "required": false,
+              "type": "Text input",
+              "json_path": "categories.activities[].activity_title",
+              "xml_path": "BudgetCategories/CategorySet/@activityTitle",
+              "widget": "TextWidget",
+              "constraints": "minLength 1, maxLength 120",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-00-3",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-00-4",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-00-5",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-00-6",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Name of the grant program, function or activity from which funds will be derived.  \nDefaults to the corresponding program name in section A, but may be overwritten if called for by the instructions for this funding opportunity",
+              "pre_populated": "B-00-3: If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; B-00-4: If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; B-00-5: If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; B-00-6: If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission."
+            },
+            {
+              "kind": "field",
+              "label": "Personnel",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].personnel",
+              "xml_path": "BudgetCategories/CategorySet/BudgetPersonnelRequestedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-01-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-01-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-01-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-01-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for personnel from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Fringe Benefits",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].fringe_benefits",
+              "xml_path": "BudgetCategories/CategorySet/BudgetFringeBenefitsRequestedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-02-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-02-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-02-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-02-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for fringe benefits from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Travel",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].travel",
+              "xml_path": "BudgetCategories/CategorySet/BudgetTravelRequestedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-03-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-03-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-03-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-03-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for travel from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Equipment",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].equipment",
+              "xml_path": "BudgetCategories/CategorySet/BudgetEquipmentRequestedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-04-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-04-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-04-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-04-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for equipment from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Supplies",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].supplies",
+              "xml_path": "BudgetCategories/CategorySet/BudgetSuppliesRequestedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-05-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-05-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-05-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-05-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for supplies from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Contractual",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].contractual",
+              "xml_path": "BudgetCategories/CategorySet/BudgetContractualRequestedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-06-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-06-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-06-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-06-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for contractual costs from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Construction",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].construction",
+              "xml_path": "BudgetCategories/CategorySet/BudgetConstructionRequestedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-07-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-07-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-07-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-07-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for construction from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Other",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].other",
+              "xml_path": "BudgetCategories/CategorySet/BudgetOtherRequestedAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-08-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-08-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-08-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-08-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for other costs from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Total Direct Charges",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].direct_total",
+              "xml_path": "BudgetCategories/CategorySet/BudgetTotalDirectChargesAmount",
+              "widget": "TextWidget",
+              "post_populated": "B-09-1: Calculated, read-only. Sum of the column (a-h).; B-09-2: Calculated, read-only. Sum of the column (a-h).; B-09-3: Calculated, read-only. Sum of the column (a-h).; B-09-4: Calculated, read-only. Sum of the column (a-h).",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-09-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-09-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-09-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-09-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Total Direct Charges"
+            },
+            {
+              "kind": "field",
+              "label": "Indirect Charges",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].indirect",
+              "xml_path": "BudgetCategories/CategorySet/BudgetIndirectChargesAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-10-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-10-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-10-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-10-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter funds required for indirect charges from the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Total",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].total",
+              "xml_path": "BudgetCategories/CategorySet/BudgetTotalAmount",
+              "widget": "TextWidget",
+              "post_populated": "B-11-1: Calculated, read-only. Sum of i and j in this column.; B-11-2: Calculated, read-only. Sum of i and j in this column.; B-11-3: Calculated, read-only. Sum of i and j in this column.; B-11-4: Calculated, read-only. Sum of i and j in this column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-11-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-11-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-11-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-11-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Total (sum of 6i and 6j)"
+            },
+            {
+              "kind": "field",
+              "label": "Program Income",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.activities[].program_income",
+              "xml_path": "BudgetCategories/CategorySet/ProgramIncomeAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "categories.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "B-12-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-12-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-12-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "B-12-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter program income for the selected program"
+            }
+          ],
+          "max_items": 4,
+          "json_path": "categories.activities"
+        },
+        {
+          "kind": "section",
+          "label": "Totals",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Personnel",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.personnel",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetPersonnelRequestedAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-01-5",
+              "post_populated": "B-01-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Fringe Benefits",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.fringe_benefits",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetFringeBenefitsRequestedAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-02-5",
+              "post_populated": "B-02-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Travel",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.travel",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetTravelRequestedAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-03-5",
+              "post_populated": "B-03-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Equipment",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.equipment",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetEquipmentRequestedAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-04-5",
+              "post_populated": "B-04-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Supplies",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.supplies",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetSuppliesRequestedAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-05-5",
+              "post_populated": "B-05-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Contractual",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.contractual",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetContractualRequestedAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-06-5",
+              "post_populated": "B-06-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Construction",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.construction",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetConstructionRequestedAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-07-5",
+              "post_populated": "B-07-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Other",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.other",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetOtherRequestedAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-08-5",
+              "post_populated": "B-08-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Total Direct Charges",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.direct_total",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetTotalDirectChargesAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-09-5",
+              "post_populated": "B-09-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total Direct Charges"
+            },
+            {
+              "kind": "field",
+              "label": "Indirect Charges",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.indirect",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetIndirectChargesAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-10-5",
+              "post_populated": "B-10-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            },
+            {
+              "kind": "field",
+              "label": "Total",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.total",
+              "xml_path": "BudgetCategories/CategoryTotals/BudgetTotalAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-11-5",
+              "post_populated": "B-11-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total (sum of 6i and 6j)"
+            },
+            {
+              "kind": "field",
+              "label": "Program Income",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "categories.totals.program_income",
+              "xml_path": "BudgetCategories/CategoryTotals/ProgramIncomeAmount",
+              "widget": "TextWidget",
+              "dat_field": "B-12-5",
+              "post_populated": "B-12-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "Total"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "C. Non-Federal Resources",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Activities",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Activity Title",
+              "required": false,
+              "type": "Text input",
+              "json_path": "resources.activities[].activity_title",
+              "xml_path": "NonFederalResources/ResourceLineItem/@activityTitle",
+              "widget": "TextWidget",
+              "constraints": "minLength 1, maxLength 120",
+              "source_bindings": {
+                "at": "resources.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "C-1-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-2-1",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-3-1",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-4-1",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Name of the grant program from which funds will be derived.  \nDefaults to the corresponding program name in section A, but may be overwritten if called for by the instructions for this funding opportunity",
+              "pre_populated": "C-1-1: Forward populated value may be overwritten. If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; C-2-1: Forward populated value may be overwritten. If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; C-3-1: Forward populated value may be overwritten. If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; C-4-1: Forward populated value may be overwritten. If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission."
+            },
+            {
+              "kind": "field",
+              "label": "Applicant",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "resources.activities[].applicant",
+              "xml_path": "NonFederalResources/ResourceLineItem/BudgetApplicantContributionAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "resources.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "C-1-2",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-2-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-3-2",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-4-2",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter resources provided by the applicant for the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "State",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "resources.activities[].state",
+              "xml_path": "NonFederalResources/ResourceLineItem/BudgetStateContributionAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "resources.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "C-1-3",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-2-3",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-3-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-4-3",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter resources provided by one or more states for the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Other Sources",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "resources.activities[].other_sources",
+              "xml_path": "NonFederalResources/ResourceLineItem/BudgetOtherContributionAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "resources.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "C-1-4",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-2-4",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-3-4",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-4-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter resources provided by the other sources (e.g. donors) for the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Total",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "resources.activities[].total",
+              "xml_path": "NonFederalResources/ResourceLineItem/BudgetTotalContributionAmount",
+              "widget": "TextWidget",
+              "post_populated": "C-1-5: Calculated, read-only. Sum of the row.; C-2-5: Calculated, read-only. Sum of the row.; C-3-5: Calculated, read-only. Sum of the row.; C-4-5: Calculated, read-only. Sum of the row.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "resources.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "C-1-5",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-2-5",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-3-5",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "C-4-5",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Totals"
+            }
+          ],
+          "max_items": 4,
+          "json_path": "resources.activities"
+        },
+        {
+          "kind": "section",
+          "label": "Totals",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Applicant",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "resources.totals.applicant",
+              "xml_path": "NonFederalResources/ResourceTotals/BudgetApplicantContributionAmount",
+              "widget": "TextWidget",
+              "dat_field": "C-5-2",
+              "post_populated": "C-5-2: Calculated, read-only. Sum of the column (8-11).",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "(b) Applicant Total (sum of lines 8-11)"
+            },
+            {
+              "kind": "field",
+              "label": "State",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "resources.totals.state",
+              "xml_path": "NonFederalResources/ResourceTotals/BudgetStateContributionAmount",
+              "widget": "TextWidget",
+              "dat_field": "C-5-3",
+              "post_populated": "C-5-3: Calculated, read-only. Sum of the column (8-11).",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "(c) State Total (sum of lines 8-11)"
+            },
+            {
+              "kind": "field",
+              "label": "Other Sources",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "resources.totals.other_sources",
+              "xml_path": "NonFederalResources/ResourceTotals/BudgetOtherContributionAmount",
+              "widget": "TextWidget",
+              "dat_field": "C-5-4",
+              "post_populated": "C-5-4: Calculated, read-only. Sum of the column (8-11).",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "(d)  Other Sources Total (sum of lines 8-11)"
+            },
+            {
+              "kind": "field",
+              "label": "Total",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "resources.totals.total",
+              "xml_path": "NonFederalResources/ResourceTotals/BudgetTotalContributionAmount",
+              "widget": "TextWidget",
+              "dat_field": "C-5-5",
+              "post_populated": "C-5-5: Calculated, read-only. Sum of the column (8-11).",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "(e)TOTALS - Total (sum of lines 8-11)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "D. Forecasted Cash Needs",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.first_year.federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-2-2",
+          "post_populated": "D-2-2: Calculated, read-only. Sum of the row.",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Total for 1st Year"
+        },
+        {
+          "kind": "field",
+          "label": "Non-Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.first_year.non_federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetNonFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-3-2",
+          "post_populated": "D-3-2: Calculated, read-only. Sum of the row.",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Total for 1st Year"
+        },
+        {
+          "kind": "field",
+          "label": "Total",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.first_year.total",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFirstYearAmounts/BudgetTotalForecastedAmount",
+          "widget": "TextWidget",
+          "post_populated": "D-4-2: Calculated, read-only. Sum of the column.",
+          "dat_field": "D-4-2",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Total for 1st Year"
+        },
+        {
+          "kind": "field",
+          "label": "Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter1.federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-2-3",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Enter the forecasted cash needs from federal sources for the first quarter of the first program year"
+        },
+        {
+          "kind": "field",
+          "label": "Non-Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter1.non_federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetNonFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-3-3",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Enter the forecasted cash needs from non-federal sources for the first quarter of the first program year"
+        },
+        {
+          "kind": "field",
+          "label": "Total",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter1.total",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFirstQuarterAmounts/BudgetTotalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-4-3",
+          "post_populated": "D-4-3: Calculated, read-only. Sum of the column.",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "1st Quarter Total (sum of lines 13 and 14)"
+        },
+        {
+          "kind": "field",
+          "label": "Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter2.federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-2-4",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Enter the forecasted cash needs from federal sources for the second quarter of the first program year"
+        },
+        {
+          "kind": "field",
+          "label": "Non-Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter2.non_federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetNonFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-3-4",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Enter the forecasted cash needs from non-federal sources for the second quarter of the first program year"
+        },
+        {
+          "kind": "field",
+          "label": "Total",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter2.total",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetSecondQuarterAmounts/BudgetTotalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-4-4",
+          "post_populated": "D-4-4: Calculated, read-only. Sum of the column.",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Second Quarter Total (sum of lines 13 and 14)"
+        },
+        {
+          "kind": "field",
+          "label": "Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter3.federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-2-5",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Enter the forecasted cash needs from federal sources for the third quarter of the first program year"
+        },
+        {
+          "kind": "field",
+          "label": "Non-Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter3.non_federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetNonFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-3-5",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Enter the forecasted cash needs from non-federal sources for the third quarter of the first program year"
+        },
+        {
+          "kind": "field",
+          "label": "Total",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter3.total",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetThirdQuarterAmounts/BudgetTotalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-4-5",
+          "post_populated": "D-4-5: Calculated, read-only. Sum of the column.",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "3rd Quarter Total (sum of lines 13 and 14)"
+        },
+        {
+          "kind": "field",
+          "label": "Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter4.federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-2-6",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Enter the forecasted cash needs from federal sources for the fourth quarter of the first program year"
+        },
+        {
+          "kind": "field",
+          "label": "Non-Federal",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter4.non_federal",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetNonFederalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-3-6",
+          "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "Enter the forecasted cash needs from non-federal sources for the fourth quarter of the first program year"
+        },
+        {
+          "kind": "field",
+          "label": "Total",
+          "required": false,
+          "type": "Decimal amount",
+          "json_path": "cash_needs.quarter4.total",
+          "xml_path": "BudgetForecastedCashNeeds/BudgetFourthQuarterAmounts/BudgetTotalForecastedAmount",
+          "widget": "TextWidget",
+          "dat_field": "D-4-6",
+          "post_populated": "D-4-6: Calculated, read-only. Sum of the column.",
+          "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+          "help_text": "4th Quarter Total (sum of lines 13 and 14)"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "E. Federal Funds Needed",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Activities",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Activity Title",
+              "required": false,
+              "type": "Text input",
+              "json_path": "future_funds.activities[].activity_title",
+              "xml_path": "FederalFundsNeeded/FundsLineItem/@activityTitle",
+              "widget": "TextWidget",
+              "constraints": "minLength 1, maxLength 120",
+              "source_bindings": {
+                "at": "future_funds.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "E-1-1",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-2-1",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-3-1",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-4-1",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Name of the grant program from which funds will be derived.  \nDefaults to the corresponding program name in section A, but may be overwritten if called for by the instructions for this funding opportunity",
+              "pre_populated": "E-1-1: Forward populated value may be overwritten. If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; E-2-1: Forward populated value may be overwritten. If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; E-3-1: Forward populated value may be overwritten. If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission.; E-4-1: Forward populated value may be overwritten. If no entry is made, and corresponding data is entered, this field will populate with 'N/A' upon submission."
+            },
+            {
+              "kind": "field",
+              "label": "First Year",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "future_funds.activities[].year1",
+              "xml_path": "FederalFundsNeeded/FundsLineItem/BudgetFirstYearAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "future_funds.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "E-1-2",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-2-2",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-3-2",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-4-2",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter the estimated federal funds that will be required in the first funding year for the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Second Year",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "future_funds.activities[].year2",
+              "xml_path": "FederalFundsNeeded/FundsLineItem/BudgetSecondYearAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "future_funds.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "E-1-3",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-2-3",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-3-3",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-4-3",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter the estimated federal funds that will be required in the second funding year for the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Third Year",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "future_funds.activities[].year3",
+              "xml_path": "FederalFundsNeeded/FundsLineItem/BudgetThirdYearAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "future_funds.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "E-1-4",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-2-4",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-3-4",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-4-4",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter the estimated federal funds that will be required in the third funding year for the selected program"
+            },
+            {
+              "kind": "field",
+              "label": "Fourth Year",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "future_funds.activities[].year4",
+              "xml_path": "FederalFundsNeeded/FundsLineItem/BudgetFourthYearAmount",
+              "widget": "TextWidget",
+              "constraints": "minimum -99999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "source_bindings": {
+                "at": "future_funds.activities",
+                "dat": [
+                  {
+                    "kind": "slot",
+                    "path": "E-1-5",
+                    "index": 0
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-2-5",
+                    "index": 1
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-3-5",
+                    "index": 2
+                  },
+                  {
+                    "kind": "slot",
+                    "path": "E-4-5",
+                    "index": 3
+                  }
+                ]
+              },
+              "help_text": "Enter the estimated federal funds that will be required in the fourth funding year for the selected program"
+            }
+          ],
+          "max_items": 4,
+          "json_path": "future_funds.activities"
+        },
+        {
+          "kind": "section",
+          "label": "Totals",
+          "children": [
+            {
+              "kind": "field",
+              "label": "First Year",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "future_funds.totals.year1",
+              "xml_path": "FederalFundsNeeded/FundsTotals/BudgetFirstYearAmount",
+              "widget": "TextWidget",
+              "dat_field": "E-5-2",
+              "post_populated": "E-5-2: Calculated, read-only. Sum of the column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "(b)First - Total (sum of lines 16 - 19)"
+            },
+            {
+              "kind": "field",
+              "label": "Second Year",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "future_funds.totals.year2",
+              "xml_path": "FederalFundsNeeded/FundsTotals/BudgetSecondYearAmount",
+              "widget": "TextWidget",
+              "dat_field": "E-5-3",
+              "post_populated": "E-5-3: Calculated, read-only. Sum of the column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "(c) Second - Total (sum of lines 16 - 19)"
+            },
+            {
+              "kind": "field",
+              "label": "Third Year",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "future_funds.totals.year3",
+              "xml_path": "FederalFundsNeeded/FundsTotals/BudgetThirdYearAmount",
+              "widget": "TextWidget",
+              "dat_field": "E-5-4",
+              "post_populated": "E-5-4: Calculated, read-only. Sum of the column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "(d) Third - Total (sum of lines 16 - 19)"
+            },
+            {
+              "kind": "field",
+              "label": "Fourth Year",
+              "required": false,
+              "type": "Decimal amount",
+              "json_path": "future_funds.totals.year4",
+              "xml_path": "FederalFundsNeeded/FundsTotals/BudgetFourthYearAmount",
+              "widget": "TextWidget",
+              "dat_field": "E-5-5",
+              "post_populated": "E-5-5: Calculated, read-only. Sum of the column.",
+              "constraints": "minimum -999999999999.99, maximum 999999999999.99, multipleOf 0.01",
+              "help_text": "(e) Fourth - Total (sum of lines 16 - 19)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "F. Other Budget Information",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Direct Charges",
+          "required": false,
+          "type": "Text input",
+          "json_path": "other_information.direct_charges",
+          "xml_path": "OtherInformation/OtherDirectChargesExplanation",
+          "widget": "TextWidget",
+          "constraints": "minLength 1, maxLength 50",
+          "dat_field": "F-0-1",
+          "help_text": "Use this space to explain amounts for individual direct object class cost categories that may appear to be out of the ordinary or to explain the details as required by the Federal grantor agency."
+        },
+        {
+          "kind": "field",
+          "label": "Indirect Charges",
+          "required": false,
+          "type": "Text input",
+          "json_path": "other_information.indirect_charges",
+          "xml_path": "OtherInformation/OtherIndirectChargesExplanation",
+          "widget": "TextWidget",
+          "constraints": "minLength 1, maxLength 50",
+          "dat_field": "F-0-2",
+          "help_text": "Enter the type of indirect rate (provisional, predetermined, final or fixed) that will be in effect during the funding period, the estimated amount of the base to which the rate is applied, and the total indirect expense."
+        },
+        {
+          "kind": "field",
+          "label": "Remarks",
+          "required": false,
+          "type": "Text input",
+          "json_path": "other_information.remarks",
+          "xml_path": "OtherInformation/Remarks",
+          "widget": "TextWidget",
+          "constraints": "minLength 1, maxLength 250",
+          "dat_field": "F-0-3",
+          "help_text": "Provide any other explanations or comments deemed necessary."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Plan-first review proposal for FID241 v1.0; no compiled form or executable calculations are included.",
+    "Four independent arrays propose separate section ownership for A, B, C and E. Current SGG instead nests those sections in activity_line_items[], sharing the A/B activity title and allowing distinct C/E grant_program answers. Both approaches support C/E title overrides; separate lists are a design proposal, not a source requirement. Each DAT cell remains explicitly bound to its section index. Section B proposes activity-first navigation following the DAT tab-order instruction.",
+    "Section C and E activity titles default from the corresponding section A row but may be overwritten (DAT C-1-1…C-4-1 and E-1-1…E-4-1). They are distinct answers; SGG already preserves this distinction using grant_program within each section. Section B title forwarding remains a source-population obligation.",
+    "DAT business rules require an entry somewhere on the form except A-1-7…A-4-7, C-1-1…C-4-1 and E-1-1…E-4-1. On submission, blank activity titles become N/A according to the row-specific rule. These cross-field/submission rules are not represented as unconditional required fields.",
+    "Amounts are signed decimals. The imported Global-V1.0 DecimalMin1Max14Places2Type has totalDigits14 and fractionDigits2. multipleOf0.01 records precision; the harness does not certify totalDigits or a JavaScript-number representation. Decide numeric representation and boundary tests before implementation.",
+    "Preserve the DAT numeric value bounds, including its different negative minima for editable amounts (-99999999999.99) and many calculated outputs (-999999999999.99), with maximum999999999999.99. The XSD only limits totalDigits14/fractionDigits2; these stricter DAT bounds are individually recorded source discrepancies for review, not silently broadened.",
+    "Preserve each DAT field's population and overwrite rules. Section A activity new/revised totals (A-1-7 through A-4-7) are calculated defaults that may be overwritten, including for supplemental grants and changes to existing awards. Totals explicitly marked Calculated, read-only remain generated outputs. Keep the source formulas and validation messages for sections A through E; optionality in XSD does not decide editability or ownership.",
+    "Wire assembly must supply glob:FormVersionIdentifier for edition1.0, fixed programType Non-Construction and fixed coreSchemaVersion1.0. These are document metadata/constants, not additional applicant questions. The XSD schema version is1.0; its instance FormVersionIdentifier is not fixed by XSD.",
+    "Contextual field labels replace PDF-dependent row numbers, dollar signs and column positions. Every differing source value is recorded individually for review; this is a proposed presentation choice, not approval.",
+    "Current SGG comparison: api/src/form_schema/forms/sf424a/1/0/form_json.py and its validation/XML tests at HHS main1858f9a6. SGG uses decimal strings, shared activity rows, conditional title requirements, a completion confirmation and specialized budget widgets. DAT/XSD source agreement does not establish parity with those application behaviors. See forms/docs/sf424a-plan-review.md for the full answer-path mapping.",
+    "The Data tab contains authored illustrative answers before any TypeSpec definition exists. Money is shown as decimal strings, following SGG to avoid binary floating point rounding; exact representation, DAT bounds and arithmetic still need implementation validation. These samples are not emitted schemas or validated submissions.",
+    "DAT B-00-3 through B-00-6 also describe overwritable program titles, while current SGG shares activity_line_items[].activity_title between A and B. This is a concrete source-versus-existing-behavior question, not a casing or layout difference. The plan preserves separate answers pending explicit reconciliation."
+  ],
+  "description": "Budget summary, cost categories, non-federal resources, cash needs, future funding and budget explanations. Four activity rows in each section retain their distinct source meaning; calculated outputs and defaults are explicit planning obligations.",
+  "omb_number": "4040-0006",
+  "expiration_date": "06/30/2028",
+  "xsd_root": "BudgetInformation",
+  "risks": [
+    "Existing SGG is the compatibility baseline. Reconcile the separate section lists against activity_line_items[] before TypeSpec. SGG shares the A/B title, but DAT B-00-3 through B-00-6 say section B titles may be overwritten. Resolve that source-versus-SGG conflict explicitly rather than silently coupling distinct source answers; also verify conditional requirements, completion behavior, calculated values and layout.",
+    "Review the proposed section/array boundaries and label context with Billy before form definition work.",
+    "Confirm the cross-field minimum-entry and N/A-on-submission rules, calculation ownership and rounding in implementation; static comparison cannot execute them.",
+    "Do not reuse a non-negative currency question without preserving signed values and the source totalDigits14/fractionDigits2 constraints.",
+    "Finite DAT slot annotations and explicit XSD-root selection are a proposed extension to the maintained review harness and require architectural review."
+  ],
+  "examples": [
+    {
+      "label": "Small starting example",
+      "description": "One source-plan answer, without computed or submission-owned values. This is not the minimum valid SGG submission: SGG also requires its own activity structure and completion confirmation.",
+      "data": {
+        "summary": {
+          "activities": [
+            {
+              "activity_title": "Community outreach"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "Two-activity budget",
+      "description": "Synthetic values covering every proposed answer path. Amounts are proposed as decimal strings, following existing SGG practice. Totals are supplied for illustration, not calculated by the plan viewer.",
+      "data": {
+        "summary": {
+          "activities": [
+            {
+              "activity_title": "Community outreach",
+              "assistance_listing": "93.123",
+              "estimated_federal": "0.00",
+              "estimated_non_federal": "0.00",
+              "new_federal": "12000.00",
+              "new_non_federal": "3000.00",
+              "new_total": "15000.00"
+            },
+            {
+              "activity_title": "Training",
+              "assistance_listing": "93.123",
+              "estimated_federal": "0.00",
+              "estimated_non_federal": "0.00",
+              "new_federal": "8000.00",
+              "new_non_federal": "2000.00",
+              "new_total": "10000.00"
+            }
+          ],
+          "totals": {
+            "estimated_federal": "0.00",
+            "estimated_non_federal": "0.00",
+            "new_federal": "20000.00",
+            "new_non_federal": "5000.00",
+            "new_total": "25000.00"
+          }
+        },
+        "categories": {
+          "activities": [
+            {
+              "activity_title": "Community outreach",
+              "personnel": "8000.00",
+              "fringe_benefits": "2000.00",
+              "travel": "1000.00",
+              "equipment": "0.00",
+              "supplies": "500.00",
+              "contractual": "1000.00",
+              "construction": "0.00",
+              "other": "500.00",
+              "direct_total": "13000.00",
+              "indirect": "2000.00",
+              "total": "15000.00",
+              "program_income": "0.00"
+            },
+            {
+              "activity_title": "Training",
+              "personnel": "5000.00",
+              "fringe_benefits": "1000.00",
+              "travel": "500.00",
+              "equipment": "500.00",
+              "supplies": "500.00",
+              "contractual": "500.00",
+              "construction": "0.00",
+              "other": "500.00",
+              "direct_total": "8500.00",
+              "indirect": "1500.00",
+              "total": "10000.00",
+              "program_income": "0.00"
+            }
+          ],
+          "totals": {
+            "personnel": "13000.00",
+            "fringe_benefits": "3000.00",
+            "travel": "1500.00",
+            "equipment": "500.00",
+            "supplies": "1000.00",
+            "contractual": "1500.00",
+            "construction": "0.00",
+            "other": "1000.00",
+            "direct_total": "21500.00",
+            "indirect": "3500.00",
+            "total": "25000.00",
+            "program_income": "0.00"
+          }
+        },
+        "resources": {
+          "activities": [
+            {
+              "activity_title": "Community outreach",
+              "applicant": "2000.00",
+              "state": "1000.00",
+              "other_sources": "0.00",
+              "total": "3000.00"
+            },
+            {
+              "activity_title": "Training",
+              "applicant": "1000.00",
+              "state": "1000.00",
+              "other_sources": "0.00",
+              "total": "2000.00"
+            }
+          ],
+          "totals": {
+            "applicant": "3000.00",
+            "state": "2000.00",
+            "other_sources": "0.00",
+            "total": "5000.00"
+          }
+        },
+        "cash_needs": {
+          "first_year": {
+            "federal": "20000.00",
+            "non_federal": "5000.00",
+            "total": "25000.00"
+          },
+          "quarter1": {
+            "federal": "5000.00",
+            "non_federal": "1250.00",
+            "total": "6250.00"
+          },
+          "quarter2": {
+            "federal": "5000.00",
+            "non_federal": "1250.00",
+            "total": "6250.00"
+          },
+          "quarter3": {
+            "federal": "5000.00",
+            "non_federal": "1250.00",
+            "total": "6250.00"
+          },
+          "quarter4": {
+            "federal": "5000.00",
+            "non_federal": "1250.00",
+            "total": "6250.00"
+          }
+        },
+        "future_funds": {
+          "activities": [
+            {
+              "activity_title": "Community outreach",
+              "year1": "13000.00",
+              "year2": "14000.00",
+              "year3": "15000.00",
+              "year4": "16000.00"
+            },
+            {
+              "activity_title": "Training",
+              "year1": "9000.00",
+              "year2": "10000.00",
+              "year3": "11000.00",
+              "year4": "12000.00"
+            }
+          ],
+          "totals": {
+            "year1": "22000.00",
+            "year2": "24000.00",
+            "year3": "26000.00",
+            "year4": "28000.00"
+          }
+        },
+        "other_information": {
+          "direct_charges": "Personnel, travel and program delivery.",
+          "indirect_charges": "Approved negotiated indirect cost rate.",
+          "remarks": "Illustrative two-activity budget."
+        }
+      }
+    },
+    {
+      "label": "Section-specific titles and an overridden total",
+      "description": "The DAT allows section B/C/E titles to differ from A; existing SGG shares the A/B title, which needs explicit reconciliation. The signed amount and applicant-supplied total illustrate separate numeric and calculation obligations, not executed rules.",
+      "data": {
+        "summary": {
+          "activities": [
+            {
+              "activity_title": "Supplemental award",
+              "new_federal": "0.00",
+              "new_non_federal": "0.00",
+              "new_total": "999999.00",
+              "estimated_federal": "-250.00"
+            }
+          ],
+          "totals": {
+            "new_total": "999999.00"
+          }
+        },
+        "categories": {
+          "activities": [
+            {
+              "activity_title": "Supplemental program costs"
+            }
+          ]
+        },
+        "resources": {
+          "activities": [
+            {
+              "activity_title": "Local matching program"
+            }
+          ]
+        },
+        "future_funds": {
+          "activities": [
+            {
+              "activity_title": "Continuation program"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "sgg_form_id": "sf424a",
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/1858f9a6f7052b101346eada88c9fba95b1ef208/api/tests/src/form_schema/forms/test_sf424a.py",
+    "examples": [
+      {
+        "label": "Existing SGG minimal payload",
+        "description": "The exact minimal_valid_json_v1_0 fixture at the linked revision. It includes the application completion confirmation.",
+        "data": {
+          "activity_line_items": [
+            {
+              "activity_title": "My full activity"
+            }
+          ],
+          "confirmation": true
+        }
+      },
+      {
+        "label": "Existing SGG populated fixture",
+        "description": "The exact full_valid_json_v1_0 fixture at the linked revision. Its zero amounts expose the existing answer structure; the fixture is not a realistic budget scenario.",
+        "data": {
+          "activity_line_items": [
+            {
+              "activity_title": "My full activity",
+              "assistance_listing_number": "12.345",
+              "budget_summary": {
+                "federal_estimated_unobligated_amount": "0.00",
+                "non_federal_estimated_unobligated_amount": "0.00",
+                "federal_new_or_revised_amount": "0.00",
+                "non_federal_new_or_revised_amount": "0.00",
+                "total_amount": "0.00"
+              },
+              "budget_categories": {
+                "personnel_amount": "0.00",
+                "fringe_benefits_amount": "0.00",
+                "travel_amount": "0.00",
+                "equipment_amount": "0.00",
+                "supplies_amount": "0.00",
+                "contractual_amount": "0.00",
+                "construction_amount": "0.00",
+                "other_amount": "0.00",
+                "total_direct_charge_amount": "0.00",
+                "total_indirect_charge_amount": "0.00",
+                "total_amount": "0.00",
+                "program_income_amount": "0.00"
+              },
+              "non_federal_resources": {
+                "grant_program": "My full activity",
+                "applicant_amount": "0.00",
+                "state_amount": "0.00",
+                "other_amount": "0.00",
+                "total_amount": "0.00"
+              },
+              "federal_fund_estimates": {
+                "grant_program": "My full activity",
+                "first_year_amount": "0.00",
+                "second_year_amount": "0.00",
+                "third_year_amount": "0.00",
+                "fourth_year_amount": "0.00"
+              }
+            }
+          ],
+          "total_budget_summary": {
+            "federal_estimated_unobligated_amount": "0.00",
+            "non_federal_estimated_unobligated_amount": "0.00",
+            "federal_new_or_revised_amount": "0.00",
+            "non_federal_new_or_revised_amount": "0.00",
+            "total_amount": "0.00"
+          },
+          "total_budget_categories": {
+            "personnel_amount": "0.00",
+            "fringe_benefits_amount": "0.00",
+            "travel_amount": "0.00",
+            "equipment_amount": "0.00",
+            "supplies_amount": "0.00",
+            "contractual_amount": "0.00",
+            "construction_amount": "0.00",
+            "other_amount": "0.00",
+            "total_direct_charge_amount": "0.00",
+            "total_indirect_charge_amount": "0.00",
+            "total_amount": "0.00",
+            "program_income_amount": "0.00"
+          },
+          "total_non_federal_resources": {
+            "applicant_amount": "0.00",
+            "state_amount": "0.00",
+            "other_amount": "0.00",
+            "total_amount": "0.00"
+          },
+          "forecasted_cash_needs": {
+            "federal_forecasted_cash_needs": {
+              "first_quarter_amount": "0.00",
+              "second_quarter_amount": "0.00",
+              "third_quarter_amount": "0.00",
+              "fourth_quarter_amount": "0.00",
+              "total_amount": "0.00"
+            },
+            "non_federal_forecasted_cash_needs": {
+              "first_quarter_amount": "0.00",
+              "second_quarter_amount": "0.00",
+              "third_quarter_amount": "0.00",
+              "fourth_quarter_amount": "0.00",
+              "total_amount": "0.00"
+            },
+            "total_forecasted_cash_needs": {
+              "first_quarter_amount": "0.00",
+              "second_quarter_amount": "0.00",
+              "third_quarter_amount": "0.00",
+              "fourth_quarter_amount": "0.00",
+              "total_amount": "0.00"
+            }
+          },
+          "total_federal_fund_estimates": {
+            "first_year_amount": "0.00",
+            "second_year_amount": "0.00",
+            "third_year_amount": "0.00",
+            "fourth_year_amount": "0.00"
+          },
+          "direct_charges_explanation": "",
+          "indirect_charges_explanation": "",
+          "remarks": "",
+          "confirmation": true
+        }
+      }
+    ]
+  }
 }
