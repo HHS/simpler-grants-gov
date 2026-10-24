@@ -1,5 +1,6 @@
 import {
   isStarted,
+  previewText,
   summaryRows,
   type SummaryItem,
   type SummarySection,
@@ -16,19 +17,31 @@ export default function SummaryList({
 }) {
   if (!isStarted(sections.flatMap((section) => section.items)))
     return <p className="collapsible__not-started">Not started</p>;
+  const summaries = sections.map(({ label, items }) => ({
+    label,
+    rows: summaryRows(items),
+  }));
+  const shortened = summaries.some((section) =>
+    section.rows.some((row) => previewText(row.value, 240) !== row.value),
+  );
   return (
     <div className="collapsible__summary">
-      {sections.map((section, index) => (
+      {shortened && (
+        <p className="collapsible__summary-hint">
+          Long answers are shortened. Open the entry to read them in full.
+        </p>
+      )}
+      {summaries.map((section, index) => (
         <div key={index} className="collapsible__summary-section">
           {section.label && (
             <p className="collapsible__summary-heading">{section.label}</p>
           )}
           <dl className="collapsible__summary-list">
-            {summaryRows(section.items).map((row, rowIndex) => (
+            {section.rows.map((row, rowIndex) => (
               <div key={rowIndex} className="collapsible__summary-row">
                 <dt>{row.label}</dt>
                 <dd className={`collapsible__value--${row.status}`}>
-                  {row.value}
+                  {previewText(row.value, 240)}
                 </dd>
               </div>
             ))}

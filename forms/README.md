@@ -73,14 +73,13 @@ as supplied; validation still owns their allowed contents.
 
 ### Repeating-list drafts
 
-The preview forwards the existing list change callback for add, delete and child edits from
-the native FieldList and the library's CollapsibleFieldList. Each owns its draft arrays; its
-bubbling DOM events do not become a second writer. Collapsing or expanding an entry changes
-only the view. Ordinary fields retain native FormData collection.
-Sibling edits retain explicitly callback-owned lists, including blank draft rows; external
-Clear/sample resets replace their context. JSON Forms reads current parent data in this live
-preview mode. No mapper, row-identity policy, widget copy or submission service is introduced.
+The library's existing CollapsibleFieldList reports add, delete and child edits through its
+preview callback. That component owns its draft arrays; its bubbling DOM events do not become
+another writer. Collapsing or expanding changes only the view. Ordinary fields retain native
+FormData collection, and sibling edits retain explicitly callback-owned lists. Clear/sample
+resets replace their context; JSON Forms reads current parent data in this live preview mode.
 
-The collapsible list is a library preview component, not a replacement for the SGG widget.
-It retains the same answer paths and existing child widgets. This callback repair does not
-resolve the native FieldList identity defect tracked in #12925 or change a form's widget choice.
+Long answers have bounded display previews and an explicit hint. Opening an entry exposes the
+full original answers in the existing child widgets. No answer value, schema constraint or XML
+binding is shortened. The component remains a library preview capability; SGG must explicitly
+support it before production adoption. This does not repair the native FieldList defect #12925.

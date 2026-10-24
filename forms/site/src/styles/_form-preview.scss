@@ -116,6 +116,12 @@
   }
 }
 
+.collapsible__summary-hint {
+  margin: 0 0 units(1);
+  @include u-font("sans", "3xs");
+  color: color("base-dark");
+}
+
 .collapsible__summary-section + .collapsible__summary-section {
   margin-top: units("105");
 }
@@ -149,11 +155,9 @@
   dt {
     font-weight: 600;
     color: color("base-dark");
-    white-space: nowrap;
-
-    @media (max-width: 640px) {
-      white-space: normal;
-    }
+    max-width: 24rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   dd {

@@ -137,6 +137,34 @@ describe("collapsible list draft ownership", () => {
     expect(report).not.toHaveBeenCalled();
   });
 
+  it("retains the full long answer when a shortened entry is reopened", async () => {
+    const answer = "X".repeat(4000);
+    await click("Edit");
+    const input = host.querySelector<HTMLInputElement>(
+      'input[name="people[0]--name"]',
+    )!;
+    await act(async () => {
+      input.value = answer;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await click("Collapse");
+    expect(
+      host.querySelector("h2 button,h3 button,h4 button,h5 button,h6 button")!
+        .textContent!.length,
+    ).toBeLessThanOrEqual(81);
+    expect(report).toHaveBeenLastCalledWith("people", [
+      { name: answer },
+      { name: "B" },
+    ]);
+    report.mockClear();
+    await click("Edit");
+    expect(
+      host.querySelector<HTMLInputElement>('input[name="people[0]--name"]')!
+        .value,
+    ).toBe(answer);
+    expect(report).not.toHaveBeenCalled();
+  });
+
   it("keeps the source cardinality controls after repeated delete/add cycles", async () => {
     await click("Delete");
     expect(buttons("Delete")[0].disabled).toBe(true);

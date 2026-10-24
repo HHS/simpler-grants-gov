@@ -150,6 +150,17 @@ export function displayValue(item: SummaryItem): string | undefined {
   return Array.isArray(value) ? value.map(labelOf).join(", ") : labelOf(value);
 }
 
+/** A bounded display excerpt; the original answer remains available when the entry opens. */
+export function previewText(value: string, limit: number): string {
+  const characters = Array.from(value);
+  return characters.length <= limit
+    ? value
+    : characters
+        .slice(0, limit - 1)
+        .join("")
+        .trimEnd() + "…";
+}
+
 /** Every answer of a collapsed section: blanks read "—", or "Missing" when required. */
 export function summaryRows(items: readonly SummaryItem[]): SummaryRow[] {
   return items.map((item) => {
@@ -178,5 +189,8 @@ export function entryTitle(
     .map(displayValue)
     .filter(Boolean)
     .join(" ");
-  return name || items.map(displayValue).find(Boolean) || fallback;
+  return previewText(
+    name || items.map(displayValue).find(Boolean) || fallback,
+    80,
+  );
 }

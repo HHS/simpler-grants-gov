@@ -95,6 +95,26 @@ describe("ED Evidence source and actual collector contract", () => {
     expect(shapeFormData(native, formSchema)).toEqual(data);
   });
 
+  it("selects the existing library list for citations without changing their data shape", () => {
+    const controls = (node: unknown): Record<string, unknown>[] => {
+      if (Array.isArray(node)) return node.flatMap(controls);
+      if (!node || typeof node !== "object") return [];
+      const value = node as Record<string, unknown>;
+      return [
+        ...(typeof value.scope === "string" ? [value] : []),
+        ...Object.values(value).flatMap(controls),
+      ];
+    };
+    expect(
+      controls(spec.uischema).find(
+        (control) => control.scope === "#/properties/citations",
+      ),
+    ).toMatchObject({
+      options: { widget: "CollapsibleFieldList" },
+    });
+    expect(spec.example?.citations).toBeInstanceOf(Array);
+  });
+
   it("puts source level-dependent study guidance into the actual UI", () => {
     const text = JSON.stringify(spec.uischema);
     expect(text).toContain("Demonstrates a Rationale");

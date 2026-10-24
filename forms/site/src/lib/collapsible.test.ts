@@ -6,6 +6,7 @@ import {
   entryFields,
   entryLayout,
   entryTitle,
+  previewText,
   scopePath,
   summaryRows,
   summarySections,
@@ -178,10 +179,30 @@ describe("entryTitle", () => {
     ).toBe("Dr. Ana Ruiz");
   });
 
+  it("keeps a source-valid long answer out of the entry heading without altering it", () => {
+    const answer = "A".repeat(4000);
+    const fields = [item(["citation"], answer)];
+    const title = entryTitle(fields, "Study 1");
+    expect(Array.from(title).length).toBeLessThanOrEqual(80);
+    expect(title.endsWith("…")).toBe(true);
+    expect(fields[0].value).toBe(answer);
+  });
+
   it("falls back to the first answer, then the number", () => {
     expect(entryTitle([item(["project_role"], "PI")], "Contact 1")).toBe("PI");
     expect(entryTitle([item(["project_role"], "")], "Contact 1")).toBe(
       "Contact 1",
     );
+  });
+});
+
+describe("previewText", () => {
+  it("preserves short values and exact boundaries", () => {
+    expect(previewText("x".repeat(80), 80)).toBe("x".repeat(80));
+    expect(previewText("Short", 80)).toBe("Short");
+  });
+
+  it("does not split a Unicode surrogate pair in an excerpt", () => {
+    expect(previewText("😀".repeat(81), 80)).toBe("😀".repeat(79) + "…");
   });
 });

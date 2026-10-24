@@ -419,7 +419,7 @@ export function CollapsibleListControl({
       }
     />
   );
-  // The list's callback owns its values, as for the native FieldList adapter.
+  // The list's callback owns its values; bubbling edits must not create another writer.
   return context.onFieldListChange ? (
     <div
       onInput={(event) => event.stopPropagation()}

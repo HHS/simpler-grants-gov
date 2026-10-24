@@ -83,7 +83,7 @@ model Evidence {
   levelOfEvidence: EvidenceLevel;
 
   @UI.label("Citation and relevance")
-  @UI.widget(Rendering.Widget.FieldList)
+  @UI.widget(Rendering.Widget.CollapsibleFieldList)
   @minItems(1)
   @maxItems(100)
   citations: Citation[];

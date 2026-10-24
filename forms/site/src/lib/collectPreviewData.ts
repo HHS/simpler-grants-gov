@@ -47,7 +47,7 @@ export function collectPreviewData(
     context,
     shapeFormData(data, schema),
   );
-  // Native and library collapsible lists own draft rows through their change callback.
+  // Library collapsible lists own draft rows through their change callback.
   // In particular, blank rows and deleted rows must survive a sibling's native edit.
   if (object(collected) && object(context))
     for (const name of widgetLists ?? [])
