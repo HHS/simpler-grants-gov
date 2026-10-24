@@ -27,6 +27,10 @@ version string, so the separate registration-identity check guards the proposed1
 
 ## Review
 
+The outline separates the full declaration from **Completion values**, so reviewers can reach
+the four controls directly. Both remain visible in source order. This is a layout group only:
+answer paths, requiredness, ownership, examples and XML mappings are unchanged.
+
 Run normal fresh parity and site/type checks. Load synthetic samples and inspect live JSON.
 Individual name/title are editable; signature/date are disabled and retained after an edit.
 Clear removes the context; it does not re-create signed values. Empty/overlong required values

@@ -57,6 +57,34 @@ describe.each(FORMS)("$0 completion contract", (slug) => {
     expect(examples[0]).not.toEqual(examples[1]);
   });
 
+  it("gives completion values a direct outline target after the declaration", () => {
+    const ui = loadUiSchema(slug) as {
+      elements: {
+        type: string;
+        label?: string;
+        options?: { description?: string };
+        elements: { type: string; scope?: string }[];
+      }[];
+    };
+    expect(ui.elements).toHaveLength(2);
+    const [declaration, completion] = ui.elements;
+    expect(declaration.type).toBe("Group");
+    expect(declaration.options?.description).toContain(
+      "As the duly authorized representative",
+    );
+    expect(declaration.elements).toEqual([]);
+    expect(completion).toMatchObject({
+      type: "Group",
+      label: "Completion values",
+    });
+    expect(completion.elements.map((field) => field.scope)).toEqual([
+      "#/properties/authorized_representative/properties/signature",
+      "#/properties/authorized_representative/properties/title",
+      "#/properties/applicant_organization_name",
+      "#/properties/submitted_date",
+    ]);
+  });
+
   it("keeps version metadata outside applicant data and consistent with the registered edition", () => {
     expect(rootProperties.sort()).toEqual([
       "applicant_organization_name",
