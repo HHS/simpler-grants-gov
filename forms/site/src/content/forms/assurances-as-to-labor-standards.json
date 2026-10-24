@@ -1,12 +1,72 @@
 {
   "title": "ASSURANCES AS TO LABOR STANDARDS",
   "slug": "assurances-as-to-labor-standards",
-  "status": "backlog",
+  "status": "ready",
   "family": ["SF-424 Short"],
   "category": "Certification & Assurance Forms",
   "apps_count": 372,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/700",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/NEH_Labor_Standards-V1.0_F700.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/NEH_Labor_Standards-V1.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/NEH_Labor_Standards-V1.0_F700.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/NEH_Labor_Standards-V1.0_F700.xls",
+  "spec_id": "assurances-as-to-labor-standards",
+  "omb_number": "3136-0134",
+  "expiration_date": "10/31/2027",
+  "description": "Institutional assurances about labor compensation, working conditions and related records under the National Foundation on the Arts and the Humanities Act.",
+  "widgets": ["TextWidget"],
+  "notes": [
+    "Organization comes from the SF-424; representative signature and date are populated on submission. Examples are explicit synthetic completed-context values.",
+    "The institution-name placeholder is represented as the source organization field; no generic acceptance checkbox, person-name decomposition or shared legal-policy abstraction is introduced.",
+    "The source institution-name blank is represented by the named organization field below the declaration. The display text identifies that relationship without adding an answer or changing the labor obligations."
+  ],
+  "risks": [
+    "Authentic cover/submission context, named human review and application delivery remain integration responsibilities."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Assurances as to Labor Standards",
+      "children": [
+        {
+          "kind": "field",
+          "label": "(Institution name)",
+          "dat_field": "01-1",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "This is the Applicant Information Legal Name from the SF-424.",
+          "constraints": "minLength 1, maxLength 60",
+          "json_path": "applicant_organization_name",
+          "xml_path": "NEH_Labor_Standards:ApplicantOrganizationName",
+          "pre_populated": "Application cover sheet; non-editable completion context."
+        },
+        {
+          "kind": "field",
+          "label": "(Signature of Institutional Grants Administrator or AOR)",
+          "dat_field": "03-0",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed on submission to Grants.gov.",
+          "constraints": "minLength 1, maxLength 144",
+          "json_path": "representative_name",
+          "xml_path": "NEH_Labor_Standards:RepresentativeName",
+          "post_populated": "Grants.gov submission; synthetic completed-context examples only."
+        },
+        {
+          "kind": "field",
+          "label": "(Date)",
+          "dat_field": "03-1",
+          "required": true,
+          "type": "Date",
+          "widget": "TextWidget",
+          "help_text": "Completed on submission to Grants.gov.",
+          "constraints": "format date",
+          "json_path": "submitted_date",
+          "xml_path": "NEH_Labor_Standards:SubmittedDate",
+          "post_populated": "Grants.gov submission; synthetic completed-context examples only."
+        }
+      ]
+    }
+  ]
 }

@@ -1,12 +1,142 @@
 {
   "title": "USDA AD-3030",
   "slug": "usda-ad-3030",
-  "status": "backlog",
+  "status": "ready",
   "family": ["SF-424", "R&R"],
-  "category": "Uncategorized",
+  "category": "Certification & Assurance Forms",
   "apps_count": 2117,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/582",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/AD_3030_2_0-V2.0_F582.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AD_3030_2_0-V2.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AD_3030_2_0-V2.0_F582.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AD_3030_2_0-V2.0_F582.xls",
+  "spec_id": "usda-ad-3030",
+  "omb_number": "0505-0025",
+  "expiration_date": "09/30/2025",
+  "description": "Representations regarding felony conviction and tax delinquent status for corporate applicants. No automated eligibility determination is made.",
+  "widgets": ["TextWidget", "TextAreaWidget", "RadioWidget"],
+  "notes": [
+    "The pinned DAT/PDF states OMB expiration September 30, 2025; confirm current official metadata before production rather than inventing a renewal.",
+    "Only corporations need this form, according to source instructions. Applicability is package context, not an invented form answer.",
+    "TaxIDNumber is the last four digits, stored as text with leading zeros. The DAT digits-only rule is stricter than the source XSD length-only restriction and is explicitly retained.",
+    "ApplicantAddress remains the source whole-text answer, and ApplicantName retains its 140-character contract instead of being forced into OrgName60.",
+    "Signature/date and title are synthetic external context in examples; no signing, authentic prepopulation or submission is claimed.",
+    "Date display is an explicit library presentation proposal: ISO JSON/XML date instead of the DAT MM-DD-YYYY display."
+  ],
+  "risks": [
+    "Current OMB validity, package applicability, source-owned context and date presentation need actual integration/review. Agent verification is not human acceptance.",
+    "The DAT requires clickable USDA complaint-page and mailto links. Their exact destinations are preserved as text in the layout; the current library/SGG description renderer emits plain paragraphs. Clickable links remain an explicit presentation integration gap."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Part A \u2014 Applicant",
+      "children": [
+        {
+          "kind": "field",
+          "label": "1. APPLICANT'S NAME",
+          "dat_field": "1-05",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the Applicant's Name. This field is required.",
+          "constraints": "minLength 1, maxLength 140",
+          "json_path": "applicant_name",
+          "xml_path": "AD_3030_2_0:ApplicantName"
+        },
+        {
+          "kind": "field",
+          "label": "2. APPLICANT'S ADDRESS (Including Zip Code)",
+          "dat_field": "1-06",
+          "required": true,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "help_text": "Enter the Applicant's Address including Zip Code. This field is required.",
+          "constraints": "minLength 1, maxLength 300",
+          "json_path": "applicant_address",
+          "xml_path": "AD_3030_2_0:ApplicantAddress"
+        },
+        {
+          "kind": "field",
+          "label": "3. TAX ID NO. (Last 4 digits)",
+          "dat_field": "1-07",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the last four digits of the Tax ID Number. This field is required.",
+          "constraints": "minLength 4, maxLength 4, pattern ^[0-9]{4}$",
+          "json_path": "tax_id_number",
+          "xml_path": "AD_3030_2_0:TaxIDNumber"
+        },
+        {
+          "kind": "field",
+          "label": "4A. Has the Applicant been convicted of a felony criminal violation under any Federal law in the 24 months preceding the date of application?",
+          "dat_field": "1-08",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "One selection is required.",
+          "constraints": "YesNoDataType enumeration",
+          "json_path": "applicant_felony",
+          "xml_path": "AD_3030_2_0:ApplicantFelony"
+        },
+        {
+          "kind": "field",
+          "label": "4B. Does the Applicant have any unpaid Federal tax liability that has been assessed, for which all judicial and administrative remedies have been exhausted or have lapsed, and that is not being paid in a timely manner pursuant to an agreement with the authority responsible for collecting the tax liability?",
+          "dat_field": "1-09",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "One selection is required.",
+          "constraints": "YesNoDataType enumeration",
+          "json_path": "unpaid_federal_tax",
+          "xml_path": "AD_3030_2_0:UnpaidFederalTax"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Part B \u2014 Signature",
+      "children": [
+        {
+          "kind": "field",
+          "label": "5A. APPLICANT'S SIGNATURE (BY)",
+          "dat_field": "1-12",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed by Grants.gov upon submission. This is a required field.",
+          "constraints": "minLength 1, maxLength 144",
+          "json_path": "aor_signature",
+          "xml_path": "AD_3030_2_0:AORSignature",
+          "post_populated": "Grants.gov submission; synthetic completed-context examples only."
+        },
+        {
+          "kind": "field",
+          "label": "5B. TITLE/RELATIONSHIP OF THE INDIVIDUAL IF SIGNING IN A REPRESENTATIVE CAPACITY",
+          "dat_field": "1-13",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the Application cover sheet. This is a required field.",
+          "constraints": "minLength 1, maxLength 45",
+          "json_path": "title",
+          "xml_path": "AD_3030_2_0:Title",
+          "pre_populated": "Application cover sheet; non-editable completion context."
+        },
+        {
+          "kind": "field",
+          "label": "5C. DATE SIGNED (MM-DD-YYYY)",
+          "dat_field": "1-14",
+          "required": true,
+          "type": "Date",
+          "widget": "TextWidget",
+          "help_text": "Completed by Grants.gov upon submission. This is a required field.",
+          "constraints": "format date",
+          "json_path": "date_signed",
+          "xml_path": "AD_3030_2_0:DateSigned",
+          "post_populated": "Grants.gov submission; synthetic completed-context examples only."
+        }
+      ]
+    }
+  ]
 }

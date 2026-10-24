@@ -1,12 +1,183 @@
 {
   "title": "USDA AD-1047",
   "slug": "usda-ad-1047",
-  "status": "backlog",
+  "status": "ready",
   "family": ["SF-424", "R&R"],
-  "category": "Key Personnel & Contact Forms",
+  "category": "Certification & Assurance Forms",
   "apps_count": 333,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/545",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/AD_1047-V1.0_F545.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AD_1047-V1.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AD_1047-V1.0_F545.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AD_1047-V1.0_F545.xls",
+  "spec_id": "usda-ad-1047",
+  "omb_number": "0505-0027",
+  "expiration_date": "09/30/2025",
+  "description": "Certification regarding debarment, suspension and other responsibility matters for primary covered transactions. Cover and submission examples are synthetic context.",
+  "widgets": ["TextWidget"],
+  "notes": [
+    "The pinned DAT and PDF state OMB expiration September 30, 2025; current metadata must be confirmed before production. The source date is preserved rather than silently renewed.",
+    "Organization, representative name/title and submission-owned signature/date are supplied as explicit illustrative context. Read-only presentation is not authentication or a signing service.",
+    "Date display differs from the DAT MM-DD-YYYY instruction: the library candidate currently displays its ISO JSON/XML date. This presentation difference remains visible for review.",
+    "If unable to certify, the source requires an explanation with the proposal/application package. The form XSD has no explanation/attachment field; this package-level instruction is preserved without inventing a new answer field."
+  ],
+  "risks": [
+    "Application integration must supply authentic cover/submission context and a mechanism for the explanation when needed; neither is implemented by this definition.",
+    "Current OMB validity and source presentation choices require review; agent checks do not establish human acceptance.",
+    "The DAT requires clickable USDA complaint-page and mailto links. Their exact destinations are preserved as text in the layout; the current library/SGG description renderer emits plain paragraphs. Clickable links remain an explicit presentation integration gap."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Certification",
+      "children": [
+        {
+          "kind": "field",
+          "label": "ORGANIZATION NAME",
+          "dat_field": "3-1",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the Application cover sheet. This field is required.",
+          "constraints": "minLength 1, maxLength 60",
+          "json_path": "organization_name",
+          "xml_path": "AD_1047:OrganizationName",
+          "pre_populated": "Application cover sheet; non-editable completion context."
+        },
+        {
+          "kind": "field",
+          "label": "PR/AWARD NUMBER OR PROJECT NAME",
+          "dat_field": "3-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the PR/Award Number or Project Name. This field is required.",
+          "constraints": "minLength 1, maxLength 60",
+          "json_path": "project_name",
+          "xml_path": "AD_1047:ProjectName"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Authorized Representative",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Authorized Representative Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "4-2",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "constraints": "minLength 1, maxLength 10",
+              "json_path": "authorized_representative.prefix",
+              "xml_path": "AD_1047:AuthorizedRepresentative/globLib:PrefixName",
+              "pre_populated": "Application cover sheet; non-editable completion context."
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "4-3",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "constraints": "minLength 1, maxLength 35",
+              "json_path": "authorized_representative.first_name",
+              "xml_path": "AD_1047:AuthorizedRepresentative/globLib:FirstName",
+              "pre_populated": "Application cover sheet; non-editable completion context."
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "4-4",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "constraints": "minLength 1, maxLength 25",
+              "json_path": "authorized_representative.middle_name",
+              "xml_path": "AD_1047:AuthorizedRepresentative/globLib:MiddleName",
+              "pre_populated": "Application cover sheet; non-editable completion context."
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "4-5",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "constraints": "minLength 1, maxLength 60",
+              "json_path": "authorized_representative.last_name",
+              "xml_path": "AD_1047:AuthorizedRepresentative/globLib:LastName",
+              "pre_populated": "Application cover sheet; non-editable completion context."
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "4-6",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "constraints": "minLength 1, maxLength 10",
+              "json_path": "authorized_representative.suffix",
+              "xml_path": "AD_1047:AuthorizedRepresentative/globLib:SuffixName",
+              "pre_populated": "Application cover sheet; non-editable completion context."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "4-7",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the Application cover sheet. This field is required.",
+          "constraints": "minLength 1, maxLength 45",
+          "json_path": "title",
+          "xml_path": "AD_1047:Title",
+          "pre_populated": "Application cover sheet; non-editable completion context."
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Submission",
+      "children": [
+        {
+          "kind": "field",
+          "label": "SIGNATURE(S)",
+          "dat_field": "5-1",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed by Grants.gov upon submission. This field is required.",
+          "constraints": "minLength 1, maxLength 144",
+          "json_path": "aor_signature",
+          "xml_path": "AD_1047:AORSignature",
+          "post_populated": "Grants.gov submission; synthetic completed-context examples only."
+        },
+        {
+          "kind": "field",
+          "label": "DATE",
+          "dat_field": "5-2",
+          "required": true,
+          "type": "Date",
+          "widget": "TextWidget",
+          "help_text": "Completed by Grants.gov upon submission. This field is required.",
+          "constraints": "format date",
+          "json_path": "date_signed",
+          "xml_path": "AD_1047:DateSigned",
+          "post_populated": "Grants.gov submission; synthetic completed-context examples only."
+        }
+      ]
+    }
+  ]
 }

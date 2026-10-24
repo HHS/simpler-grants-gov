@@ -1,6 +1,8 @@
 // TEMPORARY COPY of the pending frontend/src/utils/applyForm/jsonFormsUiSchema.ts, so the
 // form library can render with the SGG form widgets before the JSON Forms renderer lands in
-// the frontend. Only import paths are changed. Delete src/vendor/sgg with #12695.
+// the frontend. Besides import paths, the library honors inherited read-only schema
+// annotations when expanding object controls. Reconcile that correction when deleting
+// src/vendor/sgg with #12695.
 import type {
   ControlElement,
   GroupLayout,
@@ -55,6 +57,22 @@ const schemaAt = (
   } catch {
     return undefined;
   }
+};
+
+/** A context-owned object also owns its descendant controls, even when laid out as leaves. */
+const readOnlyAt = (schema: RJSFSchema, definition: string): boolean => {
+  if (schema.readOnly === true) return true;
+  const segments = definition.split("/").slice(1);
+  for (let index = 0; index < segments.length; index++) {
+    // A properties map is not a schema; consume its property name before reading annotations.
+    if (segments[index] === "properties") index++;
+    if (
+      schemaAt(schema, `/${segments.slice(0, index + 1).join("/")}`)
+        ?.readOnly === true
+    )
+      return true;
+  }
+  return false;
 };
 
 const isObjectSchema = (schema: RJSFSchema): boolean =>
@@ -139,7 +157,10 @@ export const controlToNodes = (
     readonly?: boolean;
     widget?: WidgetTypes;
   };
-  const type = options.readonly ? "null" : "field";
+  const typeAt = (pointer: string) =>
+    options.readonly || readOnlyAt(schema, pointer)
+      ? ("null" as const)
+      : ("field" as const);
 
   const items = itemSchema(fieldSchema);
   if (items && isObjectSchema(items)) {
@@ -160,7 +181,7 @@ export const controlToNodes = (
         children: layout
           ? entryFields(layout, schema, itemsBase)
           : leafDefinitions(items, itemsBase).map((childDefinition) => ({
-              type,
+              type: typeAt(childDefinition),
               definition: childDefinition,
             })),
       },
@@ -169,14 +190,14 @@ export const controlToNodes = (
 
   if (isObjectSchema(fieldSchema)) {
     return leafDefinitions(fieldSchema, definition).map((leaf) => ({
-      type,
+      type: typeAt(leaf),
       definition: leaf,
     }));
   }
 
   return [
     {
-      type,
+      type: typeAt(definition),
       definition,
       ...(options.widget ? { widget: options.widget } : {}),
     },

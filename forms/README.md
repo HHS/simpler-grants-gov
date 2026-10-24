@@ -69,3 +69,6 @@ application prefill, authorization or signing. Editable arrays remain native-col
 No row-identity reconciliation or restoration of read-only descendants in those rows is claimed.
 Conditional ownership is outside this small preview adapter. Read-only objects are copied
 as supplied; validation still owns their allowed contents.
+
+Read-only object ancestors also disable descendant native controls, including controls
+laid out as separate leaves. This does not implement read-only FieldList add/remove/reorder actions.

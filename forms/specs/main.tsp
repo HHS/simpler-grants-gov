@@ -6,3 +6,7 @@ import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
 
 import "./forms/assurances-for-non-construction-programs-sf-424b-individual/index.tsp";
+
+import "./forms/usda-ad-1047/index.tsp";
+import "./forms/usda-ad-3030/index.tsp";
+import "./forms/assurances-as-to-labor-standards/index.tsp";
