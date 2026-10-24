@@ -1,7 +1,7 @@
 {
   "title": "Evidence Form",
   "slug": "evidence-form",
-  "status": "ready",
+  "status": "in_progress",
   "family": ["SF-424"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 2877,
@@ -86,6 +86,7 @@
     "ED_Evidence is the proposed unversioned registration short name, following maintained examples; source XML root/namespace ED_Evidence_2_0 and form version2.0 remain exact. Application registration still requires integration review."
   ],
   "risks": [
+    "Native FieldList delete/add/edit can overwrite a retained study (HHS/simpler-grants-gov#12925). Source/schema/XML checks pass, but this preview editing path is held until the shared widget correction is adopted. The library CollapsibleFieldList is not selected as a workaround.",
     "Required? versus business-rule/XSD completion conflict is explicitly recorded. Review complete-row treatment and blank-row omission before implementation.",
     "Choosing an evidence category and entering text does not verify scientific validity, applicability or funding eligibility. No such assessment is claimed.",
     "Existing component availability is not demonstrated runtime parity. Current source-policy questions and implementation ownership must remain visible in the review packet."
