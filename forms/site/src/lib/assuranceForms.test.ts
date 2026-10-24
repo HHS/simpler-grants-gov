@@ -68,14 +68,7 @@ describe.each(FORMS)("$0 completion contract", (slug) => {
         value && typeof value === "object" ? value.xml_transform : undefined;
       return rule && Object.hasOwn(rule, "static_value") ? [rule] : [];
     });
-    if (slug.endsWith("-r-r")) {
-      expect(initialized).toHaveLength(1);
-      expect(initialized[0]).toMatchObject({
-        target: "FormVersionIdentifier",
-        namespace: "glob",
-        static_value: identity.formVersion,
-      });
-    } else expect(initialized).toHaveLength(0);
+    expect(initialized).toHaveLength(0);
   });
 
   it("requires every DAT completion value instead of weakening to the optional wire schema", () => {
@@ -92,7 +85,7 @@ describe.each(FORMS)("$0 completion contract", (slug) => {
     }
   });
 
-  it("rejects empty or overlong signature, title and organization values", () => {
+  it("rejects empty or overlong signature, title and applicant-name values", () => {
     for (const [group, name, limit] of [
       ["authorized_representative", "signature", 144],
       ["authorized_representative", "title", 45],

@@ -1,12 +1,5 @@
 import { useStore } from "@nanostores/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import {
-  byFamily,
-  familiesOf,
-  familySlug,
-  NO_FAMILY,
-} from "../../lib/families";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   $allForms,
   $familyFilter,
@@ -17,6 +10,7 @@ import {
   $statusFilter,
   type FormSummary,
 } from "../../stores/formFilters";
+import { byFamily, familiesOf, familySlug, NO_FAMILY } from "../../lib/families";
 
 interface Props {
   forms: FormSummary[];
@@ -35,8 +29,7 @@ const STATUS_LABELS: Record<string, string> = {
 /** Sort statuses in workflow order, matching the dashboard's Kanban columns. */
 const byStatus = (a: string, b: string) => {
   const order = Object.keys(STATUS_LABELS);
-  const rank = (s: string) =>
-    order.includes(s) ? order.indexOf(s) : order.length;
+  const rank = (s: string) => (order.includes(s) ? order.indexOf(s) : order.length);
   return rank(a) - rank(b) || a.localeCompare(b);
 };
 
@@ -64,9 +57,7 @@ function writeUrlParams(state: {
   if (state.sortBy !== "apps_desc") params.set("sort", state.sortBy);
   if (state.groupBy !== "family") params.set("group", state.groupBy);
   const qs = params.toString();
-  const url = qs
-    ? `${window.location.pathname}?${qs}`
-    : window.location.pathname;
+  const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
   window.history.replaceState(null, "", url);
 }
 
@@ -122,8 +113,7 @@ export default function FormCatalog({ forms, title, subtitle }: Props) {
   const familyCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const f of forms) {
-      for (const family of familiesOf(f))
-        counts[family] = (counts[family] ?? 0) + 1;
+      for (const family of familiesOf(f)) counts[family] = (counts[family] ?? 0) + 1;
     }
     return counts;
   }, [forms]);
@@ -199,7 +189,9 @@ export default function FormCatalog({ forms, title, subtitle }: Props) {
             <label className="usa-checkbox__label" htmlFor={`status-${s}`}>
               <span className="filter-option">
                 <span>{STATUS_LABELS[s] ?? s}</span>
-                <span className="filter-count">{statusCounts[s] ?? 0}</span>
+                <span className="filter-count">
+                  {statusCounts[s] ?? 0}
+                </span>
               </span>
             </label>
           </div>
@@ -221,10 +213,15 @@ export default function FormCatalog({ forms, title, subtitle }: Props) {
                 toggleFilter(familyFilter, f, (v) => $familyFilter.set(v))
               }
             />
-            <label className="usa-checkbox__label" htmlFor={`family-${f}`}>
+            <label
+              className="usa-checkbox__label"
+              htmlFor={`family-${f}`}
+            >
               <span className="filter-option">
                 <span>{f}</span>
-                <span className="filter-count">{familyCounts[f] ?? 0}</span>
+                <span className="filter-count">
+                  {familyCounts[f] ?? 0}
+                </span>
               </span>
             </label>
           </div>
@@ -247,11 +244,7 @@ export default function FormCatalog({ forms, title, subtitle }: Props) {
             <h1 className="page-title">{title}</h1>
             <p className="page-subtitle">{subtitle}</p>
           </div>
-          <form
-            className="search-controls"
-            role="search"
-            onSubmit={(e) => e.preventDefault()}
-          >
+          <form className="search-controls" role="search" onSubmit={(e) => e.preventDefault()}>
             <div className="search-bar">
               <input
                 className="usa-input"
@@ -271,8 +264,7 @@ export default function FormCatalog({ forms, title, subtitle }: Props) {
               onClick={() => setFiltersOpen(true)}
             >
               Filters
-              {hasActiveFilters &&
-                ` (${statusFilter.length + familyFilter.length})`}
+              {hasActiveFilters && ` (${statusFilter.length + familyFilter.length})`}
             </button>
           </form>
 
@@ -284,9 +276,7 @@ export default function FormCatalog({ forms, title, subtitle }: Props) {
                   <button
                     className="filter-chip__remove"
                     type="button"
-                    onClick={() =>
-                      $statusFilter.set(statusFilter.filter((v) => v !== s))
-                    }
+                    onClick={() => $statusFilter.set(statusFilter.filter((v) => v !== s))}
                     aria-label={`Remove ${STATUS_LABELS[s] ?? s} filter`}
                   >
                     &times;
@@ -299,9 +289,7 @@ export default function FormCatalog({ forms, title, subtitle }: Props) {
                   <button
                     className="filter-chip__remove"
                     type="button"
-                    onClick={() =>
-                      $familyFilter.set(familyFilter.filter((v) => v !== f))
-                    }
+                    onClick={() => $familyFilter.set(familyFilter.filter((v) => v !== f))}
                     aria-label={`Remove ${f} filter`}
                   >
                     &times;
@@ -314,101 +302,95 @@ export default function FormCatalog({ forms, title, subtitle }: Props) {
       </section>
 
       <section className="grid-container search-results">
-        <div className="grid-row grid-gap-4">
-          <aside className="grid-col-12 tablet:grid-col-3">
-            <div className={`filter-panel${filtersOpen ? " is-open" : ""}`}>
-              <div className="filter-panel__inner">{filterContent}</div>
+      <div className="grid-row grid-gap-4">
+        <aside className="grid-col-12 tablet:grid-col-3">
+          <div className={`filter-panel${filtersOpen ? " is-open" : ""}`}>
+            <div className="filter-panel__inner">
+              {filterContent}
             </div>
-          </aside>
+          </div>
+        </aside>
 
-          <div className="grid-col-12 tablet:grid-col-9">
-            <div className="controls-bar">
-              <h2 className="results-count">
-                {filtered.length} {filtered.length === 1 ? "Form" : "Forms"}
-              </h2>
-              <div className="sort-group-controls">
-                <div className="control-group">
-                  <label className="control-label" htmlFor="sort-select">
-                    Sort by
-                  </label>
-                  <select
-                    id="sort-select"
-                    className="usa-select"
-                    value={sortBy}
-                    onChange={(e) =>
-                      $sortBy.set(
-                        e.target.value as "apps_desc" | "apps_asc" | "name",
-                      )
-                    }
-                  >
-                    <option value="apps_desc">Form uses (high to low)</option>
-                    <option value="apps_asc">Form uses (low to high)</option>
-                    <option value="name">Name A–Z</option>
-                  </select>
-                </div>
-                <div className="control-group">
-                  <label className="control-label" htmlFor="group-select">
-                    Group
-                  </label>
-                  <select
-                    id="group-select"
-                    className="usa-select"
-                    value={groupBy}
-                    onChange={(e) =>
-                      $groupBy.set(
-                        e.target.value as "family" | "status" | "none",
-                      )
-                    }
-                  >
-                    <option value="family">Family</option>
-                    <option value="status">Status</option>
-                    <option value="none">None</option>
-                  </select>
-                </div>
+        <div className="grid-col-12 tablet:grid-col-9">
+          <div className="controls-bar">
+            <h2 className="results-count">
+              {filtered.length} {filtered.length === 1 ? "Form" : "Forms"}
+            </h2>
+            <div className="sort-group-controls">
+              <div className="control-group">
+                <label className="control-label" htmlFor="sort-select">Sort by</label>
+                <select
+                  id="sort-select"
+                  className="usa-select"
+                  value={sortBy}
+                  onChange={(e) =>
+                    $sortBy.set(
+                      e.target.value as "apps_desc" | "apps_asc" | "name",
+                    )
+                  }
+                >
+                  <option value="apps_desc">Form uses (high to low)</option>
+                  <option value="apps_asc">Form uses (low to high)</option>
+                  <option value="name">Name A–Z</option>
+                </select>
+              </div>
+              <div className="control-group">
+                <label className="control-label" htmlFor="group-select">Group</label>
+                <select
+                  id="group-select"
+                  className="usa-select"
+                  value={groupBy}
+                  onChange={(e) =>
+                    $groupBy.set(
+                      e.target.value as "family" | "status" | "none",
+                    )
+                  }
+                >
+                  <option value="family">Family</option>
+                  <option value="status">Status</option>
+                  <option value="none">None</option>
+                </select>
               </div>
             </div>
+          </div>
 
-            {grouped.map(([group, groupForms]) => (
-              <div key={group}>
-                {group && (
-                  <details open>
-                    <summary className="group-header">
-                      {groupBy === "status"
-                        ? (STATUS_LABELS[group] ?? group)
-                        : group}
-                      <span className="group-count">
-                        {groupForms.length}{" "}
-                        {groupForms.length === 1 ? "form" : "forms"}
-                      </span>
-                    </summary>
-                    <ul className="form-card-grid">
-                      {groupForms.map((form) => (
-                        <li key={form.slug}>
-                          <FormCard form={form} />
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
-                {!group && (
+          {grouped.map(([group, groupForms]) => (
+            <div key={group}>
+              {group && (
+                <details open>
+                  <summary className="group-header">
+                    {groupBy === "status"
+                      ? (STATUS_LABELS[group] ?? group)
+                      : group}
+                    <span className="group-count">
+                      {groupForms.length}{" "}
+                      {groupForms.length === 1 ? "form" : "forms"}
+                    </span>
+                  </summary>
                   <ul className="form-card-grid">
                     {groupForms.map((form) => (
-                      <li key={form.slug}>
-                        <FormCard form={form} />
-                      </li>
+                      <li key={form.slug}><FormCard form={form} /></li>
                     ))}
                   </ul>
-                )}
-              </div>
-            ))}
+                </details>
+              )}
+              {!group && (
+                <ul className="form-card-grid">
+                  {groupForms.map((form) => (
+                    <li key={form.slug}><FormCard form={form} /></li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
 
-            {filtered.length === 0 && (
-              <p className="text-center text-base padding-4">
-                No forms match your filters.
-              </p>
-            )}
-          </div>
+          {filtered.length === 0 && (
+            <p className="text-center text-base padding-4">
+              No forms match your filters.
+            </p>
+          )}
         </div>
+      </div>
       </section>
     </>
   );
@@ -449,10 +431,7 @@ function FormCard({ form }: { form: FormSummary }) {
           </span>
           {form.family.length ? (
             form.family.map((family) => (
-              <span
-                key={family}
-                className={`kanban-card__family family--${familySlug(family)}`}
-              >
+              <span key={family} className={`kanban-card__family family--${familySlug(family)}`}>
                 {family}
               </span>
             ))

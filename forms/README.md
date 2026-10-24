@@ -65,6 +65,7 @@ example path is a failure even when its schema accepts it.
 The SGG preview uses the frontend's native FormData collector. Disabled controls are absent
 from FormData, so the preview retains only schema-declared, unconditional read-only values
 from the explicitly loaded context. Clearing a sample clears that context. This is not
-application prefill, authorization or signing. Editable arrays remain native-collector owned. No row-identity reconciliation or restoration
-of read-only descendants in those rows is claimed. Conditional ownership is outside this small preview adapter. Read-only objects are copied
+application prefill, authorization or signing. Editable arrays remain native-collector owned.
+No row-identity reconciliation or restoration of read-only descendants in those rows is claimed.
+Conditional ownership is outside this small preview adapter. Read-only objects are copied
 as supplied; validation still owns their allowed contents.
