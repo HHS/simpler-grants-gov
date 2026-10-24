@@ -1,12 +1,100 @@
 {
   "title": "Evidence Form",
   "slug": "evidence-form",
-  "status": "backlog",
+  "status": "ready",
   "family": ["SF-424"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 2877,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/759",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/ED_Evidence_2_0-V2.0_F759.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/ED_Evidence_2_0-V2.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/ED_Evidence_2_0-V2.0_F759.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/ED_Evidence_2_0-V2.0_F759.xls",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Level of evidence",
+      "help_text": "1.  Level of Evidence.  Check the box next to the level of evidence for which you are applying.  See the Notice Inviting Applications for the evidence definitions.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Select the level of evidence of effectiveness for which you are applying. See the Notice Inviting Applications for the relevant definitions and requirements.",
+          "help_text": "One selection is required.",
+          "required": true,
+          "type": "Single choice: Demonstrates a Rationale | Promising Evidence | Moderate Evidence | Strong Evidence",
+          "widget": "RadioWidget",
+          "json_path": "level_of_evidence",
+          "xml_path": "LevelofEvidence",
+          "dat_field": "1-1"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Citation and relevance",
+      "help_text": "Fill in the chart below with the appropriate information about the studies that support your application.\n\n1.  Level of Evidence.  Check the box next to the level of evidence for which you are applying.  See the Notice Inviting Applications for the evidence definitions.\n\n2.  Citation and Relevance.  Fill in the chart for each of the studies you are submitting to meet the evidence standards.  If allowable under the program you are applying for, you may add additional rows to include more than four citations.  (See below for an example citation.)\n\na.  Research/Citation.  For Demonstrates a Rationale, provide the citation or link for the research or evaluation findings.  For Promising, Moderate, and Strong Evidence, provide the full citation for each study or WWC publication you are using as evidence.  If the study has been reviewed by the WWC, please include the rating it received, the WWC review standards version, and the URL link to the description of that finding in the WWC reviewed studies database.  Include a copy of the study or a URL link to the study, if available.  Note that, to provide promising, moderate, or strong evidence, you must cite either a specific recommendation from a WWC practice guide, a WWC intervention report, or a publicly available, original study of the effectiveness of a component of your proposed project on a student outcome or other relevant outcome.\n\nb.  Relevant Outcome(s)/Relevant Finding(s). For Demonstrates a Rationale, describe how the research or evaluation findings suggest that the project component included in the logic model is likely to improve relevant outcomes.  For Promising, Moderate and Strong Evidence, describe: 1) the project component included in the study (or WWC practice guide or intervention report) that is also a component of your proposed project, 2) the student outcome(s) or other relevant outcome(s) that are included in both the study (or WWC practice guide or intervention report) and in the logic model (theory of action) for your proposed project, and 3) the study (or WWC intervention report) finding(s) or WWC practice guide recommendations supporting a favorable relationship between a project component and a relevant outcome.  Cite page and table numbers from the study (or WWC practice guide or intervention report), where applicable.\n\nc.  Project Component(s)/Overlap of Population and/or Settings.  For Demonstrates a Rationale, explain how the project component(s) is informed by the research or evaluation findings.  For Promising, Moderate, and Strong Evidence, explain how the population and/or setting in your proposed project are similar to the populations and settings included in the relevant finding(s).  Cite page numbers from the study or WWC publication, where applicable.",
+      "widget": "FieldListWidget",
+      "json_path": "citations[]",
+      "min_items": 1,
+      "max_items": 100,
+      "children": [
+        {
+          "kind": "field",
+          "label": "A. Research/Citation",
+          "help_text": "Enter text up to 4,000 Characters.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "citations[].citation",
+          "xml_path": "Citations/Citation",
+          "dat_field": "2-3-1",
+          "constraints": "minLength 1, maxLength 4000"
+        },
+        {
+          "kind": "field",
+          "label": "B. Relevant Outcome(s)/Relevant Finding(s)",
+          "help_text": "Enter text up to 4,000 Characters.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "citations[].relevant_findings",
+          "xml_path": "Citations/RelevantFindings",
+          "dat_field": "2-3-2",
+          "constraints": "minLength 1, maxLength 4000"
+        },
+        {
+          "kind": "field",
+          "label": "C. Project Component(s)/Overlap of Populations and/or Settings",
+          "help_text": "Enter text up to 4,000 Characters.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "citations[].overlap_of_populations",
+          "xml_path": "Citations/OverlapofPopulations",
+          "dat_field": "2-3-3",
+          "constraints": "minLength 1, maxLength 4000"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Single evidence selection preserves the four exact XSD enum values. The plan\u2019s type text records them; maintained parity does not compare arbitrary inline enum literals in type prose. Sample membership is separately checked against the pinned source values.",
+    "Source examples on PDF pages2\u20133 are explanatory content, not pre-populated answers. They remain in the cited source PDF/DAT; generated sample studies are explicitly fictional.",
+    "Existing SGG classification: not_found_at_pinned_revision at 48d93f882c63a711bdec4b16e3150d1293cdff43, from a bounded API Form-registration inventory. No implementation was found in that directory at this revision; this is not proof of global or production absence.",
+    "The library starts with one citation row, rather than the DAT\u2019s four visually blank starter rows, to disclose only the minimum complete study. This is a deliberate presentation difference for review; the minimum one/maximum100 complete answers and full level-dependent instructions remain. Blank starter rows are not serialized as submitted studies.",
+    "Sample answers are type-checked TypeSpec examples; their study names and findings are fictional. Definition, rendered behavior and XML evidence are reviewed separately from production integration and eligibility.",
+    "ED_Evidence is the proposed unversioned registration short name, following maintained examples; source XML root/namespace ED_Evidence_2_0 and form version2.0 remain exact. Application registration still requires integration review."
+  ],
+  "risks": [
+    "Required? versus business-rule/XSD completion conflict is explicitly recorded. Review complete-row treatment and blank-row omission before implementation.",
+    "Choosing an evidence category and entering text does not verify scientific validity, applicability or funding eligibility. No such assessment is claimed.",
+    "Existing component availability is not demonstrated runtime parity. Current source-policy questions and implementation ownership must remain visible in the review packet."
+  ],
+  "new_concepts": [],
+  "description": "Select an evidence level and describe the studies supporting the proposed project. Illustrative examples do not establish eligibility or scientific validity.",
+  "widgets": ["RadioWidget", "TextAreaWidget", "FieldListWidget"],
+  "sgg_form_id": null,
+  "omb_number": "1894-0001",
+  "expiration_date": "08/31/2028",
+  "spec_id": "evidence-form"
 }

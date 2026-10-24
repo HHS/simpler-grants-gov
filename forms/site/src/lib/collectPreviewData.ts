@@ -40,11 +40,18 @@ export function collectPreviewData(
   data: FormData,
   schema: RJSFSchema,
   context: unknown,
+  widgetLists?: ReadonlySet<string>,
 ): unknown {
   const collected = withReadOnlyContext(
     schema,
     context,
     shapeFormData(data, schema),
   );
+  // Native FieldList owns its draft rows through its existing change callback.
+  // In particular, blank rows and deleted rows must survive a sibling's native edit.
+  if (object(collected) && object(context))
+    for (const name of widgetLists ?? [])
+      if (Array.isArray(context[name]))
+        collected[name] = structuredClone(context[name]);
   return collected;
 }

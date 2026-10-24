@@ -69,3 +69,12 @@ application prefill, authorization or signing. Editable arrays remain native-col
 No row-identity reconciliation or restoration of read-only descendants in those rows is claimed.
 Conditional ownership is outside this small preview adapter. Read-only objects are copied
 as supplied; validation still owns their allowed contents.
+
+### Native repeating-list drafts
+
+The preview forwards the native FieldList's existing change callback for add, delete and child
+edits. Only that widget owns its draft arrays; its bubbling DOM events do not become a second
+writer. Ordinary fields and existing collapsible lists retain native FormData collection.
+Sibling edits retain explicitly callback-owned lists, including blank draft rows; external
+Clear/sample resets replace their context. JSON Forms reads current parent data in this live
+preview mode. No mapper, row-identity policy, widget copy or submission service is introduced.

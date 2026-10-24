@@ -1,7 +1,8 @@
 // TEMPORARY COPY of `renderFieldNode` / `RootBudgetFormContext`, which the pending JSON Forms
 // renderer work exports from frontend/src/components/apply-form/FormFields.tsx. Today they
 // are inline in FormFields, so this rebuilds them from FormFields' own dependencies.
-// Delete with the rest of src/vendor/sgg with #12695.
+// The library additionally forwards the native widget change callback for FieldList.
+// Reconcile this delta when deleting src/vendor/sgg with #12695.
 import type { RJSFSchema } from "@rjsf/utils";
 import { renderWidget } from "@sgg/frontend/components/apply-form/widgets/WidgetRenderers";
 import type {
@@ -30,6 +31,7 @@ export const renderFieldNode = ({
   formContext,
   isFormLocked,
   disabled,
+  onChange,
 }: {
   node: UiSchemaField | UiSchemaFieldList;
   schema: RJSFSchema;
@@ -39,6 +41,7 @@ export const renderFieldNode = ({
   formContext?: RootBudgetFormContext;
   isFormLocked?: boolean;
   disabled?: boolean;
+  onChange?: (value: unknown) => void;
 }) => {
   const requiredField =
     node.type === "fieldList"
@@ -61,6 +64,7 @@ export const renderFieldNode = ({
     props: {
       ...widgetConfig.props,
       ...(disabled ? { disabled } : {}),
+      ...(onChange ? { onChange } : {}),
       formContext,
       isFormLocked,
     },

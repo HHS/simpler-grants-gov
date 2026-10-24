@@ -6,3 +6,5 @@ import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
 
 import "./forms/assurances-for-non-construction-programs-sf-424b-individual/index.tsp";
+
+import "./forms/evidence-form/index.tsp";

@@ -1,6 +1,7 @@
 // TEMPORARY COPY of the pending frontend/src/components/apply-form/jsonforms/renderers.tsx,
 // so the form library can render with the SGG form widgets before the JSON Forms renderer
-// lands in the frontend. Only import paths are changed. Delete src/vendor/sgg with #12695.
+// lands in the frontend. The library also forwards native FieldList callbacks to its
+// live preview without a second DOM writer. Reconcile this delta with #12695.
 import {
   and,
   isControl,
@@ -46,6 +47,8 @@ export type AdapterContextValue = {
   formContext?: RootBudgetFormContext;
   isFormLocked?: boolean;
   print?: boolean;
+  /** The native FieldList's draft-value callback; only top-level lists are supported here. */
+  onFieldListChange?: (name: string, values: unknown[]) => void;
 };
 
 export const AdapterContext = createContext<AdapterContextValue | null>(null);
@@ -73,7 +76,15 @@ const AdaptedControl = ({ uischema, visible, enabled }: ControlProps) => {
     <>
       {rendered.map((node) => {
         if (node.type === "section" || node.type === "text") return null;
-        return renderFieldNode({
+        const listChange =
+          node.type === "fieldList" && context.onFieldListChange
+            ? (value: unknown) => {
+                if (!Array.isArray(value))
+                  throw new Error("FieldList must report an array");
+                context.onFieldListChange!(node.name, value);
+              }
+            : undefined;
+        const rendered = renderFieldNode({
           node,
           schema: context.schema,
           errors: context.errors,
@@ -82,7 +93,20 @@ const AdaptedControl = ({ uischema, visible, enabled }: ControlProps) => {
           formContext: context.formContext,
           isFormLocked: context.isFormLocked,
           disabled: !enabled,
+          onChange: listChange,
         });
+        // A callback-owned list must not also be overwritten by its bubbling DOM edits.
+        return listChange ? (
+          <div
+            key={node.name}
+            onInput={(event) => event.stopPropagation()}
+            onChange={(event) => event.stopPropagation()}
+          >
+            {rendered}
+          </div>
+        ) : (
+          rendered
+        );
       })}
     </>
   );

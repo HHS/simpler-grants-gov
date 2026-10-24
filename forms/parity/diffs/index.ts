@@ -1,3 +1,4 @@
+import { DIFF as evidence } from "./evidence-form.ts";
 import { DIFF as assuranceIndividual } from "./assurances-for-non-construction-programs-sf-424b-individual.ts";
 import { DIFF as rrApplication } from "./sf424-r-r.ts";
 import { DIFF as nonconstructionBudget } from "./budget-information-for-non-construction-programs-sf-424a.ts";
@@ -10,6 +11,7 @@ import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profil
 
 /** Every form the suite checks. A plan with a `spec_id` must be listed here. */
 export const DIFFS: FormDiff[] = [
+  evidence,
   assuranceIndividual,
   rrApplication,
   nonconstructionBudget,

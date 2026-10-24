@@ -57,9 +57,11 @@ export const SggFormRenderer = ({
 
   // The data this form last reported; anything else arriving as `data` came from outside.
   const reported = useRef<unknown>(data);
+  const widgetLists = useRef(new Set<string>());
   const generation = useRef(0);
   if (data !== reported.current) {
     reported.current = data;
+    widgetLists.current.clear();
     generation.current += 1;
   }
 
@@ -84,7 +86,18 @@ export const SggFormRenderer = ({
       new FormData(event.currentTarget),
       formSchema,
       reported.current,
+      widgetLists.current,
     );
+    reported.current = next;
+    report(next);
+  };
+
+  const handleFieldListChange = (name: string, values: unknown[]) => {
+    widgetLists.current.add(name);
+    const next = {
+      ...(reported.current as Record<string, unknown>),
+      [name]: values,
+    };
     reported.current = next;
     report(next);
   };
@@ -104,6 +117,7 @@ export const SggFormRenderer = ({
         schema={formSchema}
         uiSchema={uischema}
         extraRenderers={previewRenderers}
+        onFieldListChange={handleFieldListChange}
       />
     </form>
   );

@@ -1,7 +1,8 @@
 // TEMPORARY COPY of the pending frontend/src/components/apply-form/jsonforms/JsonFormsFields.tsx,
 // so the form library can render with the SGG form widgets before the JSON Forms renderer
 // lands in the frontend. Only import paths are changed, plus `extraRenderers`, which lets the
-// form library preview its own widgets beside the SGG ones. Delete src/vendor/sgg with #12695.
+// form library preview its own widgets beside the SGG ones. It also supports the live
+// preview's native FieldList callback. Reconcile this delta with #12695.
 import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
 import { JsonForms } from "@jsonforms/react";
 import {
@@ -54,6 +55,7 @@ export const JsonFormsFields = ({
   isFormLocked,
   print,
   extraRenderers = NO_EXTRA_RENDERERS,
+  onFieldListChange,
 }: {
   errors: FormattedFormValidationWarning[] | null;
   formData: object;
@@ -64,6 +66,8 @@ export const JsonFormsFields = ({
   print?: boolean;
   /** Renderers to rank against the SGG ones, for widgets only the form library has. */
   extraRenderers?: JsonFormsRendererRegistryEntry[];
+  /** The live preview owns parent data on every edit when this callback is supplied. */
+  onFieldListChange?: (name: string, values: unknown[]) => void;
 }) => {
   const [ruleData, setRuleData] = useState<object>(formData);
   const allRenderers = useMemo(
@@ -81,16 +85,27 @@ export const JsonFormsFields = ({
       formContext,
       isFormLocked,
       print,
+      onFieldListChange,
     }),
-    [schema, formData, errors, uiSchema, formContext, isFormLocked, print],
+    [
+      schema,
+      formData,
+      errors,
+      uiSchema,
+      formContext,
+      isFormLocked,
+      print,
+      onFieldListChange,
+    ],
   );
 
   const refreshRuleData = useCallback(
     (event: FormEvent<HTMLDivElement>) => {
+      if (onFieldListChange) return;
       const form = event.currentTarget.closest("form");
       if (form) setRuleData(shapeFormData(new FormData(form), schema));
     },
-    [schema],
+    [schema, onFieldListChange],
   );
 
   return (
@@ -100,7 +115,7 @@ export const JsonFormsFields = ({
           <JsonForms
             schema={schema as object}
             uischema={uiSchema}
-            data={ruleData}
+            data={onFieldListChange ? formData : ruleData}
             renderers={allRenderers}
             cells={vanillaCells}
             readonly={isFormLocked || print}

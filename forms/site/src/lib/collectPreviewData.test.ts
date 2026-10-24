@@ -115,6 +115,52 @@ describe("native preview collection with explicit read-only context", () => {
     ).toEqual({ people: [{ answer: "Remaining answer" }] });
   });
 
+  it("keeps callback-owned deleted and blank draft rows authoritative during sibling edits", () => {
+    const data = new FormData();
+    data.set("project", "Current project");
+    data.set("citations[0]--citation", "Stale deleted row");
+    data.set("citations[1]--citation", "Remaining row");
+    const draft = {
+      citations: [{ citation: "Remaining row" }, {}],
+      project: "Old project",
+    };
+    const result = collectPreviewData(
+      data,
+      schema,
+      draft,
+      new Set(["citations"]),
+    );
+    expect(result).toHaveProperty("citations", draft.citations);
+    expect(result).toHaveProperty("project", "Current project");
+  });
+
+  it("preserves each callback list independently, including empty arrays and falsy values", () => {
+    const data = new FormData();
+    data.set("citations[0]--citation", "Current native row");
+    const draft = {
+      citations: [{ citation: "Previous row" }],
+      first: [{ value: 0, flag: false }],
+      second: [],
+    };
+    const result = collectPreviewData(
+      data,
+      schema,
+      draft,
+      new Set(["first", "second"]),
+    );
+    expect(result).toHaveProperty("first", draft.first);
+    expect(result).toHaveProperty("second", []);
+    expect(result).toHaveProperty("citations", [
+      { citation: "Current native row" },
+    ]);
+  });
+
+  it("does not retain an old list after its callback ownership is reset", () => {
+    expect(
+      collectPreviewData(new FormData(), schema, {}, new Set()),
+    ).not.toHaveProperty("citations");
+  });
+
   it("copies a readonly object atomically without inventing closed-world filtering", () => {
     const supplied = {
       name: {
