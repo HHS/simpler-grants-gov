@@ -11,6 +11,7 @@ import {
   withJsonFormsLayoutProps,
 } from "@jsonforms/react";
 
+import { AttachmentReferenceControl } from "./AttachmentReferenceControl";
 import { CollapsibleListControl } from "./collapsible/CollapsibleFieldList";
 import FormSection from "./sections/FormSection";
 
@@ -24,6 +25,17 @@ const RANK = 20;
  * draws it.
  */
 export const previewRenderers: JsonFormsRendererRegistryEntry[] = [
+  {
+    tester: rankWith(
+      RANK,
+      and(
+        isControl,
+        (ui) =>
+          widgetOf(ui) === "Attachment" || widgetOf(ui) === "AttachmentArray",
+      ),
+    ),
+    renderer: withJsonFormsControlProps(AttachmentReferenceControl),
+  },
   {
     tester: rankWith(RANK, uiTypeIs("Group")),
     renderer: withJsonFormsLayoutProps(FormSection),

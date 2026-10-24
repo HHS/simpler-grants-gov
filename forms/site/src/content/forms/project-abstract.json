@@ -1,12 +1,71 @@
 {
   "title": "Project Abstract",
   "slug": "project-abstract",
-  "status": "backlog",
-  "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Individual", "SF-424 Mandatory"],
+  "status": "in_progress",
+  "family": [
+    "SF-424",
+    "R&R",
+    "SF-424 Short",
+    "SF-424 Individual",
+    "SF-424 Mandatory"
+  ],
   "category": "Narrative & Attachment Forms",
   "apps_count": 7481,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/541",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Project_Abstract_1_2-V1.2_F541.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_Abstract_1_2-V1.2.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Project_Abstract_1_2-V1.2_F541.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Project_Abstract_1_2-V1.2_F541.xls",
+  "sgg_form_id": "b09ac657-f629-431e-a7ba-3f3017a8a466",
+  "widgets": ["ApplicationAttachmentWidget"],
+  "new_concepts": [],
+  "notes": [
+    "Existing SGG baseline: https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/src/form_schema/forms/project_abstract/1/0/form_json.py . Paths, attachment UUID transport and source XML targets are compared with this revision; tests and rule definitions are inventoried separately.",
+    "Source PDF was rendered and reviewed along with DAT labels, help, business rules and XSD structure. Instructions are carried on a nonempty section so they remain visible in the current form-plan view.",
+    "The spec_id links the maintained TypeSpec definition and layout. Authored examples now live in TypeSpec; the Data tab shows actual preview answers. Source-shaped XSD models are checked independently.",
+    "Attachment controls use a library-only UUID reference editor through the existing renderer registry. They preserve application ID transport and never upload files or claim content, existence or ownership verification.",
+    "Attachment XML export is not enabled: file metadata resolution and source-only wrappers require the shared XML mapping work. No incomplete UUID-as-file transform is emitted; this is a definition/preview PR, not a submission-ready migration."
+  ],
+  "risks": [
+    "Pinned SGG expiration date is 12/31/2026; the retrieved DAT and PDF say 08/31/2029. Preserve current source metadata in this proposal and confirm the registration update separately.",
+    "The one-page and confidentiality instructions are document-content obligations. The existing upload widget and UUID schema do not enforce them.",
+    "Synthetic UUID examples are shape illustrations only. Actual uploads, existence/ownership checks, file constraints, XML attachment metadata, application context and submission behavior remain service/runtime obligations. Do not replace UUIDs with invented file descriptors."
+  ],
+  "omb_number": "4040-0010",
+  "expiration_date": "08/31/2029",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Project Abstract File",
+      "help_text": "The Project Abstract must not exceed one page and must contain a summary of the proposed activity suitable for dissemination to the public.  It should be a self-contained description of the project and should contain a statement of objectives and methods to be employed.  It should be informative to other persons working in the same or related fields and insofar as possible understandable to a technically literate lay reader.  This Abstract must not include any proprietary/confidential information.   ",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Please click the add attachment button to complete this entry.",
+          "help_text": "Attach a file using the appropriate buttons. This attachment is required.",
+          "required": true,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "attachment",
+          "xml_path": "ProjectAbstractAddAttachment/AttachedFile",
+          "dat_field": "5",
+          "constraints": "format uuid"
+        }
+      ]
+    }
+  ],
+  "description": "Compiled form definition and source-reviewed requirements. Preview answers are illustrative; application services and production acceptance remain separate.",
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/tests/src/form_schema/forms/test_project_abstract.py",
+    "examples": [
+      {
+        "label": "minimal_valid_project_abstract_v1_2",
+        "description": "Pinned existing SGG test fixture; not an uploaded file or executed submission.",
+        "data": {
+          "attachment": "2fbc3fd0-31bf-4434-b883-cfb284c5a394"
+        }
+      }
+    ]
+  },
+  "spec_id": "project-abstract"
 }

@@ -1,12 +1,236 @@
 {
   "title": "Attachments",
   "slug": "attachments",
-  "status": "backlog",
-  "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Individual", "SF-424 Mandatory"],
+  "status": "in_progress",
+  "family": [
+    "SF-424",
+    "R&R",
+    "SF-424 Short",
+    "SF-424 Individual",
+    "SF-424 Mandatory"
+  ],
   "category": "Narrative & Attachment Forms",
   "apps_count": 75937,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/540",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/AttachmentForm_1_2-V1.2_F540.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AttachmentForm_1_2-V1.2_F540.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AttachmentForm_1_2-V1.2_F540.xls",
+  "sgg_form_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "widgets": ["ApplicationAttachmentWidget"],
+  "new_concepts": [],
+  "notes": [
+    "Preserve fifteen independent att1–att15 slots and XML ATT1/ATT1File through ATT15/ATT15File. Do not collapse these into an anonymous list: slot identity and agency-specified sequence matter.",
+    "Existing SGG baseline: https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/src/form_schema/forms/attachment_form/1/0/form_json.py . Paths, attachment UUID transport and source XML targets are compared with this revision; tests and rule definitions are inventoried separately.",
+    "Source PDF was rendered and reviewed along with DAT labels, help, business rules and XSD structure. Instructions are carried on a nonempty section so they remain visible in the current form-plan view.",
+    "The spec_id links the maintained TypeSpec definition and layout. Authored examples now live in TypeSpec; the Data tab shows actual preview answers. Source-shaped XSD models are checked independently.",
+    "Attachment controls use a library-only UUID reference editor through the existing renderer registry. They preserve application ID transport and never upload files or claim content, existence or ownership verification.",
+    "Attachment XML export is not enabled: file metadata resolution and source-only wrappers require the shared XML mapping work. No incomplete UUID-as-file transform is emitted; this is a definition/preview PR, not a submission-ready migration."
+  ],
+  "risks": [
+    "Synthetic UUID examples are shape illustrations only. Actual uploads, existence/ownership checks, file constraints, XML attachment metadata, application context and submission behavior remain service/runtime obligations. Do not replace UUIDs with invented file descriptors."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Application files",
+      "help_text": "Instructions:  On this form, you will attach the various files that make up your grant application. Please consult with the appropriate Agency Guidelines for more information about each needed file. Please remember that any files you attach must be in the document format and named as specified in the Guidelines.\n\nImportant:  Please attach your files in the proper sequence. See the appropriate Agency Guidelines for details.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "1) Please attach Attachment 1",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att1",
+          "xml_path": "ATT1/ATT1File",
+          "dat_field": "01-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "2) Please attach Attachment 2",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att2",
+          "xml_path": "ATT2/ATT2File",
+          "dat_field": "02-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "3) Please attach Attachment 3",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att3",
+          "xml_path": "ATT3/ATT3File",
+          "dat_field": "03-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "4) Please attach Attachment 4",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att4",
+          "xml_path": "ATT4/ATT4File",
+          "dat_field": "04-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "5) Please attach Attachment 5",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att5",
+          "xml_path": "ATT5/ATT5File",
+          "dat_field": "05-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "6) Please attach Attachment 6",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att6",
+          "xml_path": "ATT6/ATT6File",
+          "dat_field": "06-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "7) Please attach Attachment 7",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att7",
+          "xml_path": "ATT7/ATT7File",
+          "dat_field": "07-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "8) Please attach Attachment 8",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att8",
+          "xml_path": "ATT8/ATT8File",
+          "dat_field": "08-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "9) Please attach Attachment 9",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att9",
+          "xml_path": "ATT9/ATT9File",
+          "dat_field": "09-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "10) Please attach Attachment 10",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att10",
+          "xml_path": "ATT10/ATT10File",
+          "dat_field": "10-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "11) Please attach Attachment 11",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att11",
+          "xml_path": "ATT11/ATT11File",
+          "dat_field": "11-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "12) Please attach Attachment 12",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att12",
+          "xml_path": "ATT12/ATT12File",
+          "dat_field": "12-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "13) Please attach Attachment 13",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att13",
+          "xml_path": "ATT13/ATT13File",
+          "dat_field": "13-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "14) Please attach Attachment 14",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att14",
+          "xml_path": "ATT14/ATT14File",
+          "dat_field": "14-0",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "15) Please attach Attachment 15",
+          "help_text": "Click to add this attachment.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "att15",
+          "xml_path": "ATT15/ATT15File",
+          "dat_field": "15-0",
+          "constraints": "format uuid"
+        }
+      ]
+    }
+  ],
+  "description": "Compiled form definition and source-reviewed requirements. Preview answers are illustrative; application services and production acceptance remain separate.",
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/tests/src/form_schema/forms/test_attachment_form.py",
+    "examples": [
+      {
+        "label": "minimal_valid_attachment_form_v1_2",
+        "description": "Pinned existing SGG test fixture; not an uploaded file or executed submission.",
+        "data": {
+          "att1": "00b9001b-6ca8-4c0c-9328-46f39e9ff14b"
+        }
+      }
+    ]
+  },
+  "spec_id": "attachments"
 }

@@ -49,6 +49,13 @@ describe.each([
   "rr-key-person",
   "rr-key-person-expanded",
   "nsf-key-person-expanded",
+  "attachments",
+  "project-narrative-attachment-form",
+  "budget-narrative-attachment-form",
+  "other-attachments-form",
+  "project-abstract",
+  "project-abstract-summary",
+  "ed-abstract-form",
 ])("loadFormSpec(%s)", (specId) => {
   let spec: FormSpec;
   beforeAll(async () => {

@@ -7,6 +7,7 @@ import {
 import { useEffect, useMemo, useRef, type FormEvent } from "react";
 
 import {
+  completeWarnings,
   createAjv,
   toValidationWarnings,
   uniqueWarnings,
@@ -45,12 +46,11 @@ export const SggFormRenderer = ({
   // Ajv stands in for the API's validator; the frontend attaches and words the warnings.
   const warningsFor = (next: unknown) => {
     validate(next);
+    const raw = toValidationWarnings(validate.errors ?? []);
     return uniqueWarnings(
-      buildWarningTree(
-        sggUiSchema,
-        null,
-        toValidationWarnings(validate.errors ?? []),
-        formSchema,
+      completeWarnings(
+        raw,
+        buildWarningTree(sggUiSchema, null, raw, formSchema),
       ),
     );
   };

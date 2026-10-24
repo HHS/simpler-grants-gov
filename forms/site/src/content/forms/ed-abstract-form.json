@@ -1,12 +1,52 @@
 {
   "title": "ED Abstract Form",
   "slug": "ed-abstract-form",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["SF-424"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 11970,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/267",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/ED_Abstract-V1.1_F267.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/ED_Abstract-V1.1.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/ED_Abstract-V1.1_F267.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/ED_Abstract-V1.1_F267.xls",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Abstract requirements",
+      "help_text": "An abstract is to be submitted in accordance with the following:\n\n1. Abstract Requirements\n\n• Abstracts must not exceed one page and should use language that will be understood by a range of audiences.\n\n• Abstracts must include the project title, goals, and expected outcomes and contributions related to research, policy, and practice.\n\n• Abstracts must include the population(s) to be served.\n\n• Abstracts must include primary activities to be performed by the recipient.\n\n• Abstracts must include subrecipient activities that are known or specified at the time of application submission.\n\nFor research applications, abstracts also include the following:\n\n• Theoretical and conceptual background of the study (i.e., prior research that the investigation builds upon and that provides a compelling rationale for this study).\n\n• Research issues, hypotheses and questions being addressed.\n\n• Study design including a brief description of the sample including sample size, methods, principals, and dependent, independent, and control variables, as well as the approach to data analysis.\n\n[Note: For a non-electronic submission, include the name and address of your organization and the name, phone number and e-mail address of the contact person for this project.]\n\nYou must attach one and only one file to this page.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Attachment",
+          "required": true,
+          "type": "Proposed uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "attachment",
+          "xml_path": "Attachments",
+          "dat_field": "5-0",
+          "constraints": "format uuid"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "One and only one uploaded abstract is allowed. Preserve project title/goals/outcomes, populations, primary/subrecipient activities and research-specific instructions.",
+    "Proposed UUID transport reuses Questions.Types.Attachment and existing upload widget; it is not a discovered SGG implementation for FID267. Source XML attachment descriptor still needs the maintained file-service mapping.",
+    "No OMB number/expiration was present in the inspected DAT/PDF; none is invented.",
+    "Existing SGG classification: not_found_at_pinned_revision at 48d93f882c63a711bdec4b16e3150d1293cdff43, from a bounded API Form-registration inventory. No implementation was found in that directory at this revision; this is not proof of global or production absence.",
+    "Requirements-only: no spec_id, TypeSpec definition, compiled UI/XML, source-policy approval or production acceptance is claimed. Source PDF pages were rendered and inspected; source instructions remain distinct from input answers.",
+    "The spec_id links the maintained TypeSpec definition and layout. Authored examples now live in TypeSpec; the Data tab shows actual preview answers. Source-shaped XSD models are checked independently.",
+    "Attachment controls use a library-only UUID reference editor through the existing renderer registry. They preserve application ID transport and never upload files or claim content, existence or ownership verification.",
+    "Attachment XML export is not enabled: file metadata resolution and source-only wrappers require the shared XML mapping work. No incomplete UUID-as-file transform is emitted; this is a definition/preview PR, not a submission-ready migration."
+  ],
+  "risks": [
+    "Page count, content instructions, upload ownership/existence and XML descriptor generation need later behavior/service checks. The UUID is illustrative, not an uploaded file.",
+    "Existing component availability is not demonstrated runtime parity. Current source-policy questions and implementation ownership must remain visible in the review packet."
+  ],
+  "new_concepts": [],
+  "description": "Compiled form definition and source-reviewed requirements. Preview answers are illustrative; application services and production acceptance remain separate.",
+  "widgets": ["ApplicationAttachmentWidget"],
+  "sgg_form_id": null,
+  "spec_id": "ed-abstract-form"
 }

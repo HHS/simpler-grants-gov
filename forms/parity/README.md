@@ -249,3 +249,13 @@ not detect swapped valid codes. It does not implement allowed checkbox combinati
 an XML encoder. SF-424 R&R is the proving plan, with all five actual revision controls,
 all106 semantic fields and110 logical DAT entries. The13 unbound radio-option rows remain
 accounted for under their group answers in the source-reconciliation packet.
+
+## Scalar lists in compiled definitions
+
+A primitive array such as an ordered list of attachment UUIDs has one repeated answer leaf
+(`attachments[]`), matching the compiler's field index. The JSON Schema comparison reads
+constraints from `items`, wording from the list property, and occurrence bounds through
+all enclosing arrays. A UI control without item-detail layout uses that repeated path only
+when the schema actually contains it. A scalar or unknown control is not silently converted
+into a list. Minimum list size and invalid values are exercised by the definition tests as
+well as the source-occurrence comparisons; the flattened maximum is not a full runtime proof.

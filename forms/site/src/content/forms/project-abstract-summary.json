@@ -1,12 +1,128 @@
 {
   "title": "Project Abstract Summary",
   "slug": "project-abstract-summary",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Mandatory"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 45380,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/591",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Project_AbstractSummary_2_0-V2.0_F591.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Project_AbstractSummary_2_0-V2.0_F591.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Project_AbstractSummary_2_0-V2.0_F591.xls",
+  "sgg_form_id": "bf683068-23a4-43fa-ac7a-0f046b83cb14",
+  "widgets": ["TextWidget", "TextAreaWidget"],
+  "new_concepts": [],
+  "notes": [
+    "Keep applicant_name as the existing SGG wire property even though the XML element is OrganizationName. The UI heading does not introduce an extra object container.",
+    "Project Abstract Summary is a public-facing 4,000-character text answer, not the one-page uploaded Project Abstract form. Reuse compatible text/organization primitives without equating these distinct questions.",
+    "Existing SGG baseline: https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/src/form_schema/forms/project_abstract_summary/1/0/form_json.py . Paths, attachment UUID transport and source XML targets are compared with this revision; tests and rule definitions are inventoried separately.",
+    "Source PDF was rendered and reviewed along with DAT labels, help, business rules and XSD structure. Instructions are carried on a nonempty section so they remain visible in the current form-plan view.",
+    "The spec_id links the maintained TypeSpec definition and layout. Authored examples now live in TypeSpec; the Data tab shows actual preview answers. Source-shaped XSD models are checked independently.",
+    "Attachment controls use a library-only UUID reference editor through the existing renderer registry. They preserve application ID transport and never upload files or claim content, existence or ownership verification."
+  ],
+  "risks": [
+    "Opportunity/listing pre-population is described by source and declared in existing SGG but disabled there. This plan does not claim it runs. Applicant and project-title population requires separate ownership and conflict decisions."
+  ],
+  "omb_number": "4040-0019",
+  "expiration_date": "06/30/2028",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Project Abstract Summary",
+      "help_text": "This Project Abstract Summary form must be submitted or the application will be considered incomplete.   Ensure the Project Abstract field succinctly describes the project in plain language that the public can understand and use without the full proposal.  Use 4,000 characters or less. Do not include personally identifiable, sensitive or proprietary information.  Refer to Agency instructions for any additional Project Abstract field requirements.   If the application is funded, your project abstract information (as submitted) will be made available to public websites and/or databases including USAspending.gov.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Funding Opportunity Number",
+          "help_text": "Funding Opportunity Number for the particular program announcement. Pre-populated from the Application cover sheet. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "funding_opportunity_number",
+          "xml_path": "FundingOpportunityNumber",
+          "dat_field": "01-0",
+          "constraints": "minLength 1, maxLength 40",
+          "pre_populated": "Proposed from application cover sheet; existing SGG pre-population rules are declared but explicitly disabled. Retain a visible editable answer until population behavior is implemented."
+        },
+        {
+          "kind": "field",
+          "label": "Assistance Listing Number(s)",
+          "help_text": "Assistance Listing Number assigned to the Program. Pre-populated from the Application cover sheet.",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "assistance_listing_number",
+          "xml_path": "CFDANumber",
+          "dat_field": "02-0",
+          "constraints": "minLength 1, maxLength 15",
+          "pre_populated": "Proposed from application cover sheet; existing SGG pre-population rules are declared but explicitly disabled. Retain a visible editable answer until population behavior is implemented."
+        },
+        {
+          "kind": "field",
+          "label": "Applicant Name",
+          "help_text": "This is the legal name of applicant which will undertake the assistance activity. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "applicant_name",
+          "xml_path": "OrganizationName",
+          "dat_field": "03-0",
+          "constraints": "minLength 1, maxLength 60"
+        },
+        {
+          "kind": "field",
+          "label": "Descriptive Title of Applicant's Project",
+          "help_text": "This is the project title or brief description of the project. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "project_title",
+          "xml_path": "ProjectTitle",
+          "dat_field": "04-0",
+          "constraints": "minLength 1, maxLength 250"
+        },
+        {
+          "kind": "field",
+          "label": "Project Abstract",
+          "help_text": "Enter a work summary or abstract of the work to be performed under this project. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "project_abstract",
+          "xml_path": "ProjectAbstract",
+          "dat_field": "05-0",
+          "constraints": "minLength 1, maxLength 4000"
+        }
+      ]
+    }
+  ],
+  "description": "Compiled form definition and source-reviewed requirements. Preview answers are illustrative; application services and production acceptance remain separate.",
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/tests/src/form_schema/forms/test_project_abstract_summary.py",
+    "examples": [
+      {
+        "label": "minimal_valid_summary_v2_0",
+        "description": "Pinned existing SGG test fixture; not an uploaded file or executed submission.",
+        "data": {
+          "funding_opportunity_number": "ABC-123",
+          "applicant_name": "My Company LLC",
+          "project_title": "Research into Science",
+          "project_abstract": "We plan to do research on science"
+        }
+      },
+      {
+        "label": "full_valid_summary_v2_0",
+        "description": "Pinned existing SGG test fixture; not an uploaded file or executed submission.",
+        "data": {
+          "funding_opportunity_number": "XYZ-456",
+          "assistance_listing_number": "12.345",
+          "applicant_name": "My Business Inc",
+          "project_title": "Space Exploration",
+          "project_abstract": "We are going to Pluto"
+        }
+      }
+    ]
+  },
+  "spec_id": "project-abstract-summary"
 }

@@ -1,12 +1,71 @@
 {
   "title": "Project Narrative Attachment Form",
   "slug": "project-narrative-attachment-form",
-  "status": "backlog",
-  "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Individual", "SF-424 Mandatory"],
+  "status": "in_progress",
+  "family": [
+    "SF-424",
+    "R&R",
+    "SF-424 Short",
+    "SF-424 Individual",
+    "SF-424 Mandatory"
+  ],
   "category": "Narrative & Attachment Forms",
   "apps_count": 77358,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/539",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/ProjectNarrativeAttachments_1_2-V1.2_F539.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/ProjectNarrativeAttachments_1_2-V1.2.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/ProjectNarrativeAttachments_1_2-V1.2_F539.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/ProjectNarrativeAttachments_1_2-V1.2_F539.xls",
+  "sgg_form_id": "32165da2-354d-42c0-a986-cf4f2f350039",
+  "widgets": ["ApplicationMultipleAttachmentWidget"],
+  "new_concepts": [],
+  "notes": [
+    "Proposed consolidation follows existing SGG 48d93f882c63a711bdec4b16e3150d1293cdff43 and the XSD Attachments/AttachedFile list (1–100): the DAT mandatory first-file control and optional-more-files control become one ordered attachments array. This records the 2-0 input explicitly; no document answer is omitted. Reviewer confirmation remains open.",
+    "Shared upload transport does not make project narrative, budget narrative and other attachments the same question or reusable answer. Preserve each form’s purpose and agency instructions.",
+    "Existing SGG baseline: https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/src/form_schema/forms/project_narrative_attachment/1/0/form_json.py . Paths, attachment UUID transport and source XML targets are compared with this revision; tests and rule definitions are inventoried separately.",
+    "Source PDF was rendered and reviewed along with DAT labels, help, business rules and XSD structure. Instructions are carried on a nonempty section so they remain visible in the current form-plan view.",
+    "The spec_id links the maintained TypeSpec definition and layout. Authored examples now live in TypeSpec; the Data tab shows actual preview answers. Source-shaped XSD models are checked independently.",
+    "Attachment controls use a library-only UUID reference editor through the existing renderer registry. They preserve application ID transport and never upload files or claim content, existence or ownership verification.",
+    "Attachment XML export is not enabled: file metadata resolution and source-only wrappers require the shared XML mapping work. No incomplete UUID-as-file transform is emitted; this is a definition/preview PR, not a submission-ready migration."
+  ],
+  "risks": [
+    "Synthetic UUID examples are shape illustrations only. Actual uploads, existence/ownership checks, file constraints, XML attachment metadata, application context and submission behavior remain service/runtime obligations. Do not replace UUIDs with invented file descriptors."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Project Narrative Files",
+      "help_text": "The source PDF separates a mandatory first file from optional additional files. The proposed list preserves at least one file and a maximum of 100, following the existing SGG contract.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Project Narrative Files",
+          "help_text": "Attach at least one file. Keep files in the order required by the agency instructions. Up to 100 files may be supplied.",
+          "required": true,
+          "type": "Ordered list of uploaded attachment IDs (UUID strings)",
+          "widget": "ApplicationMultipleAttachmentWidget",
+          "json_path": "attachments[]",
+          "xml_path": "Attachments/AttachedFile",
+          "dat_field": "1-0",
+          "min_items": 1,
+          "max_items": 100,
+          "constraints": "format uuid"
+        }
+      ]
+    }
+  ],
+  "description": "Compiled form definition and source-reviewed requirements. Preview answers are illustrative; application services and production acceptance remain separate.",
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/tests/src/form_schema/forms/test_project_narrative_attachment.py",
+    "examples": [
+      {
+        "label": "minimal_valid_project_narrative_v1_2",
+        "description": "Pinned existing SGG test fixture; not an uploaded file or executed submission.",
+        "data": {
+          "attachments": ["00b9001b-6ca8-4c0c-9328-46f39e9ff14b"]
+        }
+      }
+    ]
+  },
+  "spec_id": "project-narrative-attachment-form"
 }
