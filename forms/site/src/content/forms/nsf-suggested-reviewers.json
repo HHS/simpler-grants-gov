@@ -1,12 +1,59 @@
 {
   "title": "NSF Suggested Reviewers",
   "slug": "nsf-suggested-reviewers",
-  "status": "backlog",
+  "status": "ready",
   "family": ["R&R"],
   "category": "Uncategorized",
   "apps_count": 2082,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/308",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/NSF_SuggestedReviewers-V1.1_F308.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/NSF_SuggestedReviewers-V1.1.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/NSF_SuggestedReviewers-V1.1_F308.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/NSF_SuggestedReviewers-V1.1_F308.xls",
+  "omb_number": "3145-0058",
+  "expiration_date": "11/30/2026",
+  "spec_id": "nsf-suggested-reviewers",
+  "widgets": ["TextAreaWidget"],
+  "description": "Optional prose identifying suggested reviewers and reviewers the applicant prefers not to include, with reasons.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Optional reviewer suggestions",
+      "help_text": "Applicants may include a list of suggested reviewers who they believe are especially well qualified to review the proposal. Applicants also may designate persons they would prefer not review the proposal, indicating why. These suggestions are optional. Grant Proposal Guide Appendix B, Potentially Disqualifying Conflicts of Interest (https://www.nsf.gov/publications/pub_summ.jsp?ods_key=grantsgovguide), contains information on conflicts of interest that may be useful in preparation of this list.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Suggested reviewers",
+          "dat_field": "4",
+          "required": false,
+          "type": "string",
+          "widget": "TextAreaWidget",
+          "help_text": "Provide the First, Middle, and Last Name of suggested reviewers that you believe are especially well qualified to review this proposal.",
+          "constraints": "minLength 1, maxLength 4000",
+          "json_path": "suggested_reviewers",
+          "xml_path": "NSF_SuggestedReviewers:SuggestedReviewers"
+        },
+        {
+          "kind": "field",
+          "label": "Reviewers not to include",
+          "dat_field": "6",
+          "required": false,
+          "type": "string",
+          "widget": "TextAreaWidget",
+          "help_text": "Designate persons you would prefer not review this proposal and indicate why.",
+          "constraints": "minLength 1, maxLength 4000",
+          "json_path": "reviewers_not_to_include",
+          "xml_path": "NSF_SuggestedReviewers:ReviewersNotToInclude"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The DAT states minimum0 for optional text, while the actual XSD restriction is minimum1. Omit an unanswered property; a present empty string is not valid serialized output. No optional answer is newly required.",
+    "The XSD root is nillable, but an empty object already produces a valid empty versioned document. Root-null transport is not an applicant-answer requirement.",
+    "Suggested reviewer names remain whole-text answers, as the source asks; no invented person-list structure or automated conflict decision is introduced.",
+    "SGG registration short name and version are separate; generated sync remains false until an explicit application integration change."
+  ],
+  "risks": [
+    "Program review and human interpretation of the source suggestions remain separate from syntactic validation."
+  ]
 }

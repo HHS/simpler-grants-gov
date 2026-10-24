@@ -6,3 +6,7 @@ import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
 
 import "./forms/assurances-for-non-construction-programs-sf-424b-individual/index.tsp";
+
+import "./forms/phs-assignment-request-form/index.tsp";
+import "./forms/nsf-deviation-authorization/index.tsp";
+import "./forms/nsf-suggested-reviewers/index.tsp";

@@ -18,5 +18,11 @@
   "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd": "ae2ebb3618f7d8fb337be2309b3096e9121b4af659e913af423aab85d13dcb1d",
   "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd": "4b338db919152eb8b96a1a846902d04ef8bca8d08127b21f80f927eaa62283cb",
   "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd": "ff0214de91b95a4209f50f0fe08a18d0f3d17f280ab8c8bbcb52878f37de7be8",
+  "https://apply07.grants.gov/apply/forms/sample/NSF_DeviationAuthorization-V1.1_F306.xls": "61110399103091b6eac38faf62ee66254ff8ace077a25b3e1376feb7642d2b42",
+  "https://apply07.grants.gov/apply/forms/sample/NSF_SuggestedReviewers-V1.1_F308.xls": "2447876fe2fb83b68052c339e562040870b1c8386a0d2acfd32ebf7f85e91b46",
+  "https://apply07.grants.gov/apply/forms/sample/PHS_AssignmentRequestForm_4_0-V4.0_F833.xls": "e08625bf4ebaee23a66e1ef85346c83e86726a58e36a6c5705f66fffaf867255",
+  "https://apply07.grants.gov/apply/forms/schemas/NSF_DeviationAuthorization-V1.1.xsd": "50d3847ba75433adaff3cb9126c9d78b26561e8f0d433dc2df0fa441ebac5724",
+  "https://apply07.grants.gov/apply/forms/schemas/NSF_SuggestedReviewers-V1.1.xsd": "df9c1648edafb28d418668296b338eb0e9e71ff22d3324b431e33e5f7a107775",
+  "https://apply07.grants.gov/apply/forms/schemas/PHS_AssignmentRequestForm_4_0-V4.0.xsd": "7e697ee33ea6f72271c0d74fc48c61f4f81faa242a712a4c73e7898f6c4ab976",
   "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd": "78f33338e9319ef31a052d1328b8984931a4380db2485493bcc78ab9e2c11f3a"
 }

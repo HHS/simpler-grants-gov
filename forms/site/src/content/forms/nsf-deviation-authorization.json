@@ -1,12 +1,46 @@
 {
   "title": "NSF Deviation Authorization",
   "slug": "nsf-deviation-authorization",
-  "status": "backlog",
+  "status": "ready",
   "family": ["R&R"],
   "category": "Uncategorized",
   "apps_count": 2082,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/306",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/NSF_DeviationAuthorization-V1.1_F306.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/NSF_DeviationAuthorization-V1.1.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/NSF_DeviationAuthorization-V1.1_F306.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/NSF_DeviationAuthorization-V1.1_F306.xls",
+  "omb_number": "3145-0058",
+  "expiration_date": "11/30/2026",
+  "spec_id": "nsf-deviation-authorization",
+  "widgets": ["TextAreaWidget"],
+  "description": "Optional information about an applicable NSF deviation authorization.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Deviation authorization (if applicable)",
+      "help_text": "Enter text for the Deviation Authorization information in the box below (if applicable):",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Deviation authorization information",
+          "dat_field": "3",
+          "required": false,
+          "type": "string",
+          "widget": "TextAreaWidget",
+          "help_text": "Type the Deviation Authorization information in this box (if applicable).",
+          "constraints": "minLength 1, maxLength 4000",
+          "json_path": "deviation_authorization",
+          "xml_path": "NSF_DeviationAuthorization:DeviationAuthorization"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The DAT states minimum0 for optional text, while the actual XSD restriction is minimum1. Omit an unanswered property; a present empty string is not valid serialized output. No optional answer is newly required.",
+    "The misleading XSD type name StringMin0Max4000 does not override its actual minLength1 facet.",
+    "SGG registration short name and version are separate; generated sync remains false until an explicit application integration change."
+  ],
+  "risks": [
+    "Program review and human interpretation of the source suggestions remain separate from syntactic validation."
+  ]
 }

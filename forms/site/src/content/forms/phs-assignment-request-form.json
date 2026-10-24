@@ -1,12 +1,227 @@
 {
   "title": "PHS Assignment Request Form",
   "slug": "phs-assignment-request-form",
-  "status": "backlog",
+  "status": "ready",
   "family": ["R&R"],
   "category": "Agency-Specific Supplement Forms",
   "apps_count": 237461,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/833",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/PHS_AssignmentRequestForm_4_0-V4.0_F833.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PHS_AssignmentRequestForm_4_0-V4.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/PHS_AssignmentRequestForm_4_0-V4.0_F833.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/PHS_AssignmentRequestForm_4_0-V4.0_F833.xls",
+  "omb_number": "0925-0001",
+  "expiration_date": "12/31/2027",
+  "spec_id": "phs-assignment-request-form",
+  "widgets": ["TextWidget", "TextAreaWidget"],
+  "description": "Optional assignment suggestions for awarding components, study sections, scientific expertise and reviewer exclusions. Requests may not be honored.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Awarding component assignment suggestions",
+      "help_text": "Awarding Component Assignment Suggestions (optional)\nVerify your suggested awarding component(s) (e.g., NIH Institute/Center) participate(s) in the Funding Opportunity. Use the link below to identify the appropriate short abbreviation (e.g., \"NCI\" for National Cancer Institute) and enter it below. All requests will be considered; however, assignment requests cannot always be honored.\n\nSuggestions must be listed in the \"Components of Participating Organizations\" of the NOFO, or R&R Cover Form Box 4B must list an appropriate Notice of Special Interest.\n\nInformation about Awarding Component can be found here:\nhttps://grants.nih.gov/grants/phs_assignment_information.htm#AwardingComponents",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Suggested awarding component 1",
+          "dat_field": "A-2-2",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter suggestion for awarding component (e.g., NCI). All requests will be considered; however, assignment requests cannot always be honored.",
+          "constraints": "minLength 0, maxLength 7",
+          "json_path": "suggested_awarding_component1",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:SuggestedAwardingComponent1"
+        },
+        {
+          "kind": "field",
+          "label": "Suggested awarding component 2",
+          "dat_field": "A-2-3",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter suggestion for awarding component (e.g., NCI). All requests will be considered; however, assignment requests cannot always be honored.",
+          "constraints": "minLength 0, maxLength 7",
+          "json_path": "suggested_awarding_component2",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:SuggestedAwardingComponent2"
+        },
+        {
+          "kind": "field",
+          "label": "Suggested awarding component 3",
+          "dat_field": "A-2-4",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter suggestion for awarding component (e.g., NCI). All requests will be considered; however, assignment requests cannot always be honored.",
+          "constraints": "minLength 0, maxLength 7",
+          "json_path": "suggested_awarding_component3",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:SuggestedAwardingComponent3"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Study section assignment suggestions",
+      "help_text": "Study Section Assignment Suggestions (optional)\nEnter the short study section code in the box below. Remove all hyphens, parentheses, and spaces. For example, enter \"AIRT\" to suggest study section \"Anti-Infective Resistance and Targets\", or BP10 to suggest \"Small Business: Biobehavioral Processes \u2013 BP (10)\". All requests will be considered; however, assignment suggestions cannot always be honored.\n\nInformation about Study Sections can be found here: https://grants.nih.gov/grants/phs_assignment_information.htm#StudySection",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Suggested study section 1",
+          "dat_field": "A-3-2",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter suggested study section (e.g., AIRT). All suggestions will be considered; however, study section requests cannot always be honored. Entry limited to 20 characters.",
+          "constraints": "minLength 0, maxLength 20, pattern ^[^\\x20()\\-]*$",
+          "json_path": "suggested_study_section1",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:SuggestedStudySection1"
+        },
+        {
+          "kind": "field",
+          "label": "Suggested study section 2",
+          "dat_field": "A-3-3",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter suggested study section (e.g., AIRT). All suggestions will be considered; however, study section requests cannot always be honored. Entry limited to 20 characters.",
+          "constraints": "minLength 0, maxLength 20, pattern ^[^\\x20()\\-]*$",
+          "json_path": "suggested_study_section2",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:SuggestedStudySection2"
+        },
+        {
+          "kind": "field",
+          "label": "Suggested study section 3",
+          "dat_field": "A-3-4",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter suggested study section (e.g., AIRT). All suggestions will be considered; however, study section requests cannot always be honored. Entry limited to 20 characters.",
+          "constraints": "minLength 0, maxLength 20, pattern ^[^\\x20()\\-]*$",
+          "json_path": "suggested_study_section3",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:SuggestedStudySection3"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Rationale for assignment suggestions",
+      "help_text": "Explain why you think the suggestions are appropriate. If you contacted NIH staff, list their name(s). Entry is limited to 1000 characters.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Rationale for assignment suggestions",
+          "dat_field": "A-4-1",
+          "required": false,
+          "type": "string",
+          "widget": "TextAreaWidget",
+          "help_text": "Entry is limited to 1000 characters.",
+          "constraints": "minLength 0, maxLength 1000",
+          "json_path": "rationale_suggestions",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:RationaleSuggestions"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Scientific areas of expertise",
+      "help_text": "Do not provide names of individuals. Each entry is limited to 40 characters.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Scientific expertise 1",
+          "dat_field": "A-5-2",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter scientific area of expertise needed to review your application.",
+          "constraints": "minLength 0, maxLength 40",
+          "json_path": "expertise1",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:Expertise1"
+        },
+        {
+          "kind": "field",
+          "label": "Scientific expertise 2",
+          "dat_field": "A-5-3",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter scientific area of expertise needed to review your application.",
+          "constraints": "minLength 0, maxLength 40",
+          "json_path": "expertise2",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:Expertise2"
+        },
+        {
+          "kind": "field",
+          "label": "Scientific expertise 3",
+          "dat_field": "A-5-4",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter scientific area of expertise needed to review your application.",
+          "constraints": "minLength 0, maxLength 40",
+          "json_path": "expertise3",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:Expertise3"
+        },
+        {
+          "kind": "field",
+          "label": "Scientific expertise 4",
+          "dat_field": "A-5-5",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter scientific area of expertise needed to review your application.",
+          "constraints": "minLength 0, maxLength 40",
+          "json_path": "expertise4",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:Expertise4"
+        },
+        {
+          "kind": "field",
+          "label": "Scientific expertise 5",
+          "dat_field": "A-5-6",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "help_text": "Enter scientific area of expertise needed to review your application.",
+          "constraints": "minLength 0, maxLength 40",
+          "json_path": "expertise5",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:Expertise5"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Individuals who should not review",
+      "help_text": "List individuals who should not review your application and why (optional)",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Individuals who should not review and why",
+          "dat_field": "A-6-1",
+          "required": false,
+          "type": "string",
+          "widget": "TextAreaWidget",
+          "help_text": "Entry is limited to 1000 characters.",
+          "constraints": "minLength 0, maxLength 1000",
+          "json_path": "not_review",
+          "xml_path": "PHS_AssignmentRequestForm_4_0:NotReview"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Public reporting burden",
+      "help_text": "Public reporting burden for this collection of information is estimated to average 30 minutes per response, including the time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information.  An agency may not conduct or sponsor, and a person is not required to respond to, a collection of information unless it displays a currently valid OMB control number.  Send comments regarding this burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to: NIH, Project Clearance Branch, 6705 Rockledge Drive, MSC 7974, Bethesda, MD 20892-7974, ATTN: PRA (0925-0001).  Do not return the completed form to this address. ",
+      "children": []
+    }
+  ],
+  "notes": [
+    "Public reporting burden for this collection of information is estimated to average 30 minutes per response, including the time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information.  An agency may not conduct or sponsor, and a person is not required to respond to, a collection of information unless it displays a currently valid OMB control number.  Send comments regarding this burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to: NIH, Project Clearance Branch, 6705 Rockledge Drive, MSC 7974, Bethesda, MD 20892-7974, ATTN: PRA (0925-0001).  Do not return the completed form to this address. ",
+    "Study-section instructions reject literal spaces, parentheses and hyphens without rewriting input. The DAT uses BP10 and the PDF uses B10; both are syntactically valid examples, not a code-list authority.",
+    "Source fixed slot identities are preserved, including gaps; layout headings do not create extra answer containers.",
+    "All answers are applicant-entered suggestions. No prepopulation, signing, attachment or submission service is introduced.",
+    "The proposed SGG registration identity uses short name PHS_AssignmentRequestForm with version4.0 separately, following maintained form definitions. The DAT identifies the title/FID/version but does not establish an official API short name; the XML root remains PHS_AssignmentRequestForm_4_0."
+  ],
+  "risks": [
+    "Awarding-component participation and current study-section availability require program guidance; no external code-list validation is claimed.",
+    "Actual library/agent review is separate from human source-policy acceptance and SGG integration."
+  ]
 }
