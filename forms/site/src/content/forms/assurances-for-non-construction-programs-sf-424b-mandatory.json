@@ -1,12 +1,89 @@
 {
   "title": "Assurances for Non-Construction Programs (SF-424B - Mandatory)",
   "slug": "assurances-for-non-construction-programs-sf-424b-mandatory",
-  "status": "backlog",
+  "status": "ready",
   "family": ["SF-424 Mandatory"],
   "category": "Certification & Assurance Forms",
   "apps_count": 507,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/328",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Mandatory_SF424B-V1.1_F328.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Mandatory_SF424B-V1.1.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Mandatory_SF424B-V1.1_F328.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Mandatory_SF424B-V1.1_F328.xls",
+  "omb_number": "4040-0007",
+  "expiration_date": "07/31/2028",
+  "spec_id": "assurances-for-non-construction-programs-sf-424b-mandatory",
+  "widgets": ["TextWidget"],
+  "description": "Edition-specific assurances with explicit application and submission-owned completion values. Samples are synthetic context fixtures, not signed applications.",
+  "notes": [
+    "All four DAT completion fields remain required. The XSD permits their absence; that source distinction is recorded, not used to drop DAT obligations.",
+    "Signature and submitted date are populated by submission, not entered by the applicant. Example values are explicitly synthetic.",
+    "Applicant/title are editable only for the Individual edition; the Mandatory and R&R editions receive those values from their cover form. Read-only annotations do not implement or enforce application ownership.",
+    "The full source declaration and burden statement are retained in the edition-specific layout. The source header burden estimate and detailed statement differ; no revised burden estimate is proposed."
+  ],
+  "risks": [
+    "SGG integration must populate and protect context-owned values. A library preview and synthetic XML witness do not prove actual signing, prefill or submission."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Authorized Representative",
+      "json_path": "authorized_representative",
+      "xml_path": "Mandatory_SF424B:AuthorizedRepresentative",
+      "children": [
+        {
+          "kind": "field",
+          "label": "SIGNATURE OF AUTHORIZED CERTIFYING OFFICIAL",
+          "dat_field": "19-0",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Completed on submission to Grants.gov.",
+          "constraints": "minLength 1, maxLength 144",
+          "json_path": "authorized_representative.signature",
+          "xml_path": "Mandatory_SF424B:AuthorizedRepresentative/Mandatory_SF424B:RepresentativeName",
+          "post_populated": "Submission-owned signature placeholder; completed on submission to Grants.gov."
+        },
+        {
+          "kind": "field",
+          "label": "TITLE",
+          "dat_field": "19-1",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the title of the official certifying that the applicant organization will comply with the requirements set forth in this assurance form. This field is required.",
+          "constraints": "minLength 1, maxLength 45",
+          "json_path": "authorized_representative.title",
+          "xml_path": "Mandatory_SF424B:AuthorizedRepresentative/Mandatory_SF424B:RepresentativeTitle",
+          "pre_populated": "SF424 22-6 AuthorizedRepresentativeTitle\nSF424 R&R 19-06 Title\nSF424 Mandatory 18-5 AuthorizedRepresentativeTitle; non-editable when forward-populated."
+        }
+      ]
+    },
+    {
+      "kind": "field",
+      "label": "APPLICANT ORGANIZATION",
+      "dat_field": "19-2",
+      "required": true,
+      "type": "Text input",
+      "widget": "TextWidget",
+      "help_text": "Enter the name of the applicant organization. This field is required.",
+      "constraints": "minLength 1, maxLength 60",
+      "json_path": "applicant_organization_name",
+      "xml_path": "Mandatory_SF424B:ApplicantOrganizationName",
+      "pre_populated": "SF424 08-a OrganizationName\nSF424 R&R 05-2 OrganizationName\nSF424 Mandatory 07a-1 OrganizationName\n; non-editable when forward-populated."
+    },
+    {
+      "kind": "field",
+      "label": "DATE SUBMITTED",
+      "dat_field": "19-3",
+      "required": true,
+      "type": "Date",
+      "widget": "TextWidget",
+      "help_text": "Completed on submission to Grants.gov.",
+      "constraints": "format date",
+      "json_path": "submitted_date",
+      "xml_path": "Mandatory_SF424B:SubmittedDate",
+      "post_populated": "Submission-owned date; completed on submission to Grants.gov."
+    }
+  ],
+  "xsd_root": "Assurances"
 }

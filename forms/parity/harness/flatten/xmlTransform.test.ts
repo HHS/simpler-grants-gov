@@ -53,4 +53,24 @@ describe("xmlTransformFields", () => {
       }),
     ).toThrow(/unsupported xml_transform type conditional at budget/);
   });
+
+  it("checks static wire metadata without inventing an applicant answer", () => {
+    const fields = xmlTransformFields({
+      xml_constant_version: {
+        xml_transform: {
+          target: "FormVersionIdentifier",
+          namespace: "glob",
+          static_value: "1.1",
+        },
+      },
+      title: { xml_transform: { target: "Title" } },
+    });
+    expect([...fields.byJsonPath.keys()]).toEqual(["title"]);
+    expect([...fields.byLink.keys()]).toEqual(["title -> Title"]);
+    expect([...fields.byXmlPath.keys()]).toEqual([
+      "FormVersionIdentifier",
+      "Title",
+    ]);
+    expect(fields.byXmlPath.get("Title")?.order).toBe(1);
+  });
 });

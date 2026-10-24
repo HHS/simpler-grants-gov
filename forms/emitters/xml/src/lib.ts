@@ -64,6 +64,19 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`${"name"} is the root element of mapping ${"mapping"}, so it needs an @Xml.ns naming a member of an @Xml.nsDeclarations enum: that enum lists the namespaces the document declares.`,
       },
     },
+    "xml-target-default-unsupported": {
+      severity: "error",
+      messages: {
+        default:
+          "Unmapped root XML defaults support string values only. Keep other values explicitly mapped rather than silently omitting them.",
+      },
+    },
+    "xml-static-rule-collision": {
+      severity: "error",
+      messages: {
+        default: paramMessage`XML metadata rule ${"name"} collides with a mapped response key. Rename the XML target property; no applicant answer may be shadowed.`,
+      },
+    },
   },
   emitter: { options: EmitterOptionsSchema },
   state: { xsd: {}, form: {} },

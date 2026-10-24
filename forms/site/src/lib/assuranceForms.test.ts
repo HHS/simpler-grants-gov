@@ -13,7 +13,12 @@ import {
 } from "../../../parity/harness/load.ts";
 import { createAjv } from "./validation";
 
-const FORMS = ["assurances-for-non-construction-programs-sf-424b-individual"];
+const FORMS = [
+  "assurances-for-non-construction-programs-sf-424b-mandatory",
+  "assurances-for-non-construction-programs-sf-424b-individual",
+  "assurances-for-construction-programs-sf-424d-mandatory",
+  "assurances-for-non-construction-programs-sf-424b-r-r",
+];
 
 const normalized = (text: string) => text.replace(/\s+/g, " ").trim();
 
@@ -68,7 +73,14 @@ describe.each(FORMS)("$0 completion contract", (slug) => {
         value && typeof value === "object" ? value.xml_transform : undefined;
       return rule && Object.hasOwn(rule, "static_value") ? [rule] : [];
     });
-    expect(initialized).toHaveLength(0);
+    if (slug.endsWith("-r-r")) {
+      expect(initialized).toHaveLength(1);
+      expect(initialized[0]).toMatchObject({
+        target: "FormVersionIdentifier",
+        namespace: "glob",
+        static_value: identity.formVersion,
+      });
+    } else expect(initialized).toHaveLength(0);
   });
 
   it("requires every DAT completion value instead of weakening to the optional wire schema", () => {
@@ -85,7 +97,7 @@ describe.each(FORMS)("$0 completion contract", (slug) => {
     }
   });
 
-  it("rejects empty or overlong signature, title and applicant-name values", () => {
+  it("rejects empty or overlong signature, title and organization values", () => {
     for (const [group, name, limit] of [
       ["authorized_representative", "signature", 144],
       ["authorized_representative", "title", 45],

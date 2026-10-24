@@ -35,6 +35,8 @@ export type XmlTransformRules = Record<string, unknown>;
  *   - the root's `@Xml.ns` names a member of an `@Xml.nsDeclarations` enum, and every member
  *     of that enum is declared on the document;
  *   - a literal-typed `@Xml.attribute` on the root is a fixed root attribute.
+ *   - an unmapped root element's string default initializes wire metadata using the
+ *     API's existing `static_value` rule. It never becomes an applicant property.
  *
  * Rule order is load-bearing -- the API writes elements in the order of the rules -- so rules
  * follow the order the XSD TypeSpec model declares its properties in, which is the XSD's sequence, not
@@ -116,7 +118,7 @@ export function xmlTransform(
           : {}),
       },
     },
-    ...rules.of(resolved.children),
+    ...rules.of(resolved.children, root),
   };
 }
 
@@ -128,14 +130,58 @@ class Rules {
   ) {}
 
   /** Rules for one level, in the target's order. */
-  of(nodes: MappingNode[]): XmlTransformRules {
+  of(nodes: MappingNode[], root?: Model): XmlTransformRules {
+    const entries = nodes.map((node) => ({
+      order: position(node),
+      key: jsonPropertyName(this.program, node.source, this.casing),
+      rule: this.rule(node),
+    }));
+    // Only root wire initialization is supported here, not applicant defaults or
+    // a general mechanism for constructing missing nested wrappers.
+    for (const prop of root ? modelProperties(root) : []) {
+      if (
+        !prop.defaultValue ||
+        isAttribute(this.program, prop) ||
+        mapsTarget(nodes, prop)
+      )
+        continue;
+      if (prop.defaultValue.valueKind !== "StringValue") {
+        reportDiagnostic(this.program, {
+          code: "xml-target-default-unsupported",
+          target: prop,
+        });
+        continue;
+      }
+      // Rule keys are transport-only. An underscore prefix cannot be used: the
+      // API deliberately skips keys beginning with an underscore.
+      const key = `xml_constant_${jsonPropertyName(this.program, prop, this.casing)}`;
+      if (entries.some((entry) => entry.key === key)) {
+        reportDiagnostic(this.program, {
+          code: "xml-static-rule-collision",
+          target: prop,
+          format: { name: key },
+        });
+        continue;
+      }
+      const namespace = elementNamespace(this.program, prop);
+      entries.push({
+        order: modelProperties(root!).indexOf(prop),
+        key,
+        rule: {
+          xml_transform: {
+            target: xmlName(this.program, prop),
+            static_value: prop.defaultValue.value,
+            ...(namespace && namespace.namespace !== this.defaultNamespace
+              ? { namespace: namespace.prefix }
+              : {}),
+          },
+        },
+      });
+    }
     return Object.fromEntries(
-      [...nodes]
-        .sort((a, b) => position(a) - position(b))
-        .map((node) => [
-          jsonPropertyName(this.program, node.source, this.casing),
-          this.rule(node),
-        ]),
+      entries
+        .sort((a, b) => a.order - b.order)
+        .map(({ key, rule }) => [key, rule]),
     );
   }
 
@@ -158,6 +204,15 @@ class Rules {
       return { xml_transform: transform, items: this.of(node.children) };
     return { xml_transform: transform };
   }
+}
+
+/** A use-level mapping wins over a target default, including mapped groups. */
+function mapsTarget(nodes: MappingNode[], prop: ModelProperty): boolean {
+  return nodes.some(
+    (node) =>
+      node.target === prop ||
+      ("children" in node && mapsTarget(node.children, prop)),
+  );
 }
 
 /** Where a node sits in its target's sequence. A group sits where its first child does. */

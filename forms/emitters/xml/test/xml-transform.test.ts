@@ -244,3 +244,162 @@ describe("$onEmit", () => {
     });
   });
 });
+
+describe("root wire initialization", () => {
+  const compileDefaults = async (declaration: string, form = FORM) => {
+    const code = spec(form).replace(
+      '@name("Title") title: string;',
+      `${declaration}\n@name("Title") title: string = "Not an applicant default";`,
+    );
+    const { program } = await Tester.compile(code);
+    const result = xmlTransform(
+      program,
+      lookup<Model>(program, "Forms.Example"),
+      lookup<EnumMember>(program, "Mappings.Target.xml"),
+      "snake",
+      "to",
+    )!;
+    return { program, result };
+  };
+
+  it("uses the existing static-value rule with source order and namespace", async () => {
+    const { program, result } = await compileDefaults(
+      '@ns(Ns.lib) @name("Version") version: string = "1.1";',
+    );
+    expectDiagnostics(program.diagnostics, []);
+    expect(Object.keys(result)).toEqual([
+      "_xml_config",
+      "xml_constant_version",
+      "form_title",
+      "contacts",
+      "foot_note",
+    ]);
+    expect(result.xml_constant_version).toEqual({
+      xml_transform: {
+        target: "Version",
+        static_value: "1.1",
+        namespace: "lib",
+      },
+    });
+    // A mapped property's default never shadows applicant data.
+    expect(result.form_title).toEqual({ xml_transform: { target: "Title" } });
+    expect(result).not.toHaveProperty("xml_constant_title");
+    expect(result).toHaveProperty("_xml_config.xml_structure.root_attributes", {
+      FormVersion: "1.0",
+    });
+  });
+
+  it("preserves a source-permitted empty string rather than dropping it", async () => {
+    const { result } = await compileDefaults('version: string = "";');
+    expect(
+      (result.xml_constant_version as any).xml_transform.static_value,
+    ).toBe("");
+  });
+
+  it("initializes wire metadata through target-side from mappings", async () => {
+    const { program } = await Tester.compile(`
+      import "simpler-forms";
+      import "@typespec/xml";
+      import "form-library-xml";
+      using SimplerForms;
+      using TypeSpec.Xml;
+
+      @Mapping.targets(Target)
+      namespace Mappings { enum Target { xml } }
+
+      namespace Forms {
+        @Meta.form(#{ id: "example", formName: "Example" })
+        model Example { title: string; }
+      }
+
+      namespace Wire {
+        @nsDeclarations
+        enum Ns { Form: "http://example.gov/form", global: "http://example.gov/global" }
+
+        @name("FormRoot")
+        @ns(Ns.Form)
+        @Mapping.from(Mappings.Target.xml, Forms.Example)
+        model Root {
+          @ns(Ns.global) @name("FormVersionIdentifier")
+          formVersionIdentifier: string = "1.1";
+
+          @Mapping.from(Mappings.Target.xml, Forms.Example.title)
+          @name("Title")
+          title: string = "Never replace an applicant answer";
+
+          @attribute @name("FormVersion") formVersion: "1.1";
+        }
+      }
+    `);
+    expectDiagnostics(program.diagnostics, []);
+    const result = xmlTransform(
+      program,
+      lookup<Model>(program, "Forms.Example"),
+      lookup<EnumMember>(program, "Mappings.Target.xml"),
+      "snake",
+      "from",
+    )!;
+    expect(Object.keys(result)).toEqual([
+      "_xml_config",
+      "xml_constant_form_version_identifier",
+      "title",
+    ]);
+    expect(result.xml_constant_form_version_identifier).toEqual({
+      xml_transform: {
+        target: "FormVersionIdentifier",
+        static_value: "1.1",
+        namespace: "global",
+      },
+    });
+    expect(result.title).toEqual({ xml_transform: { target: "Title" } });
+    expect(result).not.toHaveProperty("xml_constant_title");
+    expect(result).toHaveProperty("_xml_config.xml_structure.root_attributes", {
+      FormVersion: "1.1",
+    });
+  });
+
+  it("lets an explicitly mapped group own a defaulted target", async () => {
+    const form =
+      FORM.replace(
+        "model Example {",
+        '@Mapping.path(Mappings.Target.xml, "context.version", Wire.Root.version)\nmodel Example { context: Values;',
+      ) + "\nmodel Values { version: string; }";
+    const { result } = await compileDefaults('version: string = "1.1";', form);
+    expect(result).not.toHaveProperty("xml_constant_version");
+    expect(result.context).toEqual({
+      version: { xml_transform: { target: "version" } },
+    });
+  });
+
+  it.each([
+    "version: int32 = 0;",
+    "version: boolean = false;",
+    "version: string | null = null;",
+    'version: string[] = #["a"];',
+    'version: { value: string } = #{ value: "a" };',
+  ])("diagnoses unsupported initialization: %s", async (declaration) => {
+    const { program } = await compileDefaults(declaration);
+    expect(program.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: "form-library-xml/xml-target-default-unsupported",
+        severity: "error",
+      }),
+    );
+  });
+
+  it("diagnoses a transport-rule key collision instead of shadowing an answer", async () => {
+    const { program, result } = await compileDefaults(
+      'version: string = "1.1";',
+      FORM.replace("formTitle: string;", "xmlConstantVersion: string;"),
+    );
+    expect(program.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: "form-library-xml/xml-static-rule-collision",
+        severity: "error",
+      }),
+    );
+    expect(result.xml_constant_version).toEqual({
+      xml_transform: { target: "Title" },
+    });
+  });
+});

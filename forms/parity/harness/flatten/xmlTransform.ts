@@ -46,6 +46,15 @@ export function xmlTransformFields(rules: Json): XmlTransformFields {
           `unsupported xml_transform type ${transform.type} at ${render([...json, key])}`,
         );
       const step = String(transform.target);
+      if (Object.hasOwn(transform, "static_value")) {
+        // Source-owned wire metadata has an XML path but no applicant answer or
+        // JSON-to-XML link. Keep it visible to source coverage and order checks.
+        fields.byXmlPath.set([...xml, step].join("/"), {
+          order: order++,
+          rules: {},
+        });
+        continue;
+      }
       if (transform.type === "nested_object") {
         walk(rule as Json, [...json, key], [...xml, step]);
         continue;
