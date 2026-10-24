@@ -13,7 +13,12 @@ export function uiSchemaFields(ui: Json, schema: Fields): Fields {
       const segments = [...prefix, ...fromScope(node.scope)];
       const detail = node.options?.detail as Json | undefined;
       if (detail) return walk(detail, [...segments, ARRAY]);
-      const key = render(segments);
+      const direct = render(segments);
+      // A scalar array has one control, with no item-detail layout. Its repeated leaf is
+      // explicit in the schema/index, so do not confuse it with one scalar answer.
+      const repeated = render([...segments, ARRAY]);
+      const key =
+        schema.has(repeated) && !schema.has(direct) ? repeated : direct;
       fields.set(key, {
         order: fields.size,
         label: node.label,

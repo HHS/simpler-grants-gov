@@ -104,13 +104,28 @@ export function jsonSchemaFields(schema: Json): Fields {
         walk(child, [...segments, name], required && own.has(name), repeats);
       return;
     }
-    if (
-      node.type === "array" &&
-      node.items &&
-      isObject(mergeAllOf(node.items))
-    ) {
+    if (node.type === "array" && node.items) {
+      const item = mergeAllOf(node.items);
+      if (!isObject(item)) {
+        // A list of scalar answers has one repeated leaf, just like index.json records it.
+        // Its label/help belong to the list control; value constraints belong to each item.
+        fields.set(render([...segments, ARRAY]), {
+          order: fields.size,
+          label: node.title,
+          help: node.description,
+          required: required && (node.minItems ?? 0) > 0 ? "yes" : "no",
+          rules: {
+            ...rulesOf(item),
+            maxOccurs:
+              repeats === "unbounded" || typeof node.maxItems !== "number"
+                ? "unbounded"
+                : repeats * node.maxItems,
+          },
+        });
+        return;
+      }
       walk(
-        node.items,
+        item,
         [...segments, ARRAY],
         required && (node.minItems ?? 0) > 0,
         repeats === "unbounded" || typeof node.maxItems !== "number"

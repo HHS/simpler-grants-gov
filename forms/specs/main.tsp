@@ -4,3 +4,11 @@ import "./forms/key-contacts/index.tsp";
 import "./forms/nsf-key-person-expanded/index.tsp";
 import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
+
+import "./forms/attachments/index.tsp";
+import "./forms/project-narrative-attachment-form/index.tsp";
+import "./forms/budget-narrative-attachment-form/index.tsp";
+import "./forms/other-attachments-form/index.tsp";
+import "./forms/project-abstract/index.tsp";
+import "./forms/project-abstract-summary/index.tsp";
+import "./forms/ed-abstract-form/index.tsp";
