@@ -2,6 +2,7 @@ import "form-library-xml";
 import "simpler-forms";
 
 import "#forms/index.tsp";
+import "#questions/submission/index.tsp";
 import "#questions/person/title.tsp";
 
 using SimplerForms;
@@ -15,13 +16,8 @@ scalar ApplicantName extends string;
 
 /** The representative whose signature placeholder is populated by submission. */
 model SF424BIndividualRepresentative {
-  @doc("Completed on submission to Grants.gov.")
-  @UI.label("SIGNATURE OF AUTHORIZED CERTIFYING OFFICIAL")
-  @UI.widget(Rendering.Widget.Text)
   @UI.readOnly
-  @minLength(1)
-  @maxLength(144)
-  signature: string;
+  signature: Questions.Submission.SubmissionSignature;
 
   @doc("Enter the title of the official certifying that the applicant will comply with the requirements set forth in this assurance form. This field is required.")
   @UI.label("TITLE")
