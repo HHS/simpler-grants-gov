@@ -1,6 +1,8 @@
 import "form-library-xml";
 import "simpler-forms";
 import "#forms/index.tsp";
+import "#questions/award/index.tsp";
+import "#questions/submission/index.tsp";
 import "#forms/shared/usda-workplace-address.tsp";
 import "#questions/types/yes-no.tsp";
 import "#questions/organization/index.tsp";
@@ -27,10 +29,7 @@ model AuthorizedRepresentative {
 model Submission {
   @doc("Completed by Grants.gov upon submission. This field is required.")
   @UI.label("SIGNATURE(S)")
-  @UI.widget(Rendering.Widget.Text)
-  @minLength(1)
-  @maxLength(144)
-  signature: string;
+  signature: Questions.Submission.SubmissionSignature;
 
   @doc("Completed by Grants.gov upon submission. This field is required.")
   @UI.label("DATE")
@@ -108,7 +107,7 @@ model Submission {
     description: "Illustrative applicant answers and explicitly illustrative cover/submission test context. No actual organization or person has certified, signed or submitted.",
   }
 )
-model Certification {
+model AD1049Certification {
   @doc("The grantee may identify up to ten places of performance. The source instructions also permit workplaces to remain on file; no location is inferred when none is entered.")
   @UI.label("Place of Performance")
   @UI.widget(Rendering.Widget.CollapsibleFieldList)
@@ -128,13 +127,8 @@ model Certification {
   @Meta.role(ResponseRole.systemValue)
   organizationName: Questions.Organizations.OrgName;
 
-  @doc("Enter the PR/Award Number or Project Name. This field is required.")
-  @UI.label("PR/AWARD NUMBER OR PROJECT NAME")
-  @UI.widget(Rendering.Widget.Text)
   @Meta.role(ResponseRole.applicantInput)
-  @minLength(1)
-  @maxLength(60)
-  projectName: string;
+  projectName: Questions.Awards.ProjectReference;
 
   @doc("Pre-populated from the Application cover sheet. First name, last name and title are required.")
   @UI.label("Authorized Representative")

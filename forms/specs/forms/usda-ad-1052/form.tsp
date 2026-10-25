@@ -1,6 +1,8 @@
 import "form-library-xml";
 import "simpler-forms";
 import "#forms/index.tsp";
+import "#questions/award/index.tsp";
+import "#questions/submission/index.tsp";
 import "#forms/shared/usda-workplace-address.tsp";
 import "#questions/types/address.tsp";
 import "#questions/types/yes-no.tsp";
@@ -51,10 +53,7 @@ model AD1052AuthorizedRepresentative {
 model AD1052Submission {
   @doc("Completed by Grants.gov upon submission. This field is required.")
   @UI.label("SIGNATURE(S)")
-  @UI.widget(Rendering.Widget.Text)
-  @minLength(1)
-  @maxLength(144)
-  signature: string;
+  signature: Questions.Submission.SubmissionSignature;
 
   @doc("Completed by Grants.gov upon submission. This field is required.")
   @UI.label("DATE")
@@ -168,13 +167,8 @@ model AD1052Certification {
   @Meta.role(ResponseRole.applicantInput)
   agencyName: Questions.Organizations.OrgName;
 
-  @doc("Enter the PR/Award Number or Project Name. This field is required.")
-  @UI.label("PR/AWARD NUMBER OR PROJECT NAME")
-  @UI.widget(Rendering.Widget.Text)
   @Meta.role(ResponseRole.applicantInput)
-  @minLength(1)
-  @maxLength(60)
-  projectName: string;
+  projectName: Questions.Awards.ProjectReference;
 
   @doc("Pre-populated from the Application cover sheet. First name, last name and title are required.")
   @UI.label("Authorized Representative")
