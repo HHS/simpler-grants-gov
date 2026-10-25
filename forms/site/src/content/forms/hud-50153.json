@@ -1,8 +1,291 @@
 {
   "title": "HUD-50153",
   "slug": "hud-50153",
-  "status": "backlog",
-  "family": [],
-  "category": "Core Application Forms",
-  "apps_count": 497
+  "status": "in_progress",
+  "family": [
+    "SF-424"
+  ],
+  "category": "Certification & Assurance Forms",
+  "apps_count": 497,
+  "omb_number": "2501-0044",
+  "expiration_date": "02/28/2027",
+  "fid_url": "https://www.grants.gov/forms/form-items-description/fid/844",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/HUD_50153-V1.0_F844.xls",
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/HUD_50153-V1.0.xsd",
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/HUD_50153-V1.0_F844.pdf",
+  "widgets": [
+    "TextWidget",
+    "RadioWidget"
+  ],
+  "spec_id": "hud-50153",
+  "description": "Identify the proposed Promise Zone community and geographic criterion, then review the distinct Promise Zone official and submission context.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Applicant and proposed community",
+      "help_text": "View Burden Statement\n\nCertification of Consistency with Promise Zone Goals and Implementation\n\nU.S. Department of Housing and Urban Development \n\nOMB Number: 2501-0044\nExpiration Date: 02/28/2027\n\nI/We, the undersigned, certify under penalty of perjury that the information provided below is true, correct, and accurate. Warning: Anyone who knowingly submits a false claim or makes a false statement is subject to criminal and/or civil penalties, including confinement for up to 5 years, fines, and civil and administrative penalties (18 U.S.C §§ 287, 1001, 1010, 1012, 1014; 31 U.S.C. § 3729, 3802; 24 CFR § 28.10(b)(1)(iii)).\n\nI/We, the undersigned, certify that the proposed activities/projects in the application are consistent with the goals of the Promise Zones and the revitalization strategies detailed in my Promise Zone application. (Complete the fields below.)\n",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Applicant Name:",
+          "dat_field": "1-1",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF-424.",
+          "json_path": "applicant_name",
+          "xml_path": "HUD_50153:OrganizationName",
+          "constraints": "minLength 1, maxLength 60",
+          "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+        },
+        {
+          "kind": "field",
+          "label": "Number of the Federal Program to which the applicant is applying:",
+          "dat_field": "1-2-1",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF-424.",
+          "json_path": "federal_program_number",
+          "xml_path": "HUD_50153:AssistanceListingNumber",
+          "constraints": "minLength 1, maxLength 15",
+          "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+        },
+        {
+          "kind": "field",
+          "label": "Name of the Federal Program to which the applicant is applying:",
+          "dat_field": "1-2-2",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF-424.",
+          "json_path": "federal_program_title",
+          "xml_path": "HUD_50153:AssistanceListingTitle",
+          "constraints": "minLength 1, maxLength 120",
+          "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+        },
+        {
+          "kind": "field",
+          "label": "Name of the Promise Zone Designated Community:",
+          "dat_field": "1-3",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the name of the Promise Zone Designated Community. This field is required.",
+          "json_path": "designated_community",
+          "xml_path": "HUD_50153:DesignatedCommunity",
+          "constraints": "minLength 1, maxLength 200"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Geographic criteria",
+      "help_text": "Please note that projects which substantially and directly benefit Promise Zone residents but which are not within the boundaries of the Promise Zone may be considered. Agencies will make clear the acceptable definition of substantially and directly beneficial in the program’s award and funding announcement.\n\nI further certify that:\n\n(1) The applicant is engaged in activities, that in consultation with the Promise Zone designee, further the purposes of the Promise Zones initiative; and\n(2) The applicant’s proposed activities either directly reflect the goals of the Promise Zone or will result in the delivery of services that are consistent with the goals of the Promise Zones initiative; and\n(3) The applicant has committed to maintain an on-going relationship with the Promise Zone designee for the purposes of being part of the implementation processes in the designated area.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "The proposed project meets the following geographic criteria (please select one):",
+          "dat_field": "2-0",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Select one option from the provided list.\n\nWithin Boundries — The proposed project is solely within Promise Zone boundaries.\n\nIncludes Zone — The proposed project includes the entire Promise Zone boundary and other communities.\n\nIncludes Portion — The proposed project includes a portion of the Promise Zone boundary.\n\nDelivers Benefits — The proposed project is outside of the Promise Zone boundaries, but specific and definable services or benefits will be delivered within the Promise Zone or to Promise Zone residents.",
+          "json_path": "geographic_criteria",
+          "xml_path": "HUD_50153:GeographicCriteria",
+          "constraints": ""
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Promise Zone official and submission",
+      "help_text": "I further certify that:\n\n(1) The applicant is engaged in activities, that in consultation with the Promise Zone designee, further the purposes of the Promise Zones initiative; and\n(2) The applicant’s proposed activities either directly reflect the goals of the Promise Zone or will result in the delivery of services that are consistent with the goals of the Promise Zones initiative; and\n(3) The applicant has committed to maintain an on-going relationship with the Promise Zone designee for the purposes of being part of the implementation processes in the designated area.\n\nPromise Zone Official authorized to certify the project meets the above criteria to receive bonus points:\n\nform HUD 50153 (09/2014)",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Promise Zone Official",
+          "help_text": "The PDF identifies a Promise Zone official; the DAT supplies these fields from SF-424. Review this source ownership conflict before production integration.",
+          "children": [
+            {
+              "kind": "section",
+              "label": "Name",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Prefix",
+                  "dat_field": "5-1-1",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the prefix.",
+                  "json_path": "promise_zone_official.name.prefix",
+                  "xml_path": "HUD_50153:AuthorizedRepresentativeName/globLib:PrefixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Pre-populated from the SF-424.  Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "First Name",
+                  "dat_field": "5-1-2",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first name.",
+                  "json_path": "promise_zone_official.name.first_name",
+                  "xml_path": "HUD_50153:AuthorizedRepresentativeName/globLib:FirstName",
+                  "constraints": "minLength 1, maxLength 35",
+                  "pre_populated": "Pre-populated from the SF-424. Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Middle Name",
+                  "dat_field": "5-1-3",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the middle name.",
+                  "json_path": "promise_zone_official.name.middle_name",
+                  "xml_path": "HUD_50153:AuthorizedRepresentativeName/globLib:MiddleName",
+                  "constraints": "minLength 1, maxLength 25",
+                  "pre_populated": "Pre-populated from the SF-424.  Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Last Name",
+                  "dat_field": "5-1-4",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the last name.",
+                  "json_path": "promise_zone_official.name.last_name",
+                  "xml_path": "HUD_50153:AuthorizedRepresentativeName/globLib:LastName",
+                  "constraints": "minLength 1, maxLength 60",
+                  "pre_populated": "Pre-populated from the SF-424. Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Suffix",
+                  "dat_field": "5-1-5",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the suffix.",
+                  "json_path": "promise_zone_official.name.suffix",
+                  "xml_path": "HUD_50153:AuthorizedRepresentativeName/globLib:SuffixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Pre-populated from the SF-424.  Read-only."
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "label": "Title:",
+              "dat_field": "5-2",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Pre-populated from the SF-424.",
+              "json_path": "promise_zone_official.title",
+              "xml_path": "HUD_50153:AuthorizedRepresentativeTitle",
+              "constraints": "minLength 1, maxLength 45",
+              "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "field",
+              "label": "Organization:",
+              "dat_field": "5-3",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Pre-populated from the SF-424.",
+              "json_path": "promise_zone_official.organization_name",
+              "xml_path": "HUD_50153:AuthorizedRepresentativeOrganization",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Signature:",
+          "dat_field": "5-4",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed on submission to Grants.gov.",
+          "json_path": "signature",
+          "xml_path": "HUD_50153:AuthorizedRepresentativeSignature",
+          "constraints": "minLength 1, maxLength 144",
+          "post_populated": "Completed on submission to Grants.gov. Read-only; preview data is illustrative."
+        },
+        {
+          "kind": "field",
+          "label": "Date:",
+          "dat_field": "5-5",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed on submission to Grants.gov.",
+          "json_path": "signature_date",
+          "xml_path": "HUD_50153:SignatureDate",
+          "constraints": "format date",
+          "post_populated": "Completed on submission to Grants.gov. Read-only; preview data is illustrative."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The exact source geographic codes, including Within Boundries, are preserved. Full choice definitions appear beside them; no geography/eligibility service is introduced.",
+    "Legal declarations and warning remain source-local text. The Promise Zone official remains a distinct role from the applicant.",
+    "Optional program number/title use their source empty-string and maximum-length bounds, not a new generic program question.",
+    "Name/organization/title reuse existing questions; signature reuses submission/signature. Optional name-part DAT min0 versus XSD min1 remains explicit.",
+    "Optional program strings preserve original XSD minLength1 when present; DAT min0 allows a broader empty lexical form. Absence remains valid."
+  ],
+  "risks": [
+    "The PDF calls for a Promise Zone official, but the DAT forward-populates that official from the applicant SF-424. The definition preserves the DAT’s readonly context and names the PDF role accurately; a source owner must resolve authentic ownership before production integration."
+  ],
+  "examples": [
+    {
+      "label": "Illustrative scenario 1",
+      "description": "Source community/geographic choice with illustrative supplied context.",
+      "data": {
+        "applicant_name": "Illustrative Community Services",
+        "federal_program_number": "14.000",
+        "federal_program_title": "Illustrative Program",
+        "designated_community": "Illustrative Promise Zone",
+        "geographic_criteria": "Delivers Benefits",
+        "promise_zone_official": {
+          "name": {
+            "prefix": "Dr.",
+            "first_name": "Morgan",
+            "last_name": "Patel"
+          },
+          "title": "Illustrative Zone Official",
+          "organization_name": "Illustrative Zone Office"
+        },
+        "signature": "ILLUSTRATIVE SUBMISSION CONTEXT",
+        "signature_date": "2026-10-25"
+      }
+    },
+    {
+      "label": "Illustrative scenario 2",
+      "description": "Second geographic criterion and community scenario.",
+      "data": {
+        "applicant_name": "Illustrative Community Services",
+        "designated_community": "Illustrative Promise Zone",
+        "geographic_criteria": "Within Boundries",
+        "promise_zone_official": {
+          "name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "title": "Illustrative Zone Official",
+          "organization_name": "Illustrative Zone Office"
+        },
+        "signature": "ILLUSTRATIVE SUBMISSION CONTEXT",
+        "signature_date": "2026-10-25"
+      }
+    }
+  ]
 }

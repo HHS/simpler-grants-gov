@@ -1,8 +1,224 @@
 {
   "title": "Applicant and Recipient Assurances and Certifications (HUD-424B)",
   "slug": "applicant-and-recipient-assurances-and-certifications-hud-424b",
-  "status": "backlog",
-  "family": [],
-  "category": "Core Application Forms",
-  "apps_count": 4550
+  "status": "in_progress",
+  "family": [
+    "SF-424"
+  ],
+  "category": "Certification & Assurance Forms",
+  "apps_count": 4550,
+  "omb_number": "2501-0044",
+  "expiration_date": "02/28/2027",
+  "fid_url": "https://www.grants.gov/forms/form-items-description/fid/808",
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/HUD_424B-V1.0_F808.pdf",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/HUD_424B-V1.0_F808.xls",
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/HUD_424B-V1.0.xsd",
+  "widgets": [
+    "TextWidget"
+  ],
+  "spec_id": "applicant-and-recipient-assurances-and-certifications-hud-424b",
+  "description": "Review the supplied applicant and representative context, nine source assurances and submission context. No extra applicant consent or signing field.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Review applicant and representative",
+      "help_text": "Instructions for the HUD-424-B Assurances and Certifications\n\nAs part of your application for HUD funding, you, as the official authorized to sign on behalf of your organization or as an individual, must provide the following assurances and certifications, which replace any requirement to submit an SF-424-B or SF-424-D. The Responsible Civil Rights Official has specified this form for use for purposes of general compliance with 24 CFR §§ 1.5, 3.115, 8.50, and 146.25, as applicable. The Responsible Civil Rights Official may require specific civil rights assurances to be furnished consistent with those authorities and will specify the form on which such assurances must be made. A failure to furnish or comply with the civil rights assurances contained in this form may result in the procedures to effect compliance at 24 CFR §§ 1.8, 3.115, 8.57, or 146.39. \n\nBy submitting this form, you are stating that all assertions made in this form are true, accurate, and correct.\n\nAs the duly representative of the applicant, I certify that the applicant:",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Authorized Representative",
+          "help_text": "Pre-populated from the SF-424. Review this supplied context; it is read-only.",
+          "children": [
+            {
+              "kind": "section",
+              "label": "Authorized Representative Name",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Prefix",
+                  "dat_field": "02-02-1",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the prefix.",
+                  "json_path": "authorized_representative.name.prefix",
+                  "xml_path": "HUD_424B:AuthorizedRepresentative/globLib:PrefixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Pre-populated from the SF-424. Read-only. DAT permits explicit empty optional name parts; original GlobalLibrary requires minLength 1 when present."
+                },
+                {
+                  "kind": "field",
+                  "label": "First Name",
+                  "dat_field": "02-02-2",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first name.",
+                  "json_path": "authorized_representative.name.first_name",
+                  "xml_path": "HUD_424B:AuthorizedRepresentative/globLib:FirstName",
+                  "constraints": "minLength 1, maxLength 35",
+                  "pre_populated": "Pre-populated from the SF-424. Read-only. DAT permits explicit empty optional name parts; original GlobalLibrary requires minLength 1 when present."
+                },
+                {
+                  "kind": "field",
+                  "label": "Middle Name",
+                  "dat_field": "02-02-3",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the middle name.",
+                  "json_path": "authorized_representative.name.middle_name",
+                  "xml_path": "HUD_424B:AuthorizedRepresentative/globLib:MiddleName",
+                  "constraints": "minLength 1, maxLength 25",
+                  "pre_populated": "Pre-populated from the SF-424. Read-only. DAT permits explicit empty optional name parts; original GlobalLibrary requires minLength 1 when present."
+                },
+                {
+                  "kind": "field",
+                  "label": "Last Name",
+                  "dat_field": "02-02-4",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the last name.",
+                  "json_path": "authorized_representative.name.last_name",
+                  "xml_path": "HUD_424B:AuthorizedRepresentative/globLib:LastName",
+                  "constraints": "minLength 1, maxLength 60",
+                  "pre_populated": "Pre-populated from the SF-424. Read-only. DAT permits explicit empty optional name parts; original GlobalLibrary requires minLength 1 when present."
+                },
+                {
+                  "kind": "field",
+                  "label": "Suffix",
+                  "dat_field": "02-02-5",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the suffix.",
+                  "json_path": "authorized_representative.name.suffix",
+                  "xml_path": "HUD_424B:AuthorizedRepresentative/globLib:SuffixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Pre-populated from the SF-424. Read-only. DAT permits explicit empty optional name parts; original GlobalLibrary requires minLength 1 when present."
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "label": "Title",
+              "dat_field": "02-03",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the position title.",
+              "json_path": "authorized_representative.title",
+              "xml_path": "HUD_424B:Title",
+              "constraints": "minLength 1, maxLength 45",
+              "pre_populated": "Pre-populated from the SF-424. Read-only."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Applicant Organization",
+          "dat_field": "02-04",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF-424.",
+          "json_path": "organization_name",
+          "xml_path": "HUD_424B:OrganizationName",
+          "constraints": "minLength 1, maxLength 60",
+          "pre_populated": "Pre-populated from the SF-424. Read-only."
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Assurances and certifications",
+      "help_text": "1. Has the legal authority to apply for Federal assistance, has the institutional, managerial and financial capability (including funds to pay the non-Federal share of program costs) to plan, manage and complete the program as described in the application and the governing body has duly authorized the submission of the application, including these assurances and certifications, and authorized me as the official representative of the application to act in connection with the application and to provide any additional information as may be required.\n\n2. Will administer the grant in compliance with Title VI of the Civil Rights Act of 1964 (42 U.S.C 2000(d)) and implementing regulations (24 CFR part 1), which provide that no person in the United States shall, on the grounds of race, color or national origin, be excluded from participation in, be denied the benefits of, or otherwise be subject to discrimination under any program or activity that receives Federal financial assistance OR if the applicant is a Federally recognized Indian tribe or its tribally designated housing entity, is subject to the Indian Civil Rights Act (25 U.S.C. 1301-1303).\n\n3. Will administer the grant in compliance with Section 504 of the Rehabilitation Act of 1973 (29 U.S.C. 794), as amended, and implementing regulations at 24 CFR part 8, the American Disabilities Act (42 U.S.C. §§ 12101 et.seq.), and implementing regulations at 28 CFR part 35 or 36, as applicable, and the Age Discrimination Act of 1975 (42 U.S.C. 6101-07) as amended, and implementing regulations at 24 CFR part 146 which together provide that no person in the United States shall, on the grounds of disability or age, be excluded from participation in, be denied the benefits of, or otherwise be subjected to discrimination under any program or activity that receives Federal financial assistance; except if the grant program authorizes or limits participation to designated populations, then the applicant will comply with the nondiscrimination requirements within the designated population.\n\n4. Will comply with the Fair Housing Act (42 U.S.C. 3601-19), as amended, and the implementing regulations at 24  CFR part 100, which prohibit discrimination in housing on the basis of race, color, religion, sex, disability, familial status, or national origin and will affirmatively further fair housing; except an applicant which is an Indian tribe or its instrumentality which is excluded by statute from coverage does not make this certification; and further except if the grant program authorizes or limits participation to designated populations, then the applicant will comply with the nondiscrimination requirements within the designated population.\n\n5. Will comply with all applicable Federal nondiscrimination requirements, including those listed at 24 CFR §§ 5.105(a) and 5.106 as applicable.\n\n6. Will not use Federal funding to promote diversity, equity, and inclusion (DEI) mandates, policies, programs, or activities that violate any applicable Federal anti-discrimination laws.\n\n7. Will comply with the acquisition and relocation requirements of the Uniform Relocation Assistance and Real Property Acquisition Policies Act of 1970, as amended (42 U.S.C. 4601) and implementing regulations at 49 CFR part 24 and, as applicable, Section 104(d) of the Housing and Community Development Act of 1974 (42 U.S.C. 5304(d)) and implementing regulations at 24 CFR part 42, subpart A.\n\n8. Will comply with the environmental requirements of the National Environmental Policy Act (42 U.S.C. 4321 et.seq.) and related Federal authorities prior to the commitment or expenditure of funds for property.\n\n9. That no Federal appropriated funds have been paid, or will be paid, by or on behalf of the applicant, to any person for influencing or attempting to influence an officer or employee of any agency, a Member of Congress, and officer or employee of Congress, or an employee of a Member of Congress, in connection with the awarding of this Federal grant or its extension, renewal, amendment or modification. If funds other than Federal appropriated funds have or will be paid for influencing or attempting to influence the persons listed above, I shall complete and submit Standard Form-LLL, Disclosure Form to Report Lobbying. I certify that I shall require all subawards at all tiers (including sub-grants and contracts) to similarly certify and disclose accordingly. Federally recognized Indian Tribes and tribally designated housing entities (TDHEs) established by Federally-recognized Indian tribes as a result of the exercise of the tribe’s sovereign power are excluded from coverage by the Byrd Amendment, but State-recognized Indian tribes and TDHEs established under State law are not excluded from the statute’s coverage.",
+      "children": []
+    },
+    {
+      "kind": "section",
+      "label": "Submission context",
+      "help_text": "I/We, the undersigned, certify under penalty of perjury that the information provided above is true, accurate, and correct.\n\nWARNING: Anyone who knowingly submits a false claim or makes a false statement is subject to criminal and/or civil penalties, including confinement for up to 5 years, fines, and civil and administrative penalties. (18 U.S.C. §§287, 1001, 1010, 1012, 1014;  31 U.S.C. §3729, 3802; 24 CFR §28.10(b)(1)(iii)). \n\nForm HUD-424-B (02/23)",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Signature",
+          "dat_field": "04-03",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed Upon Submission to Grants.gov.",
+          "json_path": "submission.signature",
+          "xml_path": "HUD_424B:Signature",
+          "constraints": "minLength 1, maxLength 144",
+          "post_populated": "Completed upon submission; illustrative preview context is not authentic signing."
+        },
+        {
+          "kind": "field",
+          "label": "Date",
+          "dat_field": "04-04",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed Upon Submission to Grants.gov.",
+          "json_path": "submission.date_signed",
+          "xml_path": "HUD_424B:DateSigned",
+          "constraints": "format date",
+          "post_populated": "Completed upon submission; illustrative preview context is not authentic signing."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Exact source legal text and warnings are retained, including all nine numbered declarations. Headings are UI-only; source XML has no declaration answer.",
+    "Optional name parts are absent in the minimal sample. Present optional parts use original GlobalLibrary minLength 1; DAT column N allows 0. The differing source layers are recorded rather than weakening the shared name.",
+    "Source prefix/suffix combo boxes permit free entry; shared Text captures the same bounded value without imposing a closed enum.",
+    "Cover-provided and submission-provided fields are read-only. Examples are synthetic context, not authentic prefill, certification, signing or submission."
+  ],
+  "risks": [
+    "Confirm DAT versus XSD optional-name empty-value policy with the source owner; current definition preserves XSD-valid absence/nonempty values.",
+    "API registration, authentic context and submission/XML integration remain separate."
+  ],
+  "examples": [
+    {
+      "label": "Illustrative scenario 1",
+      "description": "Illustrative supplied organization, representative and submission context.",
+      "data": {
+        "authorized_representative": {
+          "name": {
+            "prefix": "Dr.",
+            "first_name": "Morgan",
+            "middle_name": "Alex",
+            "last_name": "Patel",
+            "suffix": "Jr."
+          },
+          "title": "Authorized Representative"
+        },
+        "organization_name": "Illustrative Community Housing",
+        "submission": {
+          "signature": "ILLUSTRATIVE SUBMISSION CONTEXT",
+          "date_signed": "2026-10-25"
+        }
+      }
+    },
+    {
+      "label": "Illustrative scenario 2",
+      "description": "Second illustrative supplied-context case.",
+      "data": {
+        "authorized_representative": {
+          "name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "title": "Executive Director"
+        },
+        "organization_name": "Illustrative Housing Services",
+        "submission": {
+          "signature": "ILLUSTRATIVE SUBMISSION CONTEXT",
+          "date_signed": "2026-10-25"
+        }
+      }
+    }
+  ]
 }

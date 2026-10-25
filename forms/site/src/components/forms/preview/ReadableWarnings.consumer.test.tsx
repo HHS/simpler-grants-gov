@@ -78,3 +78,31 @@ it("names the FNS long-answer limit without echoing the answer, then recovers li
     expect(screen.getByTestId("readable-warnings").textContent).toBe("[]"),
   );
 });
+it("uses OZ source instructions for the word limit instead of exposing its regex", async () => {
+  render(<Preview {...await spec("oz-certification-form")} />);
+  const control = screen.getByRole("textbox", {
+    name: /Project support for Opportunity Zones/i,
+  });
+  await act(async () => {
+    fireEvent.input(control, {
+      target: { value: Array(301).fill("a").join(" ") },
+    });
+  });
+  await waitFor(() =>
+    expect(screen.getByTestId("readable-warnings").textContent).toContain(
+      "300-word limit",
+    ),
+  );
+  expect(screen.getByTestId("readable-warnings").textContent).not.toContain(
+    "must match pattern",
+  );
+  expect(screen.getByTestId("readable-warnings").textContent).not.toContain(
+    "\\S+",
+  );
+  await act(async () => {
+    fireEvent.input(control, { target: { value: "Within the limit" } });
+  });
+  await waitFor(() =>
+    expect(screen.getByTestId("readable-warnings").textContent).toBe("[]"),
+  );
+});

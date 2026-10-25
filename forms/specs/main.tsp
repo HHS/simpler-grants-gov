@@ -22,3 +22,7 @@ import "./forms/usda-ad-1052/index.tsp";
 import "./forms/afri-project-type/index.tsp";
 
 import "./forms/grant-program-accounting-system-financial-capability-questionnaire-fns-906/index.tsp";
+
+import "./forms/applicant-and-recipient-assurances-and-certifications-hud-424b/index.tsp";
+import "./forms/oz-certification-form/index.tsp";
+import "./forms/hud-50153/index.tsp";

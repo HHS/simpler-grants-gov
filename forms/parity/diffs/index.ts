@@ -1,3 +1,6 @@
+import { DIFF as hudDefinition0 } from "./applicant-and-recipient-assurances-and-certifications-hud-424b.ts";
+import { DIFF as hudDefinition1 } from "./oz-certification-form.ts";
+import { DIFF as hudDefinition2 } from "./hud-50153.ts";
 import { DIFF as fnsDefinition0 } from "./grant-program-accounting-system-financial-capability-questionnaire-fns-906.ts";
 import { DIFF as afriProjectType } from "./afri-project-type.ts";
 import { DIFF as usdaAd1049 } from "./usda-ad-1049.ts";
@@ -22,6 +25,10 @@ import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profil
 
 /** Every form the suite checks. A plan with a `spec_id` must be listed here. */
 export const DIFFS: FormDiff[] = [
+  hudDefinition0,
+  hudDefinition1,
+  hudDefinition2,
+
   fnsDefinition0,
 
   afriProjectType,
