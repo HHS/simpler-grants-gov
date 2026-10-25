@@ -1,6 +1,7 @@
 import type { RJSFSchema } from "@rjsf/utils";
 import {
   buildWarningTree,
+  getFieldSchema,
   processFormSchema,
 } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { useEffect, useMemo, useRef, type FormEvent } from "react";
@@ -52,7 +53,27 @@ export const SggFormRenderer = ({
         raw,
         buildWarningTree(sggUiSchema, null, raw, formSchema),
       ),
-    );
+    ).map((warning) => {
+      // Presentation only: validation.ts retains the API-shaped errors. Do not echo
+      // a long or sensitive answer, or expose a regex as applicant instructions.
+      if (
+        !["maxLength", "pattern"].includes(warning.type) ||
+        !("definition" in warning) ||
+        !warning.definition
+      )
+        return warning;
+      const field = getFieldSchema({
+        definition: warning.definition,
+        formSchema,
+        schema: undefined,
+      });
+      const label = (field?.title || warning.field).replace(/:\s*$/, "");
+      const message =
+        warning.type === "maxLength" && typeof field?.maxLength === "number"
+          ? `${label} must be ${field.maxLength} characters or fewer.`
+          : `${label}: ${field?.description?.split(/\n\s*\n/)[0] || "Review the field instructions."}`;
+      return { ...warning, message, formatted: message };
+    });
   };
 
   // The data this form last reported; anything else arriving as `data` came from outside.

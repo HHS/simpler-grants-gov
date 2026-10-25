@@ -1,12 +1,431 @@
 {
   "title": "Grant Program Accounting System & Financial Capability Questionnaire (FNS-906)",
   "slug": "grant-program-accounting-system-financial-capability-questionnaire-fns-906",
-  "status": "backlog",
-  "family": ["SF-424", "SF-424 Mandatory"],
-  "category": "Key Personnel & Contact Forms",
+  "status": "in_progress",
+  "family": [
+    "SF-424"
+  ],
+  "category": "Certification & Assurance Forms",
   "apps_count": 1608,
+  "omb_number": "0584-0512",
+  "expiration_date": "07/31/2025",
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/832",
-  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/FNS_906-V1.0_F832.pdf",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/FNS_906-V1.0_F832.xls",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/FNS_906-V1.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/FNS_906-V1.0_F832.xls"
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/FNS_906-V1.0_F832.pdf",
+  "widgets": [
+    "TextWidget",
+    "TextAreaWidget",
+    "RadioWidget"
+  ],
+  "spec_id": "grant-program-accounting-system-financial-capability-questionnaire-fns-906",
+  "description": "Answer organization-level accounting and audit questions. Audit followups activate only after Yes; supplied cover and submission context remains readonly.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Organization",
+      "help_text": "View Burden Statement\n\nUNITED STATES DEPARTMENT OF AGRICULTURE \n\nFood and Nutrition Service\n\nOMB APPROVED NO. 0584-0512\n Expiration Date: 07/31/2025 \n\nGRANT PROGRAM ACCOUNTING SYSTEM & FINANCIAL  CAPABILITY QUESTIONNAIRE\n\nPURPOSE\n\nRecipients of Federal funds must maintain adequate accounting systems that meet the criteria outlined in 2 CFR §200.302 Standards for Financial and Program Management. The responses to this questionnaire are used to assist in the Food and Nutrition Service Agency’s (FNS) evaluation of your accounting system to ensure the adequate, appropriate, and transparent use of Federal funds. Failure to comply with the criteria outlined in the regulations above may preclude your organization from receiving an award. This form applies to FNS’ competitive and noncompetitive grant programs.\n\nORGANIZATION INFORMATION",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Legal Organization Name:",
+          "dat_field": "2-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF-424.",
+          "json_path": "organization_name",
+          "xml_path": "FNS_906:OrganizationName",
+          "constraints": "minLength 1, maxLength 60",
+          "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+        },
+        {
+          "kind": "field",
+          "label": "UEI Number:",
+          "dat_field": "2-3",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF-424.",
+          "json_path": "organization_uei",
+          "xml_path": "FNS_906:UEINumber",
+          "constraints": "minLength 12, maxLength 12",
+          "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Accounting system and financial controls",
+      "help_text": "FINANCIAL STABILITY AND QUALITY OF MANAGMENT SYSTEMS\n\nRequirement\n\nYes\n\nNo",
+      "children": [
+        {
+          "kind": "field",
+          "label": "1.  Has your organization received a Federal award within the past 3 years?",
+          "dat_field": "3-1-1",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Has your organization received a Federal award within the past 3 years? This field is required.",
+          "json_path": "federal_award",
+          "xml_path": "FNS_906:FederalAward",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "2.  Does your organization utilize accounting software to manage your financial records?",
+          "dat_field": "3-2-1",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Does your organization utilize accounting software to manage your financial records? This field is required.",
+          "json_path": "accounting_software",
+          "xml_path": "FNS_906:AccountingSoftware",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "3.  Does your accounting system identify the receipt and expenditure of program funds separately for each grant?",
+          "dat_field": "3-3-1",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Does your accounting system identify the receipt and expenditure of program funds separately for each grant? This field is required.",
+          "json_path": "program_funds",
+          "xml_path": "FNS_906:ProgramFunds",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "4.  Does your organization have a dedicated individual responsible for monitoring organizational funds, such as an accountant or a finance manager?",
+          "dat_field": "3-4-1",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Does your organization have a dedicated individual responsible for monitoring organizational funds, such as an accountant or a finance manager? This field is required.",
+          "json_path": "dedicated_monitoring",
+          "xml_path": "FNS_906:DedicatedMonitoring",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "5.  Does your organization separate the duties for staff handling the approval of transactions and the recording and payment of funds?",
+          "dat_field": "3-5-1",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Does your organization separate the duties for staff handling the approval of transactions and the recording and payment of funds? This field is required.",
+          "json_path": "separate_duties",
+          "xml_path": "FNS_906:SeparateDuties",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "6.  Does your organization have the ability to specifically identify and allocate employee effort to an applicable program?",
+          "dat_field": "3-6-1",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Does your organization have the ability to specifically identify and allocate employee effort to an applicable program? This field is required.",
+          "json_path": "allocate_effort",
+          "xml_path": "FNS_906:AllocateEffort",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "7.  Does your organization have a property/inventory management system in place to track location and value of equipment purchased under the award?",
+          "dat_field": "3-7-1",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Does your organization have a property/inventory management system in place to track location and value of equipment purchased under the award? This field is required.",
+          "json_path": "management_system",
+          "xml_path": "FNS_906:ManagementSystem",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Audit history",
+      "help_text": "AUDIT REPORTS AND FINDINGS\n\nRequirement\n\nYes\n\nNo",
+      "children": [
+        {
+          "kind": "field",
+          "label": "1.  Has your organization been audited within the last 5 fiscal years? (If the answer is “Yes” and this report was issued under the Single Audit Act please note this in the box below marked “Additional Information” and if not issued under the “Single Audit Act”, please provide a link to the audit report in the Hyperlink space below, or attach a copy to your application’s ATTACHMENTS FORM).",
+          "dat_field": "4-1-1",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "Has your organization been audited within the last 5 fiscal years? (If the answer is “Yes” and this report was issued under the Single Audit Act please note this in the box below marked “Additional Information” and if not issued under the “Single Audit Act”, please provide a link to the audit report in the Hyperlink space below, or attach a copy to your application’s ATTACHMENTS FORM). This field is required.",
+          "json_path": "audited",
+          "xml_path": "FNS_906:Audited",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "2.  If your organization has been audited within the last 5 fiscal years, was there a “Qualified Opinion” or an “Adverse Opinion”?",
+          "dat_field": "4-2-1",
+          "required": "conditional",
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "If your organization has been audited within the last 5 fiscal years, was there a “Qualified Opinion” or an “Adverse Opinion”? This field is required when Audited is Yes.",
+          "json_path": "qualified_opinion",
+          "xml_path": "FNS_906:QualifiedOpinion",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "3.  If your organization has been audited within the last 5 fiscal years, was there a “Material Weakness” disclosed?",
+          "dat_field": "4-3-1",
+          "required": "conditional",
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "If your organization has been audited within the last 5 fiscal years, was there a “Material Weakness” disclosed? This field is required when Audited is Yes.",
+          "json_path": "material_weakness",
+          "xml_path": "FNS_906:MaterialWeakness",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "4.  If your organization has been audited within the last 5 fiscal years, was there a “Significant Deficiency” disclosed?",
+          "dat_field": "4-4-1",
+          "required": "conditional",
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "If your organization has been audited within the last 5 fiscal years, was there a “Significant Deficiency” disclosed? This field is required when Audited is Yes.",
+          "json_path": "significant_deficiency",
+          "xml_path": "FNS_906:SignificantDeficiency",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Additional information",
+      "help_text": "",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Hyperlink (if available):",
+          "dat_field": "5-0",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Provide Hyperlink (if available).",
+          "json_path": "hyperlink",
+          "xml_path": "FNS_906:Hyperlink",
+          "constraints": "minLength 1, maxLength 200"
+        },
+        {
+          "kind": "field",
+          "label": "Additional information including expanding on responses in previous sections:",
+          "dat_field": "6-0",
+          "required": false,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "help_text": "Additional information including expanding on responses in previous sections.",
+          "json_path": "additional_information",
+          "xml_path": "FNS_906:AdditionalInformation",
+          "constraints": "minLength 1, maxLength 3000"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Authorized representative and submission",
+      "help_text": "APPLICANT CERTIFICATION\n\nI certify that the above information is complete and correct to the best of my knowledge.\n\n",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Authorized Representative's Signature:",
+          "dat_field": "7-2-1",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed by Grants.gov upon submission.",
+          "json_path": "signature",
+          "xml_path": "FNS_906:Signature",
+          "constraints": "minLength 1, maxLength 144",
+          "post_populated": "Completed by Grants.gov upon submission. Read-only; preview data is illustrative."
+        },
+        {
+          "kind": "field",
+          "label": "Date:",
+          "dat_field": "7-2-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed by Grants.gov upon submission.",
+          "json_path": "signature_date",
+          "xml_path": "FNS_906:SignatureDate",
+          "constraints": "format date",
+          "post_populated": "Completed by Grants.gov upon submission. Read-only; preview data is illustrative."
+        },
+        {
+          "kind": "section",
+          "label": "Authorized Representative",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "7-3-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "authorized_representative.prefix",
+              "xml_path": "FNS_906:AuthorizedRepresentative/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "Pre-populated from the SF-424. Read-only."
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "7-3-2",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "authorized_representative.first_name",
+              "xml_path": "FNS_906:AuthorizedRepresentative/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35",
+              "pre_populated": "Pre-populated from the SF-424. Read-only."
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "7-3-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "authorized_representative.middle_name",
+              "xml_path": "FNS_906:AuthorizedRepresentative/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "Pre-populated from the SF-424. Read-only."
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "7-3-4",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "authorized_representative.last_name",
+              "xml_path": "FNS_906:AuthorizedRepresentative/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "Pre-populated from the SF-424. Read-only."
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "7-3-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "authorized_representative.suffix",
+              "xml_path": "FNS_906:AuthorizedRepresentative/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "Pre-populated from the SF-424. Read-only."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Phone:",
+          "dat_field": "7-4",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF-424.",
+          "json_path": "phone",
+          "xml_path": "FNS_906:Phone",
+          "constraints": "minLength 1, maxLength 25",
+          "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+        },
+        {
+          "kind": "field",
+          "label": "Email:",
+          "dat_field": "7-5",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF-424.",
+          "json_path": "email",
+          "xml_path": "FNS_906:Email",
+          "constraints": "maxLength 60, format email",
+          "pre_populated": "Pre-populated from the SF-424. Read-only; preview data is illustrative."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "All eight main Yes/No answers are independent; three audit followups are enabled and required only for Audited Yes. Changing Audited does not silently clear saved answers.",
+    "The source instructs the applicant to use a separate application ATTACHMENTS FORM for an audit report if no hyperlink is supplied; no unrequested attachment question or service is introduced.",
+    "The hyperlink is a 1–200-character optional source string. No stronger URL-only format is invented.",
+    "Name, organization, UEI, phone and email are source-provided cover context. The DAT Field Type says Global for name parts, but its help explicitly identifies SF-424 prepopulation; these are readonly review values.",
+    "Optional additional text permits absence; when present its original XSD minLength is 1 even though DAT says 0.",
+    "Email uses the established bank format validator; the missing redundant minLength keyword is recorded separately from the original XSD."
+  ],
+  "risks": [
+    "Source-backed context production, attachment routing, signing and XML integration remain separate. No business answer is defaulted from organization or audit context."
+  ],
+  "examples": [
+    {
+      "label": "Illustrative scenario 1",
+      "description": "Audited organization with independent audit followups.",
+      "data": {
+        "organization_name": "Illustrative Nutrition Services",
+        "organization_uei": "EXAMPLE12345",
+        "federal_award": "N: No",
+        "accounting_software": "Y: Yes",
+        "program_funds": "Y: Yes",
+        "dedicated_monitoring": "Y: Yes",
+        "separate_duties": "Y: Yes",
+        "allocate_effort": "Y: Yes",
+        "management_system": "Y: Yes",
+        "audited": "Y: Yes",
+        "signature": "ILLUSTRATIVE SUBMISSION CONTEXT",
+        "signature_date": "2026-10-25",
+        "authorized_representative": {
+          "first_name": "Jordan",
+          "last_name": "Lee"
+        },
+        "phone": "2025550100",
+        "email": "contact@example.org",
+        "qualified_opinion": "N: No",
+        "material_weakness": "Y: Yes",
+        "significant_deficiency": "N: No",
+        "hyperlink": "https://example.org/illustrative-audit",
+        "additional_information": "Illustrative audit report issued under the Single Audit Act; no real report is submitted."
+      }
+    },
+    {
+      "label": "Illustrative scenario 2",
+      "description": "No audit; inactive followups are not required.",
+      "data": {
+        "organization_name": "Illustrative Nutrition Services",
+        "organization_uei": "EXAMPLE12345",
+        "federal_award": "N: No",
+        "accounting_software": "Y: Yes",
+        "program_funds": "Y: Yes",
+        "dedicated_monitoring": "Y: Yes",
+        "separate_duties": "Y: Yes",
+        "allocate_effort": "Y: Yes",
+        "management_system": "Y: Yes",
+        "audited": "N: No",
+        "signature": "ILLUSTRATIVE SUBMISSION CONTEXT",
+        "signature_date": "2026-10-25",
+        "authorized_representative": {
+          "first_name": "Jordan",
+          "last_name": "Lee"
+        },
+        "phone": "2025550100",
+        "email": "contact@example.org"
+      }
+    }
+  ]
 }
