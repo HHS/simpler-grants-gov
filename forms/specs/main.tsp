@@ -12,3 +12,6 @@ import "./forms/other-attachments-form/index.tsp";
 import "./forms/project-abstract/index.tsp";
 import "./forms/project-abstract-summary/index.tsp";
 import "./forms/ed-abstract-form/index.tsp";
+
+import "./forms/phs-398-research-plan/index.tsp";
+import "./forms/phs-398-research-training-program-plan/index.tsp";

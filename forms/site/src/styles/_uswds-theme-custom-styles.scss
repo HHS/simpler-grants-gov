@@ -1102,7 +1102,7 @@ details[open] > .group-header::before {
 
 .metadata-card dl {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: units("05") units(2);
   margin: 0;
   @include u-font("sans", "2xs");
@@ -1117,6 +1117,7 @@ details[open] > .group-header::before {
 
 .metadata-card dd {
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .metadata-card code {

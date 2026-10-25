@@ -1,3 +1,5 @@
+import { DIFF as phsTrainingPlan } from "./phs-398-research-training-program-plan.ts";
+import { DIFF as phsResearchPlan } from "./phs-398-research-plan.ts";
 import { DIFF as document0 } from "./attachments.ts";
 import { DIFF as document1 } from "./project-narrative-attachment-form.ts";
 import { DIFF as document2 } from "./budget-narrative-attachment-form.ts";
@@ -16,6 +18,8 @@ import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profil
 
 /** Every form the suite checks. A plan with a `spec_id` must be listed here. */
 export const DIFFS: FormDiff[] = [
+  phsResearchPlan,
+  phsTrainingPlan,
   document0,
   document1,
   document2,

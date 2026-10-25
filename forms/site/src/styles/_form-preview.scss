@@ -231,6 +231,7 @@
 
 // A section's description: a hint under its heading, smaller and quieter than a field's text.
 .form-section__description {
+  overflow-wrap: anywhere;
   margin: 0 0 units(1);
   max-width: measure(4);
   @include u-font("sans", "2xs");

@@ -63,11 +63,10 @@ export const SggFormRenderer = ({
     generation.current += 1;
   }
 
-  // Warnings are shown the way the apply form shows them after a save: computed once from
-  // the data at the time, then left alone while the applicant edits.
+  // Keep shown warnings current while editing without remounting uncontrolled inputs.
   const errors = useMemo(
     () => (showErrors ? warningsFor(data) : null),
-    [showErrors, generation.current, sggUiSchema, formSchema],
+    [showErrors, data, sggUiSchema, formSchema],
   );
 
   const report = (next: unknown) =>

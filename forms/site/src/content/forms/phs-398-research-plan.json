@@ -1,12 +1,229 @@
 {
   "title": "PHS 398 Research Plan",
   "slug": "phs-398-research-plan",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["R&R"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 213859,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/797",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/PHS398_ResearchPlan_5_0-V5.0_F797.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PHS398_ResearchPlan_5_0-V5.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/PHS398_ResearchPlan_5_0-V5.0_F797.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/PHS398_ResearchPlan_5_0-V5.0_F797.xls",
+  "omb_number": "0925-0001",
+  "expiration_date": "12/31/2027",
+  "xsd_root": "PHS398_ResearchPlan_5_0",
+  "spec_id": "phs-398-research-plan",
+  "widgets": [
+    "ApplicationAttachmentWidget",
+    "ApplicationMultipleAttachmentWidget"
+  ],
+  "new_concepts": [],
+  "description": "Source-reviewed Research Plan definition and UUID preview. External applicability, upload content and XML integration remain separately tracked.",
+  "notes": [
+    "Original FID797 XLS was freshly read with SheetJS and compared with cached extraction: all470 compared cells match. PDF page1 was rendered and inspected; all13 named purposes, source headings and metadata agree. Source manifest and exact cell crosswalk are recorded in the pinned source review packet.",
+    "The root is the Research Plan document aggregate with12 named singleton UUID references and an optional ordered Appendix UUID array. Four UI headings reference those fields without creating capture wrappers. Seven source-corresponding purposes reuse Questions.Research.Documents scalars; shared capture does not collapse different document answers.",
+    "DAT K8 enables Introduction only for external RR SF424 Resubmission or Revision; Q8 conditionally requires it. K8 does not specify clearing. Q12 requires Progress Report Publication List for Renewal; Q14 requires Vertebrate Animals when external R&R Other Project Information animals-used is Yes. These source rules are preserved as guidance and require a real external-context evaluator; no executable applicability pass is claimed.",
+    "DAT Q23 permits up to10 PDF Appendix files, while the primary XSD AttachmentGroupMin0Max100DataType allows0..100. The definition implements the narrower DAT business rule. Parity records the exact group-vs-file occurrence and source-layer difference; this is not a source waiver or a claim of full raw-XSD answer equivalence.",
+    "Every Q help tip is retained on its named field. R11 mandatory-message guidance is retained on Research Plan Section. K8/K10:K12/K14:K21/K23 request Add/Delete/View features; UUID preview controls do not provide a real upload lifecycle.",
+    "Source-shaped XSD models preserve required ResearchPlanAttachments, named attFile wrappers, Appendix0..100, targetNamespaceV5.0 and fixed FormVersion5.0. The original root XSD has an unused V4.0 prefix binding; targetNamespace remains authoritative. No active XML mapping is emitted.",
+    "UUID examples are illustrative shape coverage only. They have no associated uploaded file, filename, MIME, location or hash. Actual upload metadata, API registration, XML generation, signing and submission remain integration work; Integration ownership is coordinated separately.",
+    "Source DAT Q4 burden notice: Public reporting burden for this collection of information is estimated to average 10 hours per response, including the time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information.  An agency may not conduct or sponsor, and a person is not required to respond to, a collection of information unless it displays a currently valid OMB control number.  Send comments regarding this burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to: NIH, Project Clearance Branch, 6705 Rockledge Drive, MSC 7974, Bethesda, MD 20892-7974, ATTN: PRA (0925-0001).  Do not return the completed form to this address. "
+  ],
+  "risks": [
+    "External context is required to execute three conditional obligations and Introduction enabling. Unknown context must not silently default to New or No; no clearing behavior is inferred.",
+    "PDF content and agency/FOA/Application Guide page limits require file/opportunity evidence. UUID schema validation does not establish content, existence, ownership or submission readiness.",
+    "Primary XSD permits Appendix absent or present empty and preserves ordered duplicate occurrences. Later XML handling needs an explicit absence/empty policy; this definition introduces no uniqueness constraint."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Introduction",
+      "help_text": "Include an Introduction to Application for Resubmission or Revision applications.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "1. Introduction to Application (for Resubmission and Revision applications)",
+          "help_text": "Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": "Conditional: required for external SF424 (R&R) Resubmission or Revision; context evaluator not supplied",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "introduction_to_application",
+          "xml_path": "ResearchPlanAttachments/IntroductionToApplication/attFile",
+          "dat_field": "1-1",
+          "constraints": "format uuid"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Research Plan Section",
+      "help_text": "Research Strategy is required: Follow the instructions provided in the Application Guide and the FOA regarding the content of the Research Strategy attachment. Unless specified otherwise in the FOA, follow the page limits for the Research Strategy in the table of page limits found in the Application Guide.  Save the information in a single file and click the Add Attachment button to complete this entry. Include a Progress Report Publication List for Renewal applications. Numeric page limits depend on the applicable Application Guide, FOA and agency instructions.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "2. Specific Aims",
+          "help_text": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "specific_aims",
+          "xml_path": "ResearchPlanAttachments/SpecificAims/attFile",
+          "dat_field": "2-1",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "3. Research Strategy",
+          "help_text": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": true,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "research_strategy",
+          "xml_path": "ResearchPlanAttachments/ResearchStrategy/attFile",
+          "dat_field": "2-2",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "4. Progress Report Publication List",
+          "help_text": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": "Conditional: required for external SF424 (R&R) Renewal; context evaluator not supplied",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "progress_report_publication_list",
+          "xml_path": "ResearchPlanAttachments/ProgressReportPublicationList/attFile",
+          "dat_field": "2-3",
+          "constraints": "format uuid"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Other Research Plan Section",
+      "help_text": "Include Vertebrate Animals when you selected Yes to animals used on R&R Other Project Information. Prepare each supporting document for its named purpose and follow agency instructions.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "5. Vertebrate Animals",
+          "help_text": "Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": "Conditional: required when external R&R Other Project Information animals-used is Yes; context evaluator not supplied",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "vertebrate_animals",
+          "xml_path": "ResearchPlanAttachments/VertebrateAnimals/attFile",
+          "dat_field": "3-1",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "6. Select Agent Research",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "select_agent_research",
+          "xml_path": "ResearchPlanAttachments/SelectAgentResearch/attFile",
+          "dat_field": "3-2",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "7. Multiple PD/PI Leadership Plan",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "multiple_pd_pi_leadership_plan",
+          "xml_path": "ResearchPlanAttachments/MultiplePDPILeadershipPlan/attFile",
+          "dat_field": "3-3",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "8. Consortium/Contractual Arrangements",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "consortium_contractual_arrangements",
+          "xml_path": "ResearchPlanAttachments/ConsortiumContractualArrangements/attFile",
+          "dat_field": "3-4",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "9. Letters of Support",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "letters_of_support",
+          "xml_path": "ResearchPlanAttachments/LettersOfSupport/attFile",
+          "dat_field": "3-5",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "10. Resource Sharing Plan(s)",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "resource_sharing_plans",
+          "xml_path": "ResearchPlanAttachments/ResourceSharingPlans/attFile",
+          "dat_field": "3-6",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "11. Other Plan(s)",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "other_plans",
+          "xml_path": "ResearchPlanAttachments/OtherPlans/attFile",
+          "dat_field": "3-7",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "label": "12. Authentication of Key Biological and/or Chemical Resources",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "json_path": "authentication_of_key_biological_and_or_chemical_resources",
+          "xml_path": "ResearchPlanAttachments/KeyBiologicalAndOrChemicalResources/attFile",
+          "dat_field": "3-8",
+          "constraints": "format uuid"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Appendix",
+      "help_text": "Attach up to ten PDF files in the order required by the funding opportunity and agency instructions.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "13. Appendix",
+          "help_text": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "required": false,
+          "type": "Ordered list of uploaded attachment IDs (UUID strings)",
+          "widget": "ApplicationMultipleAttachmentWidget",
+          "json_path": "appendix[]",
+          "xml_path": "ResearchPlanAttachments/Appendix/AttachedFile",
+          "dat_field": "4-1",
+          "constraints": "format uuid",
+          "min_items": 0,
+          "max_items": 10
+        }
+      ]
+    }
+  ]
 }
