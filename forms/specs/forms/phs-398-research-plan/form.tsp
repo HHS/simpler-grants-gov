@@ -69,7 +69,6 @@ namespace Forms.Phs398ResearchPlan;
   }
 )
 model Phs398ResearchPlan {
-  @doc("Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
   introductionToApplication?: Questions.Research.Documents.IntroductionToApplication;
 
@@ -85,23 +84,18 @@ model Phs398ResearchPlan {
   @UI.label("4. Progress Report Publication List")
   progressReportPublicationList?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("5. Vertebrate Animals")
   vertebrateAnimals?: Questions.Research.Documents.VertebrateAnimals;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("6. Select Agent Research")
   selectAgentResearch?: Questions.Research.Documents.SelectAgentResearch;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("7. Multiple PD/PI Leadership Plan")
   multiplePdPiLeadershipPlan?: Questions.Research.Documents.MultiplePdPiLeadershipPlan;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("8. Consortium/Contractual Arrangements")
   consortiumContractualArrangements?: Questions.Research.Documents.ConsortiumContractualArrangements;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("9. Letters of Support")
   lettersOfSupport?: Questions.Research.Documents.LettersOfSupport;
 
@@ -109,7 +103,6 @@ model Phs398ResearchPlan {
   @UI.label("10. Resource Sharing Plan(s)")
   resourceSharingPlans?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("11. Other Plan(s)")
   otherPlans?: Questions.Research.Documents.OtherPlans;
 

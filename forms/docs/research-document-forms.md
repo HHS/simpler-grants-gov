@@ -20,7 +20,7 @@ flowchart LR
 
 The form root is a collection of named document purposes. Each singleton value is an attachment UUID; Appendix is an ordered UUID list. UI headings do not create answer objects. Source `attFile` and collection wrappers belong to the XML target, not applicant JSON. One file containing several letters or faculty biographies remains one answer.
 
-Seven questions have demonstrated consumers in both forms: Introduction to Application, Multiple PD/PI Leadership Plan, Vertebrate Animals, Select Agent Research, Consortium/Contractual Arrangements, Letters of Support, and Other Plans. They extend the existing attachment scalar. Each form retains exact source labels/help at its use site; shared question identity does not imply shared applicant answers or automatic population.
+Seven questions have demonstrated consumers in both forms: Introduction to Application, Multiple PD/PI Leadership Plan, Vertebrate Animals, Select Agent Research, Consortium/Contractual Arrangements, Letters of Support, and Other Plans. They extend the existing attachment scalar. Identical source help is authored once in the question bank, removing fourteen form-level help overrides. Each form retains its numbered source labels and exact inherited help; shared question identity does not imply shared applicant answers or automatic population.
 
 The training Program Plan and research Research Strategy are different purposes. Training Progress Report is not Research Progress Report Publication List. Participating Faculty Biosketches is a combined training-faculty document, not a single senior/key person’s Biographical Sketch or the existing overflow-biographies question. These remain local named fields until matching consumers justify new bank questions.
 

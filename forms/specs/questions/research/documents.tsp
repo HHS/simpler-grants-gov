@@ -7,7 +7,7 @@ using SimplerForms;
 // UUID transport is shared; application context and PDF validation belong to application services.
 namespace Questions.Research.Documents;
 
-/** Attach PDF formatted file. Required for Resubmission or Revision applications. Follow funding opportunity and agency instructions for page limits. */
+/** Attach PDF formatted file. Required if you selected "Resubmission" or "Revision" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
 @Meta.question(#{ id: "research/introduction-to-application" })
 @UI.label("Introduction to Application")
 scalar IntroductionToApplication extends Questions.Types.Attachment;
@@ -17,7 +17,7 @@ scalar IntroductionToApplication extends Questions.Types.Attachment;
 @UI.label("Multiple PD/PI Leadership Plan")
 scalar MultiplePdPiLeadershipPlan extends Questions.Types.Attachment;
 
-/** Attach PDF formatted file. Required when vertebrate animals are used, as declared on R&R Other Project Information. Follow funding opportunity and agency instructions. */
+/** Attach PDF formatted file. Required if you checked "Yes" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
 @Meta.question(#{ id: "research/vertebrate-animals" })
 @UI.label("Vertebrate Animals")
 scalar VertebrateAnimals extends Questions.Types.Attachment;
@@ -32,12 +32,12 @@ scalar SelectAgentResearch extends Questions.Types.Attachment;
 @UI.label("Consortium/Contractual Arrangements")
 scalar ConsortiumContractualArrangements extends Questions.Types.Attachment;
 
-/** Attach PDF formatted file containing the letters of support. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
 @Meta.question(#{ id: "research/letters-of-support" })
 @UI.label("Letters of Support")
 scalar LettersOfSupport extends Questions.Types.Attachment;
 
-/** Attach PDF formatted file containing other plans requested by the funding opportunity and agency-specific instructions. */
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
 @Meta.question(#{ id: "research/other-plans" })
 @UI.label("Other Plans")
 scalar OtherPlans extends Questions.Types.Attachment;

@@ -73,7 +73,6 @@ namespace Forms.Phs398ResearchTrainingProgramPlan;
   }
 )
 model Phs398ResearchTrainingProgramPlan {
-  @doc("Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
   introductionToApplication?: Questions.Research.Documents.IntroductionToApplication;
 
@@ -89,7 +88,6 @@ model Phs398ResearchTrainingProgramPlan {
   @UI.label("4. Plan for Instruction in Methods for Enhancing Reproducibility")
   methodsForEnhancingReproducibility?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("5. Multiple PD/PI Leadership Plan (if applicable)")
   multiplePdPiLeadershipPlan?: Questions.Research.Documents.MultiplePdPiLeadershipPlan;
 
@@ -101,7 +99,6 @@ model Phs398ResearchTrainingProgramPlan {
   @UI.label("7. Participating Faculty Biosketches")
   participatingFacultyBiosketches?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("8. Letters of Support")
   lettersOfSupport?: Questions.Research.Documents.LettersOfSupport;
 
@@ -109,19 +106,15 @@ model Phs398ResearchTrainingProgramPlan {
   @UI.label("9. Data Tables")
   dataTables?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("10. Vertebrate Animals")
   vertebrateAnimals?: Questions.Research.Documents.VertebrateAnimals;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("11. Select Agent Research")
   selectAgentResearch?: Questions.Research.Documents.SelectAgentResearch;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("12. Consortium/Contractual Arrangements")
   consortiumContractualArrangements?: Questions.Research.Documents.ConsortiumContractualArrangements;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
   @UI.label("13. Other Plan(s)")
   otherPlans?: Questions.Research.Documents.OtherPlans;
 
