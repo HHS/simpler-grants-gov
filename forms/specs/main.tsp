@@ -22,3 +22,5 @@ import "./forms/usda-ad-1052/index.tsp";
 import "./forms/afri-project-type/index.tsp";
 
 import "./forms/grant-program-accounting-system-financial-capability-questionnaire-fns-906/index.tsp";
+
+import "./forms/fra-f-30/index.tsp";
