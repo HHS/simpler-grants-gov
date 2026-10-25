@@ -1,6 +1,7 @@
 import "form-library-xml";
 import "simpler-forms";
 import "#forms/index.tsp";
+import "#questions/submission/index.tsp";
 import "#questions/organization/index.tsp";
 using SimplerForms;
 namespace Forms.NEHLaborStandards;
@@ -46,13 +47,9 @@ model LaborAssurances {
   applicantOrganizationName: Questions.Organizations.OrgName;
 
   @UI.label("(Signature of Institutional Grants Administrator or AOR)")
-  @doc("Completed on submission to Grants.gov.")
-  @UI.widget(Rendering.Widget.Text)
   @UI.readOnly
   @Meta.role(ResponseRole.systemValue)
-  @minLength(1)
-  @maxLength(144)
-  representativeName: string;
+  representativeName: Questions.Submission.SubmissionSignature;
 
   @UI.label("(Date)")
   @doc("Completed on submission to Grants.gov.")

@@ -1,6 +1,8 @@
 import "form-library-xml";
 import "simpler-forms";
 import "#forms/index.tsp";
+import "#questions/award/index.tsp";
+import "#questions/submission/index.tsp";
 import "#questions/organization/index.tsp";
 import "#questions/person/name.tsp";
 import "#questions/person/title.tsp";
@@ -58,13 +60,8 @@ model Certification {
   @Meta.role(ResponseRole.systemValue)
   organizationName: Questions.Organizations.OrgName;
 
-  @doc("Enter the PR/Award Number or Project Name. This field is required.")
-  @UI.label("PR/AWARD NUMBER OR PROJECT NAME")
-  @UI.widget(Rendering.Widget.Text)
   @Meta.role(ResponseRole.applicantInput)
-  @minLength(1)
-  @maxLength(60)
-  projectName: string;
+  projectName: Questions.Awards.ProjectReference;
 
   @doc("Pre-populated from the Application cover sheet. First and last name are required.")
   @UI.label("Authorized Representative Name")
@@ -80,12 +77,9 @@ model Certification {
 
   @doc("Completed by Grants.gov upon submission. This field is required.")
   @UI.label("SIGNATURE(S)")
-  @UI.widget(Rendering.Widget.Text)
   @UI.readOnly
   @Meta.role(ResponseRole.systemValue)
-  @minLength(1)
-  @maxLength(144)
-  aorSignature: string;
+  aorSignature: Questions.Submission.SubmissionSignature;
 
   @doc("Completed by Grants.gov upon submission. This field is required.")
   @UI.label("DATE")

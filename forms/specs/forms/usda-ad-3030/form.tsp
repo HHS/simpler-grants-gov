@@ -1,15 +1,14 @@
 import "form-library-xml";
 import "simpler-forms";
 import "#forms/index.tsp";
+import "#questions/submission/index.tsp";
 import "#questions/person/title.tsp";
+import "#questions/types/yes-no.tsp";
 using SimplerForms;
 namespace Forms.USDAAD3030;
 
 // The two answers have different meanings; only their source wire vocabulary is shared.
-enum YesNo {
-  yes: "Y: Yes",
-  no: "N: No",
-}
+alias YesNo = Questions.Types.YesNo;
 
 @Meta.form(#{ id: "usda-ad-3030", formName: "USDA AD-3030" })
 @GrantsGov.form(#{
@@ -92,12 +91,9 @@ model Representations {
 
   @UI.label("5A. APPLICANT'S SIGNATURE (BY)")
   @doc("Completed by Grants.gov upon submission. This is a required field.")
-  @UI.widget(Rendering.Widget.Text)
   @UI.readOnly
   @Meta.role(ResponseRole.systemValue)
-  @minLength(1)
-  @maxLength(144)
-  aorSignature: string;
+  aorSignature: Questions.Submission.SubmissionSignature;
 
   @UI.label("5B. TITLE/RELATIONSHIP OF THE INDIVIDUAL IF SIGNING IN A REPRESENTATIVE CAPACITY")
   @doc("Pre-populated from the Application cover sheet. This is a required field.")
