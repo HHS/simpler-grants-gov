@@ -197,7 +197,14 @@ test.describe("Search results sorting", () => {
           await navigateToSavedSearches(page, workspaceLink);
           await runSavedSearch(page, savedSearchName);
 
-          expectSortInURL(page, sortCase.value);
+          // A saved relevancy sort comes back as the default: the app leaves sortby
+          // out of the URL for relevancy (paginationToSortby), so only the dropdown
+          // shows it.
+          if (sortCase.value === DEFAULT_SORT.value) {
+            expectNoSortInURL(page);
+          } else {
+            expectSortInURL(page, sortCase.value);
+          }
           await expectSortSelected(page, sortCase, isMobile);
           expectRowsSorted(
             await readResultRows(page),
