@@ -6,6 +6,8 @@ import { $previewData } from "../../../stores/formPreview";
 export default function FormDataPanel() {
   const data = useStore($previewData);
   return (
-    <pre className="form-preview__json">{JSON.stringify(data, null, 2)}</pre>
+    <pre className="form-preview__json" data-testid="live-preview-data">
+      {JSON.stringify(data, null, 2)}
+    </pre>
   );
 }

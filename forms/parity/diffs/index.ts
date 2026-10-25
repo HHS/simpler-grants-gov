@@ -1,3 +1,5 @@
+import { DIFF as originalSF424D } from "./assurances-for-construction-programs-sf-424d.ts";
+import { DIFF as originalSF424B } from "./assurances-for-non-construction-programs-sf-424b.ts";
 import { DIFF as fnsDefinition0 } from "./grant-program-accounting-system-financial-capability-questionnaire-fns-906.ts";
 import { DIFF as afriProjectType } from "./afri-project-type.ts";
 import { DIFF as usdaAd1049 } from "./usda-ad-1049.ts";
@@ -22,6 +24,8 @@ import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profil
 
 /** Every form the suite checks. A plan with a `spec_id` must be listed here. */
 export const DIFFS: FormDiff[] = [
+  originalSF424D,
+  originalSF424B,
   fnsDefinition0,
 
   afriProjectType,

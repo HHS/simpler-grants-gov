@@ -1,12 +1,151 @@
 {
   "title": "Assurances for Non-Construction Programs (SF-424B)",
   "slug": "assurances-for-non-construction-programs-sf-424b",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["SF-424", "SF-424 Short"],
   "category": "Certification & Assurance Forms",
   "apps_count": 47874,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/240",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/SF424B-V1.1_F240.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/SF424B-V1.1_F240.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/SF424B-V1.1_F240.xls",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Assurances and authorized representative",
+      "help_text": "Public reporting burden for this collection of information is estimated to average 15 minutes per response, including time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. Send comments regarding the burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to the Office of Management and Budget, Paperwork Reduction Project (0348-0040), Washington, DC 20503.\n\nPLEASE DO NOT RETURN YOUR COMPLETED FORM TO THE OFFICE OF MANAGEMENT AND BUDGET. SEND IT TO THE ADDRESS PROVIDED BY THE SPONSORING AGENCY.\n\nNOTE:\n\nCertain of these assurances may not be applicable to your project or program. If you have questions, please contact the  awarding agency. Further, certain Federal awarding agencies may require applicants to certify to additional assurances. If such is the case, you will be notified.\n\nAs the duly authorized representative of the applicant, I certify that the applicant:\n\n1. Has the legal authority to apply for Federal assistance  and the institutional, managerial and financial capability  (including funds sufficient to pay the non-Federal share  of project cost) to ensure proper planning, management  and completion of the project described in this  application.\n\n2. Will give the awarding agency, the Comptroller General  of the United States and, if appropriate, the State,  through any authorized representative, access to and  the right to examine all records, books, papers, or  documents related to the award; and will establish a  proper accounting system in accordance with generally  accepted accounting standards or agency directives.\n\n3. Will establish safeguards to prohibit employees from  using their positions for a purpose that constitutes or  presents the appearance of personal or organizational  conflict of interest, or personal gain.\n\n4. Will initiate and complete the work within the applicable  time frame after receipt of approval of the awarding  agency.\n\n5. Will comply with the Intergovernmental Personnel Act of  1970 (42 U.S.C. §§4728-4763) relating to prescribed  standards for merit systems for programs funded under  one of the 19 statutes or regulations specified in  Appendix A of OPM's Standards for a Merit System of  Personnel Administration (5 C.F.R. 900, Subpart F).\n\n6. Will comply with all Federal statutes relating to  nondiscrimination. These include but are not limited to:  (a) Title VI of the Civil Rights Act of 1964 (P.L. 88-352)  which prohibits discrimination on the basis of race, color  or national origin; (b) Title IX of the Education  Amendments of 1972, as amended (20 U.S.C. §§1681-  1683, and 1685-1686), which prohibits discrimination on  the basis of sex; (c) Section 504 of the Rehabilitation Act of 1973, as amended (29 U.S.C. §794), which  prohibits discrimination on the basis of handicaps; (d)  the Age Discrimination Act of 1975, as amended (42  U.S.C. §§6101-6107), which prohibits discrimination  on the basis of age; (e) the Drug Abuse Office and  Treatment Act of 1972 (P.L. 92-255), as amended,  relating to nondiscrimination on the basis of drug  abuse; (f) the Comprehensive Alcohol Abuse and  Alcoholism Prevention, Treatment and Rehabilitation  Act of 1970 (P.L. 91-616), as amended, relating to  nondiscrimination on the basis of alcohol abuse or  alcoholism; (g) §§523 and 527 of the Public Health  Service Act of 1912 (42 U.S.C. §§290 dd-3 and 290 ee-  3), as amended, relating to confidentiality of alcohol  and drug abuse patient records; (h) Title VIII of the  Civil Rights Act of 1968 (42 U.S.C. §§3601 et seq.), as  amended, relating to nondiscrimination in the sale,  rental or financing of housing; (i) any other  nondiscrimination provisions in the specific statute(s)  under which application for Federal assistance is being  made; and, (j) the requirements of any other  nondiscrimination statute(s) which may apply to the  application.\n\n7. Will comply, or has already complied, with the  requirements of Titles II and III of the Uniform  Relocation Assistance and Real Property Acquisition  Policies Act of 1970 (P.L. 91-646) which provide for  fair and equitable treatment of persons displaced or  whose property is acquired as a result of Federal or  federally-assisted programs. These requirements apply  to all interests in real property acquired for project  purposes regardless of Federal participation in  purchases.\n\n8. Will comply, as applicable, with provisions of the  Hatch Act (5 U.S.C. §§1501-1508 and 7324-7328)  which limit the political activities of employees whose  principal employment activities are funded in whole or  in part with Federal funds.\n\n9. Will comply, as applicable, with the provisions of the Davis-  Bacon Act (40 U.S.C. §§276a to 276a-7), the Copeland Act  (40 U.S.C. §276c and 18 U.S.C. §874), and the Contract  Work Hours and Safety Standards Act (40 U.S.C. §§327-  333), regarding labor standards for federally-assisted  construction subagreements.\n\n10. Will comply, if applicable, with flood insurance purchase  requirements of Section 102(a) of the Flood Disaster  Protection Act of 1973 (P.L. 93-234) which requires  recipients in a special flood hazard area to participate in the  program and to purchase flood insurance if the total cost of  insurable construction and acquisition is $10,000 or more.\n\n11. Will comply with environmental standards which may be  prescribed pursuant to the following: (a) institution of  environmental quality control measures under the National  Environmental Policy Act of 1969 (P.L. 91-190) and  Executive Order (EO) 11514; (b) notification of violating  facilities pursuant to EO 11738; (c) protection of wetlands  pursuant to EO 11990; (d) evaluation of flood hazards in  floodplains in accordance with EO 11988; (e) assurance of  project consistency with the approved State management  program developed under the Coastal Zone Management  Act of 1972 (16 U.S.C. §§1451 et seq.); (f) conformity of  Federal actions to State (Clean Air) Implementation Plans  under Section 176(c) of the Clean Air Act of 1955, as  amended (42 U.S.C. §§7401 et seq.); (g) protection of  underground sources of drinking water under the Safe  Drinking Water Act of 1974, as amended (P.L. 93-523);  and, (h) protection of endangered species under the  Endangered Species Act of 1973, as amended (P.L. 93-  205).\n\n12. Will comply with the Wild and Scenic Rivers Act of  1968 (16 U.S.C. §§1271 et seq.) related to protecting  components or potential components of the national  wild and scenic rivers system.\n\n13. Will assist the awarding agency in assuring compliance  with Section 106 of the National Historic Preservation  Act of 1966, as amended (16 U.S.C. §470), EO 11593  (identification and protection of historic properties), and  the Archaeological and Historic Preservation Act of  1974 (16 U.S.C. §§469a-1 et seq.).\n\n14. Will comply with P.L. 93-348 regarding the protection of  human subjects involved in research, development, and  related activities supported by this award of assistance.\n\n15. Will comply with the Laboratory Animal Welfare Act of  1966 (P.L. 89-544, as amended, 7 U.S.C. §§2131 et  seq.) pertaining to the care, handling, and treatment of  warm blooded animals held for research, teaching, or  other activities supported by this award of assistance.\n\n16. Will comply with the Lead-Based Paint Poisoning  Prevention Act (42 U.S.C. §§4801 et seq.) which  prohibits the use of lead-based paint in construction or  rehabilitation of residence structures.\n\n17. Will cause to be performed the required financial and  compliance audits in accordance with the Single Audit  Act Amendments of 1996 and OMB Circular No. A-133,  \"Audits of States, Local Governments, and Non-Profit  Organizations.\"\n\n18. Will comply with all applicable requirements of all other  Federal laws, executive orders, regulations, and policies  governing this program.\n\n19. Will comply with the requirements of Section 106(g) of the Trafficking Victims Protection Act (TVPA) of 2000, as amended (22 U.S.C. 7104) which prohibits grant award recipients or a sub-recipient from (1) Engaging in severe forms of trafficking in persons during the period of time that the award is in effect (2) Procuring a commercial sex act during the period of time that the award is in effect or (3) Using forced labor in the performance of the award or subawards under the award.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Form Version Identifier (XML envelope)",
+          "type": "System metadata",
+          "required": true,
+          "xml_path": "FormVersionIdentifier",
+          "constraints": "minLength 1, maxLength 30",
+          "post_populated": "Required original Global XML envelope metadata, supplied as edition 1.1 by the integration service. This is not an applicant answer and has no JSON/DAT/widget coordinate. The existing SGG XML reference verifies this edition; generated XML envelope support remains an explicit integration hold."
+        },
+        {
+          "kind": "field",
+          "label": "SIGNATURE OF AUTHORIZED CERTIFYING OFFICIAL",
+          "help_text": "Completed on submission to Grants.gov.",
+          "required": true,
+          "type": "Submission-owned signature",
+          "widget": "TextWidget",
+          "json_path": "signature",
+          "xml_path": "AuthorizedRepresentative/RepresentativeName",
+          "dat_field": "19-0",
+          "constraints": "minLength 1, maxLength 144",
+          "post_populated": "Completed by the submission service at submit, not applicant editable; required in the transmitted representation. Existing SGG uses gg_post_population."
+        },
+        {
+          "kind": "field",
+          "label": "TITLE",
+          "help_text": "Enter the title of the official certifying that the applicant organization will comply with the requirements set forth in this assurance form. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "title",
+          "xml_path": "AuthorizedRepresentative/RepresentativeTitle",
+          "dat_field": "19-1",
+          "constraints": "minLength 1, maxLength 45",
+          "pre_populated": "DAT: noneditable when forward-populated from SF424/R&R/Short/Mandatory; editable for Individual. Existing SGG retains editable fields and future-copy notes; no automatic population is claimed."
+        },
+        {
+          "kind": "field",
+          "label": "APPLICANT ORGANIZATION",
+          "help_text": "Enter the name of the applicant organization. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "applicant_organization",
+          "xml_path": "ApplicantOrganizationName",
+          "dat_field": "19-2",
+          "constraints": "minLength 1, maxLength 60",
+          "pre_populated": "DAT: noneditable when forward-populated from SF424/R&R/Short/Mandatory; editable for Individual. Existing SGG retains editable fields and future-copy notes; no automatic population is claimed."
+        },
+        {
+          "kind": "field",
+          "label": "DATE SUBMITTED",
+          "help_text": "Completed on submission to Grants.gov.",
+          "required": true,
+          "type": "Submission-owned date",
+          "widget": "TextWidget",
+          "json_path": "date_signed",
+          "xml_path": "SubmittedDate",
+          "dat_field": "19-3",
+          "constraints": "format date",
+          "post_populated": "Completed by the submission service at submit, not applicant editable; required in the transmitted representation. Existing SGG uses gg_post_population."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Full source assurances and applicant instructions are retained on the nonempty section, not replaced with a generic agreement checkbox. Assurance content differs between construction and non-construction; shared signature fields do not imply interchangeable certifications.",
+    "XSD root Assurances is selected explicitly because this older schema declares several global elements. FormVersionIdentifier is envelope metadata; it must still be emitted/tested, not dropped.",
+    "DAT burden popup: Clicking displays burden statement: \nSF-424B Assurances – Non-Construction Programs Form (4040-0007)\n\nAccording to the Paperwork Reduction Act of 1995, an agency may not conduct or sponsor, and a person is not required to respond to a collection of information unless it displays a valid OMB control number.  The valid OMB control number for this information collection is 4040-0007.  The time required to complete this information collection is estimated to average 49 minutes per response, including the time to review instructions, search existing data resources, gather the data needed and complete and review the information collection.  If you have comments concerning the accuracy of the time estimate(s) or suggestions for improving this form, please write to:  U.S. Department of Health & Human Services, OS/OCIO/PRA, 200 Independence Ave., S.W., Suite 537-H, Washington D.C. 20201,  Attention: PRA Reports Clearance Officer.\n\nAgency    Total           Average Burden    Total Burden\n               Responses  per response in    Hours\n                                 Hours\n\nUSDA      6202           15/60                   1551\nNARA      145             15/60                   36\nCNCS      10               30/60                   5\nTREAS    191             15/60                   48\nDOI          3848           22/60                  1404\nVA          184              15/60                  46\nDOC        5685            15/60                  1421\nEPA        9098            1.82                    16585\nDHS        150              1                        150\nHHS        978              15/60                  245\nTotal        26491                                    21491\n\n21491 total hrs. x 60 min. = 1289460 total minutes\n\n1289460 / 26491 total responses = 49 minutes per response",
+    "Existing SGG classification: implemented at 48d93f882c63a711bdec4b16e3150d1293cdff43, from a bounded API Form-registration inventory. Exact schema, fixtures, UI/rules/XML and ownership are compared separately.",
+    "Definition profile: same four installed SGG JSON answer paths. Title and organization are required editable applicant-draft answers. Source-required signature/date are optional readonly submission context in the draft schema; example completion is synthetic, not service execution.",
+    "Original XSD makes answer elements optional while DAT describes all four at completion. The applicant-draft schema follows existing SGG title/organization requiredness. No source-policy decision is accepted by this definition.",
+    "Static original XSD/crosswalk is preserved. No generated XML transform is activated: FormVersionIdentifier envelope and flat-answer representative wrapping remain integration work. Actual SGG validator/XML rules are tested separately using these exact four JSON paths.",
+    "Legal-body qualification: complete ordered DAT source paragraphs are retained and visually checked against both pages of the original PDF. The recovered B draft had omitted seven clauses; source repair precedes this definition qualification."
+  ],
+  "risks": [
+    "Source short burden paragraph and popup use different burden estimates/control-number references. Both are retained as source evidence; this preparation does not choose policy text.",
+    "DAT forward-population/editability versus current SGG editable fields needs explicit ownership review. Required-transmission signatures/dates must not become ordinary editable or required draft answers.",
+    "Existing component availability is not demonstrated runtime parity. Current source-policy questions and implementation ownership must remain visible in the review packet.",
+    "Generated XML mapping, authenticated cover population, ownership enforcement, signing, save/reload/submission and human acceptance remain unverified. A successful existing XML reference does not close those gates."
+  ],
+  "new_concepts": [],
+  "description": "Original non-construction assurance definition with four existing SGG answer paths and separate applicant-draft/submission context.",
+  "xsd_root": "Assurances",
+  "examples": [
+    {
+      "label": "Unsigned applicant draft",
+      "description": "Existing SGG requires title and organization; signature/date remain owned by submission.",
+      "data": {
+        "title": "Executive Director",
+        "applicant_organization": "Illustrative Community Organization"
+      }
+    },
+    {
+      "label": "Illustrative submitted representation",
+      "description": "Synthetic names/date illustrate service-produced fields. This is not a signed certification or submission.",
+      "data": {
+        "signature": "Alex Example",
+        "title": "Executive Director",
+        "applicant_organization": "Illustrative Community Organization",
+        "date_signed": "2026-10-23"
+      }
+    }
+  ],
+  "widgets": ["TextWidget"],
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/tests/src/form_schema/forms/test_sf424b.py",
+    "examples": [
+      {
+        "label": "minimal_valid_sf424b_v1_1",
+        "description": "Pinned existing SGG fixture; no application execution or signing performed.",
+        "data": {
+          "signature": "Bob Smith",
+          "title": "Mr.",
+          "applicant_organization": "Business Inc."
+        }
+      },
+      {
+        "label": "full_valid_sf424b_v1_1",
+        "description": "Pinned existing SGG fixture; no application execution or signing performed.",
+        "data": {
+          "signature": "Bob Smith",
+          "title": "Mr.",
+          "applicant_organization": "Business Inc.",
+          "date_signed": "2025-01-01"
+        }
+      }
+    ]
+  },
+  "sgg_form_id": "1d0681f8-26f9-4ff1-a75e-e33477668f73",
+  "omb_number": "4040-0007",
+  "expiration_date": "07/31/2028",
+  "spec_id": "assurances-for-non-construction-programs-sf-424b"
 }
