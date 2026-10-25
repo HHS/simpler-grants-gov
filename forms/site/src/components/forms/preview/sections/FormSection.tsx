@@ -46,6 +46,17 @@ export default function FormSection({
   const name = groupName(layout.label);
   // Shown as the SGG fieldset shows a section's description: a paragraph per line.
   const description = layout.options?.description as string | undefined;
+  const help = description
+    ?.split("\n")
+    .filter(Boolean)
+    .map((paragraph, i) => (
+      <p
+        key={`${name}-section-description-paragraph-${i}`}
+        className="usa-hint form-section__description"
+      >
+        {paragraph}
+      </p>
+    ));
   const Heading = headingTag(level);
   return (
     <fieldset className="usa-fieldset form-section" id={`form-section-${name}`}>
@@ -55,17 +66,18 @@ export default function FormSection({
       >
         {layout.label}
       </Heading>
-      {description
-        ?.split("\n")
-        .filter(Boolean)
-        .map((paragraph, i) => (
-          <p
-            key={`${name}-section-description-paragraph-${i}`}
-            className="usa-hint form-section__description"
+      {layout.options?.widget === "SectionHelp" && description ? (
+        <details className="margin-y-2">
+          <summary
+            aria-label={`${layout.label}: instructions and option definitions`}
           >
-            {paragraph}
-          </p>
-        ))}
+            Instructions and option definitions
+          </summary>
+          {help}
+        </details>
+      ) : (
+        help
+      )}
       <SectionDepth.Provider value={level}>{children}</SectionDepth.Provider>
     </fieldset>
   );

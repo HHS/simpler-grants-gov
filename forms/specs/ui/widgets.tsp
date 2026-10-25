@@ -32,4 +32,7 @@ enum Widget {
 
   /** A FieldList whose entries each collapse to a read-only list of their answers. Preview only. */
   CollapsibleFieldList,
+
+  /** Expand a section's source guidance on demand; its entry controls remain visible. Preview only. */
+  SectionHelp,
 }

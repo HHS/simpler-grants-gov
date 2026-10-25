@@ -18,3 +18,5 @@ import "./forms/phs-398-research-training-program-plan/index.tsp";
 
 import "./forms/usda-ad-1049/index.tsp";
 import "./forms/usda-ad-1052/index.tsp";
+
+import "./forms/afri-project-type/index.tsp";

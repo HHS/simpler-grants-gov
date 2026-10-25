@@ -1,6 +1,7 @@
 {
   "https://apply07.grants.gov/apply/forms/sample/AD_1049_2_0-V2.0_F695.xls": "51ea648122dd66f871764057c53e546547e8be8f1582a7cbcefd1dc161280ded",
   "https://apply07.grants.gov/apply/forms/sample/AD_1052_2_0-V2.0_F696.xls": "13006422765a3bf53fdfd75bcd0630fa0d8c8c263d084cbdfdf7690f57453d1f",
+  "https://apply07.grants.gov/apply/forms/sample/AFRI_Project_Type_2_0-V2.0_F796.xls": "10565a96b009aaf6e2eacc5f1df3656c372d592535a7ceaf3b4ac891a7fc2414",
   "https://apply07.grants.gov/apply/forms/sample/AttachmentForm_1_2-V1.2_F540.xls": "e5d664667c014948b9cc6f35d3b0b61e26b3b9c247d42fbace3067588d013586",
   "https://apply07.grants.gov/apply/forms/sample/BudgetNarrativeAttachments_1_2-V1.2_F543.xls": "3432858a55f5b60f82b29072332a849ae7b6aaa096bcb90bd2ac8566ab3dd1c1",
   "https://apply07.grants.gov/apply/forms/sample/ED_Abstract-V1.1_F267.xls": "4b64735c2a716e7e98b4aa1ed6d358cd1cebea8753b237c321c7c77285882499",
@@ -19,6 +20,7 @@
   "https://apply07.grants.gov/apply/forms/sample/SF424A-V1.0_F241.xls": "5228e637f00b1946f10df473376d9f6dd50956b929cbf823b5dd8313e0bbd7a4",
   "https://apply07.grants.gov/apply/forms/schemas/AD_1049_2_0-V2.0.xsd": "e9b6f1638998e49f7281e0b4def8437dec70430a3c84a6fd6fef64fd44deb518",
   "https://apply07.grants.gov/apply/forms/schemas/AD_1052_2_0-V2.0.xsd": "78a337dbfe693dce729b78bbdd7aca90cf24485186caea83c9b8610f0dd97080",
+  "https://apply07.grants.gov/apply/forms/schemas/AFRI_Project_Type_2_0-V2.0.xsd": "44a4e8d9a9bfb0be275a9f4b72c4da5c0ab8c5d9fcd1d20b0b262563d1854577",
   "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd": "c6b7f40614a2077818f5f3b5df72959f867611b887c5b888005df8adeaa5e8e9",
   "https://apply07.grants.gov/apply/forms/schemas/BudgetNarrativeAttachments_1_2-V1.2.xsd": "33c8bc63905589adae9508ddf08e69c7d8f900b394960f12fdd9b77cbfeb4feb",
   "https://apply07.grants.gov/apply/forms/schemas/ED_Abstract-V1.1.xsd": "088219b5d7882755a5428a7d09150d1fc1ba5c79b08ce14d36e0f02f9b3f2d35",
