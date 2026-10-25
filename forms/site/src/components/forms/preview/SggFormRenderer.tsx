@@ -57,7 +57,7 @@ export const SggFormRenderer = ({
       // Presentation only: validation.ts retains the API-shaped errors. Do not echo
       // a long or sensitive answer, or expose a regex as applicant instructions.
       if (
-        !["maxLength", "pattern"].includes(warning.type) ||
+        !["maxLength", "pattern", "format"].includes(warning.type) ||
         !("definition" in warning) ||
         !warning.definition
       )
@@ -68,6 +68,11 @@ export const SggFormRenderer = ({
         schema: undefined,
       });
       const label = (field?.title || warning.field).replace(/:\s*$/, "");
+      if (warning.type === "format") {
+        if (field?.format !== "email") return warning;
+        const message = `${label}: Enter a valid email address.`;
+        return { ...warning, message, formatted: message };
+      }
       const message =
         warning.type === "maxLength" && typeof field?.maxLength === "number"
           ? `${label} must be ${field.maxLength} characters or fewer.`

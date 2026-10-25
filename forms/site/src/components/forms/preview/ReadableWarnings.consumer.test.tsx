@@ -78,3 +78,51 @@ it("names the FNS long-answer limit without echoing the answer, then recovers li
     expect(screen.getByTestId("readable-warnings").textContent).toBe("[]"),
   );
 });
+
+it("names an EPA email error without echoing the answer and preserves the other role", async () => {
+  const form = await spec("epa-key-contacts");
+  const person = (first: string, email: string) => ({
+    name: { first_name: first, last_name: "Contact" },
+    address: {
+      street1: "10 Example Street",
+      city: "Denver",
+      state: "CO: Colorado",
+      zip_code: "80202",
+      country: "USA: UNITED STATES",
+    },
+    phone: "2025550102",
+    email,
+  });
+  const payee = person("Payee", "payee@example.org");
+  const manager = person("Manager", "manager@example.org");
+  const { container } = render(
+    <Preview {...form} example={{ payee, project_manager: manager }} />,
+  );
+  const email = container.querySelector<HTMLInputElement>(
+    '[name="payee--email"]',
+  )!;
+  expect(email).not.toBeNull();
+  await act(async () => {
+    fireEvent.input(email, { target: { value: "distinctive-invalid-answer" } });
+  });
+  await waitFor(() =>
+    expect(screen.getByTestId("readable-warnings").textContent).toContain(
+      "Email: Enter a valid email address.",
+    ),
+  );
+  expect(screen.getByTestId("readable-warnings").textContent).not.toContain(
+    "distinctive-invalid-answer",
+  );
+  let answer = JSON.parse(screen.getByTestId("collected-answer").textContent!);
+  expect(answer.payee.email).toBe("distinctive-invalid-answer");
+  expect(answer.project_manager).toEqual(manager);
+  await act(async () => {
+    fireEvent.input(email, { target: { value: payee.email } });
+  });
+  await waitFor(() =>
+    expect(screen.getByTestId("readable-warnings").textContent).toBe("[]"),
+  );
+  answer = JSON.parse(screen.getByTestId("collected-answer").textContent!);
+  expect(answer.payee).toEqual(payee);
+  expect(answer.project_manager).toEqual(manager);
+});
