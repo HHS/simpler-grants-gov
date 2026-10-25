@@ -12,6 +12,7 @@ model SF424BRRLayout {
   assurances: {};
 
   @UI.label("Completion values")
+  @doc("Applicant organization and representative title come from the application cover. Signature and date are supplied at submission.")
   completion: {
     @UI.field(SF424BRR.authorizedRepresentative)
     @UI.flatten
