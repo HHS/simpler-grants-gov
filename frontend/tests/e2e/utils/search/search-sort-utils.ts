@@ -11,10 +11,10 @@ import {
   waitForURLContainsQueryParamValue,
   waitForURLContainsQueryParamValues,
 } from "tests/e2e/playwrightUtils";
+import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 import {
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
-  toggleCheckbox,
   toggleFilterDrawer,
   type LoginState,
 } from "tests/e2e/utils/search/search-filter-utils";
@@ -467,8 +467,36 @@ export async function verifySortedAcrossPages(
 // ---------------------------------------------------------------------------
 
 /**
+ * Unchecks a checkbox that is currently checked. toggleCheckbox in search-filter-utils
+ * only ever checks (it returns early when the box is already checked), so it can't
+ * be used for default filters such as Forecasted.
+ */
+async function uncheckCheckbox(page: Page, idWithoutHash: string) {
+  const checkBox = page.locator(`input[id="${idWithoutHash}"]`).first();
+  const checkBoxLabel = page
+    .locator(`label[for="${idWithoutHash}"]:visible`)
+    .first();
+  const timeout = targetEnv !== "local" ? 120000 : 30000;
+  await checkBox.waitFor({ state: "attached", timeout });
+  await checkBoxLabel.waitFor({ state: "visible", timeout });
+  await checkBoxLabel.scrollIntoViewIfNeeded();
+  await expect(checkBox).toBeEnabled();
+  await expect(
+    checkBox,
+    `Expected ${idWithoutHash} to be checked by default`,
+  ).toBeChecked();
+
+  await checkBoxLabel.click({ force: true });
+  await expect(checkBox).not.toBeChecked({ timeout: 10000 });
+}
+
+/**
  * Narrows results by unchecking the default "Forecasted" status (URL becomes status=posted).
  * Sorting must be retained and results must remain.
+ *
+ * Filter checkboxes update the URL with setQueryParam, which (unlike a sort or
+ * keyword change) does not remove the `page` param. If a page param is left over,
+ * reload without it so callers always start from page 1 of the filtered results.
  */
 export async function applyStatusNarrowingFilter(
   page: Page,
@@ -476,13 +504,21 @@ export async function applyStatusNarrowingFilter(
 ): Promise<void> {
   await ensureFilterDrawerOpen(page);
   await ensureAccordionExpanded(page, "Opportunity status");
-  await toggleCheckbox(page, "status-forecasted");
+  await uncheckCheckbox(page, "status-forecasted");
   await waitForURLContainsQueryParamValues(page, "status", ["posted"]);
   await waitForSearchResultsInitialLoad(page);
   if (isMobile) {
     await toggleFilterDrawer(page);
   }
   await getNumberOfOpportunitySearchResults(page);
+
+  const url = new URL(page.url());
+  if (url.searchParams.has("page")) {
+    url.searchParams.delete("page");
+    await gotoWithRetry(page, url.toString(), { timeout: NAVIGATION_TIMEOUT });
+    await waitForSearchResultsInitialLoad(page);
+    await getNumberOfOpportunitySearchResults(page);
+  }
 }
 
 // ---------------------------------------------------------------------------
