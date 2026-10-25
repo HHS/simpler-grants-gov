@@ -104,7 +104,7 @@ export async function selectSortBy(
 // The mobile drawer select id is duplicated in the DOM (page + dialog), so a
 // bare id locator violates strict mode. Prefer the open dialog's copy, else
 // fall back to the first match.
-async function getSortSelect(page: Page, drawer: boolean) {
+export async function getSortSelect(page: Page, drawer: boolean) {
   if (!drawer) return page.locator("#search-sort-by-select").first();
   const inDialog = page
     .getByRole("dialog")
