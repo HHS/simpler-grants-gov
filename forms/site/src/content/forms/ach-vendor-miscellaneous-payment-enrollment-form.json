@@ -1,12 +1,1021 @@
 {
   "title": "ACH Vendor/Miscellaneous Payment Enrollment Form",
   "slug": "ach-vendor-miscellaneous-payment-enrollment-form",
-  "status": "backlog",
-  "family": ["SF-424"],
-  "category": "Key Personnel & Contact Forms",
+  "status": "in_progress",
+  "family": [
+    "SF-424"
+  ],
+  "category": "Certification & Assurance Forms",
   "apps_count": 503,
+  "omb_number": "1530-0069",
+  "expiration_date": "08/31/2025",
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/666",
-  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/SF3881_2_0-V2.0_F666.pdf",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/SF3881_2_0-V2.0_F666.xls",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF3881_2_0-V2.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/SF3881_2_0-V2.0_F666.xls"
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/SF3881_2_0-V2.0_F666.pdf",
+  "widgets": [
+    "TextWidget",
+    "TextAreaWidget",
+    "RadioWidget",
+    "SelectWidget"
+  ],
+  "spec_id": "ach-vendor-miscellaneous-payment-enrollment-form",
+  "description": "Review agency-supplied context and enter distinct payee, financial institution and authorizing-official details. Identifiers remain source-qualified strings.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Agency information",
+      "help_text": "ACH VENDOR/MISCELLANEOUS PAYMENT ENROLLMENT FORM\n\nOMB Number: 1530-0069\n\nExpiration Date: 08/31/2025\n\nThis form is used for Automated Clearing House (ACH) payments with an addendum record that contains payment-related information processed through the Vendor Express Program.  Recipients of these payments should bring this information to the attention of their financial institution when presenting this form for completion.  See reverse for additional instructions.\n\nPRIVACY ACT STATEMENT\n\nThe following information is provided to comply with the Privacy Act of 1974 (P.L. 93-579).  All information collected on this form is required under the provisions of 31 U.S.C. 3322 and 31 CFR 210.  This information will be used by the Treasury Department to transmit payment data, by electronic means to vendor's financial institution.  Failure to provide the requested information may delay or prevent the receipt of payments through the Automated Clearing House Payment System.\n\nAGENCY INFORMATION",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Agency information",
+          "help_text": "Agency Name comes from the application cover; remaining fields are to be completed by the agency. These preview values are supplied readonly context.",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Agency Name:",
+              "dat_field": "3-01",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Pre-populated from the Application cover sheet.",
+              "json_path": "agency.name",
+              "xml_path": "SF3881_2_0:AgencyName",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "Pre-populated from the Application cover sheet. Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "field",
+              "label": "Agency Identifier:",
+              "dat_field": "3-02",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "To be completed by Agency.",
+              "json_path": "agency.identifier",
+              "xml_path": "SF3881_2_0:AgencyIdentifier",
+              "constraints": "minLength 0, maxLength 12",
+              "pre_populated": "To be completed by Agency. Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "field",
+              "label": "Agency Location Code (ALC):",
+              "dat_field": "3-03",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "To be completed by Agency.",
+              "json_path": "agency.location_code",
+              "xml_path": "SF3881_2_0:AgencyLocation",
+              "constraints": "minLength 0, maxLength 12, pattern ^[0-9]*$",
+              "pre_populated": "To be completed by Agency. Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "field",
+              "label": "ACH Format:",
+              "dat_field": "3-04",
+              "required": false,
+              "type": "Radio",
+              "widget": "RadioWidget",
+              "help_text": "To be completed by Agency.",
+              "json_path": "agency.ach_format",
+              "xml_path": "SF3881_2_0:ACHFormat",
+              "constraints": "",
+              "pre_populated": "To be completed by Agency. Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "section",
+              "label": "Address",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Street 1",
+                  "dat_field": "3-06",
+                  "required": "conditional",
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first line of the street address.",
+                  "json_path": "agency.address.street1",
+                  "xml_path": "SF3881_2_0:AgencyAddress/globLib:Street1",
+                  "constraints": "minLength 1, maxLength 55"
+                },
+                {
+                  "kind": "field",
+                  "label": "Street 2",
+                  "dat_field": "3-07",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the second line of the street address.",
+                  "json_path": "agency.address.street2",
+                  "xml_path": "SF3881_2_0:AgencyAddress/globLib:Street2",
+                  "constraints": "minLength 1, maxLength 55"
+                },
+                {
+                  "kind": "field",
+                  "label": "City",
+                  "dat_field": "3-08",
+                  "required": "conditional",
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the city.",
+                  "json_path": "agency.address.city",
+                  "xml_path": "SF3881_2_0:AgencyAddress/globLib:City",
+                  "constraints": "minLength 1, maxLength 35"
+                },
+                {
+                  "kind": "field",
+                  "label": "County/Parish",
+                  "dat_field": "3-09",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the county or parish.",
+                  "json_path": "agency.address.county",
+                  "xml_path": "SF3881_2_0:AgencyAddress/globLib:County",
+                  "constraints": "minLength 1, maxLength 30"
+                },
+                {
+                  "kind": "field",
+                  "label": "State",
+                  "dat_field": "3-10",
+                  "required": "conditional",
+                  "type": "Select",
+                  "widget": "SelectWidget",
+                  "help_text": "Select the state. This field is required if the country is the United States.",
+                  "json_path": "agency.address.state",
+                  "xml_path": "SF3881_2_0:AgencyAddress/globLib:State",
+                  "constraints": "StateCodeDataTypeV3 enumeration"
+                },
+                {
+                  "kind": "field",
+                  "label": "Province",
+                  "dat_field": "3-11",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the province.",
+                  "json_path": "agency.address.province",
+                  "xml_path": "SF3881_2_0:AgencyAddress/globLib:Province",
+                  "constraints": "minLength 1, maxLength 30"
+                },
+                {
+                  "kind": "field",
+                  "label": "Country",
+                  "dat_field": "3-12",
+                  "required": "conditional",
+                  "type": "Select",
+                  "widget": "SelectWidget",
+                  "help_text": "Select the country.",
+                  "json_path": "agency.address.country",
+                  "xml_path": "SF3881_2_0:AgencyAddress/globLib:Country",
+                  "constraints": "CountryCodeDataTypeV3 enumeration"
+                },
+                {
+                  "kind": "field",
+                  "label": "Zip / Postal Code",
+                  "dat_field": "3-13",
+                  "required": "conditional",
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
+                  "json_path": "agency.address.zip_code",
+                  "xml_path": "SF3881_2_0:AgencyAddress/globLib:ZipPostalCode",
+                  "constraints": "minLength 1, maxLength 30"
+                }
+              ]
+            },
+            {
+              "kind": "section",
+              "label": "Contact Person Name",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Prefix",
+                  "dat_field": "3-15",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the prefix.",
+                  "json_path": "agency.contact_name.prefix",
+                  "xml_path": "SF3881_2_0:ContactPersonName/globLib:PrefixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "To be completed by Agency. Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "First Name",
+                  "dat_field": "3-16",
+                  "required": "conditional",
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first name.",
+                  "json_path": "agency.contact_name.first_name",
+                  "xml_path": "SF3881_2_0:ContactPersonName/globLib:FirstName",
+                  "constraints": "minLength 1, maxLength 35",
+                  "pre_populated": "To be completed by Agency. Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Middle Name",
+                  "dat_field": "3-17",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the middle name.",
+                  "json_path": "agency.contact_name.middle_name",
+                  "xml_path": "SF3881_2_0:ContactPersonName/globLib:MiddleName",
+                  "constraints": "minLength 1, maxLength 25",
+                  "pre_populated": "To be completed by Agency. Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Last Name",
+                  "dat_field": "3-18",
+                  "required": "conditional",
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the last name.",
+                  "json_path": "agency.contact_name.last_name",
+                  "xml_path": "SF3881_2_0:ContactPersonName/globLib:LastName",
+                  "constraints": "minLength 1, maxLength 60",
+                  "pre_populated": "To be completed by Agency. Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Suffix",
+                  "dat_field": "3-19",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the suffix.",
+                  "json_path": "agency.contact_name.suffix",
+                  "xml_path": "SF3881_2_0:ContactPersonName/globLib:SuffixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "To be completed by Agency. Read-only."
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "label": "Telephone Number:",
+              "dat_field": "3-20",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "To be completed by Agency.",
+              "json_path": "agency.phone",
+              "xml_path": "SF3881_2_0:PhoneNumber",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "To be completed by Agency. Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "field",
+              "label": "Additional Information:",
+              "dat_field": "3-21",
+              "required": false,
+              "type": "Text",
+              "widget": "TextAreaWidget",
+              "help_text": "To be completed by Agency.",
+              "json_path": "agency.additional_information",
+              "xml_path": "SF3881_2_0:AddedInfo",
+              "constraints": "minLength 0, maxLength 500",
+              "pre_populated": "To be completed by Agency. Read-only; preview data is illustrative."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Payee/company information",
+      "help_text": "",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Payee/company information",
+          "help_text": "",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Organization Name (Legal Name):",
+              "dat_field": "4-01",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the legal name of the applicant that will undertake the assistance activity. This field is required.",
+              "json_path": "payee.organization_name",
+              "xml_path": "SF3881_2_0:Payee/OrganizationName",
+              "constraints": "minLength 1, maxLength 60"
+            },
+            {
+              "kind": "field",
+              "label": "SSN No. or Taxpayer ID No.:",
+              "dat_field": "4-02",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter either SSN or TIN as assigned by the Internal Revenue Service.  If your organization is not in the US, enter 44-4444444. This field is required.",
+              "json_path": "payee.tax_identifier",
+              "xml_path": "SF3881_2_0:Payee/SSNTIN",
+              "constraints": "minLength 9, maxLength 30"
+            },
+            {
+              "kind": "section",
+              "label": "Address",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Street 1",
+                  "dat_field": "4-03",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first line of the street address.",
+                  "json_path": "payee.address.street1",
+                  "xml_path": "SF3881_2_0:Payee/PayeeAddress/globLib:Street1",
+                  "constraints": "minLength 1, maxLength 55"
+                },
+                {
+                  "kind": "field",
+                  "label": "Street 2",
+                  "dat_field": "4-04",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the second line of the street address.",
+                  "json_path": "payee.address.street2",
+                  "xml_path": "SF3881_2_0:Payee/PayeeAddress/globLib:Street2",
+                  "constraints": "minLength 1, maxLength 55"
+                },
+                {
+                  "kind": "field",
+                  "label": "City",
+                  "dat_field": "4-05",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the city.",
+                  "json_path": "payee.address.city",
+                  "xml_path": "SF3881_2_0:Payee/PayeeAddress/globLib:City",
+                  "constraints": "minLength 1, maxLength 35"
+                },
+                {
+                  "kind": "field",
+                  "label": "County/Parish",
+                  "dat_field": "4-06",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the county or parish.",
+                  "json_path": "payee.address.county",
+                  "xml_path": "SF3881_2_0:Payee/PayeeAddress/globLib:County",
+                  "constraints": "minLength 1, maxLength 30"
+                },
+                {
+                  "kind": "field",
+                  "label": "State",
+                  "dat_field": "4-07",
+                  "required": "conditional",
+                  "type": "Select",
+                  "widget": "SelectWidget",
+                  "help_text": "Select the state. This field is required if the country is the United States.",
+                  "json_path": "payee.address.state",
+                  "xml_path": "SF3881_2_0:Payee/PayeeAddress/globLib:State",
+                  "constraints": "StateCodeDataTypeV3 enumeration"
+                },
+                {
+                  "kind": "field",
+                  "label": "Province",
+                  "dat_field": "4-08",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the province.",
+                  "json_path": "payee.address.province",
+                  "xml_path": "SF3881_2_0:Payee/PayeeAddress/globLib:Province",
+                  "constraints": "minLength 1, maxLength 30"
+                },
+                {
+                  "kind": "field",
+                  "label": "Country",
+                  "dat_field": "4-09",
+                  "required": true,
+                  "type": "Select",
+                  "widget": "SelectWidget",
+                  "help_text": "Select the country.",
+                  "json_path": "payee.address.country",
+                  "xml_path": "SF3881_2_0:Payee/PayeeAddress/globLib:Country",
+                  "constraints": "CountryCodeDataTypeV3 enumeration"
+                },
+                {
+                  "kind": "field",
+                  "label": "Zip / Postal Code",
+                  "dat_field": "4-10",
+                  "required": "conditional",
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
+                  "json_path": "payee.address.zip_code",
+                  "xml_path": "SF3881_2_0:Payee/PayeeAddress/globLib:ZipPostalCode",
+                  "constraints": "minLength 1, maxLength 30"
+                }
+              ]
+            },
+            {
+              "kind": "section",
+              "label": "Contact Person Name",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Prefix",
+                  "dat_field": "4-12",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the prefix.",
+                  "json_path": "payee.contact_name.prefix",
+                  "xml_path": "SF3881_2_0:Payee/ContactName/globLib:PrefixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Applicant-entered."
+                },
+                {
+                  "kind": "field",
+                  "label": "First Name",
+                  "dat_field": "4-13",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first name.",
+                  "json_path": "payee.contact_name.first_name",
+                  "xml_path": "SF3881_2_0:Payee/ContactName/globLib:FirstName",
+                  "constraints": "minLength 1, maxLength 35",
+                  "pre_populated": "Applicant-entered."
+                },
+                {
+                  "kind": "field",
+                  "label": "Middle Name",
+                  "dat_field": "4-14",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the middle name.",
+                  "json_path": "payee.contact_name.middle_name",
+                  "xml_path": "SF3881_2_0:Payee/ContactName/globLib:MiddleName",
+                  "constraints": "minLength 1, maxLength 25",
+                  "pre_populated": "Applicant-entered."
+                },
+                {
+                  "kind": "field",
+                  "label": "Last Name",
+                  "dat_field": "4-15",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the last name.",
+                  "json_path": "payee.contact_name.last_name",
+                  "xml_path": "SF3881_2_0:Payee/ContactName/globLib:LastName",
+                  "constraints": "minLength 1, maxLength 60",
+                  "pre_populated": "Applicant-entered."
+                },
+                {
+                  "kind": "field",
+                  "label": "Suffix",
+                  "dat_field": "4-16",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the suffix.",
+                  "json_path": "payee.contact_name.suffix",
+                  "xml_path": "SF3881_2_0:Payee/ContactName/globLib:SuffixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Applicant-entered."
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "label": "Telephone Number:",
+              "dat_field": "4-17",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the daytime Telephone Number. This field is required.",
+              "json_path": "payee.phone",
+              "xml_path": "SF3881_2_0:Payee/PhoneNumber",
+              "constraints": "minLength 1, maxLength 25"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Financial institution information",
+      "help_text": "",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Financial institution information",
+          "help_text": "",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Name of Financial Institution:",
+              "dat_field": "5-01",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter name of financial institution.  This field is required.",
+              "json_path": "financial_institution.name",
+              "xml_path": "SF3881_2_0:FinancialInstitution/BankName",
+              "constraints": "minLength 1, maxLength 55"
+            },
+            {
+              "kind": "section",
+              "label": "Address",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Street 1",
+                  "dat_field": "5-02",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first line of the street address.",
+                  "json_path": "financial_institution.address.street1",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/BankAddress/globLib:Street1",
+                  "constraints": "minLength 1, maxLength 55"
+                },
+                {
+                  "kind": "field",
+                  "label": "Street 2",
+                  "dat_field": "5-03",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the second line of the street address.",
+                  "json_path": "financial_institution.address.street2",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/BankAddress/globLib:Street2",
+                  "constraints": "minLength 1, maxLength 55"
+                },
+                {
+                  "kind": "field",
+                  "label": "City",
+                  "dat_field": "5-04",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the city.",
+                  "json_path": "financial_institution.address.city",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/BankAddress/globLib:City",
+                  "constraints": "minLength 1, maxLength 35"
+                },
+                {
+                  "kind": "field",
+                  "label": "County/Parish",
+                  "dat_field": "5-05",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the county or parish.",
+                  "json_path": "financial_institution.address.county",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/BankAddress/globLib:County",
+                  "constraints": "minLength 1, maxLength 30"
+                },
+                {
+                  "kind": "field",
+                  "label": "State",
+                  "dat_field": "5-06",
+                  "required": "conditional",
+                  "type": "Select",
+                  "widget": "SelectWidget",
+                  "help_text": "Select the state. This field is required if the country is the United States.",
+                  "json_path": "financial_institution.address.state",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/BankAddress/globLib:State",
+                  "constraints": "StateCodeDataTypeV3 enumeration"
+                },
+                {
+                  "kind": "field",
+                  "label": "Province",
+                  "dat_field": "5-07",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the province.",
+                  "json_path": "financial_institution.address.province",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/BankAddress/globLib:Province",
+                  "constraints": "minLength 1, maxLength 30"
+                },
+                {
+                  "kind": "field",
+                  "label": "Country",
+                  "dat_field": "5-08",
+                  "required": true,
+                  "type": "Select",
+                  "widget": "SelectWidget",
+                  "help_text": "Select the country.",
+                  "json_path": "financial_institution.address.country",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/BankAddress/globLib:Country",
+                  "constraints": "CountryCodeDataTypeV3 enumeration"
+                },
+                {
+                  "kind": "field",
+                  "label": "Zip / Postal Code",
+                  "dat_field": "5-09",
+                  "required": "conditional",
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
+                  "json_path": "financial_institution.address.zip_code",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/BankAddress/globLib:ZipPostalCode",
+                  "constraints": "minLength 1, maxLength 30"
+                }
+              ]
+            },
+            {
+              "kind": "section",
+              "label": "ACH Coordinator Name",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Prefix",
+                  "dat_field": "5-11",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the prefix.",
+                  "json_path": "financial_institution.ach_coordinator.prefix",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/ACHCoordinator/globLib:PrefixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Applicant-entered."
+                },
+                {
+                  "kind": "field",
+                  "label": "First Name",
+                  "dat_field": "5-12",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first name.",
+                  "json_path": "financial_institution.ach_coordinator.first_name",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/ACHCoordinator/globLib:FirstName",
+                  "constraints": "minLength 1, maxLength 35",
+                  "pre_populated": "Applicant-entered."
+                },
+                {
+                  "kind": "field",
+                  "label": "Middle Name",
+                  "dat_field": "5-13",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the middle name.",
+                  "json_path": "financial_institution.ach_coordinator.middle_name",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/ACHCoordinator/globLib:MiddleName",
+                  "constraints": "minLength 1, maxLength 25",
+                  "pre_populated": "Applicant-entered."
+                },
+                {
+                  "kind": "field",
+                  "label": "Last Name",
+                  "dat_field": "5-14",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the last name.",
+                  "json_path": "financial_institution.ach_coordinator.last_name",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/ACHCoordinator/globLib:LastName",
+                  "constraints": "minLength 1, maxLength 60",
+                  "pre_populated": "Applicant-entered."
+                },
+                {
+                  "kind": "field",
+                  "label": "Suffix",
+                  "dat_field": "5-15",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the suffix.",
+                  "json_path": "financial_institution.ach_coordinator.suffix",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/ACHCoordinator/globLib:SuffixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Applicant-entered."
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "label": "Telephone Number:",
+              "dat_field": "5-16",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the daytime Telephone Number. This field is required.",
+              "json_path": "financial_institution.phone",
+              "xml_path": "SF3881_2_0:FinancialInstitution/PhoneNumber",
+              "constraints": "minLength 1, maxLength 25"
+            },
+            {
+              "kind": "field",
+              "label": "Nine-Digit Routing Transit Number:",
+              "dat_field": "5-17",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter Nine-Digit Routing Transit Number. Numbers only. This field is required.",
+              "json_path": "financial_institution.routing_transit_number",
+              "xml_path": "SF3881_2_0:FinancialInstitution/NineDigitRoutingTransitNumber",
+              "constraints": "minLength 9, maxLength 9, pattern ^[0-9]{9}$"
+            },
+            {
+              "kind": "field",
+              "label": "Depositor Account Title:",
+              "dat_field": "5-18",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter Depositor Account Title. This field is required.",
+              "json_path": "financial_institution.account_title",
+              "xml_path": "SF3881_2_0:FinancialInstitution/DepositorAccountTitle",
+              "constraints": "minLength 1, maxLength 50"
+            },
+            {
+              "kind": "field",
+              "label": "Depositor Account Number:",
+              "dat_field": "5-19",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter Depositor Account Number. This field is required.",
+              "json_path": "financial_institution.account_number",
+              "xml_path": "SF3881_2_0:FinancialInstitution/DepositorAccountNumber",
+              "constraints": "minLength 4, maxLength 30, pattern ^[0-9]+$"
+            },
+            {
+              "kind": "field",
+              "label": "Lockbox Number:",
+              "dat_field": "5-20",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter Lockbox Number.",
+              "json_path": "financial_institution.lockbox_number",
+              "xml_path": "SF3881_2_0:FinancialInstitution/LockboxNumber",
+              "constraints": "minLength 0, maxLength 20"
+            },
+            {
+              "kind": "field",
+              "label": "Type of Account:",
+              "dat_field": "5-21",
+              "required": false,
+              "type": "Radio",
+              "widget": "RadioWidget",
+              "help_text": "Select Type of Account.",
+              "json_path": "financial_institution.account_type",
+              "xml_path": "SF3881_2_0:FinancialInstitution/TypeofAccount",
+              "constraints": ""
+            },
+            {
+              "kind": "section",
+              "label": "Authorized Official",
+              "help_text": "The source group contains name, title and phone. It defines no separate signature value.",
+              "children": [
+                {
+                  "kind": "section",
+                  "label": "Name",
+                  "children": [
+                    {
+                      "kind": "field",
+                      "label": "Prefix",
+                      "dat_field": "5-23",
+                      "required": false,
+                      "type": "Text",
+                      "widget": "TextWidget",
+                      "help_text": "Enter the prefix.",
+                      "json_path": "financial_institution.authorized_official.name.prefix",
+                      "xml_path": "SF3881_2_0:FinancialInstitution/AOSignatureAndTitle/AOName/globLib:PrefixName",
+                      "constraints": "minLength 1, maxLength 10",
+                      "pre_populated": "Applicant-entered."
+                    },
+                    {
+                      "kind": "field",
+                      "label": "First Name",
+                      "dat_field": "5-24",
+                      "required": true,
+                      "type": "Text",
+                      "widget": "TextWidget",
+                      "help_text": "Enter the first name.",
+                      "json_path": "financial_institution.authorized_official.name.first_name",
+                      "xml_path": "SF3881_2_0:FinancialInstitution/AOSignatureAndTitle/AOName/globLib:FirstName",
+                      "constraints": "minLength 1, maxLength 35",
+                      "pre_populated": "Applicant-entered."
+                    },
+                    {
+                      "kind": "field",
+                      "label": "Middle Name",
+                      "dat_field": "5-25",
+                      "required": false,
+                      "type": "Text",
+                      "widget": "TextWidget",
+                      "help_text": "Enter the middle name.",
+                      "json_path": "financial_institution.authorized_official.name.middle_name",
+                      "xml_path": "SF3881_2_0:FinancialInstitution/AOSignatureAndTitle/AOName/globLib:MiddleName",
+                      "constraints": "minLength 1, maxLength 25",
+                      "pre_populated": "Applicant-entered."
+                    },
+                    {
+                      "kind": "field",
+                      "label": "Last Name",
+                      "dat_field": "5-26",
+                      "required": true,
+                      "type": "Text",
+                      "widget": "TextWidget",
+                      "help_text": "Enter the last name.",
+                      "json_path": "financial_institution.authorized_official.name.last_name",
+                      "xml_path": "SF3881_2_0:FinancialInstitution/AOSignatureAndTitle/AOName/globLib:LastName",
+                      "constraints": "minLength 1, maxLength 60",
+                      "pre_populated": "Applicant-entered."
+                    },
+                    {
+                      "kind": "field",
+                      "label": "Suffix",
+                      "dat_field": "5-27",
+                      "required": false,
+                      "type": "Text",
+                      "widget": "TextWidget",
+                      "help_text": "Enter the suffix.",
+                      "json_path": "financial_institution.authorized_official.name.suffix",
+                      "xml_path": "SF3881_2_0:FinancialInstitution/AOSignatureAndTitle/AOName/globLib:SuffixName",
+                      "constraints": "minLength 1, maxLength 10",
+                      "pre_populated": "Applicant-entered."
+                    }
+                  ]
+                },
+                {
+                  "kind": "field",
+                  "label": "Title of Authorized Official:",
+                  "dat_field": "5-28",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter title of authorized official. This field is required.",
+                  "json_path": "financial_institution.authorized_official.title",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/AOSignatureAndTitle/AOTitle",
+                  "constraints": "minLength 1, maxLength 60"
+                },
+                {
+                  "kind": "field",
+                  "label": "Telephone Number:",
+                  "dat_field": "5-29",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the daytime Telephone Number. This field is required.",
+                  "json_path": "financial_institution.authorized_official.phone",
+                  "xml_path": "SF3881_2_0:FinancialInstitution/AOSignatureAndTitle/AOPhoneNumber",
+                  "constraints": "minLength 1, maxLength 25"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Routing and account numbers are source numeric-only strings, preserving leading zeros. Tax identifiers retain the original9–30-character source string including the foreign-organization example; no stricter EIN/SSN policy is invented.",
+    "Agency, payee, financial institution and authorized official remain distinct roles/entities. Agency fields are supplied context, not applicant-entered answers.",
+    "All three addresses reuse the existing GlobalLibrary address question and its country activity/requiredness. Optional agency address/name groups are absent until supplied; partial objects must satisfy their source required members.",
+    "The authorized-official title permits60characters; the45-character person/title bank question is an explicit nonfit. Financial institution name is55characters and is not organization/name60.",
+    "Despite its Signature and Title heading, the original XSD group contains only name, title and phone. No signature value, consent or bank authorization service is invented.",
+    "Original source privacy text is retained. Examples are synthetic; source instructions calling for a bank/agency to complete fields remain separate from authentic service integration."
+  ],
+  "risks": [
+    "Country changes retain inactive values under the existing shared address behavior. Any eventual XML projection must respect the original State/Province choice and active-country rules; this definition does not introduce a serializer.",
+    "Agency-provided fields require authentic agency context in production; the preview cannot produce or verify it."
+  ],
+  "examples": [
+    {
+      "label": "Illustrative scenario 1",
+      "description": "Foreign payee; leading-zero banking strings are illustrative.",
+      "data": {
+        "agency": {
+          "name": "Illustrative Federal Agency",
+          "identifier": "DEMO",
+          "location_code": "000012",
+          "ach_format": "CCD+",
+          "address": {
+            "street1": "100 Example Avenue",
+            "city": "Denver",
+            "state": "CO: Colorado",
+            "country": "USA: UNITED STATES",
+            "zip_code": "80202"
+          },
+          "contact_name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "phone": "2025550104",
+          "additional_information": "Illustrative agency-owned context."
+        },
+        "payee": {
+          "organization_name": "Illustrative Payee Organization",
+          "tax_identifier": "44-4444444",
+          "address": {
+            "street1": "10 Example Street",
+            "city": "Toronto",
+            "province": "Ontario",
+            "country": "CAN: CANADA",
+            "zip_code": "M5H 1A1"
+          },
+          "contact_name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "phone": "2025550101"
+        },
+        "financial_institution": {
+          "name": "Illustrative Bank - Not Real",
+          "address": {
+            "street1": "100 Example Avenue",
+            "city": "Denver",
+            "state": "CO: Colorado",
+            "country": "USA: UNITED STATES",
+            "zip_code": "80202"
+          },
+          "ach_coordinator": {
+            "first_name": "Morgan",
+            "last_name": "Patel"
+          },
+          "phone": "2025550102",
+          "routing_transit_number": "000123456",
+          "account_title": "ILLUSTRATIVE ONLY",
+          "account_number": "000012345678",
+          "authorized_official": {
+            "name": {
+              "first_name": "Alex",
+              "last_name": "Rivera"
+            },
+            "title": "Illustrative Authorizing Official",
+            "phone": "2025550103"
+          },
+          "account_type": "Checking",
+          "lockbox_number": "000010"
+        }
+      }
+    },
+    {
+      "label": "Illustrative scenario 2",
+      "description": "US payee and supplied agency context.",
+      "data": {
+        "agency": {
+          "name": "Illustrative Federal Agency"
+        },
+        "payee": {
+          "organization_name": "Illustrative Payee Organization",
+          "tax_identifier": "00-0000000",
+          "address": {
+            "street1": "100 Example Avenue",
+            "city": "Denver",
+            "state": "CO: Colorado",
+            "country": "USA: UNITED STATES",
+            "zip_code": "80202"
+          },
+          "contact_name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "phone": "2025550101"
+        },
+        "financial_institution": {
+          "name": "Illustrative Bank - Not Real",
+          "address": {
+            "street1": "100 Example Avenue",
+            "city": "Denver",
+            "state": "CO: Colorado",
+            "country": "USA: UNITED STATES",
+            "zip_code": "80202"
+          },
+          "ach_coordinator": {
+            "first_name": "Morgan",
+            "last_name": "Patel"
+          },
+          "phone": "2025550102",
+          "routing_transit_number": "000123456",
+          "account_title": "ILLUSTRATIVE ONLY",
+          "account_number": "000012345678",
+          "authorized_official": {
+            "name": {
+              "first_name": "Alex",
+              "last_name": "Rivera"
+            },
+            "title": "Illustrative Authorizing Official",
+            "phone": "2025550103"
+          }
+        }
+      }
+    }
+  ]
 }
