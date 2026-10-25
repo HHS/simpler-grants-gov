@@ -171,7 +171,7 @@ test.describe("Search results sorting", () => {
          * @and sorting works correctly with applied filters
          * The helper returns on page 1 of the filtered results with sortby kept.
          */
-        await applyStatusNarrowingFilter(page, isMobile);
+        await applyStatusNarrowingFilter(page);
         const filteredCount = await getNumberOfOpportunitySearchResults(page);
         expect(
           filteredCount,
@@ -333,7 +333,7 @@ test.describe("Search results sorting", () => {
          * @and sorting works correctly with filtered results
          * The helper returns on page 1 of the filtered results with sortby kept.
          */
-        await applyStatusNarrowingFilter(page, isMobile);
+        await applyStatusNarrowingFilter(page);
         const filteredCount = await getNumberOfOpportunitySearchResults(page);
         expect(
           filteredCount,

@@ -15,6 +15,8 @@ import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 import {
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
+  expectFilterDrawerClosed,
+  getFilterDrawer,
   toggleFilterDrawer,
   type LoginState,
 } from "tests/e2e/utils/search/search-filter-utils";
@@ -490,6 +492,13 @@ async function uncheckCheckbox(page: Page, idWithoutHash: string) {
   await expect(checkBox).not.toBeChecked({ timeout: 10000 });
 }
 
+async function closeFilterDrawerIfOpen(page: Page): Promise<void> {
+  if (await getFilterDrawer(page).isVisible()) {
+    await toggleFilterDrawer(page);
+  }
+  await expectFilterDrawerClosed(page);
+}
+
 /**
  * Narrows results by unchecking the default "Forecasted" status (URL becomes status=posted).
  * Sorting must be retained and results must remain.
@@ -498,18 +507,15 @@ async function uncheckCheckbox(page: Page, idWithoutHash: string) {
  * keyword change) does not remove the `page` param. If a page param is left over,
  * reload without it so callers always start from page 1 of the filtered results.
  */
-export async function applyStatusNarrowingFilter(
-  page: Page,
-  isMobile: boolean,
-): Promise<void> {
+export async function applyStatusNarrowingFilter(page: Page): Promise<void> {
   await ensureFilterDrawerOpen(page);
   await ensureAccordionExpanded(page, "Opportunity status");
   await uncheckCheckbox(page, "status-forecasted");
   await waitForURLContainsQueryParamValues(page, "status", ["posted"]);
   await waitForSearchResultsInitialLoad(page);
-  if (isMobile) {
-    await toggleFilterDrawer(page);
-  }
+  // The drawer is a modal on every viewport. Left open it intercepts clicks on the
+  // results, pagination and save search button, so close it (as save-search.spec.ts does).
+  await closeFilterDrawerIfOpen(page);
   await getNumberOfOpportunitySearchResults(page);
 
   const url = new URL(page.url());
@@ -536,16 +542,10 @@ export async function clickSearchFromTopNav(
   if (isMobile) {
     await openMobileNav(page);
   }
-  // Scoped to the header rather than `.usa-nav` so it holds for both the desktop
-  // nav and the opened mobile nav.
   const searchLink = page
-    .locator("header")
+    .locator(".usa-nav")
     .getByRole("link", { name: "Search", exact: true })
     .first();
-  await expect(
-    searchLink,
-    `Expected a "Search" link in the top navigation on ${page.url()}`,
-  ).toBeVisible({ timeout: 60000 });
   await searchLink.click();
 
   await waitForURLChange(
