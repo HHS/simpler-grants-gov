@@ -51,3 +51,26 @@ after changing a spec, and reload the page after changing a plan or a `parity/di
 CI builds the site for every pull request that touches `forms/` and deploys it to the
 `sgg-form-library` Cloudflare Worker, aliased to the PR. See
 [`ci-form-library-preview.yml`](../../.github/workflows/ci-form-library-preview.yml).
+
+## Applicant-proxy review
+
+A passing sample check is one control, not a complete applicant walkthrough. Before
+loading an example, record a concrete task and infer which values the applicant can
+enter from the rendered instructions. Type distinct synthetic answers into each editable
+field; assess context-only fields separately. Exercise a meaningful mistake, its correction
+and a required or optional clear. Compare the visible Data with the intended answers,
+including unaffected context. After checking, summary and inline messages must agree as
+answers change; keyboard focus and unfinished list entries must survive those edits.
+
+Check section navigation and settled input views on desktop and a narrow viewport. Long
+URLs and unbroken text are useful wrapping controls. A hidden collapsed input is not a
+visible target: open the entry before testing it. For repeated entries, perform remove,
+add and edit in one mounted form before Check, reset or a tab change; use distinct values
+to expose swapped or retained answers. Test reset/recovery separately.
+
+Bind receipts to the actual form URL, heading and deployed source head. Keep failed
+observations and qualified successors; a screenshot must visibly contain the claimed
+control. Preserve source-owned text, constraints and population. Record what the preview
+cannot supply (application context, real signing, saving or submission), along with
+scoped agent-review findings and form/family lessons. Agent tasks do not establish human
+comprehension, accessibility certification or production integration.
