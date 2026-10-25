@@ -536,10 +536,16 @@ export async function clickSearchFromTopNav(
   if (isMobile) {
     await openMobileNav(page);
   }
+  // Scoped to the header rather than `.usa-nav` so it holds for both the desktop
+  // nav and the opened mobile nav.
   const searchLink = page
-    .locator(".usa-nav")
+    .locator("header")
     .getByRole("link", { name: "Search", exact: true })
     .first();
+  await expect(
+    searchLink,
+    `Expected a "Search" link in the top navigation on ${page.url()}`,
+  ).toBeVisible({ timeout: 60000 });
   await searchLink.click();
 
   await waitForURLChange(

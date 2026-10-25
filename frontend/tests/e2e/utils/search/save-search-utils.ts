@@ -119,7 +119,29 @@ export async function saveCurrentSearch(
   }
 
   const savedSearchNameInput = page.locator("#saved-search-input");
-  await savedSearchNameInput.waitFor({ state: "visible" });
+
+  // The JavaScript click above can fire before the modal is wired up (for example on a
+  // loaded CI runner) and is then a silent no-op, so retry with a real click rather than
+  // waiting out the whole test timeout. The first wait is generous so a modal that is only
+  // slow to open is not toggled closed again by the retry.
+  const MODAL_OPEN_ATTEMPTS = 3;
+  for (let attempt = 1; attempt <= MODAL_OPEN_ATTEMPTS; attempt += 1) {
+    const opened = await savedSearchNameInput
+      .waitFor({ state: "visible", timeout: attempt === 1 ? 20000 : 10000 })
+      .then(
+        () => true,
+        () => false,
+      );
+    if (opened) {
+      break;
+    }
+    if (attempt === MODAL_OPEN_ATTEMPTS) {
+      throw new Error(
+        `Save search modal did not open after ${MODAL_OPEN_ATTEMPTS} attempts`,
+      );
+    }
+    await openSaveModalButton.click({ force: true }).catch(() => undefined);
+  }
   await savedSearchNameInput.fill(searchName);
 
   const saveSearchButton = page.locator('[data-testid="save-search-button"]');
