@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 
@@ -90,7 +96,9 @@ it("refreshes warnings on edits without remounting inputs and retains unplaced U
 
   expect(childWarnings()).toEqual([]);
   appendix.focus();
-  fireEvent.input(appendix, { target: { value: "not-a-uuid" } });
+  await act(async () =>
+    fireEvent.input(appendix, { target: { value: "not-a-uuid" } }),
+  );
   // The frontend formatter cannot place this scalar-array warning. The preview's
   // completeWarnings fallback must deliver it to both the child and live summary.
   expect(childWarnings()).toContainEqual(
@@ -102,14 +110,18 @@ it("refreshes warnings on edits without remounting inputs and retains unplaced U
   expect(screen.getByLabelText("Appendix reference")).toBe(appendix);
   expect(document.activeElement).toBe(appendix);
 
-  fireEvent.input(appendix, { target: { value: appendixId } });
+  await act(async () =>
+    fireEvent.input(appendix, { target: { value: appendixId } }),
+  );
   expect(childWarnings()).toEqual([]);
   strategy.focus();
-  fireEvent.input(strategy, { target: { value: "" } });
+  await act(async () => fireEvent.input(strategy, { target: { value: "" } }));
   expect(childWarnings()).toContainEqual(
     expect.objectContaining({ field: "$.research_strategy", type: "required" }),
   );
-  fireEvent.input(strategy, { target: { value: strategyId } });
+  await act(async () =>
+    fireEvent.input(strategy, { target: { value: strategyId } }),
+  );
   expect(childWarnings()).toEqual([]);
   expect(screen.getByTestId("summary-warnings").textContent).toBe("[]");
   expect(screen.getByLabelText("Research strategy reference")).toBe(strategy);

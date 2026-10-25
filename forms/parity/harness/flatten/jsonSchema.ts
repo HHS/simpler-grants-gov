@@ -14,7 +14,7 @@ export const indexLeaves = (index: Json): Path[] =>
     .filter((occurrence) => occurrence.leaf)
     .map((occurrence) => fromPointer(occurrence.path));
 
-/** Two `allOf` branches give one keyword different values; the suite will not pick one. */
+/** A conjunction cannot be safely flattened; the suite will not pick a branch. */
 export class AmbiguousComposition extends Error {}
 
 const ANNOTATIONS = new Set(["title", "description", "examples", "$comment"]);
@@ -40,6 +40,18 @@ export function mergeAllOf(node: Json, at: Path = ""): Json {
       } else if (!(key in merged)) {
         merged[key] = value;
       } else if (
+        (key === "minLength" || key === "maxLength") &&
+        typeof value === "number" &&
+        Number.isFinite(value) &&
+        typeof merged[key] === "number" &&
+        Number.isFinite(merged[key])
+      ) {
+        // allOf is intersection: a narrower use does not erase its bank bound.
+        merged[key] =
+          key === "minLength"
+            ? Math.max(merged[key], value)
+            : Math.min(merged[key], value);
+      } else if (
         !ANNOTATIONS.has(key) &&
         JSON.stringify(merged[key]) !== JSON.stringify(value)
       ) {
@@ -49,6 +61,14 @@ export function mergeAllOf(node: Json, at: Path = ""): Json {
       }
     }
   }
+  if (
+    typeof merged.minLength === "number" &&
+    typeof merged.maxLength === "number" &&
+    merged.minLength > merged.maxLength
+  )
+    throw new AmbiguousComposition(
+      `allOf has an empty length intersection at ${at || "root"}`,
+    );
   return merged;
 }
 

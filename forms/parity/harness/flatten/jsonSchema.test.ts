@@ -28,9 +28,26 @@ describe("mergeAllOf", () => {
     ).toEqual({});
   });
 
-  it("refuses branches that disagree", () => {
+  it("intersects source-qualified bank and use-site length bounds in either order", () => {
+    const bank = { type: "string", minLength: 1, maxLength: 30 };
+    const use = { minLength: 2, maxLength: 10 };
+    expect(mergeAllOf({ allOf: [bank, use] })).toEqual({
+      type: "string",
+      minLength: 2,
+      maxLength: 10,
+    });
+    expect(mergeAllOf({ allOf: [use, bank] })).toEqual({
+      type: "string",
+      minLength: 2,
+      maxLength: 10,
+    });
+  });
+  it("refuses empty length intersections and opaque competing constraints", () => {
     expect(() =>
-      mergeAllOf({ allOf: [{ maxLength: 1 }, { maxLength: 2 }] }),
+      mergeAllOf({ allOf: [{ minLength: 11 }, { maxLength: 10 }] }),
+    ).toThrow(AmbiguousComposition);
+    expect(() =>
+      mergeAllOf({ allOf: [{ pattern: "^A" }, { pattern: "Z$" }] }),
     ).toThrow(AmbiguousComposition);
   });
 });

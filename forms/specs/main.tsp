@@ -15,3 +15,6 @@ import "./forms/ed-abstract-form/index.tsp";
 
 import "./forms/phs-398-research-plan/index.tsp";
 import "./forms/phs-398-research-training-program-plan/index.tsp";
+
+import "./forms/usda-ad-1049/index.tsp";
+import "./forms/usda-ad-1052/index.tsp";

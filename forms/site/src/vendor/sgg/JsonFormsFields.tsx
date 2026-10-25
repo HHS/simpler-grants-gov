@@ -1,7 +1,8 @@
 // TEMPORARY COPY of the pending frontend/src/components/apply-form/jsonforms/JsonFormsFields.tsx,
 // so the form library can render with the SGG form widgets before the JSON Forms renderer
-// lands in the frontend. Only import paths are changed, plus `extraRenderers`, which lets the
-// form library preview its own widgets beside the SGG ones. Delete src/vendor/sgg with #12695.
+// lands in the frontend. Library deltas: import paths, extraRenderers, an injectable form
+// collector, and deferred input/change/click/keyboard/blur reads after widget commits.
+// Reconcile those explicit deltas when removing src/vendor/sgg with #12695.
 import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
 import { JsonForms } from "@jsonforms/react";
 import {
@@ -35,6 +36,8 @@ const uswdsStyles = [
 ];
 
 const NO_EXTRA_RENDERERS: JsonFormsRendererRegistryEntry[] = [];
+const collectNativeData = (form: HTMLFormElement, schema: RJSFSchema) =>
+  shapeFormData(new FormData(form), schema);
 
 /**
  * The body of a form whose UI schema is JSON Forms. Takes the same props as `FormFields`
@@ -54,6 +57,7 @@ export const JsonFormsFields = ({
   isFormLocked,
   print,
   extraRenderers = NO_EXTRA_RENDERERS,
+  collectData = collectNativeData,
 }: {
   errors: FormattedFormValidationWarning[] | null;
   formData: object;
@@ -64,6 +68,12 @@ export const JsonFormsFields = ({
   print?: boolean;
   /** Renderers to rank against the SGG ones, for widgets only the form library has. */
   extraRenderers?: JsonFormsRendererRegistryEntry[];
+  /** The library preview can retain its explicitly supplied immutable context. */
+  collectData?: (
+    form: HTMLFormElement,
+    schema: RJSFSchema,
+    context: object,
+  ) => unknown;
 }) => {
   const [ruleData, setRuleData] = useState<object>(formData);
   const allRenderers = useMemo(
@@ -87,16 +97,28 @@ export const JsonFormsFields = ({
 
   const refreshRuleData = useCallback(
     (event: FormEvent<HTMLDivElement>) => {
-      const form = event.currentTarget.closest("form");
-      if (form) setRuleData(shapeFormData(new FormData(form), schema));
+      const container = event.currentTarget;
+      const form = container.closest("form");
+      if (form)
+        queueMicrotask(() => {
+          if (container.isConnected)
+            setRuleData(collectData(form, schema, formData) as object);
+        });
     },
-    [schema],
+    [schema, formData, collectData],
   );
 
   return (
     <AdapterContext.Provider value={adapterContext}>
       <JsonFormsStyleContext.Provider value={{ styles: uswdsStyles }}>
-        <div onInput={refreshRuleData} onChange={refreshRuleData}>
+        <div
+          onInput={refreshRuleData}
+          onChange={refreshRuleData}
+          onClick={refreshRuleData}
+          onKeyUp={refreshRuleData}
+          onKeyDown={refreshRuleData}
+          onBlur={refreshRuleData}
+        >
           <JsonForms
             schema={schema as object}
             uischema={uiSchema}

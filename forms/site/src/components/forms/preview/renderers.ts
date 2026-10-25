@@ -3,6 +3,7 @@ import {
   and,
   isControl,
   rankWith,
+  schemaMatches,
   uiTypeIs,
   type JsonFormsRendererRegistryEntry,
 } from "@jsonforms/core";
@@ -13,6 +14,10 @@ import {
 
 import { AttachmentReferenceControl } from "./AttachmentReferenceControl";
 import { CollapsibleListControl } from "./collapsible/CollapsibleFieldList";
+import {
+  EncodedYesNoCheckboxControl,
+  isEncodedYesNoSchema,
+} from "./EncodedYesNoCheckboxControl";
 import FormSection from "./sections/FormSection";
 
 /** Above the SGG adapter's 10, so these draw the elements they match instead. */
@@ -25,6 +30,17 @@ const RANK = 20;
  * draws it.
  */
 export const previewRenderers: JsonFormsRendererRegistryEntry[] = [
+  {
+    tester: rankWith(
+      RANK,
+      and(
+        isControl,
+        (ui) => widgetOf(ui) === "Checkbox",
+        schemaMatches(isEncodedYesNoSchema),
+      ),
+    ),
+    renderer: withJsonFormsControlProps(EncodedYesNoCheckboxControl),
+  },
   {
     tester: rankWith(
       RANK,

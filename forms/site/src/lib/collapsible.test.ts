@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   displayValue,
+  entryActivity,
   entryFields,
   entryLayout,
   entryTitle,
@@ -11,6 +12,65 @@ import {
   summarySections,
   type EntryNode,
 } from "./collapsible";
+
+it("uses each row's JSON Forms country rule without affecting its sibling", () => {
+  const state = { storagePath: ["state"] },
+    province = { storagePath: ["province"] };
+  const detail = {
+    type: "Group",
+    elements: [
+      {
+        type: "Control",
+        scope: "#/properties/state",
+        rule: {
+          effect: "ENABLE",
+          condition: {
+            scope: "#/properties/country",
+            schema: { const: "USA: UNITED STATES" },
+          },
+        },
+      },
+      {
+        type: "Control",
+        scope: "#/properties/province",
+        rule: {
+          effect: "ENABLE",
+          condition: {
+            scope: "#/properties/country",
+            schema: { not: { const: "USA: UNITED STATES" } },
+          },
+        },
+      },
+    ],
+  } as UISchemaElement;
+  const layout = entryLayout(detail, [state, province]);
+  expect(
+    entryActivity(layout, { country: "USA: UNITED STATES" }).get(state)
+      ?.enabled,
+  ).toBe(true);
+  expect(
+    entryActivity(layout, { country: "USA: UNITED STATES" }).get(province)
+      ?.enabled,
+  ).toBe(false);
+  expect(
+    entryActivity(layout, { country: "CAN: CANADA" }).get(state)?.enabled,
+  ).toBe(false);
+  expect(
+    entryActivity(layout, { country: "CAN: CANADA" }).get(province)?.enabled,
+  ).toBe(true);
+  // Evaluation reads data; it does not clear the inactive answer or change another row.
+  const canada = {
+    country: "CAN: CANADA",
+    state: "VA: VIRGINIA",
+    province: "Ontario",
+  };
+  entryActivity(layout, canada);
+  expect(canada).toEqual({
+    country: "CAN: CANADA",
+    state: "VA: VIRGINIA",
+    province: "Ontario",
+  });
+});
 
 describe("scopePath", () => {
   it("reads the property names out of a scope", () => {

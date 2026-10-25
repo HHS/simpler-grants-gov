@@ -1,5 +1,6 @@
 import { crumbAttributes, headingTag } from "@/lib/breadcrumbs";
 import {
+  entryActivity,
   entryFields,
   entryLayout,
   entryTitle,
@@ -13,7 +14,14 @@ import type { FormattedFormValidationWarning } from "@sgg/frontend/types/applyFo
 import { isFieldRequired } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { getFieldListChildErrors } from "@sgg/frontend/utils/applyForm/fieldListHelpers";
 import { getFieldConfig } from "@sgg/frontend/utils/applyForm/getFieldConfig";
-import { useContext, useId, useRef, useState, type ReactNode } from "react";
+import {
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { controlToNodes } from "../../../../vendor/sgg/jsonFormsUiSchema";
 import { AdapterContext } from "../../../../vendor/sgg/renderers";
@@ -111,6 +119,8 @@ function CollapsibleFieldList({
   depth,
 }: ListProps) {
   const headingId = useId();
+  const root = useRef<HTMLDivElement>(null);
+  const mounted = useRef(false);
   const nextId = useRef(0);
   const entry = (entryValue: Value): Entry => ({
     id: nextId.current++,
@@ -122,6 +132,14 @@ function CollapsibleFieldList({
     while (saved.length < minItems) saved.push(entry({}));
     return saved;
   });
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    // Publish actual committed names/indices after list edits, before Check or navigation.
+    root.current?.dispatchEvent(new Event("input", { bubbles: true }));
+  }, [entries]);
   const update = (id: number, change: (entry: Entry) => Entry) =>
     setEntries((current) => current.map((e) => (e.id === id ? change(e) : e)));
 
@@ -135,6 +153,7 @@ function CollapsibleFieldList({
 
   return (
     <div
+      ref={root}
       id={name}
       className="field-list-widget collapsible-list border border-base-lighter radius-md padding-2 margin-y-2"
     >
@@ -247,7 +266,11 @@ function ListEntry({
     attachment: ATTACHMENTS.has(item.widget),
     storagePath: item.storagePath,
   });
+  const activity = entryActivity(layout, entry.value);
   const renderItem = (item: ListItem) => {
+    const state = activity.get(item);
+    if (state?.visible === false) return null;
+    const inactive = disabled || state?.enabled === false;
     const id = item.baseId.replace(INDEX_TOKEN, String(index));
     return renderWidget({
       type: item.widget,
@@ -261,9 +284,9 @@ function ListEntry({
         required: isFieldRequired(item.definition, requiredFields),
         updateOnInput: true,
         additionalDescribedById: headingId,
-        disabled,
-        readOnly: disabled,
-        isFormLocked: disabled,
+        disabled: inactive,
+        readOnly: inactive,
+        isFormLocked: inactive,
         onChange: (next: unknown) => onChange(item.storagePath, next),
       },
     });

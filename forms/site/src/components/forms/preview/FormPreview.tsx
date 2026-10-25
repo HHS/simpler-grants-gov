@@ -1,6 +1,6 @@
 import type { JsonSchema, UISchemaElement } from "@jsonforms/core";
 import { useStore } from "@nanostores/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 
 import { FormRenderer } from ".";
 import { $previewData } from "../../../stores/formPreview";
@@ -9,7 +9,7 @@ import SectionBreadcrumb from "./sections/SectionBreadcrumb";
 import { useSectionTrail } from "./sections/useSectionTrail";
 
 interface Props {
-  schema: JsonSchema;
+  schema: JsonSchema & { examples?: Record<string, unknown>[] };
   uischema: UISchemaElement;
   /** The form's first `@example` from the TypeSpec. */
   example?: Record<string, unknown>;
@@ -20,6 +20,9 @@ export default function FormPreview({ schema, uischema, example }: Props) {
   const data = useStore($previewData);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [showErrors, setShowErrors] = useState(false);
+  const [sampleIndex, setSampleIndex] = useState(0);
+  const sampleId = useId();
+  const samples = schema.examples ?? (example ? [example] : []);
   const form = useRef<HTMLDivElement>(null);
   const bar = useRef<HTMLElement>(null);
   const { sections, trail, goTo } = useSectionTrail(form, bar);
@@ -37,11 +40,28 @@ export default function FormPreview({ schema, uischema, example }: Props) {
   return (
     <div className="form-preview">
       <div className="form-preview__actions">
-        {example && (
+        {samples.length > 1 && (
+          <div>
+            <label htmlFor={sampleId}>Sample case</label>
+            <select
+              id={sampleId}
+              className="usa-select margin-top-0"
+              value={sampleIndex}
+              onChange={(event) => setSampleIndex(Number(event.target.value))}
+            >
+              {samples.map((_, index) => (
+                <option key={index} value={index}>
+                  Sample {index + 1} of {samples.length}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {samples.length > 0 && (
           <button
             type="button"
             className="usa-button"
-            onClick={() => reset(structuredClone(example))}
+            onClick={() => reset(structuredClone(samples[sampleIndex]))}
           >
             Load sample data
           </button>

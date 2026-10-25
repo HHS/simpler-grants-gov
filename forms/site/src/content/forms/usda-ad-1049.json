@@ -1,12 +1,332 @@
 {
   "title": "USDA AD-1049",
   "slug": "usda-ad-1049",
-  "status": "backlog",
+  "status": "ready",
   "family": ["SF-424", "R&R"],
-  "category": "Key Personnel & Contact Forms",
+  "category": "Certification & Assurance Forms",
   "apps_count": 333,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/695",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/AD_1049_2_0-V2.0_F695.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AD_1049_2_0-V2.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AD_1049_2_0-V2.0_F695.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/AD_1049_2_0-V2.0_F695.xls",
+  "spec_id": "usda-ad-1049",
+  "omb_number": "0505-0027",
+  "expiration_date": "09/30/2025",
+  "description": "Drug-free-workplace certification for grantees other than individuals. Workplace and project answers are separate from cover-owned organization/representative and submission-owned signature/date.",
+  "widgets": [
+    "TextWidget",
+    "SelectWidget",
+    "CheckboxWidget",
+    "CollapsibleFieldList"
+  ],
+  "notes": [
+    "Pinned original FID695/version2.0 PDF, XLS and three-file XSD closure are the source baseline; current official successor edition is not asserted. OMB expiration September30,2025 and revision12/22 are preserved.",
+    "Workplaces are optional0..10. The on-file checkbox is independent and uses exact Y: Yes/N: No strings; no absent-to-No default or new certification answer is added.",
+    "A local WorkplaceAddress composes the existing eight AddressParts/enums. Unlike generic Address hiding Province for USA, this use disables inactive State/Province and declares no clearing. Source form XML permits both sequential optional elements; retained inactive values require actual consumer proof.",
+    "Organization and representative name/title are cover-owned; signature/date are completed by Grants.gov upon submission. Full-contract samples contain explicitly illustrative producer context. An applicant-only draft is intentionally incomplete against transmitted required context.",
+    "Full certification commitments, privacy/burden/civil-rights notices and page-three instructions are retained as nonanswer layout descriptions attached to nonempty review sections.",
+    "The XSD target is source-shaped and has no active Mapping.from. XML lowering, authentic context production, signing/submission and production registration are integration obligations, not definition acceptance.",
+    "Source help 06-2: Pre-populated from the Application cover sheet. Shared PersonName help: Enter the prefix. The containing representative section states cover ownership and readonly review; this is a wording reuse record, not editable applicant entry.",
+    "Source help 06-3: Pre-populated from the Application cover sheet. Shared PersonName help: Enter the first name. The containing representative section states cover ownership and readonly review; this is a wording reuse record, not editable applicant entry.",
+    "Source help 06-4: Pre-populated from the Application cover sheet. Shared PersonName help: Enter the middle name. The containing representative section states cover ownership and readonly review; this is a wording reuse record, not editable applicant entry.",
+    "Source help 06-5: Pre-populated from the Application cover sheet. This field is required. Shared PersonName help: Enter the last name. The containing representative section states cover ownership and readonly review; this is a wording reuse record, not editable applicant entry.",
+    "Source help 06-6: Pre-populated from the Application cover sheet. Shared PersonName help: Enter the suffix. The containing representative section states cover ownership and readonly review; this is a wording reuse record, not editable applicant entry."
+  ],
+  "risks": [
+    "Current library native address entry requires actual country-condition/retention and list-cardinality proof; visual activity must not silently decide answer deletion.",
+    "DAT MM-DD-YYYY date display differs from the ISO JSON date displayed by current Text support; the difference remains explicit.",
+    "DAT clickable USDA complaint-page/mailto destinations are preserved exactly as literal text; clickable behavior remains a shared presentation integration gap.",
+    "Readonly presentation is not authenticated immutable context or an authentic signature. No agent check establishes legal attestation or human acceptance."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Certification",
+      "children": [
+        {
+          "kind": "field",
+          "label": "ORGANIZATION NAME",
+          "dat_field": "05-1",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the Application cover sheet. This field is required.",
+          "constraints": "minLength 1, maxLength 60",
+          "json_path": "organization_name",
+          "xml_path": "AD_1049_2_0:OrganizationName",
+          "pre_populated": "Application cover sheet; readonly review context."
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Workplaces and instructions",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Place of Performance",
+          "min_items": 0,
+          "max_items": 10,
+          "json_path": "workplaces",
+          "xml_path": "AD_1049_2_0:PlaceofPerformance",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Street1",
+              "dat_field": "03-02",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first line of the Street Address.",
+              "constraints": "minLength 1, maxLength 55",
+              "json_path": "workplaces[].street1",
+              "xml_path": "AD_1049_2_0:PlaceofPerformance/Street1",
+              "notes": "Required if data entered for this address."
+            },
+            {
+              "kind": "field",
+              "label": "Street2",
+              "dat_field": "03-03",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the second line of the Street Address.",
+              "constraints": "minLength 1, maxLength 55",
+              "json_path": "workplaces[].street2",
+              "xml_path": "AD_1049_2_0:PlaceofPerformance/Street2"
+            },
+            {
+              "kind": "field",
+              "label": "City",
+              "dat_field": "03-04",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the City.",
+              "constraints": "minLength 1, maxLength 35",
+              "json_path": "workplaces[].city",
+              "xml_path": "AD_1049_2_0:PlaceofPerformance/City",
+              "notes": "Required if data entered for this address."
+            },
+            {
+              "kind": "field",
+              "label": "County",
+              "dat_field": "03-05",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the County.",
+              "constraints": "minLength 1, maxLength 30",
+              "json_path": "workplaces[].county",
+              "xml_path": "AD_1049_2_0:PlaceofPerformance/County"
+            },
+            {
+              "kind": "field",
+              "label": "Country",
+              "dat_field": "03-06",
+              "required": "conditional",
+              "type": "Select",
+              "widget": "SelectWidget",
+              "help_text": "Select the Country.",
+              "constraints": "CountryCodeDataTypeV3 enumeration",
+              "json_path": "workplaces[].country",
+              "xml_path": "AD_1049_2_0:PlaceofPerformance/Country"
+            },
+            {
+              "kind": "field",
+              "label": "State",
+              "dat_field": "03-07",
+              "required": "conditional",
+              "type": "Select",
+              "widget": "SelectWidget",
+              "help_text": "Select the state, US possession or military code from the provided list.",
+              "constraints": "StateCodeDataTypeV3 enumeration",
+              "json_path": "workplaces[].state",
+              "xml_path": "AD_1049_2_0:PlaceofPerformance/State",
+              "notes": "Conditionally required and active if Country is US.  If Country is not US, then inactive."
+            },
+            {
+              "kind": "field",
+              "label": "Province",
+              "dat_field": "03-08",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the Province.",
+              "constraints": "minLength 1, maxLength 30",
+              "json_path": "workplaces[].province",
+              "xml_path": "AD_1049_2_0:PlaceofPerformance/Province",
+              "notes": "If Country is US then inactive.  If Country is not US, then active."
+            },
+            {
+              "kind": "field",
+              "label": "Zip / Postal Code",
+              "dat_field": "03-09",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the Postal Code (e.g., ZIP code). This field is required if the Country is United States.",
+              "constraints": "minLength 1, maxLength 30",
+              "json_path": "workplaces[].zip_code",
+              "xml_path": "AD_1049_2_0:PlaceofPerformance/ZipPostalCode",
+              "notes": "Conditionally required if Country is US then required. If Country is not US, then optional."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Check if there are workplaces on file that are not identified here.",
+          "dat_field": "04-1",
+          "required": false,
+          "type": "Checkbox",
+          "widget": "CheckboxWidget",
+          "help_text": "Check to select.",
+          "constraints": "YesNoDataType enumeration",
+          "json_path": "other_workplaces_on_file",
+          "xml_path": "AD_1049_2_0:CheckWorkplaces"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Award or project",
+      "children": [
+        {
+          "kind": "field",
+          "label": "PR/AWARD NUMBER OR PROJECT NAME",
+          "dat_field": "05-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the PR/Award Number or Project Name. This field is required.",
+          "constraints": "minLength 1, maxLength 60",
+          "json_path": "project_name",
+          "xml_path": "AD_1049_2_0:ProjectName"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Authorized Representative",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "06-2",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "constraints": "minLength 1, maxLength 10",
+              "json_path": "authorized_representative.name.prefix",
+              "xml_path": "AD_1049_2_0:AuthorizedRepresentative/globLib:PrefixName",
+              "pre_populated": "Pre-populated from the Application cover sheet. Source: SF424 block 21-Prefix\nRR SF424 block 19-Prefix. Read-only review context."
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "06-3",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "constraints": "minLength 1, maxLength 35",
+              "json_path": "authorized_representative.name.first_name",
+              "xml_path": "AD_1049_2_0:AuthorizedRepresentative/globLib:FirstName",
+              "pre_populated": "Pre-populated from the Application cover sheet. Source: SF424 block 21-First Name\nRR SF424 block 19-First Name. Read-only review context."
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "06-4",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "constraints": "minLength 1, maxLength 25",
+              "json_path": "authorized_representative.name.middle_name",
+              "xml_path": "AD_1049_2_0:AuthorizedRepresentative/globLib:MiddleName",
+              "pre_populated": "Pre-populated from the Application cover sheet. Source: SF424 block 21-Middle Name\nRR SF424 block 19-Middle Name. Read-only review context."
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "06-5",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "constraints": "minLength 1, maxLength 60",
+              "json_path": "authorized_representative.name.last_name",
+              "xml_path": "AD_1049_2_0:AuthorizedRepresentative/globLib:LastName",
+              "pre_populated": "Pre-populated from the Application cover sheet. This field is required. Source: SF424 block 21-Last Name\nRR SF424 block 19-Last Name. Read-only review context."
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "06-6",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "constraints": "minLength 1, maxLength 10",
+              "json_path": "authorized_representative.name.suffix",
+              "xml_path": "AD_1049_2_0:AuthorizedRepresentative/globLib:SuffixName",
+              "pre_populated": "Pre-populated from the Application cover sheet. Source: SF424 block 21-Suffix\nRR SF424 block 19-Suffix. Read-only review context."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "06-7",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the Application cover sheet. This field is required.",
+          "constraints": "minLength 1, maxLength 45",
+          "json_path": "authorized_representative.title",
+          "xml_path": "AD_1049_2_0:Title",
+          "pre_populated": "Application cover sheet; readonly review context."
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Submission and USDA Civil Rights Statement",
+      "children": [
+        {
+          "kind": "field",
+          "label": "SIGNATURE(S)",
+          "dat_field": "07-1",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed by Grants.gov upon submission. This field is required.",
+          "constraints": "minLength 1, maxLength 144",
+          "json_path": "submission.signature",
+          "xml_path": "AD_1049_2_0:AORSignature",
+          "pre_populated": "Completed by Grants.gov upon submission; readonly review context."
+        },
+        {
+          "kind": "field",
+          "label": "DATE",
+          "dat_field": "07-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Completed by Grants.gov upon submission. This field is required.",
+          "constraints": "format date",
+          "json_path": "submission.date_signed",
+          "xml_path": "AD_1049_2_0:DateSigned",
+          "pre_populated": "Completed by Grants.gov upon submission; readonly review context.",
+          "notes": "Date will be displayed as MM-DD-YYYY."
+        }
+      ]
+    }
+  ]
 }

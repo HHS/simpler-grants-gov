@@ -2,10 +2,10 @@ import type { RJSFSchema } from "@rjsf/utils";
 import {
   buildWarningTree,
   processFormSchema,
-  shapeFormData,
 } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { useEffect, useMemo, useRef, type FormEvent } from "react";
 
+import { collectPreviewForm } from "../../../lib/collectPreviewData";
 import {
   completeWarnings,
   createAjv,
@@ -79,9 +79,16 @@ export const SggFormRenderer = ({
   useEffect(() => report(data), [generation.current, formSchema]);
 
   const handleInput = (event: FormEvent<HTMLFormElement>) => {
-    const next = shapeFormData(new FormData(event.currentTarget), formSchema);
-    reported.current = next;
-    report(next);
+    const form = event.currentTarget;
+    const currentGeneration = generation.current;
+    // Stateful stock widgets commit named hidden controls after their event handler.
+    // Read after that commit, including button-driven selection removal.
+    queueMicrotask(() => {
+      if (!form.isConnected || currentGeneration !== generation.current) return;
+      const next = collectPreviewForm(form, formSchema, data);
+      reported.current = next;
+      report(next);
+    });
   };
 
   return (
@@ -89,6 +96,10 @@ export const SggFormRenderer = ({
       className="flex-1 margin-top-2 simpler-apply-form"
       onInput={handleInput}
       onChange={handleInput}
+      onClick={handleInput}
+      onKeyUp={handleInput}
+      onKeyDown={handleInput}
+      onBlur={handleInput}
       onSubmit={(event) => event.preventDefault()}
       noValidate
     >
@@ -99,6 +110,7 @@ export const SggFormRenderer = ({
         schema={formSchema}
         uiSchema={uischema}
         extraRenderers={previewRenderers}
+        collectData={collectPreviewForm}
       />
     </form>
   );
