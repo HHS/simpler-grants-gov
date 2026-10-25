@@ -22,3 +22,6 @@ import "./forms/usda-ad-1052/index.tsp";
 import "./forms/afri-project-type/index.tsp";
 
 import "./forms/grant-program-accounting-system-financial-capability-questionnaire-fns-906/index.tsp";
+
+import "./forms/contact-information-for-vita-and-tce-grant-programs/index.tsp";
+import "./forms/tax-counseling-for-the-elderly-tce-program-application-checklist-and-contact-sheet/index.tsp";

@@ -1,12 +1,546 @@
 {
   "title": "Tax Counseling for the Elderly (TCE) Program Application Checklist and Contact Sheet",
   "slug": "tax-counseling-for-the-elderly-tce-program-application-checklist-and-contact-sheet",
-  "status": "backlog",
-  "family": ["SF-424"],
-  "category": "Core Application Forms",
+  "status": "in_progress",
+  "family": [
+    "SF-424"
+  ],
+  "category": "Certification & Assurance Forms",
   "apps_count": 180,
+  "omb_number": "1545-2222",
+  "expiration_date": "08/31/2028",
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/694",
-  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Form_14204_2_0-V2.0_F694.pdf",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Form_14204_2_0-V2.0_F694.xls",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Form_14204_2_0-V2.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Form_14204_2_0-V2.0_F694.xls"
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Form_14204_2_0-V2.0_F694.pdf",
+  "widgets": [
+    "TextWidget",
+    "SelectWidget",
+    "RadioWidget",
+    "CheckboxWidget"
+  ],
+  "spec_id": "tax-counseling-for-the-elderly-tce-program-application-checklist-and-contact-sheet",
+  "description": "Review supplied contact details, answer administrative questions and explicitly confirm the required application documents. No document upload or eligibility decision is inferred.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Contact Information",
+      "help_text": "Form 14204 \n(March 2019)\n\nDepartment of the Treasury - Internal Revenue Service\n\nTax Counseling for the Elderly (TCE) Program Application Checklist and Contact Sheet\n\nOMB Number: 1545-2222\nExpiration Date: 08/31/2028\n\nContact Information",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Contact Information",
+          "help_text": "Supplied from the SF-424; review these values as readonly context.",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Name of organization",
+              "dat_field": "1-1",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Pre-populated from the SF 424. This field is required.",
+              "json_path": "contact_information.organization_name",
+              "xml_path": "Form_14204_2_0:ContactInformation/OrganizationName",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "section",
+              "label": "Address of organization",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Street address line 1",
+                  "dat_field": "1-2-1",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first line of the street address.",
+                  "json_path": "contact_information.address.street1",
+                  "xml_path": "Form_14204_2_0:ContactInformation/OrganizationAddress/Street1",
+                  "constraints": "minLength 1, maxLength 55",
+                  "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+                },
+                {
+                  "kind": "field",
+                  "label": "Street address line 2",
+                  "dat_field": "1-2-2",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the second line of the street address.",
+                  "json_path": "contact_information.address.street2",
+                  "xml_path": "Form_14204_2_0:ContactInformation/OrganizationAddress/Street2",
+                  "constraints": "minLength 1, maxLength 55",
+                  "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+                },
+                {
+                  "kind": "field",
+                  "label": "City",
+                  "dat_field": "1-2-3",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the city.",
+                  "json_path": "contact_information.address.city",
+                  "xml_path": "Form_14204_2_0:ContactInformation/OrganizationAddress/City",
+                  "constraints": "minLength 1, maxLength 35",
+                  "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+                },
+                {
+                  "kind": "field",
+                  "label": "State",
+                  "dat_field": "1-2-4",
+                  "required": "conditional",
+                  "type": "Select",
+                  "widget": "SelectWidget",
+                  "help_text": "US State or Territory Code",
+                  "json_path": "contact_information.address.state",
+                  "xml_path": "Form_14204_2_0:ContactInformation/OrganizationAddress/State",
+                  "constraints": "StateCodeDataTypeV3 enumeration",
+                  "pre_populated": "Pre-populated from the SF 424. This field is required if Country is the United States. Read-only cover context."
+                },
+                {
+                  "kind": "field",
+                  "label": "Province",
+                  "dat_field": "1-2-5",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the province.",
+                  "json_path": "contact_information.address.province",
+                  "xml_path": "Form_14204_2_0:ContactInformation/OrganizationAddress/Province",
+                  "constraints": "minLength 1, maxLength 30",
+                  "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+                },
+                {
+                  "kind": "field",
+                  "label": "Country",
+                  "dat_field": "1-2-6",
+                  "required": true,
+                  "type": "Select",
+                  "widget": "SelectWidget",
+                  "help_text": "Country Code",
+                  "json_path": "contact_information.address.country",
+                  "xml_path": "Form_14204_2_0:ContactInformation/OrganizationAddress/Country",
+                  "constraints": "CountryCodeDataTypeV3 enumeration",
+                  "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+                },
+                {
+                  "kind": "field",
+                  "label": "Zip / Postal Code",
+                  "dat_field": "1-2-7",
+                  "required": "conditional",
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the zip / postal code.",
+                  "json_path": "contact_information.address.zip_code",
+                  "xml_path": "Form_14204_2_0:ContactInformation/OrganizationAddress/ZipPostalCode",
+                  "constraints": "minLength 1, maxLength 30",
+                  "pre_populated": "Pre-populated from the SF 424. This field is required if Country is the United States. Read-only cover context."
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "label": "Telephone",
+              "dat_field": "1-3",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Pre-populated from the SF 424. This field is required.",
+              "json_path": "contact_information.phone",
+              "xml_path": "Form_14204_2_0:ContactInformation/PhoneNumber",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "field",
+              "label": "FAX Number",
+              "dat_field": "1-4",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Pre-populated from the SF 424. ",
+              "json_path": "contact_information.fax",
+              "xml_path": "Form_14204_2_0:ContactInformation/Fax",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "section",
+              "label": "Point of Contact (POC) name",
+              "children": [
+                {
+                  "kind": "field",
+                  "label": "Prefix",
+                  "dat_field": "1-5-1",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the prefix.",
+                  "json_path": "contact_information.name.prefix",
+                  "xml_path": "Form_14204_2_0:ContactInformation/POCName/globLib:PrefixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Pre-populated from the SF 424.  Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "First Name",
+                  "dat_field": "1-5-2",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the first name.",
+                  "json_path": "contact_information.name.first_name",
+                  "xml_path": "Form_14204_2_0:ContactInformation/POCName/globLib:FirstName",
+                  "constraints": "minLength 1, maxLength 35",
+                  "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Middle Name",
+                  "dat_field": "1-5-3",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the middle name.",
+                  "json_path": "contact_information.name.middle_name",
+                  "xml_path": "Form_14204_2_0:ContactInformation/POCName/globLib:MiddleName",
+                  "constraints": "minLength 1, maxLength 25",
+                  "pre_populated": "Pre-populated from the SF 424.  Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Last Name",
+                  "dat_field": "1-5-4",
+                  "required": true,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the last name.",
+                  "json_path": "contact_information.name.last_name",
+                  "xml_path": "Form_14204_2_0:ContactInformation/POCName/globLib:LastName",
+                  "constraints": "minLength 1, maxLength 60",
+                  "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only."
+                },
+                {
+                  "kind": "field",
+                  "label": "Suffix",
+                  "dat_field": "1-5-5",
+                  "required": false,
+                  "type": "Text",
+                  "widget": "TextWidget",
+                  "help_text": "Enter the suffix.",
+                  "json_path": "contact_information.name.suffix",
+                  "xml_path": "Form_14204_2_0:ContactInformation/POCName/globLib:SuffixName",
+                  "constraints": "minLength 1, maxLength 10",
+                  "pre_populated": "Pre-populated from the SF 424.  Read-only."
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "label": "Point of Contact (POC) title",
+              "dat_field": "1-6",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Pre-populated from the SF 424. ",
+              "json_path": "contact_information.title",
+              "xml_path": "Form_14204_2_0:ContactInformation/Title",
+              "constraints": "minLength 1, maxLength 45",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only; preview data is illustrative."
+            },
+            {
+              "kind": "field",
+              "label": "Email address for POC",
+              "dat_field": "1-7",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Pre-populated from the SF 424. This field is required.",
+              "json_path": "contact_information.email",
+              "xml_path": "Form_14204_2_0:ContactInformation/Email",
+              "constraints": "maxLength 60, format email",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only; preview data is illustrative."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Administrative Information",
+      "help_text": "",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Administrative Information",
+          "help_text": "",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Has your organization registered or renewed your registration this year through the System for Award Management (SAM) at www.sam.gov?",
+              "dat_field": "2-1",
+              "required": true,
+              "type": "Radio",
+              "widget": "RadioWidget",
+              "help_text": "One selection is required.",
+              "json_path": "administrative_information.sam_registration",
+              "xml_path": "Form_14204_2_0:AdministrativeInformation/SAMRegistration",
+              "constraints": "YesNoDataType enumeration"
+            },
+            {
+              "kind": "field",
+              "label": "Is your organization interested in applying for a multi-year grant?",
+              "dat_field": "2-2",
+              "required": true,
+              "type": "Radio",
+              "widget": "RadioWidget",
+              "help_text": "One selection is required.",
+              "json_path": "administrative_information.multiyear_grant",
+              "xml_path": "Form_14204_2_0:AdministrativeInformation/MultiyearGrant",
+              "constraints": "YesNoDataType enumeration"
+            },
+            {
+              "kind": "field",
+              "label": "If YES, have you checked the criteria under the Multi-Year Grant Opportunities section of Publication 1101 to determine if your organization is eligible to apply?",
+              "dat_field": "2-3",
+              "required": "conditional",
+              "type": "Radio",
+              "widget": "RadioWidget",
+              "help_text": "One selection is required.",
+              "json_path": "administrative_information.checked_eligible",
+              "xml_path": "Form_14204_2_0:AdministrativeInformation/CheckedEligible",
+              "constraints": "YesNoDataType enumeration"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Application Checklist and Assembly",
+      "help_text": "Application Checklist and Assembly\n\nAll documents requiring a signature must contain either an electronic signature or scanned copy of the original signature. Make sure you double check that you have all documents and information required. Technical ranking occurs simultaneously with the Grant Program Office (GPO) evaluation. Any missing information identified by the GPO during its evaluation may not be considered by technical evaluators depending on when the review is completed. It is the responsibility of the applicant to ensure all information is submitted. Incomplete applications meeting basic eligibility will be scored based on the information available at time of review. Therefore, it is extremely important that the submission is complete.\n\nChecklist:\n\nApplication Due Date: May 31st\n\nIRS Volunteer Income Tax Preparation and Outreach Programs Privacy and Paperwork Reduction Act Notice  Privacy and Paperwork Reduction Act Notice - The Privacy Act of 1974 requires that when we ask for information we tell you our legal right to ask for the information, why we are asking for it, and how it will be used. We must also tell you what could happen if we do not receive it, and whether your response is voluntary, required to obtain a benefit, or mandatory. Our legal right to ask for information is 5 U.S.C. 301. The Paperwork Reduction Act requires that the IRS display an OMB control number on all public information requests. The OMB Control Number for this study is 1545-2222. The time estimated for participation is 10 minutes. We are asking for this information to assist us in contacting you relative to your interest and/or participation in the IRS volunteer income tax preparation and outreach programs. The information you provide may be furnished to others who coordinate activities and staffing at volunteer return preparation sites or outreach activities. The information may also be used to establish effective controls, send correspondence and recognize volunteers. Your response is voluntary. However, if you do not provide the requested information, the IRS may not be able to use your assistance in these programs.",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Application Checklist and Assembly",
+          "help_text": "",
+          "children": [
+            {
+              "kind": "field",
+              "label": "1. Form 14204, TCE Application Checklist & Contact Sheet (this sheet)",
+              "dat_field": "3-2-01",
+              "required": true,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "This field is required. Check to select. ",
+              "json_path": "application_checklist.form14204",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/Form14204",
+              "constraints": "YesNoDataType enumeration, pattern ^Y:\\x20Yes$"
+            },
+            {
+              "kind": "field",
+              "label": "2. Background Narrative",
+              "dat_field": "3-2-02",
+              "required": true,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "This field is required. Check to select. ",
+              "json_path": "application_checklist.background_narrative",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/BackgroundNarrative",
+              "constraints": "YesNoDataType enumeration, pattern ^Y:\\x20Yes$"
+            },
+            {
+              "kind": "field",
+              "label": "3. Nonprofit Status Determination letter issued by the Internal Revenue Service",
+              "dat_field": "3-2-03",
+              "required": true,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "This field is required. Check to select. ",
+              "json_path": "application_checklist.nonprofit_status",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/NonprofitStatus",
+              "constraints": "YesNoDataType enumeration, pattern ^Y:\\x20Yes$"
+            },
+            {
+              "kind": "field",
+              "label": "4. Explanation on the organization’s letterhead, if Federal tax returns are not required to be file",
+              "dat_field": "3-2-04",
+              "required": false,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "Check to select.",
+              "json_path": "application_checklist.explanation_federal_tax",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/ExplanationFederalTax",
+              "constraints": "YesNoDataType enumeration"
+            },
+            {
+              "kind": "field",
+              "label": "5. Proposed Program/Budget Plan",
+              "dat_field": "3-2-05",
+              "required": true,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "This field is required. Check to select. ",
+              "json_path": "application_checklist.program_budget_plan",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/ProgramBudgetPlan",
+              "constraints": "YesNoDataType enumeration, pattern ^Y:\\x20Yes$"
+            },
+            {
+              "kind": "field",
+              "label": "6. Form 8653 - TCE Application Plan",
+              "dat_field": "3-2-06",
+              "required": true,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "This field is required. Check to select. ",
+              "json_path": "application_checklist.form8653",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/Form8653",
+              "constraints": "YesNoDataType enumeration, pattern ^Y:\\x20Yes$"
+            },
+            {
+              "kind": "field",
+              "label": "7. Standard Form 424, Application for Federal Assistance",
+              "dat_field": "3-2-07",
+              "required": true,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "This field is required. Check to select. ",
+              "json_path": "application_checklist.standard_form424",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/StandardForm424",
+              "constraints": "YesNoDataType enumeration, pattern ^Y:\\x20Yes$"
+            },
+            {
+              "kind": "field",
+              "label": "8. Civil Rights Narrative",
+              "dat_field": "3-2-08",
+              "required": true,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "This field is required. Check to select. ",
+              "json_path": "application_checklist.civil_rights_narrative",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/CivilRightsNarrative",
+              "constraints": "YesNoDataType enumeration, pattern ^Y:\\x20Yes$"
+            },
+            {
+              "kind": "field",
+              "label": "9. Form 14335, Contact Information for VITA & TCE",
+              "dat_field": "3-2-09",
+              "required": true,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "This field is required. Check to select. ",
+              "json_path": "application_checklist.form14335",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/Form14335",
+              "constraints": "YesNoDataType enumeration, pattern ^Y:\\x20Yes$"
+            },
+            {
+              "kind": "field",
+              "label": "10. Standard Form LLL, Disclosure of Lobbying Activities (if required)",
+              "dat_field": "3-2-10",
+              "required": false,
+              "type": "Checkbox",
+              "widget": "CheckboxWidget",
+              "help_text": "Check to select.",
+              "json_path": "application_checklist.standard_form_lll",
+              "xml_path": "Form_14204_2_0:ApplicationChecklist/StandardFormLLL",
+              "constraints": "YesNoDataType enumeration"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The eight DAT-required checklist boxes are proposed as affirmative inclusion confirmations. Their source required checkbox presentation is modeled with the existing exact Yes/No vocabulary and an occurrence-level pattern requiring Y: Yes. XSD permits either code; this narrower source-PDF/DAT interpretation is explicit for review.",
+    "Optional checklist boxes remain absent or explicitly Yes/No; no document is uploaded, inferred present or automatically checked.",
+    "Multi-year interest enables and requires the eligibility-review answer for Yes, without clearing a previously entered answer when changed.",
+    "Contact/address values are supplied from SF-424 and readonly. The seven-field source address excludes County; shared scalar parts and country requirements are preserved.",
+    "Original checklist instructions, due-date text and privacy/burden notice are retained as source content; they are not assertions of a currently active grant deadline.",
+    "Country code source discrepancy: DAT maxLength49 conflicts with the original XSD value SHN: SAINT HELENA, ASCENSION, AND TRISTAN DA CUNHA (50characters). Preserve the complete XSD enumeration rather than truncating or excluding that valid source code. State values max52arewithin DAT55."
+  ],
+  "risks": [
+    "Confirm the source interpretation of required checkbox as affirmative inclusion rather than merely requiring an explicit Yes/No answer. Current proposal rejects explicit No for eight mandatory document confirmations; source owner acceptance is unclaimed.",
+    "Authentic cover context, attachment completeness, eligibility and submission services remain separate."
+  ],
+  "examples": [
+    {
+      "label": "Illustrative scenario 1",
+      "description": "Multiyear grant with eligibility review and all required inclusion confirmations.",
+      "data": {
+        "contact_information": {
+          "organization_name": "Illustrative Senior Tax Services",
+          "address": {
+            "street1": "100 Example Avenue",
+            "city": "Denver",
+            "state": "CO: Colorado",
+            "country": "USA: UNITED STATES",
+            "zip_code": "80202"
+          },
+          "phone": "2025550100",
+          "name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "email": "contact@example.org"
+        },
+        "administrative_information": {
+          "sam_registration": "Y: Yes",
+          "multiyear_grant": "Y: Yes",
+          "checked_eligible": "Y: Yes"
+        },
+        "application_checklist": {
+          "form14204": "Y: Yes",
+          "background_narrative": "Y: Yes",
+          "nonprofit_status": "Y: Yes",
+          "program_budget_plan": "Y: Yes",
+          "form8653": "Y: Yes",
+          "standard_form424": "Y: Yes",
+          "civil_rights_narrative": "Y: Yes",
+          "form14335": "Y: Yes",
+          "explanation_federal_tax": "Y: Yes",
+          "standard_form_lll": "N: No"
+        }
+      }
+    },
+    {
+      "label": "Illustrative scenario 2",
+      "description": "Single-year application; optional checklist entries can be absent.",
+      "data": {
+        "contact_information": {
+          "organization_name": "Illustrative Senior Tax Services",
+          "address": {
+            "street1": "100 Example Avenue",
+            "city": "Denver",
+            "state": "CO: Colorado",
+            "country": "USA: UNITED STATES",
+            "zip_code": "80202"
+          },
+          "phone": "2025550100",
+          "name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "email": "contact@example.org"
+        },
+        "administrative_information": {
+          "sam_registration": "Y: Yes",
+          "multiyear_grant": "N: No"
+        },
+        "application_checklist": {
+          "form14204": "Y: Yes",
+          "background_narrative": "Y: Yes",
+          "nonprofit_status": "Y: Yes",
+          "program_budget_plan": "Y: Yes",
+          "form8653": "Y: Yes",
+          "standard_form424": "Y: Yes",
+          "civil_rights_narrative": "Y: Yes",
+          "form14335": "Y: Yes"
+        }
+      }
+    }
+  ]
 }

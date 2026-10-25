@@ -1,12 +1,1442 @@
 {
   "title": "Contact Information for VITA and TCE Grant Programs",
   "slug": "contact-information-for-vita-and-tce-grant-programs",
-  "status": "backlog",
-  "family": ["SF-424"],
-  "category": "Key Personnel & Contact Forms",
+  "status": "in_progress",
+  "family": [
+    "SF-424"
+  ],
+  "category": "Contact Information Forms",
   "apps_count": 1033,
+  "omb_number": "1545-2222",
+  "expiration_date": "08/31/2028",
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/710",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Form_14335_2_0-V2.0_F710.pdf",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Form_14335_2_0-V2.0_F710.xls",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Form_14335_2_0-V2.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Form_14335_2_0-V2.0_F710.xls"
+  "widgets": [
+    "TextWidget",
+    "SelectWidget",
+    "RadioWidget"
+  ],
+  "spec_id": "contact-information-for-vita-and-tce-grant-programs",
+  "description": "Enter role-specific contact details, operating hours and independent sharing choices. Cover-supplied fields remain readonly; optional Other Contact slots retain source identity.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Recipient and operating schedule",
+      "help_text": "Supplied organization/address context is readonly. Enter days and hours of operation.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Recipient name",
+          "dat_field": "1-00",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF 424. This field is required.",
+          "json_path": "organization_name",
+          "xml_path": "Form_14335_2_0:OrganizationName",
+          "constraints": "minLength 1, maxLength 60",
+          "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+        },
+        {
+          "kind": "field",
+          "label": "Federal Award Identifier",
+          "dat_field": "1-01",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Pre-populated from the SF 424.",
+          "json_path": "federal_award_identifier",
+          "xml_path": "Form_14335_2_0:FederalAwardIdentifier",
+          "constraints": "minLength 1, maxLength 25",
+          "pre_populated": "Pre-populated from the SF 424. Read-only cover context."
+        },
+        {
+          "kind": "section",
+          "label": "Organization Address",
+          "help_text": "Pre-populated from the SF 424. US state and postal code are required for the United States.",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Street address line 1",
+              "dat_field": "1-02-1",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first line of the street address.",
+              "json_path": "organization_address.street1",
+              "xml_path": "Form_14335_2_0:OrganizationAddress/Street1",
+              "constraints": "minLength 1, maxLength 55",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Street address line 2",
+              "dat_field": "1-02-2",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the second line of the street address.",
+              "json_path": "organization_address.street2",
+              "xml_path": "Form_14335_2_0:OrganizationAddress/Street2",
+              "constraints": "minLength 1, maxLength 55",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "City",
+              "dat_field": "1-02-3",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the city.",
+              "json_path": "organization_address.city",
+              "xml_path": "Form_14335_2_0:OrganizationAddress/City",
+              "constraints": "minLength 1, maxLength 35",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "State",
+              "dat_field": "1-02-4",
+              "required": "conditional",
+              "type": "Select",
+              "widget": "SelectWidget",
+              "help_text": "US State or Territory Code",
+              "json_path": "organization_address.state",
+              "xml_path": "Form_14335_2_0:OrganizationAddress/State",
+              "constraints": "StateCodeDataTypeV3 enumeration",
+              "pre_populated": "Pre-populated from the SF 424. This field is required if Country is the United States. Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Province",
+              "dat_field": "1-02-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the province.",
+              "json_path": "organization_address.province",
+              "xml_path": "Form_14335_2_0:OrganizationAddress/Province",
+              "constraints": "minLength 1, maxLength 30",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Country",
+              "dat_field": "1-02-6",
+              "required": true,
+              "type": "Select",
+              "widget": "SelectWidget",
+              "help_text": "Country Code",
+              "json_path": "organization_address.country",
+              "xml_path": "Form_14335_2_0:OrganizationAddress/Country",
+              "constraints": "CountryCodeDataTypeV3 enumeration",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Zip / Postal Code",
+              "dat_field": "1-02-7",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the zip / postal code.",
+              "json_path": "organization_address.zip_code",
+              "xml_path": "Form_14335_2_0:OrganizationAddress/ZipPostalCode",
+              "constraints": "minLength 1, maxLength 30",
+              "pre_populated": "Pre-populated from the SF 424. This field is required if Country is the United States. Read-only cover context."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Days of operation",
+          "dat_field": "1-03",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the days of operation. This field is required.",
+          "json_path": "days_operation",
+          "xml_path": "Form_14335_2_0:DaysOperation",
+          "constraints": "minLength 1, maxLength 65"
+        },
+        {
+          "kind": "field",
+          "label": "Hours of operation",
+          "dat_field": "1-04",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the hours of operation. This field is required.",
+          "json_path": "hours_operation",
+          "xml_path": "Form_14335_2_0:HoursOperation",
+          "constraints": "minLength 1, maxLength 30"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Primary Contact Information",
+      "help_text": "Name, phone and email are supplied from SF-424; title, cell phone and sharing permission are entered here.",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "1-06-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "primary_contact.name.prefix",
+              "xml_path": "Form_14335_2_0:PrimaryContact/POCName/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "1-06-2",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "primary_contact.name.first_name",
+              "xml_path": "Form_14335_2_0:PrimaryContact/POCName/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "1-06-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "primary_contact.name.middle_name",
+              "xml_path": "Form_14335_2_0:PrimaryContact/POCName/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "1-06-4",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "primary_contact.name.last_name",
+              "xml_path": "Form_14335_2_0:PrimaryContact/POCName/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "1-06-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "primary_contact.name.suffix",
+              "xml_path": "Form_14335_2_0:PrimaryContact/POCName/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "1-07",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the position title.",
+          "json_path": "primary_contact.title",
+          "xml_path": "Form_14335_2_0:PrimaryContact/Title",
+          "constraints": "minLength 1, maxLength 45"
+        },
+        {
+          "kind": "field",
+          "label": "Phone number",
+          "dat_field": "1-08",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the daytime telephone number.",
+          "json_path": "primary_contact.phone",
+          "xml_path": "Form_14335_2_0:PrimaryContact/PhoneNumber",
+          "constraints": "minLength 1, maxLength 25",
+          "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+        },
+        {
+          "kind": "field",
+          "label": "Cell phone number",
+          "dat_field": "1-09",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the cell phone number.",
+          "json_path": "primary_contact.cell_phone",
+          "xml_path": "Form_14335_2_0:PrimaryContact/CellNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email address",
+          "dat_field": "1-10",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter a valid email address.",
+          "json_path": "primary_contact.email",
+          "xml_path": "Form_14335_2_0:PrimaryContact/Email",
+          "constraints": "maxLength 60, format email",
+          "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+        },
+        {
+          "kind": "field",
+          "label": "May the IRS share the Primary Contacts information with other grant recipients and non-grant recipients involved in the VITA or TCE program",
+          "dat_field": "1-11",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "One selection is required.",
+          "json_path": "primary_contact.share_contact",
+          "xml_path": "Form_14335_2_0:PrimaryContact/SharePrimaryContact",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Alternate Contact Information",
+      "help_text": "",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "2-1-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "alternate_contact.name.prefix",
+              "xml_path": "Form_14335_2_0:AlternateContact/POCName/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10"
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "2-1-2",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "alternate_contact.name.first_name",
+              "xml_path": "Form_14335_2_0:AlternateContact/POCName/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35"
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "2-1-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "alternate_contact.name.middle_name",
+              "xml_path": "Form_14335_2_0:AlternateContact/POCName/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25"
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "2-1-4",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "alternate_contact.name.last_name",
+              "xml_path": "Form_14335_2_0:AlternateContact/POCName/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60"
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "2-1-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "alternate_contact.name.suffix",
+              "xml_path": "Form_14335_2_0:AlternateContact/POCName/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10"
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "2-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the position title.",
+          "json_path": "alternate_contact.title",
+          "xml_path": "Form_14335_2_0:AlternateContact/Title",
+          "constraints": "minLength 1, maxLength 45"
+        },
+        {
+          "kind": "field",
+          "label": "Phone number",
+          "dat_field": "2-3",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the daytime telephone number.",
+          "json_path": "alternate_contact.phone",
+          "xml_path": "Form_14335_2_0:AlternateContact/PhoneNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Cell phone number",
+          "dat_field": "2-4",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the cell phone number.",
+          "json_path": "alternate_contact.cell_phone",
+          "xml_path": "Form_14335_2_0:AlternateContact/CellNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email address",
+          "dat_field": "2-5",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter a valid email address.",
+          "json_path": "alternate_contact.email",
+          "xml_path": "Form_14335_2_0:AlternateContact/Email",
+          "constraints": "maxLength 60, format email"
+        },
+        {
+          "kind": "field",
+          "label": "May the IRS share the Alternate Contacts information with other grant recipients and non-grant recipients involved in the VITA or TCE program",
+          "dat_field": "2-6",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "One selection is required.",
+          "json_path": "alternate_contact.share_contact",
+          "xml_path": "Form_14335_2_0:AlternateContact/ShareAlternateContact",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Authorized Organization Representative Information",
+      "help_text": "Name, title, phone and email are supplied from SF-424; cell phone and sharing permission are entered here.",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "3-1-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "authorized_representative.name.prefix",
+              "xml_path": "Form_14335_2_0:AOR/POCName/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "3-1-2",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "authorized_representative.name.first_name",
+              "xml_path": "Form_14335_2_0:AOR/POCName/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "3-1-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "authorized_representative.name.middle_name",
+              "xml_path": "Form_14335_2_0:AOR/POCName/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "3-1-4",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "authorized_representative.name.last_name",
+              "xml_path": "Form_14335_2_0:AOR/POCName/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "3-1-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "authorized_representative.name.suffix",
+              "xml_path": "Form_14335_2_0:AOR/POCName/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "Pre-populated from the SF 424.  Read-only cover context."
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "3-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the position title.",
+          "json_path": "authorized_representative.title",
+          "xml_path": "Form_14335_2_0:AOR/Title",
+          "constraints": "minLength 1, maxLength 45",
+          "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+        },
+        {
+          "kind": "field",
+          "label": "Phone number",
+          "dat_field": "3-3",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the daytime telephone number.",
+          "json_path": "authorized_representative.phone",
+          "xml_path": "Form_14335_2_0:AOR/PhoneNumber",
+          "constraints": "minLength 1, maxLength 25",
+          "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+        },
+        {
+          "kind": "field",
+          "label": "Cell phone number",
+          "dat_field": "3-4",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the cell phone number.",
+          "json_path": "authorized_representative.cell_phone",
+          "xml_path": "Form_14335_2_0:AOR/CellNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email address",
+          "dat_field": "3-5",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter a valid email address.",
+          "json_path": "authorized_representative.email",
+          "xml_path": "Form_14335_2_0:AOR/Email",
+          "constraints": "maxLength 60, format email",
+          "pre_populated": "Pre-populated from the SF 424. This field is required. Read-only cover context."
+        },
+        {
+          "kind": "field",
+          "label": "May the IRS share the Authorized Organization Representatives information with other grant recipients and non-grant recipients involved in the VITA or TCE program",
+          "dat_field": "3-6",
+          "required": true,
+          "type": "Radio",
+          "widget": "RadioWidget",
+          "help_text": "One selection is required.",
+          "json_path": "authorized_representative.share_contact",
+          "xml_path": "Form_14335_2_0:AOR/ShareAuthorizedOrganizationRepresentative",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Federal Tax Matters Contact Information",
+      "help_text": "",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "4-1-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "federal_tax_matters_contact.name.prefix",
+              "xml_path": "Form_14335_2_0:FederalTaxMattersContact/POCName/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10"
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "4-1-2",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "federal_tax_matters_contact.name.first_name",
+              "xml_path": "Form_14335_2_0:FederalTaxMattersContact/POCName/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35"
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "4-1-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "federal_tax_matters_contact.name.middle_name",
+              "xml_path": "Form_14335_2_0:FederalTaxMattersContact/POCName/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25"
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "4-1-4",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "federal_tax_matters_contact.name.last_name",
+              "xml_path": "Form_14335_2_0:FederalTaxMattersContact/POCName/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60"
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "4-1-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "federal_tax_matters_contact.name.suffix",
+              "xml_path": "Form_14335_2_0:FederalTaxMattersContact/POCName/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10"
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "4-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the position title.",
+          "json_path": "federal_tax_matters_contact.title",
+          "xml_path": "Form_14335_2_0:FederalTaxMattersContact/Title",
+          "constraints": "minLength 1, maxLength 45"
+        },
+        {
+          "kind": "field",
+          "label": "Phone number",
+          "dat_field": "4-3",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the daytime telephone number.",
+          "json_path": "federal_tax_matters_contact.phone",
+          "xml_path": "Form_14335_2_0:FederalTaxMattersContact/PhoneNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Cell phone number",
+          "dat_field": "4-4",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the cell phone number.",
+          "json_path": "federal_tax_matters_contact.cell_phone",
+          "xml_path": "Form_14335_2_0:FederalTaxMattersContact/CellNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email address",
+          "dat_field": "4-5",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter a valid email address.",
+          "json_path": "federal_tax_matters_contact.email",
+          "xml_path": "Form_14335_2_0:FederalTaxMattersContact/Email",
+          "constraints": "maxLength 60, format email"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Financial/PMS Contact Information",
+      "help_text": "",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "5-1-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "financial_pms_contact.name.prefix",
+              "xml_path": "Form_14335_2_0:FinancialPMSContact/POCName/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10"
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "5-1-2",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "financial_pms_contact.name.first_name",
+              "xml_path": "Form_14335_2_0:FinancialPMSContact/POCName/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35"
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "5-1-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "financial_pms_contact.name.middle_name",
+              "xml_path": "Form_14335_2_0:FinancialPMSContact/POCName/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25"
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "5-1-4",
+              "required": true,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "financial_pms_contact.name.last_name",
+              "xml_path": "Form_14335_2_0:FinancialPMSContact/POCName/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60"
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "5-1-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "financial_pms_contact.name.suffix",
+              "xml_path": "Form_14335_2_0:FinancialPMSContact/POCName/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10"
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "5-2",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the position title.",
+          "json_path": "financial_pms_contact.title",
+          "xml_path": "Form_14335_2_0:FinancialPMSContact/Title",
+          "constraints": "minLength 1, maxLength 45"
+        },
+        {
+          "kind": "field",
+          "label": "Phone number",
+          "dat_field": "5-3",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the daytime telephone number.",
+          "json_path": "financial_pms_contact.phone",
+          "xml_path": "Form_14335_2_0:FinancialPMSContact/PhoneNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Cell phone number",
+          "dat_field": "5-4",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the cell phone number.",
+          "json_path": "financial_pms_contact.cell_phone",
+          "xml_path": "Form_14335_2_0:FinancialPMSContact/CellNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email address",
+          "dat_field": "5-5",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter a valid email address.",
+          "json_path": "financial_pms_contact.email",
+          "xml_path": "Form_14335_2_0:FinancialPMSContact/Email",
+          "constraints": "maxLength 60, format email"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Other Contact 1",
+      "help_text": "Optional source-named slot. Once used, role, first/last name, title, phone, email and sharing answer are required.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Explain role:",
+          "dat_field": "6-0-1",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Please explain their role in the space provided.",
+          "json_path": "other_contact1.role",
+          "xml_path": "Form_14335_2_0:OtherContact1/Role",
+          "constraints": "minLength 1, maxLength 60"
+        },
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "6-1-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "other_contact1.name.prefix",
+              "xml_path": "Form_14335_2_0:OtherContact1/POCName/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10"
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "6-1-2",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "other_contact1.name.first_name",
+              "xml_path": "Form_14335_2_0:OtherContact1/POCName/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35"
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "6-1-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "other_contact1.name.middle_name",
+              "xml_path": "Form_14335_2_0:OtherContact1/POCName/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25"
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "6-1-4",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "other_contact1.name.last_name",
+              "xml_path": "Form_14335_2_0:OtherContact1/POCName/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60"
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "6-1-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "other_contact1.name.suffix",
+              "xml_path": "Form_14335_2_0:OtherContact1/POCName/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10"
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "6-2",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the position title.",
+          "json_path": "other_contact1.title",
+          "xml_path": "Form_14335_2_0:OtherContact1/Title",
+          "constraints": "minLength 1, maxLength 45"
+        },
+        {
+          "kind": "field",
+          "label": "Phone number",
+          "dat_field": "6-3",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the daytime telephone number.",
+          "json_path": "other_contact1.phone",
+          "xml_path": "Form_14335_2_0:OtherContact1/PhoneNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Cell phone number",
+          "dat_field": "6-4",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the cell phone number.",
+          "json_path": "other_contact1.cell_phone",
+          "xml_path": "Form_14335_2_0:OtherContact1/CellNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email address",
+          "dat_field": "6-5",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter a valid email address.",
+          "json_path": "other_contact1.email",
+          "xml_path": "Form_14335_2_0:OtherContact1/Email",
+          "constraints": "maxLength 60, format email"
+        },
+        {
+          "kind": "field",
+          "label": "May the IRS share this other contact’s information with other grant recipients and non-grant recipients involved in the VITA or TCE program?",
+          "dat_field": "6-6",
+          "required": "conditional",
+          "type": "Select",
+          "widget": "SelectWidget",
+          "help_text": "Select one.",
+          "json_path": "other_contact1.share_contact",
+          "xml_path": "Form_14335_2_0:OtherContact1/ShareOtherContact",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Other Contact 2",
+      "help_text": "Optional source-named slot. Once used, role, first/last name, title, phone, email and sharing answer are required.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Explain role:",
+          "dat_field": "7-0-1",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Please explain their role in the space provided.",
+          "json_path": "other_contact2.role",
+          "xml_path": "Form_14335_2_0:OtherContact2/Role",
+          "constraints": "minLength 1, maxLength 60"
+        },
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "7-1-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "other_contact2.name.prefix",
+              "xml_path": "Form_14335_2_0:OtherContact2/POCName/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10"
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "7-1-2",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "other_contact2.name.first_name",
+              "xml_path": "Form_14335_2_0:OtherContact2/POCName/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35"
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "7-1-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "other_contact2.name.middle_name",
+              "xml_path": "Form_14335_2_0:OtherContact2/POCName/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25"
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "7-1-4",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "other_contact2.name.last_name",
+              "xml_path": "Form_14335_2_0:OtherContact2/POCName/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60"
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "7-1-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "other_contact2.name.suffix",
+              "xml_path": "Form_14335_2_0:OtherContact2/POCName/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10"
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "7-2",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the position title.",
+          "json_path": "other_contact2.title",
+          "xml_path": "Form_14335_2_0:OtherContact2/Title",
+          "constraints": "minLength 1, maxLength 45"
+        },
+        {
+          "kind": "field",
+          "label": "Phone number",
+          "dat_field": "7-3",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the daytime telephone number.",
+          "json_path": "other_contact2.phone",
+          "xml_path": "Form_14335_2_0:OtherContact2/PhoneNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Cell phone number",
+          "dat_field": "7-4",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the cell phone number.",
+          "json_path": "other_contact2.cell_phone",
+          "xml_path": "Form_14335_2_0:OtherContact2/CellNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email address",
+          "dat_field": "7-5",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter a valid email address.",
+          "json_path": "other_contact2.email",
+          "xml_path": "Form_14335_2_0:OtherContact2/Email",
+          "constraints": "maxLength 60, format email"
+        },
+        {
+          "kind": "field",
+          "label": "May the IRS share this other contact’s information with other grant recipients and non-grant recipients involved in the VITA or TCE program?",
+          "dat_field": "7-6",
+          "required": "conditional",
+          "type": "Select",
+          "widget": "SelectWidget",
+          "help_text": "Select one.",
+          "json_path": "other_contact2.share_contact",
+          "xml_path": "Form_14335_2_0:OtherContact2/ShareOtherContact",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Other Contact 3",
+      "help_text": "Optional source-named slot. Once used, role, first/last name, title, phone, email and sharing answer are required.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Explain role:",
+          "dat_field": "8-0-1",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Please explain their role in the space provided.",
+          "json_path": "other_contact3.role",
+          "xml_path": "Form_14335_2_0:OtherContact3/Role",
+          "constraints": "minLength 1, maxLength 60"
+        },
+        {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "8-1-1",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "json_path": "other_contact3.name.prefix",
+              "xml_path": "Form_14335_2_0:OtherContact3/POCName/globLib:PrefixName",
+              "constraints": "minLength 1, maxLength 10"
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "8-1-2",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "json_path": "other_contact3.name.first_name",
+              "xml_path": "Form_14335_2_0:OtherContact3/POCName/globLib:FirstName",
+              "constraints": "minLength 1, maxLength 35"
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "8-1-3",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "json_path": "other_contact3.name.middle_name",
+              "xml_path": "Form_14335_2_0:OtherContact3/POCName/globLib:MiddleName",
+              "constraints": "minLength 1, maxLength 25"
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "8-1-4",
+              "required": "conditional",
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "json_path": "other_contact3.name.last_name",
+              "xml_path": "Form_14335_2_0:OtherContact3/POCName/globLib:LastName",
+              "constraints": "minLength 1, maxLength 60"
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "8-1-5",
+              "required": false,
+              "type": "Text",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "json_path": "other_contact3.name.suffix",
+              "xml_path": "Form_14335_2_0:OtherContact3/POCName/globLib:SuffixName",
+              "constraints": "minLength 1, maxLength 10"
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "8-2",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the position title.",
+          "json_path": "other_contact3.title",
+          "xml_path": "Form_14335_2_0:OtherContact3/Title",
+          "constraints": "minLength 1, maxLength 45"
+        },
+        {
+          "kind": "field",
+          "label": "Phone number",
+          "dat_field": "8-3",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the daytime telephone number.",
+          "json_path": "other_contact3.phone",
+          "xml_path": "Form_14335_2_0:OtherContact3/PhoneNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Cell phone number",
+          "dat_field": "8-4",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter the cell phone number.",
+          "json_path": "other_contact3.cell_phone",
+          "xml_path": "Form_14335_2_0:OtherContact3/CellNumber",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email address",
+          "dat_field": "8-5",
+          "required": "conditional",
+          "type": "Text",
+          "widget": "TextWidget",
+          "help_text": "Enter a valid email address.",
+          "json_path": "other_contact3.email",
+          "xml_path": "Form_14335_2_0:OtherContact3/Email",
+          "constraints": "maxLength 60, format email"
+        },
+        {
+          "kind": "field",
+          "label": "May the IRS share this other contact’s information with other grant recipients and non-grant recipients involved in the VITA or TCE program?",
+          "dat_field": "8-6",
+          "required": "conditional",
+          "type": "Select",
+          "widget": "SelectWidget",
+          "help_text": "Select one.",
+          "json_path": "other_contact3.share_contact",
+          "xml_path": "Form_14335_2_0:OtherContact3/ShareOtherContact",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Instructions and definitions",
+      "help_text": "Instructions for Form 14335, Contact Information for VITA and TCE Grant Programs\n\nInstructions: List those individuals that we may contact with questions concerning your grant. Refer to the following definitions. Designate only one primary contact. Designate at least one alternate contact. We are asked occasionally to share contact information with other grant recipients and non-grant recipients involved or interested in the VITA or TCE program. Please indicate whether we may share your information.\n\nDefinitions:\n\n1. Primary — Manages the day-to-day operations of your organization's program and is responsible for ensuring its requirements are met.\n\n2. Alternate — Knowledgeable of the grant and its requirements and assists or directs the primary contact.\n\n3. Authorized Organization Representative — Authorized to act for the organization and to assume the obligations imposed by the Federal laws, regulations, requirements, and conditions that apply to grant applications or grant awards.\n\n4. Federal tax matters — Authorized to discuss your organization's federal tax matters with IRS. This individual is only contacted when questions arise concerning your organization's filing of its federal returns or paying of federal taxes, penalties or interest.\n\n5. Financial/PMS — Responsible for the financial aspects of the grant. This includes responsibility for requesting disbursement and required reporting in the Payment Management System.\n\n6. Other — Provides assistance in the absence of those designated a role or that share responsibility for a role. Please explain their\nrole in the space provided.\n\nPrivacy and Paperwork Reduction Act Notice\n\nThe Privacy Act of 1974 requires that when we ask for information we tell you our legal right to ask for the information, why we are asking for it, and how it will be used. We must also tell you what could happen if we do not receive it, and whether your response is voluntary, required to obtain a benefit, or mandatory. Our legal right to ask for information is 5 U.S.C. 301. The Paperwork Reduction Act requires that the IRS display an OMB control number on all public information requests. The OMB Control Number for this study is 1545-2222. The time estimated for participation is 30 minutes. We are asking for this information to assist us in contacting you relative to your interest and/or participation in the IRS volunteer income tax preparation and outreach programs. The information you provide may be furnished to others who coordinate activities and staffing at volunteer return preparation sites or outreach activities. The information may also be used to establish effective controls, send correspondence and recognize volunteers. Your response is voluntary. However, if you do not provide the requested information, the IRS may not be able to use your assistance in these programs.\n\nCatalog Number 59717U\n\nwww.irs.gov\n\nForm 14335 (Rev. 3-2022)",
+      "children": []
+    }
+  ],
+  "notes": [
+    "Required contact roles are distinct; name/title/phone/email use existing shared questions. A local contact body avoids carrying an unrequested address or creating a new generic question identity.",
+    "Three optional Other Contact source slots stay separate; no list compaction, inferred role, consent default or automatic sharing. All record members become required only when that optional record exists.",
+    "Optional text uses original XSD minLength 1 when present, while DAT often states 0. Explicit empty versus absence is a source-layer difference, not silently normalized by the bank.",
+    "Generic bank name/contact help replaces repeated role-specific wording; exact source ownership and instructions remain visible at the role/field context.",
+    "Email formatting follows the existing shared bank and source invalid-email message. Global XSD only bounds the string.",
+    "Optional Other Contact sharing uses existing hiddenWhen(record,null) on a UI-only permission group: it is unavailable until any slot value materializes its record. The source shows an inactive control; progressive disclosure hides it instead. This is an intentional presentation difference, not a changed requiredness, permission default or source policy. Select retains exact Yes/No codes and an unanswered state so the user can remove an optional contact. No compiler, renderer, service or data wrapper is added."
+  ],
+  "risks": [
+    "The source Other Contact sharing label incorrectly says Alternate Contacts; proposed wording names the current other contact and is pinned as an intentional presentation correction.",
+    "Authentic SF-424 context/default country population and production integration are separate.",
+    "The source’s inactive Other Contact permission is hidden until the record is used, using existing layout rules. Its Select supports clearing an optional record and preserves the same Yes/No/absence semantics; this intentional UI presentation choice is explicit for review."
+  ],
+  "examples": [
+    {
+      "label": "Illustrative scenario 1",
+      "description": "Required source-named contacts with no optional Other Contact records.",
+      "data": {
+        "organization_name": "Illustrative Tax Assistance",
+        "organization_address": {
+          "street1": "100 Example Avenue",
+          "city": "Denver",
+          "state": "CO: Colorado",
+          "country": "USA: UNITED STATES",
+          "zip_code": "80202"
+        },
+        "days_operation": "Monday through Friday",
+        "hours_operation": "9 a.m. to 5 p.m.",
+        "primary_contact": {
+          "name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "title": "Primary Coordinator",
+          "phone": "2025550101",
+          "email": "primary@example.org",
+          "share_contact": "N: No"
+        },
+        "alternate_contact": {
+          "name": {
+            "first_name": "Morgan",
+            "last_name": "Patel"
+          },
+          "title": "Alternate Coordinator",
+          "phone": "2025550102",
+          "email": "alternate@example.org",
+          "share_contact": "Y: Yes"
+        },
+        "authorized_representative": {
+          "name": {
+            "first_name": "Alex",
+            "last_name": "Rivera"
+          },
+          "title": "Director",
+          "phone": "2025550103",
+          "email": "aor@example.org",
+          "share_contact": "N: No"
+        },
+        "federal_tax_matters_contact": {
+          "name": {
+            "first_name": "Robin",
+            "last_name": "Kim"
+          },
+          "title": "Tax Contact",
+          "phone": "2025550104",
+          "email": "tax@example.org"
+        },
+        "financial_pms_contact": {
+          "name": {
+            "first_name": "Casey",
+            "last_name": "Chen"
+          },
+          "title": "Finance Contact",
+          "phone": "2025550105",
+          "email": "finance@example.org"
+        }
+      }
+    },
+    {
+      "label": "Illustrative scenario 2",
+      "description": "Optional fixed slots one and three filled independently; sharing permissions are explicit.",
+      "data": {
+        "organization_name": "Illustrative Tax Assistance",
+        "organization_address": {
+          "street1": "100 Example Avenue",
+          "city": "Denver",
+          "state": "CO: Colorado",
+          "country": "USA: UNITED STATES",
+          "zip_code": "80202"
+        },
+        "days_operation": "Monday through Friday",
+        "hours_operation": "9 a.m. to 5 p.m.",
+        "primary_contact": {
+          "name": {
+            "first_name": "Jordan",
+            "last_name": "Lee"
+          },
+          "title": "Primary Coordinator",
+          "phone": "2025550101",
+          "email": "primary@example.org",
+          "share_contact": "N: No"
+        },
+        "alternate_contact": {
+          "name": {
+            "first_name": "Morgan",
+            "last_name": "Patel"
+          },
+          "title": "Alternate Coordinator",
+          "phone": "2025550102",
+          "email": "alternate@example.org",
+          "share_contact": "Y: Yes"
+        },
+        "authorized_representative": {
+          "name": {
+            "first_name": "Alex",
+            "last_name": "Rivera"
+          },
+          "title": "Director",
+          "phone": "2025550103",
+          "email": "aor@example.org",
+          "share_contact": "N: No"
+        },
+        "federal_tax_matters_contact": {
+          "name": {
+            "first_name": "Robin",
+            "last_name": "Kim"
+          },
+          "title": "Tax Contact",
+          "phone": "2025550104",
+          "email": "tax@example.org"
+        },
+        "financial_pms_contact": {
+          "name": {
+            "first_name": "Casey",
+            "last_name": "Chen"
+          },
+          "title": "Finance Contact",
+          "phone": "2025550105",
+          "email": "finance@example.org"
+        },
+        "other_contact1": {
+          "role": "Illustrative program support",
+          "name": {
+            "first_name": "Taylor",
+            "last_name": "Jordan"
+          },
+          "title": "Support Coordinator",
+          "phone": "2025550198",
+          "email": "other1@example.org",
+          "share_contact": "N: No"
+        },
+        "other_contact3": {
+          "role": "Illustrative finance support",
+          "name": {
+            "first_name": "Jamie",
+            "last_name": "Rivera"
+          },
+          "title": "Finance Support",
+          "phone": "2025550199",
+          "email": "other3@example.org",
+          "share_contact": "Y: Yes"
+        }
+      }
+    }
+  ]
 }
