@@ -13,8 +13,8 @@ variables {
   application_log_group    = "service/nofos-infra-dev"
   pdf_readability_monitoring = {
     waf_metric_name = "nofos-infra-dev-waf"
-    cluster_name   = "nofos-infra-dev"
-    region         = "us-east-1"
+    cluster_name    = "nofos-infra-dev"
+    region          = "us-east-1"
   }
 }
 
