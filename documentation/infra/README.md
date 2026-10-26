@@ -7,6 +7,7 @@
 * [Set up AWS account](./set-up-aws-account.md)
 * [Set up application build repository](./set-up-app-build-repository.md)
 * [Set up application environment](./set-up-app-env.md)
+* [Create the private NOFO infra-dev alert email parameter](./nofo-alert-email-setup.md)
 
 ## Technical Design
 
