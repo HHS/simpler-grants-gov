@@ -13,7 +13,8 @@ run "only_infra_dev_gets_silent_pilot_monitoring" {
       for name, config in output.environment_configs :
       config.service_config.enable_pdf_readability_monitoring == (name == "infra-dev") &&
       !config.service_config.pdf_readability_alarm_actions_enabled &&
-      length(config.service_config.monitoring_email_alert_recipients) == 0
+      length(config.service_config.monitoring_email_alert_recipients) == 0 &&
+      config.service_config.monitoring_email_alert_recipient_parameter_name == null
     ])
     error_message = "Only infra-dev may get monitoring; no environment may activate notifications or invent recipients."
   }

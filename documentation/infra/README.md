@@ -15,6 +15,9 @@
 
 ## Testing
 
+* [Readability Calculator preparation and short verification checklist](./nofo-readability-verification-kit.md)
+* [Private NOFO monitoring email routing](./nofo-private-alert-email.md)
+
 * [NOFO PDF upload availability assessment and deferred test plan](./nofo-pdf-upload-assessment.md)
 
 * [Terraform unit testing](./terraform-unit-testing.md)
