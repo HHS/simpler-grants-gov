@@ -8,6 +8,16 @@ const NOT_INPUTS = new Set(["label", "button"]);
 /** Implementations whose list is fixed, so its "Max # of Chars" is not a length limit. */
 const FIXED_LISTS = new Set(["popup"]);
 
+/** In these rows the shared DAT column means a maximum value, not character length. */
+const NUMERIC_TYPES = new Set([
+  "$",
+  "integer",
+  "number",
+  "numeric",
+  "decimal",
+  "currency",
+]);
+
 /**
  * `*  Contact 1 Project Role:` -> `* Contact 1 Project Role`. The asterisk the DAT prints on
  * a required field is kept, so the label comparison can check it against the plan.
@@ -43,7 +53,7 @@ const COLUMNS = {
 /**
  * The answers a Grants.gov Data Attribute Table (DAT) workbook describes, keyed by `Field #`.
  *
- * Only `maxLength` and `maxOccurs` are read as rules. The DAT's minimum characters and
+ * Text length, numeric value bounds and `maxOccurs` are read as rules. The DAT's minimum characters and
  * minimum occurrences are 0 for every optional field and 1 for every required one, so they
  * restate requiredness; the XSD is the authority on `minLength`.
  */
@@ -75,11 +85,38 @@ export function datFields(workbook: Uint8Array): Fields {
   for (const row of rows.slice(start + 1)) {
     const id = String(row[at.field]).trim();
     const implementation = header(row[at.implementation]);
-    if (!id || NOT_INPUTS.has(implementation)) continue;
+    const agency = names.indexOf("agency field name"),
+      fieldType = names.indexOf("field type");
+    const bound = agency >= 0 && String(row[agency]).trim() !== "";
+    const radioOption =
+      implementation === "radio" &&
+      !bound &&
+      fieldType >= 0 &&
+      header(row[fieldType]) === "radio group";
+    const populated =
+      implementation === "label" &&
+      bound &&
+      fieldType >= 0 &&
+      ["post-populated", "post-populate"].includes(header(row[fieldType]));
+    if (!id || (NOT_INPUTS.has(implementation) && !populated) || radioOption)
+      continue;
     const rules: Rules = {};
-    const max = Number(row[at.max]);
-    if (String(row[at.max]).trim() && !FIXED_LISTS.has(implementation))
-      rules.maxLength = max;
+    const numeric =
+      NUMERIC_TYPES.has(header(row[at.dataType])) ||
+      /^decimal\(\d+\)$/.test(header(row[at.dataType]));
+    if (numeric) {
+      for (const [key, index] of [
+        ["minimum", names.indexOf("min # of chars or min value")],
+        ["maximum", at.max],
+      ] as const) {
+        if (index < 0 || String(row[index]).trim() === "") continue;
+        const value = Number(row[index]);
+        if (!Number.isFinite(value))
+          throw new Error(`unreadable DAT numeric ${key} at ${id}`);
+        rules[key] = value;
+      }
+    } else if (String(row[at.max]).trim() && !FIXED_LISTS.has(implementation))
+      rules.maxLength = Number(row[at.max]);
     const maxOccurs = occurrences(row[at.maxOccurs]);
     if (maxOccurs !== undefined) rules.maxOccurs = maxOccurs;
     const required = header(row[at.required]);

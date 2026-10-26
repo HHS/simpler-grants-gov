@@ -161,3 +161,52 @@ harness/
   compare.ts          comparePair(): the six checks, with recorded differences applied
   model.ts            paths, fields, discrepancies, recorded differences (+ model.test.ts)
 ```
+
+## Numbered source positions and numeric constraints
+
+A plan can keep one question when Grants.gov assigns it several source positions.
+Use `source_bindings` only for explicit, finite positions in one repeated answer;
+ordinary `dat_field` and `xml_path` remain the default. For example:
+
+```json
+{
+  "kind": "field",
+  "label": "Activity title",
+  "type": "Text input",
+  "required": false,
+  "json_path": "activities[].title",
+  "max_items": 2,
+  "source_bindings": {
+    "at": "activities",
+    "dat": [
+      { "kind": "slot", "path": "A-1-1", "index": 0 },
+      { "kind": "slot", "path": "A-2-1", "index": 1 }
+    ]
+  }
+}
+```
+
+Slots must cover every position once, without a competing shorthand, duplicate path
+or index. The corresponding `xml` slots identify source XML fields; they do not
+instruct the XML emitter. `min_items` on a scalar list can state which initial
+positions are required. Inconsistent source constraints or required positions fail
+rather than silently using the first position. The comparison page retains a
+mismatch in any position.
+
+A scalar answer represented by several DAT option controls instead uses
+`source_bindings.dat` entries with `kind: "choice"`, `path` and `value`. Each declared
+code must occur in the linked XSD enumeration. This checks DAT option codes; it is
+not XML `xs:choice` selection or an XML transformation.
+
+Numeric DAT minimum/maximum values compare as value bounds, not text lengths.
+`multipleOf` in plan constraints compares with XSD `fractionDigits` and numeric JSON
+Schema precision. A numeric keyword on a string does not constrain that string, so
+that representation gap stays visible. XSD `xsd_root` can select a named root;
+ambiguous roots and unresolved/recursive groups fail. Flat `xs:choice` leaves
+remain individually optional; that does not prove whole-document exclusivity.
+
+The site owns the plan schema (`site/src/lib/formPlanSchema.ts`) and its tests.
+A plan's optional `examples` can be reviewed in Data before a compiled definition
+exists. Proposed example paths are checked, while values/calculations/submission
+validity are not. Optional `existing_sgg` examples keep a pinned source URL and are
+shown separately from proposed answers and live preview data.

@@ -1,0 +1,184 @@
+import { describe, expect, it } from "vitest";
+import { choiceValueProblems, sourceCoordinates } from "./sourceBindings.ts";
+import {
+  planFields,
+  type PlanField,
+  type Plan,
+} from "./harness/flatten/plan.ts";
+const field = (): PlanField & {
+  source_bindings: {
+    at: string;
+    dat: { kind: "slot"; path: string; index: number }[];
+  };
+} => ({
+  kind: "field",
+  label: "Amount",
+  required: false,
+  json_path: "activities[].amount",
+  xml_path: "Budget/Activity/Amount",
+  source_bindings: {
+    at: "activities",
+    dat: [
+      { kind: "slot", path: "A-1", index: 0 },
+      { kind: "slot", path: "A-2", index: 1 },
+    ],
+  },
+});
+describe("finite DAT slots", () => {
+  it("projects an explicit list minimum to the corresponding required source prefix", () => {
+    const f = { ...field(), required: true, min_items: 1 };
+    const p: Plan = {
+      slug: "required-prefix",
+      children: [
+        { kind: "section", label: "Choices", max_items: 2, children: [f] },
+      ],
+    };
+    expect(
+      [...planFields(p, "dat_field")].map(([id, value]) => [
+        id,
+        value.required,
+      ]),
+    ).toEqual([
+      ["A-1", "yes"],
+      ["A-2", "no"],
+    ]);
+    expect(
+      planFields(p, "json_path").get("activities[].amount")?.required,
+    ).toBe("yes");
+  });
+  it("keeps a present but empty permitted list distinct from a required first slot", () => {
+    const f = { ...field(), required: true, min_items: 0 };
+    const p: Plan = {
+      slug: "empty-permitted",
+      children: [
+        { kind: "section", label: "Choices", max_items: 2, children: [f] },
+      ],
+    };
+    expect(
+      [...planFields(p, "dat_field").values()].map((v) => v.required),
+    ).toEqual(["no", "no"]);
+  });
+  it("preserves one question while projecting each actual DAT control at occurrence1", () => {
+    const f = field(),
+      p: Plan = {
+        slug: "test",
+        children: [
+          { kind: "section", label: "Activities", max_items: 2, children: [f] },
+        ],
+      };
+    expect([...planFields(p, "json_path").keys()]).toEqual([
+      "activities[].amount",
+    ]);
+    expect(
+      [...planFields(p, "dat_field")].map(([k, v]) => [k, v.rules.maxOccurs]),
+    ).toEqual([
+      ["A-1", 1],
+      ["A-2", 1],
+    ]);
+    expect(
+      planFields(p, "xml_path").get("Budget/Activity/Amount")?.rules.maxOccurs,
+    ).toBe(2);
+  });
+  for (const failure of [
+    "missing",
+    "duplicate-index",
+    "duplicate-path",
+    "out-of-range",
+    "wrong-owner",
+    "shorthand",
+    "nested-array",
+    "unbounded",
+    "negative-minimum",
+    "fractional-minimum",
+    "minimum-above-maximum",
+  ] as const)
+    it(`refuses ${failure} without emitting partial coordinates`, () => {
+      const f = field();
+      if (failure === "missing") f.source_bindings!.dat.pop();
+      if (failure === "duplicate-index") f.source_bindings!.dat[1].index = 0;
+      if (failure === "duplicate-path") f.source_bindings!.dat[1].path = "A-1";
+      if (failure === "out-of-range") f.source_bindings!.dat[1].index = 2;
+      if (failure === "wrong-owner") f.source_bindings!.at = "unrelated";
+      if (failure === "shorthand") f.dat_field = "A-1";
+      if (failure === "nested-array")
+        f.json_path = "activities[].other[].amount";
+      if (failure === "negative-minimum") f.min_items = -1;
+      if (failure === "fractional-minimum") f.min_items = 0.5;
+      if (failure === "minimum-above-maximum") f.min_items = 3;
+      const problems: any[] = [];
+      expect(
+        sourceCoordinates(
+          f,
+          failure === "unbounded" ? "unbounded" : 2,
+          "dat",
+          problems,
+        ),
+      ).toEqual([]);
+      expect(problems.length).toBeGreaterThan(0);
+    });
+  it("rejects two questions claiming the same source cells", () => {
+    const f = field(),
+      other = { ...field(), json_path: "activities[].other" };
+    const p: Plan = {
+      slug: "test",
+      children: [
+        {
+          kind: "section",
+          label: "Activities",
+          max_items: 2,
+          children: [f, other],
+        },
+      ],
+    };
+    const problems: any[] = [];
+    planFields(p, "dat_field", problems);
+    expect(problems.some((p) => p.kind === "duplicate source coordinate")).toBe(
+      true,
+    );
+  });
+});
+
+describe("DAT choice controls for one scalar code", () => {
+  const choice = (): PlanField => ({
+    kind: "field",
+    label: "Reason",
+    required: false,
+    json_path: "revision_code",
+    xml_path: "RevisionCode",
+    source_bindings: {
+      dat: [
+        { kind: "choice", path: "1-a", value: "A" },
+        { kind: "choice", path: "1-b", value: "B" },
+      ],
+    },
+  });
+  it("projects both controls without duplicating the answer", () => {
+    const p: Plan = { slug: "test", children: [choice()] };
+    expect([...planFields(p, "json_path").keys()]).toEqual(["revision_code"]);
+    expect([...planFields(p, "dat_field").keys()]).toEqual(["1-a", "1-b"]);
+  });
+  it("refuses codes outside the linked XSD enumeration", () => {
+    expect(
+      choiceValueProblems(choice(), { rules: { enum: ["A", "B", "AB"] } }),
+    ).toEqual([]);
+    expect(
+      choiceValueProblems(choice(), { rules: { enum: ["A"] } }).map(
+        (p) => p.path,
+      ),
+    ).toEqual(["1-b"]);
+    expect(choiceValueProblems(choice(), undefined)).toHaveLength(2);
+  });
+  it("refuses duplicate choice codes and repeated owners", () => {
+    const f = choice();
+    f.source_bindings = {
+      dat: [
+        { kind: "choice", path: "1-a", value: "A" },
+        { kind: "choice", path: "1-b", value: "A" },
+      ],
+    };
+    const problems: any[] = [];
+    expect(sourceCoordinates(f, 1, "dat", problems)).toEqual([]);
+    expect(problems).not.toHaveLength(0);
+    expect(sourceCoordinates(choice(), 2, "dat", [])).toEqual([]);
+  });
+});

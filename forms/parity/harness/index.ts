@@ -1,3 +1,4 @@
+import { sourceCoordinates, choiceValueProblems } from "../sourceBindings.ts";
 /**
  * The harness's entry point: `checkForm` runs every comparison for one form.
  *
@@ -34,8 +35,8 @@ import {
 } from "./model.ts";
 
 /**
- * What each comparison checks, as the tests name it. The DAT is compared on `maxLength`
- * only (see `datFields`); `enum` is compared only between the two artifacts that list values.
+ * What each comparison checks, as the tests name it. The DAT is compared on text length and numeric value bounds
+ * (see `datFields`); `enum` is compared only between the two artifacts that list values.
  * JSON schema vs XSD compares only fields the plan links, and lets the schema be stricter.
  * Labels compared with the DAT carry the asterisk it prints on a required field (see
  * `withAsterisk`).
@@ -46,7 +47,10 @@ export const SPECS = {
     order: true,
     labels: true,
     help: true,
-    constraints: { keywords: ["maxLength"], mode: "equal" },
+    constraints: {
+      keywords: ["maxLength", "minimum", "maximum"],
+      mode: "equal",
+    },
     occurrences: "equal",
   },
   xsd: {
@@ -58,6 +62,7 @@ export const SPECS = {
         "pattern",
         "minimum",
         "maximum",
+        "multipleOf",
         "enumType",
       ],
       mode: "equal",
@@ -74,6 +79,7 @@ export const SPECS = {
         "format",
         "minimum",
         "maximum",
+        "multipleOf",
       ],
       mode: "equal",
     },
@@ -95,6 +101,7 @@ export const SPECS = {
         "pattern",
         "minimum",
         "maximum",
+        "multipleOf",
         "enum",
       ],
       mode: "contains",
@@ -155,15 +162,48 @@ function joinThroughPlan(
   const toXsd = diff.xsd?.renamed ?? {};
   const left: Fields = new Map();
   const right: Fields = new Map();
-  for (const { field } of walkFields(plan.children)) {
-    if (!field.json_path || !field.xml_path) continue;
+  for (const { field, maxItems } of walkFields(plan.children)) {
+    if (!field.json_path) continue;
+    const coordinates = sourceCoordinates(field, maxItems, "xsd");
+    if (!coordinates.length) continue;
     const schemaPath = toSchema[field.json_path]?.to ?? field.json_path;
-    const xmlPath = fromXmlPath(field.xml_path);
-    const xsdField = xsd.get(toXsd[xmlPath]?.to ?? xmlPath);
+    const sources = coordinates.map((c) =>
+      xsd.get(toXsd[c.path]?.to ?? c.path),
+    );
+    const xsdField = sources[0];
+    if (
+      coordinates.length > 1 &&
+      sources.some(
+        (source, index) =>
+          !source ||
+          JSON.stringify({ ...source.rules, maxOccurs: undefined }) !==
+            JSON.stringify({ ...xsdField?.rules, maxOccurs: undefined }) ||
+          source.required !==
+            (field.min_items === undefined
+              ? xsdField?.required
+              : (coordinates[index].index ?? 0) < field.min_items
+                ? "yes"
+                : "no"),
+      )
+    )
+      throw new Error(`Finite XML slots disagree at ${field.json_path}`);
+    const combined =
+      xsdField && coordinates.length > 1
+        ? {
+            ...xsdField,
+            required:
+              field.min_items === undefined
+                ? xsdField.required
+                : field.min_items > 0
+                  ? ("yes" as const)
+                  : ("no" as const),
+            rules: { ...xsdField.rules, maxOccurs: coordinates.length },
+          }
+        : xsdField;
     const schemaField = schema.get(schemaPath);
     if (!xsdField || !schemaField) continue;
     left.set(schemaPath, schemaField);
-    right.set(schemaPath, xsdField);
+    right.set(schemaPath, combined!);
   }
   return { left, right };
 }
@@ -246,7 +286,15 @@ export async function formPairs(
   const xsdSource = xsdFields(
     required(plan.xsd_url, `xsd_url in plan ${diff.slug}`),
     (url) => readSource(url).toString("utf8"),
+    plan.xsd_root,
   );
+  for (const { field } of walkFields(plan.children))
+    planProblems.push(
+      ...choiceValueProblems(
+        field,
+        field.xml_path ? xsdSource.get(fromXmlPath(field.xml_path)) : undefined,
+      ),
+    );
   const dat = {
     ...pair(
       diff.dat,
@@ -255,7 +303,11 @@ export async function formPairs(
     ),
     wording: diff.wording,
   };
-  const xsd = pair(diff.xsd, planFields(plan, "xml_path"), xsdSource);
+  const xsd = pair(
+    diff.xsd,
+    planFields(plan, "xml_path", planProblems),
+    xsdSource,
+  );
   if (!plan.spec_id) return { plan, planProblems, dat, xsd };
 
   const specId = plan.spec_id;
