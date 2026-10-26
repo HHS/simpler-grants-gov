@@ -7,6 +7,7 @@ import FormFieldTree from "../../components/forms/FormFieldTree.astro";
 import FieldComparison from "@/components/forms/comparison/FieldComparison";
 import FormDataPanel from "../../components/forms/preview/FormDataPanel";
 import FormPreview from "../../components/forms/preview/FormPreview";
+import PlanExamples from "../../components/forms/PlanExamples.astro";
 import { loadFormSpec } from "../../lib/formSpec";
 import { compareForm } from "@parity/comparison.ts";
 
@@ -20,15 +21,19 @@ export async function getStaticPaths() {
 
 const { form } = Astro.props;
 const spec = form.data.spec_id ? await loadFormSpec(form.data.spec_id) : undefined;
+const examples = form.data.examples ?? [];
+const existingSgg = form.data.existing_sgg;
+const hasData = Boolean(spec || examples.length > 0 || existingSgg);
 const comparison = await compareForm<FieldNode>(form.data);
 const notes = form.data.notes ?? [];
+const risks = form.data.risks ?? [];
 
 const STATUS_LABELS: Record<string, string> = {
   backlog: "Backlog",
   prioritized: "Prioritized",
   in_progress: "In Progress",
-  migrated: "Migrated",
   ready: "Ready",
+  migrated: "Migrated",
 };
 ---
 
@@ -51,7 +56,6 @@ const STATUS_LABELS: Record<string, string> = {
     </div>
 
     <FormMetadata form={form} />
-
     {form.data.children.length > 0 ? (
       <>
         <div class="tab-bar" role="tablist">
@@ -59,19 +63,16 @@ const STATUS_LABELS: Record<string, string> = {
             Field tree
           </button>
           {spec ? (
-            <>
-              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="preview">
-                Form preview
-              </button>
-              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="data">
-                Data
-              </button>
-            </>
+            <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="preview">
+              Form preview
+            </button>
           ) : (
-            <>
-              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Form preview</button>
-              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Data</button>
-            </>
+            <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Form preview</button>
+          )}
+          {hasData ? (
+            <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="data">Data</button>
+          ) : (
+            <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Data</button>
           )}
           <button class="tab-bar__tab tab-bar__tab--disabled" disabled>JSON Schema</button>
           <button class="tab-bar__tab tab-bar__tab--disabled" disabled>XML Mapping</button>
@@ -97,6 +98,13 @@ const STATUS_LABELS: Record<string, string> = {
               </ul>
             </>
           )}
+          {risks.length > 0 && (
+            <>
+              <h2 class="section-title margin-top-4">Risks and open questions</h2>
+              <p class="text-base">Planning issues for review. Passing comparisons do not resolve them.</p>
+              <ul class="plan-notes">{risks.map((risk) => <li>{risk}</li>)}</ul>
+            </>
+          )}
         </div>
 
         {spec && (
@@ -111,11 +119,18 @@ const STATUS_LABELS: Record<string, string> = {
           </div>
         )}
 
-        {spec && (
+        {hasData && (
           <div data-panel="data" hidden>
-            <h2 class="section-title">Form data</h2>
-            <p class="text-base">The JSON entered in the form preview, updated as you type.</p>
-            <FormDataPanel client:only="react" />
+            {(examples.length > 0 || existingSgg) && (
+              <PlanExamples slug={form.data.slug} examples={examples} existingSgg={existingSgg} />
+            )}
+            {spec && (
+              <>
+                <h2 class="section-title">Live preview data</h2>
+                <p class="text-base">The JSON entered in the form preview, updated as you type.</p>
+                <FormDataPanel client:only="react" />
+              </>
+            )}
           </div>
         )}
       </>
