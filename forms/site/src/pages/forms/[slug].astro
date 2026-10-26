@@ -9,6 +9,7 @@ import FormDataPanel from "../../components/forms/preview/FormDataPanel";
 import FormPreview from "../../components/forms/preview/FormPreview";
 import PlanExamples from "../../components/forms/PlanExamples.astro";
 import { loadFormSpec } from "../../lib/formSpec";
+import { externalForms } from "@parity/harness/flatten/plan.ts";
 import { compareForm } from "@parity/comparison.ts";
 
 export async function getStaticPaths() {
@@ -25,6 +26,7 @@ const examples = form.data.examples ?? [];
 const existingSgg = form.data.existing_sgg;
 const hasData = Boolean(spec || examples.length > 0 || existingSgg);
 const comparison = await compareForm<FieldNode>(form.data);
+const externalReferences = externalForms(form.data);
 const notes = form.data.notes ?? [];
 const risks = form.data.risks ?? [];
 
@@ -56,6 +58,17 @@ const STATUS_LABELS: Record<string, string> = {
     </div>
 
     <FormMetadata form={form} />
+    {externalReferences.length > 0 && (
+      <aside class="usa-alert usa-alert--info margin-y-3" role="note" aria-label="External form qualification boundary">
+        <div class="usa-alert__body">
+          <h2 class="usa-alert__heading">External form boundary</h2>
+          <p class="usa-alert__text">Captured inputs and the declared source reference are compared. The nested budget model, extracted file contents and XML submission are not compared.</p>
+          <ul class="usa-list">{externalReferences.map(reference => (
+            <li><a href={reference.xsd_url}>{reference.element}</a>: {reference.min_occurs}–{reference.max_occurs} source occurrences; <code style="overflow-wrap:anywhere;white-space:normal">{reference.namespace}</code>. Nested payload qualification: <strong>not compared</strong>.</li>
+          ))}</ul>
+        </div>
+      </aside>
+    )}
 
     {form.data.children.length > 0 ? (
       <>

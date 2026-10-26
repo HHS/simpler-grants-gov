@@ -25,3 +25,7 @@ import "./forms/grant-program-accounting-system-financial-capability-questionnai
 
 import "./forms/assurances-for-non-construction-programs-sf-424b/index.tsp";
 import "./forms/assurances-for-construction-programs-sf-424d/index.tsp";
+
+import "./forms/phs-398-training-subaward-budget-attachment-s-form/index.tsp";
+
+import "./forms/r-r-subaward-budget-attachment-s-form/index.tsp";

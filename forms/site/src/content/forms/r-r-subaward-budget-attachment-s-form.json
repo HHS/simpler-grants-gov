@@ -1,12 +1,148 @@
 {
   "title": "R & R Subaward Budget Attachment(s) Form",
   "slug": "r-r-subaward-budget-attachment-s-form",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["R&R"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 24081,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/776",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/RR_SubawardBudget_3_0-V3.0_F776.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/RR_SubawardBudget_3_0-V3.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/RR_SubawardBudget_3_0-V3.0_F776.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/RR_SubawardBudget_3_0-V3.0_F776.xls",
+  "spec_id": "r-r-subaward-budget-attachment-s-form",
+  "description": "Source-reviewed subaward-budget attachment definition. Applicant answers are optional ordered file references; parsed completed budget XML is a separate declared integration boundary.",
+  "omb_number": "4040-0001",
+  "expiration_date": "01/31/2029",
+  "widgets": ["ApplicationMultipleAttachmentWidget"],
+  "new_concepts": [],
+  "examples": [
+    {
+      "label": "No subaward budget files yet",
+      "description": "All original source slots are optional. Agency requirements and actual file/template validation are separate.",
+      "data": {}
+    },
+    {
+      "label": "Two ordered illustrative budget references",
+      "description": "Distinct synthetic UUIDs preserve order; they do not identify real uploaded or validated budget PDFs.",
+      "data": {
+        "attachments": [
+          "00000000-0000-4000-8000-000000077602",
+          "00000000-0000-4000-8000-000000077601"
+        ]
+      }
+    }
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Original source instructions",
+      "help_text": "Instructions: On this form, you will attach the R&R Subaward Budget files for your grant application.  Complete the subawardee budget(s) in  accordance with the R&R budget instructions. Please remember that any files you attach must be a PDF document.\n\nImportant: Please attach your subawardee budget file(s) with the file name of the subawardee organization.  Each file name must be unique. \n\nOriginal template-extraction instruction: Click here to extract the R&R Subaward Budget Attachment\n\nThe PDF of the R&R Budget Form will be embedded into this form.  The applicant will click the button and a dialog box will appear where applicant indicates where to save the file.\n\nThe extraction button belongs to the original PDF workflow. This preview displays the instruction and accepts illustrative file references; it does not extract a template, upload a file or submit a budget.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Subaward budget files",
+          "help_text": "Attach up to 10 completed R&R Subaward Budget PDF files. Each file name must be unique and use the subawardee organization name.",
+          "required": false,
+          "type": "Ordered list of uploaded attachment IDs (UUID strings)",
+          "widget": "ApplicationMultipleAttachmentWidget",
+          "json_path": "attachments[]",
+          "source_bindings": {
+            "at": "attachments",
+            "xml": [
+              {
+                "kind": "slot",
+                "path": "ATT1",
+                "index": 0
+              },
+              {
+                "kind": "slot",
+                "path": "ATT2",
+                "index": 1
+              },
+              {
+                "kind": "slot",
+                "path": "ATT3",
+                "index": 2
+              },
+              {
+                "kind": "slot",
+                "path": "ATT4",
+                "index": 3
+              },
+              {
+                "kind": "slot",
+                "path": "ATT5",
+                "index": 4
+              },
+              {
+                "kind": "slot",
+                "path": "ATT6",
+                "index": 5
+              },
+              {
+                "kind": "slot",
+                "path": "ATT7",
+                "index": 6
+              },
+              {
+                "kind": "slot",
+                "path": "ATT8",
+                "index": 7
+              },
+              {
+                "kind": "slot",
+                "path": "ATT9",
+                "index": 8
+              },
+              {
+                "kind": "slot",
+                "path": "ATT10",
+                "index": 9
+              }
+            ]
+          },
+          "min_items": 0,
+          "max_items": 10,
+          "constraints": "format uuid",
+          "dat_field": "1-0"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Completed budget payload boundary",
+      "help_text": "Source-derived budget XML is integration-owned and is not another applicant answer. The exact imported source schema is referenced below.",
+      "children": [
+        {
+          "kind": "field",
+          "type": "External form",
+          "label": "Parsed completed budget content (integration-owned)",
+          "required": false,
+          "xml_path": "BudgetAttachments/RR_Budget_3_0",
+          "max_items": 10,
+          "external_form": {
+            "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/RR_Budget_3_0-V3.0.xsd",
+            "namespace": "http://apply.grants.gov/forms/RR_Budget_3_0-V3.0",
+            "element": "RR_Budget_3_0"
+          },
+          "post_populated": "The source imports the completed budget form beneath BudgetAttachments. Application integration must extract/resolve and validate each completed original budget PDF against this exact source form; it is not another applicant data-entry question.",
+          "min_items": 0
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The original DAT and XSD make all source attachment slots optional (0\u201310). Agency/program requirements remain additional instructions; do not impose an invented minimum of one file.",
+    "Finite XML slot bindings preserve each ATT1\u2013ATT10 source coordinate. The capture list is ordered and compact; actual service assignment to numbered source slots remains integration work, not arbitrary sparse-slot round-trip proof.",
+    "Source ATTn elements are xs:string file references. The current library Attachment scalar is a UUID service reference. This is an explicit capture projection, not a serializer that writes UUIDs as source file descriptors.",
+    "BudgetAttachments contains full imported completed-budget XML. The explicit External form source reference preserves that separate derived-payload channel; the child budget is not modeled as inline applicant questions, compiled or qualified by this definition.",
+    "Template extraction, actual PDF format/content, original-template preservation, filename conventions/uniqueness, file existence/ownership and source XML construction require real application/attachment integration. No upload or XML mapping is implemented here.",
+    "No equivalent implementation was found by the pinned SGG inventory at48d93f882c63a711bdec4b16e3150d1293cdff43. Existing-SGG behavior/runtime parity is not claimed.",
+    "Original source instructions, extraction wording and important warning are preserved in displayed plan/layout prose. The template-extraction control is not represented as a fake working button."
+  ],
+  "risks": [
+    "Synthetic UUIDs are sample references with no uploaded file behind them. Schema admission does not establish file content, filename uniqueness, template correctness, upload ownership, parsed external budget validity or a successful application submission.",
+    "The source external budget reference is an explicit not-compared/integration boundary. Passing the applicant-capture/source-reference checks must not be reported as successful child budget or source XML generation."
+  ]
 }

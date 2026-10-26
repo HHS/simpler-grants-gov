@@ -230,3 +230,21 @@ describe("SF-424 R&R choice mapping", () => {
     ).toBe("unrecorded");
   });
 });
+
+describe.each([
+  ["r-r-subaward-budget-attachment-s-form", 10],
+  ["phs-398-training-subaward-budget-attachment-s-form", 30],
+] as const)("%s finite XML visibility", (slug, maximum) => {
+  it("shows every source slot on its one applicant answer without crediting the external payload as a matched field", async () => {
+    const comparison = (await compareForm(PLANS.get(slug)!))!;
+    expect(comparison.fields.map((field) => field.id)).toEqual([
+      "attachments[]",
+    ]);
+    const match = comparison.fields[0].rows.find(
+      (row) => row.attribute === "matchedBy",
+    )!.cells.xsd;
+    expect(match.value).toContain("ATT1");
+    expect(match.value).toContain(`ATT${maximum}`);
+    expect(match.status).toBe("match");
+  });
+});

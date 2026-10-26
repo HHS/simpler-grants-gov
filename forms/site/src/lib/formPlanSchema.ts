@@ -32,49 +32,99 @@ const nodeBase = z.object({
   max_items: maxItems.optional(),
 });
 
-const fieldNode = nodeBase.extend({
-  kind: z.literal("field"),
-  source_bindings: z
-    .union([
-      z
-        .object({
-          at: z.string().min(1),
-          dat: z
-            .array(
-              z
-                .object({
-                  kind: z.literal("slot"),
-                  path: z.string().min(1),
-                  index: z.number().int().nonnegative(),
-                })
-                .strict(),
-            )
-            .min(1),
-        })
-        .strict(),
-      z
-        .object({
-          dat: z
-            .array(
-              z
-                .object({
-                  kind: z.literal("choice"),
-                  path: z.string().min(1),
-                  value: z.string().min(1),
-                })
-                .strict(),
-            )
-            .min(1),
-        })
-        .strict(),
-    ])
-    .optional(),
-  required: z.union([z.boolean(), z.string()]),
-  type: z.string(),
-  constraints: z.string().optional(),
-  pre_populated: z.string().optional(),
-  post_populated: z.string().optional(),
-});
+const fieldNode = nodeBase
+  .extend({
+    kind: z.literal("field"),
+    source_bindings: z
+      .union([
+        z
+          .object({
+            at: z.string().min(1),
+            dat: z
+              .array(
+                z
+                  .object({
+                    kind: z.literal("slot"),
+                    path: z.string().min(1),
+                    index: z.number().int().nonnegative(),
+                  })
+                  .strict(),
+              )
+              .min(1)
+              .optional(),
+            xml: z
+              .array(
+                z
+                  .object({
+                    kind: z.literal("slot"),
+                    path: z.string().min(1),
+                    index: z.number().int().nonnegative(),
+                  })
+                  .strict(),
+              )
+              .min(1)
+              .optional(),
+          })
+          .strict()
+          .refine(
+            (value) => Boolean(value.dat || value.xml),
+            "Finite bindings need DAT or XML slots",
+          ),
+        z
+          .object({
+            dat: z
+              .array(
+                z
+                  .object({
+                    kind: z.literal("choice"),
+                    path: z.string().min(1),
+                    value: z.string().min(1),
+                  })
+                  .strict(),
+              )
+              .min(1),
+          })
+          .strict(),
+      ])
+      .optional(),
+    required: z.union([z.boolean(), z.string()]),
+    type: z.string(),
+    constraints: z.string().optional(),
+    pre_populated: z.string().optional(),
+    post_populated: z.string().optional(),
+    external_form: z
+      .object({
+        xsd_url: z.url(),
+        namespace: z.string().min(1),
+        element: z.string().min(1),
+      })
+      .strict()
+      .optional(),
+  })
+  .superRefine((field, ctx) => {
+    const external = field.type === "External form";
+    if (external !== Boolean(field.external_form))
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "External form type and source identity must be declared together",
+      });
+    if (
+      external &&
+      (field.min_items === undefined ||
+        field.max_items === undefined ||
+        !field.xml_path?.trim() ||
+        !field.post_populated?.trim() ||
+        ["json_path", "dat_field", "widget", "source_bindings"].some((key) =>
+          Object.hasOwn(field, key),
+        ))
+    )
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "External forms require XML path and population explanation without applicant answer coordinates or widget",
+      });
+  });
 
 /** A group of nodes, laid out the way the form groups them. */
 const sectionNode = nodeBase.extend({

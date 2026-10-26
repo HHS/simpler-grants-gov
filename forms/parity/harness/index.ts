@@ -1,4 +1,4 @@
-import { choiceValueProblems } from "../sourceBindings.ts";
+import { sourceCoordinates, choiceValueProblems } from "../sourceBindings.ts";
 /**
  * The harness's entry point: `checkForm` runs every comparison for one form.
  *
@@ -15,7 +15,12 @@ import {
 } from "./compare.ts";
 import { datFields } from "./flatten/dat.ts";
 import { indexLeaves, jsonSchemaFields } from "./flatten/jsonSchema.ts";
-import { planFields, walkFields, type Plan } from "./flatten/plan.ts";
+import {
+  externalForms,
+  planFields,
+  walkFields,
+  type Plan,
+} from "./flatten/plan.ts";
 import { uiSchemaFields } from "./flatten/uiSchema.ts";
 import { xsdFields } from "./flatten/xsd.ts";
 import { link, xmlTransformFields } from "./flatten/xmlTransform.ts";
@@ -162,15 +167,37 @@ function joinThroughPlan(
   const toXsd = diff.xsd?.renamed ?? {};
   const left: Fields = new Map();
   const right: Fields = new Map();
-  for (const { field } of walkFields(plan.children)) {
-    if (!field.json_path || !field.xml_path) continue;
+  for (const { field, maxItems } of walkFields(plan.children)) {
+    if (!field.json_path) continue;
+    const coordinates = sourceCoordinates(field, maxItems, "xsd");
+    if (!coordinates.length) continue;
     const schemaPath = toSchema[field.json_path]?.to ?? field.json_path;
-    const xmlPath = fromXmlPath(field.xml_path);
-    const xsdField = xsd.get(toXsd[xmlPath]?.to ?? xmlPath);
+    const sources = coordinates.map((c) =>
+      xsd.get(toXsd[c.path]?.to ?? c.path),
+    );
+    const xsdField = sources[0];
+    if (
+      coordinates.length > 1 &&
+      sources.some(
+        (source) =>
+          !source ||
+          JSON.stringify({ ...source.rules, maxOccurs: undefined }) !==
+            JSON.stringify({ ...xsdField?.rules, maxOccurs: undefined }) ||
+          source.required !== xsdField?.required,
+      )
+    )
+      throw new Error(`Finite XML slots disagree at ${field.json_path}`);
+    const combined =
+      xsdField && coordinates.length > 1
+        ? {
+            ...xsdField,
+            rules: { ...xsdField.rules, maxOccurs: coordinates.length },
+          }
+        : xsdField;
     const schemaField = schema.get(schemaPath);
     if (!xsdField || !schemaField) continue;
     left.set(schemaPath, schemaField);
-    right.set(schemaPath, xsdField);
+    right.set(schemaPath, combined!);
   }
   return { left, right };
 }
@@ -254,6 +281,7 @@ export async function formPairs(
     required(plan.xsd_url, `xsd_url in plan ${diff.slug}`),
     (url) => readSource(url).toString("utf8"),
     plan.xsd_root,
+    { externalForms: externalForms(plan) },
   );
   for (const { field } of walkFields(plan.children))
     planProblems.push(

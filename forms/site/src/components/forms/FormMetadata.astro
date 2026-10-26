@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import { TOTAL_APPS } from "../../content.config";
 import { NO_FAMILY } from "../../lib/families";
+import { externalForms } from "@parity/harness/flatten/plan.ts";
 import { countFields } from "../../lib/planTree";
 
 interface Props {
@@ -12,6 +13,7 @@ const { form } = Astro.props;
 const d = form.data;
 const pct = d.apps_count ? ((d.apps_count / TOTAL_APPS) * 100).toFixed(2) : "0.00";
 const fieldCount = countFields(d.children);
+const externalCount = externalForms(d).length;
 const hasLinks = d.fid_url || d.pdf_url || d.xsd_url || d.dat_url;
 ---
 
@@ -53,7 +55,7 @@ const hasLinks = d.fid_url || d.pdf_url || d.xsd_url || d.dat_url;
       {fieldCount > 0 && (
         <>
           <dt>Fields</dt>
-          <dd>{fieldCount}</dd>
+          <dd>{externalCount ? `${fieldCount - externalCount} applicant answer; ${externalCount} external document` : fieldCount}</dd>
         </>
       )}
       {d.widgets && d.widgets.length > 0 && (

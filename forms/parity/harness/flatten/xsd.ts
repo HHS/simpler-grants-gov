@@ -147,9 +147,31 @@ const times = (outer: MaxOccurs, own: string | undefined): MaxOccurs =>
       ? "unbounded"
       : outer * Number(own);
 
+/** One explicitly declared imported global-element reference, not an opaque arbitrary path. */
+export interface ExternalFormReference {
+  path: string;
+  xsd_url: string;
+  namespace: string;
+  element: string;
+  min_occurs: number;
+  max_occurs: MaxOccurs;
+}
+export interface ExternalFormObservation extends ExternalFormReference {
+  required: boolean;
+  maxOccurs: MaxOccurs;
+  payload_qualification: "not_compared";
+}
+interface ProjectionOptions {
+  externalForms?: ExternalFormReference[];
+  observations?: ExternalFormObservation[];
+}
+
 class Walker {
   readonly fields: Fields = new Map();
   private readonly schemas: Schemas;
+  private readonly external: Map<string, ExternalFormReference>;
+  private readonly observed = new Set<string>();
+  private readonly observations: ExternalFormObservation[];
   /** How many times the element being walked can appear in one form. */
   private repeats: MaxOccurs = 1;
   private readonly activeGroups = new Set<XNode>();
@@ -167,8 +189,38 @@ class Walker {
     }
   }
 
-  constructor(schemas: Schemas) {
+  constructor(schemas: Schemas, options: ProjectionOptions = {}) {
     this.schemas = schemas;
+    const declared = options.externalForms ?? [];
+    if (
+      declared.some(
+        (entry, i) =>
+          !entry.path ||
+          !entry.xsd_url ||
+          !entry.namespace ||
+          !entry.element ||
+          declared.some(
+            (other, j) =>
+              i !== j &&
+              (entry.path === other.path ||
+                entry.path.startsWith(other.path + "/")),
+          ),
+      )
+    )
+      throw new Error(
+        "External form references must have unique non-overlapping paths and complete identities",
+      );
+    this.external = new Map(declared.map((entry) => [entry.path, entry]));
+    this.observations = options.observations ?? [];
+  }
+
+  finish() {
+    for (const path of this.external.keys())
+      if (!this.observed.has(path))
+        throw new Error(
+          `External form is not a resolved global element reference at ${path}`,
+        );
+    return this.fields;
   }
 
   /** Rules of a simple type, its base's first. `name` is the type's own, if it is named. */
@@ -242,6 +294,42 @@ class Walker {
     if (declared.ref) {
       const global = this.schemas.find("elements", declared.ref, schema);
       if (!global) throw new Error(`unknown element ${declared.ref}`);
+      const path = parent ? `${parent}/${global.name}` : global.name;
+      const external = this.external.get(path);
+      if (external) {
+        if (this.observed.has(path))
+          throw new Error(
+            `External form source reference is ambiguous at ${path}`,
+          );
+        if (
+          global.schema.url !== external.xsd_url ||
+          global.schema.targetNamespace !== external.namespace ||
+          global.name !== external.element ||
+          Number(declared.minOccurs ?? 1) !== external.min_occurs ||
+          (declared.maxOccurs === "unbounded"
+            ? "unbounded"
+            : Number(declared.maxOccurs ?? 1)) !== external.max_occurs
+        )
+          throw new Error(`External form source identity differs at ${path}`);
+        this.observed.add(path);
+        const own = required && Number(declared.minOccurs ?? 1) > 0;
+        this.repeating(declared.maxOccurs, () => {
+          this.observations.push({
+            ...external,
+            required: own,
+            maxOccurs: this.repeats,
+            payload_qualification: "not_compared",
+          });
+          const outer = this.namespace;
+          this.namespace = global.schema.targetNamespace;
+          try {
+            this.leaf(path, own, {});
+          } finally {
+            this.namespace = outer;
+          }
+        });
+        return;
+      }
       const merged = {
         ...global.node,
         ":@": { ...attrs(global.node), ...declared, ref: undefined },
@@ -439,6 +527,7 @@ export function xsdFields(
   url: string,
   read: (url: string) => string,
   rootElement?: string,
+  options: ProjectionOptions = {},
 ): Fields {
   const schemas = new Schemas(read);
   const schema = schemas.load(url);
@@ -449,7 +538,7 @@ export function xsdFields(
     throw new Error(
       `expected one selected root element in ${url}, found ${roots.length}`,
     );
-  const walker = new Walker(schemas);
+  const walker = new Walker(schemas, options);
   const complex = childNamed(roots[0], "complexType");
   if (complex) walker.complex(complex, schema, "", true);
   else {
@@ -459,5 +548,5 @@ export function xsdFields(
       throw new Error(`root element of ${url} has no complex type`);
     walker.complex(declared.node, declared.schema, "", true);
   }
-  return walker.fields;
+  return walker.finish();
 }

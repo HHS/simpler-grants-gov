@@ -31,6 +31,9 @@ export interface PlanField extends PlanNodeBase {
   required: boolean | string;
   constraints?: string;
   source_bindings?: SourceBindings;
+  type?: string;
+  post_populated?: string;
+  external_form?: { xsd_url: string; namespace: string; element: string };
 }
 
 export interface PlanSection<
@@ -128,9 +131,13 @@ export function planFields(
   }[] = [];
   const source =
     key === "dat_field" ? "dat" : key === "xml_path" ? "xsd" : undefined;
-  const explicit =
-    key === "dat_field" &&
-    walkFields(plan.children).some(({ field }) => field.source_bindings);
+  const explicit = Boolean(
+    source &&
+    walkFields(plan.children).some(({ field }) => {
+      const b = field.source_bindings;
+      return b && (source === "dat" ? b.dat : "at" in b && b.xml);
+    }),
+  );
   walkFields(plan.children).forEach(({ field, maxItems }, order) => {
     const coordinates = source
       ? sourceCoordinates(field, maxItems, source, problems)
@@ -180,4 +187,39 @@ export function planFields(
       fields.set(row.id, explicit ? { ...row.field, order: index } : row.field);
   });
   return fields;
+}
+
+/** Explicit non-answer references; never infer a boundary from a namespace or field name. */
+export function externalForms(plan: Plan) {
+  return walkFields(plan.children).flatMap(({ field }) => {
+    if (!field.external_form && field.type !== "External form") return [];
+    if (
+      field.type !== "External form" ||
+      !field.external_form ||
+      !field.xml_path?.trim() ||
+      !field.post_populated?.trim() ||
+      ["json_path", "dat_field", "widget", "source_bindings"].some((key) =>
+        Object.hasOwn(field, key),
+      )
+    )
+      throw new Error(
+        "External form requires source identity, XML path and explanation without applicant answer coordinates",
+      );
+    if (
+      !Number.isSafeInteger(field.min_items) ||
+      field.min_items! < 0 ||
+      field.max_items === undefined
+    )
+      throw new Error(
+        "External form requires explicit source reference min/max occurrences",
+      );
+    return [
+      {
+        path: fromXmlPath(field.xml_path),
+        ...field.external_form,
+        min_occurs: field.min_items!,
+        max_occurs: field.max_items,
+      },
+    ];
+  });
 }

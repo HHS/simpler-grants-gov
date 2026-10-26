@@ -1237,6 +1237,7 @@ details[open] > .group-header::before {
 // Plan notes, shown under the field tree
 .plan-notes {
   @include u-font("sans", "xs");
+  overflow-wrap: anywhere;
 
   li + li {
     margin-top: units(1);

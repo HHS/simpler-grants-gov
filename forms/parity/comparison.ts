@@ -697,41 +697,52 @@ function buildBoundField<F extends PlanField>(
   labels: Record<Source, Map<string, string>>,
 ): FieldComparison<F> {
   if (!field.source_bindings) return buildField(field, fallback, sides, labels);
-  const coordinates = sourceCoordinates(field, maxItems, "dat");
-  const copies = coordinates.map((c) =>
-    buildField({ ...field, dat_field: c.path }, fallback, sides, labels),
-  );
-  const base = copies[0] ?? buildField(field, fallback, sides, labels);
-  const rows = base.rows.map((row) => {
-    const cells = copies
-      .map((copy, index) => ({
-        path: coordinates[index].path,
-        cell: copy.rows.find((r) => r.attribute === row.attribute)?.cells.dat,
-      }))
-      .filter((x): x is { path: string; cell: Cell } => Boolean(x.cell));
-    if (!cells.length) return row;
-    const ranks = [...RANK, "notCompared" as const];
-    const status = ranks.find((rank) =>
-      cells.some((x) => x.cell.status === rank),
-    )!;
-    const values = [...new Set(cells.map((x) => x.cell.value))];
-    const value =
-      values.length === 1 && row.attribute !== "matchedBy"
-        ? values[0]
-        : cells
-            .map((x) => `${x.path}: ${x.cell.value ?? "not stated"}`)
-            .join(" | ");
-    const reason = [
-      ...new Set(cells.flatMap((x) => (x.cell.reason ? [x.cell.reason] : []))),
-    ].join(" ");
-    return {
-      ...row,
-      cells: {
-        ...row.cells,
-        dat: { status, value, ...(reason ? { reason } : {}) },
-      },
-    };
-  });
+  const base = buildField(field, fallback, sides, labels);
+  let rows = base.rows;
+  for (const source of ["dat", "xsd"] as const) {
+    const coordinates = sourceCoordinates(field, maxItems, source);
+    const copies = coordinates.map((c) =>
+      buildField(
+        { ...field, [source === "dat" ? "dat_field" : "xml_path"]: c.path },
+        fallback,
+        sides,
+        labels,
+      ),
+    );
+    rows = rows.map((row) => {
+      const cells = copies
+        .map((copy, index) => ({
+          path: coordinates[index].path,
+          cell: copy.rows.find((r) => r.attribute === row.attribute)?.cells[
+            source
+          ],
+        }))
+        .filter((x): x is { path: string; cell: Cell } => Boolean(x.cell));
+      if (!cells.length) return row;
+      const status = [...RANK, "notCompared" as const].find((rank) =>
+        cells.some((x) => x.cell.status === rank),
+      )!;
+      const values = [...new Set(cells.map((x) => x.cell.value))];
+      const value =
+        values.length === 1 && row.attribute !== "matchedBy"
+          ? values[0]
+          : cells
+              .map((x) => `${x.path}: ${x.cell.value ?? "not stated"}`)
+              .join(" | ");
+      const reason = [
+        ...new Set(
+          cells.flatMap((x) => (x.cell.reason ? [x.cell.reason] : [])),
+        ),
+      ].join(" ");
+      return {
+        ...row,
+        cells: {
+          ...row.cells,
+          [source]: { status, value, ...(reason ? { reason } : {}) },
+        },
+      };
+    });
+  }
   const choiceProblems = choiceValueProblems(
     field,
     field.xml_path
@@ -799,10 +810,12 @@ export async function compareForm<F extends PlanField>(
       new Map(
         all.flatMap((f) => {
           const key = KEYS[source].key(f);
-          return source === "dat" && f.source_bindings
-            ? sourceCoordinates(f, maxItemsByField.get(f)!, "dat").map(
-                (c) => [c.path, f.label] as const,
-              )
+          return source !== "form" && f.source_bindings
+            ? sourceCoordinates(
+                f,
+                maxItemsByField.get(f)!,
+                source === "dat" ? "dat" : "xsd",
+              ).map((c) => [c.path, f.label] as const)
             : key
               ? [[key, f.label] as const]
               : [];
@@ -813,16 +826,18 @@ export async function compareForm<F extends PlanField>(
 
   const fields: FieldComparison<F>[] = [];
   const compare = (nodes: PlanNode<F>[], at: number[]): ComparisonNode[] =>
-    nodes.map((node, index) => {
+    nodes.flatMap((node, index): ComparisonNode[] => {
       const position = [...at, index];
       if (node.kind === "section") {
         const { children, ...section } = node;
-        return {
-          kind: "section",
-          section,
-          children: compare(children, position),
-        };
+        const compared = compare(children, position);
+        return compared.length || children.length === 0
+          ? [{ kind: "section", section, children: compared }]
+          : [];
       }
+      // The page presents verified external references separately, with payload "not compared".
+      // They must not earn an ordinary applicant-field "matches every source" badge.
+      if (node.type === "External form") return [];
       const field = buildBoundField(
         node,
         maxItemsByField.get(node)!,
@@ -831,7 +846,7 @@ export async function compareForm<F extends PlanField>(
         labels,
       );
       fields.push(field);
-      return { kind: "field", id: field.id };
+      return [{ kind: "field", id: field.id }];
     });
   const children = compare(plan.children ?? [], []);
   return { children, fields };
