@@ -27,7 +27,7 @@ describe("user profile form action", () => {
     profileFormData.append("firstName", "populated");
     const result = await userProfileAction(null, profileFormData);
     expect(result.validationErrors).toEqual({
-      lastName: ["Expected string, received null"],
+      lastName: ["Invalid input: expected string, received null"],
     });
   });
   it("returns validation warning if first name is missing", async () => {
@@ -36,7 +36,7 @@ describe("user profile form action", () => {
     profileFormData.append("lastName", "populated");
     const result = await userProfileAction(null, profileFormData);
     expect(result.validationErrors).toEqual({
-      firstName: ["Expected string, received null"],
+      firstName: ["Invalid input: expected string, received null"],
     });
   });
   it("returns error if not logged in", async () => {

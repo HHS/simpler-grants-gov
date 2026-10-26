@@ -17,6 +17,7 @@
 
 * [Readability Calculator preparation and short verification checklist](./nofo-readability-verification-kit.md)
 * [Private NOFO monitoring email routing](./nofo-private-alert-email.md)
+* [Read-only Readability Calculator inspection in infra-dev](./nofo-readability-inspection.md)
 
 * [NOFO PDF upload availability assessment and deferred test plan](./nofo-pdf-upload-assessment.md)
 
