@@ -262,6 +262,16 @@ export async function clickSearchNavLink(page: Page) {
   await page.click("nav >> text=Search");
 }
 
+// Matches the "N Opportunities" count heading. :visible + hasText scope it to the rendered
+// count; the keyed Suspense in SearchResults.tsx can leave two copies in the DOM briefly
+// after a navigation/sort/filter change, which made a bare `h3` locator throw a
+// strict mode violation (flaky on Chrome and Mobile chrome).
+const RESULTS_COUNT_HEADING =
+  "div[data-testid='search-results-controls'] h3:visible";
+
+const parseResultsCount = (text: string): number =>
+  parseInt(text.replace(/\D/g, ""), 10);
+
 export async function getNumberOfOpportunitySearchResults(page: Page) {
   await waitForLoaderToBeHidden(page);
   // The results table has its own Suspense boundary (keyed on searchParams, see SearchResults.tsx)
@@ -269,10 +279,33 @@ export async function getNumberOfOpportunitySearchResults(page: Page) {
   await page
     .locator("text=Loading the table")
     .waitFor({ state: "hidden", timeout: 30000 });
-  const opportunitiesText = await page
-    .locator("div[data-testid='search-results-controls'] h3")
-    .textContent();
-  return opportunitiesText
-    ? parseInt(opportunitiesText.replace(/\D/g, ""), 10)
-    : 0;
+
+  const headings = page
+    .locator(RESULTS_COUNT_HEADING)
+    .filter({ hasText: /\d[\d,]*\s+Opportunit/i });
+
+  // Poll until all visible count headings agree on a single value. Copies that coexist
+  // during a re-render show the same number or settle to one, so this returns the settled
+  // count and never reads a stale pre-transition value.
+  let settled = 0;
+  await expect
+    .poll(
+      async () => {
+        const texts = await headings.allTextContents();
+        const counts = new Set(
+          texts.map(parseResultsCount).filter((n) => !Number.isNaN(n)),
+        );
+        if (counts.size !== 1) return false;
+        settled = [...counts][0];
+        return true;
+      },
+      {
+        message: "Opportunity count heading did not settle on a single value",
+        timeout: targetEnv !== "local" ? 60000 : 30000,
+        intervals: [100, 250, 500, 1000],
+      },
+    )
+    .toBe(true);
+
+  return settled;
 }
