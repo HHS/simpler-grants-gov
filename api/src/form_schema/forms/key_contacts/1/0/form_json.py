@@ -52,7 +52,7 @@ FORM_JSON_SCHEMA = {
                     "description": "Enter the contact's organizational affiliation.",
                 },
                 "address": {
-                    # Use the full address (with county/province) per the epic:
+                    # Use the full address (with county/province)
                     # the Province field is shown at all times on this form.
                     "allOf": [
                         {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
