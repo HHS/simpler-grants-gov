@@ -15,6 +15,8 @@
 
 ## Testing
 
+* [Read-only Readability Calculator inspection in infra-dev](./nofo-readability-inspection.md)
+
 * [NOFO PDF upload availability assessment and deferred test plan](./nofo-pdf-upload-assessment.md)
 
 * [Terraform unit testing](./terraform-unit-testing.md)
