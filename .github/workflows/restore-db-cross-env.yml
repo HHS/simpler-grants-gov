@@ -14,13 +14,10 @@ run-name: Seed ${{ inputs.target_environment }} DB from ${{ inputs.source_enviro
 #
 #   restore-db-cross-env.yml      (this file)
 #     api-infra-staging (317380566348)
-#       -> infra-sgg2 / infra-sgg3 / infra-sgg1 / infra-dev
-#          (all in 061664787759)
+#       -> infra-sgg2 / infra-sgg3 / infra-sgg1 / infra-dev  (061664787759)
+#       -> grantor1                                          (315341936575)
 #     Different accounts, so an automated snapshot cannot be used at all and
 #     two sets of credentials are required.
-#
-#     All four targets share one account, so a single KMS grant on
-#     infra-staging's key covers every one of them.
 #
 # WHY CROSS-ACCOUNT NEEDS MORE THAN A SECOND CREDENTIALS STEP
 #
@@ -38,7 +35,7 @@ run-name: Seed ${{ inputs.target_environment }} DB from ${{ inputs.source_enviro
 #
 # Allowed directions are pinned by that Terraform config, not by this workflow:
 # a restore only works if the source cluster's key policy already names the
-# target account. Today that is infra-staging -> infra-dev.
+# target account. Today that is infra-staging -> the targets listed above.
 
 on:
   workflow_dispatch:
