@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - scripts/create_nofo_alert_parameter.py
+      - scripts/nofo_alert_setup_requirements.txt
       - scripts/nofo_alert_setup_session_policy.json
       - scripts/tests/test_nofo_alert_setup.py
       - .github/workflows/setup-nofo-alert-email.yml
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - scripts/create_nofo_alert_parameter.py
+      - scripts/nofo_alert_setup_requirements.txt
       - scripts/nofo_alert_setup_session_policy.json
       - scripts/tests/test_nofo_alert_setup.py
       - .github/workflows/setup-nofo-alert-email.yml
@@ -30,5 +32,5 @@ jobs:
           persist-credentials: false
       - name: Run offline privacy and scope checks
         run: |
-          aws --version
+          python3 -m pip install -r scripts/nofo_alert_setup_requirements.txt
           python3 -m unittest discover -s scripts/tests -p test_nofo_alert_setup.py -v

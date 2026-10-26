@@ -23,6 +23,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Install pinned AWS SDK
+        run: python3 -m pip install -r scripts/nofo_alert_setup_requirements.txt
       - name: Validate private input before authentication
         env:
           NOFO_INFRA_DEV_ALERT_EMAIL: ${{ secrets.NOFO_INFRA_DEV_ALERT_EMAIL }}
