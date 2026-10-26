@@ -1,5 +1,4 @@
 # Overview
-
 This folder contains files for processing a JSON rule schema.
 
 These rule schemas are run in addition to our JSON Schema for a user's
@@ -7,9 +6,8 @@ JSON response to a form. We put logic here that either cannot go into
 JSON Schema or would be more confusing to
 
 This schema can handle:
-
-- Pre-populating and post-populating fields in a users response
-- Running validation rules that couldn't be done in JSON Schema
+* Pre-populating and post-populating fields in a users response
+* Running validation rules that couldn't be done in JSON Schema
 
 Schemas are defined as JSON in the same shape as the JSON response,
 with rules defined at the value level.
@@ -100,23 +98,23 @@ Post-population occurs when a user submits their application.
 For pre-population, this rule group is `gg_pre_population` with the following
 rules currently implemented:
 
-- `opportunity_number` - from the opportunity
-- `opportunity_title` - from the opportunity
-- `agency_name` - from the agency connected to the opportunity
-- `uei` - the UEI from the application's organization, `00000000INDV` if the application is from an individual
-- `assistance_listing_number` - from the competition
-- `assistance_listing_program_title` - from the competition
-- `public_competition_id` - from the competition
-- `competition_title` - from the competition
-- `sum_monetary` - calculated based on other fields in the JSON, see Monetary Summation section below for further details
-- `multiply_by_percentage` - a monetary amount multiplied by a whole-number percentage, see Multiply by Percentage section below for further details
-- `subtract_monetary` - calculated based on other fields in the JSON, see Monetary Subtraction section below for further details
+* `opportunity_number` - from the opportunity
+* `opportunity_title` - from the opportunity
+* `agency_name` - from the agency connected to the opportunity
+* `uei` - the UEI from the application's organization, `00000000INDV` if the application is from an individual
+* `assistance_listing_number` - from the competition
+* `assistance_listing_program_title` - from the competition
+* `public_competition_id` - from the competition
+* `competition_title` - from the competition
+* `sum_monetary` - calculated based on other fields in the JSON, see Monetary Summation section below for further details
+* `multiply_by_percentage` - a monetary amount multiplied by a whole-number percentage, see Multiply by Percentage section below for further details
+* `subtract_monetary` - calculated based on other fields in the JSON, see Monetary Subtraction section below for further details
 
 For post-population, this rule group is `gg_post_population` with the following
 rules currently implemented:
 
-- `current_date` - The current date in the US EST timezone
-- `signature` - The name of the creator of the application - NOTE - currently defaults to a random application user's email due to not having names in our system yet.
+* `current_date` - The current date in the US EST timezone
+* `signature` - The name of the creator of the application - NOTE - currently defaults to a random application user's email due to not having names in our system yet.
 
 ## Null Population
 
@@ -127,8 +125,8 @@ if there is no value (eg. We want `{}` over `{"my_field": null}`). However, if t
 returns null, we have to do something. For that reason, all pre/post population rules
 can take in an optional `null_population` rule with the following values:
 
-- `exclude_value` (the default if no rule configured) - This will not add the value to the JSON schema AND remove any existing values.
-- `set_as_null` - This will set the value as null, behaving the same as any other population
+* `exclude_value` (the default if no rule configured) - This will not add the value to the JSON schema AND remove any existing values.
+* `set_as_null` - This will set the value as null, behaving the same as any other population
 
 The default assumes we don't want null values in our JSON schema.
 
@@ -163,8 +161,8 @@ For details on how the fields parameter works, see the Fields section below.
 
 A few important details about our summation logic:
 
-- We will always populate the configured field, if no fields fetched are populated, "0.00" will be populated.
-- Any null-field is treated as "0.00".
+* We will always populate the configured field, if no fields fetched are populated, "0.00" will be populated.
+* Any null-field is treated as "0.00".
 
 NOTE: Only monetary summation is supported right now. All math done by this summing
 logic assumes the input values are strings of the format "0.00". If we need to support
@@ -197,8 +195,8 @@ below (single paths are resolved the same way as `sum_monetary`'s fields).
 
 A few important details:
 
-- A missing `amount` or `percentage` is treated as zero, producing `"0.00"`.
-- Invalid data (a non-string amount, a non-integer percentage, or an unparseable
+* A missing `amount` or `percentage` is treated as zero, producing `"0.00"`.
+* Invalid data (a non-string amount, a non-integer percentage, or an unparseable
   value) raises a validation error rather than populating a bogus value.
 
 ## Monetary Subtraction
@@ -239,9 +237,9 @@ rules use that can vary.
 These are defined as the full path from the root of the object to whatever
 field you want to fetch. All of the following would be absolute fields:
 
-- `x.y.z`
-- `my_array[*].a.b`
-- `a[*].b[*].c[*].d`
+* `x.y.z`
+* `my_array[*].a.b`
+* `a[*].b[*].c[*].d`
 
 Absolute fields work as you expect, and should handle most simple cases.
 
@@ -286,9 +284,9 @@ Specifying it with relative paths lets us make each array item calculate
 its own separate sum. Without relative paths, we wouldn't have a good way
 to specify what amounts to:
 
-- `my_array[0].my_nested_obj.x` + `my_array[0].my_nested_obj.y`
-- `my_array[1].my_nested_obj.x` + `my_array[1].my_nested_obj.y`
-- `my_array[2].my_nested_obj.x` + `my_array[2].my_nested_obj.y`
+* `my_array[0].my_nested_obj.x` + `my_array[0].my_nested_obj.y`
+* `my_array[1].my_nested_obj.x` + `my_array[1].my_nested_obj.y`
+* `my_array[2].my_nested_obj.x` + `my_array[2].my_nested_obj.y`
 
 # Validation
 
@@ -304,7 +302,7 @@ we'll add it to a list of validation issues.
 For validation, this rule group is `gg_validation` with the following
 rules currently implemented:
 
-- `attachment` - verifies that the field representing an attachment ID corresponds to an attachment ID on the application itself.
+* `attachment` - verifies that the field representing an attachment ID corresponds to an attachment ID on the application itself.
 
 # Future Work
 
