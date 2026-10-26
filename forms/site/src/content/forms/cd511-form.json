@@ -1,12 +1,285 @@
 {
   "title": "CD511 Form",
   "slug": "cd511-form",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["SF-424", "R&R", "SF-424 Short"],
   "category": "Key Personnel & Contact Forms",
   "apps_count": 9199,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/276",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/CD511-V1.1_F276.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/CD511-V1.1_F276.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/CD511-V1.1_F276.xls",
+  "sgg_form_id": "cd511",
+  "description": "Department of Commerce certification regarding lobbying. Applicant and contact details follow existing SGG answer names; certification text and submission-owned signature/date remain explicit.",
+  "widgets": ["TextWidget", "FieldsetWidget"],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Certification regarding lobbying",
+      "help_text": "Applicants should also review the instructions for certification included in the regulations before completing this form. Signature on this form provides for compliance with certification requirements under 15 CFR Part 28, 'New Restrictions on Lobbying.' The certifications shall be treated as a material representation of fact upon which reliance will be placed when the Department of Commerce determines to award the covered transaction, grant, or cooperative agreement.\n\nLOBBYING\n\nAs required by Section 1352, Title 31 of the U.S. Code, and implemented at 15 CFR Part 28, for persons entering into a grant, cooperative agreement or contract over $100,000 or a loan or loan guarantee over $150,000 as defined at 15 CFR Part 28, Sections 28.105 and 28.110, the applicant certifies that to the best of his or her knowledge and belief, that:\n\n(1) No Federal appropriated funds have been paid or will be paid, by or on behalf of the undersigned, to any person for influencing or attempting to influence an officer or employee of any agency, a Member of Congress in connection with the awarding of any Federal contract, the making of any Federal grant, the making of any Federal loan, the entering into of any cooperative agreement, and the extension, continuation, renewal, amendment, or modification of any Federal contract, grant, loan, or cooperative agreement.\n\n(2) If any funds other than Federal appropriated funds have been paid or will be paid to any person for influencing or attempting to influence an officer or employee of any agency, a Member of Congress, an officer or employee of Congress, or an employee of a member of Congress in connection with this Federal contract, grant, loan, or cooperative agreement, the undersigned shall complete and submit Standard Form-LLL, 'Disclosure Form to Report Lobbying.' in accordance with its instructions.\n\n(3) The undersigned shall require that the language of this certification be included in the award documents for all subawards at all tiers (including subcontracts, subgrants, and contracts under grants, loans, and cooperative agreements) and that all subrecipients shall certify and disclose accordingly.\n\nThis certification is a material representation of fact upon which reliance was placed when this transaction was made or entered into. Submission of this certification is a prerequisite for making or entering into this transaction imposed by section 1352, title 31, U.S. Code. Any person who fails to file the required certification shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure occurring on or before October 23, 1996, and of not less than $11,000 and not more than $110,000 for each such failure occurring after October 23, 1996.\n\nStatement for Loan Guarantees and Loan Insurance\n\nThe undersigned states, to the best of his or her knowledge and belief, that:\n\nIn any funds have been paid or will be paid to any person for influencing or attempting to influence an officer or employee of any agency, a Member of Congress, an officer or employee of Congress, or an employee of a Member of Congress in connection with this commitment providing for the United States to insure or guarantee a loan, the undersigned shall complete and submit Standard Form-LLL, 'Disclosure Form to Report Lobbying,' in accordance with its instructions.\n\nSubmission of this statement is a prerequisite for making or entering into this transaction imposed by section 1352, title 31, U.S. Code. Any person who fails to file the required statement shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure occurring on or before October 23, 1996, and of not less than $11,000 and not more than $110,000 for each such failure occurring after October 23, 1996.\n\nAs the duly authorized representative of the applicant, I hereby certify that the applicant will comply with the above applicable certification.",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Applicant information",
+          "children": [
+            {
+              "kind": "field",
+              "label": "NAME OF APPLICANT",
+              "dat_field": "02-01",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter legal name of applicant, which will undertake the assistance activity.",
+              "json_path": "applicant_name",
+              "xml_path": "OrganizationName",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "DAT 02-01: SF424-Block8-LEGAL_NAME or SF424RR-block5-Legal Name or SF424Short-block5-Legal Name. User is unable to edit field. Existing SGG currently leaves these editable and does not pre-populate; policy requires review."
+            },
+            {
+              "kind": "field",
+              "label": "AWARD NUMBER",
+              "dat_field": "02-02",
+              "required": "Conditional (when project_name is absent or blank)",
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the project award number.",
+              "json_path": "award_number",
+              "xml_path": "AwardNumber",
+              "constraints": "minLength 1, maxLength 25"
+            },
+            {
+              "kind": "field",
+              "label": "PROJECT NAME",
+              "dat_field": "02-03",
+              "required": "Conditional (when award_number is absent or blank)",
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the name of the project.",
+              "json_path": "project_name",
+              "xml_path": "ProjectName",
+              "constraints": "minLength 1, maxLength 60"
+            }
+          ],
+          "help_text": "Enter the applicant and contact details. Provide an award number, a project name, or both."
+        },
+        {
+          "kind": "section",
+          "label": "Contact person",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "02-04",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Select the Prefix from the provided list or enter a new Prefix not provided on the list.",
+              "json_path": "contact_person.prefix",
+              "xml_path": "ContactName/PrefixName",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "DAT 02-04: SF424-block21-prefix or SF424RR-block19-prefix or SF424Short-block9-prefix. User is unable to edit field. Existing SGG currently leaves these editable and does not pre-populate; policy requires review."
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "02-05",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the First Name. This field is required.",
+              "json_path": "contact_person.first_name",
+              "xml_path": "ContactName/FirstName",
+              "constraints": "minLength 1, maxLength 35",
+              "pre_populated": "DAT 02-05: SF424-block21-first name or SF424RR-block19-first name or SF424Short-block9-first name. User is unable to edit field. Existing SGG currently leaves these editable and does not pre-populate; policy requires review."
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "02-06",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the Middle Name.",
+              "json_path": "contact_person.middle_name",
+              "xml_path": "ContactName/MiddleName",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "DAT 02-06: SF424-block21-middle name or SF424RR-block19-middle name or SF424Short-block9-middle name. User is unable to edit field. Existing SGG currently leaves these editable and does not pre-populate; policy requires review."
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "02-07",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the Last Name. This field is required.",
+              "json_path": "contact_person.last_name",
+              "xml_path": "ContactName/LastName",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "DAT 02-07: SF424-block21-last name or SF424RR-block19-last name or SF424Short-block9-last name. User is unable to edit field. Existing SGG currently leaves these editable and does not pre-populate; policy requires review."
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "02-08",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Select the Suffix from the provided list or enter a new Suffix not provided on the list.",
+              "json_path": "contact_person.suffix",
+              "xml_path": "ContactName/SuffixName",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "DAT 02-08: SF424-block21-suffix or SF424RR-block19-suffix or SF424Short-block9-suffix. User is unable to edit field. Existing SGG currently leaves these editable and does not pre-populate; policy requires review."
+            },
+            {
+              "kind": "field",
+              "label": "Title",
+              "dat_field": "02-09",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter in the Position Title.",
+              "json_path": "contact_person_title",
+              "xml_path": "Title",
+              "constraints": "minLength 1, maxLength 45",
+              "pre_populated": "DAT 02-09: SF424-block21-title or SF424RR-block19-position/title or SF424Short-block9-title. User is unable to edit field. Existing SGG currently leaves these editable and does not pre-populate; policy requires review."
+            }
+          ]
+        },
+        {
+          "kind": "section",
+          "label": "Signature and date",
+          "help_text": "These values are populated by the application service at submission.",
+          "children": [
+            {
+              "kind": "field",
+              "label": "SIGNATURE",
+              "dat_field": "02-10",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "It is the organization's responsibility to assure that only properly authorized individuals sign in this capacity and/or submit the application to Grants.gov. If this application is submitted through Grants.gov leave blank. If a hard copy is submitted, the AOR must sign this block.",
+              "json_path": "signature",
+              "xml_path": "Signature",
+              "constraints": "minLength 1, maxLength 144",
+              "post_populated": "Application service supplies authorized submitter signature on submission; not an editable applicant answer."
+            },
+            {
+              "kind": "field",
+              "label": "DATE",
+              "dat_field": "02-11",
+              "required": true,
+              "type": "Date input",
+              "widget": "TextWidget",
+              "help_text": "If this application is submitted through Grants.gov, the system will generate this date. If submitting a hard copy, enter the date the AOR signed the application.",
+              "json_path": "submitted_date",
+              "xml_path": "SubmittedDate",
+              "constraints": "format date",
+              "post_populated": "Application service supplies submission date on submission; not an editable applicant answer."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The source has no OMB control number or expiration date. Existing SGG agrees; none is invented.",
+    "Award number or project name is required; both are allowed. Existing SGG tests this condition. Optional supplied strings use existing SGG nonempty values; DAT/XSD differences are pinned for review.",
+    "Prefix/suffix DAT lists are suggestions with free entry, not closed enums. Full certification wording is retained from the DAT.",
+    "Signature and submission date are required on the transmitted form and populated at submission. Examples separate those service-owned values from the applicant draft.",
+    "Definition profile: exact installed SGG JSON paths, editable existing-SGG applicant-draft fallback, and optional readonly service-owned signature/date. The DAT completion requiredness remains in this requirements plan; copying/signing and any policy decision are not performed or accepted here.",
+    "Legal display text is reconstructed from individually identified original DAT label rows and visually checked against the complete original PDF. No legal clause is shared with another form or modernized.",
+    "Form-local XML mapping uses only maintained Mapping.from, HumanName and literal FormVersion support. Full source-XML validation requires service signature/date; a valid unsigned draft is not expected to be source-XSD-valid. Actual application save/reload/populate/sign/submit remains an integration gate.",
+    "Applicant guidance makes the existing DAT 02-02/02-03 business rule explicit: provide an award number, a project name, or both. These remain separate answers; the existing OR rule and supplied-empty constraints are unchanged."
+  ],
+  "risks": [
+    "DAT marks applicant/name/title forward-populated and noneditable, whereas existing SGG explicitly tests no pre-population. Decide which population policy to preserve before implementation; this plan does not silently claim parity.",
+    "The XSD allows an empty ProjectName, while existing SGG rejects supplied empty strings. Proposed minLength1 follows SGG; that exact source-policy difference is pinned for review. DAT optional-field minimum characters are not treated as executable string constraints by the maintained comparison.",
+    "The at-least-one reference rule is an OR, not XOR. Actual browser/API/rule/XML checks and source-policy review remain distinct; no plan/schema test authenticates copying or submission."
+  ],
+  "examples": [
+    {
+      "label": "Project-name applicant draft",
+      "description": "One reference is enough. Signature/date are absent because the applicant draft has not been submitted.",
+      "data": {
+        "applicant_name": "Illustrative CD Harbor Research",
+        "project_name": "Independent Project Reference",
+        "contact_person": {
+          "first_name": "Priya",
+          "last_name": "Stone"
+        },
+        "contact_person_title": "Program Director"
+      }
+    },
+    {
+      "label": "Award-number applicant draft",
+      "description": "Uses the independent award-number route; no project name or service values are invented.",
+      "data": {
+        "applicant_name": "Illustrative CD Harbor Research",
+        "award_number": "AWARD-CD-2026-001",
+        "contact_person": {
+          "first_name": "Jonah",
+          "last_name": "Reed"
+        },
+        "contact_person_title": "Certifying Official"
+      }
+    },
+    {
+      "label": "Both references and completed illustrative context",
+      "description": "Both separate references are allowed; synthetic submission values remain readonly context, not a signed or submitted application.",
+      "data": {
+        "applicant_name": "Illustrative CD River Institute",
+        "award_number": "AWARD-CD-2026-002",
+        "project_name": "Distinct Project CD-511",
+        "contact_person": {
+          "prefix": "Ms.",
+          "first_name": "Avery",
+          "middle_name": "Rae",
+          "last_name": "Pine",
+          "suffix": "Jr."
+        },
+        "contact_person_title": "Executive Director",
+        "signature": "ILLUSTRATIVE CD511 SUBMISSION CONTEXT",
+        "submitted_date": "2026-10-25"
+      }
+    }
+  ],
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/tests/src/form_schema/forms/test_cd511.py",
+    "examples": [
+      {
+        "label": "minimal_cd511_v1_1",
+        "description": "Pinned existing SGG test fixture; not generated by this plan.",
+        "data": {
+          "applicant_name": "Example Inc.",
+          "project_name": "My example project",
+          "contact_person": {
+            "first_name": "Bob",
+            "last_name": "Smith"
+          },
+          "contact_person_title": "Director"
+        }
+      },
+      {
+        "label": "full_cd511_v1_1",
+        "description": "Pinned existing SGG test fixture; not generated by this plan.",
+        "data": {
+          "applicant_name": "Example Inc.",
+          "award_number": "ABC-XYZ",
+          "project_name": "My example project",
+          "contact_person": {
+            "prefix": "Ms",
+            "first_name": "Sally",
+            "middle_name": "Sue",
+            "last_name": "Sanders",
+            "suffix": "III"
+          },
+          "contact_person_title": "Director",
+          "signature": "Bob Smith",
+          "submitted_date": "2025-01-01"
+        }
+      }
+    ]
+  },
+  "spec_id": "cd511-form"
 }

@@ -25,3 +25,7 @@ import "./forms/grant-program-accounting-system-financial-capability-questionnai
 
 import "./forms/assurances-for-non-construction-programs-sf-424b/index.tsp";
 import "./forms/assurances-for-construction-programs-sf-424d/index.tsp";
+
+import "./forms/grants-gov-lobbying-form/index.tsp";
+
+import "./forms/cd511-form/index.tsp";

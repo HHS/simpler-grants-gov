@@ -1,12 +1,218 @@
 {
   "title": "Grants.gov Lobbying Form",
   "slug": "grants-gov-lobbying-form",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Mandatory"],
   "category": "Disclosure & Lobbying Forms",
   "apps_count": 39941,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/255",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/GG_LobbyingForm-V1.1_F255.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/GG_LobbyingForm-V1.1_F255.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/GG_LobbyingForm-V1.1_F255.xls",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Certification regarding lobbying",
+      "help_text": "Certification for Contracts, Grants, Loans, and Cooperative Agreements\n\nThe undersigned certifies, to the best of his or her knowledge and belief, that:\n\n(1) No Federal appropriated funds have been paid or will be paid, by or on behalf of the undersigned, to any person for influencing or attempting to influence an officer or employee of an agency, a Member of Congress, an officer or employee of Congress, or an employee of a Member of Congress in connection with the awarding of any Federal contract, the making of any Federal grant, the making of any Federal loan, the entering into of any cooperative agreement, and the extension, continuation, renewal, amendment, or modification of any Federal contract, grant, loan, or cooperative agreement.\n\n(2) If any funds other than Federal appropriated funds have been paid or will be paid to any person for influencing or attempting to influence an officer or employee of any agency, a Member of Congress, an officer or employee of Congress, or an employee of a Member of Congress in connection with this Federal contract, grant, loan, or cooperative agreement, the undersigned shall complete and submit Standard Form-LLL, ''Disclosure of Lobbying Activities,'' in accordance with its instructions.\n\n(3) The undersigned shall require that the language of this certification be included in the award documents for all subawards at all tiers (including subcontracts, subgrants, and contracts under grants, loans, and cooperative agreements) and that all subrecipients shall certify and disclose accordingly. This certification is a material representation of fact upon which reliance was placed when this transaction was made or entered into. Submission of this certification is a prerequisite for making or entering into this transaction imposed by section 1352, title 31, U.S. Code. Any person who fails to file the required certification shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure.\n\nStatement for Loan Guarantees and Loan Insurance\n\nThe undersigned states, to the best of his or her knowledge and belief, that:\n\nIf any funds have been paid or will be paid to any person for influencing or attempting to influence an officer or employee of any agency, a Member of Congress, an officer or employee of Congress, or an employee of a Member of Congress in connection with this commitment providing for the United States to insure or guarantee a loan, the undersigned shall complete and submit Standard Form-LLL, ''Disclosure of Lobbying Activities,'' in accordance with its instructions. Submission of this statement is a prerequisite for making or entering into this transaction imposed by section 1352, title 31, U.S. Code. Any person who fails to file the required statement shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure.",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "APPLICANT'S ORGANIZATION",
+          "help_text": "Pre-populated from the SF 424. This is the legal name of the organization that will undertake the assistance activity. This should normally be the name under which the organization has registered with the Business Partner Network.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "organization_name",
+          "xml_path": "ApplicantName",
+          "dat_field": "5-0",
+          "constraints": "minLength 1, maxLength 60",
+          "pre_populated": "DAT describes forward-population; preserve current SGG editable behavior until actual ownership/copy rules are agreed."
+        },
+        {
+          "kind": "field",
+          "label": "Prefix",
+          "help_text": "Pre-populated from the SF 424. This is the prefix (e.g., Mr., Mrs., Rev.) for the name of the Authorized Representative.",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "authorized_representative_name.prefix",
+          "xml_path": "AuthorizedRepresentativeName/PrefixName",
+          "dat_field": "6-1",
+          "constraints": "minLength 1, maxLength 10"
+        },
+        {
+          "kind": "field",
+          "label": "First Name",
+          "help_text": "Pre-populated from the SF 424. This is the first (given) name of the Authorized Representative who is signing this form.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "authorized_representative_name.first_name",
+          "xml_path": "AuthorizedRepresentativeName/FirstName",
+          "dat_field": "6-2",
+          "constraints": "minLength 1, maxLength 35"
+        },
+        {
+          "kind": "field",
+          "label": "Middle Name",
+          "help_text": "Pre-populated from the SF 424. This is the middle name of the Authorized Representative.",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "authorized_representative_name.middle_name",
+          "xml_path": "AuthorizedRepresentativeName/MiddleName",
+          "dat_field": "6-3",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Last Name",
+          "help_text": "Pre-populated from the SF 424. This is the last (family) name of the Authorized Representative signing this form.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "authorized_representative_name.last_name",
+          "xml_path": "AuthorizedRepresentativeName/LastName",
+          "dat_field": "6-4",
+          "constraints": "minLength 1, maxLength 60"
+        },
+        {
+          "kind": "field",
+          "label": "Suffix",
+          "help_text": "Pre-populated from the SF 424. This is the suffix (e.g., Jr, Sr, PhD) for the name of the Authorized Representative.",
+          "required": false,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "authorized_representative_name.suffix",
+          "xml_path": "AuthorizedRepresentativeName/SuffixName",
+          "dat_field": "6-5",
+          "constraints": "minLength 1, maxLength 10"
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "help_text": "Pre-populated from the SF 424. This is the title of the Authorized Representative who is signing this form.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "authorized_representative_title",
+          "xml_path": "AuthorizedRepresentativeTitle",
+          "dat_field": "6-6",
+          "constraints": "minLength 1, maxLength 45"
+        },
+        {
+          "kind": "field",
+          "label": "SIGNATURE",
+          "help_text": "It is the organization's responsibility to assure that only properly authorized individuals sign in this capacity and/or submit the application to Grants.gov. If this application is submitted through Grants.gov leave blank. If a hard copy is submitted, the AOR must sign this block.",
+          "required": true,
+          "type": "Submission-owned signature",
+          "widget": "TextWidget",
+          "json_path": "authorized_representative_signature",
+          "xml_path": "AuthorizedRepresentativeSignature",
+          "dat_field": "6-7",
+          "constraints": "minLength 1, maxLength 144",
+          "post_populated": "Electronic submission service supplies this value. Preserve the source distinction from hard-copy signing; applicant draft samples omit it."
+        },
+        {
+          "kind": "field",
+          "label": "DATE",
+          "help_text": "If this application is submitted through Grants.gov, the system will generate this date. If submitting a hard copy, enter the date the AOR signed the application.",
+          "required": true,
+          "type": "Submission-owned date",
+          "widget": "TextWidget",
+          "json_path": "submitted_date",
+          "xml_path": "SubmittedDate",
+          "dat_field": "6-8",
+          "constraints": "format date",
+          "post_populated": "Electronic submission service supplies this value. Preserve the source distinction from hard-copy signing; applicant draft samples omit it."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Retain organization_name, the meaningful authorized_representative_name person container, title, signature and date wire names from existing SGG. UI grouping does not add another answer wrapper.",
+    "The two distinct source statements (contracts/grants/cooperative agreements and loan guarantees/insurance) are retained in section help. A common upload or person type does not replace certification meaning.",
+    "Existing SGG classification: implemented at 48d93f882c63a711bdec4b16e3150d1293cdff43, from a bounded API Form-registration inventory. Exact schema, fixtures, UI/rules/XML and ownership are compared separately.",
+    "Definition profile: exact installed SGG JSON paths, editable existing-SGG applicant-draft fallback, and optional readonly service-owned signature/date. The DAT completion requiredness remains in this requirements plan; copying/signing and any policy decision are not performed or accepted here.",
+    "Legal display text is reconstructed from individually identified original DAT label rows and visually checked against the complete original PDF. No legal clause is shared with another form or modernized.",
+    "Form-local XML mapping uses only maintained Mapping.from, HumanName and literal FormVersion support. Full source-XML validation requires service signature/date; a valid unsigned draft is not expected to be source-XSD-valid. Actual application save/reload/populate/sign/submit remains an integration gate."
+  ],
+  "risks": [
+    "Submission-owned signature/date are source-required transmitted fields but absent from valid existing SGG drafts. Preserve service post-population and draft/submission validation separately.",
+    "Source population, certification wording and any hard-copy/electronic differences require human and runtime review; schema/path checks do not perform those actions.",
+    "Existing component availability is not demonstrated runtime parity. Current source-policy questions and implementation ownership must remain visible in the review packet."
+  ],
+  "new_concepts": [],
+  "description": "Source-reviewed requirements plan using existing library components. Existing implementation comparison and future runtime validation are separately tracked.",
+  "examples": [
+    {
+      "label": "Unsigned applicant draft",
+      "description": "Editable existing-SGG fallback; no cover copying, signing or submission is performed.",
+      "data": {
+        "organization_name": "Illustrative Harbor Research",
+        "authorized_representative_name": {
+          "first_name": "Elena",
+          "last_name": "North"
+        },
+        "authorized_representative_title": "Program Director"
+      }
+    },
+    {
+      "label": "Completed illustrative context",
+      "description": "Distinct synthetic name/title/signature values; the service-owned context is not an actual signed certification or submitted application.",
+      "data": {
+        "organization_name": "Illustrative River Institute",
+        "authorized_representative_name": {
+          "prefix": "Dr.",
+          "first_name": "Morgan",
+          "middle_name": "Quinn",
+          "last_name": "Lake",
+          "suffix": "III"
+        },
+        "authorized_representative_title": "Executive Director",
+        "authorized_representative_signature": "ILLUSTRATIVE LOBBYING SUBMISSION CONTEXT",
+        "submitted_date": "2026-10-25"
+      }
+    }
+  ],
+  "widgets": ["TextWidget"],
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/tests/src/form_schema/forms/test_gg_lobbying_form.py",
+    "examples": [
+      {
+        "label": "minimal_valid_gg_lobbying_form_v1_1",
+        "description": "Pinned existing SGG fixture; no application execution or signing performed.",
+        "data": {
+          "organization_name": "Research Organization",
+          "authorized_representative_name": {
+            "first_name": "Joe",
+            "last_name": "Doe"
+          },
+          "authorized_representative_title": "Professor"
+        }
+      },
+      {
+        "label": "full_valid_gg_lobbying_form_v1_1",
+        "description": "Pinned existing SGG fixture; no application execution or signing performed.",
+        "data": {
+          "organization_name": "Investigative Place",
+          "authorized_representative_name": {
+            "prefix": "Mrs",
+            "first_name": "Sue",
+            "middle_name": "Lynn",
+            "last_name": "Smith",
+            "suffix": "Sr"
+          },
+          "authorized_representative_title": "Professor",
+          "authorized_representative_signature": "Sue Smith",
+          "submitted_date": "2025-01-01"
+        }
+      }
+    ]
+  },
+  "sgg_form_id": "295d60a6-a3d1-4413-88fe-f4e5ee43b409",
+  "omb_number": "4040-0013",
+  "expiration_date": "06/30/2028",
+  "spec_id": "grants-gov-lobbying-form"
 }
