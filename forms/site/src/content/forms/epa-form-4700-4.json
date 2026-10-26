@@ -1,12 +1,606 @@
 {
   "title": "EPA Form 4700-4",
   "slug": "epa-form-4700-4",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["SF-424", "SF-424 Mandatory"],
   "category": "Key Personnel & Contact Forms",
   "apps_count": 12044,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/773",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/EPA4700_4_5_0-V5.0_F773.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/EPA4700_4_5_0-V5.0_F773.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/EPA4700_4_5_0-V5.0_F773.xls",
+  "spec_id": "epa-form-4700-4",
+  "xsd_root": "EPA4700_4_5_0",
+  "omb_number": "2030-0020",
+  "expiration_date": "02/28/2029",
+  "sgg_form_id": "4f0b0974-9a16-490b-a0f2-d03dfdc26ecd",
+  "description": "Original EPA preaward compliance definition with28 source-specific answers, explicit application/submission context and unchanged installed API paths.",
+  "widgets": ["TextWidget", "TextAreaWidget", "SelectWidget", "RadioWidget"],
+  "new_concepts": [],
+  "children": [
+    {
+      "kind": "section",
+      "label": "I. A. Applicant/Recipient (Name, Address, City, State, Zip Code)",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Name:",
+          "help_text": "Enter the legal name of the applicant that will undertake the assistance activity. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "applicant_name",
+          "xml_path": "ApplicantInfo/ApplicantName",
+          "dat_field": "01-A-1",
+          "constraints": "minLength 1, maxLength 60"
+        },
+        {
+          "kind": "field",
+          "label": "Address:",
+          "help_text": "Enter the address. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "applicant_address.address",
+          "xml_path": "ApplicantInfo/ApplicantAddress/Address",
+          "dat_field": "01-A-2",
+          "constraints": "minLength 1, maxLength 110"
+        },
+        {
+          "kind": "field",
+          "label": "City:",
+          "help_text": "Enter the City. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "applicant_address.city",
+          "xml_path": "ApplicantInfo/ApplicantAddress/City",
+          "dat_field": "01-A-3",
+          "constraints": "minLength 1, maxLength 35"
+        },
+        {
+          "kind": "field",
+          "label": "State:",
+          "help_text": "Select the state, US possession or military code from the provided list. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "SelectWidget",
+          "json_path": "applicant_address.state",
+          "xml_path": "ApplicantInfo/ApplicantAddress/State",
+          "dat_field": "01-A-4",
+          "constraints": "StateCodeDataTypeV3 enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "Zip Code:",
+          "help_text": "Enter the Postal Code (e.g., ZIP code). This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "applicant_address.zip_code",
+          "xml_path": "ApplicantInfo/ApplicantAddress/ZipCode",
+          "dat_field": "01-A-5",
+          "constraints": "minLength 1, maxLength 30"
+        }
+      ],
+      "help_text": "Instructions for EPA FORM 4700-4 (Rev. 04/2021) \n\nGeneral. Recipients of Federal financial assistance from the U.S. Environmental Protection Agency must comply with the following statutes and regulations.\nTitle VI of the Civil Rights Acts of 1964 provides that no person in the United States shall, on the grounds of race, color, or national origin, be excluded from participation in, be denied the benefits of, or be subjected to discrimination under any program or activity receiving Federal financial assistance. The Act goes on to explain that the statute shall not be construed to authorize action with respect to any employment practice of any employer, employment agency, or labor organization (except where the primary objective of the Federal financial assistance is to provide employment). Section 13 of the 1972 Amendments to the Federal Water Pollution Control Act provides that no person in the United States shall on the ground of sex, be excluded from participation in, be denied the benefits of, or be subjected to discrimination under the Federal Water Pollution Control Act, as amended. Employment discrimination on the basis of sex is prohibited in all such programs or activities. Section 504 of the Rehabilitation Act of 1973 provides that no otherwise qualified individual with a disability in the United States shall solely by reason of disability be excluded from participation in, be denied the benefits of, or be subjected to discrimination under any program or activity receiving Federal financial assistance. Employment discrimination on the basis of disability is prohibited in all such programs or activities. The Age Discrimination Act of 1975 provides that no person on the basis of age shall be excluded from participation under any program or activity receiving Federal financial assistance. Employment discrimination is not covered. Age discrimination in employment is prohibited by the Age Discrimination in Employment Act administered by the Equal Employment Opportunity Commission. Title IX of the Education Amendments of 1972 provides that no person in the United States on the basis of sex shall be excluded from participation in, be denied the benefits of, or be subjected to discrimination under any education program or activity receiving Federal financial assistance. Employment discrimination on the basis of sex is prohibited in all such education programs or activities. Note: an education program or activity is not limited to only those conducted by a formal institution. 40 C.F.R. Part 5 implements Title IX of the Education Amendments of 1972. 40 C.F.R. Part 7 implements Title VI of the Civil Rights Act of 1964, Section 13 of the 1972 Amendments to the Federal Water Pollution Control Act, and Section 504 of The Rehabilitation Act of 1973. \n\nItems \"Applicant\" means any entity that files an application or unsolicited proposal or otherwise requests EPA assistance. 40 C.F.R. §§ 5.105, 7.25. \"Recipient\" means any State or its political subdivision, any instrumentality of a State or its political subdivision, any public or private agency, institution, organizations, or other entity, or any person to which Federal financial assistance is extended directly or through another recipient, including any successor, assignee, or transferee of a recipient, but excluding the ultimate beneficiary of the assistance. 40 C.F.R. §§ 5.105, 7.25. \"Civil rights lawsuits and administrative complaints\" means any lawsuit or administrative complaint alleging discrimination on the basis of race, color, national origin, sex, age, or disability pending or decided against the applicant and/or entity which actually benefits from the grant, but excluding employment complaints not covered by 40 C.F.R. Parts 5 and 7. For example, if a city is the named applicant but the grant will actually benefit the Department of Sewage, civil rights lawsuits involving both the city and the Department of Sewage should be listed. \"Civil rights compliance review\" means: any federal agency-initiated investigation of a particular aspect of the applicant's and/or recipient's programs or activities to determine compliance with the federal non-discrimination laws. Submit this form with the original and required copies of applications, requests for extensions, requests for increase of funds, etc. Updates of information are all that are required after the initial application submission. If any item is not relevant to the project for which assistance is requested, write \"NA\" for \"Not Applicable.\" In the event applicant is uncertain about how to answer any questions, EPA program officials should be contacted for clarification.\n\nPublic Burden Statement from DAT business rules\n\nClicking displays: \nPublic Burden Statement: \n\nThis collection of information is approved by OMB under the Paperwork Reduction Act, 44 U.S.C. 3501 et seq. (OMB Control No. 2030-0020). Responses to this collection of information are required to obtain an assistance agreement (40 CFR Part 30, 40 CFR Part 31, and 40 CFR Part 33 for awards made prior to December 26, 2014, and 2 CFR 200, 2 CFR 1500, and 40 CFR Part 33 for awards made after December 26, 2014). An agency may not conduct or sponsor, and a person is not required to respond to, a collection of information unless it displays a currently valid OMB control number. The public reporting and recordkeeping burden for this collection of information is estimated to be 0.5 hours per response. Send comments on the Agency’s need for this information, the accuracy of the provided burden estimates and any suggested methods for minimizing respondent burden to the Regulatory Support Division Director, U.S. Environmental Protection Agency (2821T), 1200 Pennsylvania Ave., NW, Washington, D.C. 20460. Include the OMB control number in any correspondence. Do not send the completed form to this address.\n\nSeparate DAT Help Tip wording\n\nView Burden Statement\n\nEPA estimates public reporting burden for the preparation of this form to average 30 minutes per response. This estimate includes the time for reviewing instructions, gathering and maintaining the data needed and completing and reviewing the form. Send comments regarding the burden estimate, including suggestions for reducing this burden, to U.S. EPA, Attn: Collection Strategies Division (MC 2822T), Office of Information Collection, 1200 Pennsylvania Ave., NW, Washington, D.C. 20460; and to the Office of Information and Regulatory Affairs, Office of Management and Budget, Washington, D.C. 20503.\nThe information on this form is required to enable the U.S. Environmental Protection Agency to determine whether applicants and prospective recipients are developing projects, programs and activities on a nondiscriminatory basis as required by the above statutes and regulations."
+    },
+    {
+      "kind": "section",
+      "label": "I. B. Unique Entity Identifier (UEI)",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "B.  Unique Entity Identifier (UEI):",
+          "help_text": "Pre-populated from the Application cover sheet.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "sam_uei",
+          "xml_path": "SAMUEI",
+          "dat_field": "01-B-0",
+          "constraints": "minLength 12, maxLength 12",
+          "pre_populated": "DAT and actual SGG declare service/context ownership. The example provides synthetic context only; this preview does not fetch, sign or submit."
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "I. C. Applicant/Recipient Point of Contact",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Name:",
+          "help_text": "Enter the Applicant/Recipient Point of Contact Name. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "point_of_contact_name",
+          "xml_path": "POCName",
+          "dat_field": "01-C-1",
+          "constraints": "minLength 1, maxLength 100"
+        },
+        {
+          "kind": "field",
+          "label": "Phone:",
+          "help_text": "Enter the Telephone Number. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "point_of_contact_phone_number",
+          "xml_path": "Phone",
+          "dat_field": "01-C-2",
+          "constraints": "minLength 1, maxLength 25"
+        },
+        {
+          "kind": "field",
+          "label": "Email:",
+          "help_text": "Enter a valid Email Address. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "point_of_contact_email",
+          "xml_path": "Email",
+          "dat_field": "01-C-3",
+          "constraints": "minLength 1, maxLength 60, format email"
+        },
+        {
+          "kind": "field",
+          "label": "Title:",
+          "help_text": "Enter the position title. This field is required.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "point_of_contact_title",
+          "xml_path": "Title",
+          "dat_field": "01-C-4",
+          "constraints": "minLength 1, maxLength 45"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "II",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "II.  Is the applicant currently receiving EPA Assistance?",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "federal_financial_assistance",
+          "xml_path": "FederalFinancialAssistanceQuestion",
+          "dat_field": "02-1",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "III",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "III. List all pending civil rights lawsuits and administrative complaints filed under federal law against the applicant/recipient that allege discrimination based on race, color, national origin, sex, age, or disability. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.)",
+          "help_text": "List all pending civil rights lawsuits and administrative complaints filed under federal law against the applicant/recipient that allege discrimination based on race, color, national origin, sex, age, or disability. (Do not include employment complaints not  covered by 40 C.F.R. Parts 5 and 7.)\n\"Civil rights lawsuits and administrative complaints\" means any pending lawsuit or complaint alleging discrimination on the basis of race, color, national origin, sex, age, or disability filed under federal law against the applicant and/or entity which actually benefits from the grant.  For example, if a city is the named applicant but the grant will actually benefit the Department of Sewage, civil rights lawsuits involving both the city and the Department of Sewage should be listed.  ",
+          "required": false,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "civil_rights_lawsuit_question1",
+          "xml_path": "CivilRightsLawSuits1",
+          "dat_field": "03-A-1",
+          "constraints": "minLength 0, maxLength 4000"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "IV",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "IV. List all civil rights lawsuits and administrative complaints decided against the applicant/recipient within the last year that alleged discrimination based on race, color, national origin, sex, age, or disability and enclose a copy of all decisions.  Please describe all corrective actions taken.  (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.)",
+          "help_text": "List all civil rights lawsuits and administrative complaints decided against the applicant/recipient within the last year that alleged discrimination based on race, color, national origin, sex, age, or disability and enclose a copy of all decisions.  Please describe all corrective actions taken.  (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.)\n\"Civil rights lawsuits and administrative complaints\" means any lawsuit or complaint decided against the applicant/recipient within the last year that alleged discrimination on the basis of race, color, national origin, sex, age or disability against the applicant and/or entity which actually benefits from the grant.  For example, if a city is the named applicant but the grant will actually benefit the Department of Sewage, civil rights lawsuits involving both the city and the Department of Sewage should be listed.  ",
+          "required": false,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "civil_rights_lawsuit_question2",
+          "xml_path": "CivilRightsLawSuits2",
+          "dat_field": "04-A-1",
+          "constraints": "minLength 0, maxLength 4000"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "V",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "V.  List all civil rights compliance reviews of the applicant/recipient conducted under federal nondiscrimination laws by any federal agency within the last two years and enclose a copy of the review and any decisions, orders, or agreements based on the review. Please describe any corrective action taken. (40 C.F.R. § 7.80(c)(3))",
+          "help_text": "List all civil rights compliance reviews of the applicant/recipient conducted under federal nondiscrimination laws by any federal agency within the last two years and enclose a copy of the review and any decisions, orders, or agreements based on the review. Please describe any corrective action taken. (40 C.F.R. § 7.80(c)(3)). \n\"Civil rights compliance review\" means any review assessing the applicant's and/or recipient's compliance with laws prohibiting discrimination on the basis of race, color, national origin, sex, age, or disability.",
+          "required": false,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "civil_rights_lawsuit_question3",
+          "xml_path": "CivilRightsLawSuits3",
+          "dat_field": "05-A-1",
+          "constraints": "minLength 0, maxLength 4000"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "VI",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "VI.  Is the applicant requesting EPA assistance for new construction?  If no, proceed to VII; if yes, answer (a) and/or (b) below.",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "construction_federal_assistance",
+          "xml_path": "ConstructionFederalAssistance",
+          "dat_field": "06-1",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "a.  If the grant is for new construction, will all new facilities or alterations to existing facilities be designed and constructed to be readily accessible to and usable by persons with disabilities?  If yes, proceed to VII; if no, proceed to VI(b).",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "construction_new_facilities",
+          "xml_path": "Construction",
+          "dat_field": "06-2",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "b.  If the grant is for new construction and the new facilities or alterations to existing facilities will not be readily accessible to and usable by persons with disabilities, explain how a regulatory exception (40 C.F.R. 7.70) applies.",
+          "help_text": "If the grant is for new construction and the new facilities or alterations to existing facilities will not be readily accessible to and usable by persons with disabilities, explain how a regulatory exception (40 C.F.R. 7.70) applies.",
+          "required": false,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "construction_new_facilities_explanation",
+          "xml_path": "Construction2",
+          "dat_field": "06-3",
+          "constraints": "minLength 0, maxLength 500"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "VII",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "VII.   Does the applicant/recipient provide initial and continuing notice that it does not discriminate on the basis of race, color, national origin, sex, age, or disability in its program or activities?  (40 C.F.R 5.140 and 7.95)",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "notice1",
+          "xml_path": "Notice1",
+          "dat_field": "07-1-1",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "a.  Do the methods of notice accommodate those with impaired vision or hearing?",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "notice2",
+          "xml_path": "Notice2",
+          "dat_field": "07-2-1",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "b. Is the notice posted in a prominent place in the applicant's/recipient’s website, in the offices or facilities or, for education programs and activities, in appropriate periodicals and other written communications?",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "notice3",
+          "xml_path": "Notice3",
+          "dat_field": "07-3-1",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "label": "c.  Does the notice identify a designated civil rights coordinator?",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "notice4",
+          "xml_path": "Notice4",
+          "dat_field": "07-4-1",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "VIII",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "VIII.   Does the applicant/recipient maintain demographic data on the race, color, national origin, sex, age, or disability status of the population it serves?  (40 C.F.R. 7.85(a))",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "demographic_data",
+          "xml_path": "Demographic",
+          "dat_field": "08-A-1",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "IX",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "IX.   Does the applicant/recipient have a policy/procedure for providing meaningful access to services for persons with limited English proficiency?  (Title VI, 40 C.F.R. Part 7, Lau v Nichols 414 U.S. (1974))",
+          "help_text": "",
+          "required": false,
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "json_path": "policy",
+          "xml_path": "Policy1",
+          "dat_field": "09-A-1",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "X",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "X.   If the applicant is an education program or activity, or has 15 or more employees, has it designated an employee to coordinate its compliance with 40 C.F.R. Parts 5 and 7?  Provide the name, title, position, mailing address, e-mail address, fax number, and telephone number of the designated coordinator.",
+          "help_text": "If the applicant is an education program or activity, or has 15 or more employees, has it designated an employee to coordinate its compliance with 40 C.F.R. Parts 5 and 7?  Provide the name, title, position, mailing address, e-mail address, fax number, and telephone number of the designated coordinator.",
+          "required": false,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "policy_explanation",
+          "xml_path": "Policy2",
+          "dat_field": "10-A-1",
+          "constraints": "minLength 0, maxLength 1000"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "XI",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "XI.   If the applicant is an education program or activity, or has 15 or more employees, has it adopted grievance procedures that assure the prompt and fair resolution of complaints that allege a violation of 40 C.F.R. Parts 5 and 7?  Provide a legal citation or applicant’s/recipient’s website address for, or a copy of, the procedures.",
+          "help_text": "If the applicant is an education program or activity, or has 15 or more employees, has it adopted grievance procedures that assure the prompt and fair resolution of complaints that allege a violation of 40 C.F.R. Parts 5 and 7?  Provide a legal citation or applicant’s/recipient’s website address for, or a copy of, the procedures.",
+          "required": false,
+          "type": "Text",
+          "widget": "TextAreaWidget",
+          "json_path": "program_explanation",
+          "xml_path": "Program",
+          "dat_field": "11-A-1",
+          "constraints": "minLength 0, maxLength 1000"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "For the Applicant/Recipient",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "label": "A. Signature of Authorized Official",
+          "help_text": "Completed by Grants.gov upon submission. This is a required field.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "applicant_signature.aor_signature",
+          "xml_path": "ApplicantSignature/AORSignature",
+          "dat_field": "12-1-a",
+          "constraints": "minLength 1, maxLength 144",
+          "post_populated": "DAT and actual SGG declare service/context ownership. The example provides synthetic context only; this preview does not fetch, sign or submit."
+        },
+        {
+          "kind": "field",
+          "label": "B. Title of Authorized Official",
+          "help_text": "Pre-populated from the Application cover sheet. This is a required field.",
+          "required": true,
+          "type": "Text",
+          "widget": "TextWidget",
+          "json_path": "applicant_signature.aor_title",
+          "xml_path": "ApplicantSignature/PersonTitle",
+          "dat_field": "12-1-b",
+          "constraints": "minLength 1, maxLength 45",
+          "pre_populated": "DAT forwards from SF424/SF424 Mandatory authorized title. Actual SGG keeps an editable required title; cover-copy ownership remains an explicit proposal."
+        },
+        {
+          "kind": "field",
+          "label": "C. Date",
+          "help_text": "Completed by Grants.gov upon submission. This is a required field.",
+          "required": true,
+          "type": "Date",
+          "widget": "TextWidget",
+          "json_path": "applicant_signature.submitted_date",
+          "xml_path": "ApplicantSignature/SubmittedDate",
+          "dat_field": "12-1-c",
+          "constraints": "format date",
+          "post_populated": "DAT and actual SGG declare service/context ownership. The example provides synthetic context only; this preview does not fetch, sign or submit."
+        }
+      ],
+      "help_text": "I certify that the statements I have made on this form and all attachments thereto are true, accurate and complete.  I acknowledge that any knowingly false or misleading statement may be punishable by fine or imprisonment or both under applicable law.  I assure that I will fully comply with all applicable civil rights statutes and EPA regulations."
+    }
+  ],
+  "notes": [
+    "All28 logical DAT answer leaves are explicitly mapped to original XML and exact installed API paths. Nine Radio Groups each own one boolean answer; Yes/No child rows are not extra questions.",
+    "API profile: preserve the whole100-character POC name and the source-specific required address/address city/state/zip object. A generic Person or55-character country-required Address is not equivalent.",
+    "Source completion requires signature/date; actual SGG applicant drafts require only applicant_signature.aor_title inside the owned record. Signature/date are optional readonly context in TypeSpec, not applicant signing.",
+    "Required readonly UEI needs application context. Illustrative examples supply synthetic values; a blank standalone preview is not evidence of production prepopulation or a fully completable authenticated application.",
+    "DAT forwards UEI and official title from cover sheets; actual SGG populates UEI from organization/individual context and leaves the official title editable. These differences remain proposed ownership policy, not an implemented cover-copy engine.",
+    "Original XSD/DAT optional narratives allow supplied-empty. Existing SGG rejects supplied-empty narratives and address; this profile preserves that validation and declares the source discrepancy rather than accepting new policy.",
+    "Nine optional booleans preserve absent versus false. Actual SGG XML rules explicitly convert True to Y: Yes and False to N: No. No active generated mapping is claimed: current emitter lacks this value transform and ApplicantInfo wrapper support.",
+    "Original three-page PDF and all DAT instructional/legal text were reviewed. Page3 instructions and applicant certification are preserved verbatim apart from line wrapping. Supporting-document prose does not define a new upload answer.",
+    "Agency-use source section (not applicant answers):\n\nFor the U.S. Environmental Protection Agency\n\nI have reviewed the information provided by the applicant/recipient and hereby certify that the applicant/recipient has submitted all preaward compliance information required by 40 C.F.R. Parts 5 and 7; that based on the information submitted, this application satisfies the preaward provisions of 40 C.F.R. Parts 5 and 7; and that the applicant has given assurance that it will fully comply with all applicable civil rights statures and EPA regulations.\n\nA. Signature of Authorized EPA Official\n\nB. Title of Authorized Official\n\nC. Date",
+    "Original DAT Help Tip and business-rule burden wording are retained separately; neither is silently selected as an updated legal policy.",
+    "Existing SGG reference tests/rules/XML are separately executed; actual API validity, declared consumption, original-XSD validity, native preview, application lifecycle and human acceptance remain separate observations."
+  ],
+  "risks": [
+    "Generated XML mapping, real UEI/cover population, authenticated ownership enforcement, signing, save/reload/submission, supporting-document packaging and human acceptance remain open integration gates.",
+    "The instructions say NA for irrelevant items; source Yes/No fields have only Y/N. No NA enum, default false or new conditional requirement/hide rule is adopted.",
+    "The API/preview email validators have known admission differences; neither is relaxed to manufacture parity.",
+    "The PDF EPA-official certification/signature/title/date section is agency-owned and absent from the applicant XSD/API. Do not create applicant controls for it."
+  ],
+  "examples": [
+    {
+      "label": "Unsigned applicant draft with illustrative application context",
+      "description": "Synthetic required UEI is supplied as context; applicant signature/date remain absent. No prepopulation or signing is executed.",
+      "data": {
+        "applicant_name": "Joe's Research Place",
+        "applicant_address": {
+          "address": "123 Main St",
+          "city": "Exampleburg",
+          "state": "NY: New York",
+          "zip_code": "12345-6789"
+        },
+        "sam_uei": "EPA123456789",
+        "point_of_contact_name": "Whole POC Name Example",
+        "point_of_contact_phone_number": "(123) 456-7890",
+        "point_of_contact_email": "example@example.com",
+        "point_of_contact_title": "POC Director",
+        "applicant_signature": {
+          "aor_title": "Authorized Official Director"
+        }
+      }
+    },
+    {
+      "label": "Distinct completed illustrative context",
+      "description": "All source answers, including9 mixed independent booleans; service signature/date are synthetic examples, not submission acceptance.",
+      "data": {
+        "applicant_name": "APPLICANT ORGANIZATION DISTINCT",
+        "applicant_address": {
+          "address": "DOMESTIC ADDRESS DISTINCT",
+          "city": "Applicant City",
+          "state": "NY: New York",
+          "zip_code": "10001-1234"
+        },
+        "sam_uei": "EPA123456789",
+        "point_of_contact_name": "WHOLE POC NAME DISTINCT",
+        "point_of_contact_phone_number": "2025550191",
+        "point_of_contact_email": "poc-distinct@example.org",
+        "point_of_contact_title": "POC TITLE DISTINCT",
+        "federal_financial_assistance": false,
+        "civil_rights_lawsuit_question1": "PENDING LAWSUITS DISTINCT",
+        "civil_rights_lawsuit_question2": "DECIDED LAST YEAR DISTINCT",
+        "civil_rights_lawsuit_question3": "COMPLIANCE REVIEWS TWO YEARS DISTINCT",
+        "construction_federal_assistance": true,
+        "construction_new_facilities": false,
+        "construction_new_facilities_explanation": "ACCESSIBILITY EXCEPTION DISTINCT",
+        "notice1": true,
+        "notice2": false,
+        "notice3": true,
+        "notice4": false,
+        "demographic_data": true,
+        "policy": false,
+        "policy_explanation": "COORDINATOR CONTACT DISTINCT",
+        "program_explanation": "GRIEVANCE PROCEDURES DISTINCT",
+        "applicant_signature": {
+          "aor_signature": "SYNTHETIC SUBMISSION SIGNATURE DISTINCT",
+          "aor_title": "AUTHORIZED OFFICIAL TITLE DISTINCT",
+          "submitted_date": "2026-10-25"
+        }
+      }
+    }
+  ],
+  "existing_sgg": {
+    "source_url": "https://github.com/HHS/simpler-grants-gov/blob/48d93f882c63a711bdec4b16e3150d1293cdff43/api/tests/src/form_schema/forms/test_epa_form_4700_4.py",
+    "examples": [
+      {
+        "label": "minimal_valid_form_v5_0",
+        "description": "Unchanged pinned actual SGG fixture; full application lifecycle and human acceptance are separate.",
+        "data": {
+          "applicant_name": "Joe's Research Place",
+          "applicant_address": {
+            "address": "123 Main St",
+            "city": "Exampleburg",
+            "state": "NY: New York",
+            "zip_code": "12345-6789"
+          },
+          "sam_uei": "FAKEUEI98765",
+          "point_of_contact_name": "Joe Smith",
+          "point_of_contact_phone_number": "(123) 456-7890",
+          "point_of_contact_email": "example@example.com",
+          "point_of_contact_title": "Director",
+          "applicant_signature": {
+            "aor_title": "Director"
+          }
+        }
+      },
+      {
+        "label": "full_valid_form_v5_0",
+        "description": "Unchanged pinned actual SGG fixture; full application lifecycle and human acceptance are separate.",
+        "data": {
+          "applicant_name": "Frank's Factory",
+          "applicant_address": {
+            "address": "567 Dream Blvd",
+            "city": "Placeville",
+            "state": "KY: Kentucky",
+            "zip_code": "56789-0001"
+          },
+          "sam_uei": "FAKEUEI98765",
+          "point_of_contact_name": "Frank Frankson",
+          "point_of_contact_phone_number": "1234567890",
+          "point_of_contact_email": "test@example.com",
+          "point_of_contact_title": "Professor",
+          "federal_financial_assistance": true,
+          "civil_rights_lawsuit_question1": "N/A",
+          "civil_rights_lawsuit_question2": "No lawsuits",
+          "civil_rights_lawsuit_question3": "No lawsuits or pending reviews",
+          "construction_federal_assistance": true,
+          "construction_new_facilities": true,
+          "construction_new_facilities_explanation": "We'll build it right",
+          "notice1": true,
+          "notice2": true,
+          "notice3": true,
+          "notice4": true,
+          "demographic_data": true,
+          "policy": true,
+          "policy_explanation": "Yes, we follow the regulations",
+          "program_explanation": "Yes, we handle grievances",
+          "applicant_signature": {
+            "aor_signature": "Bob Smith",
+            "aor_title": "Lead Researcher",
+            "submitted_date": "2025-12-01"
+          }
+        }
+      }
+    ]
+  }
 }
