@@ -1095,6 +1095,7 @@ details[open] > .group-header::before {
 }
 
 .metadata-card {
+  min-width: 0;
   border: 1px solid color("base-lighter");
   border-radius: radius("md");
   padding: units(2) units(3);
