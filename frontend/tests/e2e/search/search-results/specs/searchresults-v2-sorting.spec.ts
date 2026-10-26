@@ -62,7 +62,7 @@ const { baseUrl, targetEnv } = playwrightEnv;
 const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
 
 // "SGG" gives a small, stable, non-zero result set (also used by save-search.spec.ts).
-const PARTIAL_RESULTS_SEARCH_TERM = "SGG";
+const PARTIAL_RESULTS_SEARCH_TERM = "E2E-*";
 
 // KNOWN APP DEFECT: on desktop the Sort by select sits inside the results <Suspense>, which is
 // keyed on every search param (SearchResults.tsx), so changing the sort remounts the select and
