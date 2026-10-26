@@ -10,12 +10,12 @@ import { collectPreviewForm } from "../../../lib/collectPreviewData";
 import {
   completeWarnings,
   createAjv,
-  toValidationWarnings,
   uniqueWarnings,
 } from "../../../lib/validation";
 import { JsonFormsFields } from "../../../vendor/sgg/JsonFormsFields";
 import { jsonFormsToUiSchema } from "../../../vendor/sgg/jsonFormsUiSchema";
 import { previewRenderers } from "./renderers";
+import { requiredChoiceWarnings } from "./requiredChoiceWarnings";
 import type { FormRendererProps } from "./types";
 
 /**
@@ -44,14 +44,15 @@ export const SggFormRenderer = ({
   );
   const validate = useMemo(() => createAjv().compile(schema), [schema]);
 
-  // Ajv stands in for the API's validator; the frontend attaches and words the warnings.
+  // Ajv stands in for the API validator. Simple required choices receive preview-only
+  // guidance before the frontend attaches and words the warnings; raw API conversion is unchanged.
   const warningsFor = (next: unknown) => {
     validate(next);
-    const raw = toValidationWarnings(validate.errors ?? []);
+    const preview = requiredChoiceWarnings(validate.errors ?? [], formSchema);
     return uniqueWarnings(
       completeWarnings(
-        raw,
-        buildWarningTree(sggUiSchema, null, raw, formSchema),
+        preview,
+        buildWarningTree(sggUiSchema, null, preview, formSchema),
       ),
     ).map((warning) => {
       // Presentation only: validation.ts retains the API-shaped errors. Do not echo
