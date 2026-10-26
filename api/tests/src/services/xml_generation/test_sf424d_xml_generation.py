@@ -523,7 +523,11 @@ class TestSF424DXSDValidation:
         _, validation_result = self._generate_and_validate(xsd_validator, application_data)
 
         assert validation_result["valid"] is False
-        assert "length" in validation_result["error_message"].lower()
+        # Make sure it failed on the length facet for this field, not some other XSD error
+        assert (
+            f"value length cannot be greater than {max_length}"
+            in validation_result["error_message"]
+        )
 
     def test_sf424d_invalid_date_fails_xsd(self, xsd_validator):
         """A non-date SubmittedDate passes through generation but is rejected by the XSD."""
@@ -537,7 +541,9 @@ class TestSF424DXSDValidation:
         _, validation_result = self._generate_and_validate(xsd_validator, application_data)
 
         assert validation_result["valid"] is False
-        assert "SubmittedDate" in validation_result["error_message"]
+        # Make sure it failed on the xs:date type check, not some other XSD error
+        assert "failed validating 'not-a-date'" in validation_result["error_message"]
+        assert "xs:date" in validation_result["error_message"]
 
     def test_sf424d_xml_escaping(self, xsd_validator):
         """Characters requiring XML escaping are serialized correctly and still validate."""
