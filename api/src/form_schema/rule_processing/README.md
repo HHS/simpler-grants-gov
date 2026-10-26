@@ -305,22 +305,11 @@ For validation, this rule group is `gg_validation` with the following
 rules currently implemented:
 
 - `attachment` - verifies that the field representing an attachment ID corresponds to an attachment ID on the application itself.
-- `date_after` - verifies that a date is after another date on the form, see Date After section below.
 
-## Date After
+# Future Work
 
-JSON Schema can't compare two fields, so this rule checks that dates like a
-project's start and end are in order. Set it on the later date, with `field`
-pointing at the earlier one (absolute or `@THIS.` relative path):
+## Cross-field Validation
 
-```json
-{
-  "project_end_date": {
-    "gg_validation": { "rule": "date_after", "field": "project_start_date" }
-  }
-}
-```
-
-The same date on both is flagged too, matching the legacy form. If either
-date is missing or isn't a valid date, the rule doesn't add an issue, since
-required and format checks are handled by the JSON schema.
+We likely want some form of cross-field validation. I don't think
+JSON Schema supports a way to validate dates are in order for something
+like start/end dates.

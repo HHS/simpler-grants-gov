@@ -477,8 +477,6 @@ FORM_RULE_SCHEMA = {
     "funding_opportunity_number": {"gg_pre_population": {"rule": "opportunity_number"}},
     "funding_opportunity_title": {"gg_pre_population": {"rule": "opportunity_title"}},
     "sam_uei": {"gg_pre_population": {"rule": "uei"}},
-    ##### VALIDATION RULES
-    "project_end_date": {"gg_validation": {"rule": "date_after", "field": "project_start_date"}},
     ##### POST-POPULATION RULES
     "date_received": {"gg_post_population": {"rule": "current_date"}},
     "aor_signature": {"gg_post_population": {"rule": "signature"}},

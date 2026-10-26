@@ -1,10 +1,9 @@
 import logging
 import typing
-from datetime import date
 
 from src.api.response import ValidationErrorDetail
 from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
-from src.form_schema.rule_processing.json_rule_util import build_path_str, get_field_values
+from src.form_schema.rule_processing.json_rule_util import build_path_str
 from src.util.dict_util import get_nested_value
 from src.validation.validation_constants import ValidationErrorType
 
@@ -93,56 +92,7 @@ def validate_attachments(context: JsonRuleContext, json_rule: JsonRule) -> None:
         )
 
 
-def _parse_date(value: typing.Any) -> date | None:
-    """Parse an ISO date string, returning None for anything that isn't one.
-
-    Missing or badly formatted dates are left to JSON schema validation
-    (required / format), so this rule only compares two real dates.
-    """
-    if not isinstance(value, str):
-        return None
-
-    try:
-        return date.fromisoformat(value)
-    except ValueError:
-        return None
-
-
-def validate_date_after(context: JsonRuleContext, json_rule: JsonRule) -> None:
-    """Validate that a date is after another date on the form, for example
-    a project end date compared to its start date.
-
-    Config: ``{"rule": "date_after", "field": "<path>"}``, set on the later
-    date, where field points at the earlier date. The path can be absolute
-    or relative (@THIS.x). The same date on both is flagged, like the legacy form.
-    """
-    other_field = json_rule.rule.get("field")
-    if other_field is None:
-        raise ValueError("date_after requires a 'field' path")
-
-    value = get_nested_value(context.json_data, json_rule.path)
-    other_values = get_field_values(context.json_data, [other_field], json_rule.path)
-
-    current_date = _parse_date(value)
-    other_date = _parse_date(other_values[0]) if other_values else None
-    if current_date is None or other_date is None:
-        return
-
-    if current_date <= other_date:
-        context.validation_issues.append(
-            ValidationErrorDetail(
-                type=ValidationErrorType.INVALID_DATE_ORDER,
-                message="The end date must be after the start date",
-                field=build_path_str(json_rule.path),
-                value=value,
-            )
-        )
-
-
-VALIDATION_RULES = {
-    "attachment": validate_attachments,
-    "date_after": validate_date_after,
-}
+VALIDATION_RULES = {"attachment": validate_attachments}
 
 
 def handle_validation(context: JsonRuleContext, json_rule: JsonRule) -> None:
