@@ -58,6 +58,15 @@ environment, image, role, or arbitrary-command input.
 
 ## If the run fails or needs to stop
 
+For unresolved ownership, use **Actions → Diagnose NOFO document history - dev →
+Run workflow → main** before changing application code or rerunning preparation.
+This separate workflow runs a fixed diagnostic in a PostgreSQL read-only
+transaction. It reports aggregate counts by model, snapshot structure, known
+parent-field availability, and retained/live ownership. It logs no document
+content, event identifiers, object identifiers, user details or arbitrary field
+names. Its success means diagnosis completed, not that history is ready to
+enable. It uses the same rollout, task-revision, concurrency and cleanup checks.
+
 Keep Constance **False**. A failed backfill prevents the completeness command from
 running; an incomplete check, failed container, or unavailable completeness logs
 keeps the workflow failed. Inspect the task identified in Actions before retrying.
