@@ -57,7 +57,7 @@ export const SggFormRenderer = ({
       // Presentation only: validation.ts retains the API-shaped errors. Do not echo
       // a long or sensitive answer, or expose a regex as applicant instructions.
       if (
-        !["maxLength", "pattern"].includes(warning.type) ||
+        !["minLength", "maxLength", "pattern"].includes(warning.type) ||
         !("definition" in warning) ||
         !warning.definition
       )
@@ -71,7 +71,9 @@ export const SggFormRenderer = ({
       const message =
         warning.type === "maxLength" && typeof field?.maxLength === "number"
           ? `${label} must be ${field.maxLength} characters or fewer.`
-          : `${label}: ${field?.description?.split(/\n\s*\n/)[0] || "Review the field instructions."}`;
+          : warning.type === "minLength" && typeof field?.minLength === "number"
+            ? `${label} must be at least ${field.minLength} characters.`
+            : `${label}: ${field?.description?.split(/\n\s*\n/)[0] || "Review the field instructions."}`;
       return { ...warning, message, formatted: message };
     });
   };
