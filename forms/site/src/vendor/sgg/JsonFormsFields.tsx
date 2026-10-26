@@ -1,7 +1,8 @@
 // TEMPORARY COPY of the pending frontend/src/components/apply-form/jsonforms/JsonFormsFields.tsx,
 // so the form library can render with the SGG form widgets before the JSON Forms renderer
-// lands in the frontend. Only import paths are changed, plus `extraRenderers`, which lets the
-// form library preview its own widgets beside the SGG ones. Delete src/vendor/sgg with #12695.
+// lands in the frontend. Library deltas: import paths, extraRenderers and a preview
+// list callback. The preview supplies current committed data for rules.
+// Reconcile these behaviors when the shared frontend renderer is imported.
 import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
 import { JsonForms } from "@jsonforms/react";
 import {
@@ -11,11 +12,8 @@ import {
 } from "@jsonforms/vanilla-renderers";
 import type { RJSFSchema } from "@rjsf/utils";
 import type { FormattedFormValidationWarning } from "@sgg/frontend/types/applyForm/types";
-import {
-  getRequiredProperties,
-  shapeFormData,
-} from "@sgg/frontend/utils/applyForm/applyFormUtils";
-import { useCallback, useMemo, useState, type FormEvent } from "react";
+import { getRequiredProperties } from "@sgg/frontend/utils/applyForm/applyFormUtils";
+import { useMemo } from "react";
 
 import type { JsonFormsUiSchema } from "./jsonFormsUiSchema";
 import {
@@ -41,9 +39,8 @@ const NO_EXTRA_RENDERERS: JsonFormsRendererRegistryEntry[] = [];
  * and renders into the same `<form>`, so saving is unchanged: every widget still submits
  * under its own field name and the save action shapes the FormData as it always has.
  *
- * JSON Forms keeps its own copy of the data only to evaluate rules. It is refreshed from
- * the form on every input, so a field enabled by another field's answer changes as soon
- * as that answer does.
+ * The preview's collector owns current data. JSON Forms uses that same data for rules;
+ * this local adapter does not run a second collector or keep another answer state.
  */
 export const JsonFormsFields = ({
   errors,
@@ -54,6 +51,7 @@ export const JsonFormsFields = ({
   isFormLocked,
   print,
   extraRenderers = NO_EXTRA_RENDERERS,
+  onFieldListChange,
 }: {
   errors: FormattedFormValidationWarning[] | null;
   formData: object;
@@ -64,8 +62,9 @@ export const JsonFormsFields = ({
   print?: boolean;
   /** Renderers to rank against the SGG ones, for widgets only the form library has. */
   extraRenderers?: JsonFormsRendererRegistryEntry[];
+  /** Repeating preview widgets report their current draft rows explicitly. */
+  onFieldListChange?: (name: string, values: unknown[]) => void;
 }) => {
-  const [ruleData, setRuleData] = useState<object>(formData);
   const allRenderers = useMemo(
     () => [...renderers, ...extraRenderers],
     [extraRenderers],
@@ -81,26 +80,28 @@ export const JsonFormsFields = ({
       formContext,
       isFormLocked,
       print,
+      onFieldListChange,
     }),
-    [schema, formData, errors, uiSchema, formContext, isFormLocked, print],
-  );
-
-  const refreshRuleData = useCallback(
-    (event: FormEvent<HTMLDivElement>) => {
-      const form = event.currentTarget.closest("form");
-      if (form) setRuleData(shapeFormData(new FormData(form), schema));
-    },
-    [schema],
+    [
+      schema,
+      formData,
+      errors,
+      uiSchema,
+      formContext,
+      isFormLocked,
+      print,
+      onFieldListChange,
+    ],
   );
 
   return (
     <AdapterContext.Provider value={adapterContext}>
       <JsonFormsStyleContext.Provider value={{ styles: uswdsStyles }}>
-        <div onInput={refreshRuleData} onChange={refreshRuleData}>
+        <div>
           <JsonForms
             schema={schema as object}
             uischema={uiSchema}
-            data={ruleData}
+            data={formData}
             renderers={allRenderers}
             cells={vanillaCells}
             readonly={isFormLocked || print}

@@ -32,6 +32,11 @@ declare module "@sgg/frontend/utils/applyForm/applyFormUtils" {
     formData: FormData,
     formSchema: RJSFSchema,
   ) => T;
+  export const getFieldSchema: (args: {
+    definition: string;
+    formSchema: RJSFSchema;
+    schema?: RJSFSchema;
+  }) => RJSFSchema | undefined;
   export const getRequiredProperties: (schema: RJSFSchema) => string[];
   export const isFieldRequired: (
     path: string,
