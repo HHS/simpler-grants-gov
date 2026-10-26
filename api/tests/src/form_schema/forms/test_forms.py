@@ -39,7 +39,7 @@ EXPECTED_FORM_DATA = {
     541: {
         "form_name": "Project Abstract",
         "omb_number": "4040-0010",
-        "expiration_date": "12/31/2026",
+        "expiration_date": "8/31/2029",
     },
     276: {
         "form_name": "CD511",
