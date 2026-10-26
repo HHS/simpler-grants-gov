@@ -77,8 +77,10 @@ it("names a short ACH routing answer, counts its two issues honestly, and recove
   await waitFor(() =>
     expect(screen.getByRole("status").textContent).toContain("No errors found"),
   );
-  const after = structuredClone($previewData.get()) as any;
-  const expected = structuredClone(before) as any;
+  const after = structuredClone($previewData.get());
+  const expected = structuredClone(before) as {
+    financial_institution: { routing_transit_number: string };
+  };
   expected.financial_institution.routing_transit_number = "012345678";
   expect(after).toEqual(expected);
 });
