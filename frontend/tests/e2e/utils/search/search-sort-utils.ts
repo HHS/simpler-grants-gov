@@ -227,7 +227,8 @@ export async function expectNoFullPageReload(page: Page): Promise<void> {
 
 export type ResultRow = {
   id: string; // href of the opportunity link, unique per opportunity
-  title: string;
+  title: string; // whitespace-normalized, for messages
+  rawTitle: string; // exactly as rendered, untrimmed: this is what the index sorts on
   closeDate: string; // "MMM D, YYYY" or "TBD"
   postedDate: string; // "MMM D, YYYY" or ""
   awardMin: string; // "$1,234", "$--" (none) or "" ($0)
@@ -257,6 +258,7 @@ export async function readResultRows(page: Page): Promise<ResultRow[]> {
         return {
           id: link?.getAttribute("href") ?? "",
           title: clean(link?.textContent),
+          rawTitle: link?.textContent ?? "",
           closeDate: cells[0] ?? "",
           postedDate,
           awardMin: cells[4] ?? "",
@@ -266,9 +268,38 @@ export async function readResultRows(page: Page): Promise<ResultRow[]> {
     );
 }
 
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+// Dates outside this range are bad data (staging has opportunities dated e.g. 0202 or 1920).
+// Their position relative to real dates is not something this test can reason about.
+const PLAUSIBLE_YEAR_RANGE = { min: 1990, max: 2100 };
+
+/**
+ * Parses "MMM D, YYYY" exactly. Date.parse is not used because it silently remaps short
+ * years ("Jan 1, 0020" becomes 2020, "0050" becomes 1950).
+ */
 function parseDate(text: string): number | null {
-  const time = Date.parse(text);
-  return Number.isNaN(time) ? null : time;
+  const match = /^([A-Z][a-z]{2}) (\d{1,2}), (\d{4})$/.exec(text.trim());
+  if (!match) return null;
+  const month = MONTHS.indexOf(match[1]);
+  if (month < 0) return null;
+  const date = new Date(0);
+  date.setUTCFullYear(Number(match[3]), month, Number(match[2]));
+  date.setUTCHours(0, 0, 0, 0);
+  return date.getTime();
 }
 
 function parseAward(text: string): number | null {
@@ -285,12 +316,28 @@ function getSortValue(row: ResultRow, key: SortKey): number | string | null {
     case "postedDate":
       return parseDate(row.postedDate);
     case "title":
-      return row.title;
+      return row.rawTitle;
     case "awardMin":
       return parseAward(row.awardMin);
     case "awardMax":
       return parseAward(row.awardMax);
   }
+}
+
+/**
+ * Whether the row's value has a position this test can verify. Rows with a value that
+ * is present but not verifiable are left out of the ordering check.
+ */
+function isVerifiable(value: number | string, key: SortKey): boolean {
+  if (key === "closeDate" || key === "postedDate") {
+    const year = new Date(Number(value)).getUTCFullYear();
+    return year >= PLAUSIBLE_YEAR_RANGE.min && year <= PLAUSIBLE_YEAR_RANGE.max;
+  }
+  if (key === "title") {
+    // Collation of titles that start with whitespace or punctuation is implementation defined.
+    return /^[\p{L}\p{N}]/u.test(String(value));
+  }
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -308,14 +355,25 @@ const compareStrings: Comparator = (a, b) => {
 };
 const compareStringsIgnoringCase: Comparator = (a, b) =>
   compareStrings(String(a).toLowerCase(), String(b).toLowerCase());
+// Case, accents and punctuation ignored.
+const toLooseTitle = (value: number | string) =>
+  String(value)
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]/gu, "");
+const compareStringsLoosely: Comparator = (a, b) =>
+  compareStrings(toLooseTitle(a), toLooseTitle(b));
+
+type Entry = { row: ResultRow; index: number; value: number | string };
 
 function findFirstViolation(
-  values: (number | string)[],
+  entries: Entry[],
   direction: SortDirection,
   compare: Comparator,
 ): number {
-  for (let i = 1; i < values.length; i += 1) {
-    const result = compare(values[i - 1], values[i]);
+  for (let i = 1; i < entries.length; i += 1) {
+    const result = compare(entries[i - 1].value, entries[i].value);
     // Non-strict: ties are allowed, and are common for dates and awards.
     if (direction === "asc" ? result > 0 : result < 0) {
       return i;
@@ -324,14 +382,26 @@ function findFirstViolation(
   return -1;
 }
 
+const describeRow = (row: ResultRow) =>
+  JSON.stringify({
+    title: row.rawTitle,
+    closeDate: row.closeDate,
+    postedDate: row.postedDate,
+    awardMin: row.awardMin,
+    awardMax: row.awardMax,
+  });
+
 /**
  * Asserts rows are ordered for the sort option: non-strict ordering on the sorted
  * column, with rows that have no value (TBD close date, "$--" award) after all rows
  * that do. Relevancy is skipped (no visible score). Pass rows from consecutive pages
  * concatenated to also verify the page boundary.
  *
- * Title ordering passes if it holds either case-sensitively or case-insensitively,
- * since the search index collation is not defined in this repo.
+ * Environments differ in data, so rows whose value cannot be verified are left out of
+ * the check (see isVerifiable): dates outside a plausible year range, and titles that
+ * start with whitespace or punctuation. Title ordering passes if it holds exactly,
+ * ignoring case, or ignoring case/accents/punctuation, since the search index collation
+ * is not defined in this repo.
  */
 export function expectRowsSorted(
   rows: ResultRow[],
@@ -341,25 +411,37 @@ export function expectRowsSorted(
   const { key, direction } = sortCase;
   if (!key || !direction) return;
 
-  const sortValues = rows.map((row) => getSortValue(row, key));
+  const entries = rows.map((row, index) => ({
+    row,
+    index,
+    value: getSortValue(row, key),
+  }));
 
-  const firstMissing = sortValues.findIndex((value) => value === null);
+  const firstMissing = entries.findIndex((entry) => entry.value === null);
   if (firstMissing !== -1) {
     expect(
-      sortValues.slice(firstMissing).every((value) => value === null),
+      entries.slice(firstMissing).every((entry) => entry.value === null),
       `${context}: rows with no ${key} value should sort after rows that have one ("${sortCase.label}")`,
     ).toBe(true);
   }
 
-  const values = sortValues.filter(
-    (value): value is number | string => value !== null,
+  const present = entries.filter(
+    (entry): entry is Entry => entry.value !== null,
   );
+  const verifiable = present.filter((entry) => isVerifiable(entry.value, key));
+  if (verifiable.length !== present.length) {
+    console.warn(
+      `${context}: ${present.length - verifiable.length} of ${present.length} rows ` +
+        `have a ${key} value that can't be verified and were left out of the ordering check`,
+    );
+  }
+
   const comparators: Comparator[] =
     key === "title"
-      ? [compareStrings, compareStringsIgnoringCase]
+      ? [compareStrings, compareStringsIgnoringCase, compareStringsLoosely]
       : [compareNumbers];
   const violations = comparators.map((compare) =>
-    findFirstViolation(values, direction, compare),
+    findFirstViolation(verifiable, direction, compare),
   );
   const violationIndex = violations.every((index) => index !== -1)
     ? violations[0]
@@ -369,9 +451,10 @@ export function expectRowsSorted(
     violationIndex,
     violationIndex === -1
       ? ""
-      : `${context}: "${sortCase.label}" out of order at ${key} values ` +
-          `#${violationIndex - 1} -> #${violationIndex}: ` +
-          `"${values[violationIndex - 1]}" then "${values[violationIndex]}"`,
+      : `${context}: "${sortCase.label}" out of order between rows ` +
+          `#${verifiable[violationIndex - 1].index} and #${verifiable[violationIndex].index}: ` +
+          `${describeRow(verifiable[violationIndex - 1].row)} then ` +
+          `${describeRow(verifiable[violationIndex].row)}`,
   ).toBe(-1);
 }
 
@@ -525,6 +608,79 @@ export async function applyStatusNarrowingFilter(page: Page): Promise<void> {
     await waitForSearchResultsInitialLoad(page);
     await getNumberOfOpportunitySearchResults(page);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Partial result sets
+// ---------------------------------------------------------------------------
+
+/**
+ * Finds a keyword that returns a partial result set (fewer results than one page) on whatever
+ * data the target environment has, and leaves the browser on that search.
+ *
+ * Seed data differs between environments (the "SGG" keyword returns a handful of results locally
+ * but hundreds on staging), so the preferred keyword is tried first. The fallback uses titles of
+ * opportunities on the default search page: keyword search defaults to AND, so a title (or its
+ * first words) only matches a few opportunities. A set of 2 or more is preferred so ordering is
+ * meaningful; a set of 1 is accepted if that is all there is.
+ */
+export async function gotoPartialResultsSearch(
+  page: Page,
+  baseUrl: string,
+  preferredTerm: string,
+): Promise<{ term: string; count: number }> {
+  const attempted: string[] = [];
+  let singleResultMatch: { term: string; count: number } | undefined;
+
+  const tryTerm = async (term: string) => {
+    await gotoWithRetry(
+      page,
+      `${baseUrl}/search?query=${encodeURIComponent(term)}`,
+      { timeout: NAVIGATION_TIMEOUT },
+    );
+    await waitForSearchResultsInitialLoad(page);
+    const count = await getNumberOfOpportunitySearchResults(page);
+    attempted.push(`"${term}" -> ${count}`);
+    if (count >= 2 && count <= SEARCH_PAGE_SIZE) {
+      return { term, count };
+    }
+    if (count === 1 && !singleResultMatch) {
+      singleResultMatch = { term, count };
+    }
+    return undefined;
+  };
+
+  const preferred = await tryTerm(preferredTerm);
+  if (preferred) return preferred;
+
+  await gotoWithRetry(page, `${baseUrl}/search`, {
+    timeout: NAVIGATION_TIMEOUT,
+  });
+  await waitForSearchResultsInitialLoad(page);
+  const titles = (await readResultRows(page)).map((row) => row.title);
+
+  const candidates = titles
+    .slice(0, 5)
+    .flatMap((title) => [title.split(/\s+/).slice(0, 3).join(" "), title])
+    .filter(
+      (term, index, all) => term.length > 0 && all.indexOf(term) === index,
+    );
+
+  for (const term of candidates) {
+    const found = await tryTerm(term);
+    if (found) return found;
+  }
+
+  if (singleResultMatch) {
+    // Go back to it so the browser is on the search that is returned.
+    await tryTerm(singleResultMatch.term);
+    return singleResultMatch;
+  }
+
+  throw new Error(
+    "Could not find a keyword returning a partial result set (1-" +
+      `${SEARCH_PAGE_SIZE} results). Tried: ${attempted.join("; ")}`,
+  );
 }
 
 // ---------------------------------------------------------------------------

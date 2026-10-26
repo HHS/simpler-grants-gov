@@ -19,7 +19,6 @@ import {
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 import {
   deleteAllSavedSearches,
   navigateToSavedSearches,
@@ -41,6 +40,7 @@ import {
   expectRowsSorted,
   expectSortInURL,
   expectSortSelected,
+  gotoPartialResultsSearch,
   markPageSession,
   NON_DEFAULT_SORT_VALUE,
   openFirstResultAndGoBack,
@@ -53,15 +53,15 @@ import {
   clickPaginationPageIfPresent,
   getNumberOfOpportunitySearchResults,
   getSortSelect,
-  waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/search-utils";
 
 const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
-const { baseUrl, targetEnv } = playwrightEnv;
-const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
+const { baseUrl } = playwrightEnv;
 
-// "SGG" gives a small, stable, non-zero result set (also used by save-search.spec.ts).
+// Preferred keyword for a small result set (matches the E2E-prefixed seed data). Other
+// environments have different data, so gotoPartialResultsSearch falls back to opportunity titles
+// when this returns no results or more than one page.
 const PARTIAL_RESULTS_SEARCH_TERM = "E2E-*";
 
 // KNOWN APP DEFECT: on desktop the Sort by select sits inside the results <Suspense>, which is
@@ -390,18 +390,11 @@ test.describe("Search results sorting", () => {
          * @and sorting works correctly with partial result sets
          * A search term that returns less than one full page.
          */
-        await gotoWithRetry(
+        const { count: partialCount } = await gotoPartialResultsSearch(
           page,
-          `${baseUrl}/search?query=${PARTIAL_RESULTS_SEARCH_TERM}`,
-          { timeout: GOTO_TIMEOUT },
+          baseUrl,
+          PARTIAL_RESULTS_SEARCH_TERM,
         );
-        await waitForSearchResultsInitialLoad(page);
-        const partialCount = await getNumberOfOpportunitySearchResults(page);
-        expect(
-          partialCount,
-          `Expected a small result set for "${PARTIAL_RESULTS_SEARCH_TERM}". ` +
-            "If this starts failing, the seed data changed",
-        ).toBeGreaterThan(0);
         expect(partialCount).toBeLessThanOrEqual(SEARCH_PAGE_SIZE);
 
         await selectSort();
