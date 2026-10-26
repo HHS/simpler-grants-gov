@@ -29,4 +29,6 @@ jobs:
         with:
           persist-credentials: false
       - name: Run offline privacy and scope checks
-        run: python3 -m unittest discover -s scripts/tests -p test_nofo_alert_setup.py -v
+        run: |
+          aws --version
+          python3 -m unittest discover -s scripts/tests -p test_nofo_alert_setup.py -v

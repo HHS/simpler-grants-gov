@@ -58,6 +58,11 @@ the resolved recipient after routing is deployed and must remain restricted.
    changing it. Have the operator confirm its type, encryption and intended
    recipient privately. Do not delete or overwrite it merely to obtain a green
    run. A timeout leaves creation status uncertain; inspect privately first.
+   Other failures report only a fixed category and numeric CLI exit code, never
+   response text or the address. `cli_input_file`, `cli_input_json` and
+   `cli_options` indicate CLI/input failures to investigate before requesting
+   more AWS permissions. `unclassified` means the reason is still unknown;
+   do not infer a permission denial or enable raw/debug logging.
 6. Once routing support is merged, prepare a separate environment opt-in setting
    `monitoring_email_alert_recipient_parameter_name` to this fixed path and keep
    `pdf_readability_alarm_actions_enabled = false`. Review/apply using the usual
@@ -82,7 +87,10 @@ python3 -m unittest discover -s scripts/tests -p test_nofo_alert_setup.py -v
 
 Tests mock the AWS process, including sensitive failure output, existing
 parameters, access denial and timeout. CI does not authenticate to AWS or read
-the private secret. These checks do not prove effective deployed permissions.
+the private secret. CI additionally runs the installed CLI's output-skeleton
+validation with a synthetic stdin payload and a loopback-only endpoint. That
+checks the real CLI input path without an AWS request. The CLI probe is skipped
+locally if AWS CLI is unavailable. These checks do not prove effective deployed permissions.
 
 AWS references: [PutParameter API](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PutParameter.html),
 [overwrite permission condition](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-policy-conditions.html),

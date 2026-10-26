@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 import subprocess
 import unittest
 from pathlib import Path
@@ -106,6 +107,36 @@ class SetupTests(unittest.TestCase):
         self.assertIn("Result is unconfirmed", text)
         call.assert_called_once()
 
+    def test_fixed_failure_categories_never_print_request_or_response_details(self):
+        for raw, category in (
+            (
+                f"An error occurred (ValidationException) when calling the PutParameter operation: {EMAIL}",
+                "ValidationException",
+            ),
+            (
+                f"An error occurred (InvalidKeyId) when calling the PutParameter operation: {EMAIL}",
+                "InvalidKeyId",
+            ),
+            (f"Unable to load paramfile file:///dev/stdin: {EMAIL}", "cli_input_file"),
+            (f"Invalid JSON: {EMAIL}", "cli_input_json"),
+            (f"Unknown options: {EMAIL}", "cli_options"),
+            (f"Unable to locate credentials: {EMAIL}", "credentials_unavailable"),
+            (f"Could not connect to the endpoint: {EMAIL}", "endpoint_unreachable"),
+            (
+                f"An error occurred ({EMAIL}) when calling the PutParameter operation",
+                "unclassified",
+            ),
+        ):
+            with self.subTest(category=category):
+                status, text, call = self.run_main(
+                    result=subprocess.CompletedProcess(
+                        [], 252, stdout=EMAIL, stderr=raw
+                    )
+                )
+                self.assertEqual(status, 1)
+                self.assertIn(f"category={category}, cli_exit=252", text)
+                call.assert_called_once()
+
     def test_policy_only_allows_fixed_parameter_creation_and_contextual_encryption(
         self,
     ):
@@ -138,6 +169,49 @@ class SetupTests(unittest.TestCase):
                 }
             },
         )
+
+
+class AwsCliInputTests(unittest.TestCase):
+    @unittest.skipUnless(
+        shutil.which("aws"), "AWS CLI is checked on the Ubuntu CI runner"
+    )
+    def test_real_cli_accepts_synthetic_stdin_request_without_an_aws_call(self):
+        # Output skeleton validates CLI inputs without an API request. The closed
+        # loopback endpoint also prevents accidental contact with AWS if changed.
+        result = subprocess.run(
+            [
+                "aws",
+                "ssm",
+                "put-parameter",
+                "--region",
+                "us-east-1",
+                "--cli-input-json",
+                "file:///dev/stdin",
+                "--no-cli-pager",
+                "--generate-cli-skeleton",
+                "output",
+                "--endpoint-url",
+                "http://127.0.0.1:9",
+            ],
+            input=json.dumps(setup.parameter_payload(EMAIL)),
+            text=True,
+            capture_output=True,
+            timeout=20,
+            env={
+                "PATH": os.environ.get("PATH", ""),
+                "HOME": os.environ.get("HOME", "/tmp"),
+                "AWS_ACCESS_KEY_ID": "synthetic",
+                "AWS_SECRET_ACCESS_KEY": "synthetic",
+                "AWS_EC2_METADATA_DISABLED": "true",
+                "AWS_MAX_ATTEMPTS": "1",
+                "AWS_CLI_AUTO_PROMPT": "off",
+                "AWS_PAGER": "",
+            },
+        )
+        self.assertEqual(
+            result.returncode, 0, f"Synthetic CLI validation failed: {result.stderr}"
+        )
+        self.assertIn("Version", json.loads(result.stdout))
 
 
 if __name__ == "__main__":
