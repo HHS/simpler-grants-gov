@@ -74,7 +74,7 @@ const strings = (value: unknown): string[] =>
       ? Object.values(value).flatMap(strings)
       : [];
 
-describe.each(forms.filter((form) => [776, 732].includes(form.fid)))(
+describe.each(forms)(
   "$slug source-qualified file capture",
   ({ slug, fid, maximum, instructions, extraction }) => {
     it("accepts optional zero through source capacity without inventing a required first file", async () => {

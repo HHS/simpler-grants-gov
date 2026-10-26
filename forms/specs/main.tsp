@@ -29,3 +29,13 @@ import "./forms/assurances-for-construction-programs-sf-424d/index.tsp";
 import "./forms/phs-398-training-subaward-budget-attachment-s-form/index.tsp";
 
 import "./forms/r-r-subaward-budget-attachment-s-form/index.tsp";
+
+import "./forms/r-r-subaward-budget-attachment-s-form-10-yr-30-att/index.tsp";
+
+import "./forms/research-related-subaward-budget-total-fed-non-fed-attachment-s-form/index.tsp";
+
+import "./forms/r-r-multi-project-subaward-budget-attachment-s-form-10yr-30att/index.tsp";
+
+import "./forms/r-r-subaward-budget-attachment-s-form-5-yr-30-att/index.tsp";
+
+import "./forms/r-r-subaward-budget-attachment-s-form-10-yr-10-att/index.tsp";

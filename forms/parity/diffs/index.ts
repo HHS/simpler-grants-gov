@@ -1,3 +1,8 @@
+import { DIFF as subaward778 } from "./r-r-subaward-budget-attachment-s-form-10-yr-10-att.ts";
+import { DIFF as subaward782 } from "./r-r-subaward-budget-attachment-s-form-5-yr-30-att.ts";
+import { DIFF as subaward789 } from "./r-r-multi-project-subaward-budget-attachment-s-form-10yr-30att.ts";
+import { DIFF as subaward715 } from "./research-related-subaward-budget-total-fed-non-fed-attachment-s-form.ts";
+import { DIFF as subaward780 } from "./r-r-subaward-budget-attachment-s-form-10-yr-30-att.ts";
 import { DIFF as subaward776 } from "./r-r-subaward-budget-attachment-s-form.ts";
 import { DIFF as subaward732 } from "./phs-398-training-subaward-budget-attachment-s-form.ts";
 import { DIFF as originalSF424D } from "./assurances-for-construction-programs-sf-424d.ts";
@@ -26,6 +31,11 @@ import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profil
 
 /** Every form the suite checks. A plan with a `spec_id` must be listed here. */
 export const DIFFS: FormDiff[] = [
+  subaward778,
+  subaward782,
+  subaward789,
+  subaward715,
+  subaward780,
   subaward776,
   subaward732,
   originalSF424D,
