@@ -67,12 +67,25 @@ content, event identifiers, object identifiers, user details or arbitrary field
 names. Its success means diagnosis completed, not that history is ready to
 enable. It uses the same rollout, task-revision, concurrency and cleanup checks.
 
-### Verify the original performance need first
+### Gather preliminary dev performance and coverage evidence
 
-Choose **verify** in that same inspection workflow to measure the example NOFO
-from Builder #1142. No extra workflow is needed. The document is fixed in the
-reviewed source; no arbitrary document, command, environment or production input
-is accepted. A missing document fails explicitly instead of substituting another.
+Choose **verify** in that same inspection workflow to measure the user-supplied
+CAP-STIs dev NOFO, `d9bfd050-4d01-482b-847d-1e01b478838a`. No extra workflow is
+needed. The original production example from Builder #1142 is not present in dev:
+[the first verification run](https://github.com/HHS/simpler-grants-gov/actions/runs/40556189493)
+reported `target_missing`. This replacement target is fixed in reviewed source;
+no arbitrary document, command, environment or production input is accepted. A
+missing selected document still fails explicitly instead of substituting another.
+
+On October 27, the current legacy history UI showed 13 visible events for CAP-STIs,
+11 for BEN-TEST-3 (`03fa1e14-71cb-47e1-a92c-1cc79dc235bd`), and 9 for Dental
+Preventive and Clinical Support Program (`918ec820-82c3-47f0-b5a7-6899ee4f0949`).
+CAP-STIs includes a deleted-subsection event and comparison links. These are UI
+observations, not indexed event counts or timing measurements. None currently
+offers Load More. CAP-STIs provides preliminary coverage evidence, not a large
+history/pagination stress test or proof that the original production issue is
+fixed. An empty second page does not validate Load More performance. A longer
+history and the original production example remain acceptance work for #1142.
 
 The verification executes explicit indexed and legacy reader functions in one
 PostgreSQL repeatable-read, read-only transaction with a 30-second per-statement

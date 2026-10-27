@@ -132,6 +132,8 @@ class PreparationTests(unittest.TestCase):
             "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY", command
         )
         self.assertIn("main()", command)
+        self.assertIn('TARGET = "d9bfd050-4d01-482b-847d-1e01b478838a"', command)
+        self.assertNotIn("e5664268-36af-43ca-bf49-61983533041b", command)
         self.assertNotIn("--chunk-size", command)
         self.assertNotIn("backfill_history_index", command)
         self.assertLess(len(json.dumps(launch["overrides"]).encode()), 8192)
@@ -161,7 +163,7 @@ class PreparationTests(unittest.TestCase):
                 self.run_prepare(verify=True)
             self.assertNotIn("private document", capture.getvalue())
 
-    def test_missing_original_document_does_not_claim_measurement_success(self):
+    def test_missing_selected_document_does_not_claim_measurement_success(self):
         self.logs = [
             "NOFO_HISTORY_VERIFICATION "
             + json.dumps({"status": "target_missing", "counts": {}})
