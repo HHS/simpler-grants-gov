@@ -1,0 +1,507 @@
+{
+  "_xml_config": {
+    "form_name": "EPA_KeyContacts_2_0",
+    "namespaces": {
+      "default": "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0",
+      "EPA_KeyContacts_2_0": "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0",
+      "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+      "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0"
+    },
+    "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
+    "xml_structure": {
+      "root_element": "KeyContactPersons_2_0",
+      "root_namespace_prefix": "EPA_KeyContacts_2_0",
+      "root_attributes": {
+        "FormVersion": "2.0"
+      }
+    }
+  },
+  "authorized_representative": {
+    "xml_transform": {
+      "target": "AuthorizedRepresentative",
+      "type": "nested_object"
+    },
+    "name": {
+      "xml_transform": {
+        "target": "Name",
+        "type": "nested_object",
+        "namespace": "globLib"
+      },
+      "prefix": {
+        "xml_transform": {
+          "target": "PrefixName",
+          "namespace": "globLib"
+        }
+      },
+      "first_name": {
+        "xml_transform": {
+          "target": "FirstName",
+          "namespace": "globLib"
+        }
+      },
+      "middle_name": {
+        "xml_transform": {
+          "target": "MiddleName",
+          "namespace": "globLib"
+        }
+      },
+      "last_name": {
+        "xml_transform": {
+          "target": "LastName",
+          "namespace": "globLib"
+        }
+      },
+      "suffix": {
+        "xml_transform": {
+          "target": "SuffixName",
+          "namespace": "globLib"
+        }
+      }
+    },
+    "title": {
+      "xml_transform": {
+        "target": "Title",
+        "namespace": "globLib"
+      }
+    },
+    "address": {
+      "xml_transform": {
+        "target": "Address",
+        "type": "nested_object",
+        "namespace": "globLib"
+      },
+      "street1": {
+        "xml_transform": {
+          "target": "Street1",
+          "namespace": "globLib"
+        }
+      },
+      "street2": {
+        "xml_transform": {
+          "target": "Street2",
+          "namespace": "globLib"
+        }
+      },
+      "city": {
+        "xml_transform": {
+          "target": "City",
+          "namespace": "globLib"
+        }
+      },
+      "county": {
+        "xml_transform": {
+          "target": "County",
+          "namespace": "globLib"
+        }
+      },
+      "state": {
+        "xml_transform": {
+          "target": "State",
+          "namespace": "globLib"
+        }
+      },
+      "province": {
+        "xml_transform": {
+          "target": "Province",
+          "namespace": "globLib"
+        }
+      },
+      "zip_code": {
+        "xml_transform": {
+          "target": "ZipPostalCode",
+          "namespace": "globLib"
+        }
+      },
+      "country": {
+        "xml_transform": {
+          "target": "Country",
+          "namespace": "globLib"
+        }
+      }
+    },
+    "phone": {
+      "xml_transform": {
+        "target": "Phone",
+        "namespace": "globLib"
+      }
+    },
+    "fax": {
+      "xml_transform": {
+        "target": "Fax",
+        "namespace": "globLib"
+      }
+    },
+    "email": {
+      "xml_transform": {
+        "target": "Email",
+        "namespace": "globLib"
+      }
+    }
+  },
+  "payee": {
+    "xml_transform": {
+      "target": "Payee",
+      "type": "nested_object"
+    },
+    "name": {
+      "xml_transform": {
+        "target": "Name",
+        "type": "nested_object",
+        "namespace": "globLib"
+      },
+      "prefix": {
+        "xml_transform": {
+          "target": "PrefixName",
+          "namespace": "globLib"
+        }
+      },
+      "first_name": {
+        "xml_transform": {
+          "target": "FirstName",
+          "namespace": "globLib"
+        }
+      },
+      "middle_name": {
+        "xml_transform": {
+          "target": "MiddleName",
+          "namespace": "globLib"
+        }
+      },
+      "last_name": {
+        "xml_transform": {
+          "target": "LastName",
+          "namespace": "globLib"
+        }
+      },
+      "suffix": {
+        "xml_transform": {
+          "target": "SuffixName",
+          "namespace": "globLib"
+        }
+      }
+    },
+    "title": {
+      "xml_transform": {
+        "target": "Title",
+        "namespace": "globLib"
+      }
+    },
+    "address": {
+      "xml_transform": {
+        "target": "Address",
+        "type": "nested_object",
+        "namespace": "globLib"
+      },
+      "street1": {
+        "xml_transform": {
+          "target": "Street1",
+          "namespace": "globLib"
+        }
+      },
+      "street2": {
+        "xml_transform": {
+          "target": "Street2",
+          "namespace": "globLib"
+        }
+      },
+      "city": {
+        "xml_transform": {
+          "target": "City",
+          "namespace": "globLib"
+        }
+      },
+      "county": {
+        "xml_transform": {
+          "target": "County",
+          "namespace": "globLib"
+        }
+      },
+      "state": {
+        "xml_transform": {
+          "target": "State",
+          "namespace": "globLib"
+        }
+      },
+      "province": {
+        "xml_transform": {
+          "target": "Province",
+          "namespace": "globLib"
+        }
+      },
+      "zip_code": {
+        "xml_transform": {
+          "target": "ZipPostalCode",
+          "namespace": "globLib"
+        }
+      },
+      "country": {
+        "xml_transform": {
+          "target": "Country",
+          "namespace": "globLib"
+        }
+      }
+    },
+    "phone": {
+      "xml_transform": {
+        "target": "Phone",
+        "namespace": "globLib"
+      }
+    },
+    "fax": {
+      "xml_transform": {
+        "target": "Fax",
+        "namespace": "globLib"
+      }
+    },
+    "email": {
+      "xml_transform": {
+        "target": "Email",
+        "namespace": "globLib"
+      }
+    }
+  },
+  "administrative_contact": {
+    "xml_transform": {
+      "target": "AdminstrativeContact",
+      "type": "nested_object"
+    },
+    "name": {
+      "xml_transform": {
+        "target": "Name",
+        "type": "nested_object",
+        "namespace": "globLib"
+      },
+      "prefix": {
+        "xml_transform": {
+          "target": "PrefixName",
+          "namespace": "globLib"
+        }
+      },
+      "first_name": {
+        "xml_transform": {
+          "target": "FirstName",
+          "namespace": "globLib"
+        }
+      },
+      "middle_name": {
+        "xml_transform": {
+          "target": "MiddleName",
+          "namespace": "globLib"
+        }
+      },
+      "last_name": {
+        "xml_transform": {
+          "target": "LastName",
+          "namespace": "globLib"
+        }
+      },
+      "suffix": {
+        "xml_transform": {
+          "target": "SuffixName",
+          "namespace": "globLib"
+        }
+      }
+    },
+    "title": {
+      "xml_transform": {
+        "target": "Title",
+        "namespace": "globLib"
+      }
+    },
+    "address": {
+      "xml_transform": {
+        "target": "Address",
+        "type": "nested_object",
+        "namespace": "globLib"
+      },
+      "street1": {
+        "xml_transform": {
+          "target": "Street1",
+          "namespace": "globLib"
+        }
+      },
+      "street2": {
+        "xml_transform": {
+          "target": "Street2",
+          "namespace": "globLib"
+        }
+      },
+      "city": {
+        "xml_transform": {
+          "target": "City",
+          "namespace": "globLib"
+        }
+      },
+      "county": {
+        "xml_transform": {
+          "target": "County",
+          "namespace": "globLib"
+        }
+      },
+      "state": {
+        "xml_transform": {
+          "target": "State",
+          "namespace": "globLib"
+        }
+      },
+      "province": {
+        "xml_transform": {
+          "target": "Province",
+          "namespace": "globLib"
+        }
+      },
+      "zip_code": {
+        "xml_transform": {
+          "target": "ZipPostalCode",
+          "namespace": "globLib"
+        }
+      },
+      "country": {
+        "xml_transform": {
+          "target": "Country",
+          "namespace": "globLib"
+        }
+      }
+    },
+    "phone": {
+      "xml_transform": {
+        "target": "Phone",
+        "namespace": "globLib"
+      }
+    },
+    "fax": {
+      "xml_transform": {
+        "target": "Fax",
+        "namespace": "globLib"
+      }
+    },
+    "email": {
+      "xml_transform": {
+        "target": "Email",
+        "namespace": "globLib"
+      }
+    }
+  },
+  "project_manager": {
+    "xml_transform": {
+      "target": "ProjectManager",
+      "type": "nested_object"
+    },
+    "name": {
+      "xml_transform": {
+        "target": "Name",
+        "type": "nested_object",
+        "namespace": "globLib"
+      },
+      "prefix": {
+        "xml_transform": {
+          "target": "PrefixName",
+          "namespace": "globLib"
+        }
+      },
+      "first_name": {
+        "xml_transform": {
+          "target": "FirstName",
+          "namespace": "globLib"
+        }
+      },
+      "middle_name": {
+        "xml_transform": {
+          "target": "MiddleName",
+          "namespace": "globLib"
+        }
+      },
+      "last_name": {
+        "xml_transform": {
+          "target": "LastName",
+          "namespace": "globLib"
+        }
+      },
+      "suffix": {
+        "xml_transform": {
+          "target": "SuffixName",
+          "namespace": "globLib"
+        }
+      }
+    },
+    "title": {
+      "xml_transform": {
+        "target": "Title",
+        "namespace": "globLib"
+      }
+    },
+    "address": {
+      "xml_transform": {
+        "target": "Address",
+        "type": "nested_object",
+        "namespace": "globLib"
+      },
+      "street1": {
+        "xml_transform": {
+          "target": "Street1",
+          "namespace": "globLib"
+        }
+      },
+      "street2": {
+        "xml_transform": {
+          "target": "Street2",
+          "namespace": "globLib"
+        }
+      },
+      "city": {
+        "xml_transform": {
+          "target": "City",
+          "namespace": "globLib"
+        }
+      },
+      "county": {
+        "xml_transform": {
+          "target": "County",
+          "namespace": "globLib"
+        }
+      },
+      "state": {
+        "xml_transform": {
+          "target": "State",
+          "namespace": "globLib"
+        }
+      },
+      "province": {
+        "xml_transform": {
+          "target": "Province",
+          "namespace": "globLib"
+        }
+      },
+      "zip_code": {
+        "xml_transform": {
+          "target": "ZipPostalCode",
+          "namespace": "globLib"
+        }
+      },
+      "country": {
+        "xml_transform": {
+          "target": "Country",
+          "namespace": "globLib"
+        }
+      }
+    },
+    "phone": {
+      "xml_transform": {
+        "target": "Phone",
+        "namespace": "globLib"
+      }
+    },
+    "fax": {
+      "xml_transform": {
+        "target": "Fax",
+        "namespace": "globLib"
+      }
+    },
+    "email": {
+      "xml_transform": {
+        "target": "Email",
+        "namespace": "globLib"
+      }
+    }
+  }
+}
