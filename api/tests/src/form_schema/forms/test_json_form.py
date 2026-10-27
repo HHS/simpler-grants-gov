@@ -125,6 +125,21 @@ class TestLoadJsonForm:
         with pytest.raises(ValueError, match="declared both inline"):
             load_json_form(form_path)
 
+    def test_xml_mapping_file_fills_xml_configuration(self, tmp_path: Path) -> None:
+        mapping = {"format": "xml-mapping", "namespaces": {"default": "urn:f"}, "root": {}}
+        form_path = _write_split(tmp_path, MINIMAL_FORM)
+        (form_path.parent / "xml_mapping.json").write_text(json.dumps(mapping))
+
+        assert load_json_form(form_path).json_to_xml_schema == mapping
+
+    def test_xml_configuration_in_both_formats_rejected(self, tmp_path: Path) -> None:
+        form_path = _write_split(tmp_path, MINIMAL_FORM)
+        (form_path.parent / "xml_transform.json").write_text("{}")
+        (form_path.parent / "xml_mapping.json").write_text("{}")
+
+        with pytest.raises(ValueError, match="xml_transform.json and xml_mapping.json"):
+            load_json_form(form_path)
+
     def test_malformed_schema_file_named_in_error(self, tmp_path: Path) -> None:
         data = {k: v for k, v in MINIMAL_FORM.items() if k != "form_json_schema"}
         form_path = _write_inline(tmp_path, data)

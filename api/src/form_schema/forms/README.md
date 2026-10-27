@@ -26,7 +26,7 @@ forms/
             ├── json_schema.json    # form_json_schema
             ├── ui_schema.json      # form_ui_schema
             ├── rule_schema.json    # form_rule_schema
-            └── xml_transform.json  # json_to_xml_schema
+            └── xml_transform.json  # json_to_xml_schema, or xml_mapping.json (one of the two)
 ```
 
 - A version has exactly one of `form_json.py` or `form.json`.
