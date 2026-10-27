@@ -1,0 +1,32 @@
+name: Test private NOFO alert setup
+
+on:
+  pull_request:
+    paths:
+      - scripts/create_nofo_alert_parameter.py
+      - scripts/nofo_alert_setup_session_policy.json
+      - scripts/tests/test_nofo_alert_setup.py
+      - .github/workflows/setup-nofo-alert-email.yml
+      - .github/workflows/ci-nofo-alert-setup.yml
+  push:
+    branches: [main]
+    paths:
+      - scripts/create_nofo_alert_parameter.py
+      - scripts/nofo_alert_setup_session_policy.json
+      - scripts/tests/test_nofo_alert_setup.py
+      - .github/workflows/setup-nofo-alert-email.yml
+      - .github/workflows/ci-nofo-alert-setup.yml
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run offline privacy and scope checks
+        run: python3 -m unittest discover -s scripts/tests -p test_nofo_alert_setup.py -v

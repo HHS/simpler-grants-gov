@@ -58,7 +58,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
-    "zod": "^3.23.8"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.0",
@@ -121,7 +121,7 @@
     "sharp": "^0.35.5",
     "source-map-js": "^1.2.2",
     "postcss": "8.5.23",
-    "undici": "^7.29.1",
+    "undici": "^7.30.1",
     "dompurify": "^3.4.17"
   },
   "devEngines": {
