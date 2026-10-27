@@ -18,6 +18,7 @@ import pytest
 
 import src.form_schema.forms as forms_pkg
 from src.form_schema.forms.sf424 import FORM_JSON_SCHEMA, FORM_XML_TRANSFORM_RULES
+from src.services.xml_generation.mapping import is_xml_mapping, mapped_root_fields
 from src.services.xml_generation.transformers.base_transformer import FIELD_REFERENCE_PATTERN
 
 # Schema fields that are intentionally not written to the XML, keyed by form package name.
@@ -97,6 +98,8 @@ def _conditional_source_fields(transform: dict, from_root: bool) -> set[str]:
 
 def _mapped_fields(rules: dict, schema_fields: set[str]) -> set[str]:
     """Top-level schema fields that the transform rules read from."""
+    if is_xml_mapping(rules):
+        return mapped_root_fields(rules)
     xml_config = rules.get("_xml_config", {})
     mapped = {key for key in rules if not key.startswith("_")}
     mapped |= set(xml_config.get("attachment_fields", {}))
