@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 from src.form_schema.forms import get_active_forms, init_form_registry
+from src.services.xml_generation.mapping import is_xml_mapping
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,13 @@ def _build_xml_form_xsd_url_map() -> dict[str, str]:
     """
     xsd_urls: dict[str, str] = {}
     for form_name, transform_config in _build_xml_form_map().items():
-        xml_config = (transform_config or {}).get("_xml_config", {})
+        transform_config = transform_config or {}
+        # A mapping in the XML mapping format keeps xsd_url at its top level.
+        xml_config = (
+            transform_config
+            if is_xml_mapping(transform_config)
+            else transform_config.get("_xml_config", {})
+        )
         xsd_url = xml_config.get("xsd_url")
         if xsd_url:
             xsd_urls[form_name] = xsd_url
