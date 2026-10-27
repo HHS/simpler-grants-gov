@@ -2,8 +2,9 @@
 
 Whether each form's artifacts agree: the form plan (`site/src/content/forms/<slug>.json`),
 the Grants.gov DAT and XSD it cites, the JSON Schema and UI schema compiled from its
-TypeSpec (`dist/canonical/forms/<spec_id>/`), and the XML transform rules emitted from its
-`@Mapping` links (`xml-transform.json`, in the same directory). It is static analysis: every artifact is
+TypeSpec (`dist/canonical/forms/<spec_id>/`), and the XML mapping emitted from its
+`@Mapping` links, in both formats the API reads (`xml-transform.json` and `xml-mapping.json`,
+in the same directory). It is static analysis: every artifact is
 flattened to `{path: field}` and the maps are compared. Nothing is validated or rendered.
 
 ## Running it
@@ -55,6 +56,11 @@ TypeSpec model names it with `@Mapping.from` in the `grantsGovXml` mapping. Plan
 JSON path and element path together, so a field the mapping writes to a different element
 than the plan says shows as both missing and extra. Order is checked against the XSD
 because the API writes elements in the order of the rules, and the XSD is a sequence.
+
+The three XML mapping comparisons run twice per form: once for `xml-transform.json`, the
+rules keyed by the response's properties, and once for `xml-mapping.json`, the mapping shaped
+like the XML. Both flatten to the same `{path: field}` maps, so one record in `parity/diffs/`
+covers both.
 
 `xsdModels.test.ts` checks the XSD TypeSpec models (each form's `xsd.tsp`, and the shared ones
 in `specs/xsd/`), the XML mapping target

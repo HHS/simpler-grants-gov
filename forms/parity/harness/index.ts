@@ -17,13 +17,12 @@ import { indexLeaves, jsonSchemaFields } from "./flatten/jsonSchema.ts";
 import { planFields, walkFields, type Plan } from "./flatten/plan.ts";
 import { uiSchemaFields } from "./flatten/uiSchema.ts";
 import { xsdFields } from "./flatten/xsd.ts";
-import { link, xmlTransformFields } from "./flatten/xmlTransform.ts";
+import { link } from "./flatten/xmlTransform.ts";
 import {
   loadFormSchema,
   loadIndex,
   loadPlans,
   loadUiSchema,
-  loadXmlTransform,
   readSource,
 } from "./load.ts";
 import {
@@ -32,6 +31,7 @@ import {
   type Fields,
   type FormDiff,
 } from "./model.ts";
+import { xmlFields, type XmlFormat } from "./xml.ts";
 
 /**
  * What each comparison checks, as the tests name it. The DAT is compared on `maxLength`
@@ -232,10 +232,17 @@ export interface FormPairs {
   };
 }
 
+/** Which of a form's emitted files to check. */
+export interface CheckOptions {
+  /** The format the XML mapping is read in. Defaults to `xml-transform`. */
+  xml?: XmlFormat;
+}
+
 /** Reads and flattens every artifact for one form, pairing each with the plan. */
 export async function formPairs(
   diff: FormDiff,
   plans: Map<string, Plan> = loadPlans(),
+  options: CheckOptions = {},
 ): Promise<FormPairs> {
   const plan = required(plans.get(diff.slug), `plan with slug ${diff.slug}`);
   const planProblems: Discrepancy[] = [];
@@ -262,8 +269,7 @@ export async function formPairs(
   const schema = jsonSchemaFields(await loadFormSchema(specId));
   const jsonPlan = planFields(plan, "json_path");
   const joined = joinThroughPlan(diff, plan, schema, xsdSource);
-  const rules = loadXmlTransform(specId);
-  const mapped = rules && xmlTransformFields(rules);
+  const mapped = xmlFields(specId, options.xml);
   return {
     plan,
     planProblems,
@@ -295,8 +301,9 @@ export async function formPairs(
 export async function checkForm(
   diff: FormDiff,
   plans: Map<string, Plan> = loadPlans(),
+  options: CheckOptions = {},
 ): Promise<FormCheck> {
-  const { planProblems, ...pairs } = await formPairs(diff, plans);
+  const { planProblems, ...pairs } = await formPairs(diff, plans, options);
   const dat = comparePair(pairs.dat, SPECS.dat);
   const xsd = comparePair(pairs.xsd, SPECS.xsd);
   const requirements = { dat, xsd };
@@ -361,6 +368,7 @@ export type {
 } from "./flatten/plan.ts";
 export { walkFields } from "./flatten/plan.ts";
 export { hasXmlTransform, loadGrantsGovIdentity, loadPlans } from "./load.ts";
+export type { XmlFormat } from "./xml.ts";
 export {
   report,
   type Discrepancy,
