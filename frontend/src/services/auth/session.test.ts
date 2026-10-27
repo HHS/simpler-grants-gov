@@ -91,6 +91,14 @@ describe("getSession", () => {
       expiresAt: 123000,
     });
   });
+  it("returns null without decrypting if there is no session cookie", async () => {
+    getCookiesMock.mockReturnValueOnce(
+      undefined as unknown as { value: string },
+    );
+    const session = await getSession();
+    expect(session).toEqual(null);
+    expect(decryptMock).not.toHaveBeenCalled();
+  });
   it("returns null if client token decrypt does not return a payload and token", async () => {
     decryptMock.mockReturnValue(null);
     const session = await getSession();

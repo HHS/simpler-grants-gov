@@ -1,0 +1,28 @@
+{
+  "name": "simpler-forms-sgg",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Installs form library forms into this application's form registry.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "typespec": "./lib/main.tsp",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "check:types": "tsc -p . --noEmit"
+  },
+  "peerDependencies": {
+    "@typespec/compiler": "^1.16.0",
+    "form-library-xml": "*",
+    "simpler-forms": "*"
+  },
+  "devDependencies": {
+    "@typespec/compiler": "^1.16.0",
+    "simpler-forms": "^0.1.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -165,6 +165,56 @@ def get_submissions(
 
     if consolidated_filter and consolidated_filter.filters:
         submission_filters = consolidated_filter.filters
+
+        # Each one of these filters is Last One Wins — if multiple of the same type are entered,
+        # only the last one is applied. We apply non-Status filters first and track whether any
+        # were provided so we can handle unrecognized Status values below without re-iterating.
+        has_other_filters = False
+
+        grants_gov_tracking_numbers = get_filter_values(
+            submission_filters, GetSubmissionListFilter.GRANTS_GOV_TRACKING_NUMBER
+        )
+        if grants_gov_tracking_numbers:
+            has_other_filters = True
+            stmt = stmt.where(
+                [
+                    ApplicationSubmission.legacy_tracking_number == tracking_number
+                    for tracking_number in grants_gov_tracking_numbers
+                ][-1]
+            )
+        cfda_numbers = get_filter_values(submission_filters, GetSubmissionListFilter.CFDA_NUMBER)
+        if cfda_numbers:
+            has_other_filters = True
+            stmt = stmt.where(
+                [
+                    OpportunityAssistanceListing.assistance_listing_number == cfda
+                    for cfda in cfda_numbers
+                ][-1]
+            )
+        funding_opportunity_numbers = get_filter_values(
+            submission_filters, GetSubmissionListFilter.FUNDING_OPPORTUNITY_NUMBER
+        )
+        if funding_opportunity_numbers:
+            has_other_filters = True
+            stmt = stmt.where(
+                [
+                    Opportunity.opportunity_number == opportunity_number
+                    for opportunity_number in funding_opportunity_numbers
+                ][-1]
+            )
+        opportunity_ids = get_filter_values(
+            submission_filters, GetSubmissionListFilter.OPPORTUNITY_ID
+        )
+        if opportunity_ids:
+            has_other_filters = True
+            stmt = stmt.where(
+                [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][
+                    -1
+                ]
+            )
+
+        # Status filter is applied last because it requires a translation layer (string →
+        # ApplicationStatus enum) and has special handling for unrecognized values.
         status = get_filter_values(submission_filters, GetSubmissionListFilter.STATUS)
         if status:
             if len(status) > 1:
@@ -187,45 +237,11 @@ def get_submissions(
                         ~ApplicationSubmission.application_submission_tracking_numbers.any(),
                         Application.application_status == simpler_status,
                     )
-        # Each one of these filters is Last One Wins — if multiple of the same type are entered,
-        # only the last one is applied.
-        grants_gov_tracking_numbers = get_filter_values(
-            submission_filters, GetSubmissionListFilter.GRANTS_GOV_TRACKING_NUMBER
-        )
-        if grants_gov_tracking_numbers:
-            stmt = stmt.where(
-                [
-                    ApplicationSubmission.legacy_tracking_number == tracking_number
-                    for tracking_number in grants_gov_tracking_numbers
-                ][-1]
-            )
-        cfda_numbers = get_filter_values(submission_filters, GetSubmissionListFilter.CFDA_NUMBER)
-        if cfda_numbers:
-            stmt = stmt.where(
-                [
-                    OpportunityAssistanceListing.assistance_listing_number == cfda
-                    for cfda in cfda_numbers
-                ][-1]
-            )
-        funding_opportunity_numbers = get_filter_values(
-            submission_filters, GetSubmissionListFilter.FUNDING_OPPORTUNITY_NUMBER
-        )
-        if funding_opportunity_numbers:
-            stmt = stmt.where(
-                [
-                    Opportunity.opportunity_number == opportunity_number
-                    for opportunity_number in funding_opportunity_numbers
-                ][-1]
-            )
-        opportunity_ids = get_filter_values(
-            submission_filters, GetSubmissionListFilter.OPPORTUNITY_ID
-        )
-        if opportunity_ids:
-            stmt = stmt.where(
-                [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][
-                    -1
-                ]
-            )
+                else:
+                    # Unrecognized status — if other filters are present, ignore status and
+                    # let them apply. If status is the only filter, return nothing.
+                    if not has_other_filters:
+                        return []
 
         # Unsupported but logged
         unsupported_filters = {

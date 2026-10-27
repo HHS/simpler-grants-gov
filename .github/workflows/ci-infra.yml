@@ -7,14 +7,23 @@ on:
     paths:
       - bin/**
       - infra/**
+      - .github/scripts/nofo_history/**
       - .github/workflows/**
   pull_request:
     paths:
       - bin/**
       - infra/**
+      - .github/scripts/nofo_history/**
       - .github/workflows/**
 
 jobs:
+  test-nofo-history-preparation:
+    name: Test NOFO history preparation helper
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run offline preparation tests
+        run: python3 -m unittest discover -s .github/scripts/nofo_history/tests -p 'test_prepare_nofos_history_dev.py' -v
   lint-github-actions:
     # Lint github actions files using https://github.com/rhysd/actionlint
     # This job configuration is largely copied from https://github.com/rhysd/actionlint/blob/main/docs/usage.md#use-actionlint-on-github-actions

@@ -69,3 +69,9 @@ To release a tag:
 ## ⛑️ Helper workflows
 
 - [`check-ci-cd-auth`](./check-ci-cd-auth.yml): verifes that the project's Github repo is able to connect to AWS
+- [`prepare-nofos-history-dev`](./prepare-nofos-history-dev.yml): manually backfills
+  and checks NOFO document history in dev after deployment. See the
+  [operator steps](../../documentation/infra/prepare-nofo-document-history-dev.md).
+- [`diagnose-nofos-history-dev`](./diagnose-nofos-history-dev.yml), displayed as
+  **Inspect NOFO document history - dev**: verifies timings/coverage for the
+  original slow document or reports legacy ownership counts, both read-only.

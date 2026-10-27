@@ -1,0 +1,39 @@
+name: Inspect NOFO document history - dev
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "Choose read-only original-document verification or legacy ownership counts"
+        type: choice
+        default: verify
+        options: [verify, diagnose]
+concurrency:
+  group: cd-nofos-infra-dev
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+      - name: Configure dev AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: nofos
+          environment: infra-dev
+      - name: Inspect history without changing data or the reader switch
+        env:
+          HISTORY_OPERATION: ${{ inputs.operation }}
+        run: |
+          case "$HISTORY_OPERATION" in
+            verify|diagnose) python3 .github/scripts/nofo_history/prepare_dev.py "--$HISTORY_OPERATION" ;;
+            *) exit 1 ;;
+          esac

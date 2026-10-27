@@ -27,7 +27,9 @@ from tests.src.db.models.factories import (
 )
 
 
-def _make_soap_request(soap_client_certificate, status=None, tracking_number=None):
+def _make_soap_request(
+    soap_client_certificate, status=None, tracking_number=None, filter_type=None, filter_value=None
+):
     request_xml = (
         '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
         'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -48,6 +50,13 @@ def _make_soap_request(soap_client_certificate, status=None, tracking_number=Non
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             f"<gran:FilterValue>GRANT{tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+        )
+    if filter_type and filter_value is not None:
+        request_xml += (
+            "<gran:ExpandedApplicationFilter>"
+            f"<gran:FilterType>{filter_type}</gran:FilterType>"
+            f"<gran:FilterValue>{filter_value}</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
         )
 
@@ -242,10 +251,27 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         assert len(set(application_status)) == 1
         assert application_status[0] == "Validated"
 
-    def test_get_submission_list_expanded_entering_invalid_status_just_ignores_status_filters_entirely(
-        self, db_session, enable_factory_create, setup_data
+    @pytest.mark.parametrize(
+        "filter_type,filter_value",
+        [
+            ("Status", "XYZ"),
+            ("GrantsGovTrackingNumber", "GRANT9999999999"),
+            ("CFDANumber", "99.999"),
+            ("FundingOpportunityNumber", "FON-DOES-NOT-EXIST"),
+            ("OpportunityID", "9999999"),
+        ],
+    )
+    def test_get_submission_list_expanded_no_results_when_filter_matches_nothing(
+        self, db_session, enable_factory_create, setup_data, filter_type, filter_value
     ):
-        soap_request = _make_soap_request(setup_data["soap_client_certificate"], status="X")
+        """AC: When no applications meet the filtering criteria, return no applications.
+        This covers all supported filter types — whether the value is gibberish (e.g. Status='XYZ')
+        or simply doesn't match any data in the DB."""
+        soap_request = _make_soap_request(
+            setup_data["soap_client_certificate"],
+            filter_type=filter_type,
+            filter_value=filter_value,
+        )
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
         schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
@@ -261,7 +287,35 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
-        assert result.available_application_number == 5
+        assert result.available_application_number == 0
+
+    def test_get_submission_list_expanded_unrecognized_status_ignored_when_other_filters_present(
+        self, db_session, enable_factory_create, setup_data
+    ):
+        """When Status is unrecognized but other filters are present, Status is ignored and the
+        other filters apply normally. Verified against the live Grants.gov training endpoint."""
+        soap_request = _make_soap_request(
+            setup_data["soap_client_certificate"],
+            status="XYZ",
+            tracking_number=setup_data["submission"].legacy_tracking_number,
+        )
+        payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
+        soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        simpler_submissions = get_submission_list(
+            db_session=db_session,
+            request=schema,
+            soap_request=soap_request,
+            soap_config=_make_operation_config(),
+            is_expanded=True,
+        )
+        result = get_submission_list_response(
+            simpler_submissions=simpler_submissions,
+            proxy_response=SOAPResponse(data="", status_code=200, headers={}),
+        )
+        assert result.success is True
+        assert result.available_application_number == 1
+        assert result.submission_info[0].grants_gov_tracking_number == setup_data["tracking_number"]
 
     def test_get_submission_list_expanded_response_does_not_include_grants_gov_application_status_if_it_is_none(
         self, db_session, enable_factory_create, setup_data

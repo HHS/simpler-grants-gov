@@ -11216,6 +11216,10 @@ components:
     UserSavedSearchesResponseSchema:
       type: object
       properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id055
+          $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
           description: The message to return
@@ -15199,12 +15203,12 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
     ApiUserKeyAuth:
       type: apiKey
       in: header
       name: X-API-Key
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 

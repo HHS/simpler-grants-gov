@@ -37,7 +37,6 @@ jobs:
           gh workflow disable "Co-planning: Sync GitHub to Fider" || true
           gh workflow disable "Deliverable mapping: Issue level" || true
           gh workflow disable "E2E Test Daily" || true
-          gh workflow disable "E2E Tests Weekly" || true
           gh workflow disable "ECR Cleanup" || true
           gh workflow disable "Lint - Bulk inherit parent metadata" || true
           gh workflow disable "Lint - Deliverable Acceptance Criteria and Metrics" || true

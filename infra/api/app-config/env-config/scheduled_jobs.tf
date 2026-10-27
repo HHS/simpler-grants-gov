@@ -93,16 +93,7 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    grantee2 = [
-      "flask",
-      "data-migration",
-      "load-transform",
-      "--load",
-      "--transform",
-      "--set-current",
-      "--store-version"
-    ],
-    # Mirrors grantee2.
+    # Mirrors infra-sgg3.
     grantor1 = [
       "flask",
       "data-migration",
@@ -169,7 +160,6 @@ locals {
     grantee1         = ["flask", "task", "sam-extracts"]
     "infra-sgg2"     = ["flask", "task", "sam-extracts"]
     "infra-sgg3"     = ["flask", "task", "sam-extracts"]
-    grantee2         = ["flask", "task", "sam-extracts"]
     grantor1         = ["flask", "task", "sam-extracts"]
     "infra-sgg1"     = ["flask", "task", "sam-extracts"]
     prod             = ["flask", "task", "sam-extracts"]
@@ -184,7 +174,6 @@ locals {
     grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
     "infra-sgg3"     = "DISABLED"
-    grantee2         = "DISABLED"
     grantor1         = "DISABLED"
     "infra-sgg1"     = "DISABLED"
     prod             = "DISABLED"
@@ -199,7 +188,6 @@ locals {
     grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
     "infra-sgg3"     = "DISABLED"
-    grantee2         = "DISABLED"
     grantor1         = "DISABLED"
     "infra-sgg1"     = "DISABLED"
     prod             = "DISABLED"
@@ -214,7 +202,6 @@ locals {
     grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
     "infra-sgg3"     = "ENABLED"
-    grantee2         = "ENABLED"
     grantor1         = "ENABLED"
     "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
@@ -229,7 +216,6 @@ locals {
     grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
     "infra-sgg3"     = "ENABLED"
-    grantee2         = "ENABLED"
     grantor1         = "ENABLED"
     "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
@@ -244,7 +230,6 @@ locals {
     grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
     "infra-sgg3"     = "ENABLED"
-    grantee2         = "ENABLED"
     grantor1         = "ENABLED"
     "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
@@ -259,10 +244,24 @@ locals {
     grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
     "infra-sgg3"     = "DISABLED"
-    grantee2         = "DISABLED"
     grantor1         = "DISABLED"
     "infra-sgg1"     = "DISABLED"
     prod             = "ENABLED"
+  }
+  new-opportunity-notification-state = {
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "DISABLED"
+    "infra-training" = "DISABLED"
+    grantee1         = "DISABLED"
+    "infra-sgg2"     = "DISABLED"
+    "infra-sgg3"     = "DISABLED"
+    grantee2         = "DISABLED"
+    grantor1         = "DISABLED"
+    "infra-sgg1"     = "DISABLED"
+    prod             = "DISABLED"
   }
   scheduled_jobs = {
     load-transform = {
@@ -416,6 +415,16 @@ locals {
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+    }
+    new-opportunity-notification = {
+      task_command = ["flask", "task", "new-opportunity-notification"]
+      # Every day at 4am Eastern Time during DST. 5am during non-DST.
+      schedule_expression = "cron(0 9 * * ? *)"
+      # Only enable in dev/staging, do not run in training/prod yet
+      state            = local.new-opportunity-notification-state[var.environment]
+      cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
+      mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
   }
 }

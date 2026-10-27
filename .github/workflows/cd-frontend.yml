@@ -26,7 +26,6 @@ on:
           - training
           - infra-training
           - grantee1
-          - grantee2
           - grantor1
           - infra-sgg2
           - infra-sgg3
@@ -89,10 +88,16 @@ jobs:
     name: E2E Staging (post-deploy)
     needs: [deploy]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    uses: ./.github/workflows/e2e-staging.yml
+    # Newest post-deploy run wins: if the API deploy for the same merge (or a
+    # later merge) finishes while this run is going, that run cancels this one
+    # and tests the fully deployed state. Shared with cd-api.yml.
+    concurrency:
+      group: staging-e2e-post-deploy
+      cancel-in-progress: true
+    uses: ./.github/workflows/e2e-deployed-env.yml
     secrets: inherit
     with:
-      version: ${{ inputs.version || github.ref }}
+      version: ${{ inputs.version || github.sha }}
       target: staging
       playwright_tags: "@smoke|@full-regression"
       send_slack_notification: false
