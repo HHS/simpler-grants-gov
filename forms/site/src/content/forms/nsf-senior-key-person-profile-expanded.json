@@ -367,7 +367,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the person's NSF ID, if they have one.",
-              "constraints": "pattern [0-9A-Z]{9}",
+              "constraints": "pattern ^[0-9A-Z]{9}$",
               "json_path": "principal_investigator.profile.nsf_id",
               "xml_path": "NSF_KeyPersonExpanded_3_3:PDPI/NSF_KeyPersonExpanded_3_3:Profile/NSF_KeyPersonExpanded_3_3:NSFID"
             }
@@ -741,7 +741,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the person's NSF ID, if they have one.",
-              "constraints": "pattern [0-9A-Z]{9}",
+              "constraints": "pattern ^[0-9A-Z]{9}$",
               "json_path": "senior_key_persons[].profile.nsf_id",
               "xml_path": "NSF_KeyPersonExpanded_3_3:KeyPerson/NSF_KeyPersonExpanded_3_3:Profile/NSF_KeyPersonExpanded_3_3:NSFID"
             }
