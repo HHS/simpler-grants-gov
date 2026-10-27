@@ -18,6 +18,21 @@ STARTED_BY = "nofo-history-dev"
 MODULE = "infra/nofos/service"
 SUCCESS = "Document audit index complete: 0 events missing."
 TIMEOUT = 30 * 60
+VERIFICATION_FIELDS = {
+    "first_page_ms",
+    "second_page_ms",
+    "first_page_rows",
+    "second_page_rows",
+    "duplicate_page_events",
+    "legacy_read_ms",
+    "legacy_visible_events",
+    "indexed_visible_events",
+    "legacy_only_events",
+    "indexed_only_events",
+    "legacy_only_deleted_objects",
+    "postgresql_plan_checked",
+    "named_index_seen",
+}
 COMMAND = [
     "sh",
     "-c",
@@ -138,7 +153,7 @@ def require_no_preparation(cluster, task_definition):
             )
 
 
-def read_counts(log_options, container_name, task_arn, diagnose=False):
+def read_counts(log_options, container_name, task_arn, diagnose=False, verify=False):
     stream = f"{log_options['awslogs-stream-prefix']}/{container_name}/{task_arn.rsplit('/', 1)[-1]}"
     params = {
         "log_group_name": log_options["awslogs-group"],
@@ -151,11 +166,35 @@ def read_counts(log_options, container_name, task_arn, diagnose=False):
     complete = False
     ownership_resolved = False
     diagnostic_received = False
+    verification_received = False
     # Output only the application's known count messages, never arbitrary logs.
     while True:
         result = aws("logs", "get-log-events", **params)
         for event in result.get("events", []):
             message = event["message"].strip()
+            if verify and message.startswith("NOFO_HISTORY_VERIFICATION "):
+                data = json.loads(message.removeprefix("NOFO_HISTORY_VERIFICATION "))
+                counts = data.get("counts")
+                if (
+                    set(data) == {"status", "counts"}
+                    and data["status"]
+                    in (
+                        "measured",
+                        "target_missing",
+                        "query_timeout",
+                        "verification_failed",
+                    )
+                    and isinstance(counts, dict)
+                    and set(counts).issubset(VERIFICATION_FIELDS)
+                    and all(type(v) is int and 0 <= v < 10**12 for v in counts.values())
+                    and (
+                        data["status"] != "measured"
+                        or set(counts) == VERIFICATION_FIELDS
+                    )
+                ):
+                    print(message, flush=True)
+                    verification_received = data["status"] == "measured"
+                continue
             if diagnose and message.startswith("NOFO_HISTORY_DIAGNOSTIC "):
                 data = json.loads(message.removeprefix("NOFO_HISTORY_DIAGNOSTIC "))
                 counts = data.get("counts")
@@ -193,14 +232,17 @@ def read_counts(log_options, container_name, task_arn, diagnose=False):
                 print(message.removeprefix("CommandError: "), flush=True)
         token = result.get("nextForwardToken")
         if not token or token == params.get("next_token"):
+            if verify:
+                return verification_received
             return diagnostic_received if diagnose else complete and ownership_resolved
         params["next_token"] = token
 
 
 def prepare():
     diagnose = sys.argv[1:] == ["--diagnose"]
+    verify = sys.argv[1:] == ["--verify"]
     if (
-        sys.argv[1:] not in ([], ["--diagnose"])
+        sys.argv[1:] not in ([], ["--diagnose"], ["--verify"])
         or os.environ.get("GITHUB_REF") != "refs/heads/main"
     ):
         raise RuntimeError(
@@ -247,10 +289,15 @@ def prepare():
                             "-c",
                             "cd /app/nofos && poetry run python manage.py shell -c "
                             + shlex.quote(
-                                Path(__file__).with_name("diagnose_dev.py").read_text()
+                                Path(__file__)
+                                .with_name(
+                                    "verify_dev.py" if verify else "diagnose_dev.py"
+                                )
+                                .read_text()
+                                + ("\nmain()" if verify else "")
                             ),
                         ]
-                        if diagnose
+                        if diagnose or verify
                         else COMMAND
                     ),
                 }
@@ -278,7 +325,7 @@ def prepare():
         for _ in range(6):
             try:
                 complete = read_counts(
-                    options, service_name, task_arn, diagnose=diagnose
+                    options, service_name, task_arn, diagnose=diagnose, verify=verify
                 )
             except RuntimeError:
                 pass
@@ -291,11 +338,13 @@ def prepare():
             )
         if not complete:
             raise RuntimeError(
-                "Could not confirm completeness and zero unresolved ownership from logs. Keep Constance disabled and inspect the task."
+                "Could not confirm read-only history inspection output; no enablement is authorized."
+                if diagnose or verify
+                else "Could not confirm completeness and zero unresolved ownership from logs. Keep Constance disabled and inspect the task."
             )
         message = (
             "Read-only dev diagnosis complete. Constance is unchanged; this does not authorize enabling indexed history."
-            if diagnose
+            if diagnose or verify
             else "Dev backfill and completeness check passed. Constance is unchanged; you may now enable DOCUMENT_HISTORY_INDEX_ENABLED in dev and test history."
         )
         print(message, flush=True)
