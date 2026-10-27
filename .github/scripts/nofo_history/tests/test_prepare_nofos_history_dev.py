@@ -3,6 +3,7 @@
 import copy
 import importlib.util
 import io
+import json
 import os
 import subprocess
 import unittest
@@ -92,18 +93,57 @@ class PreparationTests(unittest.TestCase):
             return {}
         raise AssertionError(operation)
 
-    def run_prepare(self):
+    def run_prepare(self, diagnose=False):
         with (
             patch.object(history, "aws", side_effect=self.aws),
             patch.object(history, "output", side_effect=["dev-cluster", "dev-nofo"]),
             patch.object(history.subprocess, "run"),
             patch.object(history.time, "sleep"),
-            patch.object(history.sys, "argv", ["prepare-nofos-history-dev.py"]),
+            patch.object(
+                history.sys,
+                "argv",
+                ["prepare-nofos-history-dev.py"] + (["--diagnose"] if diagnose else []),
+            ),
             patch.dict(
                 os.environ, {"GITHUB_REF": "refs/heads/main", "GITHUB_STEP_SUMMARY": ""}
             ),
         ):
             history.prepare()
+
+    def test_diagnostic_mode_runs_only_read_only_source(self):
+        self.logs = [
+            "NOFO_HISTORY_DIAGNOSTIC "
+            + json.dumps(
+                {
+                    "total_missing": 7,
+                    "counts": {"nofos.subsection:retained_object_ownership": 7},
+                }
+            )
+        ]
+        capture = io.StringIO()
+        with redirect_stdout(capture):
+            self.run_prepare(diagnose=True)
+        launch = next(params for _, op, params in self.calls if op == "run-task")
+        command = launch["overrides"]["containerOverrides"][0]["command"][2]
+        self.assertIn("SET TRANSACTION READ ONLY", command)
+        self.assertNotIn("--chunk-size", command)
+        self.assertIn("does not authorize enabling", capture.getvalue())
+        self.assertNotIn("you may now enable", capture.getvalue())
+
+    def test_diagnostics_reject_unknown_fields_and_payload_strings(self):
+        self.logs = [
+            "NOFO_HISTORY_DIAGNOSTIC "
+            + json.dumps(
+                {"total_missing": 7, "counts": {"private document content": 7}}
+            )
+        ]
+        capture = io.StringIO()
+        with (
+            redirect_stdout(capture),
+            self.assertRaisesRegex(RuntimeError, "Could not confirm"),
+        ):
+            self.run_prepare(diagnose=True)
+        self.assertNotIn("private document", capture.getvalue())
 
     def test_success_pins_deployed_revision_and_only_prints_counts(self):
         capture = io.StringIO()
