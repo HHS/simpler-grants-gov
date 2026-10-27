@@ -3,8 +3,15 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"],
-      "@parity/*": ["../parity/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@parity/*": [
+        "../parity/*"
+      ],
+      "@xml/*": [
+        "../emitters/xml/src/runtime/*"
+      ]
     }
   }
 }
