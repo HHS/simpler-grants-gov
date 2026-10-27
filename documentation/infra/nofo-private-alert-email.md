@@ -78,6 +78,25 @@ review and deployed verification. We can prepare the private parameter setup
 through GitHub if existing access supports it; a personal AWS-console login is
 not inherently required.
 
+## Controlled topic-to-inbox test
+
+After the subscriber confirms privately, use **Actions → Test NOFO dev alert
+email delivery → Run workflow → main**. This manually sends one message with
+subject **TEST: NOFO Builder dev email delivery** to the fixed dev monitoring
+topic. No new secret, recipient input, alarm change or upload enablement is used.
+It requires exactly one confirmed email subscription and fails without publishing
+if routing differs or remains pending. Raw AWS responses, endpoint addresses and
+confirmation links are never printed. Its AWS session can only check subscriptions
+and publish to that topic; source IAM permissions are not expanded.
+
+A successful run means SNS accepted publication. An inbox holder must verify the
+labelled test arrived and record that receipt. A timeout can leave publication
+status uncertain; check privately before manually retrying to avoid duplicate
+messages. An access denial needs the specific SNS permission reviewed, not broad
+role access. This direct topic test does not prove CloudWatch alarm/recovery
+delivery. Calculator alarm actions remain off pending the separately coordinated
+alarm/recovery check and explicit activation decision.
+
 ## Change or pause the route
 
 Keep the chosen parameter stable unless the address needs to change. When it
