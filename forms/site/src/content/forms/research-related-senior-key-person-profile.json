@@ -209,7 +209,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "1-11",
               "required": true,
               "type": "Text input",
@@ -222,7 +222,7 @@
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "1-12",
               "required": false,
               "type": "Text input",
@@ -353,7 +353,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "pre_populated": "SF424(R&R) field 14-13 (deferred)",
               "json_path": "principal_investigator.profile.email",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Email"
@@ -368,7 +368,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Credential, e.g., agency login",
+              "label": "Credential, e.g., Agency Login",
               "dat_field": "1-21",
               "required": false,
               "type": "Text input",
@@ -582,7 +582,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "2-11",
               "required": "Conditional (required for each senior/key person)",
               "type": "Text input",
@@ -594,7 +594,7 @@
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "2-12",
               "required": false,
               "type": "Text input",
@@ -716,7 +716,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "senior_key_persons[].profile.email",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Email"
             }
@@ -730,7 +730,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Credential, e.g., agency login",
+              "label": "Credential, e.g., Agency Login",
               "dat_field": "2-21",
               "required": false,
               "type": "Text input",

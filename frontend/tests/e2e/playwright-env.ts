@@ -14,7 +14,6 @@ const TEST_ORG_LABELS: Record<string, string> = {
   local: "Sally's Soup Emporium",
   staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
   grantee1: "Automatic staging Organization for UEI AUTOHQDCCHBY",
-  grantee2: "Automatic staging Organization for UEI AUTOHQDCCHBY",
   grantor1: "Automatic staging Organization for UEI AUTOHQDCCHBY",
   grantor2: "Automatic staging Organization for UEI AUTOHQDCCHBY",
 };
@@ -23,7 +22,6 @@ export const SUPPORTED_ENVS = [
   "local",
   "staging",
   "grantee1",
-  "grantee2",
   "grantor1",
   "grantor2",
 ] as const;

@@ -1,4 +1,8 @@
-import { requiredLabel, type FieldComparison } from "@/lib/comparison";
+import {
+  countsIn,
+  requiredLabel,
+  type FieldComparison,
+} from "@/lib/comparison";
 import { openField } from "@/stores/fieldComparison";
 
 import DeviationBadges from "./DeviationBadges";
@@ -39,7 +43,7 @@ export default function FieldRow({
         aria-label={`Compare ${field.label} with its sources`}
         onClick={() => openField(comparison.id)}
       >
-        <DeviationBadges counts={comparison.counts} />
+        <DeviationBadges counts={countsIn(comparison)} />
         <span className="field-row__open" aria-hidden="true">
           Compare ›
         </span>

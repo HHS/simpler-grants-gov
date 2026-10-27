@@ -1,0 +1,42 @@
+name: E2E Tag Checks
+
+# Fails a PR when an E2E test is missing its execution tag or uses an unknown
+# tag, or when a workflow selects a tag that does not exist. Without this, a
+# typo in a tag filter silently runs fewer tests and still passes.
+
+on:
+  pull_request:
+    paths:
+      - frontend/tests/**
+      - frontend/scripts/validate-e2e-tags.js
+      - .github/workflows/**
+      - .github/actions/**
+
+defaults:
+  run:
+    working-directory: ./frontend
+
+env:
+  NODE_VERSION: 24
+  LOCKFILE_PATH: ./frontend/package-lock.json
+  PACKAGE_MANAGER: npm
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-e2e-tags:
+    name: Validate E2E tags
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+      # Dependencies are needed so Playwright can load the test files; no browsers are installed.
+      - run: npm ci
+      - name: Validate E2E tags
+        run: npm run test:e2e:validate-tags

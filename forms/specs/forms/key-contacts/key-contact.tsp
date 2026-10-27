@@ -16,11 +16,8 @@ namespace Forms.KeyContacts;
 @maxLength(45)
 scalar ProjectRole extends string;
 
-/**
- * A contact person named for their role on the project: Key Contacts `RoleOnProject`.
- *
- * A `Person`, plus a free-text role and an affiliation, and the email is required.
- */
+// A contact person named for their role on the project: Key Contacts `RoleOnProject`. A
+// `Person`, plus a free-text role and an affiliation, and the email is required.
 @Meta.question(#{ id: "person/key-contact" })
 @Meta.tag(Catalogue.Tag.person, Catalogue.Tag.role)
 @UI.label("Key Contact")

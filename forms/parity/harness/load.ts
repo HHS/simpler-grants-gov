@@ -31,6 +31,7 @@ export const FORMS_ROOT = (() => {
 
 const PLANS_DIR = path.join(FORMS_ROOT, "site", "src", "content", "forms");
 const CANONICAL_DIR = path.join(FORMS_ROOT, "dist", "canonical");
+const SGG_DIR = path.join(FORMS_ROOT, "dist", "sgg");
 const CACHE_DIR = path.join(FORMS_ROOT, ".cache", "sources");
 export const LOCK_FILE = path.join(
   FORMS_ROOT,
@@ -87,6 +88,14 @@ export const hasXmlTransform = (specId: string): boolean =>
 /** The form's emitted XML transform rules, or undefined for a form that is not mapped. */
 export const loadXmlTransform = (specId: string): Json | undefined =>
   hasXmlTransform(specId) ? readJson(xmlTransformFile(specId)) : undefined;
+
+/** The form's `@GrantsGov.form` identity, as the SGG emitter wrote it, or null without one. */
+export const loadGrantsGovIdentity = (specId: string): Json =>
+  (
+    readJson(path.join(SGG_DIR, "forms", specId, "sgg.json")) as {
+      grantsGov: Json;
+    }
+  ).grantsGov;
 
 // ---------------------------------------------------------------------------------------
 // Grants.gov sources (`npm run parity:fetch`)

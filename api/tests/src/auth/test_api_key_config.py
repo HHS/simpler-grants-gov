@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.auth.api_key_config import ApiKeyConfig
+from src.auth.api_key_config import ApiKeyConfig, get_api_key_config
 
 
 def test_pepper_read_from_env(monkeypatch):
@@ -40,3 +40,9 @@ def test_pepper_available_to_test_suite():
     override.env entry can't break this test.
     """
     assert ApiKeyConfig().pepper
+
+
+def test_get_api_key_config_is_cached():
+    """The config is only built once, as it's used on every X-API-Key request"""
+    assert get_api_key_config() is get_api_key_config()
+    assert get_api_key_config().pepper == ApiKeyConfig().pepper

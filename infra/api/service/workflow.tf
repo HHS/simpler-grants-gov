@@ -39,7 +39,11 @@ resource "aws_ecs_task_definition" "workflow" {
       essential              = true,
       readonlyRootFilesystem = true,
 
-      command = ["flask", "workflow", "workflow-main"],
+      # Runs the application submission consumer. This service previously ran
+      # the workflow manager ("flask workflow workflow-main"); the service /
+      # role / log group names keep the workflow- prefix until a follow-up
+      # rename to avoid resource replacement churn in this change.
+      command = ["flask", "submission-consumer", "run"],
 
       healthCheck = null,
 

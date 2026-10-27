@@ -25,7 +25,7 @@ import uuid
 from sqlalchemy import select
 
 import src.adapters.db as db
-from src.auth.api_key_config import ApiKeyConfig
+from src.auth.api_key_config import get_api_key_config
 from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.auth.auth_handler import AuthHandler
 from src.auth.endpoint_access_util import verify_access
@@ -43,9 +43,9 @@ def setup_file_scan_scanner_user(
     db_session: db.Session,
     requesting_user: User,
     user_id: uuid.UUID,
-) -> UserApiKey:
+) -> tuple[UserApiKey, str]:
     """Create/ensure the scanner user and its INTERNAL_S3_SCAN role, then mint a
-    fresh API key for it and return the new key.
+    fresh API key for it and return the new key along with the raw key.
 
     Caller owns the transaction. ``requesting_user`` is the authenticated API-key
     user; access is gated on the ``MANAGE_INTERNAL_ROLES`` privilege.
@@ -54,9 +54,9 @@ def setup_file_scan_scanner_user(
 
     user = _ensure_user(db_session, user_id)
     _ensure_internal_role(user)
-    api_key = _create_api_key(db_session, user)
+    api_key, key_id = _create_api_key(db_session, user)
     logger.info("Finished provisioning file-scan scanner user", extra={"user_id": user_id})
-    return api_key
+    return api_key, key_id
 
 
 def _ensure_user(db_session: db.Session, user_id: uuid.UUID) -> User:
@@ -86,7 +86,7 @@ def _ensure_internal_role(user: User) -> None:
     )
 
 
-def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
+def _create_api_key(db_session: db.Session, user: User) -> tuple[UserApiKey, str]:
     # Mint the key through the shared auth handler (no AWS API Gateway import):
     # this key is validated only against the user_api_key table by the
     # X-API-Key auth, same as the locally-seeded scanner key.
@@ -97,16 +97,16 @@ def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
         "Registered file-scan scanner API key",
         extra={"user_id": user.user_id} | api_key.get_log_extra(),
     )
-    return api_key
+    return api_key, key_id
 
 
 def _generate_unique_key_id(auth_handler: AuthHandler) -> tuple[str, str]:
     """Generate a new key_id and its hash, retrying if the hash is already taken."""
-    pepper = ApiKeyConfig().pepper
+    pepper = get_api_key_config().pepper
     for _attempt in range(MAX_KEY_GENERATION_RETRIES):
         key_id = generate_api_key_id()
         key_id_hash = hash_api_key_id(key_id, pepper)
-        if auth_handler.get_api_key_by_key_id_hash(key_id_hash) is None:
+        if auth_handler.get_api_key_by_hash(key_id_hash) is None:
             return key_id, key_id_hash
 
     logger.error(

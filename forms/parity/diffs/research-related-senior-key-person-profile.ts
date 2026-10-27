@@ -2,6 +2,7 @@ import type { FormDiff, Recorded } from "../harness/model.ts";
 import {
   ADDRESS_HEADING,
   BANK_WORDING,
+  emailMinLength,
   unmappedAttachments,
   PROFILE_GROUPS,
 } from "./common.ts";
@@ -73,6 +74,18 @@ export const DIFF: FormDiff = {
         ...EACH_KEY_PERSON,
       },
     },
+  },
+  xsd: {
+    differingRules: emailMinLength([
+      "PDPI/Profile/Email",
+      "KeyPerson/Profile/Email",
+    ]),
+  },
+  jsonSchemaVsXsd: {
+    differingRules: emailMinLength([
+      "principal_investigator.profile.email",
+      "senior_key_persons[].profile.email",
+    ]),
   },
   ...unmappedAttachments([
     [

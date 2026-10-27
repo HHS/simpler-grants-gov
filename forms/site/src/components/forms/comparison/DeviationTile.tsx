@@ -9,6 +9,7 @@ import { useStore } from "@nanostores/react";
 import StatusDot from "./StatusDot";
 
 const TITLES: Record<FilterKey, string> = {
+  unrecorded: "Unrecorded differences",
   gap: "Known gaps",
   upstream: "Upstream discrepancies",
   intentional: "Intentional differences",

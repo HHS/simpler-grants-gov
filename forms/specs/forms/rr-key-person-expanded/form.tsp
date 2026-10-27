@@ -22,6 +22,7 @@ namespace Forms.RRKeyPersonExpanded;
   formVersion: "4.0",
   agencyCode: "SGG",
   ombNumber: "4040-0001",
+  expirationDate: "2029-01-31",
 })
 @example(#{
   principalInvestigator: #{

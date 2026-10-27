@@ -51,6 +51,21 @@ export const PROFILE_GROUPS: Recorded = {
     "Every key-person form lays a profile out in the same groups: Name, Role, Address, Contact Information, Credentials, Attachments. Role puts the organization before the department and the project role after the division, where the DAT lists them elsewhere.",
 };
 
+/** Email fields, which leave out the XSD's minimum length. */
+export const EMAIL_MIN_LENGTH: Pinned = {
+  plan: null,
+  source: 1,
+  category: "intentional",
+  reason:
+    "globLib:EmailDataType has a minLength of 1. Email fields leave it out, as the API's hand-written forms do: format email already rejects an empty string, and two errors for the same problem is confusing.",
+};
+
+/** `differingRules` entries recording `EMAIL_MIN_LENGTH` for each email field's path. */
+export const emailMinLength = (paths: string[]): Record<string, Pinned> =>
+  Object.fromEntries(
+    paths.map((path) => [`${path}/minLength`, EMAIL_MIN_LENGTH]),
+  );
+
 /** Attachments, which the XML transform rules cannot write yet. */
 export const ATTACHMENT_XML: Recorded = {
   category: "gap",
