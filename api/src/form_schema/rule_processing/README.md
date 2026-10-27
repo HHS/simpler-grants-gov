@@ -51,8 +51,8 @@ For example, with data that looks like:
 ```json
 {
   "my_array_field": [
-    { "x": "ABC", "y": "XYZ" },
-    { "x": "abc", "y": "xyz" }
+    {"x":  "ABC", "y": "XYZ"},
+    {"x":  "abc", "y": "xyz"}
   ]
 }
 ```
@@ -77,8 +77,8 @@ Which upon running would produce something like:
 ```json
 {
   "my_array_field": [
-    { "x": "ABC", "y": "XYZ", "z": "my-opportunity-number" },
-    { "x": "abc", "y": "xyz", "z": "my-opportunity-number" }
+    {"x":  "ABC", "y": "XYZ", "z": "my-opportunity-number"},
+    {"x":  "abc", "y": "xyz", "z": "my-opportunity-number"}
   ]
 }
 ```
@@ -257,9 +257,9 @@ For example assume the following data and rule:
 ```json
 {
   "my_array": [
-    { "my_nested_obj": { "x": "100.00", "y": "200.00" } },
-    { "my_nested_obj": { "x": "300.00", "y": "400.00" } },
-    { "my_nested_obj": { "x": "500.00", "y": "600.00" } }
+    {"my_nested_obj":  {"x": "100.00", "y": "200.00"}},
+    {"my_nested_obj":  {"x": "300.00", "y": "400.00"}},
+    {"my_nested_obj":  {"x": "500.00", "y": "600.00"}}
   ]
 }
 ```
