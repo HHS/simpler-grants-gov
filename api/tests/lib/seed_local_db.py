@@ -590,6 +590,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "165fad29-80d2-4c2d-b86b-1906fd68cf3f",
         ),
         (
+            "EPA_KeyContacts_Generated",
+            "E2E-EPAKCG",
+            "EPA Key Contacts Form (Generated)",
+            "b677779b-2081-4212-8f38-7781f43af676",
+            "c28049b0-8cfb-452d-a300-b095d465be5b",
+        ),
+        (
             "GG_LobbyingForm",
             "E2E-GGLOB",
             "Grants.gov Lobbying Form",

@@ -34,6 +34,7 @@ from src.form_schema.forms import (
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
+    EPAKeyContactsGenerated_v2_0,
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
@@ -599,6 +600,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "EPA Key Contacts Form",
                 EPA_KEY_CONTACT_v2_0.form_id,
                 "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631",
+            ),
+            (
+                "E2E-EPAKCG",
+                "EPA Key Contacts Form (Generated)",
+                EPAKeyContactsGenerated_v2_0.form_id,
+                "b677779b-2081-4212-8f38-7781f43af676",
             ),
             (
                 "E2E-GGLOB",
