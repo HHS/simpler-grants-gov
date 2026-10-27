@@ -1,11 +1,13 @@
-"""Read-only measurements for the original slow-history example; counts only."""
+"""Read-only preliminary measurements for an existing dev NOFO; counts only."""
 
 import json
 import sys
 import time
 from uuid import UUID
 
-TARGET = "e5664268-36af-43ca-bf49-61983533041b"
+# User-supplied CAP-STIs dev example, confirmed present before selecting it.
+# The original production example is absent in dev; this is preliminary evidence.
+TARGET = "d9bfd050-4d01-482b-847d-1e01b478838a"
 
 
 def compare(document):
