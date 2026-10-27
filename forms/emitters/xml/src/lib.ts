@@ -64,6 +64,12 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`${"name"} is the root element of mapping ${"mapping"}, so it needs an @Xml.ns naming a member of an @Xml.nsDeclarations enum: that enum lists the namespaces the document declares.`,
       },
     },
+    "xml-mapping-unsupported": {
+      severity: "error",
+      messages: {
+        default: paramMessage`The XML mapping can't write ${"element"} yet: it holds ${"reason"}.`,
+      },
+    },
     "mapping-transform-unknown": {
       severity: "error",
       messages: {

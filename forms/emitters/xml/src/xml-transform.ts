@@ -208,7 +208,7 @@ const elementNamespace = (program: Program, prop: ModelProperty) =>
   getNs(program, prop) ?? (prop.model ? getNs(program, prop.model) : undefined);
 
 /** Every namespace the enum that declares the root's namespace declares, by prefix. */
-function declaredNamespaces(
+export function declaredNamespaces(
   program: Program,
   rootNs: { namespace: string; prefix: string },
 ): Record<string, string> {

@@ -1,8 +1,10 @@
 // The parts of simpler-forms' API this emitter reads.
 export {
   jsonPropertyName,
+  mappedFromRoot,
   mappingTargets,
   modelProperties,
+  propMappedFrom,
   resolveForms,
   resolveMapping,
   resolveMappingFrom,
