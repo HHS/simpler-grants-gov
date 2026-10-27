@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: "Choose read-only original-document verification or legacy ownership counts"
+        description: "Choose read-only dev-document verification or legacy ownership counts"
         type: choice
         default: verify
         options: [verify, diagnose]
