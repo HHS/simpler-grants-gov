@@ -10,6 +10,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { NSF_KEY_PERSON_EXPANDED_FORM } from "tests/e2e/apply/fixtures/nsf-key-person-expanded-data";
 import { RR_KEY_PERSON_FORM } from "tests/e2e/apply/fixtures/rr-key-person-data";
 import { RR_KEY_PERSON_EXPANDED_FORM } from "tests/e2e/apply/fixtures/rr-key-person-expanded-data";
 import playwrightEnv from "tests/e2e/playwright-env";
@@ -33,6 +34,7 @@ const { testOrgLabel } = playwrightEnv;
 const SENIOR_KEY_PERSON_FORMS = [
   RR_KEY_PERSON_FORM,
   RR_KEY_PERSON_EXPANDED_FORM,
+  NSF_KEY_PERSON_EXPANDED_FORM,
 ];
 
 // Skip non-Chrome browsers in staging to avoid OTP rate-limiting
