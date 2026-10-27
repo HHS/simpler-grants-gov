@@ -17,6 +17,7 @@ namespace Forms.KeyContacts;
 @Sgg.sync(#{
   formType: "KeyContacts",
   instructions: "b3ce463f-1f42-4444-90c6-1f1d2c39ad83",
+  xml: "mapping",
 })
 @GrantsGov.form(#{
   legacyFormId: 683,
