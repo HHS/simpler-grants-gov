@@ -36,7 +36,7 @@
         {
           "kind": "field",
           "label": "Organization Name",
-          "help_text": "Indicate the organization name of the primary site where the work will be performed.  If a portion of the project will be performed at any other sites(s), identify the site location(s) in the block(s) provided.  (This field is not applicable for applicants using SF 424 Individual Form Set.)",
+          "help_text": "Indicate the organization name of the site where the work will be performed.",
           "required": "Conditional (unless applying as an individual, including when that choice is absent)",
           "type": "Text input",
           "widget": "TextWidget",
@@ -59,8 +59,8 @@
         },
         {
           "kind": "field",
-          "label": "Street1",
-          "help_text": "Enter first line of the street address in \"Street 1\" field of the primary performance site location.  This field is required.",
+          "label": "Street 1",
+          "help_text": "Enter the first line of the street address.",
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
@@ -71,8 +71,8 @@
         },
         {
           "kind": "field",
-          "label": "Street2",
-          "help_text": "Enter second line of the street address in \"Street 2\" field for the primary performance site location.  This field is optional.",
+          "label": "Street 2",
+          "help_text": "Enter the second line of the street address.",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
@@ -84,7 +84,7 @@
         {
           "kind": "field",
           "label": "City",
-          "help_text": "Enter the City for address of the primary performance site location.  This field is required.",
+          "help_text": "Enter the city.",
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
@@ -96,7 +96,7 @@
         {
           "kind": "field",
           "label": "County/Parish",
-          "help_text": "Enter the County of the performance site location.",
+          "help_text": "Enter the county or parish.",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
@@ -108,7 +108,7 @@
         {
           "kind": "field",
           "label": "State",
-          "help_text": "Enter the State where the primary performance site location is located.  This field is required if the Project Performance Site is located in the United States.",
+          "help_text": "Select the state. This field is required if the country is the United States.",
           "required": "Conditional (when the site country is USA: UNITED STATES)",
           "type": "Dropdown",
           "widget": "SelectWidget",
@@ -120,7 +120,7 @@
         {
           "kind": "field",
           "label": "Province",
-          "help_text": "Enter the Province where the primary performance site location is located.",
+          "help_text": "Enter the province.",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
@@ -132,7 +132,7 @@
         {
           "kind": "field",
           "label": "Country",
-          "help_text": "Select the country for the primary performance site location.",
+          "help_text": "Select the country.",
           "required": true,
           "type": "Dropdown",
           "widget": "SelectWidget",
@@ -144,7 +144,7 @@
         {
           "kind": "field",
           "label": "Zip / Postal Code",
-          "help_text": "Enter the nine-digit Postal Code (e.g., ZIP code) of the primary performance site location.  This field is required if the Project Performance Site is located in the United States.",
+          "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
           "required": "Conditional (when the site country is USA: UNITED STATES)",
           "type": "Text input",
           "widget": "TextWidget",
@@ -156,7 +156,7 @@
         {
           "kind": "field",
           "label": "Project/Performance Site Congressional District",
-          "help_text": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district.\n\nIf all districts in a state are affected, enter \"all\" for the district number. Example: MD-all for all congressional districts in Maryland.\n\nIf nationwide (all districts in all states), enter US-all.\n\nIf the program/project is outside the US, enter 00-000.\n\nTo locate your congressional district, visit the Grants.gov web site.  Note it is likely that this field will be identical to the “Congressional Districts of Applicant” field provided elsewhere in this application.",
+          "help_text": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005, MD-all, US-all, 00-000. Required if the site is in the United States.",
           "required": "Conditional (when the site country is USA: UNITED STATES)",
           "type": "Text input",
           "widget": "TextWidget",
@@ -188,7 +188,7 @@
         {
           "kind": "field",
           "label": "Organization Name",
-          "help_text": "Indicate the organization name of the primary site where the work will be performed.  If a portion of the project will be performed at any other sites(s), identify the site location(s) in the block(s) provided.  (This field is not applicable for applicants using SF 424 Individual Form Set.)",
+          "help_text": "Indicate the organization name of the site where the work will be performed.",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
@@ -211,8 +211,8 @@
         },
         {
           "kind": "field",
-          "label": "Street1",
-          "help_text": "Enter first line of the street address in \"Street 1\" field of the primary performance site location.  This field is required.",
+          "label": "Street 1",
+          "help_text": "Enter the first line of the street address.",
           "required": "Conditional (when this additional site entry is supplied)",
           "type": "Text input",
           "widget": "TextWidget",
@@ -223,8 +223,8 @@
         },
         {
           "kind": "field",
-          "label": "Street2",
-          "help_text": "Enter second line of the street address in \"Street 2\" field for the primary performance site location.  This field is optional.",
+          "label": "Street 2",
+          "help_text": "Enter the second line of the street address.",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
@@ -236,7 +236,7 @@
         {
           "kind": "field",
           "label": "City",
-          "help_text": "Enter the City for address of the primary performance site location.  This field is required.",
+          "help_text": "Enter the city.",
           "required": "Conditional (when this additional site entry is supplied)",
           "type": "Text input",
           "widget": "TextWidget",
@@ -248,7 +248,7 @@
         {
           "kind": "field",
           "label": "County/Parish",
-          "help_text": "Enter the County of the performance site location.",
+          "help_text": "Enter the county or parish.",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
@@ -260,7 +260,7 @@
         {
           "kind": "field",
           "label": "State",
-          "help_text": "Enter the State where the primary performance site location is located.  This field is required if the Project Performance Site is located in the United States.",
+          "help_text": "Select the state. This field is required if the country is the United States.",
           "required": "Conditional (when this additional site exists and its country is USA: UNITED STATES)",
           "type": "Dropdown",
           "widget": "SelectWidget",
@@ -272,7 +272,7 @@
         {
           "kind": "field",
           "label": "Province",
-          "help_text": "Enter the Province where the primary performance site location is located.",
+          "help_text": "Enter the province.",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
@@ -284,7 +284,7 @@
         {
           "kind": "field",
           "label": "Country",
-          "help_text": "Select the name of the country for the primary project performance site.",
+          "help_text": "Select the country.",
           "required": "Conditional (when this additional site entry is supplied)",
           "type": "Dropdown",
           "widget": "SelectWidget",
@@ -296,7 +296,7 @@
         {
           "kind": "field",
           "label": "Zip / Postal Code",
-          "help_text": "Enter the nine-digit Postal Code (e.g., ZIP code) of the primary performance site location.  This field is required if the Project Performance Site is located in the United States.",
+          "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
           "required": "Conditional (when this additional site exists and its country is USA: UNITED STATES)",
           "type": "Text input",
           "widget": "TextWidget",
@@ -308,7 +308,7 @@
         {
           "kind": "field",
           "label": "Project/Performance Site Congressional District",
-          "help_text": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district.\n\nIf all districts in a state are affected, enter \"all\" for the district number. Example: MD-all for all congressional districts in Maryland.\n\nIf nationwide (all districts in all states), enter US-all.\n\nIf the program/project is outside the US, enter 00-000.\n\nTo locate your congressional district, visit the Grants.gov web site.  Note it is likely that this field will be identical to the “Congressional Districts of Applicant” field provided elsewhere in this application.",
+          "help_text": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005, MD-all, US-all, 00-000. Required if the site is in the United States.",
           "required": "Conditional (when this additional site exists and its country is USA: UNITED STATES)",
           "type": "Text input",
           "widget": "TextWidget",
@@ -333,7 +333,7 @@
         {
           "kind": "field",
           "label": "Additional Location(s)",
-          "help_text": "Attach a file using the appropriate buttons.",
+          "help_text": "Attach a file listing additional locations if more than 299 additional sites are needed.",
           "required": false,
           "type": "File",
           "widget": "ApplicationAttachmentWidget",

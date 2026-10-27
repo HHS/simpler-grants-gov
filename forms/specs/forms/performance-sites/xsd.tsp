@@ -19,7 +19,6 @@ alias grantsGovXml = Mappings.Target.grantsGovXml;
 alias Transformation = Mappings.Transforms.Transformation;
 alias PerformanceSites = Forms.PerformanceSites.PerformanceSites;
 alias Site = Forms.PerformanceSites.Site;
-alias SiteAddress = Forms.PerformanceSites.SiteAddress;
 alias GlobLib = XSD.GlobLib;
 alias Att = XSD.Att;
 
@@ -70,7 +69,7 @@ model SiteLocationDataType {
 
   @Mapping.from(grantsGovXml, Site.address)
   @name("Address")
-  address: SiteAddressDataType;
+  address: GlobLib.AddressDataTypeV3;
 
   @Mapping.from(grantsGovXml, Site.congressionalDistrict)
   @name("CongressionalDistrictProgramProject")
@@ -79,41 +78,3 @@ model SiteLocationDataType {
   congressionalDistrictProgramProject?: string;
 }
 
-/**
- * `globLib:AddressDataTypeV3`, filled from `SiteAddress`. The shared model in
- * `#xsd/global-library.tsp` is filled from `Address`, whose Province a site replaces.
- */
-@ns(Namespaces.globLib)
-model SiteAddressDataType {
-  @Mapping.from(grantsGovXml, SiteAddress.street1)
-  @name("Street1")
-  street1: string;
-
-  @Mapping.from(grantsGovXml, SiteAddress.street2)
-  @name("Street2")
-  street2?: string;
-
-  @Mapping.from(grantsGovXml, SiteAddress.city)
-  @name("City")
-  city: string;
-
-  @Mapping.from(grantsGovXml, SiteAddress.county)
-  @name("County")
-  county?: string;
-
-  @Mapping.from(grantsGovXml, SiteAddress.state)
-  @name("State")
-  state?: string;
-
-  @Mapping.from(grantsGovXml, SiteAddress.province)
-  @name("Province")
-  province?: string;
-
-  @Mapping.from(grantsGovXml, SiteAddress.zipCode)
-  @name("ZipPostalCode")
-  zipPostalCode?: string;
-
-  @Mapping.from(grantsGovXml, SiteAddress.country)
-  @name("Country")
-  country: string;
-}

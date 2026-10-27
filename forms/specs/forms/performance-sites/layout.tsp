@@ -9,7 +9,7 @@ namespace Forms.PerformanceSites;
 @UI.layout(PerformanceSites)
 model PerformanceSitesLayout {
   @UI.label("Primary performance site")
-  @doc("Identify the primary location where work will be performed. Organization details do not apply when submitting as an individual.")
+  @doc("Identify the primary location where the work will be performed.")
   primary: {
     @UI.field(PerformanceSites.primarySite)
     @UI.flatten
@@ -23,7 +23,7 @@ model PerformanceSitesLayout {
   };
 
   @UI.label("Additional performance sites")
-  @doc("Add each other site separately. Address and congressional-district rules apply to that site's country. The overflow reference is available at 299 additional sites or while a reference is already present.")
+  @doc("Add each additional site separately. If there are more than 299, attach a file listing the rest.")
   additional: {
     @UI.field(PerformanceSites.additionalSites)
     additionalSites: {

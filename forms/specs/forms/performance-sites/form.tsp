@@ -10,14 +10,6 @@ using SimplerForms;
 
 namespace Forms.PerformanceSites;
 
-// Reuse the address question's parts and requiredness. The DAT keeps Province visible
-// but inactive for USA; it does not authorize dropping a retained answer on another edit.
-model SiteAddress extends Questions.Types.Address {
-  @UI.label("Province")
-  @UI.disabledWhen(SiteAddress.country, Questions.Types.CountryCode.USA)
-  province?: Questions.Types.AddressParts.Province;
-}
-
 /** Enter the congressional district as two state characters, a hyphen and three characters. */
 @minLength(6)
 @maxLength(6)
@@ -40,10 +32,10 @@ model Site {
   @UI.label("UEI")
   uei?: Questions.Organizations.OrgUei;
 
-  address: SiteAddress;
+  address: Questions.Types.Address;
 
-  @doc("Enter the congressional district in the format **-***. This field is required for a US site.")
-  @UI.label("Congressional District")
+  @doc("Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005, MD-all, US-all, 00-000. Required if the site is in the United States.")
+  @UI.label("Project/Performance Site Congressional District")
   @Validation.requiredWhenPath(
     "address.country",
     Questions.Types.CountryCode.USA
@@ -72,7 +64,7 @@ model PrimarySite {
 
 @Meta.form(#{
   id: "performance-sites",
-  formName: "Project/Performance Site Location(s)",
+  formName: "PROJECT/PERFORMANCE SITE LOCATION(S)",
 })
 @GrantsGov.form(#{
   legacyFormId: 723,
@@ -190,8 +182,8 @@ model PerformanceSites {
   @maxItems(299)
   additionalSites?: Site[];
 
-  @doc("If more than 299 additional sites exist, attach a file listing additional locations. The preview accepts an illustrative upload UUID; no file content, existence or ownership is verified.")
-  @UI.label("Additional locations attachment")
+  @doc("Attach a file listing additional locations if more than 299 additional sites are needed.")
+  @UI.label("Additional Location(s)")
   @UI.widget(Rendering.Widget.Attachment)
   additionalLocationsAttachment?: Questions.Types.Attachment;
 }
