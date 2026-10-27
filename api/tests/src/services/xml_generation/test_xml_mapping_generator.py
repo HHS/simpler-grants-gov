@@ -11,6 +11,8 @@ from src.services.xml_generation.mapping import (
     is_xml_mapping,
     mapped_root_fields,
 )
+from src.services.xml_generation.models import XMLGenerationRequest
+from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 from src.services.xml_generation.value_transformers import ValueTransformationError
 
@@ -332,6 +334,20 @@ class TestAttachment:
     def test_rejects_an_upload_the_application_does_not_have(self) -> None:
         with pytest.raises(ValueError, match="not found in attachment mapping"):
             _generate(self._MAPPING, {"people": [{"sketch": "unknown"}]})
+
+
+class TestService:
+    def test_uses_the_new_generator_only_for_a_mapping_in_this_format(self) -> None:
+        mapping = _small_mapping({"Title": {"$field": "title"}})
+
+        response = XMLGenerationService().generate_xml(
+            XMLGenerationRequest(application_data={"title": "A"}, transform_config=mapping)
+        )
+
+        assert is_xml_mapping(mapping)
+        assert not is_xml_mapping({"_xml_config": {}})
+        assert response.success, response.error_message
+        assert "<Form:Title>A</Form:Title>" in (response.xml_data or "")
 
 
 class TestNesting:
