@@ -4,8 +4,7 @@ import { readBlock } from "simpler-forms";
 import { reportDiagnostic, stateKeys } from "./lib.js";
 import { modelSync } from "./model.js";
 
-const UUID =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * `@Sgg.sync` installs a form, so it belongs on a model with `@Meta.form`, and that form
