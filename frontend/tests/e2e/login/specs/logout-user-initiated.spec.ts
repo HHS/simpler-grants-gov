@@ -9,7 +9,6 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import { findSignOutButton } from "tests/e2e/utils/auth/perform-login-utils";
 
 const { SMOKE } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
@@ -22,6 +21,7 @@ const SIGN_IN = 'a:has-text("Sign In"), button:has-text("Sign In")';
 const SESSION_ENDPOINT = "/api/auth/session";
 const TIMEOUT = targetEnv === "local" ? 15000 : 60000;
 
+const SIGN_OUT_LINK = 'a[href="/api/auth/logout"]';
 const SETTINGS_PAGE = "/settings";
 const EMAIL_INPUT = "input#email";
 
@@ -45,6 +45,23 @@ const getAccountEmail = async (page: Page): Promise<string> => {
   const emailInput = page.locator(EMAIL_INPUT);
   await expect(emailInput).toBeVisible({ timeout: TIMEOUT });
   return emailInput.inputValue();
+};
+
+// Open the Account menu (mobile: nav first) and return the Sign out link.
+// The shared findSignOutButton does a one-shot isVisible() check (Playwright
+// ignores its timeout option), so a click that lands before React hydrates is
+// lost and the menu stays closed. Retry the open until the link is visible, and
+// only click the toggle while the link is hidden so we never close an open menu.
+const openAccountMenuAndGetSignOut = async (page: Page, isMobile: boolean) => {
+  if (isMobile) await openMobileNav(page);
+  const signOut = page.locator(SIGN_OUT_LINK);
+  await expect(async () => {
+    if (!(await signOut.isVisible())) {
+      await page.locator(ACCOUNT_MENU).click({ timeout: 2000 });
+    }
+    await expect(signOut).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: TIMEOUT });
+  return signOut;
 };
 
 const expectLoggedIn = async (page: Page) => {
@@ -91,9 +108,24 @@ test.describe("User-initiated logout", () => {
       await expect(page).toHaveURL(new RegExp(`${AUTHENTICATED_PAGE}$`));
 
       // When the user initiates logout using the application's Sign out option
-      const signOut = await findSignOutButton(page, isMobile);
-      await expect(signOut).toBeVisible();
+      const signOut = await openAccountMenuAndGetSignOut(page, isMobile);
       await signOut.click();
+
+      // The logout chain (app -> API -> IdP -> API -> app) must come back on the
+      // SAME host Playwright seeded the session cookie for. Cookies are host-scoped,
+      // so if the app is configured for "localhost" (AUTH_LOGOUT_URL on the frontend,
+      // LOGOUT_FINAL_DESTINATION on the API) but baseURL is "127.0.0.1", the logout
+      // callback clears a cookie on the wrong host and the seeded session survives.
+      await page.waitForURL(
+        (url) =>
+          url.pathname.endsWith("/logout") && !url.pathname.startsWith("/api/"),
+        { timeout: TIMEOUT },
+      );
+      expect(
+        new URL(page.url()).hostname,
+        "logout chain returned on a different host than Playwright baseURL; " +
+          "align AUTH_LOGOUT_URL (frontend) and LOGOUT_FINAL_DESTINATION (API) with the test host",
+      ).toBe(new URL(playwrightEnv.baseUrl).hostname);
 
       // Then the application transitions the user to the logged-out state.
       // Note: SignOutNavLink stores the current page as post-auth-redirect, so the
