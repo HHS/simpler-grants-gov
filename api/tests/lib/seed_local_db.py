@@ -653,6 +653,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "7fc52d4e-6efb-421d-8b0a-8c9e982f1e0f",
         ),
         (
+            "PerformanceSite_Generated",
+            "E2E-PPSLG",
+            "Project Performance Site Location(s) (Generated)",
+            "4b585a14-ab56-42c1-a01f-78eba5b93d97",
+            "1123199e-23f8-4d7e-a6dc-d212e1f7ff6c",
+        ),
+        (
             "SF424_4_0",
             "E2E-SF424",
             "Application for Federal Assistance (SF-424)",
