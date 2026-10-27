@@ -8,7 +8,7 @@ from typing import Any
 from ...json_schema.harness import flatten_schema
 from ...json_schema.harness.flatten_schema import FormInput
 from ...paths import Path, join
-from . import flatten_transform, flatten_xsd
+from . import flatten_transform, flatten_xml_mapping, flatten_xsd
 from .form_diff import FormDiff
 
 
@@ -61,18 +61,20 @@ def load(diff: FormDiff) -> FlatForm:
 def flatten(diff: FormDiff, mapping: dict[str, Any], json_schema: dict[str, Any]) -> FlatForm:
     """Flatten a form's XML mapping, its JSON Schema and the XSD the mapping targets.
 
-    A form with unchecked rules gets no `fields`, since the checks that read them are
-    skipped.
+    The mapping is read in whichever format it's in: XML transform rules, or a mapping
+    shaped like the XML. A form with unchecked rules gets no `fields`, since the checks that
+    read them are skipped.
     """
-    targets, unchecked = flatten_transform.read(mapping)
+    reader = (
+        flatten_xml_mapping if flatten_xml_mapping.is_xml_mapping(mapping) else flatten_transform
+    )
+    targets, unchecked = reader.read(mapping)
     return FlatForm(
         diff=diff,
         targets=targets,
         unchecked_rules=unchecked,
-        xsd_elements=flatten_xsd.elements(
-            flatten_transform.xsd_of(mapping), flatten_transform.root_of(mapping)
-        ),
-        attachments=flatten_transform.attachment_elements(mapping),
+        xsd_elements=flatten_xsd.elements(reader.xsd_of(mapping), reader.root_of(mapping)),
+        attachments=reader.attachment_elements(mapping),
         fields={} if unchecked else flatten_schema.inputs(json_schema),
-        transformed=flatten_transform.transformed(mapping),
+        transformed=reader.transformed(mapping),
     )

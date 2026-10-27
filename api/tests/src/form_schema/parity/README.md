@@ -79,8 +79,12 @@ doesn't read is left out of the XML. Most Grants.gov elements are optional, so t
 validates and nothing else catches it.
 
 `xml/harness/flatten_form.py` reads all three into one `FlatForm`: the elements
-the mapping produces and the fields that fill them (`flatten_transform.py`), the elements
-the XSD declares (`flatten_xsd.py`), and the form's fields (`flatten_schema.inputs()`).
+the mapping produces and the fields that fill them, the elements the XSD declares
+(`flatten_xsd.py`), and the form's fields (`flatten_schema.inputs()`). A mapping is read in
+whichever format it's in: XML transform rules by `flatten_transform.py`, and a mapping
+shaped like the XML (`"format": "xml-mapping"`, from `xml_mapping.json`) by
+`flatten_xml_mapping.py`. Both produce the same element paths, so every check below, and
+every recorded difference, applies to either.
 
 | Group | Check | Test | Recorded in |
 | --- | --- | --- | --- |

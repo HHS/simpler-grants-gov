@@ -76,4 +76,4 @@ def out_of_order_elements(flat: FlatForm) -> list[Discrepancy]:
 
 def _from_attachment(path: Path, attachments: frozenset[str]) -> bool:
     """Return whether an element sits under an attachment element."""
-    return len(path) > 1 and path[0] in attachments
+    return any(step in attachments for step in path[:-1])
