@@ -71,11 +71,11 @@ def output(name):
     ).strip()
 
 
-def require_stable_service(cluster, service_name):
+def require_stable_service(cluster, service_name, label="Dev"):
     response = aws("ecs", "describe-services", cluster=cluster, services=service_name)
     services = response.get("services", [])
     if response.get("failures") or len(services) != 1:
-        raise RuntimeError("Cannot identify the dev service.")
+        raise RuntimeError(f"Cannot identify the {label.lower()} service.")
     service = services[0]
     if (
         service.get("status") != "ACTIVE"
@@ -86,29 +86,31 @@ def require_stable_service(cluster, service_name):
         or service["deployments"][0].get("rolloutState") != "COMPLETED"
     ):
         raise RuntimeError(
-            "Dev rollout is not complete. Wait for deployment before retrying."
+            f"{label} rollout is not complete. Wait for deployment before retrying."
         )
     arns = aws("ecs", "list-tasks", cluster=cluster, service_name=service_name)[
         "taskArns"
     ]
     if len(arns) != service["desiredCount"]:
         raise RuntimeError(
-            "Dev workers are still changing. Retry after rollout completes."
+            f"{label} workers are still changing. Retry after rollout completes."
         )
     workers = aws("ecs", "describe-tasks", cluster=cluster, tasks=arns)
     if workers.get("failures") or len(workers.get("tasks", [])) != len(arns):
-        raise RuntimeError("Cannot verify all dev workers.")
+        raise RuntimeError(f"Cannot verify all {label.lower()} workers.")
     if any(
         worker.get("lastStatus") != "RUNNING"
         or worker.get("taskDefinitionArn") != service["taskDefinition"]
         for worker in workers["tasks"]
     ):
-        raise RuntimeError("Old dev workers remain. Wait for rollout before retrying.")
+        raise RuntimeError(
+            f"Old {label.lower()} workers remain. Wait for rollout before retrying."
+        )
     return service
 
 
-def wait_for_task(cluster, task_arn):
-    deadline = time.monotonic() + TIMEOUT
+def wait_for_task(cluster, task_arn, timeout_seconds=TIMEOUT):
+    deadline = time.monotonic() + timeout_seconds
     while time.monotonic() < deadline:
         response = aws("ecs", "describe-tasks", cluster=cluster, tasks=task_arn)
         if response.get("failures") or len(response.get("tasks", [])) != 1:
@@ -120,13 +122,17 @@ def wait_for_task(cluster, task_arn):
             return task
         print(f"Preparation task: {task.get('lastStatus', 'unknown')}", flush=True)
         time.sleep(15)
-    raise RuntimeError("Preparation exceeded 30 minutes; requesting task stop.")
+    raise RuntimeError(
+        f"Preparation exceeded {timeout_seconds // 60} minutes; requesting task stop."
+    )
 
 
-def require_no_preparation(cluster, task_definition):
-    if aws("ecs", "list-tasks", cluster=cluster, started_by=STARTED_BY)["taskArns"]:
+def require_no_preparation(
+    cluster, task_definition, started_by=STARTED_BY, label="dev"
+):
+    if aws("ecs", "list-tasks", cluster=cluster, started_by=started_by)["taskArns"]:
         raise RuntimeError(
-            "A dev history preparation task is already active. Inspect it before retrying."
+            f"A {label} history task is already active. Inspect it before retrying."
         )
     # A stop request changes desired status before the process has exited.
     family = task_definition.rsplit("/", 1)[-1].rsplit(":", 1)[0]
@@ -145,7 +151,7 @@ def require_no_preparation(cluster, task_definition):
                 "Cannot verify earlier preparation tasks; inspect them before retrying."
             )
         if any(
-            t.get("startedBy") == STARTED_BY and t.get("lastStatus") != "STOPPED"
+            t.get("startedBy") == started_by and t.get("lastStatus") != "STOPPED"
             for t in response["tasks"]
         ):
             raise RuntimeError(

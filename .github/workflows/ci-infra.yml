@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run offline preparation tests
-        run: python3 -m unittest discover -s .github/scripts/nofo_history/tests -p 'test_prepare_nofos_history_dev.py' -v
+        run: python3 -m unittest discover -s .github/scripts/nofo_history/tests -p 'test_*.py' -v
   lint-github-actions:
     # Lint github actions files using https://github.com/rhysd/actionlint
     # This job configuration is largely copied from https://github.com/rhysd/actionlint/blob/main/docs/usage.md#use-actionlint-on-github-actions
