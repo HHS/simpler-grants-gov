@@ -3,6 +3,7 @@ import "form-library-xml";
 import "simpler-forms";
 
 import "#mapping/targets.tsp";
+import "#mapping/transforms.tsp";
 import "#xsd/attachments.tsp";
 import "#xsd/global-library.tsp";
 
@@ -15,6 +16,7 @@ using SimplerForms;
 namespace XSD.PerformanceSite40;
 
 alias grantsGovXml = Mappings.Target.grantsGovXml;
+alias Transformation = Mappings.Transforms.Transformation;
 alias PerformanceSites = Forms.PerformanceSites.PerformanceSites;
 alias Site = Forms.PerformanceSites.Site;
 alias SiteAddress = Forms.PerformanceSites.SiteAddress;
@@ -54,6 +56,7 @@ model Root {
 @ns(Namespaces.PerformanceSite_4_0)
 model SiteLocationDataType {
   @Mapping.from(grantsGovXml, Site.submittingAsIndividual)
+  @Mapping.transform(Transformation.booleanToYesNo)
   @name("Individual")
   individual?: string;
 
