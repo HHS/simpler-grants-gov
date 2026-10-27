@@ -1,5 +1,6 @@
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 
 import "#forms/index.tsp";
 import "#questions/research/index.tsp";
@@ -13,6 +14,7 @@ namespace Forms.NSFKeyPersonExpanded;
 
 // The data only: how an applicant is shown it is in layout.tsp.
 /** NSF Senior/Key Person Profile (Expanded), Grants.gov version 3.3. */
+@Sgg.sync(#{ instructions: "bf8931e8-9209-4267-affd-6e86fbeaf421", xml: "mapping" })
 @Meta.form(#{
   id: "nsf-key-person-expanded",
   formName: "NSF Senior/Key Person Profile (Expanded)",

@@ -39,86 +39,40 @@ model NSFKeyPersonExpandedLayout {
 // PROFILE LAYOUTS
 // =============================================================================
 
-/** The PD/PI's profile, in the groups every key-person form shares. */
+/** The PD/PI's profile. */
 model NSFPrincipalInvestigatorProfileLayout {
-  /** Enter the PD/PI's name. First and last name are required. */
-  name: NSFPrincipalInvestigatorProfile.name;
-
-  /** Enter the PD/PI's position, organization and role on the project. */
-  @UI.label("Role")
-  role: {
-    title: NSFPrincipalInvestigatorProfile.title;
-    organizationName: NSFPrincipalInvestigatorProfile.organizationName;
-    department: NSFPrincipalInvestigatorProfile.department;
-    division: NSFPrincipalInvestigatorProfile.division;
-    projectRole: NSFPrincipalInvestigatorProfile.projectRole;
-  };
-
-  /** Enter the PD/PI's complete address. */
-  address: NSFPrincipalInvestigatorProfile.address;
-
-  /** Enter the PD/PI's phone, fax and email. Phone and email are required. */
-  @UI.label("Contact Information")
-  contact: {
-    phone: NSFPrincipalInvestigatorProfile.phone;
-    fax: NSFPrincipalInvestigatorProfile.fax;
-    email: NSFPrincipalInvestigatorProfile.email;
-  };
-
-  /** Enter the PD/PI's NSF ID, if they have one. */
-  @UI.label("Credentials")
-  credentials: {
-    nsfId: NSFPrincipalInvestigatorProfile.nsfId;
-  };
-
-  /** Attach the PD/PI's biographical sketch, current & pending (other) support, collaborators and other affiliations, and synergistic activities. */
-  @UI.label("Attachments")
-  attachments: {
-    biographicalSketch: NSFPrincipalInvestigatorProfile.biographicalSketch;
-    currentPendingSupport: NSFPrincipalInvestigatorProfile.currentPendingSupport;
-    collaborators: NSFPrincipalInvestigatorProfile.collaborators;
-    synergisticActivities: NSFPrincipalInvestigatorProfile.synergisticActivities;
-  };
+  @UI.flatten name: NSFPrincipalInvestigatorProfile.name;
+  title: NSFPrincipalInvestigatorProfile.title;
+  organizationName: NSFPrincipalInvestigatorProfile.organizationName;
+  department: NSFPrincipalInvestigatorProfile.department;
+  division: NSFPrincipalInvestigatorProfile.division;
+  projectRole: NSFPrincipalInvestigatorProfile.projectRole;
+  @UI.flatten address: NSFPrincipalInvestigatorProfile.address;
+  phone: NSFPrincipalInvestigatorProfile.phone;
+  fax: NSFPrincipalInvestigatorProfile.fax;
+  email: NSFPrincipalInvestigatorProfile.email;
+  nsfId: NSFPrincipalInvestigatorProfile.nsfId;
+  biographicalSketch: NSFPrincipalInvestigatorProfile.biographicalSketch;
+  currentPendingSupport: NSFPrincipalInvestigatorProfile.currentPendingSupport;
+  collaborators: NSFPrincipalInvestigatorProfile.collaborators;
+  synergisticActivities: NSFPrincipalInvestigatorProfile.synergisticActivities;
 }
 
-/** A senior/key person's profile, in the groups every key-person form shares. */
+/** A senior/key person's profile. */
 model NSFSeniorKeyPersonProfileLayout {
-  /** Enter the senior/key person's name. First and last name are required. */
-  name: NSFSeniorKeyPersonProfile.name;
-
-  /** Enter the senior/key person's position, organization and role on the project. */
-  @UI.label("Role")
-  role: {
-    title: NSFSeniorKeyPersonProfile.title;
-    organizationUei: NSFSeniorKeyPersonProfile.organizationUei;
-    department: NSFSeniorKeyPersonProfile.department;
-    division: NSFSeniorKeyPersonProfile.division;
-    projectRole: NSFSeniorKeyPersonProfile.projectRole;
-  };
-
-  /** Enter the senior/key person's complete address. */
-  address: NSFSeniorKeyPersonProfile.address;
-
-  /** Enter the senior/key person's phone, fax and email. Phone and email are required. */
-  @UI.label("Contact Information")
-  contact: {
-    phone: NSFSeniorKeyPersonProfile.phone;
-    fax: NSFSeniorKeyPersonProfile.fax;
-    email: NSFSeniorKeyPersonProfile.email;
-  };
-
-  /** Enter the senior/key person's NSF ID, if they have one. */
-  @UI.label("Credentials")
-  credentials: {
-    nsfId: NSFSeniorKeyPersonProfile.nsfId;
-  };
-
-  /** Attach the senior/key person's biographical sketch, current & pending (other) support, collaborators and other affiliations, and synergistic activities. */
-  @UI.label("Attachments")
-  attachments: {
-    biographicalSketch: NSFSeniorKeyPersonProfile.biographicalSketch;
-    currentPendingSupport: NSFSeniorKeyPersonProfile.currentPendingSupport;
-    collaborators: NSFSeniorKeyPersonProfile.collaborators;
-    synergisticActivities: NSFSeniorKeyPersonProfile.synergisticActivities;
-  };
+  @UI.flatten name: NSFSeniorKeyPersonProfile.name;
+  title: NSFSeniorKeyPersonProfile.title;
+  organizationUei: NSFSeniorKeyPersonProfile.organizationUei;
+  department: NSFSeniorKeyPersonProfile.department;
+  division: NSFSeniorKeyPersonProfile.division;
+  projectRole: NSFSeniorKeyPersonProfile.projectRole;
+  @UI.flatten address: NSFSeniorKeyPersonProfile.address;
+  phone: NSFSeniorKeyPersonProfile.phone;
+  fax: NSFSeniorKeyPersonProfile.fax;
+  email: NSFSeniorKeyPersonProfile.email;
+  nsfId: NSFSeniorKeyPersonProfile.nsfId;
+  biographicalSketch: NSFSeniorKeyPersonProfile.biographicalSketch;
+  currentPendingSupport: NSFSeniorKeyPersonProfile.currentPendingSupport;
+  collaborators: NSFSeniorKeyPersonProfile.collaborators;
+  synergisticActivities: NSFSeniorKeyPersonProfile.synergisticActivities;
 }
