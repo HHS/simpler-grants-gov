@@ -62,6 +62,18 @@ class TestRead:
         targets, _ = flatten_transform.read(mapping)
         assert targets == {("BioSketch",): "sketch"}
 
+    def test_reads_attachment_without_placeholder_at_root(self):
+        mapping = {
+            "_xml_config": {
+                "attachment_fields": {
+                    "upload": {"xml_element": "AttachedFile", "type": "single_with_wrapper"}
+                }
+            },
+            "title": rule("Title"),
+        }
+        targets, _ = flatten_transform.read(mapping)
+        assert targets == {("Title",): "title", ("AttachedFile",): "upload"}
+
     def test_reports_data_dependent_conditional_unchecked(self):
         mapping = {
             "budget": rule(
