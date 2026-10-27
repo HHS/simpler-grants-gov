@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:RR_KeyPersonExpanded_4_0="http://apply.grants.gov/forms/RR_KeyPersonExpanded_4_0-V4.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" targetNamespace="http://apply.grants.gov/forms/RR_KeyPersonExpanded_4_0-V4.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="4.0">
+	<xs:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:element name="RR_KeyPersonExpanded_4_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PDPI" type="RR_KeyPersonExpanded_4_0:PersonProfileDataType"/>
+				<xs:element name="KeyPerson" type="RR_KeyPersonExpanded_4_0:PersonProfileDataType" minOccurs="0" maxOccurs="99"/>
+				<xs:element name="AdditionalProfilesAttached" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="AdditionalProfileAttached" type="att:AttachedFileDataType" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="BioSketchsAttached" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="BioSketchAttached" type="att:AttachedFileDataType" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="SupportsAttached" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="SupportAttached" type="att:AttachedFileDataType" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="4.0"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="PersonProfileDataType">
+		<xs:sequence>
+			<xs:element name="Profile">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Name" type="globLib:HumanNameDataType"/>
+						<xs:element name="Title" type="globLib:HumanTitleDataType" minOccurs="0"/>
+						<xs:element name="Address" type="globLib:AddressDataTypeV3"/>
+						<xs:element name="Phone" type="globLib:TelephoneNumberDataType"/>
+						<xs:element name="Fax" type="globLib:TelephoneNumberDataType" minOccurs="0"/>
+						<xs:element name="Email" type="globLib:EmailDataType"/>
+						<xs:element name="OrganizationName" type="globLib:OrganizationNameDataType" minOccurs="0"/>
+						<xs:element name="Department" type="globLib:DepartmentNameDataTypeV2" minOccurs="0"/>
+						<xs:element name="Division" type="globLib:DivisionNameDataTypeV2" minOccurs="0"/>
+						<xs:element name="Credential" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="60"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="ProjectRole" type="RR_KeyPersonExpanded_4_0:ProjectRoleDataType"/>
+						<xs:element name="OtherProjectRoleCategory" minOccurs="0">
+							<xs:complexType>
+								<xs:simpleContent>
+									<xs:extension base="RR_KeyPersonExpanded_4_0:OtherProjectRoleStringDataType"/>
+								</xs:simpleContent>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="DegreeType" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="75"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DegreeYear" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="25"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="BioSketchsAttached" minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="BioSketchAttached" type="att:AttachedFileDataType" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="SupportsAttached" minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="SupportAttached" type="att:AttachedFileDataType" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+				<xs:key name="ProjectRoleKey">
+					<xs:selector xpath="."/>
+					<xs:field xpath="RR_KeyPersonExpanded_4_0:ProjectRole"/>
+				</xs:key>
+				<xs:keyref name="ProjectRoleKeyRef" refer="RR_KeyPersonExpanded_4_0:ProjectRoleKey">
+					<xs:selector xpath="./RR_KeyPersonExpanded_4_0:OtherProjectRoleCategory"/>
+					<xs:field xpath="@RR_KeyPersonExpanded_4_0:ProjectRole"/>
+				</xs:keyref>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="ProjectRoleDataType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="PD/PI"/>
+			<xs:enumeration value="Co-PD/PI"/>
+			<xs:enumeration value="Faculty"/>
+			<xs:enumeration value="Post Doctoral"/>
+			<xs:enumeration value="Post Doctoral Associate"/>
+			<xs:enumeration value="Post Doctoral Scholar"/>
+			<xs:enumeration value="Other Professional"/>
+			<xs:enumeration value="Graduate Student"/>
+			<xs:enumeration value="Undergraduate Student"/>
+			<xs:enumeration value="Technician"/>
+			<xs:enumeration value="Consultant"/>
+			<xs:enumeration value="Co-Investigator"/>
+			<xs:enumeration value="Other (Specify)"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="OtherProjectRoleStringDataType">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="40"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="OrganizationContactPersonDataType">
+		<xs:sequence>
+			<xs:element name="Name" type="globLib:HumanNameDataType"/>
+			<xs:element name="Title" type="globLib:HumanTitleDataType" minOccurs="0"/>
+			<xs:element name="Address" type="globLib:AddressDataTypeV3"/>
+			<xs:element name="Phone" type="globLib:TelephoneNumberDataType"/>
+			<xs:element name="Fax" type="globLib:TelephoneNumberDataType" minOccurs="0"/>
+			<xs:element name="Email" type="globLib:EmailDataType" minOccurs="0"/>
+			<xs:element name="OrganizationName" type="globLib:OrganizationNameDataType" minOccurs="0"/>
+			<xs:element name="Department" type="globLib:DepartmentNameDataTypeV2" minOccurs="0"/>
+			<xs:element name="Division" type="globLib:DivisionNameDataTypeV2" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
