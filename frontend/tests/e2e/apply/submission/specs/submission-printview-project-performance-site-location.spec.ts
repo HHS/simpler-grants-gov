@@ -9,6 +9,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { PPSL_OPPORTUNITIES } from "tests/e2e/apply/fixtures/project-performance-site-location-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -37,25 +38,36 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-const OPPORTUNITY_NUMBER = "E2E-PPSL-ORG-IND-01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-
-const applicantScenarios = [
-  {
-    testName: `Complete the PROJECT/PERFORMANCE SITE LOCATION(S) Submission and Print View workflow for an Organization user`,
-    orgLabel: testOrgLabel,
+const applicantScenarios = PPSL_OPPORTUNITIES.flatMap(
+  ({ formLabel, opportunityNumber, attachmentSectionId }) => {
+    const opportunityConfig = loadOpportunityConfig(opportunityNumber);
+    return [
+      {
+        testName: `Complete the ${formLabel} Submission and Print View workflow for an Organization user`,
+        orgLabel: testOrgLabel,
+        opportunityConfig,
+        attachmentSectionId,
+      },
+      {
+        testName: `Complete the ${formLabel} Submission and Print View workflow for an Individual user`,
+        orgLabel: undefined,
+        opportunityConfig,
+        attachmentSectionId,
+      },
+    ];
   },
-  {
-    testName: `Complete the PROJECT/PERFORMANCE SITE LOCATION(S) Submission and Print View workflow for an Individual user`,
-    orgLabel: undefined,
-  },
-] as const;
+);
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { testName, orgLabel } of applicantScenarios) {
+for (const {
+  testName,
+  opportunityConfig,
+  orgLabel,
+  attachmentSectionId,
+} of applicantScenarios) {
   test(
     testName,
     { tag: [APPLY_FORMS, FULL_REGRESSION] },
@@ -133,7 +145,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           await navigateToPrintView(page, printUrl);
           await validateAttachmentPrintViewSection(
             page,
-            "form-section-additional_locations_attachment",
+            attachmentSectionId,
             testData["additional_locations_attachment"],
           );
         }
