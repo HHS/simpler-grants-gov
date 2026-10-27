@@ -169,10 +169,12 @@ async function buildForm(id, { sync, grantsGov }) {
   const schema = await bundle(await readJson(resolve(formDir, "schema.json")), formDir);
 
   // A form not yet mapped to its XSD, or installed with `xml: false`, generates no XML.
+  // Otherwise `xml` names the format: the rules keyed by the response's properties, or the
+  // mapping shaped like the XML.
   let xmlMapping = null;
   if (sync.xml) {
     try {
-      xmlMapping = await readJson(resolve(formDir, "xml-transform.json"));
+      xmlMapping = await readJson(resolve(formDir, `xml-${sync.xml}.json`));
     } catch {
       // Not mapped yet.
     }
@@ -198,7 +200,10 @@ async function buildForm(id, { sync, grantsGov }) {
   if (sync.instructions) form.form_instruction_id = sync.instructions;
   const rules = await readRuleSchema(id);
   if (rules) form.form_rule_schema = rules;
-  if (xmlMapping) form.json_to_xml_schema = xmlMapping;
+  // Both formats load into the API's `json_to_xml_schema`, which reads the file's `format`
+  // to pick a generator; they're kept apart here only so each is written to its own file.
+  if (xmlMapping && sync.xml === "mapping") form.json_to_xml_mapping = xmlMapping;
+  else if (xmlMapping) form.json_to_xml_schema = xmlMapping;
   // A parallel directory, so a specification-authored form registers alongside the
   // hand-written one it mirrors instead of replacing it. Both appear in the registry
   // with distinct ids, which is what makes a side-by-side comparison possible.
@@ -227,6 +232,7 @@ const SCHEMA_FILENAMES = {
   form_ui_schema: "ui_schema.json",
   form_rule_schema: "rule_schema.json",
   json_to_xml_schema: "xml_transform.json",
+  json_to_xml_mapping: "xml_mapping.json",
 };
 
 function splitForm(form) {
