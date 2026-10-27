@@ -17,6 +17,9 @@ model KeyContacts { ... }
   compiles and emits, but stays out of `api/src/form_schema/forms/`.
 - **`@Sgg.sync(#{ xml: false })`** registers it without its XML transform rules, e.g.
   while they can't produce a valid document yet.
+- **`@Sgg.sync(#{ xml: "mapping" })`** installs its XML mapping as `xml_mapping.json`, the
+  format shaped like the XML, instead of `xml_transform.json`. The default is
+  `xml: "transform"`.
 - **`@Sgg.sync(#{ instructions: "<uuid>" })`** points the form at its instructions: the
   `form_instruction_id` of a form instruction record, uploaded to each environment with
   the API's `update-form-instruction` task (`api/src/task/forms/README.md`). Give each form
@@ -37,7 +40,7 @@ application.
 One file per form, and a rule schema for a form with attachments, under `dist/sgg/`:
 
 ```
-forms/<id>/sgg.json           { "sync": false | { "xml", "sggVersion", "instructions"? }, "grantsGov": { ... } | null }
+forms/<id>/sgg.json           { "sync": false | { "xml": false | "transform" | "mapping", "sggVersion", "instructions"? }, "grantsGov": { ... } | null }
 forms/<id>/rule-schema.json   { "<field>": { "gg_validation": { "rule": "attachment" } }, ... }
 ```
 
