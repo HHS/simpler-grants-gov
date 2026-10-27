@@ -1,14 +1,18 @@
-"""Exercise private input handling and fixed AWS write scope without AWS access."""
+"""Private request handling and SDK validation without AWS access."""
 
 import contextlib
 import importlib.util
 import io
 import json
 import os
-import subprocess
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+
+import boto3
+from botocore.exceptions import (ClientError, NoCredentialsError,
+                                 ReadTimeoutError)
+from botocore.stub import Stubber
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
@@ -20,91 +24,96 @@ EMAIL = "synthetic-alerts@example.com"
 
 
 class SetupTests(unittest.TestCase):
-    def run_main(self, result=None, validate=False, value=EMAIL, error=None):
+    def run_main(self, validate=False, value=EMAIL, error=None):
         output, errors = io.StringIO(), io.StringIO()
         args = ["setup"] + (["--validate-only"] if validate else [])
         with patch.dict(os.environ, {setup.SECRET: value}), patch(
             "sys.argv", args
-        ), patch.object(
-            setup.subprocess, "run", return_value=result, side_effect=error
-        ) as call, contextlib.redirect_stdout(
+        ), patch.object(setup.boto3, "client") as factory, contextlib.redirect_stdout(
             output
         ), contextlib.redirect_stderr(
             errors
         ):
+            factory.return_value.put_parameter.side_effect = error
             status = setup.main()
         text = output.getvalue() + errors.getvalue()
         self.assertNotIn(EMAIL, text)
-        return status, text, call
+        return status, text, factory
 
-    def test_validate_only_does_not_call_aws(self):
-        status, _, call = self.run_main(validate=True)
+    def test_validate_only_and_invalid_secrets_never_create_aws_client(self):
+        status, _, factory = self.run_main(validate=True)
         self.assertEqual(status, 0)
-        call.assert_not_called()
-
-    def test_missing_or_invalid_secret_never_calls_aws(self):
+        factory.assert_not_called()
         for value in ("", "bad", EMAIL + "\nsecond@example.com", "a\x01@b.com"):
-            with self.subTest(value=value):
-                status, _, call = self.run_main(value=value)
-                self.assertEqual(status, 1)
-                call.assert_not_called()
+            status, _, factory = self.run_main(value=value)
+            self.assertEqual(status, 1)
+            factory.assert_not_called()
 
-    def test_creation_passes_secret_only_via_stdin_and_drops_raw_response(self):
-        status, _, call = self.run_main(
-            result=subprocess.CompletedProcess([], 0, stdout=EMAIL, stderr=EMAIL),
-            value=" " + EMAIL + " ",
-        )
+    def test_creation_uses_fixed_sdk_request_and_disables_retries(self):
+        status, _, factory = self.run_main(value=" " + EMAIL + " ")
         self.assertEqual(status, 0)
-        command = call.call_args.args[0]
-        arguments = call.call_args.kwargs
-        self.assertNotIn(EMAIL, " ".join(command))
-        self.assertNotIn(setup.SECRET, arguments["env"])
+        self.assertEqual(factory.call_args.args, ("ssm",))
+        self.assertEqual(factory.call_args.kwargs["region_name"], "us-east-1")
         self.assertEqual(
-            command,
-            [
-                "aws",
-                "ssm",
-                "put-parameter",
-                "--region",
-                "us-east-1",
-                "--cli-input-json",
-                "file:///dev/stdin",
-                "--no-cli-pager",
-            ],
+            factory.call_args.kwargs["config"].retries["total_max_attempts"], 1
         )
-        payload = json.loads(arguments["input"])
-        self.assertEqual(payload["Value"], EMAIL)
+        factory.return_value.put_parameter.assert_called_once_with(
+            **setup.parameter_payload(EMAIL)
+        )
+        payload = factory.return_value.put_parameter.call_args.kwargs
         self.assertEqual(payload["Name"], "/nofos/infra-dev/monitoring/alert-email")
         self.assertEqual(payload["Type"], "SecureString")
         self.assertEqual(payload["KeyId"], "alias/aws/ssm")
         self.assertEqual(payload["Tier"], "Standard")
         self.assertIs(payload["Overwrite"], False)
-        self.assertTrue(arguments["capture_output"])
-        call.assert_called_once()
 
-    def test_existing_parameter_and_denials_fail_without_read_or_retry(self):
+    def test_service_errors_only_emit_fixed_categories_not_error_messages(self):
         for code, message in (
             ("ParameterAlreadyExists", "not read or overwritten"),
             ("AccessDeniedException", "ssm:PutParameter"),
-            ("OtherFailure", "Raw output was suppressed"),
+            ("ValidationException", "category=ValidationException"),
+            ("InvalidKeyId", "category=InvalidKeyId"),
+            (EMAIL, "category=unclassified"),
         ):
             with self.subTest(code=code):
-                status, text, call = self.run_main(
-                    result=subprocess.CompletedProcess(
-                        [], 1, stdout=EMAIL, stderr=code + EMAIL
-                    )
+                error = ClientError(
+                    {"Error": {"Code": code, "Message": EMAIL}}, "PutParameter"
                 )
+                status, text, factory = self.run_main(error=error)
                 self.assertEqual(status, 1)
                 self.assertIn(message, text)
-                call.assert_called_once()
+                factory.return_value.put_parameter.assert_called_once()
 
-    def test_timeout_does_not_print_exception_input_or_output(self):
-        status, text, call = self.run_main(
-            error=subprocess.TimeoutExpired([EMAIL], 45, output=EMAIL, stderr=EMAIL)
-        )
+    def test_transport_and_unexpected_failures_do_not_expose_exception_text(self):
+        for error in (ReadTimeoutError(endpoint_url=EMAIL), RuntimeError(EMAIL)):
+            status, text, factory = self.run_main(error=error)
+            self.assertEqual(status, 1)
+            self.assertIn("unconfirmed", text)
+            factory.return_value.put_parameter.assert_called_once()
+
+    def test_missing_credentials_are_classified_without_response_details(self):
+        status, text, _ = self.run_main(error=NoCredentialsError())
         self.assertEqual(status, 1)
-        self.assertIn("Result is unconfirmed", text)
-        call.assert_called_once()
+        self.assertIn("credentials unavailable", text)
+
+    def test_real_sdk_validates_request_with_stubbed_service_response(self):
+        # Dummy credentials, a closed loopback endpoint and Stubber keep this offline.
+        client = boto3.client(
+            "ssm",
+            region_name="us-east-1",
+            aws_access_key_id="synthetic",
+            aws_secret_access_key="synthetic",
+            endpoint_url="http://127.0.0.1:9",
+        )
+        with Stubber(client) as stubber:
+            stubber.add_response(
+                "put_parameter",
+                {"Version": 1, "Tier": "Standard"},
+                setup.parameter_payload(EMAIL),
+            )
+            with patch.object(setup.boto3, "client", return_value=client):
+                setup.create(EMAIL)
+            stubber.assert_no_pending_responses()
 
     def test_policy_only_allows_fixed_parameter_creation_and_contextual_encryption(
         self,

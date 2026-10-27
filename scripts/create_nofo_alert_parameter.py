@@ -1,15 +1,32 @@
 """Create the fixed infra-dev email parameter without logging its private value."""
 
 import argparse
-import json
 import os
 import re
-import subprocess
 import sys
+
+import boto3
+from botocore.config import Config
+from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 PARAMETER = "/nofos/infra-dev/monitoring/alert-email"
 REGION = "us-east-1"
 SECRET = "NOFO_INFRA_DEV_ALERT_EMAIL"
+SAFE_ERROR_CODES = {
+    "ValidationException",
+    "InvalidKeyId",
+    "ParameterLimitExceeded",
+    "ParameterPatternMismatchException",
+    "InternalServerError",
+    "ThrottlingException",
+    "TooManyUpdates",
+    "ExpiredTokenException",
+    "UnrecognizedClientException",
+}
+
+
+class SetupFailure(Exception):
+    """Only fixed safe messages may leave the setup process."""
 
 
 def recipient():
@@ -17,14 +34,14 @@ def recipient():
     if not re.fullmatch(
         r"[^@\s\x00-\x1f\x7f]+@[^@\s\x00-\x1f\x7f]+\.[^@\s\x00-\x1f\x7f]+", value
     ):
-        raise ValueError(
+        raise SetupFailure(
             "The private email secret is missing or invalid; no AWS write attempted."
         )
     return value
 
 
-def create(value):
-    payload = {
+def parameter_payload(value):
+    return {
         "Name": PARAMETER,
         "Value": value,
         "Type": "SecureString",
@@ -33,42 +50,43 @@ def create(value):
         "Overwrite": False,
         "Description": "Private NOFO infra-dev operational alert recipient",
     }
-    # Keep the value off the command line and disk, and out of the child environment.
-    environment = {k: v for k, v in os.environ.items() if k != SECRET}
-    environment.update(AWS_PAGER="", AWS_CLI_AUTO_PROMPT="off", AWS_MAX_ATTEMPTS="1")
-    result = subprocess.run(
-        [
-            "aws",
+
+
+def create(value):
+    # Direct SDK call: no CLI/stdin parsing, subprocess arguments or private files.
+    try:
+        client = boto3.client(
             "ssm",
-            "put-parameter",
-            "--region",
-            REGION,
-            "--cli-input-json",
-            "file:///dev/stdin",
-            "--no-cli-pager",
-        ],
-        input=json.dumps(payload),
-        text=True,
-        capture_output=True,
-        env=environment,
-        timeout=45,
-        check=False,
-    )
-    if result.returncode:
-        # Never relay raw AWS errors: they may contain request data.
-        if "ParameterAlreadyExists" in result.stderr:
-            raise RuntimeError(
-                "Parameter already exists. It was not read or overwritten; ask the operator to confirm existing setup privately."
-            )
-        if any(
-            code in result.stderr for code in ("AccessDenied", "UnauthorizedOperation")
-        ):
-            raise RuntimeError(
-                "AWS denied parameter creation or encryption. Ask infrastructure support to check ssm:PutParameter and kms:Encrypt for the fixed dev parameter; no permissions were changed."
-            )
-        raise RuntimeError(
-            "AWS parameter creation failed. Raw output was suppressed to protect the recipient; infrastructure support can inspect restricted AWS audit records."
+            region_name=REGION,
+            config=Config(
+                connect_timeout=5,
+                read_timeout=15,
+                retries={"total_max_attempts": 1, "mode": "standard"},
+            ),
         )
+        client.put_parameter(**parameter_payload(value))
+    except ClientError as error:
+        code = error.response.get("Error", {}).get("Code", "")
+        if code == "ParameterAlreadyExists":
+            raise SetupFailure(
+                "Parameter already exists. It was not read or overwritten; ask the operator to confirm existing setup privately."
+            ) from None
+        if code in ("AccessDenied", "AccessDeniedException", "UnauthorizedOperation"):
+            raise SetupFailure(
+                "AWS denied parameter creation or encryption. Ask infrastructure support to check ssm:PutParameter and kms:Encrypt for the fixed dev parameter; no permissions were changed."
+            ) from None
+        category = code if code in SAFE_ERROR_CODES else "unclassified"
+        raise SetupFailure(
+            f"AWS parameter creation failed (category={category}). Raw output was suppressed to protect the recipient; no automatic retry or overwrite was attempted."
+        ) from None
+    except NoCredentialsError:
+        raise SetupFailure(
+            "AWS credentials unavailable; parameter creation was not attempted."
+        ) from None
+    except BotoCoreError:
+        raise SetupFailure(
+            "AWS SDK request failed. Result is unconfirmed; raw output was suppressed and no automatic retry or overwrite was attempted."
+        ) from None
 
 
 def main():
@@ -85,11 +103,12 @@ def main():
                 "Created the encrypted infra-dev alert parameter. No subscription, notification or deployment was performed."
             )
         return 0
-    except (ValueError, RuntimeError) as error:
+    except SetupFailure as error:
         print(str(error), file=sys.stderr)
-    except (OSError, subprocess.TimeoutExpired):
+    except Exception:
+        # Even unexpected SDK/configuration errors must not leak response values.
         print(
-            "AWS command unavailable or timed out. Result is unconfirmed; no automatic retry or overwrite was attempted.",
+            "Unexpected setup failure. Result is unconfirmed; raw output was suppressed to protect the recipient.",
             file=sys.stderr,
         )
     return 1
