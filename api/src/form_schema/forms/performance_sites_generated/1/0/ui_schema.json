@@ -1,0 +1,240 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/submitting_as_individual",
+          "label": "I am submitting an application as an individual, and not on behalf of a company, state, local or tribal government, academia, or other type of organization.",
+          "options": {
+            "widget": "Checkbox"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/organization_name",
+          "label": "Organization Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/uei",
+          "label": "UEI"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/address/properties/street1",
+          "label": "Street 1"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/address/properties/street2",
+          "label": "Street 2"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/address/properties/city",
+          "label": "City"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/address/properties/county",
+          "label": "County/Parish"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/address/properties/state",
+          "label": "State"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/address/properties/province",
+          "label": "Province",
+          "rule": {
+            "effect": "SHOW",
+            "condition": {
+              "scope": "#/properties/primary_site/properties/address/properties/country",
+              "schema": {
+                "allOf": [
+                  {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "const": ""
+                        },
+                        {
+                          "type": "array",
+                          "maxItems": 0
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "const": "USA: UNITED STATES"
+                    }
+                  }
+                ]
+              },
+              "failWhenUndefined": true
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/address/properties/country",
+          "label": "Country"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/address/properties/zip_code",
+          "label": "Zip / Postal Code"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/primary_site/properties/congressional_district",
+          "label": "Project/Performance Site Congressional District"
+        }
+      ],
+      "label": "Primary performance site",
+      "options": {
+        "description": "Identify the primary location where the work will be performed."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/additional_sites",
+          "label": "Additional site",
+          "options": {
+            "detail": {
+              "type": "Group",
+              "elements": [
+                {
+                  "type": "Control",
+                  "scope": "#/properties/submitting_as_individual",
+                  "label": "I am submitting an application as an individual, and not on behalf of a company, state, local or tribal government, academia, or other type of organization.",
+                  "options": {
+                    "widget": "Checkbox"
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/organization_name",
+                  "label": "Organization Name"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/uei",
+                  "label": "UEI"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/street1",
+                  "label": "Street 1"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/street2",
+                  "label": "Street 2"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/city",
+                  "label": "City"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/county",
+                  "label": "County/Parish"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/state",
+                  "label": "State"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/province",
+                  "label": "Province",
+                  "rule": {
+                    "effect": "SHOW",
+                    "condition": {
+                      "scope": "#/properties/address/properties/country",
+                      "schema": {
+                        "allOf": [
+                          {
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "const": ""
+                                },
+                                {
+                                  "type": "array",
+                                  "maxItems": 0
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "not": {
+                              "const": "USA: UNITED STATES"
+                            }
+                          }
+                        ]
+                      },
+                      "failWhenUndefined": true
+                    }
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/country",
+                  "label": "Country"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/zip_code",
+                  "label": "Zip / Postal Code"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/congressional_district",
+                  "label": "Project/Performance Site Congressional District"
+                }
+              ]
+            },
+            "widget": "CollapsibleFieldList"
+          }
+        }
+      ],
+      "label": "Additional performance sites",
+      "options": {
+        "description": "Add each additional site separately. If there are more than 299, attach a file listing the rest."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/additional_locations_attachment",
+          "label": "Additional Location(s)",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Additional Locations"
+    }
+  ]
+}
