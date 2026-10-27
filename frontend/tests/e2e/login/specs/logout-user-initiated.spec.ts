@@ -22,16 +22,29 @@ const SIGN_IN = 'a:has-text("Sign In"), button:has-text("Sign In")';
 const SESSION_ENDPOINT = "/api/auth/session";
 const TIMEOUT = targetEnv === "local" ? 15000 : 60000;
 
-// Use a seeded user that no other spec depends on concurrently. Logging out
-// ends that user's server-side session, so do NOT use "primaryOrgAdmin" here:
-// it is shared across workers/shards and would log out unrelated tests.
+const SETTINGS_PAGE = "/settings";
+const EMAIL_INPUT = "input#email";
+
+// Use "orgMember": locally it is the seeded user with a linked login.gov
+// identity (so its session carries an email), and each authenticateE2eUser
+// call mints its own token, so logging out only ends this test's session.
 const LOGOUT_TEST_USER = "orgMember" as const;
 
-type SessionState = { isLoggedIn?: boolean; email?: string | null };
+// /api/auth/session intentionally exposes only login state (never PII/email).
+type SessionState = { isLoggedIn?: boolean };
 
 const getSessionState = async (page: Page): Promise<SessionState> => {
   const response = await page.request.get(SESSION_ENDPOINT);
   return response.ok() ? ((await response.json()) as SessionState) : {};
+};
+
+// The email is private user info, so read it where the app shows it to the
+// logged-in user: the (disabled) email field on the Settings page.
+const getAccountEmail = async (page: Page): Promise<string> => {
+  await page.goto(SETTINGS_PAGE, { waitUntil: "domcontentloaded" });
+  const emailInput = page.locator(EMAIL_INPUT);
+  await expect(emailInput).toBeVisible({ timeout: TIMEOUT });
+  return emailInput.inputValue();
 };
 
 const expectLoggedIn = async (page: Page) => {
@@ -60,19 +73,22 @@ test.describe("User-initiated logout", () => {
       // Session accepted by the auth gate / header...
       await expectLoggedIn(page);
       // ...and the dashboard actually rendered. /workspace renders nothing when
-      // the session has no email, and the e2e-token JWT currently carries
-      // email=null (see create_e2e_token.py), so this fails until that is fixed.
+      // the session has no email, so a missing h1 means the seeded user has no
+      // linked email (see seed_e2e.py / create_e2e_token.py).
       await expect(
         page.getByRole("heading", { level: 1 }),
-        "workspace h1 missing: session likely has no email (e2e-token JWT email is null)",
+        "workspace h1 missing: session likely has no email (seeded user needs a linked login.gov identity)",
       ).toBeVisible({ timeout: TIMEOUT });
 
       // Capture identity so we can prove it disappears from public pages later.
-      const { email } = await getSessionState(page);
+      const email = await getAccountEmail(page);
       expect(
         email,
-        "seeded user should have an email on its session",
+        "seeded user should have an email shown on the Settings page",
       ).toBeTruthy();
+      // Return to the authenticated page we want to be "on" when logging out.
+      await page.goto(AUTHENTICATED_PAGE, { waitUntil: "domcontentloaded" });
+      await expect(page).toHaveURL(new RegExp(`${AUTHENTICATED_PAGE}$`));
 
       // When the user initiates logout using the application's Sign out option
       const signOut = await findSignOutButton(page, isMobile);
@@ -103,11 +119,18 @@ test.describe("User-initiated logout", () => {
       });
       await expect(page.locator(SIGN_IN).first()).toBeAttached();
 
+      // And the account settings page no longer exposes the user's email
+      await page.goto(SETTINGS_PAGE, { waitUntil: "domcontentloaded" });
+      await expect(page.locator(".usa-alert--error")).toBeVisible({
+        timeout: TIMEOUT,
+      });
+      await expect(page.locator(EMAIL_INPUT)).toHaveCount(0);
+
       // And private user information is not accessible on public pages
       for (const publicPage of PUBLIC_PAGES) {
         await page.goto(publicPage, { waitUntil: "domcontentloaded" });
         await expectLoggedOut(page);
-        await expect(page.locator("body")).not.toContainText(email as string);
+        await expect(page.locator("body")).not.toContainText(email);
       }
 
       // When the user logs in again (new seeded session token; the old one was revoked)
