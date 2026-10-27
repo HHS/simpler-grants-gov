@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://simpler.grants.gov/schemas/xml-mapping.json",
+  "title": "XML mapping",
+  "description": "A mapping shaped like the XML it produces: each element names where in a form's response its value comes from. A key starting with $ is a function; every other key is something to write. See src/runtime/format.ts.",
+  "type": "object",
+  "required": ["format", "namespaces", "root"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "xml-mapping"
+    },
+    "namespaces": {
+      "description": "Each namespace the document declares, by prefix. `default` is the form's own, and another prefix must declare it too.",
+      "type": "object",
+      "required": ["default"],
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "xsd_url": {
+      "type": "string"
+    },
+    "root": {
+      "description": "One key: the root element.",
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/elements"
+      }
+    }
+  },
+  "$defs": {
+    "path": {
+      "description": "A dotted path, relative to the response or, inside $each, to the item.",
+      "type": "string",
+      "pattern": "^[^.]+(\\.[^.]+)*$"
+    },
+    "literal": {
+      "type": ["string", "number", "boolean"]
+    },
+    "elements": {
+      "description": "Child elements and attributes, in the XSD's order. `Name` is in the form's namespace, `prefix:Name` in another, and `@prefix:Name` is an attribute. No key starts with $.",
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "pattern": "^\\$"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/value"
+      }
+    },
+    "value": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/field"
+        },
+        {
+          "$ref": "#/$defs/const"
+        },
+        {
+          "$ref": "#/$defs/match"
+        },
+        {
+          "$ref": "#/$defs/transform"
+        },
+        {
+          "$ref": "#/$defs/attachment"
+        },
+        {
+          "$ref": "#/$defs/each"
+        },
+        {
+          "$ref": "#/$defs/when"
+        },
+        {
+          "$ref": "#/$defs/elements"
+        }
+      ]
+    },
+    "branch": {
+      "description": "A case entry, default, then or else: a value, or a literal as $const.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/value"
+        },
+        {
+          "$ref": "#/$defs/literal"
+        }
+      ]
+    },
+    "field": {
+      "type": "object",
+      "required": ["$field"],
+      "additionalProperties": false,
+      "properties": {
+        "$field": {
+          "$ref": "#/$defs/path"
+        }
+      }
+    },
+    "const": {
+      "type": "object",
+      "required": ["$const"],
+      "additionalProperties": false,
+      "properties": {
+        "$const": {
+          "$ref": "#/$defs/literal"
+        }
+      }
+    },
+    "match": {
+      "description": "The case entry for a value (a string as it is, anything else as JSON writes it), or default. A value with neither is an error.",
+      "type": "object",
+      "required": ["$match"],
+      "additionalProperties": false,
+      "properties": {
+        "$match": {
+          "type": "object",
+          "required": ["value", "case"],
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/value"
+            },
+            "case": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/branch"
+              }
+            },
+            "default": {
+              "$ref": "#/$defs/branch"
+            }
+          }
+        }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "required": ["$transform"],
+      "additionalProperties": false,
+      "properties": {
+        "$transform": {
+          "type": "object",
+          "required": ["name", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "description": "A name in the API's value_transformers.TRANSFORMATION_REGISTRY.",
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/value"
+            },
+            "params": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "attachment": {
+      "description": "The upload whose id is at this path, written as an att:AttachedFileDataType.",
+      "type": "object",
+      "required": ["$attachment"],
+      "additionalProperties": false,
+      "properties": {
+        "$attachment": {
+          "$ref": "#/$defs/path"
+        }
+      }
+    },
+    "each": {
+      "type": "object",
+      "required": ["$each"],
+      "additionalProperties": false,
+      "properties": {
+        "$each": {
+          "type": "object",
+          "required": ["items", "map"],
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "description": "Any value that yields a list.",
+              "$ref": "#/$defs/value"
+            },
+            "map": {
+              "$ref": "#/$defs/value"
+            }
+          }
+        }
+      }
+    },
+    "when": {
+      "type": "object",
+      "required": ["$when"],
+      "additionalProperties": false,
+      "properties": {
+        "$when": {
+          "type": "object",
+          "required": ["condition", "then"],
+          "additionalProperties": false,
+          "properties": {
+            "condition": {
+              "$ref": "#/$defs/condition"
+            },
+            "then": {
+              "$ref": "#/$defs/branch"
+            },
+            "else": {
+              "$ref": "#/$defs/branch"
+            }
+          }
+        }
+      }
+    },
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["field", "operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "$ref": "#/$defs/path"
+            },
+            "operator": {
+              "enum": ["equals", "not_equals"]
+            },
+            "value": {}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["field", "operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "$ref": "#/$defs/path"
+            },
+            "operator": {
+              "const": "in"
+            },
+            "value": {
+              "type": "array"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["field", "operator"],
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "$ref": "#/$defs/path"
+            },
+            "operator": {
+              "const": "exists"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["all"],
+          "additionalProperties": false,
+          "properties": {
+            "all": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/condition"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["any"],
+          "additionalProperties": false,
+          "properties": {
+            "any": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/condition"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
