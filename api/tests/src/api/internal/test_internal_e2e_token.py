@@ -82,7 +82,9 @@ def test_get_e2e_token_includes_email_when_user_has_linked_login(
     )
 
     assert resp.status_code == 200
-    decoded_token = jwt.decode(resp.get_json()["data"]["token"], options={"verify_signature": False})
+    decoded_token = jwt.decode(
+        resp.get_json()["data"]["token"], options={"verify_signature": False}
+    )
     assert decoded_token["email"] == external_user.email
 
 
@@ -97,7 +99,9 @@ def test_get_e2e_token_email_is_none_without_linked_login(
     )
 
     assert resp.status_code == 200
-    decoded_token = jwt.decode(resp.get_json()["data"]["token"], options={"verify_signature": False})
+    decoded_token = jwt.decode(
+        resp.get_json()["data"]["token"], options={"verify_signature": False}
+    )
     assert decoded_token["email"] is None
 
 
