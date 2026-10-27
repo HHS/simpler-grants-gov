@@ -13,7 +13,12 @@ includes every answer, which includes:
 import pytest
 
 from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
-from tests.src.form_schema.parity.xml.diffs import key_contacts, key_contacts_generated
+from tests.src.form_schema.parity.xml.diffs import (
+    epa_key_contacts,
+    epa_key_contacts_generated,
+    key_contacts,
+    key_contacts_generated,
+)
 from tests.src.form_schema.parity.xml.harness import flatten_form
 from tests.src.form_schema.parity.xml.harness.compare import (
     form_schema_vs_xsd,
@@ -25,6 +30,8 @@ from tests.src.form_schema.parity.xml.harness.compare import (
 DIFFS = [
     key_contacts.DIFF,
     key_contacts_generated.DIFF,
+    epa_key_contacts.DIFF,
+    epa_key_contacts_generated.DIFF,
 ]
 
 
