@@ -23,7 +23,7 @@ export const buildSF424ShortHappyPathTestData = (
     applicant_city: `City ${shortSuffix}`,
     applicant_state: "AL: Alabama",
     applicant_country: "USA: UNITED STATES",
-    applicant_zip_code: "12345",
+    applicant_zip_code: "12345-6789",
     applicant_web_address: `https://example${shortSuffix}.org`,
     // applicant_type_code is an array field (type: array, minItems: 1, maxItems: 3)
     // Backend schema has MultiSelect widget - test passes array of selected codes
@@ -52,7 +52,7 @@ export const buildSF424ShortHappyPathTestData = (
     project_director_city: `City ${shortSuffix}`,
     project_director_state: "AL: Alabama",
     project_director_country: "USA: UNITED STATES",
-    project_director_zip_code: "12345",
+    project_director_zip_code: "12345-6789",
 
     // Section 8 - Primary Contact/Grants Administrator
     // Filled independently rather than via "Same as Project Director" -
@@ -71,7 +71,7 @@ export const buildSF424ShortHappyPathTestData = (
     contact_person_city: `City ${shortSuffix}`,
     contact_person_state: "AL: Alabama",
     contact_person_country: "USA: UNITED STATES",
-    contact_person_zip_code: "12345",
+    contact_person_zip_code: "12345-6789",
 
     // Section 9 - Authorized Representative
     application_certification: "true",
