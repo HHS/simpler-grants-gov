@@ -1,5 +1,7 @@
 import type { FormDiff } from "../harness/model.ts";
 
+import { NINE_DIGIT_ZIP } from "./common.ts";
+
 export const DIFF: FormDiff = {
   slug: "project-performance-site-location-s",
   dat: {
@@ -229,9 +231,7 @@ export const DIFF: FormDiff = {
         source: "Select the country.",
       },
       "primary_site.address.zip_code": {
-        category: "gap",
-        reason:
-          "The DAT specifies nine-digit US ZIP guidance;existing SGG/general bank bounds permit shorter values. Candidate preserves current API admission. The source/consumer policy is unresolved;do not treat this comparison as source acceptance.",
+        ...NINE_DIGIT_ZIP,
         plan: "Enter the nine-digit Postal Code (e.g., ZIP code) of the primary performance site location. This field is required if the Project Performance Site is located in the United States.",
         source:
           "Enter the zip / postal code. This field is required if the country is the United States.",
@@ -303,9 +303,7 @@ export const DIFF: FormDiff = {
         source: "Select the country.",
       },
       "additional_sites[].address.zip_code": {
-        category: "gap",
-        reason:
-          "The DAT specifies nine-digit US ZIP guidance;existing SGG/general bank bounds permit shorter values. Candidate preserves current API admission. The source/consumer policy is unresolved;do not treat this comparison as source acceptance.",
+        ...NINE_DIGIT_ZIP,
         plan: "Enter the nine-digit Postal Code (e.g., ZIP code) of the primary performance site location. This field is required if the Project Performance Site is located in the United States.",
         source:
           "Enter the zip / postal code. This field is required if the country is the United States.",
