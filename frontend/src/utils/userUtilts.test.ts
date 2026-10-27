@@ -133,6 +133,8 @@ describe("isSafeLoginRedirect / getSafeLoginRedirect", () => {
     "/login/callback",
     "/login?pivError=true",
     "/LOGIN",
+    "/logout",
+    "/logout/callback",
     "/maintenance",
     "/unauthenticated",
     "/error",

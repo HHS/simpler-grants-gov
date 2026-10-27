@@ -29,7 +29,7 @@ The frontend returns users to the page where they chose Sign in or Create accoun
 3. Login.gov returns to `/api/auth/callback`, which always redirects to `/login` (or `/login?pivError=true`). The callback never reads or clears the saved destination and never logs the token.
 4. `/login` reads `login-redirect`, validates it, keeps the safe destination in a local variable, clears `login-redirect`, then calls `router.replace(destination)` exactly once. Repeated effect runs, such as under React Strict Mode, do not navigate again.
 
-A saved destination is used only if it is a root-relative Simpler path: it must begin with `/`, must not begin with `//`, must not contain backslashes, whitespace, or control characters, must be well formed, and must not be (or be under) `/login`, `/maintenance`, `/unauthenticated`, `/error`, `/api`, or `/dev`. Invalid values are not repaired; they fall back to `/`.
+A saved destination is used only if it is a root-relative Simpler path: it must begin with `/`, must not begin with `//`, must not contain backslashes, whitespace, or control characters, must be well formed, and must not be (or be under) `/login`, `/logout`, `/maintenance`, `/unauthenticated`, `/error`, `/api`, or `/dev`. Invalid values are not repaired; they fall back to `/`.
 
 If the user leaves Login.gov with the browser Back button, they return to the previous Simpler page. Authentication is not restarted automatically, and `login-redirect` stays in that tab until `/login` uses it or the user starts authentication again, which replaces it.
 
@@ -96,7 +96,7 @@ flowchart TD
     F --> G{Session created?}
     G -->|Yes| H[Redirect to /login]
     G -->|No| H
-    H --> J["/login restores the saved destination with one router.replace"]
+    H --> I["/login restores the saved destination with one router.replace"]
 ```
 
 ### Token Refresh

@@ -66,7 +66,6 @@ export const isSafeLoginRedirect = (
     return false;
   }
   return (
-    url.origin === LOGIN_REDIRECT_BASE_URL &&
     !isBlockedLoginRedirectPath(url.pathname) &&
     !isBlockedLoginRedirectPath(decodedPathname)
   );

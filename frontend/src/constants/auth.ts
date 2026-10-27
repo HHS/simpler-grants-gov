@@ -11,6 +11,7 @@ export const LOGIN_REDIRECT_STORAGE_KEY = "login-redirect";
 export const LOGIN_REDIRECT_FALLBACK = "/";
 export const LOGIN_REDIRECT_BLOCKED_PREFIXES = [
   "/login",
+  "/logout",
   "/maintenance",
   "/unauthenticated",
   "/error",
