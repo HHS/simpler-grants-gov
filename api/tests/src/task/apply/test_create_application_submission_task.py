@@ -5,19 +5,23 @@ from decimal import Decimal
 from io import BytesIO
 
 import pytest
-from sqlalchemy import update
+from sqlalchemy import select, text, update
+from sqlalchemy.orm import Session
 
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
 from src.db.models.competition_models import Application, Form
 from src.form_schema.forms import SF424_v4_0
 from src.form_schema.registry.form_template_registry import form_template_registry
+from src.services.applications.create_application_submission import (
+    ApplicationSubmissionMetrics,
+    FileMetadata,
+    SubmissionContainer,
+    create_manifest_text,
+)
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
     CreateApplicationSubmissionTask,
-    FileMetadata,
-    SubmissionContainer,
-    create_manifest_text,
 )
 from src.util import file_util
 from tests.conftest import BaseTestClass
@@ -258,11 +262,11 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert len(not_picked_up_app2.application_submissions) == 0
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 2
-        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 0
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_PROCESSED_COUNT] == 2
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_ATTACHMENT_COUNT] == 0
         apps_processed = [application_with_attachments, application_without_attachments]
         assert (
-            metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT]
+            metrics[ApplicationSubmissionMetrics.APPLICATION_FORM_COUNT]
             == sum([len(app.application_forms) for app in apps_processed]) - 1
         )  # Not counting the one app form that we skip
 
@@ -337,7 +341,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 1
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_ATTACHMENT_COUNT] == 1
 
     def test_run_task_with_erroring_application(
         self, db_session, create_submission_task, monkeypatch
@@ -350,7 +354,9 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             raise Exception("It errors")
 
         monkeypatch.setattr(
-            create_submission_task, "process_application_attachments", erroring_function
+            create_submission_task.application_submission_builder,
+            "process_application_attachments",
+            erroring_function,
         )
 
         create_submission_task.run_task()
@@ -361,7 +367,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert len(application.application_submissions) == 0
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 1
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_PROCESSED_COUNT] == 1
         assert metrics[create_submission_task.Metrics.ERROR_COUNT] == 1
 
     def test_xml_generation_unsupported_form(self, db_session, enable_factory_create, s3_config):
@@ -460,6 +466,37 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
         assert submission.project_title == "my fun title"
         assert submission.total_requested_amount == Decimal("456.78")
+
+    def test_locked_applications_do_not_get_picked_up_by_fetch_applications(
+        self, db_session, enable_factory_create, create_submission_task
+    ):
+        task = create_submission_task
+        unlocked_application_ids = [
+            ApplicationFactory.create(application_status=ApplicationStatus.SUBMITTED).application_id
+            for _ in range(3)
+        ]
+        locked_application_id = ApplicationFactory.create(
+            application_status=ApplicationStatus.SUBMITTED
+        ).application_id
+        engine = db_session.get_bind().engine
+        with Session(engine) as lock_session, Session(engine) as fetch_session:
+            # Lock the application
+            lock_session.scalars(
+                select(Application)
+                .where(Application.application_id == locked_application_id)
+                .with_for_update()
+            ).one()
+            fetch_session.execute(text("SET LOCAL lock_timeout = '2s'"))
+            result_1 = task.fetch_applications()
+            # Fetch application skips locked application
+            assert locked_application_id not in [a.application_id for a in result_1]
+            assert set(unlocked_application_ids) == set([a.application_id for a in result_1])
+            # Unlock the application
+            lock_session.rollback()
+            fetch_session.rollback()
+            result_2 = task.fetch_applications()
+            # Fetch application picks up formerly unlocked application
+            assert locked_application_id in [a.application_id for a in result_2]
 
 
 def test_get_file_name_in_zip():

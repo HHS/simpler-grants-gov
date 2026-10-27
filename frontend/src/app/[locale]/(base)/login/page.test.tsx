@@ -33,8 +33,8 @@ describe("Login Page", () => {
 
     render(<LoginPage />);
 
-    expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
-    expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
+    expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(mockPush).toHaveBeenCalledWith("/test-redirect-path");
     expect(mockPush).toHaveBeenCalledTimes(1);
   });
@@ -44,8 +44,8 @@ describe("Login Page", () => {
 
     render(<LoginPage />);
 
-    expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
-    expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
+    expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
@@ -55,8 +55,8 @@ describe("Login Page", () => {
 
     render(<LoginPage />);
 
-    expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
-    expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
+    expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
@@ -66,8 +66,8 @@ describe("Login Page", () => {
 
     render(<LoginPage />);
 
-    expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
-    expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
+    expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(mockPush).toHaveBeenCalledWith("/");
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
@@ -77,7 +77,7 @@ describe("Login Page", () => {
 
     const { container } = render(<LoginPage />);
 
-    expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
+    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(container).toHaveTextContent("Redirecting...");
   });
 });

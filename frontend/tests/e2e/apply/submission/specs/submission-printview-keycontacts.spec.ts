@@ -17,10 +17,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import {
-  skipNonChromeOnStaging,
-  skipWebkit,
-} from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -38,8 +35,7 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE, FULL_REGRESSION } =
-  VALID_TAGS;
+const { APPLY_FORMS, SMOKE, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
@@ -58,32 +54,31 @@ const applicantScenarios = [
   {
     testName: `Key Contacts - Required fields only - Organization user`,
     orgLabel: testOrgLabel,
-    tags: [SMOKE, GRANTEE, APPLY, APPLY_FORMS],
+    tags: [APPLY_FORMS, SMOKE],
     buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
   },
   {
     testName: `Key Contacts - Complete form - Organization user`,
     orgLabel: testOrgLabel,
-    tags: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+    tags: [APPLY_FORMS, FULL_REGRESSION],
     buildTestData: buildKeyContactsHappyPathTestData,
   },
   {
     testName: `Key Contacts - Required fields only - Individual user`,
     orgLabel: undefined,
-    tags: [SMOKE, GRANTEE, APPLY, APPLY_FORMS],
+    tags: [APPLY_FORMS, SMOKE],
     buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
   },
   {
     testName: `Key Contacts - Complete form - Individual user`,
     orgLabel: undefined,
-    tags: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+    tags: [APPLY_FORMS, FULL_REGRESSION],
     buildTestData: buildKeyContactsHappyPathTestData,
   },
 ] as const;
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
-  skipWebkit(testInfo);
 });
 
 for (const { testName, orgLabel, tags, buildTestData } of applicantScenarios) {

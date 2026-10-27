@@ -17,7 +17,6 @@ on:
         type: choice
         options:
           - grantee1
-          - grantee2
           - grantor1
       app:
         description: Which app's parameters to copy

@@ -1,7 +1,9 @@
 import uuid
+from datetime import date
 
 import pytest
 import requests
+from freezegun import freeze_time
 
 import src.util.file_util as file_util
 from tests.src.api.opportunities_v1.conftest import (
@@ -585,6 +587,35 @@ def test_get_opportunity_with_competitions_200(
     assert len(response_data["competitions"]) == 1
     assert response_data["competitions"][0]["competition_id"] == str(competition.competition_id)
     assert response_data["competitions"][0]["opportunity_id"] == str(opportunity.opportunity_id)
+
+
+@freeze_time("2025-01-15 12:00:00", tz_offset=0)
+def test_get_opportunity_package_only_competition_200(
+    client, enable_factory_create, user_api_key_id
+):
+    # A package only opportunity has a Grants.gov package but no current summary, so no status
+    opportunity = OpportunityFactory.create(current_opportunity_summary=None)
+    CompetitionFactory.create(
+        opportunity=opportunity,
+        legacy_package_id="PKG-00260155",
+        is_simpler_grants_enabled=False,
+        opening_date=date(2025, 1, 1),
+        closing_date=date(2025, 12, 31),
+    )
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": user_api_key_id}
+    )
+
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+
+    assert response_data["opportunity_status"] is None
+    assert len(response_data["competitions"]) == 1
+    response_competition = response_data["competitions"][0]
+    assert response_competition["has_open_date"] is True
+    assert response_competition["is_legacy_package"] is True
+    assert response_competition["is_open"] is False
 
 
 # JWT version of the get opportunity with competitions, regular endpoint

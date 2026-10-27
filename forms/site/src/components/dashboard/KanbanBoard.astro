@@ -1,0 +1,32 @@
+---
+import { getCollection } from "astro:content";
+import KanbanColumn from "./KanbanColumn.astro";
+
+const forms = await getCollection("forms");
+
+const columns = [
+  { status: "backlog", label: "Backlog" },
+  { status: "prioritized", label: "Prioritized" },
+  { status: "in_progress", label: "In Progress" },
+  { status: "migrated", label: "Migrated" },
+] as const;
+
+const grouped = Object.fromEntries(
+  columns.map((col) => [
+    col.status,
+    forms
+      .filter((f) => f.data.status === col.status)
+      .sort((a, b) => b.data.apps_count - a.data.apps_count),
+  ]),
+);
+---
+
+<div class="kanban-board">
+  {columns.map((col) => (
+    <KanbanColumn
+      label={col.label}
+      status={col.status}
+      forms={grouped[col.status] ?? []}
+    />
+  ))}
+</div>

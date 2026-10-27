@@ -15,7 +15,7 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { getTestOrgId } from "tests/e2e/utils/auth/test-users";
 
-const { AUTH, CORE_REGRESSION } = VALID_TAGS;
+const { FULL_REGRESSION } = VALID_TAGS;
 
 const { targetEnv } = playwrightEnv;
 
@@ -36,7 +36,7 @@ test.describe("Organization detail page access - failure path", () => {
    */
   test(
     "Org admin from another organization cannot access the organization detail page",
-    { tag: [AUTH, CORE_REGRESSION] },
+    { tag: [FULL_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
@@ -71,7 +71,7 @@ test.describe("Organization detail page access - failure path", () => {
    */
   test(
     "Org admin from another organization still cannot access the organization detail page after reload",
-    { tag: [AUTH, CORE_REGRESSION] },
+    { tag: [FULL_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
@@ -107,7 +107,7 @@ test.describe("Organization detail page access - failure path", () => {
    */
   test(
     "Signed-out user cannot access an organization's detail page",
-    { tag: [AUTH, CORE_REGRESSION] },
+    { tag: [FULL_REGRESSION] },
     async ({ page }) => {
       // Given the user is signed out
       // Default test context starts signed out. This scenario does not call

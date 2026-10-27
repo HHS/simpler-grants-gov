@@ -18,10 +18,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import {
-  skipNonChromeOnStaging,
-  skipWebkit,
-} from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillFormPartial } from "tests/e2e/utils/forms/general-forms-filling";
 import { clickSaveButton } from "tests/e2e/utils/forms/save-form-utils";
@@ -38,8 +35,7 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, FULL_REGRESSION, GRANTEE } =
-  VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
@@ -60,14 +56,13 @@ const applicantScenarios = [
 test.describe("Key Contacts FieldList", () => {
   test.beforeEach(({ page: _ }, testInfo) => {
     skipNonChromeOnStaging(testInfo);
-    skipWebkit(testInfo);
   });
 
   for (const { testName, orgLabel } of applicantScenarios) {
     test(
       testName,
       {
-        tag: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+        tag: [APPLY_FORMS, FULL_REGRESSION],
       },
       async (
         { page, context }: { page: Page; context: BrowserContext },

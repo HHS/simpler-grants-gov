@@ -5,6 +5,7 @@ import src.task.opportunities.set_current_opportunities_task  # ruff: ignore[unu
 import src.task.opportunities.export_opportunity_data_task  # ruff: ignore[unused-import] isort:skip
 import src.task.analytics.create_analytics_db_csvs  # ruff: ignore[unused-import] isort:skip
 import src.task.notifications.email_notification  # ruff: ignore[unused-import] isort:skip
+import src.task.notifications.new_opportunity_notification  # ruff: ignore[unused-import] isort:skip
 import src.task.sam_extracts.sam_extract_cli  # ruff: ignore[unused-import] isort:skip
 import src.task.apply.create_application_submission_task  # ruff: ignore[unused-import] isort:skip
 import src.task.generate_internal_token  # ruff: ignore[unused-import] isort:skip

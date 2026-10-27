@@ -1,11 +1,33 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import {
   fakeResponsiveTableHeaders,
   fakeResponsiveTableRows,
 } from "src/utils/testing/fixtures";
 
+import { useState } from "react";
+
 import { TableWithResponsiveHeader } from "src/components/core/TableWithResponsiveHeader";
+
+const ClickCounter = ({ label }: { label: string }) => {
+  const [count, setCount] = useState(0);
+  return (
+    <button type="button" onClick={() => setCount(count + 1)}>
+      {label} {count}
+    </button>
+  );
+};
+
+const counterTable = (labels: string[]) => (
+  <TableWithResponsiveHeader
+    headerContent={[{ cellData: "counter" }]}
+    tableRowData={labels.map((label) => [
+      { cellData: <ClickCounter label={label} /> },
+    ])}
+    rowKeys={labels}
+  />
+);
 
 // this does not directly test responsive aspects of the component, that should be done in e2e tests
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
@@ -144,5 +166,20 @@ describe("TableWithResponsiveHeader", () => {
     );
 
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  });
+  it("keeps stateful cell content with its row when rowKeys are provided", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(counterTable(["first", "second"]));
+
+    await user.click(screen.getByRole("button", { name: "first 0" }));
+
+    // a new row added at the top should not take over the existing row's state
+    rerender(counterTable(["new", "first", "second"]));
+
+    expect(screen.getByRole("button", { name: "new 0" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "first 1" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "second 0" }),
+    ).toBeInTheDocument();
   });
 });

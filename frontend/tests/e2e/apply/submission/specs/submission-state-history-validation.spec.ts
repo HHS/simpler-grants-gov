@@ -17,10 +17,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import {
-  skipNonChromeOnStaging,
-  skipWebkit,
-} from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
@@ -42,7 +39,7 @@ const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
-const { APPLY, CORE_REGRESSION, GRANTEE } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 // Validation errors specific to required SF-424B and conditional SF-LLL form combination
 const EXPECTED_SUBMISSION_ERRORS = {
@@ -68,12 +65,11 @@ const EXPECTED_HISTORY_ENTRIES = [
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
-  skipWebkit(testInfo);
 });
 
 test(
   "SF-424B submission and application history validation",
-  { tag: [APPLY, CORE_REGRESSION, GRANTEE] },
+  { tag: [APPLY_FORMS, FULL_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

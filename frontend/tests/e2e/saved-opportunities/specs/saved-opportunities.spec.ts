@@ -6,7 +6,7 @@ import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { ensureOpportunityIsSaved } from "tests/e2e/utils/saved-opportunities/save-opportunity-utils";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 const { targetEnv } = playwrightEnv;
 
@@ -42,7 +42,7 @@ test.describe("Saved Opportunities", () => {
    */
   test(
     "Saved opportunities page shows unauthenticated state if not logged in",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }) => {
       // When the user navigates directly to the "/saved-opportunities" URL
       await page.goto("/saved-opportunities");
@@ -59,7 +59,7 @@ test.describe("Saved Opportunities", () => {
    */
   test(
     "Working saved opportunities page link appears in nav when logged in",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = project.name.match(/[Mm]obile/);
 
@@ -101,8 +101,11 @@ test.describe("Saved Opportunities", () => {
    */
   test(
     "Logged-in user can view saved opportunities and navigate to opportunity detail page",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page, context }, { project }) => {
+      // This test can search for and save the opportunity first, which on Webkit
+      // exceeded the default 75s local timeout.
+      test.setTimeout(150_000);
       const isMobile = project.name.match(/[Mm]obile/);
 
       // Given the user is authenticated

@@ -31,7 +31,13 @@ output "service_config" {
       var.service_override_extra_environment_variables
     )
 
+    enable_pdf_readability_monitoring     = var.enable_pdf_readability_monitoring
+    monitoring_email_alert_recipients     = var.monitoring_email_alert_recipients
+    pdf_readability_alarm_actions_enabled = var.pdf_readability_alarm_actions_enabled
+
     secrets = local.secrets
+
+    pdf_readability_waf = var.pdf_readability_waf
 
     file_upload_jobs = {
       for job_name, job_config in local.file_upload_jobs :

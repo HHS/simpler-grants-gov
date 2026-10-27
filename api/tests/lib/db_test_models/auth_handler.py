@@ -40,16 +40,11 @@ class AuthHandler(
             .options(selectinload(SharedUserTokenSession.shared_user))
         ).scalar()
 
-    def get_api_key_by_key_id(self, key_id: uuid.UUID) -> SharedUserApiKey | None:
+    def get_api_key_by_hash(self, key_id_hash: str) -> SharedUserApiKey | None:
         return self.db_session.execute(
             select(SharedUserApiKey)
-            .where(SharedUserApiKey.key_id == key_id)
+            .where(SharedUserApiKey.key_id_hash == key_id_hash)
             .options(selectinload(SharedUserApiKey.shared_user))
-        ).scalar_one_or_none()
-
-    def get_api_key_by_key_id_hash(self, key_id_hash: str) -> SharedUserApiKey | None:
-        return self.db_session.execute(
-            select(SharedUserApiKey).where(SharedUserApiKey.key_id_hash == key_id_hash)
         ).scalar_one_or_none()
 
     def create_api_key(

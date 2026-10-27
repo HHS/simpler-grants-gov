@@ -11,8 +11,7 @@ import { test as base, expect } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } =
-  VALID_TAGS;
+const { DISCOVERY, SMOKE, FULL_REGRESSION } = VALID_TAGS;
 type TestWithOpportunityId = {
   testOpportunityId: string;
 };
@@ -32,7 +31,6 @@ const testOpportunityIdMap: {
   staging: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
   local: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
   grantee1: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
-  grantee2: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
   grantor1: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
   grantor2: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
 };
@@ -51,31 +49,23 @@ test.beforeEach(async ({ page, testOpportunityId }) => {
 });
 
 /** @scenario Show the page title */
-test(
-  "has title",
-  { tag: [SMOKE, GRANTEE, OPPORTUNITY_SEARCH] },
-  async ({ page }) => {
-    // Then the page title should start with "Opportunity Listing -"
-    await expect(page).toHaveTitle(/^Opportunity Listing - */);
-  },
-);
+test("has title", { tag: [DISCOVERY, SMOKE] }, async ({ page }) => {
+  // Then the page title should start with "Opportunity Listing -"
+  await expect(page).toHaveTitle(/^Opportunity Listing - */);
+});
 
 /** @scenario Show key page content */
-test(
-  "has page attributes",
-  { tag: [SMOKE, CORE_REGRESSION, OPPORTUNITY_SEARCH] },
-  async ({ page }) => {
-    // Then I should see "Application process" in "Application process section"
-    await expect(page.getByText("Application process")).toBeVisible();
-  },
-);
+test("has page attributes", { tag: [DISCOVERY, SMOKE] }, async ({ page }) => {
+  // Then I should see "Application process" in "Application process section"
+  await expect(page.getByText("Application process")).toBeVisible();
+});
 
 /** @scenario Expand and collapse the opportunity description */
 // a bit tough to target the content display toggles on the page, since they have the same text and there's
 // nothing really special about the markup surrounding them
 test(
   "can expand and collapse opportunity description",
-  { tag: [CORE_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page }) => {
     const descriptionExpander = page.locator(
       "div[data-testid='opportunity-description'] div[data-testid='content-display-toggle']",
@@ -137,7 +127,7 @@ test(
 /** @scenario Expand and collapse the close date description */
 test(
   "can expand and collapse close date description",
-  { tag: [FULL_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page }) => {
     const descriptionExpander = page.locator(
       "div[data-testid='opportunity-status-widget'] div[data-testid='content-display-toggle']",
@@ -199,7 +189,7 @@ test(
 /** @scenario Open Grants.gov in a new tab */
 test(
   "can navigate to grants.gov",
-  { tag: [CORE_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page, context }) => {
     // Given I should see "View on Grants.gov"
     const newTabPromise = context.waitForEvent("page");

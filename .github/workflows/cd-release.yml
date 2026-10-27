@@ -34,7 +34,6 @@ on:
           - staging
           - training
           - grantee1
-          - grantee2
           - grantor1
           - prod
       version:
@@ -104,7 +103,7 @@ jobs:
     uses: ./.github/workflows/ci-frontend-e2e.yml
     secrets: inherit
     with:
-      playwright_tags: "@smoke|@core-regression"
+      playwright_tags: "@smoke|@full-regression"
 
   # =====================================================
   # PHASE 2: Deploy to prod (or selected environment)
@@ -138,12 +137,12 @@ jobs:
     name: E2E Staging (on Deploy)
     needs: [deploy-frontend]
     if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
-    uses: ./.github/workflows/e2e-staging.yml
+    uses: ./.github/workflows/e2e-deployed-env.yml
     secrets: inherit
     with:
       version: ${{ inputs.version || github.ref }}
       target: staging
-      playwright_tags: "@smoke|@core-regression"
+      playwright_tags: "@smoke|@full-regression"
 
   # 3. Deploy Analytics after API completes successfully
   deploy-analytics:

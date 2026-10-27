@@ -8,7 +8,7 @@ import { fakeAttachments } from "src/utils/testing/fixtures";
 import { NextRequest } from "next/server";
 
 const fakeRequestForOpportunity = () => {
-  return {} as NextRequest;
+  return { headers: new Headers() } as NextRequest;
 };
 
 const paramForAttachment = "43";

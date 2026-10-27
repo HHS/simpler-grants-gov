@@ -1,0 +1,143 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import type { FieldNode } from "../../content.config";
+import Base from "../../layouts/Base.astro";
+import FormMetadata from "../../components/forms/FormMetadata.astro";
+import FormFieldTree from "../../components/forms/FormFieldTree.astro";
+import FieldComparison from "@/components/forms/comparison/FieldComparison";
+import FormDataPanel from "../../components/forms/preview/FormDataPanel";
+import FormPreview from "../../components/forms/preview/FormPreview";
+import { loadFormSpec } from "../../lib/formSpec";
+import { compareForm } from "@parity/comparison.ts";
+
+export async function getStaticPaths() {
+  const forms = await getCollection("forms");
+  return forms.map((form: CollectionEntry<"forms">) => ({
+    params: { slug: form.data.slug },
+    props: { form },
+  }));
+}
+
+const { form } = Astro.props;
+const spec = form.data.spec_id ? await loadFormSpec(form.data.spec_id) : undefined;
+const comparison = await compareForm<FieldNode>(form.data);
+const notes = form.data.notes ?? [];
+
+const STATUS_LABELS: Record<string, string> = {
+  backlog: "Backlog",
+  prioritized: "Prioritized",
+  in_progress: "In Progress",
+  migrated: "Migrated",
+  ready: "Ready",
+};
+---
+
+<Base title={form.data.title}>
+  <div class="grid-container">
+    <nav class="breadcrumb-simple" aria-label="Breadcrumb">
+      <a href="/forms/">Forms</a>
+      <span class="breadcrumb-sep">&rsaquo;</span>
+      <span>{form.data.title}</span>
+    </nav>
+
+    <div class="page-header">
+      <div class="form-detail-header">
+        <h1 class="page-title">{form.data.title}</h1>
+        <span class={`status-badge status-badge--${form.data.status.replace("_", "-")}`}>
+          {STATUS_LABELS[form.data.status] ?? form.data.status}
+        </span>
+      </div>
+      <p class="page-description">{form.data.description}</p>
+    </div>
+
+    <FormMetadata form={form} />
+
+    {form.data.children.length > 0 ? (
+      <>
+        <div class="tab-bar" role="tablist">
+          <button class="tab-bar__tab tab-bar__tab--active" role="tab" aria-selected="true" data-tab="fields">
+            Field tree
+          </button>
+          {spec ? (
+            <>
+              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="preview">
+                Form preview
+              </button>
+              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="data">
+                Data
+              </button>
+            </>
+          ) : (
+            <>
+              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Form preview</button>
+              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Data</button>
+            </>
+          )}
+          <button class="tab-bar__tab tab-bar__tab--disabled" disabled>JSON Schema</button>
+          <button class="tab-bar__tab tab-bar__tab--disabled" disabled>XML Mapping</button>
+        </div>
+
+        <div data-panel="fields">
+          <h2 class="section-title">Fields</h2>
+          {comparison ? (
+            <FieldComparison client:load comparison={comparison} />
+          ) : (
+            <div class="field-tree">
+              <FormFieldTree nodes={form.data.children} />
+            </div>
+          )}
+          {notes.length > 0 && (
+            <>
+              <h2 class="section-title margin-top-4">Notes</h2>
+              <p class="text-base">Context from planning. Unlike the comparison above, notes are not checked.</p>
+              <ul class="plan-notes">
+                {notes.map((note) => (
+                  <li>{note}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+
+        {spec && (
+          <div data-panel="preview" hidden>
+            <h2 class="section-title">Form preview</h2>
+            <FormPreview
+              client:only="react"
+              schema={spec.schema}
+              uischema={spec.uischema}
+              example={spec.example}
+            />
+          </div>
+        )}
+
+        {spec && (
+          <div data-panel="data" hidden>
+            <h2 class="section-title">Form data</h2>
+            <p class="text-base">The JSON entered in the form preview, updated as you type.</p>
+            <FormDataPanel client:only="react" />
+          </div>
+        )}
+      </>
+    ) : (
+      <p class="text-base padding-y-4">
+        Field details will be added when this form is prioritized for migration.
+      </p>
+    )}
+  </div>
+</Base>
+
+<script>
+  for (const tab of document.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
+    tab.addEventListener("click", () => {
+      for (const other of document.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
+        const active = other === tab;
+        other.classList.toggle("tab-bar__tab--active", active);
+        other.setAttribute("aria-selected", String(active));
+      }
+      for (const panel of document.querySelectorAll<HTMLElement>("[data-panel]")) {
+        panel.hidden = panel.dataset.panel !== tab.dataset.tab;
+      }
+    });
+  }
+</script>

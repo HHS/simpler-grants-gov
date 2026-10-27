@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 from bs4 import BeautifulSoup, NavigableString
@@ -79,3 +80,11 @@ def truncate_html_inline(value: str, max_length: int, suffix: str) -> str:
             break
 
     return str(soup)
+
+
+def fmt_currency(value: int) -> str:
+    return f"${value:,}"
+
+
+def fmt_date(value: datetime.date) -> str:
+    return value.strftime("%m/%d/%Y")

@@ -1,5 +1,5 @@
 import { getSession } from "src/services/auth/session";
-import { APIResponse } from "src/types/apiResponseTypes";
+import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   SavedSearchRecord,
   SearchRequestBody,
@@ -12,6 +12,22 @@ interface SavedSearchResponse extends APIResponse {
     saved_search_id?: string;
   };
 }
+
+export type SavedSearchPage = {
+  savedSearches: SavedSearchRecord[];
+  paginationInfo: PaginationInfo;
+};
+
+const PAGE_SIZE = 25;
+
+const emptyPaginationInfo = (page: number): PaginationInfo => ({
+  order_by: "name",
+  page_offset: page,
+  page_size: PAGE_SIZE,
+  sort_direction: "ascending",
+  total_pages: 0,
+  total_records: 0,
+});
 
 // make call from server to API to save a search
 export const handleSavedSearch = async (
@@ -50,18 +66,23 @@ export const handleDeleteSavedSearch = async (
   return (await response.json()) as APIResponse;
 };
 
-export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
+export const fetchSavedSearchesPage = async (
+  page = 1,
+): Promise<SavedSearchPage> => {
   const session = await getSession();
   // Supplementary data: this renders on pages available to logged-out users, so a
   // missing token degrades to an empty list rather than throwing (unlike required-data
   // fetchers such as fetchApplications, which throw MissingAuthError).
   if (!session?.token) {
-    return [];
+    return {
+      savedSearches: [],
+      paginationInfo: emptyPaginationInfo(page),
+    };
   }
   const body = {
     pagination: {
-      page_offset: 1,
-      page_size: 25,
+      page_offset: page,
+      page_size: PAGE_SIZE,
       sort_order: [
         {
           order_by: "name",
@@ -75,6 +96,17 @@ export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
     subPath,
     body,
   });
-  const json = (await resp.json()) as { data: [] };
-  return json.data;
+  const json = (await resp.json()) as {
+    data: SavedSearchRecord[];
+    pagination_info: PaginationInfo;
+  };
+  return {
+    savedSearches: json.data,
+    paginationInfo: json.pagination_info,
+  };
+};
+
+export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
+  const { savedSearches } = await fetchSavedSearchesPage();
+  return savedSearches;
 };

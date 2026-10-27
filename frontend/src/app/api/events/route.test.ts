@@ -6,6 +6,7 @@ import { POST } from "src/app/api/events/route";
 
 const getCorrelationIdMock = jest.fn();
 const loggerInfoMock = jest.fn();
+const loggerErrorMock = jest.fn();
 
 jest.mock("src/services/correlationId/correlationId", () => ({
   getCorrelationId: () => getCorrelationIdMock() as unknown,
@@ -14,6 +15,7 @@ jest.mock("src/services/correlationId/correlationId", () => ({
 jest.mock("src/services/logger/simplerLogger", () => ({
   logger: {
     info: (arg: unknown) => loggerInfoMock(arg) as unknown,
+    error: (...args: unknown[]) => loggerErrorMock(...args) as unknown,
   },
 }));
 
@@ -60,7 +62,7 @@ describe("POST /api/events", () => {
     });
   });
 
-  it("returns 400 and does not log when the request body isn't valid JSON", async () => {
+  it("returns 400 and logs an error instead of the event when the request body isn't valid JSON", async () => {
     const response = await POST(
       new Request("http://fake-host.test/api/events", {
         method: "POST",
@@ -70,5 +72,9 @@ describe("POST /api/events", () => {
 
     expect(response.status).toBe(400);
     expect(loggerInfoMock).not.toHaveBeenCalled();
+    expect(loggerErrorMock).toHaveBeenCalledWith(
+      { err: expect.anything() as unknown, awsTraceId: null },
+      "Error handling user event",
+    );
   });
 });

@@ -16,10 +16,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import {
-  skipNonChromeOnStaging,
-  skipWebkit,
-} from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
   verifyVirusScanFailedAndRemoved,
   verifyVirusScanPassedAndUploaded,
@@ -38,8 +35,8 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
-const TAGS = [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION];
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
+const TAGS = [APPLY_FORMS, FULL_REGRESSION];
 
 const { testOrgLabel } = playwrightEnv;
 
@@ -58,7 +55,6 @@ const VALID_FILE_NAME = "sample-upload-kb.pdf";
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
-  skipWebkit(testInfo);
 });
 
 const applicantScenarios = [

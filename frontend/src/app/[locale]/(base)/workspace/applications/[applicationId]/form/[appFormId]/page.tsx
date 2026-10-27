@@ -4,6 +4,7 @@ import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicati
 import { ApiRequestError } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import {
   buildWarningTree,
   pointerToFieldName,
@@ -61,9 +62,9 @@ async function FormPage({ params }: formPageProps) {
       );
     }
   } catch (e) {
-    console.error(
-      `Error retrieving application details for (${applicationId})`,
-      e,
+    logger.error(
+      { err: e, applicationId },
+      "Error retrieving application details",
     );
     return <TopLevelError />;
   }

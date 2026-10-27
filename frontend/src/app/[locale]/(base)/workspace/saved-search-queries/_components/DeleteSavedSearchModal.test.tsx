@@ -4,7 +4,7 @@ import { DeleteSavedSearchModal } from "./DeleteSavedSearchModal";
 
 const mockUseUser = jest.fn(() => ({
   user: {
-    token: "faketoken",
+    isLoggedIn: true,
   },
 }));
 

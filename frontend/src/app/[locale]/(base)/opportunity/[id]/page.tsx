@@ -1,9 +1,9 @@
 import { Metadata } from "next";
-import { OpportunityCompetitionStart } from "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityCompetitionStart";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { getUserSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -11,11 +11,11 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
 import OpportunityCTA from "./_components/OpportunityCTA";
 import OpportunityDescription from "./_components/OpportunityDescription";
 import OpportunityDocuments from "./_components/OpportunityDocuments";
+import OpportunityHeader from "./_components/OpportunityHeader";
 import OpportunityHistory from "./_components/OpportunityHistory";
 import OpportunityIntro from "./_components/OpportunityIntro";
 import OpportunityLink from "./_components/OpportunityLink";
@@ -39,9 +39,12 @@ export async function generateMetadata({
   try {
     const { data: opportunityData } = await getOpportunityDetails(id);
     title = `${t("OpportunityListing.pageTitle")} - ${opportunityData.opportunity_title || ""}`;
-  } catch (error) {
-    console.error("Failed to render page title due to API error", error);
-    if (parseErrorStatus(error as ApiRequestError) === 404) {
+  } catch (e) {
+    logger.error(
+      { err: e, opportunityId: id },
+      "Failed to render page title due to API error",
+    );
+    if (parseErrorStatus(e as ApiRequestError) === 404) {
       return notFound();
     }
   }
@@ -125,8 +128,11 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         opportunitySaved = true;
       }
     }
-  } catch (error) {
-    console.error("Unable to fetch list of saved opportunities", error);
+  } catch (e) {
+    logger.error(
+      { err: e, opportunityId: id },
+      "Unable to fetch list of saved opportunities",
+    );
   }
 
   opportunityData.summary = opportunityData?.summary
@@ -134,32 +140,13 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     : emptySummary();
 
   return (
-    <div>
-      <GridContainer
-        data-testid="opportunity-intro-content"
-        className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6"
-      >
-        {opportunityData.opportunity_title ? (
-          <h2 className="margin-bottom-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
-            {opportunityData.opportunity_title}
-          </h2>
-        ) : null}
+    <div data-testid="opportunity-intro-content">
+      <OpportunityHeader
+        opportunityData={opportunityData}
+        opportunitySaved={opportunitySaved}
+      />
+      <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6">
         <Grid row gap={true}>
-          <div className="display-flex desktop:padding-y-1 padding-y-3">
-            <OpportunitySaveUserControl
-              opportunityId={opportunityData.opportunity_id}
-              type="button"
-              opportunitySaved={opportunitySaved}
-            />
-            {opportunityData.competitions &&
-              opportunityData.opportunity_title && (
-                <OpportunityCompetitionStart
-                  opportunityId={opportunityData.opportunity_id}
-                  opportunityTitle={opportunityData.opportunity_title}
-                  competitions={opportunityData.competitions}
-                />
-              )}
-          </div>
           <div className="grid-row grid-gap" id="opportunity-detail-content">
             <div className="desktop:grid-col-8 grid-col-12 order-1 desktop:order-first">
               <OpportunityIntro opportunityData={opportunityData} />

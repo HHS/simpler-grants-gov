@@ -1,0 +1,23 @@
+---
+import Base from "../layouts/Base.astro";
+import StatsGrid from "../components/dashboard/StatsGrid.astro";
+import KanbanBoard from "../components/dashboard/KanbanBoard.astro";
+---
+
+<Base title="Dashboard">
+  <div class="grid-container">
+    <div class="page-header">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Grants.gov forms migration progress</p>
+    </div>
+
+    <section class="section-spacing">
+      <StatsGrid />
+    </section>
+
+    <section class="section-spacing">
+      <h2 class="kanban-section-title">Migration board</h2>
+      <KanbanBoard />
+    </section>
+  </div>
+</Base>
