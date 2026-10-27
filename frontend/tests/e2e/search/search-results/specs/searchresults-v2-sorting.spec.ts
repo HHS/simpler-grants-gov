@@ -1,15 +1,11 @@
 /**
  * @feature Search Results Sorting – General Behavior - Search Results Table
  * @featureFile e2e/search/search-results/features/searchresults-v2-sorting.feature
- * @useCase Grantee Regression Use Case 5 (Sort Search Results), ACs 5.1–5.5
  *
  * @scenario Selecting a sort option updates results
  *    Test 1: one test per sort option.
  * @scenario Data integrity after sorting
  *    Test 2: one test per sort option.
- *
- * Viewport comes from the Playwright project (Chrome = desktop, Mobile chrome = mobile).
- * Login state per option follows the Examples table in the feature file.
  */
 
 import { expect, test, type Locator, type TestInfo } from "@playwright/test";
@@ -59,16 +55,9 @@ const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 const { baseUrl } = playwrightEnv;
 
-// Preferred keyword for a small result set (matches the E2E-prefixed seed data). Other
-// environments have different data, so gotoPartialResultsSearch falls back to opportunity titles
-// when this returns no results or more than one page.
 const PARTIAL_RESULTS_SEARCH_TERM = "E2E-*";
 
-// KNOWN APP DEFECT: on desktop the Sort by select sits inside the results <Suspense>, which is
-// keyed on every search param (SearchResults.tsx), so changing the sort remounts the select and
-// focus falls back to the page. While this is false the check is non-blocking: a lost focus is
-// recorded as a "known-issue" annotation in the report instead of failing the test.
-// Set to true once the app keeps focus on the dropdown, so the check is enforced again.
+// Controls whether loss of focus after sort selection fails the test or is recorded as a non-blocking annotation.
 const ENFORCE_FOCUS_AFTER_SELECTION = false;
 
 async function expectFocusRemainsOnSortSelect(
