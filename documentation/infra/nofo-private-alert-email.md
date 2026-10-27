@@ -10,9 +10,19 @@ follow-on work under [#12950](https://github.com/HHS/simpler-grants-gov/issues/1
 The monitoring module accepts `email_alert_recipient_parameter_name`, an optional
 SSM **SecureString** parameter path containing exactly one email address. NOFO
 exposes it as `monitoring_email_alert_recipient_parameter_name` in each environment
-module. Both default to null. All current environments retain null, empty public
-recipient lists and their existing alarm settings: this PR creates no AWS email
-parameter/subscription and activates no alarm notifications.
+module. Both default to null. The infra-dev configuration now selects
+`/nofos/infra-dev/monitoring/alert-email`; every other environment retains null.
+Public recipient lists remain empty, and calculator alarm actions remain off
+everywhere. Applying this dev configuration creates the private SNS email
+subscription; confirmation and delivery verification are separate steps.
+
+The encrypted parameter was created successfully in
+[setup run 40514626054](https://github.com/HHS/simpler-grants-gov/actions/runs/40514626054).
+That establishes creation, not the deployment role's read/decrypt access or email
+delivery. Merging this infrastructure change can trigger the normal dev deploy.
+After it succeeds, check the selected inbox for an AWS subscription-confirmation
+message. Do not publish its address or confirmation link. Confirm privately,
+then test topic delivery and alarm routing before enabling calculator actions.
 
 The private endpoint remains Terraform-sensitive in ordinary plans. It uses a
 stable subscription index, rather than putting the email in a `for_each` resource
