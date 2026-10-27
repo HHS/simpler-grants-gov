@@ -1,0 +1,436 @@
+"""Tests for XML generation from a mapping shaped like the XML (``xml_mapping.json``)."""
+
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from src.services.xml_generation.mapping import (
+    generate_xml_from_mapping,
+    is_xml_mapping,
+    mapped_root_fields,
+)
+from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
+from src.services.xml_generation.value_transformers import ValueTransformationError
+
+_HERE = Path(__file__).parent
+_SNAPSHOTS = _HERE / "snapshots"
+
+
+def _mapping(name: str) -> dict[str, Any]:
+    """A form's mapping as the form library emits it (forms/emitters/xml)."""
+    return json.loads((_HERE / "fixtures" / "xml_mapping" / f"{name}.json").read_text())
+
+
+def _small_mapping(content: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "format": "xml-mapping",
+        "namespaces": {
+            "default": "urn:form",
+            "Form": "urn:form",
+            "lib": "urn:lib",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+        },
+        "root": {"Root": content},
+    }
+
+
+def _generate(mapping: dict[str, Any], data: dict[str, Any], **kwargs: Any) -> str:
+    return generate_xml_from_mapping(mapping, data, **kwargs)
+
+
+_ADDITIONAL_LOCATIONS = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+_ADDITIONAL_LOCATIONS_FILE = AttachmentInfo(
+    filename="additional_locations.pdf",
+    mime_type="application/pdf",
+    file_location="additional_locations.pdf",
+    hash_value="aeB1+6gdFwih51ijIRn3b8QYn24=",
+)
+
+
+class TestMatchesTheCurrentGenerator:
+    """The emitted mappings write the same XML the hand-written forms' rules do, from the
+    data each snapshot test uses."""
+
+    def test_key_contacts(self) -> None:
+        data = {
+            "applicant_organization_name": "Acme Corporation",
+            "key_contacts": [
+                {
+                    "project_role": "Principal Investigator",
+                    "name": {"prefix": "Dr.", "first_name": "Jane", "last_name": "Smith"},
+                    "title": "Senior Researcher",
+                    "address": {
+                        "street1": "123 Main Street",
+                        "city": "Washington",
+                        "state": "DC: District of Columbia",
+                        "zip_code": "20001",
+                        "country": "USA: UNITED STATES",
+                    },
+                    "phone": "2025550100",
+                    "email": "jane.smith@acme.org",
+                }
+            ],
+        }
+
+        xml = _generate(_mapping("key_contacts"), data)
+
+        assert xml == (_SNAPSHOTS / "key_contacts_2_0.xml").read_text()
+
+    def test_performance_sites(self) -> None:
+        us_site = {
+            "submitting_as_individual": False,
+            "organization_name": "Example University",
+            "uei": "ABCDEFGHIJ12",
+            "address": {
+                "street1": "123 Research Blvd",
+                "street2": "Suite 400",
+                "city": "Science City",
+                "county": "Grant County",
+                "state": "CA: California",
+                "country": "USA: UNITED STATES",
+                "zip_code": "90210-1234",
+            },
+            "congressional_district": "CA-033",
+        }
+        international_site = {
+            "submitting_as_individual": False,
+            "organization_name": "International Research Institute",
+            "address": {"street1": "10 Rue de la Paix", "city": "Paris", "country": "FRA: FRANCE"},
+        }
+        individual_site = {
+            "submitting_as_individual": True,
+            "address": {
+                "street1": "456 Main St",
+                "city": "Springfield",
+                "country": "USA: UNITED STATES",
+                "zip_code": "12345-6789",
+                "state": "IL: Illinois",
+            },
+            "congressional_district": "IL-013",
+        }
+        data = {
+            "primary_site": us_site,
+            "additional_sites": [international_site, individual_site],
+            "additional_locations_attachment": _ADDITIONAL_LOCATIONS,
+        }
+
+        xml = _generate(
+            _mapping("performance_sites"),
+            data,
+            attachment_mapping={_ADDITIONAL_LOCATIONS: _ADDITIONAL_LOCATIONS_FILE},
+        )
+
+        assert xml == (_SNAPSHOTS / "performance_site_4_0.xml").read_text()
+
+
+class TestValues:
+    def test_writes_each_element_in_its_namespace(self) -> None:
+        xml = _generate(
+            _small_mapping({"Title": {"$field": "title"}, "lib:Note": {"$field": "note"}}),
+            {"title": "A", "note": "B"},
+        )
+
+        assert "<Form:Title>A</Form:Title>" in xml
+        assert "<lib:Note>B</lib:Note>" in xml
+
+    def test_writes_an_attribute_with_its_prefix(self) -> None:
+        xml = _generate(_small_mapping({"@Form:FormVersion": {"$const": "1.0"}}), {})
+
+        assert 'Form:FormVersion="1.0"' in xml
+
+    def test_rejects_an_attribute_without_a_prefix(self) -> None:
+        with pytest.raises(ValueError, match="has no namespace prefix"):
+            _generate(_small_mapping({"@FormVersion": {"$const": "1.0"}}), {})
+
+    def test_leaves_out_elements_with_nothing_to_write(self) -> None:
+        xml = _generate(
+            _small_mapping(
+                {
+                    "Wrapper": {"Inner": {"$field": "missing"}},
+                    "Empty": {"$field": "empty"},
+                    "Present": {"$field": "here"},
+                }
+            ),
+            {"here": "yes", "empty": ""},
+        )
+
+        assert "Wrapper" not in xml
+        assert "Empty" not in xml
+        assert "<Form:Present>yes</Form:Present>" in xml
+
+    def test_writes_a_boolean_as_true_or_false(self) -> None:
+        mapping = _small_mapping({"Agrees": {"$field": "agrees"}, "@Form:Flag": {"$field": "flag"}})
+
+        xml = _generate(mapping, {"agrees": True, "flag": False})
+
+        assert "<Form:Agrees>true</Form:Agrees>" in xml
+        assert 'Form:Flag="false"' in xml
+
+    def test_writes_a_whole_number_without_a_decimal(self) -> None:
+        mapping = _small_mapping({"Count": {"$field": "n"}, "Share": {"$field": "share"}})
+
+        xml = _generate(mapping, {"n": 3.0, "share": 2.5})
+
+        assert "<Form:Count>3</Form:Count>" in xml
+        assert "<Form:Share>2.5</Form:Share>" in xml
+
+    def test_transforms_a_value_by_name(self) -> None:
+        mapping = _small_mapping(
+            {"Agrees": {"$transform": {"name": "boolean_to_yes_no", "value": {"$field": "agrees"}}}}
+        )
+
+        assert "<Form:Agrees>Y: Yes</Form:Agrees>" in _generate(mapping, {"agrees": True})
+        assert "Agrees" not in _generate(mapping, {})
+
+    def test_matches_a_value_to_its_case(self) -> None:
+        mapping = _small_mapping(
+            {
+                "Individual": {
+                    "$match": {
+                        "value": {"$field": "individual"},
+                        "case": {"true": "Y: Yes", "false": "N: No"},
+                    }
+                }
+            }
+        )
+
+        assert "<Form:Individual>Y: Yes</Form:Individual>" in _generate(
+            mapping, {"individual": True}
+        )
+        assert "<Form:Individual>N: No</Form:Individual>" in _generate(
+            mapping, {"individual": False}
+        )
+        assert "Individual" not in _generate(mapping, {})
+
+    def test_keys_a_whole_number_as_an_integer(self) -> None:
+        mapping = _small_mapping(
+            {"Count": {"$match": {"value": {"$field": "n"}, "case": {"1": "One"}}}}
+        )
+
+        assert "<Form:Count>One</Form:Count>" in _generate(mapping, {"n": 1.0})
+
+    def test_matches_an_unlisted_value_to_the_default(self) -> None:
+        mapping = _small_mapping(
+            {"Kind": {"$match": {"value": {"$field": "k"}, "case": {"a": "A"}, "default": "Other"}}}
+        )
+
+        assert "<Form:Kind>Other</Form:Kind>" in _generate(mapping, {"k": "b"})
+
+    def test_rejects_an_unlisted_value_without_a_default(self) -> None:
+        mapping = _small_mapping(
+            {"Kind": {"$match": {"value": {"$field": "k"}, "case": {"a": "A"}}}}
+        )
+
+        with pytest.raises(ValueError, match="no case for 'b'"):
+            _generate(mapping, {"k": "b"})
+
+    def test_rejects_an_unknown_transform(self) -> None:
+        mapping = _small_mapping({"A": {"$transform": {"name": "shout", "value": {"$field": "a"}}}})
+
+        with pytest.raises(ValueTransformationError, match="Unknown transformation type: shout"):
+            _generate(mapping, {"a": "x"})
+
+
+class TestEach:
+    def test_repeats_an_element_per_item_with_paths_relative_to_it(self) -> None:
+        mapping = _small_mapping(
+            {
+                "Person": {
+                    "$each": {
+                        "items": {"$field": "people"},
+                        "map": {"Profile": {"lib:FirstName": {"$field": "name.first"}}},
+                    }
+                }
+            }
+        )
+
+        xml = _generate(
+            mapping, {"people": [{"name": {"first": "Ada"}}, {"name": {"first": "Bo"}}]}
+        )
+
+        assert xml.count("<Form:Person>") == 2
+        assert xml.index("Ada") < xml.index("Bo")
+        assert "<Form:Profile>" in xml
+
+
+class TestWhen:
+    _MAPPING = _small_mapping(
+        {
+            "Kind": {
+                "$when": {
+                    "condition": {"field": "type", "operator": "equals", "value": "a"},
+                    "then": {"$const": "Alpha"},
+                    "else": {"$const": "Other"},
+                }
+            },
+            "Extra": {
+                "$when": {
+                    "condition": {
+                        "all": [
+                            {"field": "type", "operator": "in", "value": ["a", "b"]},
+                            {"field": "extra", "operator": "exists"},
+                        ]
+                    },
+                    "then": {"$field": "extra"},
+                }
+            },
+        }
+    )
+
+    def test_writes_then_when_the_condition_holds(self) -> None:
+        xml = _generate(self._MAPPING, {"type": "a", "extra": "x"})
+
+        assert "<Form:Kind>Alpha</Form:Kind>" in xml
+        assert "<Form:Extra>x</Form:Extra>" in xml
+
+    def test_writes_else_or_nothing_when_it_does_not(self) -> None:
+        xml = _generate(self._MAPPING, {"type": "c", "extra": "x"})
+
+        assert "<Form:Kind>Other</Form:Kind>" in xml
+        assert "Extra" not in xml
+
+    def test_rejects_an_unknown_operator(self) -> None:
+        mapping = _small_mapping(
+            {
+                "A": {
+                    "$when": {
+                        "condition": {"field": "a", "operator": "near"},
+                        "then": {"$const": 1},
+                    }
+                }
+            }
+        )
+
+        with pytest.raises(ValueError, match="Unknown condition operator: near"):
+            _generate(mapping, {})
+
+
+class TestAttachment:
+    _MAPPING = _small_mapping(
+        {
+            "Person": {
+                "$each": {
+                    "items": {"$field": "people"},
+                    "map": {"Sketches": {"Sketch": {"$attachment": "sketch"}}},
+                }
+            }
+        }
+    )
+
+    def test_writes_an_upload_inside_a_list_item(self) -> None:
+        xml = _generate(
+            self._MAPPING,
+            {"people": [{"sketch": _ADDITIONAL_LOCATIONS}]},
+            attachment_mapping={_ADDITIONAL_LOCATIONS: _ADDITIONAL_LOCATIONS_FILE},
+        )
+
+        sketch = xml[xml.index("<Form:Sketch>") : xml.index("</Form:Sketch>")]
+        assert "<att:FileName>additional_locations.pdf</att:FileName>" in sketch
+
+    def test_rejects_an_upload_the_application_does_not_have(self) -> None:
+        with pytest.raises(ValueError, match="not found in attachment mapping"):
+            _generate(self._MAPPING, {"people": [{"sketch": "unknown"}]})
+
+
+class TestNesting:
+    def test_a_case_entry_can_be_a_when(self) -> None:
+        mapping = _small_mapping(
+            {
+                "Status": {
+                    "$match": {
+                        "value": {"$field": "status"},
+                        "case": {
+                            "open": "Open",
+                            "closed": {
+                                "$when": {
+                                    "condition": {"field": "reason", "operator": "exists"},
+                                    "then": {"$field": "reason"},
+                                    "else": "Closed",
+                                }
+                            },
+                        },
+                    }
+                }
+            }
+        )
+
+        assert "<Form:Status>Open</Form:Status>" in _generate(mapping, {"status": "open"})
+        assert "<Form:Status>Withdrawn</Form:Status>" in _generate(
+            mapping, {"status": "closed", "reason": "Withdrawn"}
+        )
+        assert "<Form:Status>Closed</Form:Status>" in _generate(mapping, {"status": "closed"})
+
+    def test_a_case_entry_can_be_a_group_of_elements(self) -> None:
+        mapping = _small_mapping(
+            {
+                "Applicant": {
+                    "$match": {
+                        "value": {"$field": "kind"},
+                        "case": {"person": {"lib:FirstName": {"$field": "first_name"}}},
+                        "default": {"OrganizationName": {"$field": "organization"}},
+                    }
+                }
+            }
+        )
+
+        person = _generate(mapping, {"kind": "person", "first_name": "Ada"})
+        organization = _generate(mapping, {"kind": "org", "organization": "Acme"})
+
+        assert "<Form:Applicant>" in person and "<lib:FirstName>Ada</lib:FirstName>" in person
+        assert "<Form:OrganizationName>Acme</Form:OrganizationName>" in organization
+
+    def test_a_match_can_read_a_transformed_value(self) -> None:
+        mapping = _small_mapping(
+            {
+                "Code": {
+                    "$match": {
+                        "value": {
+                            "$transform": {"name": "boolean_to_yes_no", "value": {"$field": "ok"}}
+                        },
+                        "case": {"Y: Yes": "1", "N: No": "0"},
+                    }
+                }
+            }
+        )
+
+        assert "<Form:Code>1</Form:Code>" in _generate(mapping, {"ok": True})
+
+    def test_each_can_read_its_list_from_any_value(self) -> None:
+        mapping = _small_mapping(
+            {
+                "Site": {
+                    "$each": {
+                        "items": {
+                            "$when": {
+                                "condition": {
+                                    "field": "has_sites",
+                                    "operator": "equals",
+                                    "value": True,
+                                },
+                                "then": {"$field": "sites"},
+                            }
+                        },
+                        "map": {"Name": {"$field": "name"}},
+                    }
+                }
+            }
+        )
+
+        data = {"sites": [{"name": "A"}, {"name": "B"}]}
+        assert _generate(mapping, {**data, "has_sites": True}).count("<Form:Site>") == 2
+        assert "Site" not in _generate(mapping, {**data, "has_sites": False})
+
+
+class TestMappedRootFields:
+    def test_lists_the_top_level_fields_a_mapping_reads(self) -> None:
+        nested = _small_mapping(
+            {"A": {"$match": {"value": {"$field": "kind"}, "case": {"x": {"$field": "other"}}}}}
+        )
+        assert mapped_root_fields(nested) == {"kind", "other"}
+        assert mapped_root_fields(_mapping("performance_sites")) == {
+            "primary_site",
+            "additional_sites",
+            "additional_locations_attachment",
+        }
