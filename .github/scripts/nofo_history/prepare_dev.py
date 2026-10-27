@@ -7,6 +7,7 @@ and Terraform installation are supplied by the manual GitHub Actions workflow.
 import json
 import os
 import re
+import shlex
 import signal
 import subprocess
 import sys
@@ -137,7 +138,7 @@ def require_no_preparation(cluster, task_definition):
             )
 
 
-def read_counts(log_options, container_name, task_arn):
+def read_counts(log_options, container_name, task_arn, diagnose=False):
     stream = f"{log_options['awslogs-stream-prefix']}/{container_name}/{task_arn.rsplit('/', 1)[-1]}"
     params = {
         "log_group_name": log_options["awslogs-group"],
@@ -149,11 +150,33 @@ def read_counts(log_options, container_name, task_arn):
     }
     complete = False
     ownership_resolved = False
+    diagnostic_received = False
     # Output only the application's known count messages, never arbitrary logs.
     while True:
         result = aws("logs", "get-log-events", **params)
         for event in result.get("events", []):
             message = event["message"].strip()
+            if diagnose and message.startswith("NOFO_HISTORY_DIAGNOSTIC "):
+                data = json.loads(message.removeprefix("NOFO_HISTORY_DIAGNOSTIC "))
+                counts = data.get("counts")
+                if (
+                    set(data) == {"total_missing", "counts"}
+                    and type(data["total_missing"]) is int
+                    and data["total_missing"] >= 0
+                    and isinstance(counts, dict)
+                    and all(
+                        re.fullmatch(
+                            r"(?:nofos\.(?:nofo|section|subsection)|composer\.(?:contentguide|contentguideinstance|contentguidesection|contentguidesubsection)):(?:total|event_type_[123]|invalid_json|dict_snapshot|empty_or_invalid_list|list_snapshot|invalid_object_uuid|retained_object_ownership|live_object|uuid_field_(?:nofo|nofo_id|section|section_id|content_guide|content_guide_id|content_guide_instance|content_guide_instance_id)|retained_parent_ownership|live_parent|parent_audit_exists)",
+                            key,
+                        )
+                        and type(value) is int
+                        and value >= 0
+                        for key, value in counts.items()
+                    )
+                ):
+                    print(message, flush=True)
+                    diagnostic_received = True
+                continue
             if message == SUCCESS:
                 complete = True
                 print(message, flush=True)
@@ -170,12 +193,16 @@ def read_counts(log_options, container_name, task_arn):
                 print(message.removeprefix("CommandError: "), flush=True)
         token = result.get("nextForwardToken")
         if not token or token == params.get("next_token"):
-            return complete and ownership_resolved
+            return diagnostic_received if diagnose else complete and ownership_resolved
         params["next_token"] = token
 
 
 def prepare():
-    if len(sys.argv) != 1 or os.environ.get("GITHUB_REF") != "refs/heads/main":
+    diagnose = sys.argv[1:] == ["--diagnose"]
+    if (
+        sys.argv[1:] not in ([], ["--diagnose"])
+        or os.environ.get("GITHUB_REF") != "refs/heads/main"
+    ):
         raise RuntimeError(
             "Run the fixed dev workflow from main; arguments are not accepted."
         )
@@ -210,7 +237,25 @@ def prepare():
         launch_type="FARGATE",
         platform_version="1.4.0",
         network_configuration=service["networkConfiguration"],
-        overrides={"containerOverrides": [{"name": service_name, "command": COMMAND}]},
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": service_name,
+                    "command": (
+                        [
+                            "sh",
+                            "-c",
+                            "cd /app/nofos && poetry run python manage.py shell -c "
+                            + shlex.quote(
+                                Path(__file__).with_name("diagnose_dev.py").read_text()
+                            ),
+                        ]
+                        if diagnose
+                        else COMMAND
+                    ),
+                }
+            ]
+        },
         count=1,
     )
     tasks = result.get("tasks", [])
@@ -232,7 +277,9 @@ def prepare():
         # rerun either database command.
         for _ in range(6):
             try:
-                complete = read_counts(options, service_name, task_arn)
+                complete = read_counts(
+                    options, service_name, task_arn, diagnose=diagnose
+                )
             except RuntimeError:
                 pass
             if complete:
@@ -246,7 +293,11 @@ def prepare():
             raise RuntimeError(
                 "Could not confirm completeness and zero unresolved ownership from logs. Keep Constance disabled and inspect the task."
             )
-        message = "Dev backfill and completeness check passed. Constance is unchanged; you may now enable DOCUMENT_HISTORY_INDEX_ENABLED in dev and test history."
+        message = (
+            "Read-only dev diagnosis complete. Constance is unchanged; this does not authorize enabling indexed history."
+            if diagnose
+            else "Dev backfill and completeness check passed. Constance is unchanged; you may now enable DOCUMENT_HISTORY_INDEX_ENABLED in dev and test history."
+        )
         print(message, flush=True)
         if os.environ.get("GITHUB_STEP_SUMMARY"):
             with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a") as summary:
