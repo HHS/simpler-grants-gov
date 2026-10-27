@@ -674,6 +674,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "e789d45b-3123-4d32-a69b-c6883af7d370",
         ),
         (
+            "NSF_KeyPersonExpanded_Generated",
+            "E2E-NSFKPEG",
+            "NSF Senior/Key Person Profile (Expanded) (Generated)",
+            "7b0b7e69-0943-429e-b380-ebaf69985400",
+            "9607f84f-ab9b-4d23-a5aa-d055318a5660",
+        ),
+        (
             "SF424_4_0",
             "E2E-SF424",
             "Application for Federal Assistance (SF-424)",
