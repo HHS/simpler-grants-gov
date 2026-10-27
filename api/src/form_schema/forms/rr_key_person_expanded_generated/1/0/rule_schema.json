@@ -1,0 +1,42 @@
+{
+  "principal_investigator": {
+    "biographical_sketch": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    },
+    "current_pending_support": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    }
+  },
+  "senior_key_persons": {
+    "gg_type": "array",
+    "biographical_sketch": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    },
+    "current_pending_support": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    }
+  },
+  "additional_profiles": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "additional_biographical_sketches": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "additional_current_pending_support": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  }
+}
