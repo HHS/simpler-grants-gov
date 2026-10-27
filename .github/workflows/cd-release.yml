@@ -137,7 +137,7 @@ jobs:
     name: E2E Staging (on Deploy)
     needs: [deploy-frontend]
     if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
-    uses: ./.github/workflows/e2e-staging.yml
+    uses: ./.github/workflows/e2e-deployed-env.yml
     secrets: inherit
     with:
       version: ${{ inputs.version || github.ref }}

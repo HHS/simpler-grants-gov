@@ -112,7 +112,7 @@ const TEXT = {
   help: { kind: "help differs", register: "differingHelp" },
 } as const;
 
-/** Matched fields whose label or help text differs, ignoring whitespace. */
+/** Matched fields whose label or help text differs, ignoring whitespace and case. */
 function textDifferences(
   pair: Pair,
   attribute: keyof typeof TEXT,
@@ -122,7 +122,7 @@ function textDifferences(
   for (const [path, target] of matchFields(pair)) {
     const plan = normalize(pair.plan.get(path)![attribute]);
     const source = normalize(pair.source.get(target)![attribute]);
-    if (plan === source) continue;
+    if (plan.toLowerCase() === source.toLowerCase()) continue;
     found.push({
       kind,
       path,

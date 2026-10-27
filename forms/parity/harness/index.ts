@@ -360,7 +360,7 @@ export type {
   PlanSection,
 } from "./flatten/plan.ts";
 export { walkFields } from "./flatten/plan.ts";
-export { hasXmlTransform, loadPlans } from "./load.ts";
+export { hasXmlTransform, loadGrantsGovIdentity, loadPlans } from "./load.ts";
 export {
   report,
   type Discrepancy,

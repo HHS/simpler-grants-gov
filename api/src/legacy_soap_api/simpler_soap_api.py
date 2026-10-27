@@ -221,6 +221,7 @@ def process_simpler_request(
             in [
                 SimplerRequests.GET_SUBMISSION_LIST_EXPANDED_REQUEST,
                 SimplerRequests.GET_SUBMISSION_LIST_REQUEST,
+                SimplerRequests.GET_APPLICATION_LIST_EXPANDED_REQUEST,
             ]
             and api_name == SimplerSoapAPI.GRANTORS
         ):

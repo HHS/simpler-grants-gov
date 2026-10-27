@@ -2,6 +2,10 @@ import type { Model, Program } from "@typespec/compiler";
 import { formIdentities } from "form-library-xml";
 import { readBlock } from "simpler-forms";
 import { reportDiagnostic, stateKeys } from "./lib.js";
+import { modelSync } from "./model.js";
+
+const UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * `@Sgg.sync` installs a form, so it belongs on a model with `@Meta.form`, and that form
@@ -25,6 +29,13 @@ export function $onValidate(program: Program): void {
         code: "sync-without-identity",
         target: model,
         format: { name: model.name },
+      });
+    const { instructions } = modelSync(program, model)!;
+    if (instructions !== undefined && !UUID.test(instructions))
+      reportDiagnostic(program, {
+        code: "invalid-instructions",
+        target: model,
+        format: { name: model.name, value: instructions },
       });
   }
 }

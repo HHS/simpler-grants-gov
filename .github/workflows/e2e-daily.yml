@@ -18,7 +18,7 @@ on:
 jobs:
   daily-e2e-tests-deployed:
     name: Daily E2E tests (staging)
-    uses: ./.github/workflows/e2e-staging.yml
+    uses: ./.github/workflows/e2e-deployed-env.yml
     if: always()
     secrets: inherit
     with:

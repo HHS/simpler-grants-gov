@@ -31,4 +31,7 @@ model FormIdentity {
 
   agencyCode?: string;
   ombNumber?: string;
+
+  /** When the OMB approval for `ombNumber` expires, as an ISO 8601 date, e.g. `2029-08-31`. */
+  expirationDate?: string;
 }

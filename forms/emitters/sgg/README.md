@@ -17,6 +17,12 @@ model KeyContacts { ... }
   compiles and emits, but stays out of `api/src/form_schema/forms/`.
 - **`@Sgg.sync(#{ xml: false })`** registers it without its XML transform rules, e.g.
   while they can't produce a valid document yet.
+- **`@Sgg.sync(#{ instructions: "<uuid>" })`** points the form at its instructions: the
+  `form_instruction_id` of a form instruction record, uploaded to each environment with
+  the API's `update-form-instruction` task (`api/src/task/forms/README.md`). Give each form
+  its own record, even one that shares another form's PDF.
+- **`@Sgg.sync(#{ sggVersion: "1.1" })`** sets the form's version in Simpler Grants, its
+  `sgg_version`. It defaults to `1.0`.
 
 A form with `@Sgg.sync` must also have `@GrantsGov.form` (from
 [`form-library-xml`](../xml/)), the identity the API registers it under.
@@ -26,7 +32,7 @@ A form with `@Sgg.sync` must also have `@GrantsGov.form` (from
 One file per form, under `dist/sgg/`:
 
 ```
-forms/<id>/sgg.json   { "sync": false | { "xml": boolean }, "grantsGov": { ... } | null }
+forms/<id>/sgg.json   { "sync": false | { "xml", "sggVersion", "instructions"? }, "grantsGov": { ... } | null }
 ```
 
 The sync emitter reads these files and compiles the artifacts that the

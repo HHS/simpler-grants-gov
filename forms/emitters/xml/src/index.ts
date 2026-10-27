@@ -19,6 +19,7 @@ export interface FormIdentity {
   formVersion: string;
   agencyCode?: string;
   ombNumber?: string;
+  expirationDate?: string;
 }
 
 const $form = (

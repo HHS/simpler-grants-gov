@@ -4,6 +4,7 @@ import { DIFFS } from "./diffs/index.ts";
 import {
   checkForm,
   hasXmlTransform,
+  loadGrantsGovIdentity,
   loadPlans,
   report,
   type Discrepancy,
@@ -15,6 +16,10 @@ function expectNone(found: readonly Discrepancy[], header: string) {
 }
 
 const PLANS = loadPlans();
+
+/** A plan's `MM/DD/YYYY` date as the ISO `YYYY-MM-DD` that `@GrantsGov.form` takes. */
+const isoDate = (date: string) =>
+  date.replace(/^(\d{2})\/(\d{2})\/(\d{4})$/, "$3-$1-$2");
 
 /** Whether a form has a compiled spec. A record without one gets requirements checks only. */
 const compiled = (slug: string) => Boolean(PLANS.get(slug)?.spec_id);
@@ -110,6 +115,25 @@ describe.each(DIFFS)("$slug", (diff) => {
 
   // Does what we built do what the plan says?
   describe.skipIf(!compiled(diff.slug))("Implementation checks", () => {
+    describe("plan vs Grants.gov identity", () => {
+      const plan = () => PLANS.get(diff.slug)!;
+      const identity = () =>
+        loadGrantsGovIdentity(plan().spec_id!) as {
+          ombNumber?: string;
+          expirationDate?: string;
+        } | null;
+
+      it("identity matches the OMB number", () => {
+        expect(identity()?.ombNumber ?? "").toBe(plan().omb_number ?? "");
+      });
+
+      it("identity matches the OMB expiration date", () => {
+        expect(identity()?.expirationDate ?? "").toBe(
+          isoDate(plan().expiration_date ?? ""),
+        );
+      });
+    });
+
     describe("plan vs JSON schema", () => {
       const schema = () => form.implementation!.jsonSchema;
 
