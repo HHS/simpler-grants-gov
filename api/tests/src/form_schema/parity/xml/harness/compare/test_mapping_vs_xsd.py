@@ -45,6 +45,17 @@ class TestUnsourcedElements:
         )
         assert not mapping_vs_xsd.unsourced_elements(form)
 
+    def test_accepts_element_under_nested_attachment(self):
+        form = flat(
+            xsd_elements={
+                ("KeyPerson", "Profile", "BioSketchsAttached", "BioSketchAttached", "FileName"): (
+                    element(required=True)
+                )
+            },
+            attachments=frozenset({"BioSketchAttached"}),
+        )
+        assert not mapping_vs_xsd.unsourced_elements(form)
+
 
 class TestOutOfOrderElements:
     def test_accepts_elements_in_xsd_order(self):
