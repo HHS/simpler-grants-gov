@@ -19,6 +19,7 @@ from src.form_schema.forms import (
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
+    RRKeyPersonGenerated_v3_0,
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
@@ -212,3 +213,8 @@ def project_performance_site_location_handwritten_v4_0():
 @pytest.fixture(scope="session")
 def performance_sites_generated_v4_0():
     return setup_resolved_form(PerformanceSitesGenerated_v4_0)
+
+
+@pytest.fixture(scope="session")
+def rr_key_person_generated_v3_0():
+    return setup_resolved_form(RRKeyPersonGenerated_v3_0)
