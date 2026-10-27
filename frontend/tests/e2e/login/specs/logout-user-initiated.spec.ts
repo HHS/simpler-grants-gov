@@ -57,10 +57,15 @@ test.describe("User-initiated logout", () => {
       // And the user navigates to an authenticated page
       await page.goto(AUTHENTICATED_PAGE, { waitUntil: "domcontentloaded" });
       await expect(page).toHaveURL(new RegExp(`${AUTHENTICATED_PAGE}$`));
-      await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
-        timeout: TIMEOUT,
-      });
+      // Session accepted by the auth gate / header...
       await expectLoggedIn(page);
+      // ...and the dashboard actually rendered. /workspace renders nothing when
+      // the session has no email, and the e2e-token JWT currently carries
+      // email=null (see create_e2e_token.py), so this fails until that is fixed.
+      await expect(
+        page.getByRole("heading", { level: 1 }),
+        "workspace h1 missing: session likely has no email (e2e-token JWT email is null)",
+      ).toBeVisible({ timeout: TIMEOUT });
 
       // Capture identity so we can prove it disappears from public pages later.
       const { email } = await getSessionState(page);
