@@ -5,6 +5,10 @@ on:
     paths:
       - scripts/create_nofo_alert_parameter.py
       - scripts/send_nofo_alert_test.py
+      - scripts/test_nofo_alarm_delivery.py
+      - scripts/nofo_alarm_delivery_session_policy.json
+      - scripts/tests/test_nofo_alert_alarm.py
+      - .github/workflows/test-nofo-alarm-delivery.yml
       - scripts/nofo_alert_delivery_session_policy.json
       - scripts/tests/test_nofo_alert_delivery.py
       - .github/workflows/test-nofo-alert-delivery.yml
@@ -18,6 +22,10 @@ on:
     paths:
       - scripts/create_nofo_alert_parameter.py
       - scripts/send_nofo_alert_test.py
+      - scripts/test_nofo_alarm_delivery.py
+      - scripts/nofo_alarm_delivery_session_policy.json
+      - scripts/tests/test_nofo_alert_alarm.py
+      - .github/workflows/test-nofo-alarm-delivery.yml
       - scripts/nofo_alert_delivery_session_policy.json
       - scripts/tests/test_nofo_alert_delivery.py
       - .github/workflows/test-nofo-alert-delivery.yml

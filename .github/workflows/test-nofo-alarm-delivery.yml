@@ -1,0 +1,51 @@
+name: Test NOFO dev alarm and recovery email
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-nofo-alert-email-infra-dev
+  cancel-in-progress: false
+
+jobs:
+  test-alarm:
+    if: github.repository == 'HHS/simpler-grants-gov' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 7
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned AWS SDK
+        run: python3 -m pip install -r scripts/nofo_alert_setup_requirements.txt
+      - name: Limit session to this run's temporary alarm
+        id: policy
+        run: |
+          policy=$(jq -c --arg suffix "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            '.Statement[0].Resource |= sub("\\*$"; $suffix)' \
+            scripts/nofo_alarm_delivery_session_policy.json)
+          echo "json=$policy" >> "$GITHUB_OUTPUT"
+      - name: Authenticate for the fixed dev alarm test
+        id: aws
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::061664787759:role/simpler-grants-gov-github-actions
+          role-session-name: NofoDevAlarmDeliveryTest
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+          unset-current-credentials: true
+          retry-max-attempts: 2
+          inline-session-policy: ${{ steps.policy.outputs.json }}
+      - name: Exercise temporary alarm and verify both notification actions
+        id: test
+        run: python3 scripts/test_nofo_alarm_delivery.py
+      - name: Retry owned temporary alarm cleanup after failure or cancellation
+        if: always() && steps.aws.outcome == 'success' && steps.test.outcome != 'skipped'
+        run: python3 scripts/test_nofo_alarm_delivery.py --cleanup

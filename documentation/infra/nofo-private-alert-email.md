@@ -97,6 +97,59 @@ role access. This direct topic test does not prove CloudWatch alarm/recovery
 delivery. Calculator alarm actions remain off pending the separately coordinated
 alarm/recovery check and explicit activation decision.
 
+## Controlled CloudWatch alarm and recovery test
+
+The dev route was deployed, its subscription confirmed privately, and the direct
+SNS test was received after
+[delivery run 40570559443](https://github.com/HHS/simpler-grants-gov/actions/runs/40570559443).
+The next test exercises CloudWatch notification actions, without changing an
+existing calculator alarm or generating application traffic.
+
+After this workflow is reviewed and merged, use **Actions → Test NOFO dev alarm
+and recovery email → Run workflow → main**. No new secret, inbox input or personal
+AWS-console access is required. The workflow uses the existing GitHub AWS role;
+its session policy is narrowed to the single test alarm for that run and attempt,
+plus subscription inspection on the fixed dev monitoring topic. It does not grant
+new permissions to the underlying role. A denied operation needs focused
+infrastructure review; the workflow reports only an allowlisted operation/error
+category, never the raw AWS response.
+
+The workflow:
+
+1. Requires exactly one confirmed email subscription. Recipient values are never
+   printed. It refuses to modify an alarm that already exists under its test name.
+2. Creates `NOFO-DEV-TEST-alert-delivery-<run-id>-<attempt>` with ALARM and OK
+   notification actions pointing to the existing dev topic. It uses an isolated,
+   unpublished synthetic metric and ignores missing data to preserve the test
+   state. No real service thresholds, WAF rules or upload settings are changed.
+3. Uses AWS's supported
+   [SetAlarmState test mechanism](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_SetAlarmState.html)
+   to request ALARM, waits for a successful SNS action in CloudWatch history,
+   then requests OK and checks its action separately. Each wait is bounded;
+   raw history and embedded notification bodies are never logged. Unexpected
+   history formats fail verification rather than assuming success.
+4. Deletes the owned test alarm in a finally block and checks removal. A separate
+   always-run cleanup step retries deletion after failure or cancellation when
+   the runner and credentials remain available. A creation timeout also attempts
+   cleanup because AWS may have accepted the request.
+
+An inbox holder must confirm **both** messages, identified by the test alarm name
+and the ALARM and OK states. AWS may use its standard alarm-email subject format;
+expect the alarm name beginning `NOFO-DEV-TEST`, rather than the earlier direct
+SNS test subject. Record the workflow link and receipt of each state, without
+copying addresses, subscription links or email bodies into public evidence.
+A green workflow confirms successful notification actions and cleanup, not inbox
+receipt, threshold evaluation, calculator alarm configuration, or public release
+readiness. Existing calculator notification actions remain off pending separate
+review and activation.
+
+If the run fails, inspect the sanitized result and cleanup step before retrying.
+If the runner is forcibly stopped, cleanup cannot be guaranteed. Infrastructure
+support should inspect/delete only that run's temporary test alarm (whose name is
+derived from the workflow run ID and attempt), using approved AWS access. Do not
+rerun just to remove an older alarm: a new attempt has a different name and scope.
+A test that produced only one email remains incomplete even if cleanup succeeded.
+
 ## Change or pause the route
 
 Keep the chosen parameter stable unless the address needs to change. When it
