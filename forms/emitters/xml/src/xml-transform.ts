@@ -17,6 +17,7 @@ import {
   type PropertyCasing,
 } from "./simpler-forms.js";
 import { reportDiagnostic, stateKeys } from "./lib.js";
+import { transformOf } from "./transforms.js";
 
 /** One form's rules, in the shape `FORM_XML_TRANSFORM_RULES` takes. */
 export type XmlTransformRules = Record<string, unknown>;
@@ -34,7 +35,11 @@ export type XmlTransformRules = Record<string, unknown>;
  *     from the root's, as the API expects;
  *   - the root's `@Xml.ns` names a member of an `@Xml.nsDeclarations` enum, and every member
  *     of that enum is declared on the document;
- *   - a literal-typed `@Xml.attribute` on the root is a fixed root attribute.
+ *   - a literal-typed `@Xml.attribute` on the root is a fixed root attribute;
+ *   - `@Mapping.transform` on an element is its `value_transform`;
+ *   - an element of the root whose type is a `@GrantsGov.attachment` scalar is an attachment
+ *     field, not a rule: the API writes an attachment from the upload, not the answer, and
+ *     only reads attachment fields at the root.
  *
  * Rule order is load-bearing -- the API writes elements in the order of the rules -- so rules
  * follow the order the XSD TypeSpec model declares its properties in, which is the XSD's sequence, not
@@ -100,6 +105,19 @@ export function xmlTransform(
   );
 
   const rules = new Rules(program, casing, rootNs.namespace);
+  const attachments = resolved.children.filter((node) =>
+    isAttachment(program, node),
+  );
+  const attachmentFields = Object.fromEntries(
+    attachments.map((node) => [
+      jsonPropertyName(program, node.source, casing),
+      {
+        xml_element: xmlName(program, node.target!),
+        type: "single_with_wrapper",
+        file_element: "",
+      },
+    ]),
+  );
   return {
     _xml_config: {
       form_name: rootNs.prefix,
@@ -115,8 +133,11 @@ export function xmlTransform(
           ? { root_attributes: attributes }
           : {}),
       },
+      ...(attachments.length ? { attachment_fields: attachmentFields } : {}),
     },
-    ...rules.of(resolved.children),
+    ...rules.of(
+      resolved.children.filter((node) => !attachments.includes(node)),
+    ),
   };
 }
 
@@ -144,6 +165,7 @@ class Rules {
     if (node.kind === "group") return this.of(node.children);
     const target = node.target!;
     const namespace = elementNamespace(this.program, target);
+    const valueTransform = transformOf(this.program, target);
     const transform = {
       target: xmlName(this.program, target),
       ...(node.kind === "object" ? { type: "nested_object" } : {}),
@@ -151,6 +173,7 @@ class Rules {
       ...(namespace && namespace.namespace !== this.defaultNamespace
         ? { namespace: namespace.prefix }
         : {}),
+      ...(valueTransform ? { value_transform: { type: valueTransform } } : {}),
     };
     if (node.kind === "object")
       return { xml_transform: transform, ...this.of(node.children) };
@@ -158,6 +181,16 @@ class Rules {
       return { xml_transform: transform, items: this.of(node.children) };
     return { xml_transform: transform };
   }
+}
+
+/** Whether `node` is a single element whose type is a `@GrantsGov.attachment` scalar. */
+function isAttachment(program: Program, node: MappingNode): boolean {
+  const type = node.target?.type;
+  return (
+    node.kind === "leaf" &&
+    type?.kind === "Scalar" &&
+    program.stateSet(stateKeys.attachment).has(type)
+  );
 }
 
 /** Where a node sits in its target's sequence. A group sits where its first child does. */

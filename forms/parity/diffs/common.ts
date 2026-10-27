@@ -16,6 +16,13 @@ export const SHARED_HELP: Recorded = {
     "Shared questions use one help text across forms, written in the question bank, so it does not follow this DAT's wording: role names, “Please”, or “This field is required.” (the form marks required fields itself).",
 };
 
+/** A DAT that asks for a nine-digit ZIP code, where the form accepts any length. */
+export const NINE_DIGIT_ZIP: Recorded = {
+  category: "gap",
+  reason:
+    "The DAT asks for a nine-digit ZIP code, but the question bank accepts any length, as SGG's existing forms do, so `20001` is valid. The form keeps accepting what the API accepts today. Whether to require ZIP+4 is still undecided.",
+};
+
 /** Prefix and Suffix, which Grants.gov offers as a list and the form does not. */
 export const FREE_TEXT_HELP: Recorded = {
   category: "intentional",

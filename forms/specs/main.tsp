@@ -4,3 +4,4 @@ import "./forms/key-contacts/index.tsp";
 import "./forms/nsf-key-person-expanded/index.tsp";
 import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
+import "./forms/performance-sites/index.tsp";

@@ -2,10 +2,11 @@
 
 import { sendGAEvent } from "@next/third-parties/google";
 import { OptionalStringDict } from "src/types/generalTypes";
+import { searchFilterNames } from "src/types/search/searchFilterTypes";
 import { expectedQueryParamKeys } from "src/types/search/searchQueryTypes";
 import {
-  setNewRelicCustomAttribute,
-  unsetAllNewRelicQueryAttributes,
+  NewRelicSearchAttemptAttributes,
+  sendNewRelicSearchAttempt,
   waitForNewRelic,
 } from "src/utils/analyticsUtil";
 
@@ -16,7 +17,31 @@ const getCurrentFilters = (params: OptionalStringDict): string => {
   return JSON.stringify(withoutQueryAndPage);
 };
 
-// send custom New Relic and GA data for search pages
+// Built in allowlist order so equivalent search states serialize identically.
+// Using underscores since NR has problems with querying fields with dashes.
+const getNewRelicSearchAttemptAttributes = (
+  params: OptionalStringDict,
+): NewRelicSearchAttemptAttributes => {
+  const attributes = expectedQueryParamKeys.reduce((activeParams, key) => {
+    const value = params[key];
+    if (value) {
+      activeParams[`search_param_${key}`] = value;
+    }
+    return activeParams;
+  }, {} as NewRelicSearchAttemptAttributes);
+  // NRQL can't calculate string lengths, so send the query length directly.
+  attributes.search_param_query_length = params.query?.length ?? 0;
+  // agency and topLevelAgency are one user-facing Agency filter.
+  attributes.search_filter_count = new Set(
+    searchFilterNames
+      .filter((filterName) => params[filterName])
+      .map((filterName) =>
+        filterName === "topLevelAgency" ? "agency" : filterName,
+      ),
+  ).size;
+  return attributes;
+};
+
 function SearchAnalytics({
   params,
   newRelicEnabled,
@@ -35,31 +60,19 @@ function SearchAnalytics({
       .catch((e) => console.error("Error waiting for new relic", e));
   }, [newRelicEnabled]);
 
-  // set new relic query param based custom attributes
+  // Use serialized attributes so equivalent param objects don't resend the event.
+  const searchAttemptAttributes = JSON.stringify(
+    getNewRelicSearchAttemptAttributes(params),
+  );
+
   useEffect(() => {
     if (!newRelicEnabled || !newRelicInitialized) {
-      return () => {};
+      return;
     }
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        // only pass on valid query params to NR
-        if ((expectedQueryParamKeys as readonly string[]).includes(key)) {
-          setNewRelicCustomAttribute(key, value || "");
-
-          // New relic does not support certain functionalities such as  calculating string
-          // lengths. This conditional is needed to log and gain insights into search query length.
-          if (key === "query") {
-            setNewRelicCustomAttribute("query_length", value?.length ?? 0);
-          }
-        }
-      });
-    }
-    // note that this cleanup is not running quickly enough to prevent search query params
-    // being sent on route transition when navigating away from the search page
-    return () => {
-      unsetAllNewRelicQueryAttributes();
-    };
-  }, [params, newRelicEnabled, newRelicInitialized]);
+    sendNewRelicSearchAttempt(
+      JSON.parse(searchAttemptAttributes) as NewRelicSearchAttemptAttributes,
+    );
+  }, [searchAttemptAttributes, newRelicEnabled, newRelicInitialized]);
 
   useEffect(() => {
     // send list of filters defined in page query params on each page load

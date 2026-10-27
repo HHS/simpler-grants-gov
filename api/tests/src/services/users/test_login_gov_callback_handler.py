@@ -9,16 +9,15 @@ from sqlalchemy import select
 import src.adapters.oauth.login_gov.login_gov_jwt as login_gov_jwt_auth
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.adapters.oauth.oauth_client_models import OauthTokenResponse
+from src.auth.auth_handler import AuthHandler
 from src.auth.jwt import ApiJwtConfig, JwtAuth
-from src.services.users.login_gov_callback_handler_base import LoginGovDataContainer
-from tests.lib.db_test_models.auth_handler import AuthHandler
-from tests.lib.db_test_models.db_test_models import (
-    SharedLinkExternalUser,
-    SharedLoginGovState,
-    SharedUserTokenSession,
+from src.constants.lookup_constants import ExternalUserType
+from src.db.models.user_models import LinkExternalUser, LoginGovState, UserTokenSession
+from src.services.users.login_gov_callback_handler import (
+    LoginGovCallbackHandler,
+    LoginGovDataContainer,
 )
-from tests.lib.db_test_models.login_gov_callback_handler import LoginGovCallbackHandler
-from tests.src.db.models.factories import SharedLinkExternalUserFactory, SharedLoginGovStateFactory
+from tests.src.db.models.factories import LinkExternalUserFactory, LoginGovStateFactory
 
 # These match the values on the login_gov_config fixture in conftest.py
 DEFAULT_ISSUER = "http://localhost:3000"
@@ -73,7 +72,7 @@ def mock_oauth_client(monkeypatch):
     """Swap the real login.gov client for a mock one in the callback handler"""
     client = MockLoginGovOauthClient()
     monkeypatch.setattr(
-        "src.services.users.login_gov_callback_handler_base.get_login_gov_client",
+        "src.services.users.login_gov_callback_handler.get_login_gov_client",
         lambda: client,
     )
     return client
@@ -92,10 +91,10 @@ def set_login_gov_config(monkeypatch, login_gov_config):
 
 
 def test_handle_callback_request(enable_factory_create, db_session, login_gov_callback_handler):
-    login_gov_state = SharedLoginGovStateFactory.create()
+    login_gov_state = LoginGovStateFactory.create()
     query = {
         "code": "1234",
-        "state": str(login_gov_state.shared_login_gov_state_id),
+        "state": str(login_gov_state.login_gov_state_id),
     }
     login_gov_data_container = login_gov_callback_handler.handle_callback_request(query)
     assert login_gov_data_container.code == query["code"]
@@ -103,9 +102,8 @@ def test_handle_callback_request(enable_factory_create, db_session, login_gov_ca
 
     # The state should have been deleted so it can't be reused
     remaining_state = db_session.execute(
-        select(SharedLoginGovState).where(
-            SharedLoginGovState.shared_login_gov_state_id
-            == login_gov_state.shared_login_gov_state_id
+        select(LoginGovState).where(
+            LoginGovState.login_gov_state_id == login_gov_state.login_gov_state_id
         )
     ).scalar_one_or_none()
     assert remaining_state is None
@@ -211,17 +209,13 @@ def test_handle_token_succeeds(
 
     # The external user should have been created with a lowercased email
     external_user = db_session.execute(
-        select(SharedLinkExternalUser).where(
-            SharedLinkExternalUser.external_user_id == external_user_id
-        )
+        select(LinkExternalUser).where(LinkExternalUser.external_user_id == external_user_id)
     ).scalar_one()
     assert external_user.email == "fake_user@mail.com"
 
     # A token session should have been created for the new user
     token_session = db_session.execute(
-        select(SharedUserTokenSession).where(
-            SharedUserTokenSession.shared_user_id == external_user.shared_user_id
-        )
+        select(UserTokenSession).where(UserTokenSession.user_id == external_user.user_id)
     ).scalar_one()
     assert token_session.is_valid is True
 
@@ -234,8 +228,10 @@ def test_handle_token_succeeds_existing_user(
     set_login_gov_config,
     private_rsa_key,
 ):
-    external_user = SharedLinkExternalUserFactory.create(
-        external_user_id="existing-user-xyz", email="old_email@mail.com"
+    external_user = LinkExternalUserFactory.create(
+        external_user_id="existing-user-xyz",
+        external_user_type=ExternalUserType.LOGIN_GOV,
+        email="old_email@mail.com",
     )
     external_user_id = external_user.external_user_id
 

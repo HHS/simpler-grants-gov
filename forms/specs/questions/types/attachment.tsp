@@ -1,4 +1,5 @@
 import "simpler-forms";
+import "simpler-forms-sgg";
 
 import "#questions/index.tsp";
 
@@ -13,5 +14,6 @@ namespace Questions.Types;
 @Meta.tag(Catalogue.Tag.attachment)
 @UI.label("Attachment")
 @UI.widget(Rendering.Widget.Attachment)
+@Sgg.attachment
 @format("uuid")
 scalar Attachment extends string;
