@@ -101,16 +101,7 @@
                     {
                       "type": "Control",
                       "scope": "#/properties/address/properties/state",
-                      "label": "State",
-                      "rule": {
-                        "effect": "ENABLE",
-                        "condition": {
-                          "scope": "#/properties/address/properties/country",
-                          "schema": {
-                            "const": "USA: UNITED STATES"
-                          }
-                        }
-                      }
+                      "label": "State"
                     },
                     {
                       "type": "Control",
