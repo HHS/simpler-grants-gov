@@ -383,6 +383,40 @@ class TestAttachment:
         with pytest.raises(ValueError, match="not found in attachment mapping"):
             _generate(self._MAPPING, {"people": [{"sketch": "unknown"}]})
 
+    def test_reads_dot_as_the_item_itself_for_a_list_of_upload_ids(self) -> None:
+        other = "11111111-2222-3333-4444-555555555555"
+        mapping = _small_mapping(
+            {
+                "OtherAttachments": {
+                    "OtherAttachment": {
+                        "$each": {
+                            "items": {"$field": "other_attachments"},
+                            "map": {"$attachment": "."},
+                        }
+                    }
+                },
+                "Code": {"$each": {"items": {"$field": "codes"}, "map": {"$field": "."}}},
+            }
+        )
+
+        xml = _generate(
+            mapping,
+            {"other_attachments": [_ADDITIONAL_LOCATIONS, other], "codes": ["X", "Y"]},
+            attachment_mapping={
+                _ADDITIONAL_LOCATIONS: _ADDITIONAL_LOCATIONS_FILE,
+                other: AttachmentInfo(
+                    filename="other.pdf",
+                    mime_type="application/pdf",
+                    file_location="other.pdf",
+                    hash_value="hash",
+                ),
+            },
+        )
+
+        assert xml.count("<Form:OtherAttachment>") == 2
+        assert xml.index("additional_locations.pdf") < xml.index("other.pdf")
+        assert "<Form:Code>X</Form:Code>\n  <Form:Code>Y</Form:Code>" in xml
+
 
 class TestService:
     def test_uses_the_new_generator_only_for_a_mapping_in_this_format(self) -> None:

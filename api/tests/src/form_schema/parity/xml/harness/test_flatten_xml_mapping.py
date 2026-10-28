@@ -131,6 +131,17 @@ class TestRead:
             {},
         )
 
+    def test_reads_dot_as_the_item_itself(self):
+        uploads = mapping(
+            {
+                "OtherAttachment": {
+                    "$each": {"items": {"$field": "uploads"}, "map": {"$attachment": "."}}
+                }
+            }
+        )
+        assert flatten_xml_mapping.read(uploads) == ({("OtherAttachment",): "uploads.[]"}, {})
+        assert flatten_xml_mapping.attachment_elements(uploads) == frozenset({"OtherAttachment"})
+
 
 class TestDocument:
     def test_reads_root_and_xsd(self):

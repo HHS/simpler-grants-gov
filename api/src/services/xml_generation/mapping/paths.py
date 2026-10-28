@@ -5,9 +5,11 @@ from typing import Any
 
 
 def read(scope: Any, path: str) -> Any:
-    """The value at a dotted path below ``scope``, or None. A whole-number step reads a list's
-    entry by index (``types.0``), as the form library's runtime does; any other step reads a
-    dict's key."""
+    """The value at a dotted path below ``scope``, or None. ``.`` is ``scope`` itself: inside
+    ``$each``, the item. A whole-number step reads a list's entry by index (``types.0``), as
+    the form library's runtime does; any other step reads a dict's key."""
+    if path == ".":
+        return scope
     value = scope
     for step in path.split("."):
         if isinstance(value, list):
