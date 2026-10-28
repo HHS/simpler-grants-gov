@@ -1,0 +1,38 @@
+name: Test NOFO dev alert email delivery
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: test-nofo-alert-email-infra-dev
+  cancel-in-progress: false
+jobs:
+  test-delivery:
+    if: github.repository == 'HHS/simpler-grants-gov' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned AWS SDK
+        run: python3 -m pip install -r scripts/nofo_alert_setup_requirements.txt
+      - name: Load topic-only test session policy
+        id: policy
+        run: echo "json=$(jq -c . scripts/nofo_alert_delivery_session_policy.json)" >> "$GITHUB_OUTPUT"
+      - name: Authenticate for the fixed dev topic test
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::061664787759:role/simpler-grants-gov-github-actions
+          role-session-name: NofoDevAlertDeliveryTest
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+          unset-current-credentials: true
+          retry-max-attempts: 2
+          inline-session-policy: ${{ steps.policy.outputs.json }}
+      - name: Send one labelled test to the confirmed dev email subscription
+        run: python3 scripts/send_nofo_alert_test.py
