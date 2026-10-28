@@ -150,7 +150,9 @@ def _source(value: Any, prefix: str) -> str | None:
 
 
 def _join(prefix: str, path: str) -> str:
-    """A field below `prefix`. A whole-number step reads one entry of a list, so it stands for
-    any item: `types.0` -> `types.[]`."""
+    """A field below `prefix`. `.` is the item itself. A whole-number step reads one entry of a
+    list, so it stands for any item: `types.0` -> `types.[]`."""
+    if path == ".":
+        return prefix
     steps = [ARRAY if step.isdecimal() else step for step in path.split(".")]
     return ".".join([prefix, *steps] if prefix else steps)

@@ -153,10 +153,22 @@ including inside `$each`.
 
 An id the submission has no record for is an error, the same as in transform rules.
 
+A list of upload ids is an `$each` whose `map` reads the item itself, `.`. It writes the element
+once per upload, as an `AttachmentGroup`'s `att:AttachedFile` or RR Other Project
+Information's `OtherAttachment`:
+
+```json
+"OtherAttachments": {
+  "OtherAttachment": {
+    "$each": { "items": { "$field": "other_attachments" }, "map": { "$attachment": "." } }
+  }
+}
+```
+
 ### `$each`: one element per item of a list
 
 Writes the element once per item of the list at `items`, with `map` as its content. Paths in
-`map` are relative to the item.
+`map` are relative to the item, and `.` is the item itself, for a list of values.
 
 ```json
 "KeyPerson": {
