@@ -6,6 +6,7 @@
 from decimal import Decimal
 
 import pytest
+import xmlschema
 
 from tests.src.form_schema.parity.xml.harness import flatten_xsd
 from tests.src.form_schema.parity.xml.harness.utils import FOURTEEN_DIGITS
@@ -45,6 +46,19 @@ class TestElements:
     def test_raises_on_undeclared_root(self):
         with pytest.raises(KeyError, match="declares no root element 'Wrong'"):
             flatten_xsd.elements(KEY_CONTACTS[0], "Wrong")
+
+
+class TestConstraints:
+    def test_reads_pattern_facet(self):
+        schema = xmlschema.XMLSchema("""<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+              <xs:element name="NsfId">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string"><xs:pattern value="[0-9A-Z]{9}"/></xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:schema>""")
+        _, rules = flatten_xsd._constraints(schema.elements["NsfId"])
+        assert rules["pattern"] == "[0-9A-Z]{9}"
 
 
 class TestImpliedRange:

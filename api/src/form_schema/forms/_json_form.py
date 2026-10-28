@@ -41,18 +41,25 @@ _FIELD_PARSERS = {
 
 
 class SchemaFile(NamedTuple):
-    """A large Form document that a form.json can keep in a separate file."""
+    """A large Form document that a form.json can keep in a separate file.
+
+    Most fields have one file. The XML configuration has one per format, ``xml_transform.json``
+    or ``xml_mapping.json``, and a form keeps it in exactly one of them; the generator reads
+    the format from the document itself.
+    """
 
     module_attribute: str
-    filename: str
+    filenames: tuple[str, ...]
 
 
 # Keyed by the Form field each schema file fills.
 SCHEMA_FILES = {
-    "form_json_schema": SchemaFile("FORM_JSON_SCHEMA", "json_schema.json"),
-    "form_ui_schema": SchemaFile("FORM_UI_SCHEMA", "ui_schema.json"),
-    "form_rule_schema": SchemaFile("FORM_RULE_SCHEMA", "rule_schema.json"),
-    "json_to_xml_schema": SchemaFile("FORM_XML_TRANSFORM_RULES", "xml_transform.json"),
+    "form_json_schema": SchemaFile("FORM_JSON_SCHEMA", ("json_schema.json",)),
+    "form_ui_schema": SchemaFile("FORM_UI_SCHEMA", ("ui_schema.json",)),
+    "form_rule_schema": SchemaFile("FORM_RULE_SCHEMA", ("rule_schema.json",)),
+    "json_to_xml_schema": SchemaFile(
+        "FORM_XML_TRANSFORM_RULES", ("xml_transform.json", "xml_mapping.json")
+    ),
 }
 
 
@@ -97,7 +104,11 @@ def build_form_from_dict(data: dict[str, Any], path: Path) -> Form:
 
 def schema_file_paths(version_dir: Path) -> list[Path]:
     """Return the schema files present in a version directory, in a fixed order."""
-    paths = [version_dir / schema_file.filename for schema_file in SCHEMA_FILES.values()]
+    paths = [
+        version_dir / filename
+        for schema_file in SCHEMA_FILES.values()
+        for filename in schema_file.filenames
+    ]
     return [path for path in paths if path.exists()]
 
 
@@ -114,13 +125,19 @@ def _merge_schema_files(data: dict[str, Any], version_dir: Path) -> dict[str, An
     merged = dict(data)
 
     for field, schema_file in SCHEMA_FILES.items():
-        path = version_dir / schema_file.filename
-        if not path.exists():
+        present = [name for name in schema_file.filenames if (version_dir / name).exists()]
+        if len(present) > 1:
+            raise ValueError(
+                f"{version_dir}: {field} is declared in both {' and '.join(present)}; "
+                "a field must be declared exactly once"
+            )
+        if not present:
             continue
+        path = version_dir / present[0]
         if field in merged:
             raise ValueError(
                 f"{path}: {field} is declared both inline in {JSON_FORM_FILENAME} and in "
-                f"{schema_file.filename}; a field must be declared exactly once"
+                f"{present[0]}; a field must be declared exactly once"
             )
         merged[field] = _read_json(path)
 

@@ -268,6 +268,9 @@ NOTE: The committed XSDs live in src/services/xml_generation/xsds/. Refresh them
 
 Transformation rules are defined in each form module (e.g., `sf424.py`, `project_narrative_attachment.py`).
 
+A form defined in `forms/` can use a mapping shaped like the XML (`xml_mapping.json`) instead
+of transform rules. See [mapping/README.md](mapping/README.md).
+
 ### Example: SF-424
 
 ```python
