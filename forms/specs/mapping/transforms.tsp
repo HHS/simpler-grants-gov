@@ -23,4 +23,10 @@ enum Transformation {
 
   /** The string's first `max_length` characters: `#{ max_length: 60 }`. */
   truncateString: "truncate_string",
+
+  /**
+   * A list of strings joined into one, sorted with `#{ sort: true }` so a code combined from
+   * checkbox selections doesn't depend on their order.
+   */
+  joinValues: "join_values",
 }

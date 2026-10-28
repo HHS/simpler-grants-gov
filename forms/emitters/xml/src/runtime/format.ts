@@ -62,7 +62,8 @@ export interface Const {
 
 /**
  * The `case` entry for a value, or `default`. A string is its own key; anything else is keyed
- * as JSON writes it, so `true` matches `"true"`. A value with neither is an error.
+ * as JSON writes it, so `true` matches `"true"` and a list `["A","C"]`. A value with neither
+ * is an error. To match checkbox selections in any order, `join_values` them sorted first.
  */
 export interface Match {
   $match: { value: Value; case: Record<string, Branch>; default?: Branch };
