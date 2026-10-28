@@ -16,7 +16,7 @@ const { targetEnv } = playwrightEnv;
 
 const PRIVATE_NO_STORE = "private, no-store, max-age=0";
 const NOINDEX = "noindex, nofollow";
-// the proxy only checks that a session cookie is present
+// the proxy only checks that a non-empty session cookie is present
 const SESSION_COOKIE = { Cookie: "session=cache-header-test" };
 
 // origin headers only; final CDN headers are verified against deployed environments
