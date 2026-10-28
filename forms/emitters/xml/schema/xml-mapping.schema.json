@@ -115,7 +115,7 @@
       }
     },
     "match": {
-      "description": "The case entry for a value (a string as it is, anything else as JSON writes it), or default. A value with neither is an error.",
+      "description": "The case entry for a value (a string as it is, anything else as compact JSON writes it, so a list depends on its order), or default. A value with neither is an error.",
       "type": "object",
       "required": ["$match"],
       "additionalProperties": false,

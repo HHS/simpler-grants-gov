@@ -265,6 +265,37 @@ describe("generateXml", () => {
     ).toThrow(/no case for x/);
   });
 
+  it("keys a list as compact JSON, or joins it whatever its order", () => {
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: {
+        Root: {
+          Code: {
+            $match: { value: { $field: "codes" }, case: { '["A","C"]': "AC" } },
+          },
+          RevisionCode: {
+            $transform: {
+              name: "join_values",
+              value: { $field: "revision_codes" },
+              params: { sort: true },
+            },
+          },
+        },
+      },
+    };
+    expect(generateXml(mapping, { codes: ["A", "C"] })).toContain(
+      "<f:Code>AC</f:Code>",
+    );
+    for (const codes of [
+      ["A", "C"],
+      ["C", "A"],
+    ])
+      expect(generateXml(mapping, { revision_codes: codes })).toContain(
+        "<f:RevisionCode>AC</f:RevisionCode>",
+      );
+  });
+
   it("nests functions: a case entry can be a $when or a group of elements", () => {
     const mapping: XmlMapping = {
       format: "xml-mapping",
@@ -548,6 +579,9 @@ describe("$transform", () => {
     ["map_values", "z", { mappings: {}, default: "D" }, "D"],
     ["map_values", "z", { mappings: {}, passthrough_unknown: true }, "z"],
     ["map_values", "z", { mappings: {} }, Error],
+    ["join_values", ["C", "A"], {}, "CA"],
+    ["join_values", ["C", "A"], { sort: true, separator: "," }, "A,C"],
+    ["join_values", ["A", 1], {}, Error],
   ];
   it.each(cases)("%s(%j, %j) is %s", async (name, value, params, expected) => {
     const mapping: XmlMapping = {

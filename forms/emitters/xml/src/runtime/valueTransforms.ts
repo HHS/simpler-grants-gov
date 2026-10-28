@@ -91,6 +91,23 @@ export const VALUE_TRANSFORMS: Record<string, ValueTransform> = {
     if (params.passthrough_unknown) return value;
     throw new Error(`value '${key}' not found in mappings`);
   },
+
+  /**
+   * A list of strings joined with `separator`, in order or, with `sort`, sorted, so a code
+   * combined from checkbox selections doesn't depend on the order they were chosen in.
+   */
+  join_values: (value, params) => {
+    takes("join_values", params, [], ["separator", "sort"]);
+    if (
+      !Array.isArray(value) ||
+      !value.every((entry) => typeof entry === "string")
+    )
+      throw new Error(
+        `join_values requires a list of strings, got ${JSON.stringify(value)}`,
+      );
+    const entries = params.sort ? [...value].sort(byCodePoint) : value;
+    return entries.join((params.separator as string | undefined) ?? "");
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -126,4 +143,14 @@ function pythonStr(value: unknown): string {
   throw new Error(
     `map_values only keys a string, number or boolean, got ${JSON.stringify(value)}`,
   );
+}
+
+/** Order strings by code point, as Python sorts them. */
+function byCodePoint(a: string, b: string): number {
+  const [x, y] = [Array.from(a), Array.from(b)];
+  for (let i = 0; i < Math.min(x.length, y.length); i++) {
+    const difference = x[i].codePointAt(0)! - y[i].codePointAt(0)!;
+    if (difference) return difference;
+  }
+  return x.length - y.length;
 }
