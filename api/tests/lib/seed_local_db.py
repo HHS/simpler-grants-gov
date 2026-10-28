@@ -660,6 +660,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "1123199e-23f8-4d7e-a6dc-d212e1f7ff6c",
         ),
         (
+            "RR_KeyPerson_Generated",
+            "E2E-RRKPG",
+            "R&R Senior/Key Person Profile (Generated)",
+            "17a8581a-779f-4199-a3f6-a2ffe7293dec",
+            "e01467fd-70b7-4cd2-9fbc-1fc455b2ce93",
+        ),
+        (
             "SF424_4_0",
             "E2E-SF424",
             "Application for Federal Assistance (SF-424)",

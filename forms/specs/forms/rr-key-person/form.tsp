@@ -1,5 +1,6 @@
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 
 import "#forms/index.tsp";
 import "#questions/research/index.tsp";
@@ -13,6 +14,7 @@ namespace Forms.RRKeyPerson;
 
 // The data only: how an applicant is shown it is in layout.tsp.
 /** Research & Related Senior/Key Person Profile, Grants.gov version 3.0. */
+@Sgg.sync(#{ instructions: "8bcde1bd-0e2d-4ba8-a2e2-11d9ea2c21e3", xml: "mapping" })
 @Meta.form(#{
   id: "rr-key-person",
   formName: "RESEARCH & RELATED Senior/Key Person Profile",

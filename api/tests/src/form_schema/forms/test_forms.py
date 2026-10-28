@@ -101,6 +101,11 @@ EXPECTED_FORM_DATA = {
         "omb_number": "4040-0010",
         "expiration_date": "08/31/2029",
     },
+    772: {
+        "form_name": "Research & Related Senior/Key Person Profile",
+        "omb_number": "4040-0001",
+        "expiration_date": "01/31/2029",
+    },
 }
 
 
@@ -300,3 +305,14 @@ def test_performance_sites_forms_have_distinct_instructions(
         project_performance_site_location_handwritten_v4_0.form_instruction_id
         != performance_sites_generated_v4_0.form_instruction_id
     )
+
+
+def test_rr_key_person_generated_v3_0(rr_key_person_generated_v3_0):
+    expected_values = EXPECTED_FORM_DATA.get(rr_key_person_generated_v3_0.legacy_form_id)
+    assert rr_key_person_generated_v3_0.omb_number == expected_values["omb_number"]
+    assert (
+        rr_key_person_generated_v3_0.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert rr_key_person_generated_v3_0.sgg_version == "1.0"
+    assert rr_key_person_generated_v3_0.form_instruction_id is not None
