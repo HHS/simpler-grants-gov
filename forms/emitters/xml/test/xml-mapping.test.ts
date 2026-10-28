@@ -1,5 +1,5 @@
 import type { EnumMember, Model, Program } from "@typespec/compiler";
-import { createTester } from "@typespec/compiler/testing";
+import { createTester, expectDiagnostics } from "@typespec/compiler/testing";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { xmlMapping } from "../src/xml-mapping.js";
@@ -24,9 +24,13 @@ const spec = (form: string, root: string, models = "") => `
   @Mapping.targets(Target)
   namespace Mappings { enum Target { xml } }
 
+  @Mapping.transforms(Transformation)
+  namespace Transforms { enum Transformation { yesNo: "boolean_to_yes_no" } }
+
   namespace Forms {
     @Meta.form(#{ id: "example", formName: "Example" })
     model Example { ${form} }
+    model Race { name: string; }
   }
 
   namespace Wire {
@@ -89,6 +93,44 @@ describe("xmlMapping", () => {
           },
         },
       },
+    });
+  });
+
+  it("writes a list of values as one element per value", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "races?: string[]; disabled?: boolean[];",
+      `@Mapping.from(xml, Forms.Example.races)
+       @name("Race")
+       race?: string[];
+
+       @Mapping.from(xml, Forms.Example.disabled)
+       @Mapping.transform(Transforms.Transformation.yesNo)
+       @name("Disabled")
+       disabled?: string[];`,
+    );
+    expect(diagnostics.filter((d) => d.severity === "error")).toEqual([]);
+    expect(mapping?.root.FormRoot).toEqual({
+      Race: { $each: { items: { $field: "races" }, map: { $field: "." } } },
+      Disabled: {
+        $each: {
+          items: { $field: "disabled" },
+          map: {
+            $transform: { name: "boolean_to_yes_no", value: { $field: "." } },
+          },
+        },
+      },
+    });
+  });
+
+  it("rejects a list of values filled from a list of objects", async () => {
+    const { diagnostics } = await mappingOf(
+      "races?: Race[];",
+      `@Mapping.from(xml, Forms.Example.races) @name("Race") race?: string[];`,
+    );
+    expectDiagnostics(diagnostics, {
+      code: "form-library-xml/xml-mapping-unsupported",
+      message:
+        "The XML mapping can't write Race yet: it holds a list of values filled from a list of objects.",
     });
   });
 });

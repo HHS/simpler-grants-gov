@@ -33,8 +33,8 @@ import {
  *
  *   - an element with `@Mapping.from` reads the field it names, found among the fields of
  *     the one its parent reads, with a path relative to the response or, in a list, the item;
- *   - a list of elements is an `$each` over the field it reads, and a list of attachments an
- *     `$each` whose items are the upload ids themselves (`.`);
+ *   - a list of elements is an `$each` over the field it reads, and a list of values (or of
+ *     attachments) an `$each` whose items are the values themselves (`.`);
  *   - an element with no `@Mapping.from` whose own elements read fields is a wrapper: a key
  *     with its elements under it, reading from the same field as its parent;
  *   - an element whose type is a `@GrantsGov.attachment` scalar is an `$attachment`;
@@ -117,25 +117,28 @@ export function xmlMapping(
       const steps = path(prefix, source);
       const field = steps.join(".");
       const shape = shapeOf(source.at(-1)!.type);
-      if (
-        to.array &&
-        !to.object &&
-        shape.array &&
-        !shape.object &&
-        isAttachment(program, to.item)
-      ) {
-        // A list of upload ids: the element once per id, each item the id itself.
+      if (to.array && !to.object && shape.array && !shape.object) {
+        // A list of values: the element once per value, each item the value itself.
         elements[key(prop)] = {
-          $each: { items: { $field: field }, map: { $attachment: "." } },
+          $each: {
+            items: { $field: field },
+            map: leaf(program, prop, ".", to.item),
+          },
         };
         continue;
       }
       if (to.array) {
+        if (!shape.array) continue; // reported by simpler-forms
         if (!to.object || !shape.object) {
           reportDiagnostic(program, {
             code: "xml-mapping-unsupported",
             target: prop,
-            format: { element: key(prop), reason: "a list of values" },
+            format: {
+              element: key(prop),
+              reason: to.object
+                ? "a list of elements filled from a list of values"
+                : "a list of values filled from a list of objects",
+            },
           });
           continue;
         }
@@ -172,9 +175,17 @@ export function xmlMapping(
   };
 }
 
-/** A value element: its field, as an attachment, transformed, or as it is. */
-function leaf(program: Program, prop: ModelProperty, field: string): Value {
-  if (isAttachment(program, prop.type)) return { $attachment: field };
+/**
+ * A value element: its field, as an attachment, transformed, or as it is. `type` is the
+ * value's, which for a list of values is each entry's.
+ */
+function leaf(
+  program: Program,
+  prop: ModelProperty,
+  field: string,
+  type = prop.type,
+): Value {
+  if (isAttachment(program, type)) return { $attachment: field };
   const transform = transformOf(program, prop);
   return transform
     ? { $transform: { name: transform, value: { $field: field } } }
