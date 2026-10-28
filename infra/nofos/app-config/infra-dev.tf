@@ -27,11 +27,11 @@ module "infra_dev_config" {
   enable_pdf_readability_monitoring               = true
   monitoring_email_alert_recipient_parameter_name = "/nofos/infra-dev/monitoring/alert-email"
   pdf_readability_alarm_actions_enabled           = true
-  # Temporary dev rate-enforcement verification; restore count after the test.
-  # Public uploads remain disabled. See the WAF runbook merge gate.
+  # Observation first. Switch rate_action to block only for the coordinated
+  # synthetic dev test; public pilot enablement remains a separate decision.
   pdf_readability_waf = {
     rate_limit      = 10
-    rate_action     = "block"
+    rate_action     = "count"
     emergency_block = false
   }
 

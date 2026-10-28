@@ -19,13 +19,13 @@ the service module. Only `infra/nofos/app-config/infra-dev.tf` opts in:
 ```hcl
 pdf_readability_waf = {
   rate_limit      = 10
-  rate_action     = "block"
+  rate_action     = "count"
   emergency_block = false
 }
 ```
 
-This temporary dev configuration enables POST rate enforcement while the
-emergency rule remains in Count mode. It does not enable public uploads. Production and every other environment remain opted out.
+Both rules initially observe in Count mode; this does **not** enforce throttling
+or block the route. Production and every other environment remain opted out.
 The current `Deploy NOFOs` workflow maps its `dev` selection to `infra-dev`.
 Confirm the selected infrastructure revision, environment, account, and HTTPS
 endpoint before testing. The workflow's `version` input selects the Builder
@@ -65,8 +65,8 @@ evaluation before rate limiting. Each rule has a CloudWatch counter and disables
 its own sampled requests. Existing ACL/managed-group sampling and WAF/ALB logs
 are unchanged: this is not a logging-redaction or privacy-control change.
 
-The preceding path-scope deployment used Count mode for both rules. This
-separate temporary verification change enables only rate enforcement in dev. Merging
+The infra-dev environment remains in Count mode with emergency blocking off.
+Correcting the path scope does not enable enforcement or public uploads. Merging
 service-module changes can automatically deploy dev; confirm the actual path
 matchers and unchanged Count actions afterward. Live blocking/restoration still
 requires the bounded verification procedure below.
@@ -87,7 +87,7 @@ terraform -chdir=infra/nofos/app-config test
 Service tests cover default behavior, rule order/actions, path and method
 configuration, source-IP aggregation, rate bounds, independent activation, and
 NOFO-only validation. The environment test verifies that only `infra-dev` opts
-in and rate blocking is enabled and emergency blocking stays off mode. CI runs both suites. These tests verify
+in and both actions begin in Count mode. CI runs both suites. These tests verify
 planned configuration, not AWS request matching, effective IAM, drift, or live
 capacity.
 
@@ -163,45 +163,36 @@ References: [AWS rate settings](https://docs.aws.amazon.com/waf/latest/developer
 [AWS rate caveats](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-caveats.html),
 and [infrastructure changes](./making-infra-changes.md).
 
-## Temporary rate-test merge gate and restoration
+## Inspecting missing Count evidence
 
-This change is for the first enforcement stage only. Keep the PR draft until
-Count-mode evidence has been reviewed, an operator can run the test immediately
-after deployment, and a fallback infrastructure contact is available. Merging
-can automatically deploy dev; do not merge merely to queue a later test.
-Public uploads must remain disabled. No production configuration changes.
+The read-only `Inspect Readability Calculator` workflow follows the dev ECS
+service's target group to its load balancer and associated ACL. Its WAF summary
+now reports `scope_matches_reviewed_paths_and_methods` for each selected rule.
+True means the exact reviewed path/method structure (including NONE transforms)
+was found; false means different or missing structure, not proof that no path
+matches. It accepts either ordering of the two AND clauses and the AWS CLI's
+base64 representation of the fixed POST byte string. It never prints arbitrary
+rule statements, metric names, resource identifiers or request data.
 
-Baseline on October 28, 2026 at 19:46 UTC: eight requests (one GET and one empty
-POST to each of the four public path forms) returned 301 for slashless paths,
-503 for `/readability-checker/`, and 308 for `/readability/`. A health GET returned
-200. Redirects were not followed; no documents were submitted. This establishes
-application responses only, not WAF matching. Preserve the inspection link and
-Count evidence separately before moving this PR out of draft.
+Metric queries use the deployed ACL and rule VisibilityConfig metric names,
+with Region us-east-1, as described in the
+[AWS metric dimensions](https://docs.aws.amazon.com/waf/latest/developerguide/waf-metrics.html).
+The report states whether each rule metric name equals its rule name and adds
+numeric WAF sums for the last hour. Missing sums remain null; missing rule metric
+names get an explicit query status. These aggregate counters cannot establish
+which individual request/path matched, and unrelated requests can contribute.
 
-After deployment, inspect the rules: rate Block, emergency Count, limit 10 per
-IP over 300 seconds, correct dev ACL. Verify the public calculator is still
-unavailable. Use the bounded card in Builder's
-[readiness plan](https://github.com/HHS/simpler-grants-pdf-builder/blob/main/documentation/READABILITY_CALCULATOR_READINESS.md):
-44 empty POSTs distributed across the four forms, at most one every two seconds,
-then GET each form and `/health`. Allow at most ten minutes for this phase;
-stop on unexpected health failures, upload availability, or configuration drift.
-Do not increase load if blocking is not observed. Record 429 responses with WAF
-counter evidence; GETs must remain excluded from this rate rule. Observe recovery
-using at most ten empty POSTs at one-minute intervals plus four path GETs.
+The October 28 baseline used eight GET/empty POST requests across the four public
+path forms at 19:46 UTC, without following redirects or submitting documents.
+Responses were the expected 301/503/308; health returned 200. Inspections
+[40757276518](https://github.com/HHS/simpler-grants-gov/actions/runs/40757276518),
+[40757422396](https://github.com/HHS/simpler-grants-gov/actions/runs/40757422396), and
+[40757737551](https://github.com/HHS/simpler-grants-gov/actions/runs/40757737551)
+reported no WAF datapoints. This remains unresolved; do not infer zero traffic,
+working enforcement, or a confirmed query defect. Four POSTs were below the
+rate threshold; the emergency Count rule is the expected baseline signal.
 
-Restore through a reviewed change: set `rate_action = "count"` in
-`infra/nofos/app-config/infra-dev.tf` and the matching test expectation to
-`rate_action == "count"` in
-both `infra/nofos/app-config/tests/pdf_readability_waf.tftest.hcl` and
-`infra/nofos/app-config/tests/pdf_readability_monitoring.tftest.hcl`; keep
-`emergency_block = false`. Rename the test/description back to observation mode
-and update this runbook to record results. Run the app-config mocked tests,
-merge/deploy through the usual path, then verify both rules Count, the same
-nine baseline responses, and no public uploads. A failed deploy is not proof
-of restoration: inspect actual rules and use the agreed infrastructure fallback
-if the reviewed deployment path cannot restore them. Do not delete rules or
-bypass review. Record deployment links, activation/restoration times, and gaps.
-
-Emergency blocking is a subsequent reviewed stage: it must not run concurrently
-with this rate test because its priority-zero 403 would hide rate-rule behavior.
-Neither this PR nor these baseline checks establish release readiness.
+After this inspection extension is reviewed and merged, run from main, compare
+scope and metric results, and only then repeat bounded requests if needed.
+Keep both rules in Count and public uploads disabled. Live rate/emergency
+activation and restoration require a subsequent reviewed configuration change.
