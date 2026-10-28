@@ -36,7 +36,12 @@ and step summary. No raw response, artifact or raw-log file is produced.
 
 For each window it reports:
 
-- Whether the bounded log scan completed, and how many log events it scanned.
+- Separate bounded searches for structured application errors (`logs`) and
+  the literal `WORKER TIMEOUT` marker (`worker_timeouts`), with completion and
+  scanned-event counts for each. CloudWatch filters before returning events:
+  structured errors match `levelname` ERROR/CRITICAL or numeric `status` /
+  `status_code` from 500 through 599. These match Builder's JSON request logger
+  fields; they do not assume all deployed logs have that format.
 - Error-log-event counts, numeric 5xx status counts, broad fixed route families,
   and known exception-class counts. Unknown classes become `unknown`; URLs,
   query strings, IDs, exception messages, tracebacks, filenames, documents and
@@ -49,6 +54,13 @@ For each window it reports:
 - The number of alarm state-update records and whether the alarm-history read
   was complete. Reasons and notification bodies are suppressed.
 
+A complete search means only that all matching events were scanned. Plain-text
+errors other than the timeout marker, split/prefixed JSON, and differently named
+fields can be missed. No matches do not establish that no errors occurred.
+The searches can overlap; do not sum their counts. The current public route is
+reported as the fixed `readability-checker` family, separately from legacy
+`readability`.
+
 A request can generate multiple log entries. Do not equate log-event counts with
 unique requests or assume that separate route and exception totals identify the
 same request. The ALB metric and application logging may cover different
@@ -56,7 +68,8 @@ requests, especially errors occurring before structured logging or on paths
 excluded from that logging. The diagnostic does not inspect historical task
 termination, deployment records or the current application health.
 
-Each window reads at most ten pages of up to 500 log events. Empty pages with a
+Each search in each window reads at most ten pages of up to 500 matching log
+events (up to 20 pages per window across both searches). Empty pages with a
 continuation token are followed. Repeated tokens, the page limit or the scan's
 shared 180-second deadline mark results incomplete. AWS calls have bounded
 connect/read timeouts and no automatic retry; the whole job times out after
@@ -77,7 +90,13 @@ that gap. Keep shared monitoring notifications active during investigation.
 Record a workflow link and a short sanitized finding once reviewed. Do not copy
 email unsubscribe links, recipient addresses or raw errors into public evidence.
 Changing the incident windows or expanding the data read requires another
-reviewed change. No live diagnostic has been run merely by merging this workflow.
+reviewed change. The [initial run](https://github.com/HHS/simpler-grants-gov/actions/runs/40752325955)
+confirmed AWS read access and 19 / 15 target-5xx responses in the respective
+windows, but both unfiltered scans stopped at 5,000 events, almost all non-JSON.
+This motivated filtering, not a conclusion about the cause. Rerun from main
+after the filtering change merges; offline tests cannot verify live filter
+acceptance or deployed log coverage. The afternoon incident is outside these
+fixed windows.
 
 References: [CloudWatch FilterLogEvents pagination](https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_FilterLogEvents.html),
 [metric statistics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricStatistics.html).
