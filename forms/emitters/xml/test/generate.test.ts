@@ -327,6 +327,24 @@ describe("generateXml", () => {
     );
   });
 
+  it("reads a list's entry by index, for numbered elements", () => {
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: {
+        Root: {
+          Type1: { $field: "types.0" },
+          Type2: { $field: "types.1" },
+          Type3: { $field: "types.2" },
+          Count: { $field: "types.length" },
+        },
+      },
+    };
+    expect(generateXml(mapping, { types: ["A", "B"] })).toEqual(
+      `<?xml version='1.0' encoding='utf-8'?>\n<f:Root xmlns:f="urn:f">\n  <f:Type1>A</f:Type1>\n  <f:Type2>B</f:Type2>\n</f:Root>`,
+    );
+  });
+
   it("refuses a $ key that isn't a function", () => {
     const mapping = {
       format: "xml-mapping",
