@@ -12,7 +12,7 @@ using SimplerForms;
 
 namespace Forms.PerformanceSites;
 
-@Sgg.sync(#{ instructions: "30e2d140-46b8-4fe0-b48c-48a5270ed118" })
+@Sgg.sync(#{ instructions: "30e2d140-46b8-4fe0-b48c-48a5270ed118", xml: "mapping" })
 @Meta.form(#{
   id: "performance-sites",
   formName: "PROJECT/PERFORMANCE SITE LOCATION(S)",

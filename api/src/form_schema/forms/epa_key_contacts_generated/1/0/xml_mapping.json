@@ -1,0 +1,245 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0",
+    "EPA_KeyContacts_2_0": "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
+  "root": {
+    "KeyContactPersons_2_0": {
+      "@EPA_KeyContacts_2_0:FormVersion": {
+        "$const": "2.0"
+      },
+      "AuthorizedRepresentative": {
+        "globLib:Name": {
+          "globLib:PrefixName": {
+            "$field": "authorized_representative.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "authorized_representative.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "authorized_representative.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "authorized_representative.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "authorized_representative.name.suffix"
+          }
+        },
+        "globLib:Title": {
+          "$field": "authorized_representative.title"
+        },
+        "globLib:Address": {
+          "globLib:Street1": {
+            "$field": "authorized_representative.address.street1"
+          },
+          "globLib:Street2": {
+            "$field": "authorized_representative.address.street2"
+          },
+          "globLib:City": {
+            "$field": "authorized_representative.address.city"
+          },
+          "globLib:County": {
+            "$field": "authorized_representative.address.county"
+          },
+          "globLib:State": {
+            "$field": "authorized_representative.address.state"
+          },
+          "globLib:Province": {
+            "$field": "authorized_representative.address.province"
+          },
+          "globLib:ZipPostalCode": {
+            "$field": "authorized_representative.address.zip_code"
+          },
+          "globLib:Country": {
+            "$field": "authorized_representative.address.country"
+          }
+        },
+        "globLib:Phone": {
+          "$field": "authorized_representative.phone"
+        },
+        "globLib:Fax": {
+          "$field": "authorized_representative.fax"
+        },
+        "globLib:Email": {
+          "$field": "authorized_representative.email"
+        }
+      },
+      "Payee": {
+        "globLib:Name": {
+          "globLib:PrefixName": {
+            "$field": "payee.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "payee.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "payee.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "payee.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "payee.name.suffix"
+          }
+        },
+        "globLib:Title": {
+          "$field": "payee.title"
+        },
+        "globLib:Address": {
+          "globLib:Street1": {
+            "$field": "payee.address.street1"
+          },
+          "globLib:Street2": {
+            "$field": "payee.address.street2"
+          },
+          "globLib:City": {
+            "$field": "payee.address.city"
+          },
+          "globLib:County": {
+            "$field": "payee.address.county"
+          },
+          "globLib:State": {
+            "$field": "payee.address.state"
+          },
+          "globLib:Province": {
+            "$field": "payee.address.province"
+          },
+          "globLib:ZipPostalCode": {
+            "$field": "payee.address.zip_code"
+          },
+          "globLib:Country": {
+            "$field": "payee.address.country"
+          }
+        },
+        "globLib:Phone": {
+          "$field": "payee.phone"
+        },
+        "globLib:Fax": {
+          "$field": "payee.fax"
+        },
+        "globLib:Email": {
+          "$field": "payee.email"
+        }
+      },
+      "AdminstrativeContact": {
+        "globLib:Name": {
+          "globLib:PrefixName": {
+            "$field": "administrative_contact.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "administrative_contact.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "administrative_contact.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "administrative_contact.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "administrative_contact.name.suffix"
+          }
+        },
+        "globLib:Title": {
+          "$field": "administrative_contact.title"
+        },
+        "globLib:Address": {
+          "globLib:Street1": {
+            "$field": "administrative_contact.address.street1"
+          },
+          "globLib:Street2": {
+            "$field": "administrative_contact.address.street2"
+          },
+          "globLib:City": {
+            "$field": "administrative_contact.address.city"
+          },
+          "globLib:County": {
+            "$field": "administrative_contact.address.county"
+          },
+          "globLib:State": {
+            "$field": "administrative_contact.address.state"
+          },
+          "globLib:Province": {
+            "$field": "administrative_contact.address.province"
+          },
+          "globLib:ZipPostalCode": {
+            "$field": "administrative_contact.address.zip_code"
+          },
+          "globLib:Country": {
+            "$field": "administrative_contact.address.country"
+          }
+        },
+        "globLib:Phone": {
+          "$field": "administrative_contact.phone"
+        },
+        "globLib:Fax": {
+          "$field": "administrative_contact.fax"
+        },
+        "globLib:Email": {
+          "$field": "administrative_contact.email"
+        }
+      },
+      "ProjectManager": {
+        "globLib:Name": {
+          "globLib:PrefixName": {
+            "$field": "project_manager.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "project_manager.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "project_manager.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "project_manager.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "project_manager.name.suffix"
+          }
+        },
+        "globLib:Title": {
+          "$field": "project_manager.title"
+        },
+        "globLib:Address": {
+          "globLib:Street1": {
+            "$field": "project_manager.address.street1"
+          },
+          "globLib:Street2": {
+            "$field": "project_manager.address.street2"
+          },
+          "globLib:City": {
+            "$field": "project_manager.address.city"
+          },
+          "globLib:County": {
+            "$field": "project_manager.address.county"
+          },
+          "globLib:State": {
+            "$field": "project_manager.address.state"
+          },
+          "globLib:Province": {
+            "$field": "project_manager.address.province"
+          },
+          "globLib:ZipPostalCode": {
+            "$field": "project_manager.address.zip_code"
+          },
+          "globLib:Country": {
+            "$field": "project_manager.address.country"
+          }
+        },
+        "globLib:Phone": {
+          "$field": "project_manager.phone"
+        },
+        "globLib:Fax": {
+          "$field": "project_manager.fax"
+        },
+        "globLib:Email": {
+          "$field": "project_manager.email"
+        }
+      }
+    }
+  }
+}

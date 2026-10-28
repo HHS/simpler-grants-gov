@@ -17,7 +17,7 @@ namespace Forms.EPAKeyContacts;
 // The data only: how an applicant is shown it is `EPAKeyContactsLayout`, in layout.tsp.
 /** EPA KEY CONTACTS FORM, Grants.gov version 2.0. */
 @Meta.form(#{ id: "epa-key-contacts", formName: "EPA KEY CONTACTS FORM" })
-@Sgg.sync(#{ instructions: "50bf1880-18da-4a55-9956-57036ca5f468" })
+@Sgg.sync(#{ instructions: "50bf1880-18da-4a55-9956-57036ca5f468", xml: "mapping" })
 @GrantsGov.form(#{
   legacyFormId: 674,
   shortFormName: "EPA_KeyContacts",
