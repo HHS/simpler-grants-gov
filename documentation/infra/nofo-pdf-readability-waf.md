@@ -162,3 +162,37 @@ only after dev evidence and the separate reviews; public enablement remains gate
 References: [AWS rate settings](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-high-level-settings.html),
 [AWS rate caveats](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-caveats.html),
 and [infrastructure changes](./making-infra-changes.md).
+
+## Inspecting missing Count evidence
+
+The read-only `Inspect Readability Calculator` workflow follows the dev ECS
+service's target group to its load balancer and associated ACL. Its WAF summary
+now reports `scope_matches_reviewed_paths_and_methods` for each selected rule.
+True means the exact reviewed path/method structure (including NONE transforms)
+was found; false means different or missing structure, not proof that no path
+matches. It accepts either ordering of the two AND clauses and the AWS CLI's
+base64 representation of the fixed POST byte string. It never prints arbitrary
+rule statements, metric names, resource identifiers or request data.
+
+Metric queries use the deployed ACL and rule VisibilityConfig metric names,
+with Region us-east-1, as described in the
+[AWS metric dimensions](https://docs.aws.amazon.com/waf/latest/developerguide/waf-metrics.html).
+The report states whether each rule metric name equals its rule name and adds
+numeric WAF sums for the last hour. Missing sums remain null; missing rule metric
+names get an explicit query status. These aggregate counters cannot establish
+which individual request/path matched, and unrelated requests can contribute.
+
+The October 28 baseline used eight GET/empty POST requests across the four public
+path forms at 19:46 UTC, without following redirects or submitting documents.
+Responses were the expected 301/503/308; health returned 200. Inspections
+[40757276518](https://github.com/HHS/simpler-grants-gov/actions/runs/40757276518),
+[40757422396](https://github.com/HHS/simpler-grants-gov/actions/runs/40757422396), and
+[40757737551](https://github.com/HHS/simpler-grants-gov/actions/runs/40757737551)
+reported no WAF datapoints. This remains unresolved; do not infer zero traffic,
+working enforcement, or a confirmed query defect. Four POSTs were below the
+rate threshold; the emergency Count rule is the expected baseline signal.
+
+After this inspection extension is reviewed and merged, run from main, compare
+scope and metric results, and only then repeat bounded requests if needed.
+Keep both rules in Count and public uploads disabled. Live rate/emergency
+activation and restoration require a subsequent reviewed configuration change.
