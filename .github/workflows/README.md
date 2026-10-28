@@ -72,3 +72,9 @@ To release a tag:
 - [`prepare-nofos-history-dev`](./prepare-nofos-history-dev.yml): manually backfills
   and checks NOFO document history in dev after deployment. See the
   [operator steps](../../documentation/infra/prepare-nofo-document-history-dev.md).
+- [`diagnose-nofos-history-dev`](./diagnose-nofos-history-dev.yml), displayed as
+  **Inspect NOFO document history - dev**: verifies timings/coverage for the
+  selected dev document or reports legacy ownership counts, both read-only.
+- [`check-nofos-history-production`](./check-nofos-history-production.yml): runs a
+  bounded read-only production index/coverage preflight without backfill or switch
+  changes. See [instructions](../../documentation/infra/check-nofo-production-history.md).

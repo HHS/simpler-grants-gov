@@ -7,6 +7,7 @@ and Terraform installation are supplied by the manual GitHub Actions workflow.
 import json
 import os
 import re
+import shlex
 import signal
 import subprocess
 import sys
@@ -17,6 +18,21 @@ STARTED_BY = "nofo-history-dev"
 MODULE = "infra/nofos/service"
 SUCCESS = "Document audit index complete: 0 events missing."
 TIMEOUT = 30 * 60
+VERIFICATION_FIELDS = {
+    "first_page_ms",
+    "second_page_ms",
+    "first_page_rows",
+    "second_page_rows",
+    "duplicate_page_events",
+    "legacy_read_ms",
+    "legacy_visible_events",
+    "indexed_visible_events",
+    "legacy_only_events",
+    "indexed_only_events",
+    "legacy_only_deleted_objects",
+    "postgresql_plan_checked",
+    "named_index_seen",
+}
 COMMAND = [
     "sh",
     "-c",
@@ -55,11 +71,11 @@ def output(name):
     ).strip()
 
 
-def require_stable_service(cluster, service_name):
+def require_stable_service(cluster, service_name, label="Dev"):
     response = aws("ecs", "describe-services", cluster=cluster, services=service_name)
     services = response.get("services", [])
     if response.get("failures") or len(services) != 1:
-        raise RuntimeError("Cannot identify the dev service.")
+        raise RuntimeError(f"Cannot identify the {label.lower()} service.")
     service = services[0]
     if (
         service.get("status") != "ACTIVE"
@@ -70,29 +86,31 @@ def require_stable_service(cluster, service_name):
         or service["deployments"][0].get("rolloutState") != "COMPLETED"
     ):
         raise RuntimeError(
-            "Dev rollout is not complete. Wait for deployment before retrying."
+            f"{label} rollout is not complete. Wait for deployment before retrying."
         )
     arns = aws("ecs", "list-tasks", cluster=cluster, service_name=service_name)[
         "taskArns"
     ]
     if len(arns) != service["desiredCount"]:
         raise RuntimeError(
-            "Dev workers are still changing. Retry after rollout completes."
+            f"{label} workers are still changing. Retry after rollout completes."
         )
     workers = aws("ecs", "describe-tasks", cluster=cluster, tasks=arns)
     if workers.get("failures") or len(workers.get("tasks", [])) != len(arns):
-        raise RuntimeError("Cannot verify all dev workers.")
+        raise RuntimeError(f"Cannot verify all {label.lower()} workers.")
     if any(
         worker.get("lastStatus") != "RUNNING"
         or worker.get("taskDefinitionArn") != service["taskDefinition"]
         for worker in workers["tasks"]
     ):
-        raise RuntimeError("Old dev workers remain. Wait for rollout before retrying.")
+        raise RuntimeError(
+            f"Old {label.lower()} workers remain. Wait for rollout before retrying."
+        )
     return service
 
 
-def wait_for_task(cluster, task_arn):
-    deadline = time.monotonic() + TIMEOUT
+def wait_for_task(cluster, task_arn, timeout_seconds=TIMEOUT):
+    deadline = time.monotonic() + timeout_seconds
     while time.monotonic() < deadline:
         response = aws("ecs", "describe-tasks", cluster=cluster, tasks=task_arn)
         if response.get("failures") or len(response.get("tasks", [])) != 1:
@@ -104,13 +122,17 @@ def wait_for_task(cluster, task_arn):
             return task
         print(f"Preparation task: {task.get('lastStatus', 'unknown')}", flush=True)
         time.sleep(15)
-    raise RuntimeError("Preparation exceeded 30 minutes; requesting task stop.")
+    raise RuntimeError(
+        f"Preparation exceeded {timeout_seconds // 60} minutes; requesting task stop."
+    )
 
 
-def require_no_preparation(cluster, task_definition):
-    if aws("ecs", "list-tasks", cluster=cluster, started_by=STARTED_BY)["taskArns"]:
+def require_no_preparation(
+    cluster, task_definition, started_by=STARTED_BY, label="dev"
+):
+    if aws("ecs", "list-tasks", cluster=cluster, started_by=started_by)["taskArns"]:
         raise RuntimeError(
-            "A dev history preparation task is already active. Inspect it before retrying."
+            f"A {label} history task is already active. Inspect it before retrying."
         )
     # A stop request changes desired status before the process has exited.
     family = task_definition.rsplit("/", 1)[-1].rsplit(":", 1)[0]
@@ -129,7 +151,7 @@ def require_no_preparation(cluster, task_definition):
                 "Cannot verify earlier preparation tasks; inspect them before retrying."
             )
         if any(
-            t.get("startedBy") == STARTED_BY and t.get("lastStatus") != "STOPPED"
+            t.get("startedBy") == started_by and t.get("lastStatus") != "STOPPED"
             for t in response["tasks"]
         ):
             raise RuntimeError(
@@ -137,7 +159,7 @@ def require_no_preparation(cluster, task_definition):
             )
 
 
-def read_counts(log_options, container_name, task_arn):
+def read_counts(log_options, container_name, task_arn, diagnose=False, verify=False):
     stream = f"{log_options['awslogs-stream-prefix']}/{container_name}/{task_arn.rsplit('/', 1)[-1]}"
     params = {
         "log_group_name": log_options["awslogs-group"],
@@ -149,11 +171,57 @@ def read_counts(log_options, container_name, task_arn):
     }
     complete = False
     ownership_resolved = False
+    diagnostic_received = False
+    verification_received = False
     # Output only the application's known count messages, never arbitrary logs.
     while True:
         result = aws("logs", "get-log-events", **params)
         for event in result.get("events", []):
             message = event["message"].strip()
+            if verify and message.startswith("NOFO_HISTORY_VERIFICATION "):
+                data = json.loads(message.removeprefix("NOFO_HISTORY_VERIFICATION "))
+                counts = data.get("counts")
+                if (
+                    set(data) == {"status", "counts"}
+                    and data["status"]
+                    in (
+                        "measured",
+                        "target_missing",
+                        "query_timeout",
+                        "verification_failed",
+                    )
+                    and isinstance(counts, dict)
+                    and set(counts).issubset(VERIFICATION_FIELDS)
+                    and all(type(v) is int and 0 <= v < 10**12 for v in counts.values())
+                    and (
+                        data["status"] != "measured"
+                        or set(counts) == VERIFICATION_FIELDS
+                    )
+                ):
+                    print(message, flush=True)
+                    verification_received = data["status"] == "measured"
+                continue
+            if diagnose and message.startswith("NOFO_HISTORY_DIAGNOSTIC "):
+                data = json.loads(message.removeprefix("NOFO_HISTORY_DIAGNOSTIC "))
+                counts = data.get("counts")
+                if (
+                    set(data) == {"total_missing", "counts"}
+                    and type(data["total_missing"]) is int
+                    and data["total_missing"] >= 0
+                    and isinstance(counts, dict)
+                    and all(
+                        re.fullmatch(
+                            r"(?:nofos\.(?:nofo|section|subsection)|composer\.(?:contentguide|contentguideinstance|contentguidesection|contentguidesubsection)):(?:total|event_type_[123]|invalid_json|dict_snapshot|empty_or_invalid_list|list_snapshot|invalid_object_uuid|retained_object_ownership|live_object|uuid_field_(?:nofo|nofo_id|section|section_id|content_guide|content_guide_id|content_guide_instance|content_guide_instance_id)|retained_parent_ownership|live_parent|parent_audit_exists)",
+                            key,
+                        )
+                        and type(value) is int
+                        and value >= 0
+                        for key, value in counts.items()
+                    )
+                ):
+                    print(message, flush=True)
+                    diagnostic_received = True
+                continue
             if message == SUCCESS:
                 complete = True
                 print(message, flush=True)
@@ -170,12 +238,19 @@ def read_counts(log_options, container_name, task_arn):
                 print(message.removeprefix("CommandError: "), flush=True)
         token = result.get("nextForwardToken")
         if not token or token == params.get("next_token"):
-            return complete and ownership_resolved
+            if verify:
+                return verification_received
+            return diagnostic_received if diagnose else complete and ownership_resolved
         params["next_token"] = token
 
 
 def prepare():
-    if len(sys.argv) != 1 or os.environ.get("GITHUB_REF") != "refs/heads/main":
+    diagnose = sys.argv[1:] == ["--diagnose"]
+    verify = sys.argv[1:] == ["--verify"]
+    if (
+        sys.argv[1:] not in ([], ["--diagnose"], ["--verify"])
+        or os.environ.get("GITHUB_REF") != "refs/heads/main"
+    ):
         raise RuntimeError(
             "Run the fixed dev workflow from main; arguments are not accepted."
         )
@@ -210,7 +285,30 @@ def prepare():
         launch_type="FARGATE",
         platform_version="1.4.0",
         network_configuration=service["networkConfiguration"],
-        overrides={"containerOverrides": [{"name": service_name, "command": COMMAND}]},
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": service_name,
+                    "command": (
+                        [
+                            "sh",
+                            "-c",
+                            "cd /app/nofos && poetry run python manage.py shell -c "
+                            + shlex.quote(
+                                Path(__file__)
+                                .with_name(
+                                    "verify_dev.py" if verify else "diagnose_dev.py"
+                                )
+                                .read_text()
+                                + ("\nmain()" if verify else "")
+                            ),
+                        ]
+                        if diagnose or verify
+                        else COMMAND
+                    ),
+                }
+            ]
+        },
         count=1,
     )
     tasks = result.get("tasks", [])
@@ -232,7 +330,9 @@ def prepare():
         # rerun either database command.
         for _ in range(6):
             try:
-                complete = read_counts(options, service_name, task_arn)
+                complete = read_counts(
+                    options, service_name, task_arn, diagnose=diagnose, verify=verify
+                )
             except RuntimeError:
                 pass
             if complete:
@@ -244,9 +344,15 @@ def prepare():
             )
         if not complete:
             raise RuntimeError(
-                "Could not confirm completeness and zero unresolved ownership from logs. Keep Constance disabled and inspect the task."
+                "Could not confirm read-only history inspection output; no enablement is authorized."
+                if diagnose or verify
+                else "Could not confirm completeness and zero unresolved ownership from logs. Keep Constance disabled and inspect the task."
             )
-        message = "Dev backfill and completeness check passed. Constance is unchanged; you may now enable DOCUMENT_HISTORY_INDEX_ENABLED in dev and test history."
+        message = (
+            "Read-only dev diagnosis complete. Constance is unchanged; this does not authorize enabling indexed history."
+            if diagnose or verify
+            else "Dev backfill and completeness check passed. Constance is unchanged; you may now enable DOCUMENT_HISTORY_INDEX_ENABLED in dev and test history."
+        )
         print(message, flush=True)
         if os.environ.get("GITHUB_STEP_SUMMARY"):
             with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a") as summary:

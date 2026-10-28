@@ -94,10 +94,10 @@ requests rejected by WAF.
 Keep internal team addresses out of public PRs and issue comments unless the
 team explicitly approves publication. This PR configures no actual recipient.
 The checked-in environment setting below is suitable only for an address
-approved for public disclosure. For a private address, an authorized
-infrastructure operator must agree and implement a private configuration path
-or manage the subscription outside this Terraform resource without creating
-ownership conflicts. No private input path is introduced by this PR.
+approved for public disclosure. For a private address, use the optional encrypted-parameter route described in
+[Private NOFO monitoring email routing](nofo-private-alert-email.md). It defaults
+to null and does not activate any current environment. Do not put a private
+address into the public recipient list.
 
 Email recipients do not need AWS or PagerDuty access to receive notifications
 and confirm the subscription link. An operator must verify resource deployment

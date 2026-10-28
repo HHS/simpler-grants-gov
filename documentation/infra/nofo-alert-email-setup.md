@@ -23,8 +23,8 @@ session permissions only narrow permissions that the role already has.
 
 The workflow has no recipient, parameter-path, account or environment input.
 It accepts the private address only from the Actions repository secret
-`NOFO_INFRA_DEV_ALERT_EMAIL`. The script passes it to AWS over standard input,
-not command arguments or a temporary file, and suppresses raw AWS responses and
+`NOFO_INFRA_DEV_ALERT_EMAIL`. The script passes it directly to the AWS SDK in
+memory, not CLI arguments, standard input or a temporary file, and suppresses raw AWS responses and
 errors. No artifact contains the value. The address must not be copied into
 public comments, screenshots, dispatch inputs, code or workflow logs.
 
@@ -58,6 +58,10 @@ the resolved recipient after routing is deployed and must remain restricted.
    changing it. Have the operator confirm its type, encryption and intended
    recipient privately. Do not delete or overwrite it merely to obtain a green
    run. A timeout leaves creation status uncertain; inspect privately first.
+   Other service failures report only a fixed allowlisted category, never
+   response text or the address. Transport/unexpected failures leave the result
+   unconfirmed. `unclassified` means the reason is still unknown; do not infer
+   a permission denial or enable raw/debug logging.
 6. Once routing support is merged, prepare a separate environment opt-in setting
    `monitoring_email_alert_recipient_parameter_name` to this fixed path and keep
    `pdf_readability_alarm_actions_enabled = false`. Review/apply using the usual
@@ -77,12 +81,21 @@ this workflow's scope. Slack/New Relic remains follow-on work in
 ## Offline validation
 
 ```sh
+python3 -m pip install -r scripts/nofo_alert_setup_requirements.txt
 python3 -m unittest discover -s scripts/tests -p test_nofo_alert_setup.py -v
 ```
 
-Tests mock the AWS process, including sensitive failure output, existing
+Tests mock the SDK client, including sensitive failure details, existing
 parameters, access denial and timeout. CI does not authenticate to AWS or read
-the private secret. These checks do not prove effective deployed permissions.
+the private secret. An SDK Stubber test validates the request against the real
+service model using dummy credentials and a loopback-only endpoint, without an
+AWS request. These checks do not prove effective deployed permissions.
+
+The first live run validated the secret and authenticated, but the CLI rejected
+its stdin JSON. An offline Ubuntu CI test reproduced that with synthetic data
+([run](https://github.com/HHS/simpler-grants-gov/actions/runs/40404178995)). The
+SDK avoids that transport failure. A live rerun is still needed after review;
+the reproduction does not prove create/encrypt permission or successful setup.
 
 AWS references: [PutParameter API](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PutParameter.html),
 [overwrite permission condition](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-policy-conditions.html),

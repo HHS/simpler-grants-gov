@@ -4,6 +4,22 @@ variable "email_alert_recipients" {
   description = "List of emails to subscribe to alerts"
 }
 
+variable "email_alert_recipient_parameter_name" {
+  type        = string
+  default     = null
+  description = "Optional SecureString SSM parameter containing one private email recipient. Leave null for no private subscription."
+
+  validation {
+    condition     = var.email_alert_recipient_parameter_name == null ? true : can(regex("^/[A-Za-z0-9_./-]+$", var.email_alert_recipient_parameter_name))
+    error_message = "The private email parameter must be an absolute SSM parameter path."
+  }
+
+  validation {
+    condition     = var.email_alert_recipient_parameter_name == null || length(var.email_alert_recipients) == 0
+    error_message = "Use either the private email parameter or the public recipient list, not both."
+  }
+}
+
 variable "incident_management_service_integration_url" {
   type        = string
   default     = null
@@ -57,7 +73,7 @@ variable "pdf_readability_alarm_actions_enabled" {
   validation {
     condition = !var.pdf_readability_alarm_actions_enabled || (
       var.pdf_readability_monitoring != null &&
-      (length(var.email_alert_recipients) > 0 || var.incident_management_service_integration_url != null)
+      (length(var.email_alert_recipients) > 0 || var.email_alert_recipient_parameter_name != null || var.incident_management_service_integration_url != null)
     )
     error_message = "Pilot notifications require monitoring and an explicit email recipient or existing incident integration. Email subscriptions still require confirmation."
   }
