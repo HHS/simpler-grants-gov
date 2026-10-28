@@ -107,11 +107,28 @@ transforms and their errors apply. `params` is passed to it as it is.
 <PerformanceSite_4_0:Individual>N: No</PerformanceSite_4_0:Individual>
 ```
 
+A list of strings joined into one, `join_values`, combines checkbox selections into one code.
+With `sort`, the code doesn't depend on the order they were chosen in: RR SF-424's
+`RevisionCode` is `AC` for selections A and C either way. `separator` goes between entries,
+and is empty by default.
+
+```json
+"RevisionCode": {
+  "$transform": {
+    "name": "join_values",
+    "value": { "$field": "revision_codes" },
+    "params": { "sort": true }
+  }
+}
+```
+
 ### `$match`: a lookup from answers to values
 
 Writes the `case` entry for the answer, or `default` for an answer `case` doesn't list. An
 answer with neither is an error. `case` keys are strings, as JSON object keys always are, so a
-non-string answer is keyed as JSON writes it: `true` as `"true"`, `1` as `"1"`.
+non-string answer is keyed as JSON writes it: `true` as `"true"`, `1` as `"1"`, and a list as
+compact JSON, `["A","C"]`. A list's key depends on its order, so to match a set of checkbox
+selections whatever order they were chosen in, sort and join them first (see below).
 
 ```json
 "StateReview": {
