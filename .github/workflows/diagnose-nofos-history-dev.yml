@@ -1,6 +1,12 @@
-name: Diagnose NOFO document history - dev
+name: Inspect NOFO document history - dev
 on:
   workflow_dispatch:
+    inputs:
+      operation:
+        description: "Choose read-only dev-document verification or legacy ownership counts"
+        type: choice
+        default: verify
+        options: [verify, diagnose]
 concurrency:
   group: cd-nofos-infra-dev
   cancel-in-progress: false
@@ -23,5 +29,11 @@ jobs:
         with:
           app_name: nofos
           environment: infra-dev
-      - name: Diagnose unresolved history ownership
-        run: python3 .github/scripts/nofo_history/prepare_dev.py --diagnose
+      - name: Inspect history without changing data or the reader switch
+        env:
+          HISTORY_OPERATION: ${{ inputs.operation }}
+        run: |
+          case "$HISTORY_OPERATION" in
+            verify|diagnose) python3 .github/scripts/nofo_history/prepare_dev.py "--$HISTORY_OPERATION" ;;
+            *) exit 1 ;;
+          esac

@@ -16,6 +16,8 @@
 
 ## Testing
 
+* [Readability Calculator preparation and short verification checklist](./nofo-readability-verification-kit.md)
+* [Private NOFO monitoring email routing](./nofo-private-alert-email.md)
 * [Read-only Readability Calculator inspection in infra-dev](./nofo-readability-inspection.md)
 
 * [NOFO PDF upload availability assessment and deferred test plan](./nofo-pdf-upload-assessment.md)
@@ -25,6 +27,7 @@
 ## Operations
 
 * [Prepare NOFO document history in dev](./prepare-nofo-document-history-dev.md)
+* [Check NOFO production history readiness](./check-nofo-production-history.md)
 * [NOFO PDF readability WAF controls and dev verification](./nofo-pdf-readability-waf.md)
 
 ## Learning
