@@ -234,7 +234,7 @@ export interface FormPairs {
 
 /** Which of a form's emitted files to check. */
 export interface CheckOptions {
-  /** The format the XML mapping is read in. Defaults to `xml-transform`. */
+  /** The format the XML mapping is read in. Defaults to the record's, then `xml-transform`. */
   xml?: XmlFormat;
 }
 
@@ -269,7 +269,7 @@ export async function formPairs(
   const schema = jsonSchemaFields(await loadFormSchema(specId));
   const jsonPlan = planFields(plan, "json_path");
   const joined = joinThroughPlan(diff, plan, schema, xsdSource);
-  const mapped = xmlFields(specId, options.xml);
+  const mapped = xmlFields(specId, options.xml ?? diff.xml);
   return {
     plan,
     planProblems,

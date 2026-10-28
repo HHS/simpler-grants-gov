@@ -136,18 +136,16 @@ describe("generateXml", () => {
 
   it("writes each person's attachments inside their profile", async () => {
     const person = (sketch: string) => ({
-      profile: {
-        name: { first_name: "Ada", last_name: "Lovelace" },
-        address: {
-          street1: "1 Main St",
-          city: "Town",
-          country: "USA: UNITED STATES",
-        },
-        phone: "2025550100",
-        email: "ada@example.org",
-        project_role: "PD/PI",
-        biographical_sketch: sketch,
+      name: { first_name: "Ada", last_name: "Lovelace" },
+      address: {
+        street1: "1 Main St",
+        city: "Town",
+        country: "USA: UNITED STATES",
       },
+      phone: "2025550100",
+      email: "ada@example.org",
+      project_role: "PD/PI",
+      biographical_sketch: sketch,
     });
     const xml = generateXml(
       await mappingOf("rr-key-person"),

@@ -16,12 +16,14 @@ namespace XSD.NSFKeyPersonExpanded33;
 
 alias grantsGovXml = Mappings.Target.grantsGovXml;
 alias KeyPersonForm = Forms.NSFKeyPersonExpanded.NSFKeyPersonExpanded;
-alias PrincipalInvestigator = Forms.NSFKeyPersonExpanded.NSFPrincipalInvestigator;
-alias SeniorKeyPerson = Forms.NSFKeyPersonExpanded.NSFSeniorKeyPerson;
 alias PrincipalInvestigatorProfile = Forms.NSFKeyPersonExpanded.NSFPrincipalInvestigatorProfile;
 alias SeniorKeyPersonProfile = Forms.NSFKeyPersonExpanded.NSFSeniorKeyPersonProfile;
 alias GlobLib = XSD.GlobLib;
 alias Att = XSD.Att;
+
+// =============================================================================
+// ROOT ELEMENT
+// =============================================================================
 
 @nsDeclarations
 enum Namespaces {
@@ -64,18 +66,20 @@ model Root {
   @attribute @name("FormVersion") formVersion: "3.3";
 }
 
-/** The PD/PI on the form: their `Profile`. */
+// =============================================================================
+// PEOPLE
+// =============================================================================
+
+/** The PD/PI on the form: their `Profile`, filled from the same answers. */
 @ns(Namespaces.NSF_KeyPersonExpanded_3_3)
 model PDPIProfileDataType {
-  @Mapping.from(grantsGovXml, PrincipalInvestigator.profile)
   @name("Profile")
   profile: PDPIProfile;
 }
 
-/** A senior/key person on the form: their `Profile`. */
+/** A senior/key person on the form: their `Profile`, filled from the same answers. */
 @ns(Namespaces.NSF_KeyPersonExpanded_3_3)
 model PersonProfileDataType {
-  @Mapping.from(grantsGovXml, SeniorKeyPerson.profile)
   @name("Profile")
   profile: PersonProfile;
 }
@@ -179,6 +183,10 @@ model PersonProfile {
 
   ...ProfileAttachments;
 }
+
+// =============================================================================
+// ATTACHMENTS
+// =============================================================================
 
 /** The four attachments every profile requires. */
 model ProfileAttachments {
