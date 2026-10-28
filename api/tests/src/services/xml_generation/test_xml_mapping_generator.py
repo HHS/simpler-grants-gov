@@ -256,6 +256,33 @@ class TestValues:
             _generate(mapping, {"a": "x"})
 
 
+class TestRequired:
+    _MAPPING = _small_mapping(
+        {
+            "DateReceived": {"$required": {"$field": "date_received"}},
+            "Wrapper": {"$required": {"Inner": {"$field": "inner"}}},
+            "@Form:Flag": {"$required": {"$field": "flag"}},
+        }
+    )
+
+    def test_writes_an_empty_element_when_it_has_nothing_to_write(self) -> None:
+        xml = _generate(self._MAPPING, {})
+
+        assert xml == (
+            "<?xml version='1.0' encoding='utf-8'?>\n"
+            '<Form:Root xmlns:Form="urn:form" xmlns:lib="urn:lib"'
+            ' xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" Form:Flag="">\n'
+            "  <Form:DateReceived/>\n"
+            "  <Form:Wrapper/>\n"
+            "</Form:Root>"
+        )
+
+    def test_writes_the_value_when_there_is_one(self) -> None:
+        xml = _generate(self._MAPPING, {"date_received": "2025-01-15"})
+
+        assert "<Form:DateReceived>2025-01-15</Form:DateReceived>" in xml
+
+
 class TestEach:
     def test_repeats_an_element_per_item_with_paths_relative_to_it(self) -> None:
         mapping = _small_mapping(

@@ -11,6 +11,7 @@ handler returns what its node yields, or None for nothing to write.
     $when        ``then`` or ``else``, as a condition holds
     $each        ``map`` once per item of a list, read relative to each item
     $attachment  the upload whose id is at a path
+    $required    a value, or an empty element when it has nothing to write
 """
 
 import json
@@ -21,6 +22,11 @@ from ..value_transformers import apply_value_transformation
 from .conditions import holds
 from .paths import read
 from .transform import Handler, Transform, is_empty
+
+
+class EmptyElement:
+    """What ``$required`` yields when its value has nothing to write: an empty element."""
+
 
 # =============================================================================
 # PUBLIC FUNCTIONS
@@ -48,6 +54,7 @@ def default_handlers(attachments: dict[str, AttachmentInfo]) -> dict[str, Handle
         "$transform": transform_value,
         "$when": when,
         "$each": each,
+        "$required": required,
         "$attachment": attachment,
     }
 
@@ -94,6 +101,11 @@ def each(scope: Any, argument: dict[str, Any], transform: Transform) -> list[Any
         return None
     written = [transform(item, argument["map"]) for item in items]
     return [value for value in written if not is_empty(value)]
+
+
+def required(scope: Any, argument: Any, transform: Transform) -> Any:
+    value = transform(scope, argument)
+    return EmptyElement() if is_empty(value) else value
 
 
 # =============================================================================

@@ -230,6 +230,22 @@ The operators are:
 }
 ```
 
+### `$required`: an element written even when it's empty
+
+Writes its value, or an empty element when the value has nothing to write. It's for an element
+the XSD requires that the form may leave unanswered, which transform rules write with
+`null_handling: include_null`.
+
+```json
+"DateReceived": { "$required": { "$field": "date_received" } }
+```
+
+With no `date_received`:
+
+```xml
+<SF424_4_0:DateReceived/>
+```
+
 ## Nesting
 
 Every input to a function is itself a value, so functions nest. A `case` entry, `default`,
@@ -267,5 +283,5 @@ take no `$`: they only ever appear inside a function.
 ## Elements with nothing to write
 
 An element whose value is missing or empty is left out, and so is a group none of whose
-elements has anything to write. Most conditional sections need no `$when`: an address with no
+elements has anything to write, unless it's `$required`. Most conditional sections need no `$when`: an address with no
 answers, for example, writes no `<Address>` at all.

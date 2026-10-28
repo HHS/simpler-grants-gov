@@ -115,6 +115,22 @@ class TestRead:
             {},
         )
 
+    def test_reads_a_required_value_as_the_value_it_wraps(self):
+        required = mapping(
+            {
+                "DateReceived": {"$required": {"$field": "date_received"}},
+                "Wrapper": {"$required": {"Inner": {"$field": "inner"}}},
+            }
+        )
+        assert flatten_xml_mapping.read(required) == (
+            {
+                ("DateReceived",): "date_received",
+                ("Wrapper",): None,
+                ("Wrapper", "Inner"): "inner",
+            },
+            {},
+        )
+
 
 class TestDocument:
     def test_reads_root_and_xsd(self):

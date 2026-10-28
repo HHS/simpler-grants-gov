@@ -8,7 +8,7 @@ so every check reads either format.
 Element paths drop namespace prefixes, as the rules' targets do. A group of elements, and an
 element repeated by `each`, takes no value from the form, so its field is None. Inside
 `each`, fields are read below the list's `[]`, as is a numbered element's entry (`types.0`).
-Both branches of a `when` are read.
+Both branches of a `when` are read, and a `required` value as the value it wraps.
 """
 
 from typing import Any
@@ -99,6 +99,8 @@ def _walk(mapping: dict[str, Any]) -> list[tuple[Path, dict[str, Any], str]]:
             items = _source(value["$each"]["items"], prefix)
             out.append((path, value, prefix))
             visit_contents(path, value["$each"]["map"], f"{items}.{ARRAY}")
+        elif "$required" in value:
+            visit(path, value["$required"], prefix)
         elif "$when" in value:
             visit(path, value["$when"]["then"], prefix)
             if "else" in value["$when"]:
@@ -136,6 +138,8 @@ def _source(value: Any, prefix: str) -> str | None:
         return _join(prefix, value["$attachment"])
     if "$transform" in value:
         return _source(value["$transform"]["value"], prefix)
+    if "$required" in value:
+        return _source(value["$required"], prefix)
     if "$match" in value:
         return _source(value["$match"]["value"], prefix)
     if "$when" in value:
