@@ -4,7 +4,8 @@ import "simpler-forms";
 import "#forms/index.tsp";
 import "#questions/research/index.tsp";
 
-import "./profile.tsp";
+import "./examples.tsp";
+import "./fragments.tsp";
 
 using SimplerForms;
 
@@ -24,22 +25,15 @@ namespace Forms.RRKeyPersonExpanded;
   ombNumber: "4040-0001",
   expirationDate: "2029-01-31",
 })
-@example(#{
-  principalInvestigator: #{
-    profile: Forms.RRKeyPersonExpanded.Examples.principalInvestigator,
-  },
-  seniorKeyPersons: #[
-    #{ profile: Forms.RRKeyPersonExpanded.Examples.engineer }
-  ],
-})
+@example(Examples.form)
 model RRKeyPersonExpanded {
   // The XSD makes every sketch optional; the form requires the PD/PI's, as the DAT does.
-  @Validation.requiredPaths("profile.biographicalSketch")
-  principalInvestigator: RRExpandedKeyPersonEntry;
+  @Validation.requiredPaths("biographicalSketch")
+  principalInvestigator: RRExpandedKeyPersonProfile;
 
   @maxItems(99)
   @UI.widget(Rendering.Widget.CollapsibleFieldList)
-  seniorKeyPersons?: RRExpandedKeyPersonEntry[];
+  seniorKeyPersons?: RRExpandedKeyPersonProfile[];
 
   additionalProfiles?: Questions.Research.AdditionalProfiles;
   additionalBiographicalSketches?: Questions.Research.AdditionalBiographicalSketches;

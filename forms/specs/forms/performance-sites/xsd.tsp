@@ -22,6 +22,10 @@ alias Site = Forms.PerformanceSites.Site;
 alias GlobLib = XSD.GlobLib;
 alias Att = XSD.Att;
 
+// =============================================================================
+// ROOT ELEMENT
+// =============================================================================
+
 @nsDeclarations
 enum Namespaces {
   PerformanceSite_4_0: "http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0",
@@ -50,6 +54,10 @@ model Root {
   @attribute @name("FormVersion") formVersion: "4.0";
 }
 
+// =============================================================================
+// SITES
+// =============================================================================
+
 // The element names are declared in the form's namespace; only their content types come
 // from the global library.
 @ns(Namespaces.PerformanceSite_4_0)
@@ -77,4 +85,3 @@ model SiteLocationDataType {
   @maxLength(6)
   congressionalDistrictProgramProject?: string;
 }
-

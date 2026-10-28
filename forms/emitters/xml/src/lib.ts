@@ -52,12 +52,6 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`Form ${"form"} is linked in both ${"first"} and ${"second"}, but writes one xml-transform.json. Configure mapping-targets with only one of them.`,
       },
     },
-    "xml-wrappers-left-out": {
-      severity: "warning",
-      messages: {
-        default: paramMessage`${"form"}'s rules leave out ${"count"} element(s) that wrap fields without a field of their own, which rules keyed by the response's properties cannot write: ${"elements"}.`,
-      },
-    },
     "xml-root-namespace-missing": {
       severity: "error",
       messages: {

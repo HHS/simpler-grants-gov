@@ -54,31 +54,9 @@ export function xmlTransform(
 ): XmlTransformRules | undefined {
   let resolved;
   if (direction === "from") {
-    const from = resolveMappingFrom(program, form, mapping);
-    resolved = from?.resolved;
     // These rules are keyed by the form's properties, so a wrapper element with no property
-    // of its own is left out. Reported once per form, naming each.
-    const wrappers = (from?.problems ?? []).filter(
-      (p) => p.code === "simpler-forms/mapping-from-wrapper",
-    );
-    const left = [
-      ...new Set(
-        wrappers.map((w) => {
-          const t = w.target as ModelProperty;
-          return t.model ? `${t.model.name}.${t.name}` : t.name;
-        }),
-      ),
-    ];
-    if (left.length)
-      reportDiagnostic(program, {
-        code: "xml-wrappers-left-out",
-        target: form,
-        format: {
-          form: form.name,
-          count: String(left.length),
-          elements: left.join(", "),
-        },
-      });
+    // of its own is left out. The XML mapping format writes it; every installed form uses that.
+    resolved = resolveMappingFrom(program, form, mapping)?.resolved;
   } else resolved = resolveMapping(program, form, mapping);
   if (!resolved) return undefined;
   const root = resolved.target;

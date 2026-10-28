@@ -4,7 +4,8 @@ import "simpler-forms";
 import "#forms/index.tsp";
 import "#questions/research/index.tsp";
 
-import "./profile.tsp";
+import "./examples.tsp";
+import "./fragments.tsp";
 
 using SimplerForms;
 
@@ -24,20 +25,13 @@ namespace Forms.NSFKeyPersonExpanded;
   ombNumber: "3145-0058",
   expirationDate: "2026-11-30",
 })
-@example(#{
-  principalInvestigator: #{
-    profile: Forms.NSFKeyPersonExpanded.Examples.principalInvestigator,
-  },
-  seniorKeyPersons: #[
-    #{ profile: Forms.NSFKeyPersonExpanded.Examples.engineer }
-  ],
-})
+@example(Examples.form)
 model NSFKeyPersonExpanded {
-  principalInvestigator: NSFPrincipalInvestigator;
+  principalInvestigator: NSFPrincipalInvestigatorProfile;
 
   @maxItems(99)
   @UI.widget(Rendering.Widget.CollapsibleFieldList)
-  seniorKeyPersons?: NSFSeniorKeyPerson[];
+  seniorKeyPersons?: NSFSeniorKeyPersonProfile[];
 
   additionalProfiles?: Questions.Research.AdditionalProfiles;
   additionalBiographicalSketches?: Questions.Research.AdditionalBiographicalSketches;

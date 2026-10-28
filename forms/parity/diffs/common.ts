@@ -72,37 +72,3 @@ export const emailMinLength = (paths: string[]): Record<string, Pinned> =>
   Object.fromEntries(
     paths.map((path) => [`${path}/minLength`, EMAIL_MIN_LENGTH]),
   );
-
-/** Attachments, which the XML transform rules cannot write yet. */
-export const ATTACHMENT_XML: Recorded = {
-  category: "gap",
-  reason:
-    "Each attachment sits in a wrapper element (e.g. BioSketchsAttached) with no field of its own, which the API's XML transform rules, keyed by the response's properties, cannot write. A rule format keyed by XML path would; until then the emitter leaves them out.",
-};
-
-/**
- * The XML registers for attachments the rules leave out, from each one's JSON path and element
- * path as the plan links them.
- */
-export const unmappedAttachments = (
-  links: [json: string, xml: string][],
-): Pick<
-  FormDiff,
-  "xmlMapping" | "xmlMappingVsJsonSchema" | "xmlMappingVsXsd"
-> => ({
-  xmlMapping: {
-    absentFromSource: Object.fromEntries(
-      links.map(([json, xml]) => [`${json} -> ${xml}`, ATTACHMENT_XML]),
-    ),
-  },
-  xmlMappingVsJsonSchema: {
-    absentFromPlan: Object.fromEntries(
-      links.map(([json]) => [json, ATTACHMENT_XML]),
-    ),
-  },
-  xmlMappingVsXsd: {
-    absentFromPlan: Object.fromEntries(
-      links.map(([, xml]) => [xml, ATTACHMENT_XML]),
-    ),
-  },
-});
