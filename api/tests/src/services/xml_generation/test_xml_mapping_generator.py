@@ -234,6 +234,30 @@ class TestValues:
 
         assert "<Form:Count>One</Form:Count>" in _generate(mapping, {"n": 1.0})
 
+    def test_keys_a_list_as_compact_json(self) -> None:
+        mapping = _small_mapping(
+            {"Code": {"$match": {"value": {"$field": "codes"}, "case": {'["A","C"]': "AC"}}}}
+        )
+
+        assert "<Form:Code>AC</Form:Code>" in _generate(mapping, {"codes": ["A", "C"]})
+
+    def test_combines_selections_into_one_code_whatever_their_order(self) -> None:
+        mapping = _small_mapping(
+            {
+                "RevisionCode": {
+                    "$transform": {
+                        "name": "join_values",
+                        "value": {"$field": "revision_codes"},
+                        "params": {"sort": True},
+                    }
+                }
+            }
+        )
+
+        for codes in (["A", "C"], ["C", "A"]):
+            xml = _generate(mapping, {"revision_codes": codes})
+            assert "<Form:RevisionCode>AC</Form:RevisionCode>" in xml
+
     def test_matches_an_unlisted_value_to_the_default(self) -> None:
         mapping = _small_mapping(
             {"Kind": {"$match": {"value": {"$field": "k"}, "case": {"a": "A"}, "default": "Other"}}}
@@ -312,6 +336,9 @@ class TestTransform:
             ("map_values", "z", {"mappings": {}, "default": "D"}, "D"),
             ("map_values", "z", {"mappings": {}, "passthrough_unknown": True}, "z"),
             ("map_values", "z", {"mappings": {}}, Exception),
+            ("join_values", ["C", "A"], {}, "CA"),
+            ("join_values", ["C", "A"], {"sort": True, "separator": ","}, "A,C"),
+            ("join_values", ["A", 1], {}, Exception),
         ],
     )
     def test_matches_the_form_librarys_runtime(

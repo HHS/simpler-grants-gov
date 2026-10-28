@@ -114,10 +114,11 @@ def required(scope: Any, argument: Any, transform: Transform) -> Any:
 
 
 def _case_key(value: Any) -> str:
-    """A value as a ``case`` key. A whole-number float is keyed as an integer (``1.0`` as
-    ``"1"``), as the form library's generator keys it."""
+    """A value as a ``case`` key, written as the form library's runtime writes it: a
+    whole-number float as an integer (``1.0`` as ``"1"``), and a list as compact JSON
+    (``["A","C"]``)."""
     if isinstance(value, str):
         return value
     if isinstance(value, float) and value.is_integer():
         return json.dumps(int(value))
-    return json.dumps(value)
+    return json.dumps(value, separators=(",", ":"), ensure_ascii=False)
