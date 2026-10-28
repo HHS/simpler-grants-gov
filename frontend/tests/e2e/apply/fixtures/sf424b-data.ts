@@ -49,52 +49,62 @@ export const SF424B_OPPORTUNITY_DATA: PrintViewFormData = {
   buildTestData: buildSF424BHappyPathTestData,
 };
 
-/**
- * Path of the pre-submitted staging application used by the submission ZIP
- * verification spec. Relative so it resolves against the Playwright baseURL.
- * SF424B_ZIP_ALL_FIELDS_DATA below describes this application, so keep the
- * two together.
- */
-export const SF424B_ZIP_APPLICATION_PATH =
-  "/workspace/applications/aa9da806-3764-4e98-8dd7-8e5a72b20bd8";
-
-/**
- * Fixed test data used specifically for submission ZIP/XML/PDF verification.
- * These values are intentionally stable so the generated GrantApplication.xml
- * and SF424B.pdf can be verified against known values.
- */
-export const SF424B_ZIP_ALL_FIELDS_DATA = {
-  representative_name: {
-    element: "SF424B:RepresentativeName",
-    value: "simpler-grants-e2e-tester@navapbc.com",
-  },
-  title: {
-    element: "SF424B:RepresentativeTitle",
-    value: "ZIP TEST 001",
-  },
-  applicant_organization: {
-    element: "SF424B:ApplicantOrganizationName",
-    value: "ZIP TEST ORG 001",
-  },
-  SubmittedDate: {
-    element: "SF424B:SubmittedDate",
-    value: "2026-09-09",
-  },
-} as const;
-
 /** Entry name of the SF-424B PDF inside the submission zip. */
 export const SF424B_ZIP_PDF_NAME = "SF424B.pdf";
 
 /**
- * Text expected in SF424B.pdf for the pre-submitted application above.
+ * Value the system post-populates into the SF-424B signature
+ * (SF424B:RepresentativeName) at submission: the e2e user's email.
+ */
+export const SF424B_ZIP_SIGNATURE_VALUE =
+  "simpler-grants-e2e-tester@navapbc.com";
+
+/**
+ * Submission date as it appears in the zip (YYYY-MM-DD). Uses UTC because the
+ * date is generated server-side. Call right after submission.
+ */
+export const getSubmittedDateUtc = (): string =>
+  new Date().toISOString().slice(0, 10);
+
+/**
+ * Expected GrantApplication.xml elements for a run of the end-to-end flow.
+ * user-entered values come from the testData that was filled into the form.
+ */
+export const buildSF424BZipXmlFields = (
+  testData: Record<string, string>,
+  submittedDate: string,
+): Record<string, { element: string; value: string }> => ({
+  representative_name: {
+    element: "SF424B:RepresentativeName",
+    value: SF424B_ZIP_SIGNATURE_VALUE,
+  },
+  title: {
+    element: "SF424B:RepresentativeTitle",
+    value: testData.title,
+  },
+  applicant_organization: {
+    element: "SF424B:ApplicantOrganizationName",
+    value: testData.applicant_organization,
+  },
+  SubmittedDate: {
+    element: "SF424B:SubmittedDate",
+    value: submittedDate,
+  },
+});
+
+/**
+ * Text expected in SF424B.pdf for a run of the end-to-end flow.
  * Labels come from the field definitions; the PDF renders required fields
  * as "<Label>* <value>". Values are matched alone where the PDF shows no label.
  */
-export const SF424B_ZIP_PDF_EXPECTED_TEXT: (string | RegExp)[] = [
+export const buildSF424BZipPdfExpectedText = (
+  testData: Record<string, string>,
+  submittedDate: string,
+): (string | RegExp)[] => [
   SF424B_FORM_MATCHER,
   fieldDefinitionsSF424B.signature.field,
-  SF424B_ZIP_ALL_FIELDS_DATA.representative_name.value,
-  `${fieldDefinitionsSF424B.title.field}* ${SF424B_ZIP_ALL_FIELDS_DATA.title.value}`,
-  `${fieldDefinitionsSF424B.applicant_organization.field}* ${SF424B_ZIP_ALL_FIELDS_DATA.applicant_organization.value}`,
-  SF424B_ZIP_ALL_FIELDS_DATA.SubmittedDate.value,
+  SF424B_ZIP_SIGNATURE_VALUE,
+  `${fieldDefinitionsSF424B.title.field}* ${testData.title}`,
+  `${fieldDefinitionsSF424B.applicant_organization.field}* ${testData.applicant_organization}`,
+  submittedDate,
 ];
