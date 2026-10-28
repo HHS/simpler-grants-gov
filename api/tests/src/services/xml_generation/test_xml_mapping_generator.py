@@ -283,6 +283,52 @@ class TestRequired:
         assert "<Form:DateReceived>2025-01-15</Form:DateReceived>" in xml
 
 
+class TestTransform:
+    """Each transform's results and errors, mirrored in the form library's runtime tests
+    (forms/emitters/xml/test/generate.test.ts). ``Exception`` is an error."""
+
+    @pytest.mark.parametrize(
+        "name,value,params,expected",
+        [
+            ("boolean_to_yes_no", True, {}, "Y: Yes"),
+            ("boolean_to_yes_no", "no", {}, "N: No"),
+            ("boolean_to_yes_no", "maybe", {}, Exception),
+            ("boolean_to_yes_no", True, {"strict": True}, Exception),
+            ("currency_format", "1", {}, "1.00"),
+            ("currency_format", "-.50", {}, "-0.50"),
+            ("currency_format", "007", {}, "7.00"),
+            ("currency_format", "1.5", {}, Exception),
+            ("currency_format", "-", {}, Exception),
+            ("currency_format", 12, {}, Exception),
+            ("string_case", "o'neil mcDONALD 3rd", {"case_type": "title"}, "O'Neil Mcdonald 3Rd"),
+            ("string_case", "abc", {"case_type": "upper"}, "ABC"),
+            ("string_case", "abc", {"case_type": "camel"}, Exception),
+            ("string_case", "abc", {}, Exception),
+            ("truncate_string", "abcdef", {"max_length": 3}, "abc"),
+            ("truncate_string", "a\U0001f600bc", {"max_length": 2}, "a\U0001f600"),
+            ("truncate_string", "ab", {"max_length": -1}, Exception),
+            ("map_values", True, {"mappings": {"True": "T"}}, "T"),
+            ("map_values", 2, {"mappings": {"2": "two"}}, "two"),
+            ("map_values", "z", {"mappings": {}, "default": "D"}, "D"),
+            ("map_values", "z", {"mappings": {}, "passthrough_unknown": True}, "z"),
+            ("map_values", "z", {"mappings": {}}, Exception),
+        ],
+    )
+    def test_matches_the_form_librarys_runtime(
+        self, name: str, value: Any, params: dict[str, Any], expected: Any
+    ) -> None:
+        mapping = _small_mapping(
+            {"V": {"$transform": {"name": name, "value": {"$field": "v"}, "params": params}}}
+        )
+
+        if expected is Exception:
+            # A parameter the transform doesn't take is a TypeError, as a keyword argument.
+            with pytest.raises((ValueTransformationError, TypeError)):
+                _generate(mapping, {"v": value})
+        else:
+            assert f"<Form:V>{expected}</Form:V>" in _generate(mapping, {"v": value})
+
+
 class TestEach:
     def test_repeats_an_element_per_item_with_paths_relative_to_it(self) -> None:
         mapping = _small_mapping(
