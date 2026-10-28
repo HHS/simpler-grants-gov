@@ -423,6 +423,73 @@ describe("generateXml", () => {
     expect(xml).toContain("<f:Code>X</f:Code>\n  <f:Code>Y</f:Code>");
   });
 
+  it("writes one element per option a list `contains`, or does `not`", async () => {
+    const option = (code: string) => ({
+      $when: {
+        condition: { field: "options", operator: "contains", value: code },
+        then: "Y: Yes",
+        else: "N: No",
+      },
+    });
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: {
+        Root: {
+          OptionA: option("a"),
+          OptionB: option("b"),
+          NoneChosen: {
+            $when: {
+              condition: {
+                not: { field: "options", operator: "exists" },
+              },
+              then: "Y: Yes",
+            },
+          },
+          Single: {
+            $when: {
+              condition: { field: "single", operator: "contains", value: "a" },
+              then: "Y: Yes",
+            },
+          },
+        },
+      },
+    };
+    await expectValid(mapping);
+    expect(generateXml(mapping, { options: ["a"], single: "a" })).toEqual(
+      `<?xml version='1.0' encoding='utf-8'?>\n<f:Root xmlns:f="urn:f">\n  <f:OptionA>Y: Yes</f:OptionA>\n  <f:OptionB>N: No</f:OptionB>\n</f:Root>`,
+    );
+    expect(generateXml(mapping, {})).toContain(
+      "<f:NoneChosen>Y: Yes</f:NoneChosen>",
+    );
+  });
+
+  it("compares answers as the API's runtime does", () => {
+    const when = (
+      field: string,
+      operator: "equals" | "contains" | "in",
+      value: unknown,
+    ) =>
+      ({
+        $when: { condition: { field, operator, value }, then: "1" },
+      }) as XmlMapping["root"][string][string];
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: {
+        Root: {
+          Equals: when("flag", "equals", 1),
+          Contains: when("flags", "contains", 1),
+          Count: when("count", "in", [1]),
+        },
+      },
+    };
+    const xml = generateXml(mapping, { flag: true, flags: [true], count: 1.0 });
+    expect(xml).not.toContain("Equals");
+    expect(xml).not.toContain("Contains");
+    expect(xml).toContain("<f:Count>1</f:Count>");
+  });
+
   it("refuses a $ key that isn't a function", () => {
     const mapping = {
       format: "xml-mapping",

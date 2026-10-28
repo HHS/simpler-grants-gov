@@ -242,7 +242,8 @@
               "$ref": "#/$defs/path"
             },
             "operator": {
-              "enum": ["equals", "not_equals"]
+              "description": "contains holds when the answer is a list with value among its entries.",
+              "enum": ["equals", "not_equals", "contains"]
             },
             "value": {}
           }
@@ -299,6 +300,16 @@
               "items": {
                 "$ref": "#/$defs/condition"
               }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["not"],
+          "additionalProperties": false,
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/condition"
             }
           }
         }
