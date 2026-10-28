@@ -14,7 +14,7 @@ export const indexLeaves = (index: Json): Path[] =>
     .filter((occurrence) => occurrence.leaf)
     .map((occurrence) => fromPointer(occurrence.path));
 
-/** Two `allOf` branches give one keyword different values; the suite will not pick one. */
+/** A conjunction cannot be safely flattened; the suite will not pick a branch. */
 export class AmbiguousComposition extends Error {}
 
 const ANNOTATIONS = new Set(["title", "description", "examples", "$comment"]);
@@ -40,6 +40,18 @@ export function mergeAllOf(node: Json, at: Path = ""): Json {
       } else if (!(key in merged)) {
         merged[key] = value;
       } else if (
+        (key === "minLength" || key === "maxLength") &&
+        typeof value === "number" &&
+        Number.isFinite(value) &&
+        typeof merged[key] === "number" &&
+        Number.isFinite(merged[key])
+      ) {
+        // allOf is intersection: a narrower use does not erase its bank bound.
+        merged[key] =
+          key === "minLength"
+            ? Math.max(merged[key], value)
+            : Math.min(merged[key], value);
+      } else if (
         !ANNOTATIONS.has(key) &&
         JSON.stringify(merged[key]) !== JSON.stringify(value)
       ) {
@@ -49,6 +61,14 @@ export function mergeAllOf(node: Json, at: Path = ""): Json {
       }
     }
   }
+  if (
+    typeof merged.minLength === "number" &&
+    typeof merged.maxLength === "number" &&
+    merged.minLength > merged.maxLength
+  )
+    throw new AmbiguousComposition(
+      `allOf has an empty length intersection at ${at || "root"}`,
+    );
   return merged;
 }
 
@@ -61,6 +81,15 @@ function rulesOf(node: Json): Rules {
     "maximum",
   ] as const)
     if (typeof node[keyword] === "number") rules[keyword] = node[keyword];
+  // Numeric keywords do not constrain decimal strings. Leave that representation gap visible.
+  if (
+    (node.type === "number" || node.type === "integer") &&
+    typeof node.multipleOf === "number"
+  ) {
+    if (!Number.isFinite(node.multipleOf) || node.multipleOf <= 0)
+      throw new Error("multipleOf must be a positive finite number");
+    rules.multipleOf = node.multipleOf;
+  }
   if (typeof node.pattern === "string") rules.pattern = node.pattern;
   if (typeof node.format === "string") rules.format = node.format;
   if ("const" in node) rules.enum = [String(node.const)];
@@ -95,13 +124,28 @@ export function jsonSchemaFields(schema: Json): Fields {
         walk(child, [...segments, name], required && own.has(name), repeats);
       return;
     }
-    if (
-      node.type === "array" &&
-      node.items &&
-      isObject(mergeAllOf(node.items))
-    ) {
+    if (node.type === "array" && node.items) {
+      const item = mergeAllOf(node.items);
+      if (!isObject(item)) {
+        // A list of scalar answers has one repeated leaf, just like index.json records it.
+        // Its label/help belong to the list control; value constraints belong to each item.
+        fields.set(render([...segments, ARRAY]), {
+          order: fields.size,
+          label: node.title,
+          help: node.description,
+          required: required && (node.minItems ?? 0) > 0 ? "yes" : "no",
+          rules: {
+            ...rulesOf(item),
+            maxOccurs:
+              repeats === "unbounded" || typeof node.maxItems !== "number"
+                ? "unbounded"
+                : repeats * node.maxItems,
+          },
+        });
+        return;
+      }
       walk(
-        node.items,
+        item,
         [...segments, ARRAY],
         required && (node.minItems ?? 0) > 0,
         repeats === "unbounded" || typeof node.maxItems !== "number"

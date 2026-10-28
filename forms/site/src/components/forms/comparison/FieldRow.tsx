@@ -5,6 +5,7 @@ import {
 } from "@/lib/comparison";
 import { openField } from "@/stores/fieldComparison";
 
+import FieldHelp from "../FieldHelp";
 import DeviationBadges from "./DeviationBadges";
 import FieldDetails from "./FieldDetails";
 
@@ -30,9 +31,7 @@ export default function FieldRow({
             <span className="field-row__optional">Optional</span>
           )}
         </div>
-        {field.help_text && (
-          <div className="field-row__help">{field.help_text}</div>
-        )}
+        {field.help_text && <FieldHelp text={field.help_text} />}
         <div className="field-row__tertiary">{tertiary.join(" · ")}</div>
         <FieldDetails field={field} />
       </div>

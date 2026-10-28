@@ -2,7 +2,14 @@
  * Pure helpers for the form library's collapsible list (`components/forms/preview/
  * collapsible/`): how a list entry's fields group, and how a collapsed entry reads.
  */
-import type { UISchemaElement } from "@jsonforms/core";
+import {
+  createAjv,
+  isEnabled,
+  isVisible,
+  type UISchemaElement,
+} from "@jsonforms/core";
+
+const ruleValidator = createAjv();
 
 /** The widget name `specs/ui/widgets.tsp` declares for the collapsible list. */
 export const COLLAPSIBLE_FIELD_LIST = "CollapsibleFieldList";
@@ -23,8 +30,13 @@ const startsWith = (path: readonly string[], prefix: readonly string[]) =>
 
 /** A list entry laid out by the list's `options.detail`: its groups, and the fields in them. */
 export type EntryNode<F> =
-  | { kind: "field"; field: F }
-  | { kind: "group"; label: string; children: EntryNode<F>[] };
+  | { kind: "field"; field: F; ui?: UISchemaElement }
+  | {
+      kind: "group";
+      label: string;
+      children: EntryNode<F>[];
+      ui?: UISchemaElement;
+    };
 
 /**
  * An entry's fields arranged by the detail layout: each labeled group inside it keeps its
@@ -45,7 +57,11 @@ export function entryLayout<F extends { storagePath: string[] }>(
         )
         .map((field) => {
           placed.add(field);
-          return { kind: "field", field };
+          return {
+            kind: "field",
+            field,
+            ...(element.rule ? { ui: element } : {}),
+          };
         });
     }
     const children =
@@ -58,7 +74,14 @@ export function entryLayout<F extends { storagePath: string[] }>(
       typeof label === "string" &&
       children.length
     )
-      return [{ kind: "group", label, children }];
+      return [
+        {
+          kind: "group",
+          label,
+          children,
+          ...(element.rule ? { ui: element } : {}),
+        },
+      ];
     return children;
   };
   // The detail's own group is the entry itself, which the list already heads.
@@ -80,6 +103,34 @@ export function entryFields<F>(nodes: readonly EntryNode<F>[]): F[] {
   return nodes.flatMap((node) =>
     node.kind === "field" ? [node.field] : entryFields(node.children),
   );
+}
+
+/** Evaluate the existing JSON Forms rules relative to this entry, including its groups. */
+export function entryActivity<F>(
+  nodes: readonly EntryNode<F>[],
+  data: unknown,
+): Map<F, { visible: boolean; enabled: boolean }> {
+  const result = new Map<F, { visible: boolean; enabled: boolean }>();
+  const visit = (
+    children: readonly EntryNode<F>[],
+    visible: boolean,
+    enabled: boolean,
+  ) => {
+    for (const node of children) {
+      const state = {
+        visible:
+          visible &&
+          (!node.ui || isVisible(node.ui, data, "", ruleValidator, {})),
+        enabled:
+          enabled &&
+          (!node.ui || isEnabled(node.ui, data, "", ruleValidator, {})),
+      };
+      if (node.kind === "field") result.set(node.field, state);
+      else visit(node.children, state.visible, state.enabled);
+    }
+  };
+  visit(nodes, true, true);
+  return result;
 }
 
 /** A run of a collapsed entry's answers, under the group they belong to if any. */

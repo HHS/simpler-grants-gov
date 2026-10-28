@@ -1,3 +1,4 @@
+import { isDecimalMultiple } from "./decimal.ts";
 import {
   KEYWORDS,
   type Discrepancy,
@@ -164,6 +165,8 @@ function looser(keyword: Keyword, plan: unknown, source: unknown): boolean {
     case "minLength":
     case "minimum":
       return (plan as number) < (source as number);
+    case "multipleOf":
+      return !isDecimalMultiple(plan as number, source as number);
     case "enum":
       return (plan as string[]).some(
         (value) => !(source as string[]).includes(value),

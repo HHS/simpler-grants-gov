@@ -76,7 +76,7 @@ export default function FormPreview({ schema, uischema, example }: Props) {
               <>
                 <p className="usa-alert__text">
                   {warnings.length}{" "}
-                  {warnings.length === 1 ? "field needs" : "fields need"}{" "}
+                  {warnings.length === 1 ? "issue needs" : "issues need"}{" "}
                   attention:
                 </p>
                 <ul className="usa-list">

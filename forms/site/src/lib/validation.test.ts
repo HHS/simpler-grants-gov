@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createAjv, toValidationWarnings, uniqueWarnings } from "./validation";
+import {
+  completeWarnings,
+  createAjv,
+  toValidationWarnings,
+  uniqueWarnings,
+} from "./validation";
 
 const schema = {
   type: "object",
@@ -91,5 +96,37 @@ describe("uniqueWarnings", () => {
       warning("$.name.first_name", "'' is too short"),
       warning("$.name.last_name", "'' is too short"),
     ]);
+  });
+});
+
+describe("completeWarnings", () => {
+  const raw = {
+    field: "$.files[0]",
+    message: "invalid id",
+    type: "format",
+    value: null,
+  };
+  it("preserves unplaced failures instead of reporting false success", () => {
+    expect(completeWarnings([raw], [])).toEqual([
+      { ...raw, formatted: "$.files[0]: invalid id" },
+    ]);
+  });
+  it("retains existing formatting without duplicating the same validator failure", () => {
+    const placed = {
+      ...raw,
+      formatted: "File reference is invalid",
+      htmlField: "files[0]",
+    };
+    expect(completeWarnings([raw], [placed])).toEqual([placed]);
+  });
+  it("does not discard a different failure at the same path", () => {
+    const other = { ...raw, type: "minLength", message: "too short" };
+    expect(
+      completeWarnings(
+        [raw, other],
+        [{ ...raw, formatted: "Existing wording" }],
+      ),
+    ).toHaveLength(2);
+    expect(completeWarnings([], [])).toEqual([]);
   });
 });

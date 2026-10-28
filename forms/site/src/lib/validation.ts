@@ -17,6 +17,27 @@ export interface ValidationWarning {
   value: string | null;
 }
 
+/** Keep validator failures visible when the frontend formatter cannot place one in a control. */
+export function completeWarnings<
+  W extends ValidationWarning & { formatted?: string },
+>(
+  raw: ValidationWarning[],
+  formatted: W[],
+): (W | (ValidationWarning & { formatted: string }))[] {
+  const key = (warning: ValidationWarning) =>
+    JSON.stringify([warning.field, warning.type, warning.message]);
+  const placed = new Set(formatted.map(key));
+  return [
+    ...formatted,
+    ...raw
+      .filter((warning) => !placed.has(key(warning)))
+      .map((warning) => ({
+        ...warning,
+        formatted: `${warning.field}: ${warning.message}`,
+      })),
+  ];
+}
+
 /** Ajv reports a failed `if/then` twice: the `then` failure and a summary `if` error. */
 const isReportable = (error: ErrorObject) => error.keyword !== "if";
 

@@ -1,6 +1,7 @@
 // TEMPORARY COPY of the pending frontend/src/components/apply-form/jsonforms/renderers.tsx,
 // so the form library can render with the SGG form widgets before the JSON Forms renderer
-// lands in the frontend. Only import paths are changed. Delete src/vendor/sgg with #12695.
+// lands in the frontend. The library adds its list draft callback to AdapterContext.
+// Reconcile this behavior when #12907 imports the shared frontend renderer.
 import {
   and,
   isControl,
@@ -46,6 +47,8 @@ export type AdapterContextValue = {
   formContext?: RootBudgetFormContext;
   isFormLocked?: boolean;
   print?: boolean;
+  /** The library preview lists report their draft values here. Top-level lists only. */
+  onFieldListChange?: (name: string, values: unknown[]) => void;
 };
 
 export const AdapterContext = createContext<AdapterContextValue | null>(null);

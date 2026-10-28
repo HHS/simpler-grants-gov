@@ -57,11 +57,133 @@ describe("datFields", () => {
     ]);
   });
 
+  it("keeps a radio group answer but not its unbound option controls", () => {
+    const header = [...HEADER, "Agency Field Name", "Field Type"];
+    const fields = datFields(
+      workbook([
+        header,
+        [
+          "1",
+          "Submission type",
+          "Yes",
+          "LIST",
+          "",
+          1,
+          "Radio Group",
+          "",
+          "SubmissionTypeCode",
+          "Radio Group",
+        ],
+        ["1-a", "Application", "No", "", "", 1, "Radio", "", "", "Radio Group"],
+        [
+          "2",
+          "Bound radio",
+          "No",
+          "",
+          "",
+          1,
+          "Radio",
+          "",
+          "OwnField",
+          "Radio Group",
+        ],
+      ]),
+    );
+    expect([...fields.keys()]).toEqual(["1", "2"]);
+  });
+
+  it.each(["Post-Populated", "Post-populate"])(
+    "retains bound %s labels as wire answers while skipping ordinary labels",
+    (population) => {
+      const header = [...HEADER, "Agency Field Name", "Field Type"];
+      const fields = datFields(
+        workbook([
+          header,
+          [
+            "s",
+            "Signature",
+            "Yes",
+            "AN",
+            144,
+            1,
+            "Label",
+            "Completed on submission",
+            "AOR_Signature",
+            population,
+          ],
+          [
+            "h",
+            "Section heading",
+            "No",
+            "",
+            "",
+            1,
+            "Label",
+            "",
+            "",
+            population,
+          ],
+        ]),
+      );
+      expect([...fields.keys()]).toEqual(["s"]);
+      expect(fields.get("s")?.rules.maxLength).toBe(144);
+    },
+  );
+
   it("reads no length from fixed lists", () => {
     const dat = datFields(
       workbook([HEADER, ["7-14", "State:", "No", "LIST", 55, 4, "Popup", ""]]),
     );
     expect(dat.get("7-14")?.rules).toEqual({ maxOccurs: 4 });
+  });
+
+  it.each(["$", "INTEGER", "DECIMAL(2)"])(
+    "does not reinterpret %s value bounds as character lengths",
+    (type) => {
+      const dat = datFields(
+        workbook([
+          HEADER,
+          ["01-a", "$", "No", type, 9999999999.99, 1, "Field", ""],
+        ]),
+      );
+      expect(dat.get("01-a")?.rules).toEqual({
+        maximum: 9999999999.99,
+        maxOccurs: 1,
+      });
+    },
+  );
+
+  it("preserves signed numeric minima and refuses malformed numeric bounds", () => {
+    const header = [...HEADER, "Min # of Chars or Min Value"];
+    const fields = datFields(
+      workbook([
+        header,
+        ["m", "Amount", "No", "DECIMAL(2)", 999.99, 1, "Field", "", -999.99],
+      ]),
+    );
+    expect(fields.get("m")?.rules).toEqual({
+      minimum: -999.99,
+      maximum: 999.99,
+      maxOccurs: 1,
+    });
+    expect(() =>
+      datFields(
+        workbook([
+          header,
+          [
+            "m",
+            "Amount",
+            "No",
+            "DECIMAL(2)",
+            "unknown",
+            1,
+            "Field",
+            "",
+            -999.99,
+          ],
+        ]),
+      ),
+    ).toThrow("numeric maximum");
   });
 
   it("keeps asterisk on required labels", () => {

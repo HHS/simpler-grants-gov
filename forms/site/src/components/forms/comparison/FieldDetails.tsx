@@ -54,7 +54,7 @@ export default function FieldDetails({
     <details className="field-row__detail">
       <summary>Details</summary>
       <Group title="Source IDs" items={ids} />
-      <Group title="Populated from other forms" items={population} />
+      <Group title="Population and ownership" items={population} />
       <Group title="Rendering" items={rendering} />
     </details>
   );
