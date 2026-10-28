@@ -515,6 +515,55 @@ describe("generateXml", () => {
   });
 });
 
+/**
+ * Each transform behaves as the API's `value_transformers` does, mirrored in
+ * `api/tests/src/services/xml_generation/test_xml_mapping_generator.py`. `Error` is an error.
+ */
+describe("$transform", () => {
+  const cases: [string, unknown, Record<string, unknown>, unknown][] = [
+    ["boolean_to_yes_no", true, {}, "Y: Yes"],
+    ["boolean_to_yes_no", "no", {}, "N: No"],
+    ["boolean_to_yes_no", "maybe", {}, Error],
+    ["boolean_to_yes_no", true, { strict: true }, Error],
+    ["currency_format", "1", {}, "1.00"],
+    ["currency_format", "-.50", {}, "-0.50"],
+    ["currency_format", "007", {}, "7.00"],
+    ["currency_format", "1.5", {}, Error],
+    ["currency_format", "-", {}, Error],
+    ["currency_format", 12, {}, Error],
+    [
+      "string_case",
+      "o'neil mcDONALD 3rd",
+      { case_type: "title" },
+      "O'Neil Mcdonald 3Rd",
+    ],
+    ["string_case", "abc", { case_type: "upper" }, "ABC"],
+    ["string_case", "abc", { case_type: "camel" }, Error],
+    ["string_case", "abc", {}, Error],
+    ["truncate_string", "abcdef", { max_length: 3 }, "abc"],
+    ["truncate_string", "a😀bc", { max_length: 2 }, "a😀"],
+    ["truncate_string", "ab", { max_length: -1 }, Error],
+    ["map_values", true, { mappings: { True: "T" } }, "T"],
+    ["map_values", 2, { mappings: { "2": "two" } }, "two"],
+    ["map_values", "z", { mappings: {}, default: "D" }, "D"],
+    ["map_values", "z", { mappings: {}, passthrough_unknown: true }, "z"],
+    ["map_values", "z", { mappings: {} }, Error],
+  ];
+  it.each(cases)("%s(%j, %j) is %s", async (name, value, params, expected) => {
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: {
+        Root: { V: { $transform: { name, value: { $field: "v" }, params } } },
+      },
+    };
+    await expectValid(mapping);
+    const generate = () => generateXml(mapping, { v: value });
+    if (expected === Error) expect(generate).toThrow();
+    else expect(generate()).toContain(`<f:V>${expected}</f:V>`);
+  });
+});
+
 describe("xml-mapping.json", () => {
   it("matches schema/xml-mapping.schema.json for every form", async () => {
     const validate = await schemaValidator();

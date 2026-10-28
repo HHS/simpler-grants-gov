@@ -25,7 +25,12 @@ const spec = (form: string, root: string, models = "") => `
   namespace Mappings { enum Target { xml } }
 
   @Mapping.transforms(Transformation)
-  namespace Transforms { enum Transformation { yesNo: "boolean_to_yes_no" } }
+  namespace Transforms {
+    enum Transformation {
+      yesNo: "boolean_to_yes_no",
+      truncate: "truncate_string",
+    }
+  }
 
   namespace Forms {
     @Meta.form(#{ id: "example", formName: "Example" })
@@ -131,6 +136,26 @@ describe("xmlMapping", () => {
       code: "form-library-xml/xml-mapping-unsupported",
       message:
         "The XML mapping can't write Race yet: it holds a list of values filled from a list of objects.",
+    });
+  });
+
+  it("passes @Mapping.transform's params to the transform", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "title?: string;",
+      `@Mapping.from(xml, Forms.Example.title)
+       @Mapping.transform(Transforms.Transformation.truncate, #{ max_length: 60 })
+       @name("Title")
+       title?: string;`,
+    );
+    expect(diagnostics.filter((d) => d.severity === "error")).toEqual([]);
+    expect(mapping?.root.FormRoot).toEqual({
+      Title: {
+        $transform: {
+          name: "truncate_string",
+          value: { $field: "title" },
+          params: { max_length: 60 },
+        },
+      },
     });
   });
 });

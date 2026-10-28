@@ -98,7 +98,7 @@ export function transformValue(
   const fn = VALUE_TRANSFORMS[argument.name];
   if (!fn) throw new Error(`unknown transform ${argument.name}`);
   const value = transform(scope, argument.value);
-  return isEmpty(value) ? undefined : fn(value);
+  return isEmpty(value) ? undefined : fn(value, argument.params ?? {});
 }
 
 export function when(
