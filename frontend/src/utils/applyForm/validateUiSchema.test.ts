@@ -77,6 +77,22 @@ describe("validateFormData", () => {
       expect(schemaErrors).toBeFalsy();
     });
 
+    it("accepts a field's schema override with a description, on an array field", () => {
+      const validUiSchema: UiSchema = [
+        {
+          type: "field",
+          definition: "/properties/races",
+          schema: {
+            title: "Race",
+            type: "array",
+            description: "Select all that apply.",
+          },
+        },
+      ];
+
+      expect(validateUiSchema(validUiSchema)).toBeFalsy();
+    });
+
     it("should validate a Table multiField UI schema", () => {
       const validUiSchema: UiSchema = [
         {

@@ -82,6 +82,50 @@ describe("controlToNodes", () => {
     expect(validateUiSchema(nodes)).toBeFalsy();
   });
 
+  it("carries the control's label and description onto the field as a schema override", () => {
+    const nodes = controlToNodes(
+      control("#/properties/title", {
+        label: "Project Title",
+        options: { description: "As it appears on the cover page." },
+      }),
+      schema,
+    );
+
+    expect(nodes).toEqual([
+      {
+        type: "field",
+        definition: "/properties/title",
+        schema: {
+          title: "Project Title",
+          type: "string",
+          description: "As it appears on the cover page.",
+        },
+      },
+    ]);
+    expect(validateUiSchema(nodes)).toBeFalsy();
+  });
+
+  it("keeps the schema's title when the control only overrides the description", () => {
+    expect(
+      controlToNodes(
+        control("#/properties/title", { options: { description: "Help." } }),
+        schema,
+      ),
+    ).toEqual([
+      {
+        type: "field",
+        definition: "/properties/title",
+        schema: { title: "Title", type: "string", description: "Help." },
+      },
+    ]);
+  });
+
+  it("adds no schema override when the control sets no label or description", () => {
+    expect(
+      controlToNodes(control("#/properties/title", { label: false }), schema),
+    ).toEqual([{ type: "field", definition: "/properties/title" }]);
+  });
+
   it("maps a readonly control to a disabled field", () => {
     expect(
       controlToNodes(
