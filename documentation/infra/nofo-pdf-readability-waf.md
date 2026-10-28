@@ -34,13 +34,20 @@ comes from the workflow checkout.
 
 | Rule | Priority | Scope | Activation |
 | --- | --- | --- | --- |
-| `NOFO-PDFReadability-EmergencyBlock` | 0 | GET and POST; exact `/readability` or `/readability/` URI path | `emergency_block = true` returns WAF's default 403 |
-| `NOFO-PDFReadability-UploadRate` | 1 | POST; same two URI paths; per WAF-observed source IP | `rate_action = "block"` returns 429 near the configured rate |
+| `NOFO-PDFReadability-EmergencyBlock` | 0 | GET and POST; exact `/readability-checker`, `/readability-checker/`, `/readability`, or `/readability/` URI path | `emergency_block = true` returns WAF's default 403 |
+| `NOFO-PDFReadability-UploadRate` | 1 | POST; same four URI paths; per WAF-observed source IP | `rate_action = "block"` returns 429 near the configured rate |
 | Existing managed groups | 2–8 when opted in | Existing scope/actions | Relative ordering and Allow overrides preserved |
 
-Both URI matches are anchored, case-sensitive, with no text transformations;
+Both rule matchers cover the current public `/readability-checker/` route and
+the legacy `/readability/` redirect, each with or without the trailing slash.
+They use anchored alternatives without capturing subexpressions, which AWS WAF
+[does not support](https://docs.aws.amazon.com/waf/latest/developerguide/waf-regex-pattern-support.html).
+Matching remains case-sensitive, with no text transformations;
 query strings are separate from the URI path. These rules do not match child
-paths, GET rate counts, or other methods. Alternate encoded/normalized route
+paths, the authenticated `/nofos/readability-checker/` route, GET rate counts, or
+other methods. Both public path families share one per-source-IP rate budget;
+renaming or alternating between the two does not create a second configured
+rate rule. Alternate encoded/normalized route
 forms are not claimed covered; assess them separately before launch.
 
 The rate window is 300 seconds. The integer rate limit is configurable from
@@ -57,6 +64,12 @@ overrides. Count is non-terminating; an activated emergency block stops further
 evaluation before rate limiting. Each rule has a CloudWatch counter and disables
 its own sampled requests. Existing ACL/managed-group sampling and WAF/ALB logs
 are unchanged: this is not a logging-redaction or privacy-control change.
+
+The infra-dev environment remains in Count mode with emergency blocking off.
+Correcting the path scope does not enable enforcement or public uploads. Merging
+service-module changes can automatically deploy dev; confirm the actual path
+matchers and unchanged Count actions afterward. Live blocking/restoration still
+requires the bounded verification procedure below.
 
 ## Local checks
 
@@ -92,8 +105,8 @@ An empty POST can verify WAF interception without enabling PDF analysis.
    actions, action modes, rate/window, and source-IP aggregation. Record the
    running infrastructure revision and environment; keep detailed configuration
    and log evidence in the approved restricted location.
-3. In Count mode, send bounded GET/POST requests to both exact route forms and
-   GET to an unrelated Builder route (for example `/health`). Confirm the pilot
+3. In Count mode, send bounded GET/POST requests to all four exact current/legacy
+   route forms and GET to an unrelated Builder route (for example `/health`). Confirm the pilot
    is still disabled and inspect the corresponding rule counters. Check query
    strings, excluded paths/methods, and any additional route aliases separately.
 4. Through a reviewed dev configuration change, set `rate_action = "block"`
@@ -104,8 +117,8 @@ An empty POST can verify WAF interception without enabling PDF analysis.
    stop and investigate rather than escalating load. Assess shared-IP behavior
    and confirm whether WAF sees a client or an upstream proxy address.
 5. Set `emergency_block = true` through the same controlled path. Verify GET
-   and POST for both route forms return WAF 403, independent of Django, while
-   unrelated Builder routes remain available. The emergency rule should be the
+   and POST for all four current/legacy route forms return WAF 403, independent
+   of Django, while unrelated Builder routes remain available. The emergency rule should be the
    terminating rule even if rate limiting is active.
 6. Restore `emergency_block = false` and `rate_action = "count"`, redeploy, and
    verify restoration, disabled pilot responses, and unrelated routes. Record
@@ -129,8 +142,8 @@ AWS access and a procedure to reconcile Terraform so a later deployment does not
 silently undo an incident block.
 
 For restoration, return `emergency_block` to false through the agreed path and
-verify both route forms and unrelated routes. Restore the pre-incident rate mode
-and keep the application pilot flag in its agreed state. Do not delete the rules
+verify all four current/legacy route forms and unrelated routes. Restore the
+pre-incident rate mode and keep the application pilot flag in its agreed state. Do not delete the rules
 or alter managed protections as a shortcut.
 
 Before this is a tested incident procedure, record the actual operator, fallback,
