@@ -162,6 +162,27 @@ class TestValues:
         assert "Empty" not in xml
         assert "<Form:Present>yes</Form:Present>" in xml
 
+    def test_reads_a_lists_entry_by_index_for_numbered_elements(self) -> None:
+        mapping = _small_mapping(
+            {
+                "Type1": {"$field": "types.0"},
+                "Type2": {"$field": "types.1"},
+                "Type3": {"$field": "types.2"},
+                "Count": {"$field": "types.length"},
+            }
+        )
+
+        xml = _generate(mapping, {"types": ["A", "B"]})
+
+        assert xml == (
+            "<?xml version='1.0' encoding='utf-8'?>\n"
+            '<Form:Root xmlns:Form="urn:form" xmlns:lib="urn:lib"'
+            ' xmlns:att="http://apply.grants.gov/system/Attachments-V1.0">\n'
+            "  <Form:Type1>A</Form:Type1>\n"
+            "  <Form:Type2>B</Form:Type2>\n"
+            "</Form:Root>"
+        )
+
     def test_writes_a_boolean_as_true_or_false(self) -> None:
         mapping = _small_mapping({"Agrees": {"$field": "agrees"}, "@Form:Flag": {"$field": "flag"}})
 

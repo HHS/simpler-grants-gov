@@ -1,15 +1,22 @@
 """Dotted paths into a form's response."""
 
+import re
 from typing import Any
 
 
 def read(scope: Any, path: str) -> Any:
-    """The value at a dotted path below ``scope``, or None."""
+    """The value at a dotted path below ``scope``, or None. A whole-number step reads a list's
+    entry by index (``types.0``), as the form library's runtime does; any other step reads a
+    dict's key."""
     value = scope
     for step in path.split("."):
-        if not isinstance(value, dict):
+        if isinstance(value, list):
+            in_range = re.fullmatch(r"[0-9]+", step) and int(step) < len(value)
+            value = value[int(step)] if in_range else None
+        elif isinstance(value, dict):
+            value = value.get(step)
+        else:
             return None
-        value = value.get(step)
     return value
 
 

@@ -7,7 +7,8 @@ so every check reads either format.
 
 Element paths drop namespace prefixes, as the rules' targets do. A group of elements, and an
 element repeated by `each`, takes no value from the form, so its field is None. Inside
-`each`, fields are read below the list's `[]`. Both branches of a `when` are read.
+`each`, fields are read below the list's `[]`, as is a numbered element's entry (`types.0`).
+Both branches of a `when` are read.
 """
 
 from typing import Any
@@ -145,4 +146,7 @@ def _source(value: Any, prefix: str) -> str | None:
 
 
 def _join(prefix: str, path: str) -> str:
-    return f"{prefix}.{path}" if prefix else path
+    """A field below `prefix`. A whole-number step reads one entry of a list, so it stands for
+    any item: `types.0` -> `types.[]`."""
+    steps = [ARRAY if step.isdecimal() else step for step in path.split(".")]
+    return ".".join([prefix, *steps] if prefix else steps)

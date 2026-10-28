@@ -74,6 +74,15 @@ A dotted path into the response. Inside `$each`, the path is relative to the ite
 </Key_Contacts_2_0:ContactName>
 ```
 
+A whole-number step reads a list's entry by index, for an XSD that numbers its elements
+instead of repeating one. An entry the list doesn't have writes nothing.
+
+```json
+"ApplicantTypeCode1": { "$field": "applicant_type_code.0" },
+"ApplicantTypeCode2": { "$field": "applicant_type_code.1" },
+"ApplicantTypeCode3": { "$field": "applicant_type_code.2" }
+```
+
 ### `$const`: a fixed value
 
 ```json

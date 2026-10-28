@@ -108,6 +108,13 @@ class TestRead:
             ("Individual",): frozenset({"map_values"})
         }
 
+    def test_reads_a_numbered_elements_entry_as_any_item(self):
+        numbered = mapping({"Type1": {"$field": "types.0"}, "Type2": {"$field": "types.1"}})
+        assert flatten_xml_mapping.read(numbered) == (
+            {("Type1",): "types.[]", ("Type2",): "types.[]"},
+            {},
+        )
+
 
 class TestDocument:
     def test_reads_root_and_xsd(self):
