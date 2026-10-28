@@ -13,6 +13,7 @@ from .gg_lobbying_form import GG_LobbyingForm_v1_1
 from .key_contacts import KeyContacts_v2_0
 from .key_contacts_generated import FORM as KeyContactsGenerated_v2_0
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
+from .performance_sites_generated import FORM as PerformanceSitesGenerated_v4_0
 from .project_abstract import ProjectAbstract_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
 from .project_narrative_attachment import ProjectNarrativeAttachment_v1_2
@@ -51,6 +52,7 @@ _ALL_FORMS: list[Form] = [
     ProjectPerformanceSiteLocation_v4_0,
     KeyContactsGenerated_v2_0,
     EPAKeyContactsGenerated_v2_0,
+    PerformanceSitesGenerated_v4_0,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -59,6 +61,7 @@ _ALL_FORMS: list[Form] = [
 GENERATED_FORMS: list[Form] = [
     KeyContactsGenerated_v2_0,
     EPAKeyContactsGenerated_v2_0,
+    PerformanceSitesGenerated_v4_0,
 ]
 
 
