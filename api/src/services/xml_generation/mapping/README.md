@@ -229,7 +229,22 @@ The operators are:
 | `equals` | equals `value` |
 | `not_equals` | doesn't equal `value` |
 | `in` | is one of the list `value` |
+| `contains` | is a list with `value` among its entries, as a checkbox group's answer is |
 | `exists` | is present and not empty |
+
+A boolean never equals a number, so `true` isn't `1`, as in the form library's runtime.
+
+`contains` writes a checkbox group as one element per option:
+
+```json
+"OptionA": {
+  "$when": {
+    "condition": { "field": "options", "operator": "contains", "value": "a" },
+    "then": "Y: Yes",
+    "else": "N: No"
+  }
+}
+```
 
 `all` and `any` combine conditions:
 
@@ -240,6 +255,12 @@ The operators are:
     { "field": "material_change_year", "operator": "exists" }
   ]
 }
+```
+
+`not` holds when another condition doesn't:
+
+```json
+"condition": { "not": { "field": "options", "operator": "exists" } }
 ```
 
 ### `$required`: an element written even when it's empty
@@ -289,8 +310,8 @@ boolean there means `$const`. `$each` reads its list from any value that yields 
 | `{"status": "closed"}` | `<Status>Closed</Status>` |
 
 A function's own arguments (`value`, `case`, `default`, `items`, `map`, `condition`, `then`,
-`else`, `name`, `params`) and a condition's keys (`field`, `operator`, `value`, `all`, `any`)
-take no `$`: they only ever appear inside a function.
+`else`, `name`, `params`) and a condition's keys (`field`, `operator`, `value`, `all`, `any`,
+`not`) take no `$`: they only ever appear inside a function.
 
 ## Elements with nothing to write
 

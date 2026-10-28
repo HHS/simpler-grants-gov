@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from .conditions import fields_of
 from .paths import root_of
 
 
@@ -26,7 +27,7 @@ def mapped_root_fields(mapping: dict[str, Any]) -> set[str]:
         elif "$transform" in node:
             visit(node["$transform"]["value"])
         elif "$when" in node:
-            fields.add(root_of(node["$when"]["condition"].get("field", "")))
+            fields.update(root_of(field) for field in fields_of(node["$when"]["condition"]))
             visit(node["$when"]["then"])
             visit(node["$when"].get("else"))
         elif "$const" not in node:
