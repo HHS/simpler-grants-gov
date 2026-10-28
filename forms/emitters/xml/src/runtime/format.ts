@@ -34,7 +34,15 @@ export interface Elements {
  * so functions nest: a `$match` can read a `$transform`, and a `case` entry can be a `$when`.
  */
 export type Value =
-  Field | Const | Match | Transform | Attachment | Each | When | Elements;
+  | Field
+  | Const
+  | Match
+  | Transform
+  | Attachment
+  | Each
+  | When
+  | Required
+  | Elements;
 
 /** A `case` entry or `default`: a value, or a plain string, number or boolean as `$const`. */
 export type Branch = Value | string | number | boolean;
@@ -75,6 +83,14 @@ export interface Each {
 /** `then` when `condition` holds, else `else`, else nothing. */
 export interface When {
   $when: { condition: Condition; then: Branch; else?: Branch };
+}
+
+/**
+ * The value, or an empty element when it has nothing to write: for an element the XSD
+ * requires that the form may leave unanswered, like SF-424's `DateReceived`.
+ */
+export interface Required {
+  $required: Value;
 }
 
 export type Condition =

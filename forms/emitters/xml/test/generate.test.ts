@@ -46,6 +46,25 @@ const mappingOf = async (form: string) =>
 const fixture = (name: string) =>
   readFile(fileURLToPath(new URL(`fixtures/${name}`, import.meta.url)), "utf8");
 
+const schemaValidator = async () =>
+  new Ajv().compile(
+    JSON.parse(
+      await readFile(
+        fileURLToPath(
+          new URL("../schema/xml-mapping.schema.json", import.meta.url),
+        ),
+        "utf8",
+      ),
+    ),
+  );
+
+/** Expect `mapping` to match schema/xml-mapping.schema.json. */
+const expectValid = async (mapping: XmlMapping) => {
+  const validate = await schemaValidator();
+  validate(mapping);
+  expect(validate.errors ?? []).toEqual([]);
+};
+
 const ADDITIONAL_LOCATIONS = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
 const ADDITIONAL_LOCATIONS_FILE: AttachmentInfo = {
   fileName: "additional_locations.pdf",
@@ -345,6 +364,27 @@ describe("generateXml", () => {
     );
   });
 
+  it("writes a $required element empty when it has nothing to write", async () => {
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: {
+        Root: {
+          DateReceived: { $required: { $field: "date_received" } },
+          Wrapper: { $required: { Inner: { $field: "inner" } } },
+          "@f:Flag": { $required: { $field: "flag" } },
+        },
+      },
+    };
+    await expectValid(mapping);
+    expect(generateXml(mapping, {})).toEqual(
+      `<?xml version='1.0' encoding='utf-8'?>\n<f:Root xmlns:f="urn:f" f:Flag="">\n  <f:DateReceived/>\n  <f:Wrapper/>\n</f:Root>`,
+    );
+    expect(generateXml(mapping, { date_received: "2025-01-15" })).toContain(
+      "<f:DateReceived>2025-01-15</f:DateReceived>",
+    );
+  });
+
   it("refuses a $ key that isn't a function", () => {
     const mapping = {
       format: "xml-mapping",
@@ -372,16 +412,7 @@ describe("generateXml", () => {
 
 describe("xml-mapping.json", () => {
   it("matches schema/xml-mapping.schema.json for every form", async () => {
-    const validate = new Ajv().compile(
-      JSON.parse(
-        await readFile(
-          fileURLToPath(
-            new URL("../schema/xml-mapping.schema.json", import.meta.url),
-          ),
-          "utf8",
-        ),
-      ),
-    );
+    const validate = await schemaValidator();
     const forms = await readdir(path.join(outputDir, "forms"));
     expect(forms.length).toBeGreaterThan(0);
     for (const form of forms) {

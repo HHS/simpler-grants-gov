@@ -3,11 +3,12 @@
  *
  * A key without a prefix is in the form's namespace, `prefix:Name` is in another, and
  * `@prefix:Name` is an attribute. A `Group` is an element's children, an array repeats its
- * element once per entry, an `AttachedFile` is an `att:AttachedFileDataType`, and anything
- * else is the element's text. The output matches the API's: the same namespace
- * declarations, serialization and attachment elements.
+ * element once per entry, an `AttachedFile` is an `att:AttachedFileDataType`, an
+ * `EmptyElement` is an element with no content, and anything else is the element's text. The
+ * output matches the API's: the same namespace declarations, serialization and attachment
+ * elements.
  */
-import { AttachedFile, type AttachmentInfo } from "./handlers.js";
+import { AttachedFile, EmptyElement, type AttachmentInfo } from "./handlers.js";
 import { Group } from "./transform.js";
 
 const ATTACHMENTS = "http://apply.grants.gov/system/Attachments-V1.0";
@@ -72,14 +73,17 @@ export function writeXml(
     if (value instanceof Group) writeChildren(node, value);
     else if (value instanceof AttachedFile)
       node.children = attachmentNodes(value.info);
-    else node.text = text(value);
+    else if (!(value instanceof EmptyElement)) node.text = text(value);
     return node;
   };
 
   const writeChildren = (node: Node, content: Group) => {
     for (const [key, value] of content) {
       if (key.startsWith("@"))
-        node.attributes.push([key.slice(1), text(value)]);
+        node.attributes.push([
+          key.slice(1),
+          value instanceof EmptyElement ? "" : text(value),
+        ]);
       else
         for (const entry of Array.isArray(value) ? value : [value])
           node.children.push(element(key, entry));

@@ -76,6 +76,9 @@
           "$ref": "#/$defs/when"
         },
         {
+          "$ref": "#/$defs/required"
+        },
+        {
           "$ref": "#/$defs/elements"
         }
       ]
@@ -214,6 +217,17 @@
               "$ref": "#/$defs/branch"
             }
           }
+        }
+      }
+    },
+    "required": {
+      "description": "The value, or an empty element when it has nothing to write: for an element the XSD requires that the form may leave unanswered.",
+      "type": "object",
+      "required": ["$required"],
+      "additionalProperties": false,
+      "properties": {
+        "$required": {
+          "$ref": "#/$defs/value"
         }
       }
     },

@@ -12,9 +12,16 @@
  *   $when        `then` or `else`, as a condition holds
  *   $each        `map` once per item of a list, read relative to each item
  *   $attachment  the upload whose id is at a path
+ *   $required    a value, or an empty element when it has nothing to write
  */
 import { holds } from "./conditions.js";
-import type { Each, Match, Transform as TransformFn, When } from "./format.js";
+import type {
+  Each,
+  Match,
+  Transform as TransformFn,
+  Value,
+  When,
+} from "./format.js";
 import { read } from "./paths.js";
 import { isEmpty, type Handler, type Transform } from "./transform.js";
 import { VALUE_TRANSFORMS } from "./valueTransforms.js";
@@ -33,6 +40,9 @@ export class AttachedFile {
   constructor(readonly info: AttachmentInfo) {}
 }
 
+/** What `$required` yields when its value has nothing to write: an empty element. */
+export class EmptyElement {}
+
 // ---------------------------------------------------------------------------
 // Public functions
 // ---------------------------------------------------------------------------
@@ -48,6 +58,7 @@ export function defaultHandlers(
     $transform: transformValue,
     $when: when,
     $each: each,
+    $required: required,
     $attachment: (scope: unknown, path: string) => {
       const id = read(scope, path);
       if (typeof id !== "string" || id === "") return undefined;
@@ -111,4 +122,13 @@ export function each(
   return items
     .map((item) => transform(item, argument.map))
     .filter((value) => !isEmpty(value));
+}
+
+export function required(
+  scope: unknown,
+  argument: Value,
+  transform: Transform,
+): unknown {
+  const value = transform(scope, argument);
+  return isEmpty(value) ? new EmptyElement() : value;
 }
