@@ -105,26 +105,6 @@ const headers = [
       },
     ],
   },
-  // don't cache user specific pages: saved-opportunities, saved-search-queries
-  {
-    source: "/saved/:path*",
-    headers: [
-      {
-        key: "Cache-Control",
-        value: "no-store, must-revalidate",
-      },
-    ],
-  },
-  // don't cache the user specific page for applications
-  {
-    source: "/applications",
-    headers: [
-      {
-        key: "Cache-Control",
-        value: "no-store, must-revalidate",
-      },
-    ],
-  },
   // don't cache if users has a session cookie
   {
     source: "/:path*",

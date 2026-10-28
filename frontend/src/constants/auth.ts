@@ -18,5 +18,12 @@ export const LOGIN_REDIRECT_BLOCKED_PREFIXES = [
   "/api",
   "/dev",
 ];
+export const AUTH_GATED_PATH_PREFIXES = [
+  "/workspace",
+  "/settings",
+  "/notifications",
+  "/grantor",
+  "/developers/api-dashboard",
+];
 
 export const testApplicationId = "892a6aa8-92b1-46c2-a26b-21a6aaab825d";
