@@ -9,7 +9,7 @@ import { $transform, $transforms } from "./transforms.js";
 
 export { $lib } from "./lib.js";
 export { $onEmit } from "./emitter.js";
-export { transformOf } from "./transforms.js";
+export { transformOf, transformParamsOf } from "./transforms.js";
 export { xmlTransform, type XmlTransformRules } from "./xml-transform.js";
 
 export const $xsd = (ctx: DecoratorContext, target: Model, url: string) =>

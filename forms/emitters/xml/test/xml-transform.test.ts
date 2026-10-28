@@ -242,7 +242,9 @@ const valueSpec = (transform = "Transforms.Transformation.yesNo") => `
   namespace Mappings { enum Target { xml } }
 
   @Mapping.transforms(Transformation)
-  namespace Transforms { enum Transformation { yesNo: "boolean_to_yes_no" } }
+  namespace Transforms {
+    enum Transformation { yesNo: "boolean_to_yes_no", truncate: "truncate_string" }
+  }
   namespace Undeclared { enum Transformation { shout } }
 
   namespace Wire {
@@ -256,6 +258,8 @@ const valueSpec = (transform = "Transforms.Transformation.yesNo") => `
     @ns(Ns.Form)
     model Root {
       @Mapping.transform(${transform}) @name("Agrees") agrees: string;
+      @Mapping.transform(Transforms.Transformation.truncate, #{ max_length: 60 })
+      @name("Title") title?: string;
       @name("File") file?: AttachedFile;
     }
   }
@@ -265,6 +269,7 @@ const valueSpec = (transform = "Transforms.Transformation.yesNo") => `
     @Mapping.to(Mappings.Target.xml, Wire.Root)
     model Example {
       @Mapping.to(Mappings.Target.xml, Wire.Root.agrees) agrees: boolean;
+      @Mapping.to(Mappings.Target.xml, Wire.Root.title) title?: string;
       @Mapping.to(Mappings.Target.xml, Wire.Root.file) upload?: string;
     }
   }
@@ -289,6 +294,19 @@ describe("xmlTransform values", () => {
       xml_transform: {
         target: "Agrees",
         value_transform: { type: "boolean_to_yes_no" },
+      },
+    });
+  });
+
+  it("writes @Mapping.transform's params as the value_transform's", async () => {
+    const { result } = await valueRules();
+    expect(result.title).toEqual({
+      xml_transform: {
+        target: "Title",
+        value_transform: {
+          type: "truncate_string",
+          params: { max_length: 60 },
+        },
       },
     });
   });

@@ -15,7 +15,7 @@ import {
   type PropertyCasing,
 } from "./simpler-forms.js";
 import { reportDiagnostic, stateKeys } from "./lib.js";
-import { transformOf } from "./transforms.js";
+import { transformOf, transformParamsOf } from "./transforms.js";
 import { declaredNamespaces } from "./xml-transform.js";
 import {
   XML_MAPPING_FORMAT,
@@ -38,7 +38,7 @@ import {
  *   - an element with no `@Mapping.from` whose own elements read fields is a wrapper: a key
  *     with its elements under it, reading from the same field as its parent;
  *   - an element whose type is a `@GrantsGov.attachment` scalar is an `$attachment`;
- *   - `@Mapping.transform` wraps the value in a `$transform`;
+ *   - `@Mapping.transform` wraps the value in a `$transform`, with its `params`;
  *   - a literal-typed `@Xml.attribute` is a `$const`.
  *
  * Unlike `xmlTransform`'s rules, nothing is left out: every element the form fills is in the
@@ -187,8 +187,15 @@ function leaf(
 ): Value {
   if (isAttachment(program, type)) return { $attachment: field };
   const transform = transformOf(program, prop);
+  const params = transformParamsOf(program, prop);
   return transform
-    ? { $transform: { name: transform, value: { $field: field } } }
+    ? {
+        $transform: {
+          name: transform,
+          value: { $field: field },
+          ...(params ? { params } : {}),
+        },
+      }
     : { $field: field };
 }
 

@@ -17,7 +17,7 @@ import {
   type PropertyCasing,
 } from "./simpler-forms.js";
 import { reportDiagnostic, stateKeys } from "./lib.js";
-import { transformOf } from "./transforms.js";
+import { transformOf, transformParamsOf } from "./transforms.js";
 
 /** One form's rules, in the shape `FORM_XML_TRANSFORM_RULES` takes. */
 export type XmlTransformRules = Record<string, unknown>;
@@ -36,7 +36,7 @@ export type XmlTransformRules = Record<string, unknown>;
  *   - the root's `@Xml.ns` names a member of an `@Xml.nsDeclarations` enum, and every member
  *     of that enum is declared on the document;
  *   - a literal-typed `@Xml.attribute` on the root is a fixed root attribute;
- *   - `@Mapping.transform` on an element is its `value_transform`;
+ *   - `@Mapping.transform` on an element is its `value_transform`, with its `params`;
  *   - an element of the root whose type is a `@GrantsGov.attachment` scalar is an attachment
  *     field, not a rule: the API writes an attachment from the upload, not the answer, and
  *     only reads attachment fields at the root.
@@ -144,6 +144,7 @@ class Rules {
     const target = node.target!;
     const namespace = elementNamespace(this.program, target);
     const valueTransform = transformOf(this.program, target);
+    const params = transformParamsOf(this.program, target);
     const transform = {
       target: xmlName(this.program, target),
       ...(node.kind === "object" ? { type: "nested_object" } : {}),
@@ -151,7 +152,14 @@ class Rules {
       ...(namespace && namespace.namespace !== this.defaultNamespace
         ? { namespace: namespace.prefix }
         : {}),
-      ...(valueTransform ? { value_transform: { type: valueTransform } } : {}),
+      ...(valueTransform
+        ? {
+            value_transform: {
+              type: valueTransform,
+              ...(params ? { params } : {}),
+            },
+          }
+        : {}),
     };
     if (node.kind === "object")
       return { xml_transform: transform, ...this.of(node.children) };
