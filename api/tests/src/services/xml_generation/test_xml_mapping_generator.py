@@ -341,6 +341,75 @@ class TestWhen:
         assert "<Form:Kind>Other</Form:Kind>" in xml
         assert "Extra" not in xml
 
+    def test_writes_one_element_per_option_a_list_contains_or_does_not(self) -> None:
+        def option(code: str) -> dict[str, Any]:
+            return {
+                "$when": {
+                    "condition": {"field": "options", "operator": "contains", "value": code},
+                    "then": "Y: Yes",
+                    "else": "N: No",
+                }
+            }
+
+        mapping = _small_mapping(
+            {
+                "OptionA": option("a"),
+                "OptionB": option("b"),
+                "NoneChosen": {
+                    "$when": {
+                        "condition": {"not": {"field": "options", "operator": "exists"}},
+                        "then": "Y: Yes",
+                    }
+                },
+                "Single": {
+                    "$when": {
+                        "condition": {"field": "single", "operator": "contains", "value": "a"},
+                        "then": "Y: Yes",
+                    }
+                },
+            }
+        )
+
+        assert _generate(mapping, {"options": ["a"], "single": "a"}) == (
+            "<?xml version='1.0' encoding='utf-8'?>\n"
+            '<Form:Root xmlns:Form="urn:form" xmlns:lib="urn:lib"'
+            ' xmlns:att="http://apply.grants.gov/system/Attachments-V1.0">\n'
+            "  <Form:OptionA>Y: Yes</Form:OptionA>\n"
+            "  <Form:OptionB>N: No</Form:OptionB>\n"
+            "</Form:Root>"
+        )
+        assert "<Form:NoneChosen>Y: Yes</Form:NoneChosen>" in _generate(mapping, {})
+
+    def test_compares_answers_as_the_form_librarys_runtime_does(self) -> None:
+        mapping = _small_mapping(
+            {
+                "Equals": {
+                    "$when": {
+                        "condition": {"field": "flag", "operator": "equals", "value": 1},
+                        "then": "1",
+                    }
+                },
+                "Contains": {
+                    "$when": {
+                        "condition": {"field": "flags", "operator": "contains", "value": 1},
+                        "then": "1",
+                    }
+                },
+                "Count": {
+                    "$when": {
+                        "condition": {"field": "count", "operator": "in", "value": [1]},
+                        "then": "1",
+                    }
+                },
+            }
+        )
+
+        xml = _generate(mapping, {"flag": True, "flags": [True], "count": 1.0})
+
+        assert "Equals" not in xml
+        assert "Contains" not in xml
+        assert "<Form:Count>1</Form:Count>" in xml
+
     def test_rejects_an_unknown_operator(self) -> None:
         mapping = _small_mapping(
             {
@@ -527,6 +596,22 @@ class TestMappedRootFields:
             {"A": {"$match": {"value": {"$field": "kind"}, "case": {"x": {"$field": "other"}}}}}
         )
         assert mapped_root_fields(nested) == {"kind", "other"}
+        combined = _small_mapping(
+            {
+                "A": {
+                    "$when": {
+                        "condition": {
+                            "all": [
+                                {"field": "a.b", "operator": "exists"},
+                                {"not": {"field": "c", "operator": "exists"}},
+                            ]
+                        },
+                        "then": "x",
+                    }
+                }
+            }
+        )
+        assert mapped_root_fields(combined) == {"a", "c"}
         assert mapped_root_fields(_mapping("performance_sites")) == {
             "primary_site",
             "additional_sites",
