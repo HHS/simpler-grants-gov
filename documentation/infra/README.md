@@ -16,6 +16,8 @@
 
 ## Testing
 
+* [Readability Calculator readiness test plan: public uploads remain disabled](./nofo-readiness-test-plan.md)
+
 * [Readability Calculator preparation and short verification checklist](./nofo-readability-verification-kit.md)
 * [Private NOFO monitoring email routing](./nofo-private-alert-email.md)
 * [Read-only Readability Calculator inspection in infra-dev](./nofo-readability-inspection.md)
