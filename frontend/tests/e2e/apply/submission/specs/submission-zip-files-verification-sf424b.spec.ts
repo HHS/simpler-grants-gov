@@ -13,11 +13,9 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
-  buildSF424BZipPdfExpectedText,
-  buildSF424BZipXmlFields,
-  getSubmittedDateUtc,
-  SF424B_ZIP_PDF_NAME,
-} from "tests/e2e/apply/fixtures/sf424b-data";
+  fieldDefinitionsSF424B,
+  SF424B_FORM_MATCHER,
+} from "tests/e2e/apply/fixtures/sf424b-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -48,6 +46,10 @@ const { testOrgLabel } = playwrightEnv;
 // details are resolved from the per-form data files.
 const OPPORTUNITY_NUMBER = "E2E-SF424B-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
+
+const SF424B_ZIP_PDF_NAME = "SF424B.pdf";
+// System post-populated signature (SF424B:RepresentativeName): the e2e user's email.
+const SIGNATURE_VALUE = "simpler-grants-e2e-tester@navapbc.com";
 
 test.beforeEach(({ page: _ }, testInfo) => {
   test.skip(
@@ -106,9 +108,8 @@ test(
     await submitApplicationAndVerify(page, "success");
     await verifySubmissionConfirmation(page);
 
-    // Captured right after submission: SubmittedDate in the XML/PDF is the
-    // submission date (server date, UTC).
-    const submittedDate = getSubmittedDateUtc();
+    // SubmittedDate in the XML/PDF is the server (UTC) submission date.
+    const submittedDate = new Date().toISOString().slice(0, 10);
 
     // --- Download and unzip the generated submission zip ---
     // The zip is generated on demand after submission, so return to the
@@ -120,18 +121,38 @@ test(
     const contents = await downloadAndUnzipSubmission(page);
 
     await test.step("Verify GrantApplication.xml field values", () => {
-      assertXmlContainsFields(
-        contents,
-        buildSF424BZipXmlFields(testData, submittedDate),
-      );
+      assertXmlContainsFields(contents, {
+        representative_name: {
+          element: "SF424B:RepresentativeName",
+          value: SIGNATURE_VALUE,
+        },
+        title: {
+          element: "SF424B:RepresentativeTitle",
+          value: testData.title,
+        },
+        applicant_organization: {
+          element: "SF424B:ApplicantOrganizationName",
+          value: testData.applicant_organization,
+        },
+        submitted_date: {
+          element: "SF424B:SubmittedDate",
+          value: submittedDate,
+        },
+      });
     });
 
     await test.step("Verify SF424B.pdf form title and field values", async () => {
-      await assertPdfContainsText(
-        contents,
-        SF424B_ZIP_PDF_NAME,
-        buildSF424BZipPdfExpectedText(testData, submittedDate),
-      );
+      const { title, applicant_organization, signature } =
+        fieldDefinitionsSF424B;
+
+      await assertPdfContainsText(contents, SF424B_ZIP_PDF_NAME, [
+        SF424B_FORM_MATCHER,
+        signature.field,
+        SIGNATURE_VALUE,
+        `${title.field}* ${testData.title}`,
+        `${applicant_organization.field}* ${testData.applicant_organization}`,
+        submittedDate,
+      ]);
     });
   },
 );
