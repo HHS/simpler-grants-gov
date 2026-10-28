@@ -131,17 +131,36 @@ class Rules {
     return Object.fromEntries(
       [...nodes]
         .sort((a, b) => position(a) - position(b))
-        .map((node) => [
-          jsonPropertyName(this.program, node.source, this.casing),
-          this.rule(node),
-        ]),
+        .flatMap((node) => {
+          const rule = this.rule(node);
+          return rule
+            ? [[jsonPropertyName(this.program, node.source, this.casing), rule]]
+            : [];
+        }),
     );
   }
 
-  private rule(node: MappingNode): XmlTransformRules {
+  private rule(node: MappingNode): XmlTransformRules | undefined {
     // A group has no element of its own: its children land in the parent's.
     if (node.kind === "group") return this.of(node.children);
     const target = node.target!;
+    // The API writes an attachment from the upload only for a root attachment field; as a
+    // rule, it would write the upload's id.
+    const attachment = attachmentShape(this.program, target);
+    if (attachment) {
+      reportDiagnostic(this.program, {
+        code: "xml-transform-unsupported",
+        target,
+        format: {
+          element: xmlName(this.program, target),
+          reason:
+            attachment === "list"
+              ? "a list of attachments"
+              : "an attachment below the root",
+        },
+      });
+      return undefined;
+    }
     const namespace = elementNamespace(this.program, target);
     const valueTransform = transformOf(this.program, target);
     const params = transformParamsOf(this.program, target);
@@ -171,12 +190,26 @@ class Rules {
 
 /** Whether `node` is a single element whose type is a `@GrantsGov.attachment` scalar. */
 function isAttachment(program: Program, node: MappingNode): boolean {
-  const type = node.target?.type;
   return (
     node.kind === "leaf" &&
-    type?.kind === "Scalar" &&
-    program.stateSet(stateKeys.attachment).has(type)
+    !!node.target &&
+    attachmentShape(program, node.target) === "single"
   );
+}
+
+/** Whether `prop` holds an attachment, or a list of them. */
+function attachmentShape(
+  program: Program,
+  prop: ModelProperty,
+): "single" | "list" | undefined {
+  const attachments = program.stateSet(stateKeys.attachment);
+  const type = prop.type;
+  if (type.kind === "Scalar" && attachments.has(type)) return "single";
+  const item =
+    type.kind === "Model" && type.indexer?.key.name === "integer"
+      ? type.indexer.value
+      : undefined;
+  return item?.kind === "Scalar" && attachments.has(item) ? "list" : undefined;
 }
 
 /** Where a node sits in its target's sequence. A group sits where its first child does. */
