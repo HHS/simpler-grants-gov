@@ -34,12 +34,17 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
       case "boolean":
         return content ? t("yes") : t("no");
       case "string":
-        return formatStringReturnValue(content);
-      case "object":
-        if (Array.isArray(content) && content.length) {
+        return content.trim()
+          ? formatStringReturnValue(content)
+          : t("notSpecified");
+      case "object": {
+        const items = Array.isArray(content)
+          ? content.filter((item) => item.trim())
+          : [];
+        if (items.length) {
           return (
             <ul className="usa-list margin-y-0">
-              {content.map((item, index) => (
+              {items.map((item, index) => (
                 <li key={`contentList-${index}`}>
                   {formatStringReturnValue(item)}
                 </li>
@@ -48,6 +53,7 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
           );
         }
         return t("notSpecified");
+      }
       default:
         return t("notSpecified");
     }
