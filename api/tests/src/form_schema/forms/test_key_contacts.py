@@ -244,9 +244,11 @@ def test_key_contacts_v2_0_us_address_requires_state_zip(contact_minimal, key_co
     validate_required(data, EXPECTED_REQUIRED_FIELDS, key_contacts_v2_0)
 
 
-def test_key_contacts_v2_0_ui_schema_hides_field_list_heading(key_contacts_v2_0):
+def test_key_contacts_v2_0_ui_schema_hides_field_list_heading(key_contacts_handwritten_v2_0):
     section = next(
-        section for section in key_contacts_v2_0.form_ui_schema if section["name"] == "key_contacts"
+        section
+        for section in key_contacts_handwritten_v2_0.form_ui_schema
+        if section["name"] == "key_contacts"
     )
     field_list = next(
         child
@@ -256,3 +258,51 @@ def test_key_contacts_v2_0_ui_schema_hides_field_list_heading(key_contacts_v2_0)
 
     assert field_list["label"] == "Key Contact"
     assert field_list["hideFieldListHeading"] is True
+
+
+def test_key_contacts_generated_v2_0_ui_schema_shows_fields_in_contacts_list(
+    key_contacts_generated_v2_0,
+):
+    """Every field of a contact has a Control in the list's `options.detail`.
+
+    The generated UI schema renders the list of contacts as one JSON Forms Control. That
+    Control's `options.detail` is the layout of each contact, and a renderer shows only the
+    fields it places there. A field in a contact's JSON Schema with no Control in the
+    detail is accepted by validation but never shown, so applicants could not fill it in.
+    """
+
+    def controls(element: dict) -> list[dict]:
+        if element["type"] == "Control":
+            return [element]
+        return [c for child in element.get("elements", []) for c in controls(child)]
+
+    key_contacts = next(
+        control
+        for control in controls(key_contacts_generated_v2_0.form_ui_schema)
+        if control["scope"] == "#/properties/key_contacts"
+    )
+    detail_scopes = {control["scope"] for control in controls(key_contacts["options"]["detail"])}
+
+    name_fields = ["prefix", "first_name", "middle_name", "last_name", "suffix"]
+    address_fields = [
+        "street1",
+        "street2",
+        "city",
+        "county",
+        "state",
+        "province",
+        "country",
+        "zip_code",
+    ]
+    expected_scopes = {
+        "#/properties/project_role",
+        *(f"#/properties/name/properties/{field}" for field in name_fields),
+        "#/properties/title",
+        "#/properties/organizational_affiliation",
+        *(f"#/properties/address/properties/{field}" for field in address_fields),
+        "#/properties/phone",
+        "#/properties/fax",
+        "#/properties/email",
+    }
+
+    assert detail_scopes == expected_scopes
