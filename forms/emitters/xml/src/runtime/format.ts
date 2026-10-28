@@ -99,9 +99,18 @@ export interface Required {
   $required: Value;
 }
 
+/**
+ * `contains` holds when the answer at `field` is a list with `value` among its entries, as a
+ * checkbox group's answer is.
+ */
 export type Condition =
-  | { field: string; operator: "equals" | "not_equals"; value: unknown }
+  | {
+      field: string;
+      operator: "equals" | "not_equals" | "contains";
+      value: unknown;
+    }
   | { field: string; operator: "in"; value: unknown[] }
   | { field: string; operator: "exists" }
   | { all: Condition[] }
-  | { any: Condition[] };
+  | { any: Condition[] }
+  | { not: Condition };
