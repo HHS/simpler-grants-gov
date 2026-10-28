@@ -19,6 +19,18 @@ const OpportunityImportantDates = ({
     <div>
       <h2>{t("title")}</h2>
       <div className="border radius-md border-base-lighter padding-x-2">
+        {!opportunityStatus && (
+          <PostedOpportunityItem
+            detail={{
+              ...detail,
+              summary: {
+                ...detail.summary,
+                close_date: null,
+                close_date_description: null,
+              },
+            }}
+          />
+        )}
         {opportunityStatus === "forecasted" && (
           <ForecastOpportunityItem detail={detail} />
         )}
