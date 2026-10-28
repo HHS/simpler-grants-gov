@@ -47,7 +47,10 @@ export type Value =
 /** A `case` entry or `default`: a value, or a plain string, number or boolean as `$const`. */
 export type Branch = Value | string | number | boolean;
 
-/** The value at a dotted path, relative to the response or, inside `$each`, to the item. */
+/**
+ * The value at a dotted path, relative to the response or, inside `$each`, to the item. `.`
+ * is the item itself, for a list of values.
+ */
 export interface Field {
   $field: string;
 }
@@ -70,7 +73,10 @@ export interface Transform {
   $transform: { name: string; value: Value; params?: Record<string, unknown> };
 }
 
-/** The attached file whose upload id is at this path, written as an `att:AttachedFileDataType`. */
+/**
+ * The attached file whose upload id is at this path, written as an `att:AttachedFileDataType`.
+ * Inside `$each` over a list of upload ids, `.` is the item's.
+ */
 export interface Attachment {
   $attachment: string;
 }

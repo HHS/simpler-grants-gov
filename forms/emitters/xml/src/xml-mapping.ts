@@ -33,7 +33,8 @@ import {
  *
  *   - an element with `@Mapping.from` reads the field it names, found among the fields of
  *     the one its parent reads, with a path relative to the response or, in a list, the item;
- *   - a list of elements is an `$each` over the field it reads;
+ *   - a list of elements is an `$each` over the field it reads, and a list of attachments an
+ *     `$each` whose items are the upload ids themselves (`.`);
  *   - an element with no `@Mapping.from` whose own elements read fields is a wrapper: a key
  *     with its elements under it, reading from the same field as its parent;
  *   - an element whose type is a `@GrantsGov.attachment` scalar is an `$attachment`;
@@ -116,6 +117,19 @@ export function xmlMapping(
       const steps = path(prefix, source);
       const field = steps.join(".");
       const shape = shapeOf(source.at(-1)!.type);
+      if (
+        to.array &&
+        !to.object &&
+        shape.array &&
+        !shape.object &&
+        isAttachment(program, to.item)
+      ) {
+        // A list of upload ids: the element once per id, each item the id itself.
+        elements[key(prop)] = {
+          $each: { items: { $field: field }, map: { $attachment: "." } },
+        };
+        continue;
+      }
       if (to.array) {
         if (!to.object || !shape.object) {
           reportDiagnostic(program, {
@@ -160,12 +174,7 @@ export function xmlMapping(
 
 /** A value element: its field, as an attachment, transformed, or as it is. */
 function leaf(program: Program, prop: ModelProperty, field: string): Value {
-  const type = prop.type;
-  if (
-    type.kind === "Scalar" &&
-    program.stateSet(stateKeys.attachment).has(type)
-  )
-    return { $attachment: field };
+  if (isAttachment(program, prop.type)) return { $attachment: field };
   const transform = transformOf(program, prop);
   return transform
     ? { $transform: { name: transform, value: { $field: field } } }
@@ -210,11 +219,22 @@ const copies = (prop: ModelProperty, field: ModelProperty) => {
   return false;
 };
 
-/** Whether a type is a list, and the object it holds (directly or as each entry), if any. */
-function shapeOf(type: Type): { array: boolean; object?: Model } {
+/** Whether a type is a `@GrantsGov.attachment` scalar: an upload id. */
+const isAttachment = (program: Program, type: Type | undefined) =>
+  type?.kind === "Scalar" && program.stateSet(stateKeys.attachment).has(type);
+
+/**
+ * Whether a type is a list, and the object it holds (directly or as each entry), if any. A
+ * list's `item` is its entries' type.
+ */
+function shapeOf(type: Type): { array: boolean; object?: Model; item?: Type } {
   if (type.kind === "Model" && type.indexer?.key.name === "integer") {
     const item = type.indexer.value;
-    return { array: true, object: item.kind === "Model" ? item : undefined };
+    return {
+      array: true,
+      object: item.kind === "Model" ? item : undefined,
+      item,
+    };
   }
   return { array: false, object: type.kind === "Model" ? type : undefined };
 }

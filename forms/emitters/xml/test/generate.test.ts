@@ -385,6 +385,44 @@ describe("generateXml", () => {
     );
   });
 
+  it("reads `.` as the item itself, for a list of upload ids", async () => {
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: {
+        Root: {
+          OtherAttachments: {
+            OtherAttachment: {
+              $each: {
+                items: { $field: "other_attachments" },
+                map: { $attachment: "." },
+              },
+            },
+          },
+          Code: {
+            $each: { items: { $field: "codes" }, map: { $field: "." } },
+          },
+        },
+      },
+    };
+    await expectValid(mapping);
+    const xml = generateXml(
+      mapping,
+      { other_attachments: ["a", "b"], codes: ["X", "Y"] },
+      {
+        attachment: (id) => ({
+          fileName: `${id}.pdf`,
+          mimeType: "application/pdf",
+          fileLocation: `${id}.pdf`,
+          hashValue: "hash",
+        }),
+      },
+    );
+    expect(xml.match(/<f:OtherAttachment>/g)).toHaveLength(2);
+    expect(xml.indexOf("a.pdf")).toBeLessThan(xml.indexOf("b.pdf"));
+    expect(xml).toContain("<f:Code>X</f:Code>\n  <f:Code>Y</f:Code>");
+  });
+
   it("refuses a $ key that isn't a function", () => {
     const mapping = {
       format: "xml-mapping",

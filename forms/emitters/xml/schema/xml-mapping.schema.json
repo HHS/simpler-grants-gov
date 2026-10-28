@@ -33,9 +33,9 @@
   },
   "$defs": {
     "path": {
-      "description": "A dotted path, relative to the response or, inside $each, to the item.",
+      "description": "A dotted path, relative to the response or, inside $each, to the item. `.` is the item itself, and a whole-number step reads a list's entry by index.",
       "type": "string",
-      "pattern": "^[^.]+(\\.[^.]+)*$"
+      "pattern": "^(\\.|[^.]+(\\.[^.]+)*)$"
     },
     "literal": {
       "type": ["string", "number", "boolean"]
