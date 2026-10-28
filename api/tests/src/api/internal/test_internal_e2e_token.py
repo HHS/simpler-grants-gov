@@ -69,42 +69,6 @@ def test_get_e2e_token_success(client, db_session, manager_api_key, test_user):
     )
 
 
-def test_get_e2e_token_includes_email_when_user_has_linked_login(
-    client, db_session, manager_api_key, test_user
-):
-    """The JWT carries the user's email (as real logins do) so the frontend session has one"""
-    external_user = factories.LinkExternalUserFactory.create(user=test_user)
-
-    resp = client.post(
-        E2E_TOKEN_URL,
-        headers={"X-API-Key": manager_api_key},
-        json={"user_id": str(test_user.user_id)},
-    )
-
-    assert resp.status_code == 200
-    decoded_token = jwt.decode(
-        resp.get_json()["data"]["token"], options={"verify_signature": False}
-    )
-    assert decoded_token["email"] == external_user.email
-
-
-def test_get_e2e_token_email_is_none_without_linked_login(
-    client, db_session, manager_api_key, test_user
-):
-    """A test user with no linked login still gets a token, with no email"""
-    resp = client.post(
-        E2E_TOKEN_URL,
-        headers={"X-API-Key": manager_api_key},
-        json={"user_id": str(test_user.user_id)},
-    )
-
-    assert resp.status_code == 200
-    decoded_token = jwt.decode(
-        resp.get_json()["data"]["token"], options={"verify_signature": False}
-    )
-    assert decoded_token["email"] is None
-
-
 def test_get_e2e_token_forbidden_wrong_privilege(
     client, db_session, enable_factory_create, test_user
 ):

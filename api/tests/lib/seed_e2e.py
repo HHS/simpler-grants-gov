@@ -154,10 +154,6 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
     (
         UserBuilder(E2E_ORG_MEMBER_USER_ID, db_session, "e2e org member test user")
         .with_e2e_test_user()
-        # Linked external user gives the user an email, which the e2e-token JWT (and so the
-        # frontend session) carries. Needed by tests that load pages requiring session.email
-        # such as /workspace (see the user-initiated logout E2E test).
-        .with_oauth_login("e2e_org_member")
         .with_organization(e2e_organization, roles=[ORG_MEMBER])
         .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
         .build()

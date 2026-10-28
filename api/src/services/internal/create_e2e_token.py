@@ -42,8 +42,6 @@ def create_e2e_token(db_session: db.Session, api_key_user: User, target_user_id:
 
     logger.info("Generating E2E bypass token")
 
-    # Real logins put the user's email in the JWT, and the frontend session (plus pages
-    # like /workspace, which render nothing without session.email) relies on it.
-    jwt_str, token_session = create_jwt_for_user(target_user, db_session, email=target_user.email)
+    jwt_str, token_session = create_jwt_for_user(target_user, db_session)
 
     return {"token": jwt_str, "expires_at": token_session.expires_at}

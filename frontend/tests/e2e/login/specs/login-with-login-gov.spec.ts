@@ -46,6 +46,23 @@ const openAccountMenuAndGetSignOut = async (
   return signOut;
 };
 
+// Login.gov's logout is called with client_id + post_logout_redirect_uri and no
+// id_token_hint (see get_login_gov_logout_redirect_uri in the API), so Login.gov
+// shows a "sign out" confirmation page instead of signing the user out immediately.
+// The app session is only cleared after that confirmation, so click it if shown.
+const LOGIN_GOV_CONFIRM_SIGN_OUT = /sign out|log out/i;
+const confirmLoginGovSignOutIfShown = async (page: Page) => {
+  try {
+    if (new URL(page.url()).hostname === new URL(baseUrl).hostname) return;
+    const confirm = page
+      .getByRole("button", { name: LOGIN_GOV_CONFIRM_SIGN_OUT })
+      .first();
+    if (await confirm.isVisible()) await confirm.click();
+  } catch {
+    // Page was mid-navigation; the next poll iteration retries.
+  }
+};
+
 const isLoggedInOnServer = async (page: Page): Promise<boolean> => {
   const response = await page.request.get("/api/auth/session");
   if (!response.ok()) return false;
@@ -130,6 +147,9 @@ test.describe("Login.gov based authentication tests", () => {
         targetEnv !== "staging",
         "Real Login.gov logout flow is limited to staging",
       );
+      // Login with MFA (+ possible TOTP-window wait) plus the IdP round trip
+      // does not fit the default 120s.
+      test.setTimeout(240000);
       const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
 
       const isFirstAttempt = test.info().retry === 0;
@@ -158,11 +178,17 @@ test.describe("Login.gov based authentication tests", () => {
 
         // Then the round trip completes and the app session is gone
         await expect
-          .poll(() => isLoggedInOnServer(page), {
-            timeout: TIMEOUT_REDIRECT,
-            message:
-              "app session still active after Sign out; the Login.gov logout round trip did not complete",
-          })
+          .poll(
+            async () => {
+              await confirmLoginGovSignOutIfShown(page);
+              return isLoggedInOnServer(page);
+            },
+            {
+              timeout: TIMEOUT_REDIRECT,
+              message:
+                "app session still active after Sign out; the Login.gov logout round trip did not complete (check the failure screenshot for a Login.gov confirmation page)",
+            },
+          )
           .toBe(false);
         // ...and the user is back on the application, not stranded at the IdP
         await expect
