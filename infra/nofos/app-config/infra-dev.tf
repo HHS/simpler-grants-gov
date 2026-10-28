@@ -22,8 +22,11 @@ module "infra_dev_config" {
   database_max_capacity         = 1
   database_instance_count       = 1
 
-  # Dashboard and silent alarms first; no recipient or delivery approval assumed.
-  enable_pdf_readability_monitoring = true
+  # Alarm and recovery receipt confirmed in run 40576048291. Enable dev-only
+  # calculator notifications through the existing private route; see the runbook.
+  enable_pdf_readability_monitoring               = true
+  monitoring_email_alert_recipient_parameter_name = "/nofos/infra-dev/monitoring/alert-email"
+  pdf_readability_alarm_actions_enabled           = true
   # Observation first. Switch rate_action to block only for the coordinated
   # synthetic dev test; public pilot enablement remains a separate decision.
   pdf_readability_waf = {

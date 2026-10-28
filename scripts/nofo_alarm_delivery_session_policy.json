@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:SetAlarmState",
+        "cloudwatch:DescribeAlarmHistory",
+        "cloudwatch:DeleteAlarms"
+      ],
+      "Resource": "arn:aws:cloudwatch:us-east-1:061664787759:alarm:NOFO-DEV-TEST-alert-delivery-*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "sns:ListSubscriptionsByTopic",
+      "Resource": "arn:aws:sns:us-east-1:061664787759:nofos-infra-dev-monitoring"
+    }
+  ]
+}

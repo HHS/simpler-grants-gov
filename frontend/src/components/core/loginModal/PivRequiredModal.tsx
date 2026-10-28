@@ -3,6 +3,7 @@
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
@@ -15,12 +16,14 @@ const DESCRIPTION_ID = `${MODAL_ID}-description`;
 export const PivRequiredModal = () => {
   const t = useTranslations("PivRequiredModal");
   const pivModalRef = useRef<ModalRef | null>(null);
+  const pathname = usePathname();
+  // re-checked on navigation because this modal stays mounted in the layout
+  // while /login sets the flag and client-side redirects
   useEffect(() => {
-    const pivError = SessionStorage.getItem("showPivError") === "true";
-    if (pivError && pivModalRef?.current) {
-      pivModalRef.current?.toggleModal();
+    if (SessionStorage.getItem("showPivError") === "true") {
+      pivModalRef.current?.toggleModal(undefined, true);
     }
-  }, []);
+  }, [pathname]);
   return (
     <SimplerModal
       modalId={MODAL_ID}

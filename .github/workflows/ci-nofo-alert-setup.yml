@@ -4,6 +4,14 @@ on:
   pull_request:
     paths:
       - scripts/create_nofo_alert_parameter.py
+      - scripts/send_nofo_alert_test.py
+      - scripts/test_nofo_alarm_delivery.py
+      - scripts/nofo_alarm_delivery_session_policy.json
+      - scripts/tests/test_nofo_alert_alarm.py
+      - .github/workflows/test-nofo-alarm-delivery.yml
+      - scripts/nofo_alert_delivery_session_policy.json
+      - scripts/tests/test_nofo_alert_delivery.py
+      - .github/workflows/test-nofo-alert-delivery.yml
       - scripts/nofo_alert_setup_requirements.txt
       - scripts/nofo_alert_setup_session_policy.json
       - scripts/tests/test_nofo_alert_setup.py
@@ -13,6 +21,14 @@ on:
     branches: [main]
     paths:
       - scripts/create_nofo_alert_parameter.py
+      - scripts/send_nofo_alert_test.py
+      - scripts/test_nofo_alarm_delivery.py
+      - scripts/nofo_alarm_delivery_session_policy.json
+      - scripts/tests/test_nofo_alert_alarm.py
+      - .github/workflows/test-nofo-alarm-delivery.yml
+      - scripts/nofo_alert_delivery_session_policy.json
+      - scripts/tests/test_nofo_alert_delivery.py
+      - .github/workflows/test-nofo-alert-delivery.yml
       - scripts/nofo_alert_setup_requirements.txt
       - scripts/nofo_alert_setup_session_policy.json
       - scripts/tests/test_nofo_alert_setup.py
@@ -33,4 +49,4 @@ jobs:
       - name: Run offline privacy and scope checks
         run: |
           python3 -m pip install -r scripts/nofo_alert_setup_requirements.txt
-          python3 -m unittest discover -s scripts/tests -p test_nofo_alert_setup.py -v
+          python3 -m unittest discover -s scripts/tests -p 'test_nofo_alert*.py' -v

@@ -4,6 +4,71 @@ Work for [#12568](https://github.com/HHS/simpler-grants-gov/issues/12568), item 
 This adds an operations dashboard and alarm definitions, not a completed
 monitoring/support sign-off or permission to launch the anonymous pilot.
 
+## Dev notification activation and threshold review
+
+The current infra-dev configuration enables notification actions on the four
+existing calculator alarms through the private monitoring route. Other NOFO
+environments and the module default remain disabled. This takes effect only
+after the normal dev deployment applies the configuration; merging NOFO
+infrastructure paths can automatically start **Deploy NOFOs**. This is dev
+notification activation, not public-upload enablement or WAF enforcement.
+
+The private subscription and direct topic delivery were confirmed, followed by
+[controlled alarm/recovery run 40576048291](https://github.com/HHS/simpler-grants-gov/actions/runs/40576048291).
+CloudWatch recorded both successful notification actions, the inbox holder
+confirmed both ALARM and OK emails, and deletion of the temporary alarm was
+verified. The test used a separate synthetic alarm. It does not prove the four
+actual alarms evaluate correctly or that their configured thresholds have been
+load-tested.
+
+The read-only [pre-activation inspection 40576501884](https://github.com/HHS/simpler-grants-gov/actions/runs/40576501884)
+on October 27, 2026 found all four existing alarms in OK with notification actions
+disabled and the expected alarm/recovery topic configured. It found one confirmed
+email subscription, recent CPU/memory datapoints, and both WAF rules in Count
+mode. No WAF rule datapoints appeared in the inspected hour; that is not evidence
+of working enforcement. The inspection's `delivery_tested: false` means that
+inspection does not test delivery; the separate test and inbox confirmations above
+provide that evidence.
+
+The source review retains the existing thresholds for initial dev observation:
+
+| Existing alarm | Trigger and interpretation | Review decision |
+| --- | --- | --- |
+| Emergency WAF blocks | At least one actual block in a one-minute period | Keep: any emergency-rule block is useful to investigate, including an expected operator-initiated block. |
+| Upload-rate WAF blocks | At least one actual block in a one-minute period | Keep: reports actual enforcement; Count-only matches do not trigger it. |
+| Service CPU | Average CPU at least 80% in 3 of 5 one-minute periods | Keep provisionally for dev: sustained utilization rather than a single spike. No measured baseline supports changing it yet. |
+| Service memory | Average memory at least 80% in 3 of 5 one-minute periods | Keep provisionally for dev; tune after observing baseline and alert usefulness. |
+
+Both utilization alarms measure the whole NOFO ECS service, not just calculator
+requests or occupied workers. They are not document-processing failure alarms.
+Missing utilization data can produce INSUFFICIENT_DATA, but these alarms have
+only ALARM and OK actions, so missing data alone does not send an email. The WAF
+alarms treat missing counters as not breaching and remain quiet while the two
+rules are in Count mode. The dev rate setting remains 10 per IP per 300 seconds,
+with emergency blocking off; this PR does not turn either rule into Block.
+Alerts occur on state transitions, not once for each blocked request.
+
+After merge/deployment:
+
+1. Confirm **Deploy NOFOs** completed successfully for dev.
+2. Run **Inspect Readability Calculator** from main. Confirm the four expected
+   alarm identities, actions enabled, thresholds, existing confirmed private
+   subscription, and WAF Count mode. Keep raw configuration and recipients private.
+3. Record deployment/inspection links and any missing signals in #12568. Do not
+   infer metric enforcement or application cleanup from notification delivery.
+4. Observe real dev signals and review noisy/missed conditions before production
+   opt-in. Coordinate any deliberate WAF blocking or application load separately.
+
+To roll back only calculator notifications, set
+`pdf_readability_alarm_actions_enabled = false` in
+`infra/nofos/app-config/infra-dev.tf` and deploy through the same reviewed path.
+This preserves the private subscription and generic Builder notifications.
+Email delivery does not establish responder coverage; investigation/escalation
+ownership and the remaining public-release safeguards stay open.
+
+The sections below describe the original default-off setup; the dev activation
+above supersedes their initial disabled-state descriptions for infra-dev only.
+
 ## What the dashboard is
 
 The dashboard is an AWS CloudWatch page named
@@ -94,10 +159,10 @@ requests rejected by WAF.
 Keep internal team addresses out of public PRs and issue comments unless the
 team explicitly approves publication. This PR configures no actual recipient.
 The checked-in environment setting below is suitable only for an address
-approved for public disclosure. For a private address, an authorized
-infrastructure operator must agree and implement a private configuration path
-or manage the subscription outside this Terraform resource without creating
-ownership conflicts. No private input path is introduced by this PR.
+approved for public disclosure. For a private address, use the optional encrypted-parameter route described in
+[Private NOFO monitoring email routing](nofo-private-alert-email.md). It defaults
+to null and does not activate any current environment. Do not put a private
+address into the public recipient list.
 
 Email recipients do not need AWS or PagerDuty access to receive notifications
 and confirm the subscription link. An operator must verify resource deployment
