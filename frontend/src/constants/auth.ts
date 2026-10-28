@@ -22,7 +22,6 @@ export const AUTH_GATED_PATH_PREFIXES = [
   "/workspace",
   "/settings",
   "/notifications",
-  "/grantor",
   "/developers/api-dashboard",
 ];
 

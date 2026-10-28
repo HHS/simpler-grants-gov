@@ -33,7 +33,6 @@ test.describe("auth-gated pages", () => {
     "/workspace/applications",
     "/settings",
     "/notifications",
-    "/grantor/opportunities",
     "/developers/api-dashboard",
   ];
 
@@ -50,8 +49,6 @@ test.describe("auth-gated pages", () => {
           expect(response.status(), path).toBe(200);
           expectPrivateNoindex(response);
         }
-        // /grantor has no index page, so only its headers are checked
-        expectPrivateNoindex(await request.get("/grantor", { headers }));
       },
     );
   }

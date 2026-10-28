@@ -27,12 +27,9 @@ describe("proxy cache and index headers", () => {
     "/workspace/saved-opportunities",
     "/settings",
     "/notifications",
-    "/grantor",
-    "/grantor/opportunities",
     "/developers/api-dashboard",
     "/developers/api-dashboard/keys",
     "/es/workspace",
-    "/es/grantor/opportunities",
   ];
 
   describe.each([
@@ -54,7 +51,6 @@ describe("proxy cache and index headers", () => {
     "/workspace-foo",
     "/settingsfoo",
     "/developers/api-dashboard-foo",
-    "/grantors",
     "/es/search",
     "/search/workspace",
   ];
