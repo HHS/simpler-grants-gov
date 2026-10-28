@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 
 import OpportunityContact from "./OpportunityContact";
@@ -45,6 +45,37 @@ describe("OpportunityContact", () => {
     expect(
       screen.getByRole("link", { name: "contact@example.com" }),
     ).toBeInTheDocument();
+  });
+
+  it("shows the fallback message when both descriptions are blank strings", () => {
+    render(
+      <OpportunityContact
+        summary={{
+          ...mockSummaryData,
+          agency_contact_description: "   ",
+          agency_email_address_description: "",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("noContactInfo")).toBeInTheDocument();
+  });
+
+  it("does not render an empty block for a blank description next to a real one", () => {
+    render(
+      <OpportunityContact
+        summary={{
+          ...mockSummaryData,
+          agency_email_address_description: "   ",
+        }}
+      />,
+    );
+
+    const contact = screen.getByTestId("opportunity-contact");
+    expect(screen.getByText("Contact Description")).toBeInTheDocument();
+    expect(screen.queryByText("noContactInfo")).not.toBeInTheDocument();
+    // the email line and the contact description only, no empty paragraph
+    expect(within(contact).getAllByRole("paragraph")).toHaveLength(2);
   });
 
   it("does not show the fallback when only one description exists", () => {
