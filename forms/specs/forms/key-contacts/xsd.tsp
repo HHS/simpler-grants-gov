@@ -18,6 +18,10 @@ alias KeyContacts = Forms.KeyContacts.KeyContacts;
 alias KeyContact = Forms.KeyContacts.KeyContact;
 alias GlobLib = XSD.GlobLib;
 
+// =============================================================================
+// ROOT ELEMENT
+// =============================================================================
+
 @nsDeclarations
 enum Namespaces {
   Key_Contacts_2_0: "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
@@ -41,6 +45,10 @@ model Root {
 
   @attribute @name("FormVersion") formVersion: "2.0";
 }
+
+// =============================================================================
+// KEY CONTACTS
+// =============================================================================
 
 @ns(Namespaces.Key_Contacts_2_0)
 model RoleOnProject {

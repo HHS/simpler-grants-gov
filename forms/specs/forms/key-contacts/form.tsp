@@ -5,7 +5,8 @@ import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/organization/index.tsp";
 
-import "./key-contact.tsp";
+import "./examples.tsp";
+import "./fragments.tsp";
 
 using SimplerForms;
 
@@ -22,13 +23,7 @@ namespace Forms.KeyContacts;
   ombNumber: "4040-0010",
   expirationDate: "2029-08-31",
 })
-@example(#{
-  applicantOrganizationName: "Acme Corporation",
-  keyContacts: #[
-    Forms.KeyContacts.Examples.principalInvestigator,
-    Forms.KeyContacts.Examples.projectManager
-  ],
-})
+@example(Examples.form)
 model KeyContacts {
   /** Enter the legal name of the applicant that will undertake the assistance activity. This field is required. */
   @UI.label("Applicant Organization Name")

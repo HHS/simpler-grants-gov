@@ -12,11 +12,15 @@ namespace SimplerForms.Sgg;
 /** How sync installs a form. */
 model SyncOptions {
   /**
-   * Whether to install the form's XML transform rules, so the API can write its
-   * submission XML. Defaults to true. Set it to false while the rules cannot produce a
-   * valid document yet, e.g. when they leave out required elements.
+   * Whether, and in which format, to install how the form's submission XML is built:
+   *
+   *   - `"transform"` (or `true`, the default): `xml_transform.json`, rules keyed by the
+   *     response's properties;
+   *   - `"mapping"`: `xml_mapping.json`, a mapping shaped like the XML;
+   *   - `false`: neither, while the form can't produce a valid document yet, e.g. when its
+   *     mapping leaves out required elements.
    */
-  xml?: boolean;
+  xml?: boolean | "transform" | "mapping";
 
   /**
    * The form's version in Simpler Grants, which the API reports as its legacy form version.

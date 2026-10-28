@@ -89,6 +89,14 @@ export const hasXmlTransform = (specId: string): boolean =>
 export const loadXmlTransform = (specId: string): Json | undefined =>
   hasXmlTransform(specId) ? readJson(xmlTransformFile(specId)) : undefined;
 
+const xmlMappingFile = (specId: string) => formFile(specId, "xml-mapping.json");
+
+/** The form's emitted XML mapping, shaped like the XML, or undefined for one not mapped. */
+export const loadXmlMapping = (specId: string): Json | undefined =>
+  existsSync(xmlMappingFile(specId))
+    ? readJson(xmlMappingFile(specId))
+    : undefined;
+
 /** The form's `@GrantsGov.form` identity, as the SGG emitter wrote it, or null without one. */
 export const loadGrantsGovIdentity = (specId: string): Json =>
   (

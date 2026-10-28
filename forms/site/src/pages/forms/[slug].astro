@@ -73,6 +73,13 @@ const STATUS_LABELS: Record<string, string> = {
               <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Data</button>
             </>
           )}
+          {notes.length > 0 ? (
+            <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="notes">
+              Notes
+            </button>
+          ) : (
+            <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Notes</button>
+          )}
           <button class="tab-bar__tab tab-bar__tab--disabled" disabled>JSON Schema</button>
           <button class="tab-bar__tab tab-bar__tab--disabled" disabled>XML Mapping</button>
         </div>
@@ -86,18 +93,19 @@ const STATUS_LABELS: Record<string, string> = {
               <FormFieldTree nodes={form.data.children} />
             </div>
           )}
-          {notes.length > 0 && (
-            <>
-              <h2 class="section-title margin-top-4">Notes</h2>
-              <p class="text-base">Context from planning. Unlike the comparison above, notes are not checked.</p>
-              <ul class="plan-notes">
-                {notes.map((note) => (
-                  <li>{note}</li>
-                ))}
-              </ul>
-            </>
-          )}
         </div>
+
+        {notes.length > 0 && (
+          <div data-panel="notes" hidden>
+            <h2 class="section-title">Notes</h2>
+            <p class="text-base">Context from planning. Unlike the field comparison, notes are not checked.</p>
+            <ul class="plan-notes">
+              {notes.map((note) => (
+                <li>{note}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {spec && (
           <div data-panel="preview" hidden>
@@ -114,8 +122,11 @@ const STATUS_LABELS: Record<string, string> = {
         {spec && (
           <div data-panel="data" hidden>
             <h2 class="section-title">Form data</h2>
-            <p class="text-base">The JSON entered in the form preview, updated as you type.</p>
-            <FormDataPanel client:only="react" />
+            <p class="text-base">
+              The JSON entered in the form preview, and the Grants.gov XML built from it, updated
+              as you type.
+            </p>
+            <FormDataPanel client:only="react" xmlMapping={spec.xmlMapping} />
           </div>
         )}
       </>

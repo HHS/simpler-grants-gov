@@ -2,13 +2,15 @@ import type { EmitContext, Model } from "@typespec/compiler";
 import { emitFile, resolvePath } from "@typespec/compiler";
 import { mappingTargets, resolveForms } from "./simpler-forms.js";
 import { reportDiagnostic, type XmlEmitterOptions } from "./lib.js";
+import { xmlMapping } from "./xml-mapping.js";
 import { xmlTransform } from "./xml-transform.js";
 
 /**
- * Writes Grants.gov XML transform rules -- the `xml_transform.json` the API's XML generation
- * reads -- for every form linked in a configured mapping, beside the form's other artifacts:
+ * Writes how to build each form's Grants.gov XML, for every form linked in a configured
+ * mapping, beside the form's other artifacts, in both formats the API's XML generation reads:
  *
- *   forms/<form id>/xml-transform.json
+ *   forms/<form id>/xml-transform.json   rules keyed by the response's properties
+ *   forms/<form id>/xml-mapping.json     a mapping shaped like the XML (`runtime/format.ts`)
  *
  * Point `emitter-output-dir` at the `simpler-forms` emitter's to keep a form's artifacts in
  * one directory. One file per form, so a form linked in two configured mappings is an error.
@@ -58,6 +60,15 @@ export async function $onEmit(
         ),
         content: `${JSON.stringify(rules, null, 2)}\n`,
       });
+      const xml = xmlMapping(program, model, mapping, casing);
+      if (xml)
+        await emitFile(program, {
+          path: resolvePath(
+            context.emitterOutputDir,
+            `forms/${form.id}/xml-mapping.json`,
+          ),
+          content: `${JSON.stringify(xml, null, 2)}\n`,
+        });
     }
   }
 }
