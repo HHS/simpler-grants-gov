@@ -2,9 +2,10 @@
 
 A key without a prefix is in the form's namespace, ``prefix:Name`` is in another, and
 ``@prefix:Name`` is an attribute. A ``Group`` is an element's children, a list repeats its
-element once per entry, an ``AttachmentInfo`` is an ``att:AttachedFileDataType``, and
-anything else is the element's text. The output matches the current generator's: the same
-namespace declarations, serialization and attachment elements.
+element once per entry, an ``AttachmentInfo`` is an ``att:AttachedFileDataType``, an
+``EmptyElement`` is an element with no content, and anything else is the element's text. The
+output matches the current generator's: the same namespace declarations, serialization and
+attachment elements.
 """
 
 from typing import Any
@@ -12,6 +13,7 @@ from typing import Any
 from lxml import etree as lxml_etree
 
 from ..utils.attachment_mapping import AttachmentInfo
+from .handlers import EmptyElement
 from .transform import Group
 
 ATTACHMENTS_NS = "http://apply.grants.gov/system/Attachments-V1.0"
@@ -62,7 +64,8 @@ class _Writer:
             raise ValueError(f"Expected elements, got {content!r}")
         for key, value in content.items():
             if key.startswith("@"):
-                parent.set(self.attribute_name(key), _text(value))
+                text = "" if isinstance(value, EmptyElement) else _text(value)
+                parent.set(self.attribute_name(key), text)
             else:
                 for entry in value if isinstance(value, list) else [value]:
                     self.write_element(parent, key, entry)
@@ -73,7 +76,7 @@ class _Writer:
             self.write_children(element, value)
         elif isinstance(value, AttachmentInfo):
             self.write_attachment(element, value)
-        else:
+        elif not isinstance(value, EmptyElement):
             element.text = _text(value)
 
     def write_attachment(self, element: lxml_etree._Element, info: AttachmentInfo) -> None:
