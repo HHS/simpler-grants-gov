@@ -303,7 +303,10 @@ class Walker {
       );
     const type = this.schemas.find("complexTypes", declared.type, schema);
     if (!type) throw new Error(`unknown type ${declared.type} on ${path}`);
-    if (type.schema.targetNamespace === ATTACHMENTS && type.name === ATTACHED_FILE)
+    if (
+      type.schema.targetNamespace === ATTACHMENTS &&
+      type.name === ATTACHED_FILE
+    )
       return this.leaf(path, own, {});
     this.complex(type.node, type.schema, path, own);
   }

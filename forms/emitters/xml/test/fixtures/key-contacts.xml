@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Key_Contacts_2_0:Key_Contacts_2_0 xmlns:Key_Contacts_2_0="http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" Key_Contacts_2_0:FormVersion="2.0">
+  <Key_Contacts_2_0:ApplicantOrganizationName>Acme Corporation</Key_Contacts_2_0:ApplicantOrganizationName>
+  <Key_Contacts_2_0:RoleOnProject>
+    <Key_Contacts_2_0:ContactProjectRole>Principal Investigator</Key_Contacts_2_0:ContactProjectRole>
+    <Key_Contacts_2_0:ContactName>
+      <globLib:PrefixName>Dr.</globLib:PrefixName>
+      <globLib:FirstName>Jane</globLib:FirstName>
+      <globLib:LastName>Smith</globLib:LastName>
+    </Key_Contacts_2_0:ContactName>
+    <Key_Contacts_2_0:ContactTitle>Senior Researcher</Key_Contacts_2_0:ContactTitle>
+    <Key_Contacts_2_0:ContactAddress>
+      <globLib:Street1>123 Main Street</globLib:Street1>
+      <globLib:City>Washington</globLib:City>
+      <globLib:State>DC: District of Columbia</globLib:State>
+      <globLib:ZipPostalCode>20001</globLib:ZipPostalCode>
+      <globLib:Country>USA: UNITED STATES</globLib:Country>
+    </Key_Contacts_2_0:ContactAddress>
+    <Key_Contacts_2_0:ContactPhone>2025550100</Key_Contacts_2_0:ContactPhone>
+    <Key_Contacts_2_0:ContactEmail>jane.smith@acme.org</Key_Contacts_2_0:ContactEmail>
+  </Key_Contacts_2_0:RoleOnProject>
+</Key_Contacts_2_0:Key_Contacts_2_0>

@@ -36,7 +36,7 @@
       "kind": "section",
       "label": "PD/PI Profile",
       "help_text": "Enter the profile of the Project Director/Principal Investigator (PD/PI).",
-      "json_path": "principal_investigator.profile",
+      "json_path": "principal_investigator",
       "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile",
       "widget": "FieldsetWidget",
       "children": [
@@ -44,7 +44,7 @@
           "kind": "section",
           "label": "Name",
           "help_text": "Enter the PD/PI's name. First and last name are required.",
-          "json_path": "principal_investigator.profile.name",
+          "json_path": "principal_investigator.name",
           "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name",
           "widget": "FieldsetWidget",
           "children": [
@@ -58,7 +58,7 @@
               "help_text": "Enter the prefix.",
               "constraints": "minLength 1, maxLength 10",
               "pre_populated": "SF424(R&R) field 14-1 (deferred)",
-              "json_path": "principal_investigator.profile.name.prefix",
+              "json_path": "principal_investigator.name.prefix",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:PrefixName"
             },
             {
@@ -71,7 +71,7 @@
               "help_text": "Enter the first name.",
               "constraints": "minLength 1, maxLength 35",
               "pre_populated": "SF424(R&R) field 14-2 (deferred)",
-              "json_path": "principal_investigator.profile.name.first_name",
+              "json_path": "principal_investigator.name.first_name",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:FirstName"
             },
             {
@@ -84,7 +84,7 @@
               "help_text": "Enter the middle name.",
               "constraints": "minLength 1, maxLength 25",
               "pre_populated": "SF424(R&R) field 14-3 (deferred)",
-              "json_path": "principal_investigator.profile.name.middle_name",
+              "json_path": "principal_investigator.name.middle_name",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:MiddleName"
             },
             {
@@ -97,7 +97,7 @@
               "help_text": "Enter the last name.",
               "constraints": "minLength 1, maxLength 60",
               "pre_populated": "SF424(R&R) field 14-4 (deferred)",
-              "json_path": "principal_investigator.profile.name.last_name",
+              "json_path": "principal_investigator.name.last_name",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:LastName"
             },
             {
@@ -110,7 +110,7 @@
               "help_text": "Enter the suffix.",
               "constraints": "minLength 1, maxLength 10",
               "pre_populated": "SF424(R&R) field 14-5 (deferred)",
-              "json_path": "principal_investigator.profile.name.suffix",
+              "json_path": "principal_investigator.name.suffix",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:SuffixName"
             }
           ]
@@ -131,7 +131,7 @@
               "help_text": "Enter the position title.",
               "constraints": "minLength 1, maxLength 45",
               "pre_populated": "SF424(R&R) field 14-6 (deferred)",
-              "json_path": "principal_investigator.profile.title",
+              "json_path": "principal_investigator.title",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Title"
             },
             {
@@ -144,7 +144,7 @@
               "help_text": "Enter the legal name of the organization.",
               "constraints": "minLength 1, maxLength 60",
               "pre_populated": "SF424(R&R) field 14-7 (deferred)",
-              "json_path": "principal_investigator.profile.organization_name",
+              "json_path": "principal_investigator.organization_name",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:OrganizationName"
             },
             {
@@ -157,7 +157,7 @@
               "help_text": "Enter the name of the department, service, laboratory or equivalent within the organization.",
               "constraints": "minLength 1, maxLength 100",
               "pre_populated": "SF424(R&R) field 14-8 (deferred)",
-              "json_path": "principal_investigator.profile.department",
+              "json_path": "principal_investigator.department",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Department"
             },
             {
@@ -170,7 +170,7 @@
               "help_text": "Enter the name of the division, office or major subdivision within the organization.",
               "constraints": "minLength 1, maxLength 100",
               "pre_populated": "SF424(R&R) field 14-9 (deferred)",
-              "json_path": "principal_investigator.profile.division",
+              "json_path": "principal_investigator.division",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Division"
             },
             {
@@ -182,7 +182,7 @@
               "widget": "SelectWidget",
               "help_text": "Select the person's role on the project.",
               "constraints": "ProjectRoleDataType",
-              "json_path": "principal_investigator.profile.project_role",
+              "json_path": "principal_investigator.project_role",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:ProjectRole"
             },
             {
@@ -194,7 +194,7 @@
               "widget": "TextWidget",
               "help_text": "Complete if the project role is \"Other Professional\" or \"Other (Specify)\", e.g., Engineer, Chemist.",
               "constraints": "minLength 1, maxLength 40",
-              "json_path": "principal_investigator.profile.other_project_role_category",
+              "json_path": "principal_investigator.other_project_role_category",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:OtherProjectRoleCategory"
             }
           ]
@@ -203,7 +203,7 @@
           "kind": "section",
           "label": "Address",
           "help_text": "Enter the PD/PI's complete address.",
-          "json_path": "principal_investigator.profile.address",
+          "json_path": "principal_investigator.address",
           "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address",
           "widget": "FieldsetWidget",
           "children": [
@@ -217,7 +217,7 @@
               "help_text": "Enter the first line of the street address.",
               "constraints": "minLength 1, maxLength 55",
               "pre_populated": "SF424(R&R) field 14-10a (deferred)",
-              "json_path": "principal_investigator.profile.address.street1",
+              "json_path": "principal_investigator.address.street1",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:Street1"
             },
             {
@@ -230,7 +230,7 @@
               "help_text": "Enter the second line of the street address.",
               "constraints": "minLength 1, maxLength 55",
               "pre_populated": "SF424(R&R) field 14-10b (deferred)",
-              "json_path": "principal_investigator.profile.address.street2",
+              "json_path": "principal_investigator.address.street2",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:Street2"
             },
             {
@@ -243,7 +243,7 @@
               "help_text": "Enter the city.",
               "constraints": "minLength 1, maxLength 35",
               "pre_populated": "SF424(R&R) field 14-10c (deferred)",
-              "json_path": "principal_investigator.profile.address.city",
+              "json_path": "principal_investigator.address.city",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:City"
             },
             {
@@ -256,7 +256,7 @@
               "help_text": "Enter the county or parish.",
               "constraints": "minLength 1, maxLength 30",
               "pre_populated": "SF424(R&R) field 14-10d (deferred)",
-              "json_path": "principal_investigator.profile.address.county",
+              "json_path": "principal_investigator.address.county",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:County"
             },
             {
@@ -269,7 +269,7 @@
               "help_text": "Select the state. This field is required if the country is the United States.",
               "constraints": "StateCodeDataTypeV3",
               "pre_populated": "SF424(R&R) field 14-10e (deferred)",
-              "json_path": "principal_investigator.profile.address.state",
+              "json_path": "principal_investigator.address.state",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:State"
             },
             {
@@ -282,7 +282,7 @@
               "help_text": "Enter the province.",
               "constraints": "minLength 1, maxLength 30",
               "pre_populated": "SF424(R&R) field 14-10e1 (deferred)",
-              "json_path": "principal_investigator.profile.address.province",
+              "json_path": "principal_investigator.address.province",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:Province"
             },
             {
@@ -295,7 +295,7 @@
               "help_text": "Select the country.",
               "constraints": "CountryCodeDataTypeV3",
               "pre_populated": "SF424(R&R) field 14-10g (deferred)",
-              "json_path": "principal_investigator.profile.address.country",
+              "json_path": "principal_investigator.address.country",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:Country"
             },
             {
@@ -308,7 +308,7 @@
               "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
               "constraints": "minLength 1, maxLength 30",
               "pre_populated": "SF424(R&R) field 14-10f (deferred)",
-              "json_path": "principal_investigator.profile.address.zip_code",
+              "json_path": "principal_investigator.address.zip_code",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:ZipPostalCode"
             }
           ]
@@ -329,7 +329,7 @@
               "help_text": "Enter the phone number.",
               "constraints": "minLength 1, maxLength 25",
               "pre_populated": "SF424(R&R) field 14-11 (deferred)",
-              "json_path": "principal_investigator.profile.phone",
+              "json_path": "principal_investigator.phone",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Phone"
             },
             {
@@ -342,7 +342,7 @@
               "help_text": "Enter the fax number.",
               "constraints": "minLength 1, maxLength 25",
               "pre_populated": "SF424(R&R) field 14-12 (deferred)",
-              "json_path": "principal_investigator.profile.fax",
+              "json_path": "principal_investigator.fax",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Fax"
             },
             {
@@ -355,7 +355,7 @@
               "help_text": "Enter the email address.",
               "constraints": "maxLength 60, format email",
               "pre_populated": "SF424(R&R) field 14-13 (deferred)",
-              "json_path": "principal_investigator.profile.email",
+              "json_path": "principal_investigator.email",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Email"
             }
           ]
@@ -375,7 +375,7 @@
               "widget": "TextWidget",
               "help_text": "If you have an established personal profile with the agency (e.g., NIH), enter its agency ID.",
               "constraints": "minLength 1, maxLength 60",
-              "json_path": "principal_investigator.profile.credential",
+              "json_path": "principal_investigator.credential",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Credential"
             }
           ]
@@ -395,7 +395,7 @@
               "widget": "ApplicationAttachmentWidget",
               "help_text": "Attach a biographical sketch: education and training, research and professional experience, collaborators and affiliations, publications and synergistic activities.",
               "constraints": "format uuid",
-              "json_path": "principal_investigator.profile.biographical_sketch",
+              "json_path": "principal_investigator.biographical_sketch",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:BioSketchsAttached/RR_KeyPerson_3_0:BioSketchAttached"
             },
             {
@@ -407,7 +407,7 @@
               "widget": "ApplicationAttachmentWidget",
               "help_text": "Attach a list of all current and pending support for ongoing projects and pending proposals.",
               "constraints": "format uuid",
-              "json_path": "principal_investigator.profile.current_pending_support",
+              "json_path": "principal_investigator.current_pending_support",
               "xml_path": "RR_KeyPerson_3_0:PDPI/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:SupportsAttached/RR_KeyPerson_3_0:SupportAttached"
             }
           ]
@@ -426,7 +426,7 @@
           "kind": "section",
           "label": "Name",
           "help_text": "Enter the senior/key person's name. First and last name are required.",
-          "json_path": "senior_key_persons[].profile.name",
+          "json_path": "senior_key_persons[].name",
           "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name",
           "widget": "FieldsetWidget",
           "children": [
@@ -439,7 +439,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the prefix.",
               "constraints": "minLength 1, maxLength 10",
-              "json_path": "senior_key_persons[].profile.name.prefix",
+              "json_path": "senior_key_persons[].name.prefix",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:PrefixName"
             },
             {
@@ -451,7 +451,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the first name.",
               "constraints": "minLength 1, maxLength 35",
-              "json_path": "senior_key_persons[].profile.name.first_name",
+              "json_path": "senior_key_persons[].name.first_name",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:FirstName"
             },
             {
@@ -463,7 +463,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the middle name.",
               "constraints": "minLength 1, maxLength 25",
-              "json_path": "senior_key_persons[].profile.name.middle_name",
+              "json_path": "senior_key_persons[].name.middle_name",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:MiddleName"
             },
             {
@@ -475,7 +475,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the last name.",
               "constraints": "minLength 1, maxLength 60",
-              "json_path": "senior_key_persons[].profile.name.last_name",
+              "json_path": "senior_key_persons[].name.last_name",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:LastName"
             },
             {
@@ -487,7 +487,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the suffix.",
               "constraints": "minLength 1, maxLength 10",
-              "json_path": "senior_key_persons[].profile.name.suffix",
+              "json_path": "senior_key_persons[].name.suffix",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Name/globLib:SuffixName"
             }
           ]
@@ -507,7 +507,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the position title.",
               "constraints": "minLength 1, maxLength 45",
-              "json_path": "senior_key_persons[].profile.title",
+              "json_path": "senior_key_persons[].title",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Title"
             },
             {
@@ -519,7 +519,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the legal name of the organization.",
               "constraints": "minLength 1, maxLength 60",
-              "json_path": "senior_key_persons[].profile.organization_name",
+              "json_path": "senior_key_persons[].organization_name",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:OrganizationName"
             },
             {
@@ -531,7 +531,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the name of the department, service, laboratory or equivalent within the organization.",
               "constraints": "minLength 1, maxLength 100",
-              "json_path": "senior_key_persons[].profile.department",
+              "json_path": "senior_key_persons[].department",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Department"
             },
             {
@@ -543,7 +543,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the name of the division, office or major subdivision within the organization.",
               "constraints": "minLength 1, maxLength 100",
-              "json_path": "senior_key_persons[].profile.division",
+              "json_path": "senior_key_persons[].division",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Division"
             },
             {
@@ -555,7 +555,7 @@
               "widget": "SelectWidget",
               "help_text": "Select the person's role on the project.",
               "constraints": "ProjectRoleDataType",
-              "json_path": "senior_key_persons[].profile.project_role",
+              "json_path": "senior_key_persons[].project_role",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:ProjectRole"
             },
             {
@@ -567,7 +567,7 @@
               "widget": "TextWidget",
               "help_text": "Complete if the project role is \"Other Professional\" or \"Other (Specify)\", e.g., Engineer, Chemist.",
               "constraints": "minLength 1, maxLength 40",
-              "json_path": "senior_key_persons[].profile.other_project_role_category",
+              "json_path": "senior_key_persons[].other_project_role_category",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:OtherProjectRoleCategory"
             }
           ]
@@ -576,7 +576,7 @@
           "kind": "section",
           "label": "Address",
           "help_text": "Enter the senior/key person's complete address.",
-          "json_path": "senior_key_persons[].profile.address",
+          "json_path": "senior_key_persons[].address",
           "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address",
           "widget": "FieldsetWidget",
           "children": [
@@ -589,7 +589,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the first line of the street address.",
               "constraints": "minLength 1, maxLength 55",
-              "json_path": "senior_key_persons[].profile.address.street1",
+              "json_path": "senior_key_persons[].address.street1",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:Street1"
             },
             {
@@ -601,7 +601,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the second line of the street address.",
               "constraints": "minLength 1, maxLength 55",
-              "json_path": "senior_key_persons[].profile.address.street2",
+              "json_path": "senior_key_persons[].address.street2",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:Street2"
             },
             {
@@ -613,7 +613,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the city.",
               "constraints": "minLength 1, maxLength 35",
-              "json_path": "senior_key_persons[].profile.address.city",
+              "json_path": "senior_key_persons[].address.city",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:City"
             },
             {
@@ -625,7 +625,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the county or parish.",
               "constraints": "minLength 1, maxLength 30",
-              "json_path": "senior_key_persons[].profile.address.county",
+              "json_path": "senior_key_persons[].address.county",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:County"
             },
             {
@@ -637,7 +637,7 @@
               "widget": "SelectWidget",
               "help_text": "Select the state. This field is required if the country is the United States.",
               "constraints": "StateCodeDataTypeV3",
-              "json_path": "senior_key_persons[].profile.address.state",
+              "json_path": "senior_key_persons[].address.state",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:State"
             },
             {
@@ -649,7 +649,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the province.",
               "constraints": "minLength 1, maxLength 30",
-              "json_path": "senior_key_persons[].profile.address.province",
+              "json_path": "senior_key_persons[].address.province",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:Province"
             },
             {
@@ -661,7 +661,7 @@
               "widget": "SelectWidget",
               "help_text": "Select the country.",
               "constraints": "CountryCodeDataTypeV3",
-              "json_path": "senior_key_persons[].profile.address.country",
+              "json_path": "senior_key_persons[].address.country",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:Country"
             },
             {
@@ -673,7 +673,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
               "constraints": "minLength 1, maxLength 30",
-              "json_path": "senior_key_persons[].profile.address.zip_code",
+              "json_path": "senior_key_persons[].address.zip_code",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Address/globLib:ZipPostalCode"
             }
           ]
@@ -693,7 +693,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the phone number.",
               "constraints": "minLength 1, maxLength 25",
-              "json_path": "senior_key_persons[].profile.phone",
+              "json_path": "senior_key_persons[].phone",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Phone"
             },
             {
@@ -705,7 +705,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the fax number.",
               "constraints": "minLength 1, maxLength 25",
-              "json_path": "senior_key_persons[].profile.fax",
+              "json_path": "senior_key_persons[].fax",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Fax"
             },
             {
@@ -717,7 +717,7 @@
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
               "constraints": "maxLength 60, format email",
-              "json_path": "senior_key_persons[].profile.email",
+              "json_path": "senior_key_persons[].email",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Email"
             }
           ]
@@ -737,7 +737,7 @@
               "widget": "TextWidget",
               "help_text": "If you have an established personal profile with the agency (e.g., NIH), enter its agency ID.",
               "constraints": "minLength 1, maxLength 60",
-              "json_path": "senior_key_persons[].profile.credential",
+              "json_path": "senior_key_persons[].credential",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:Credential"
             }
           ]
@@ -757,7 +757,7 @@
               "widget": "ApplicationAttachmentWidget",
               "help_text": "Attach a biographical sketch: education and training, research and professional experience, collaborators and affiliations, publications and synergistic activities.",
               "constraints": "format uuid",
-              "json_path": "senior_key_persons[].profile.biographical_sketch",
+              "json_path": "senior_key_persons[].biographical_sketch",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:BioSketchsAttached/RR_KeyPerson_3_0:BioSketchAttached"
             },
             {
@@ -769,7 +769,7 @@
               "widget": "ApplicationAttachmentWidget",
               "help_text": "Attach a list of all current and pending support for ongoing projects and pending proposals.",
               "constraints": "format uuid",
-              "json_path": "senior_key_persons[].profile.current_pending_support",
+              "json_path": "senior_key_persons[].current_pending_support",
               "xml_path": "RR_KeyPerson_3_0:KeyPerson/RR_KeyPerson_3_0:Profile/RR_KeyPerson_3_0:SupportsAttached/RR_KeyPerson_3_0:SupportAttached"
             }
           ]

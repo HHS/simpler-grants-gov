@@ -124,12 +124,12 @@ describe.each([
   "rr-key-person-expanded",
   "nsf-key-person-expanded",
 ])("%s PD/PI profile", (specId) => {
-  type Data = { principal_investigator: { profile: Record<string, unknown> } };
+  type Data = { principal_investigator: Record<string, unknown> };
 
   it("rejects a profile with only an email", async () => {
     const { schema } = await loadFormSpec(specId);
     const data = {
-      principal_investigator: { profile: { email: "pi@example.invalid" } },
+      principal_investigator: { email: "pi@example.invalid" },
     };
     expect(createAjv().compile(schema)(data)).toBe(false);
   });
@@ -139,12 +139,12 @@ describe.each([
     async (field) => {
       const { schema, example } = await loadFormSpec(specId);
       const data = clone(example) as Data;
-      delete data.principal_investigator.profile[field];
+      delete data.principal_investigator[field];
       const validate = createAjv().compile(schema);
       expect(validate(data)).toBe(false);
       expect(validate.errors).toContainEqual(
         expect.objectContaining({
-          instancePath: "/principal_investigator/profile",
+          instancePath: "/principal_investigator",
           params: { missingProperty: field },
         }),
       );
@@ -154,7 +154,7 @@ describe.each([
   it("requires an email", async () => {
     const { schema, example } = await loadFormSpec(specId);
     const data = clone(example) as Data;
-    delete data.principal_investigator.profile.email;
+    delete data.principal_investigator.email;
     expect(createAjv().compile(schema)(data)).toBe(false);
   });
 });

@@ -3,7 +3,6 @@ import {
   ADDRESS_HEADING,
   BANK_WORDING,
   emailMinLength,
-  unmappedAttachments,
   PROFILE_GROUPS,
 } from "./common.ts";
 
@@ -23,6 +22,7 @@ const EACH_KEY_PERSON: Recorded = {
 
 export const DIFF: FormDiff = {
   slug: "research-related-senior-key-person-profile",
+  xml: "xml-mapping",
   wording: BANK_WORDING,
   dat: {
     absentFromPlan: { "1-10": ADDRESS_HEADING, "2-10": ADDRESS_HEADING },
@@ -83,35 +83,8 @@ export const DIFF: FormDiff = {
   },
   jsonSchemaVsXsd: {
     differingRules: emailMinLength([
-      "principal_investigator.profile.email",
-      "senior_key_persons[].profile.email",
+      "principal_investigator.email",
+      "senior_key_persons[].email",
     ]),
   },
-  ...unmappedAttachments([
-    [
-      "principal_investigator.profile.biographical_sketch",
-      "PDPI/Profile/BioSketchsAttached/BioSketchAttached",
-    ],
-    [
-      "principal_investigator.profile.current_pending_support",
-      "PDPI/Profile/SupportsAttached/SupportAttached",
-    ],
-    [
-      "senior_key_persons[].profile.biographical_sketch",
-      "KeyPerson/Profile/BioSketchsAttached/BioSketchAttached",
-    ],
-    [
-      "senior_key_persons[].profile.current_pending_support",
-      "KeyPerson/Profile/SupportsAttached/SupportAttached",
-    ],
-    [
-      "additional_profiles",
-      "AdditionalProfilesAttached/AdditionalProfileAttached",
-    ],
-    [
-      "additional_biographical_sketches",
-      "BioSketchsAttached/BioSketchAttached",
-    ],
-    ["additional_current_pending_support", "SupportsAttached/SupportAttached"],
-  ]),
 };

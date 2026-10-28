@@ -17,7 +17,7 @@ import {
   type PropertyCasing,
 } from "./simpler-forms.js";
 import { reportDiagnostic, stateKeys } from "./lib.js";
-import { transformOf } from "./transforms.js";
+import { transformOf, transformParamsOf } from "./transforms.js";
 
 /** One form's rules, in the shape `FORM_XML_TRANSFORM_RULES` takes. */
 export type XmlTransformRules = Record<string, unknown>;
@@ -36,7 +36,7 @@ export type XmlTransformRules = Record<string, unknown>;
  *   - the root's `@Xml.ns` names a member of an `@Xml.nsDeclarations` enum, and every member
  *     of that enum is declared on the document;
  *   - a literal-typed `@Xml.attribute` on the root is a fixed root attribute;
- *   - `@Mapping.transform` on an element is its `value_transform`;
+ *   - `@Mapping.transform` on an element is its `value_transform`, with its `params`;
  *   - an element of the root whose type is a `@GrantsGov.attachment` scalar is an attachment
  *     field, not a rule: the API writes an attachment from the upload, not the answer, and
  *     only reads attachment fields at the root.
@@ -54,31 +54,9 @@ export function xmlTransform(
 ): XmlTransformRules | undefined {
   let resolved;
   if (direction === "from") {
-    const from = resolveMappingFrom(program, form, mapping);
-    resolved = from?.resolved;
     // These rules are keyed by the form's properties, so a wrapper element with no property
-    // of its own is left out. Reported once per form, naming each.
-    const wrappers = (from?.problems ?? []).filter(
-      (p) => p.code === "simpler-forms/mapping-from-wrapper",
-    );
-    const left = [
-      ...new Set(
-        wrappers.map((w) => {
-          const t = w.target as ModelProperty;
-          return t.model ? `${t.model.name}.${t.name}` : t.name;
-        }),
-      ),
-    ];
-    if (left.length)
-      reportDiagnostic(program, {
-        code: "xml-wrappers-left-out",
-        target: form,
-        format: {
-          form: form.name,
-          count: String(left.length),
-          elements: left.join(", "),
-        },
-      });
+    // of its own is left out. The XML mapping format writes it; every installed form uses that.
+    resolved = resolveMappingFrom(program, form, mapping)?.resolved;
   } else resolved = resolveMapping(program, form, mapping);
   if (!resolved) return undefined;
   const root = resolved.target;
@@ -153,19 +131,39 @@ class Rules {
     return Object.fromEntries(
       [...nodes]
         .sort((a, b) => position(a) - position(b))
-        .map((node) => [
-          jsonPropertyName(this.program, node.source, this.casing),
-          this.rule(node),
-        ]),
+        .flatMap((node) => {
+          const rule = this.rule(node);
+          return rule
+            ? [[jsonPropertyName(this.program, node.source, this.casing), rule]]
+            : [];
+        }),
     );
   }
 
-  private rule(node: MappingNode): XmlTransformRules {
+  private rule(node: MappingNode): XmlTransformRules | undefined {
     // A group has no element of its own: its children land in the parent's.
     if (node.kind === "group") return this.of(node.children);
     const target = node.target!;
+    // The API writes an attachment from the upload only for a root attachment field; as a
+    // rule, it would write the upload's id.
+    const attachment = attachmentShape(this.program, target);
+    if (attachment) {
+      reportDiagnostic(this.program, {
+        code: "xml-transform-unsupported",
+        target,
+        format: {
+          element: xmlName(this.program, target),
+          reason:
+            attachment === "list"
+              ? "a list of attachments"
+              : "an attachment below the root",
+        },
+      });
+      return undefined;
+    }
     const namespace = elementNamespace(this.program, target);
     const valueTransform = transformOf(this.program, target);
+    const params = transformParamsOf(this.program, target);
     const transform = {
       target: xmlName(this.program, target),
       ...(node.kind === "object" ? { type: "nested_object" } : {}),
@@ -173,7 +171,14 @@ class Rules {
       ...(namespace && namespace.namespace !== this.defaultNamespace
         ? { namespace: namespace.prefix }
         : {}),
-      ...(valueTransform ? { value_transform: { type: valueTransform } } : {}),
+      ...(valueTransform
+        ? {
+            value_transform: {
+              type: valueTransform,
+              ...(params ? { params } : {}),
+            },
+          }
+        : {}),
     };
     if (node.kind === "object")
       return { xml_transform: transform, ...this.of(node.children) };
@@ -185,12 +190,26 @@ class Rules {
 
 /** Whether `node` is a single element whose type is a `@GrantsGov.attachment` scalar. */
 function isAttachment(program: Program, node: MappingNode): boolean {
-  const type = node.target?.type;
   return (
     node.kind === "leaf" &&
-    type?.kind === "Scalar" &&
-    program.stateSet(stateKeys.attachment).has(type)
+    !!node.target &&
+    attachmentShape(program, node.target) === "single"
   );
+}
+
+/** Whether `prop` holds an attachment, or a list of them. */
+function attachmentShape(
+  program: Program,
+  prop: ModelProperty,
+): "single" | "list" | undefined {
+  const attachments = program.stateSet(stateKeys.attachment);
+  const type = prop.type;
+  if (type.kind === "Scalar" && attachments.has(type)) return "single";
+  const item =
+    type.kind === "Model" && type.indexer?.key.name === "integer"
+      ? type.indexer.value
+      : undefined;
+  return item?.kind === "Scalar" && attachments.has(item) ? "list" : undefined;
 }
 
 /** Where a node sits in its target's sequence. A group sits where its first child does. */
@@ -208,7 +227,7 @@ const elementNamespace = (program: Program, prop: ModelProperty) =>
   getNs(program, prop) ?? (prop.model ? getNs(program, prop.model) : undefined);
 
 /** Every namespace the enum that declares the root's namespace declares, by prefix. */
-function declaredNamespaces(
+export function declaredNamespaces(
   program: Program,
   rootNs: { namespace: string; prefix: string },
 ): Record<string, string> {

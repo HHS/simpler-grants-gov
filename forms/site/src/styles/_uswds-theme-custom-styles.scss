@@ -1223,7 +1223,7 @@ details[open] > .group-header::before {
   }
 }
 
-.form-preview__json {
+.form-preview__code pre {
   max-height: 80vh;
   overflow: auto;
   margin: 0;
@@ -1233,7 +1233,7 @@ details[open] > .group-header::before {
   @include u-font("mono", "3xs");
 }
 
-// Plan notes, shown under the field tree
+// Plan notes, in their own tab
 .plan-notes {
   @include u-font("sans", "xs");
 

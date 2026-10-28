@@ -3,7 +3,8 @@ import { stateKeys } from "./lib.js";
 
 /** How sync installs a form, from `@Sgg.sync`'s options. */
 export interface SyncOptions {
-  xml: boolean;
+  /** The format sync installs the form's XML mapping in, or false for none. */
+  xml: false | "transform" | "mapping";
   sggVersion: string;
   instructions?: string;
 }
@@ -12,10 +13,17 @@ export interface SyncOptions {
 export const $sync = (
   ctx: DecoratorContext,
   target: Model,
-  options?: { xml?: boolean; sggVersion?: string; instructions?: string },
+  options?: {
+    xml?: boolean | "transform" | "mapping";
+    sggVersion?: string;
+    instructions?: string;
+  },
 ) =>
   ctx.program.stateMap(stateKeys.sync).set(target, {
-    xml: options?.xml ?? true,
+    xml:
+      options?.xml === true || options?.xml === undefined
+        ? "transform"
+        : options.xml,
     sggVersion: options?.sggVersion ?? "1.0",
     ...(options?.instructions && { instructions: options.instructions }),
   } satisfies SyncOptions);
