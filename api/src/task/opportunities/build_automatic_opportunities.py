@@ -38,6 +38,7 @@ from src.form_schema.forms import (
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
+    NSFKeyPersonExpandedGenerated_v3_3,
     OtherNarrativeAttachment_v1_2,
     PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
@@ -675,6 +676,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "R&R Senior/Key Person Profile (Expanded) (Generated)",
                 RRKeyPersonExpandedGenerated_v4_0.form_id,
                 "60993a94-d03a-4fcd-a97d-59608282c1c4",
+            ),
+            (
+                "E2E-NSFKPEG",
+                "NSF Senior/Key Person Profile (Expanded) (Generated)",
+                NSFKeyPersonExpandedGenerated_v3_3.form_id,
+                "7b0b7e69-0943-429e-b380-ebaf69985400",
             ),
             (
                 "E2E-SF424",
