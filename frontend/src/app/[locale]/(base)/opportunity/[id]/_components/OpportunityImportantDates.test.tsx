@@ -7,7 +7,12 @@ jest.mock("./ForecastOpportunityItem", () => ({
   ForecastOpportunityItem: () => <div data-testid="forecast-item" />,
 }));
 jest.mock("./PostedOpportunityItem", () => ({
-  PostedOpportunityItem: () => <div data-testid="posted-item" />,
+  PostedOpportunityItem: ({ detail }: { detail: OpportunityDetail }) => (
+    <div
+      data-testid="posted-item"
+      data-close-date={String(detail.summary.close_date)}
+    />
+  ),
 }));
 jest.mock("./ClosedOpportunityItem", () => ({
   ClosedOpportunityItem: () => <div data-testid="closed-item" />,
@@ -53,6 +58,36 @@ describe("OpportunityImportantDates", () => {
 
       expect(screen.getByTestId(testId)).toBeInTheDocument();
       expect(screen.queryByTestId("forecast-item")).not.toBeInTheDocument();
+    },
+  );
+
+  it.each([
+    ["has a summary", { close_date: "2025-03-01" }],
+    ["has no summary", null],
+  ])(
+    "falls back to the posted item with no close date when the opportunity has no status and %s",
+    (_, summary) => {
+      render(
+        <OpportunityImportantDates
+          detail={
+            {
+              opportunity_status: null,
+              summary,
+            } as unknown as OpportunityDetail
+          }
+        />,
+      );
+
+      expect(
+        screen.getByRole("heading", { level: 2, name: "title" }),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("posted-item")).toHaveAttribute(
+        "data-close-date",
+        "null",
+      );
+      expect(screen.queryByTestId("forecast-item")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("closed-item")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("archived-item")).not.toBeInTheDocument();
     },
   );
 
