@@ -10,9 +10,9 @@ type OpportunityContactProps = {
 const OpportunityContact = ({ summary }: OpportunityContactProps) => {
   const t = useTranslations("OpportunityListing.description");
 
-  const hasDescription =
-    !!summary.agency_email_address_description ||
-    !!summary.agency_contact_description;
+  const emailDescription = summary.agency_email_address_description?.trim();
+  const contactDescription = summary.agency_contact_description?.trim();
+  const hasDescription = !!emailDescription || !!contactDescription;
 
   return (
     <div className="margin-top-6" data-testid="opportunity-contact">
@@ -27,13 +27,11 @@ const OpportunityContact = ({ summary }: OpportunityContactProps) => {
           t("notSpecified")
         )}
       </p>
-      {summary.agency_email_address_description && (
-        <p>{summary.agency_email_address_description}</p>
-      )}
-      {summary.agency_contact_description && (
+      {emailDescription && <p>{emailDescription}</p>}
+      {contactDescription && (
         <div
           dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(summary.agency_contact_description),
+            __html: DOMPurify.sanitize(contactDescription),
           }}
         />
       )}
