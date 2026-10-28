@@ -149,6 +149,59 @@ describe("OpportunityAwardInfo", () => {
     expect(screen.getAllByText("notSpecified")).toHaveLength(baseline + 1);
   });
 
+  it("falls back to not specified when explanations are empty or blank strings", () => {
+    const { unmount } = render(
+      <OpportunityAwardInfo opportunityData={mockOpportunityData} />,
+    );
+    const baseline = screen.queryAllByText("notSpecified").length;
+    unmount();
+
+    render(
+      <OpportunityAwardInfo
+        opportunityData={{
+          ...mockOpportunityData,
+          category_explanation: "",
+          summary: {
+            ...mockOpportunityData.summary,
+            funding_category_description: "   ",
+          },
+        }}
+      />,
+    );
+
+    expect(
+      screen.queryByText("Funds allocated by agency discretion"),
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByText("notSpecified")).toHaveLength(baseline + 2);
+  });
+
+  it("ignores blank list items and falls back when none are left", () => {
+    const { unmount } = render(
+      <OpportunityAwardInfo opportunityData={mockOpportunityData} />,
+    );
+    const baseline = screen.queryAllByText("notSpecified").length;
+    unmount();
+
+    render(
+      <OpportunityAwardInfo
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            ...mockOpportunityData.summary,
+            funding_instruments: ["Grant", "", "  "],
+            funding_categories: ["", " "],
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Grant").tagName).toBe("LI");
+    expect(
+      screen.getAllByRole("listitem").filter((li) => !li.textContent?.trim()),
+    ).toHaveLength(0);
+    expect(screen.getAllByText("notSpecified")).toHaveLength(baseline + 1);
+  });
+
   it("renders zero amounts as values, not as missing", () => {
     render(
       <OpportunityAwardInfo
