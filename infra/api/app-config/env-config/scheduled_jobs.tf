@@ -64,16 +64,6 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    grantee1 = [
-      "flask",
-      "data-migration",
-      "load-transform",
-      "--load",
-      "--transform",
-      "--set-current",
-      "--store-version"
-    ],
-    # Mirrors grantee1.
     "infra-sgg2" = [
       "flask",
       "data-migration",
@@ -157,7 +147,6 @@ locals {
     "infra-staging"  = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
     training         = ["flask", "task", "sam-extracts"]
     "infra-training" = ["flask", "task", "sam-extracts"]
-    grantee1         = ["flask", "task", "sam-extracts"]
     "infra-sgg2"     = ["flask", "task", "sam-extracts"]
     "infra-sgg3"     = ["flask", "task", "sam-extracts"]
     grantor1         = ["flask", "task", "sam-extracts"]
@@ -171,7 +160,6 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "DISABLED"
     "infra-training" = "DISABLED"
-    grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
     "infra-sgg3"     = "DISABLED"
     grantor1         = "DISABLED"
@@ -185,7 +173,6 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
     "infra-sgg3"     = "DISABLED"
     grantor1         = "DISABLED"
@@ -199,7 +186,6 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
     "infra-sgg3"     = "ENABLED"
     grantor1         = "ENABLED"
@@ -213,7 +199,6 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
     "infra-sgg3"     = "ENABLED"
     grantor1         = "ENABLED"
@@ -227,7 +212,6 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "ENABLED"
     "infra-sgg2"     = "ENABLED"
     "infra-sgg3"     = "ENABLED"
     grantor1         = "ENABLED"
@@ -241,7 +225,6 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
     "infra-sgg3"     = "DISABLED"
     grantor1         = "DISABLED"
@@ -255,7 +238,6 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "DISABLED"
     "infra-training" = "DISABLED"
-    grantee1         = "DISABLED"
     "infra-sgg2"     = "DISABLED"
     "infra-sgg3"     = "DISABLED"
     grantee2         = "DISABLED"
