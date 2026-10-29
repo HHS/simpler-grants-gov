@@ -48,9 +48,27 @@ describe("resolveExternalRequestUrl", () => {
         ),
       );
 
-      expect(url).not.toContain("raw.login.jwt");
-      expect(url).toContain("token=REDACTED");
-      expect(url).toContain("other=kept");
+      expect(url).toMatch(/\/api\/auth\/callback\?token=REDACTED&other=kept$/);
+    },
+  );
+
+  it.each([
+    [
+      { host: "grantee2.teams.simpler.grants.gov" },
+      "https://grantee2.teams.simpler.grants.gov",
+    ],
+    [{}, "https://0.0.0.0:8000"],
+  ])(
+    "leaves a token param on an unrelated route unchanged with headers %p",
+    (headers, origin) => {
+      expect(
+        resolveExternalRequestUrl(
+          buildRequest(
+            "https://0.0.0.0:8000/some-route?token=ordinary-value",
+            headers,
+          ),
+        ),
+      ).toBe(`${origin}/some-route?token=ordinary-value`);
     },
   );
 

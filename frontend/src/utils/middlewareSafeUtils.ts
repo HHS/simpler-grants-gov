@@ -15,28 +15,29 @@ export const stringToBoolean = (
 
 const EXTERNAL_HOST_PATTERN = /^[a-zA-Z0-9.-]+(:\d{1,5})?$/;
 
-// the Login.gov token arrives as a query param on /api/auth/callback
-const SENSITIVE_QUERY_PARAMS = ["token"];
+const LOGIN_CALLBACK_PATHNAME = "/api/auth/callback";
 
-const redactSensitiveQueryParams = (url: URL): string => {
-  SENSITIVE_QUERY_PARAMS.forEach((param) => {
-    if (url.searchParams.has(param)) {
-      url.searchParams.set(param, "REDACTED");
-    }
-  });
+// the Login.gov token arrives as a query param on the login callback
+const redactLoginToken = (url: URL): string => {
+  if (
+    url.pathname === LOGIN_CALLBACK_PATHNAME &&
+    url.searchParams.has("token")
+  ) {
+    url.searchParams.set("token", "REDACTED");
+  }
   return url.toString();
 };
 
-// resolves the URL for request logging, so sensitive query param values are redacted
+// resolves the URL for request logging, so the Login.gov token is redacted
 export const resolveExternalRequestUrl = (request: NextRequest): string => {
   const host = request.headers.get("host");
   const internalUrl = new URL(request.url);
 
   if (!host || !EXTERNAL_HOST_PATTERN.test(host)) {
-    return redactSensitiveQueryParams(internalUrl);
+    return redactLoginToken(internalUrl);
   }
 
-  return redactSensitiveQueryParams(
+  return redactLoginToken(
     new URL(
       `${internalUrl.protocol}//${host}${internalUrl.pathname}${internalUrl.search}`,
     ),
