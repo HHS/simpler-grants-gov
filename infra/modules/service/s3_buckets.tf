@@ -48,7 +48,7 @@ data "aws_iam_policy_document" "s3_buckets_put_access" {
         length(aws_iam_role.opensearch_write) > 0 ? [aws_iam_role.opensearch_write[0].arn] : [],
         # The submission consumer builds application submission zips in the
         # draft files bucket (and reads attachments from it).
-        length(aws_iam_role.workflow_service) > 0 ? [aws_iam_role.workflow_service[0].arn] : []
+        length(aws_iam_role.submission_consumer) > 0 ? [aws_iam_role.submission_consumer[0].arn] : []
       )
     }
   }
