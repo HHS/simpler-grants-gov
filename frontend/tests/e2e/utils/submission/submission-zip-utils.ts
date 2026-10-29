@@ -29,12 +29,41 @@ export interface ZipContents {
 }
 
 /**
- * Waits for the application submission download button to become enabled.
+ * Waits for the submission zip to be ready, then for the download button to be enabled.
+ *
+ * The button is only rendered once the application status is ACCEPTED. Until then
+ * (status SUBMITTED) the page shows a "being prepared" message, and the page is
+ * server-rendered, so it must be reloaded to pick up the status change.
  *
  * @param page Playwright Page object, already on the application page
+ * @param timeoutMs How long to wait for the zip to be built (default 90s)
  */
-export async function waitForSubmissionZipReady(page: Page): Promise<void> {
+export async function waitForSubmissionZipReady(
+  page: Page,
+  timeoutMs = 90_000,
+): Promise<void> {
   const downloadButton = page.getByTestId("application-submission-download");
+  const preparingMessage = page.getByTestId(
+    "application-submission-download-message",
+  );
+
+  try {
+    await expect(async () => {
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await expect(downloadButton).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: timeoutMs, intervals: [2_000, 3_000, 5_000] });
+  } catch (error) {
+    const stillPreparing = await preparingMessage
+      .isVisible()
+      .catch(() => false);
+    throw new Error(
+      stillPreparing
+        ? `Submission zip was not ready after ${timeoutMs}ms: the application is still SUBMITTED ` +
+            "(the submission consumer / create-application-submission task has not processed it)."
+        : `Submission download button not found after ${timeoutMs}ms.`,
+      { cause: error },
+    );
+  }
 
   await expect(downloadButton).toBeEnabled({ timeout: 10_000 });
 }

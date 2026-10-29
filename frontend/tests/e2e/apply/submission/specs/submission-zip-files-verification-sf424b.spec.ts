@@ -53,6 +53,10 @@ const SF424B_ZIP_PDF_NAME = "SF424B.pdf";
 const SIGNATURE_VALUE = "simpler-grants-e2e-tester@navapbc.com";
 
 test.beforeEach(({ page: _ }, testInfo) => {
+  test.skip(
+    playwrightEnv.targetEnv !== "staging",
+    "Submission ZIP verification runs only against staging",
+  );
   skipNonChromeOnStaging(testInfo);
 });
 
