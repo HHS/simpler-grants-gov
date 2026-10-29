@@ -1,17 +1,17 @@
 locals {
-  workflow_service_config = local.environment_config.workflow_service_config
-  enable_workflow_service = local.workflow_service_config.enable
-  workflow_service_name   = "${local.service_name}-workflow"
+  submission_consumer_config = local.environment_config.submission_consumer_config
+  enable_submission_consumer = local.submission_consumer_config.enable
+  submission_consumer_name   = "${local.service_name}-submission-consumer"
 }
 
 #-------------------------------
-# Workflow CloudWatch Log Groups
+# Submission Consumer CloudWatch Log Groups
 #-------------------------------
 
-resource "aws_cloudwatch_log_group" "workflow" {
-  count = local.enable_workflow_service ? 1 : 0
+resource "aws_cloudwatch_log_group" "submission_consumer" {
+  count = local.enable_submission_consumer ? 1 : 0
 
-  name = "service/${local.workflow_service_name}"
+  name = "service/${local.submission_consumer_name}"
 
   retention_in_days = 365
 
@@ -19,22 +19,22 @@ resource "aws_cloudwatch_log_group" "workflow" {
 }
 
 #-------------------------------
-# Workflow ECS Task Definition
+# Submission Consumer ECS Task Definition
 #-------------------------------
 
-resource "aws_ecs_task_definition" "workflow" {
-  count = local.enable_workflow_service ? 1 : 0
+resource "aws_ecs_task_definition" "submission_consumer" {
+  count = local.enable_submission_consumer ? 1 : 0
 
-  family             = local.workflow_service_name
+  family             = local.submission_consumer_name
   execution_role_arn = module.service.task_role_arn
-  task_role_arn      = module.service.workflow_service_role_arn
+  task_role_arn      = module.service.submission_consumer_role_arn
 
   container_definitions = jsonencode([
     {
-      name                   = local.workflow_service_name,
+      name                   = local.submission_consumer_name,
       image                  = module.service.image_url,
-      memory                 = local.workflow_service_config.memory,
-      cpu                    = local.workflow_service_config.cpu,
+      memory                 = local.submission_consumer_config.memory,
+      cpu                    = local.submission_consumer_config.cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = true,
@@ -74,9 +74,9 @@ resource "aws_ecs_task_definition" "workflow" {
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          "awslogs-group"         = "service/${local.workflow_service_name}",
+          "awslogs-group"         = "service/${local.submission_consumer_name}",
           "awslogs-region"        = data.aws_region.current.name,
-          "awslogs-stream-prefix" = local.workflow_service_name
+          "awslogs-stream-prefix" = local.submission_consumer_name
         }
       }
       systemControls = []
@@ -84,55 +84,55 @@ resource "aws_ecs_task_definition" "workflow" {
     },
   ])
 
-  cpu    = local.workflow_service_config.cpu
-  memory = local.workflow_service_config.memory
+  cpu    = local.submission_consumer_config.cpu
+  memory = local.submission_consumer_config.memory
 
   requires_compatibilities = ["FARGATE"]
 
   network_mode = "awsvpc"
 
   depends_on = [
-    aws_cloudwatch_log_group.workflow,
+    aws_cloudwatch_log_group.submission_consumer,
   ]
 }
 
 #-------------------------------
-# Workflow New Relic Log Forwarding
+# Submission Consumer New Relic Log Forwarding
 #-------------------------------
 
-resource "aws_lambda_permission" "allow_cloudwatch_workflow" {
-  count = local.enable_workflow_service ? 1 : 0
+resource "aws_lambda_permission" "allow_cloudwatch_submission_consumer" {
+  count = local.enable_submission_consumer ? 1 : 0
 
-  statement_id  = "AllowCloudWatchWorkflow"
+  statement_id  = "AllowCloudWatchSubmissionConsumer"
   action        = "lambda:InvokeFunction"
   function_name = module.service.nr_host_log_forwarder_name
   principal     = "logs.amazonaws.com"
-  source_arn    = "${aws_cloudwatch_log_group.workflow[0].arn}:*"
+  source_arn    = "${aws_cloudwatch_log_group.submission_consumer[0].arn}:*"
 }
 
-resource "aws_cloudwatch_log_subscription_filter" "workflow_to_newrelic" {
-  count = local.enable_workflow_service ? 1 : 0
+resource "aws_cloudwatch_log_subscription_filter" "submission_consumer_to_newrelic" {
+  count = local.enable_submission_consumer ? 1 : 0
 
-  name            = "${local.workflow_service_name}-to-newrelic"
-  log_group_name  = aws_cloudwatch_log_group.workflow[0].name
+  name            = "${local.submission_consumer_name}-to-newrelic"
+  log_group_name  = aws_cloudwatch_log_group.submission_consumer[0].name
   filter_pattern  = ""
   destination_arn = module.service.nr_host_log_forwarder_arn
 
-  depends_on = [aws_lambda_permission.allow_cloudwatch_workflow]
+  depends_on = [aws_lambda_permission.allow_cloudwatch_submission_consumer]
 }
 
 #-------------------------------
-# Workflow ECS Service
+# Submission Consumer ECS Service
 #-------------------------------
 
-resource "aws_ecs_service" "workflow" {
-  count = local.enable_workflow_service ? 1 : 0
+resource "aws_ecs_service" "submission_consumer" {
+  count = local.enable_submission_consumer ? 1 : 0
 
-  name            = local.workflow_service_name
+  name            = local.submission_consumer_name
   cluster         = module.service.cluster_arn
   launch_type     = "FARGATE"
-  task_definition = aws_ecs_task_definition.workflow[0].arn
-  desired_count   = local.workflow_service_config.desired_count
+  task_definition = aws_ecs_task_definition.submission_consumer[0].arn
+  desired_count   = local.submission_consumer_config.desired_count
 
   enable_execute_command = local.service_config.enable_command_execution ? true : null
 
