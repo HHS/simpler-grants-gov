@@ -635,3 +635,6 @@ class NotificationQueue(ApiSchemaTable, TimestampMixin):
     )
 
     ses_message_id: Mapped[str | None]
+
+    # How many times the processor has picked up this row, so it can stop retrying
+    attempt_count: Mapped[int] = mapped_column(default=0, server_default="0")
