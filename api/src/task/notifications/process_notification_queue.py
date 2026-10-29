@@ -9,7 +9,8 @@ from datetime import datetime
 from enum import StrEnum
 from types import FrameType
 
-from sqlalchemy import exists, func, literal, select, tuple_, update
+from botocore.exceptions import ClientError
+from sqlalchemy import ColumnElement, and_, exists, func, literal, select, tuple_, update
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -54,6 +55,9 @@ class NotificationQueueProcessorConfig(PydanticBaseEnvConfig):
     # How long to wait before polling again once the queue is drained, in seconds
     notification_processor_poll_interval_sec: int = 60  # NOTIFICATION_PROCESSOR_POLL_INTERVAL_SEC
 
+    # How many times a row is attempted before the processor stops retrying it
+    notification_processor_max_attempts: int = 5  # NOTIFICATION_PROCESSOR_MAX_ATTEMPTS
+
     # How many batches to run - only used for testing,
     # we have no limit under ordinary circumstances
     notification_processor_maximum_batch_count: int | None = (
@@ -70,8 +74,8 @@ class NotificationSendResult(StrEnum):
 
 
 @dataclass
-class QueueCursor:
-    """Position in the queue, ordered by created_at with the ID as a tiebreaker
+class QueuePosition:
+    """Position of a row in the queue, ordered by created_at with the ID as a tiebreaker
 
     Rows inserted by the same enqueue run can share a created_at, so the ID
     keeps a batch boundary from skipping a row.
@@ -89,12 +93,14 @@ class ClaimedNotification:
     subject: str
     email_body: str
     email_type: EmailType
+    attempt_count: int
 
     def get_log_extra(self) -> dict:
         return {
             "notification_queue_id": self.notification_queue_id,
             "user_id": self.user_id,
             "email_type": self.email_type,
+            "attempt_count": self.attempt_count,
         }
 
 
@@ -105,6 +111,7 @@ class NotificationQueueProcessor:
     the rows oldest-first in batches. A cursor tracks how far the pass has gotten
     so a row that fails isn't retried until the next pass. When a batch comes back
     empty the cursor resets and the processor waits before starting the next pass.
+    A row is retried until it has been attempted the configured maximum number of times.
     """
 
     def __init__(
@@ -119,7 +126,7 @@ class NotificationQueueProcessor:
         self.notification_config = notification_config or get_email_config()
         self.sesv2_client = sesv2_client
 
-        self.cursor: QueueCursor | None = None
+        self.cursor: QueuePosition | None = None
         self.metrics = {
             "batches_processed": 0,
             "notifications_sent": 0,
@@ -172,26 +179,25 @@ class NotificationQueueProcessor:
                 return False
 
         start = time.perf_counter()
-        rows = self._fetch_batch()
+        queued_notifications = self._fetch_batch()
 
-        if not rows:
+        if not queued_notifications:
             logger.info("Notification queue drained, resetting cursor")
             self.cursor = None
             return False
 
         results: dict[NotificationSendResult, int] = {}
-        for notification_queue_id, _ in rows:
-            result = self.process_notification(notification_queue_id)
+        for queued_notification in queued_notifications:
+            result = self.process_notification(queued_notification.notification_queue_id)
             results[result] = results.get(result, 0) + 1
 
-        last_id, last_created_at = rows[-1]
-        self.cursor = QueueCursor(created_at=last_created_at, notification_queue_id=last_id)
+        self.cursor = queued_notifications[-1]
         self.metrics["batches_processed"] += 1
 
         logger.info(
             "Finished processing notification queue batch",
             extra={
-                "batch_size": len(rows),
+                "batch_size": len(queued_notifications),
                 "batch_duration_sec": round(time.perf_counter() - start, 3),
                 **{f"{result}_count": count for result, count in results.items()},
             },
@@ -205,23 +211,18 @@ class NotificationQueueProcessor:
         """
         with self.db_session.begin():
             oldest_created_at = self.db_session.execute(
-                select(func.min(NotificationQueue.created_at)).where(
-                    NotificationQueue.status.in_(STATUSES_TO_PROCESS)
-                )
+                select(func.min(NotificationQueue.created_at)).where(self._is_processable())
             ).scalar_one_or_none()
 
-        oldest_age_seconds = (
-            0
-            if oldest_created_at is None
-            else round((datetime_util.utcnow() - oldest_created_at).total_seconds(), 3)
-        )
+        if oldest_created_at is None:
+            logger.info("Starting pass through notification queue", extra={"oldest_age_seconds": 0})
+            return False
+
+        oldest_age_seconds = round((datetime_util.utcnow() - oldest_created_at).total_seconds(), 3)
         logger.info(
             "Starting pass through notification queue",
             extra={"oldest_age_seconds": oldest_age_seconds},
         )
-
-        if oldest_created_at is None:
-            return False
 
         if self.notification_config.sync_suppressed_emails:
             self._sync_suppressed_emails()
@@ -237,10 +238,16 @@ class NotificationQueueProcessor:
             logger.exception("Failed to sync suppressed emails")
             self.db_session.rollback()
 
-    def _fetch_batch(self) -> list[tuple[uuid.UUID, datetime]]:
+    def _is_processable(self) -> ColumnElement[bool]:
+        return and_(
+            NotificationQueue.status.in_(STATUSES_TO_PROCESS),
+            NotificationQueue.attempt_count < self.config.notification_processor_max_attempts,
+        )
+
+    def _fetch_batch(self) -> list[QueuePosition]:
         stmt = (
-            select(NotificationQueue.notification_queue_id, NotificationQueue.created_at)
-            .where(NotificationQueue.status.in_(STATUSES_TO_PROCESS))
+            select(NotificationQueue.created_at, NotificationQueue.notification_queue_id)
+            .where(self._is_processable())
             .order_by(NotificationQueue.created_at, NotificationQueue.notification_queue_id)
             .limit(self.config.notification_processor_batch_size)
         )
@@ -248,12 +255,19 @@ class NotificationQueueProcessor:
             stmt = stmt.where(
                 tuple_(NotificationQueue.created_at, NotificationQueue.notification_queue_id)
                 > tuple_(
-                    literal(self.cursor.created_at), literal(self.cursor.notification_queue_id)
+                    literal(self.cursor.created_at, NotificationQueue.created_at.type),
+                    literal(
+                        self.cursor.notification_queue_id,
+                        NotificationQueue.notification_queue_id.type,
+                    ),
                 )
             )
 
         with self.db_session.begin():
-            return [(row[0], row[1]) for row in self.db_session.execute(stmt)]
+            return [
+                QueuePosition(created_at=created_at, notification_queue_id=notification_queue_id)
+                for created_at, notification_queue_id in self.db_session.execute(stmt)
+            ]
 
     def process_notification(self, notification_queue_id: uuid.UUID) -> NotificationSendResult:
         log_extra = {"notification_queue_id": notification_queue_id}
@@ -287,11 +301,15 @@ class NotificationQueueProcessor:
                 trace_id=trace_id,
                 email_tags=build_email_tags(notification.email_type),
             )
-        except Exception:
+        except Exception as e:
+            # Log the error type and SES error code as fields, so failures can be
+            # grouped and alerted on without parsing the exception message
             logger.exception(
-                "Failed to send notification email", extra=log_extra | {"ses_trace_id": trace_id}
+                "Failed to send notification email",
+                extra=log_extra | {"ses_trace_id": trace_id} | get_send_error_log_extra(e),
             )
             self._set_status(notification_queue_id, NotificationQueueStatus.FAILED)
+            self._log_if_out_of_attempts(notification.attempt_count, log_extra)
             self.metrics["notifications_failed"] += 1
             return NotificationSendResult.FAILED
 
@@ -316,7 +334,7 @@ class NotificationQueueProcessor:
                 select(NotificationQueue)
                 .where(
                     NotificationQueue.notification_queue_id == notification_queue_id,
-                    NotificationQueue.status.in_(STATUSES_TO_PROCESS),
+                    self._is_processable(),
                 )
                 .with_for_update(skip_locked=True)
             ).scalar_one_or_none()
@@ -325,7 +343,8 @@ class NotificationQueueProcessor:
                 logger.info("Notification already claimed, skipping", extra=log_extra)
                 return NotificationSendResult.SKIPPED
 
-            log_extra["user_id"] = queue_row.user_id
+            queue_row.attempt_count += 1
+            log_extra |= {"user_id": queue_row.user_id, "attempt_count": queue_row.attempt_count}
             email = queue_row.user.email
 
             if email is None:
@@ -333,6 +352,7 @@ class NotificationQueueProcessor:
                     "User has no email address, cannot send notification", extra=log_extra
                 )
                 queue_row.status = NotificationQueueStatus.FAILED
+                self._log_if_out_of_attempts(queue_row.attempt_count, log_extra)
                 self.metrics["notifications_failed"] += 1
                 return NotificationSendResult.FAILED
 
@@ -354,6 +374,14 @@ class NotificationQueueProcessor:
                 subject=job_content.subject,
                 email_body=job_content.email_body,
                 email_type=EmailType(job_content.notification_type),
+                attempt_count=queue_row.attempt_count,
+            )
+
+    def _log_if_out_of_attempts(self, attempt_count: int, log_extra: dict) -> None:
+        if attempt_count >= self.config.notification_processor_max_attempts:
+            logger.warning(
+                "Notification reached the maximum number of attempts and will not be retried",
+                extra=log_extra,
             )
 
     def _is_suppressed(self, email: str) -> bool:
@@ -402,3 +430,19 @@ class NotificationQueueProcessor:
         logger.info("Skipping notification queue processing due to maintenance mode")
         self._shutdown_event.wait()
         logger.info("Exiting after receiving SIGTERM.")
+
+
+def get_send_error_log_extra(error: Exception) -> dict:
+    """Non-identifying details about why a send failed"""
+    log_extra: dict = {"send_error_type": type(error).__name__}
+
+    if isinstance(error, ClientError):
+        log_extra |= {
+            "ses_error_code": error.response.get("Error", {}).get("Code"),
+            "ses_http_status_code": error.response.get("ResponseMetadata", {}).get(
+                "HTTPStatusCode"
+            ),
+            "aws_request_id": error.response.get("ResponseMetadata", {}).get("RequestId"),
+        }
+
+    return log_extra
