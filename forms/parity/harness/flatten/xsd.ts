@@ -135,6 +135,30 @@ const IGNORED_FACETS = new Set([
   "annotation",
 ]);
 
+/**
+ * An XSD pattern matches the whole value, and a JSON Schema pattern matches anywhere in it. So
+ * a pattern is read as the JSON Schema pattern that accepts the same values, and a form's
+ * pattern compares equal to it only if the form's is anchored too.
+ */
+const asJsonSchemaPattern = (pattern: string) =>
+  hasTopLevelAlternation(pattern) ? `^(?:${pattern})$` : `^${pattern}$`;
+
+/** True for `a|b`, but not for `(a|b)` or `[|]`. */
+function hasTopLevelAlternation(pattern: string): boolean {
+  let depth = 0;
+  let inClass = false;
+  for (let i = 0; i < pattern.length; i++) {
+    const char = pattern[i];
+    if (char === "\\") i++;
+    else if (inClass) inClass = char !== "]";
+    else if (char === "[") inClass = true;
+    else if (char === "(") depth++;
+    else if (char === ")") depth--;
+    else if (char === "|" && depth === 0) return true;
+  }
+  return false;
+}
+
 type MaxOccurs = number | "unbounded";
 
 /** How many times something inside `outer` can appear, given its own `maxOccurs`. */
@@ -193,7 +217,7 @@ class Walker {
         rules.minLength = rules.maxLength = Number(value);
       else if (kind === "minInclusive") rules.minimum = Number(value);
       else if (kind === "maxInclusive") rules.maximum = Number(value);
-      else if (kind === "pattern") rules.pattern = value;
+      else if (kind === "pattern") rules.pattern = asJsonSchemaPattern(value);
       else if (!IGNORED_FACETS.has(kind))
         throw new Error(`unsupported facet xs:${kind}`);
     }

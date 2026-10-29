@@ -27,13 +27,22 @@ model KeyContacts { ... }
 A form with `@Sgg.sync` must also have `@GrantsGov.form` (from
 [`form-library-xml`](../xml/)), the identity the API registers it under.
 
+**`@Sgg.attachment`** marks a question whose answer is the id of one of the application's
+uploads, as `Questions.Types.Attachment` is. Every form that asks one, or a scalar that
+extends it, gets a rule schema that has the API check each id still belongs to the
+application.
+
 ## Output
 
-One file per form, under `dist/sgg/`:
+One file per form, and a rule schema for a form with attachments, under `dist/sgg/`:
 
 ```
-forms/<id>/sgg.json   { "sync": false | { "xml", "sggVersion", "instructions"? }, "grantsGov": { ... } | null }
+forms/<id>/sgg.json           { "sync": false | { "xml", "sggVersion", "instructions"? }, "grantsGov": { ... } | null }
+forms/<id>/rule-schema.json   { "<field>": { "gg_validation": { "rule": "attachment" } }, ... }
 ```
+
+Set `property-casing` to match the `simpler-forms` emitter's, so the rule schema's keys
+name the schema's properties.
 
 The sync emitter reads these files and compiles the artifacts that the
 `simpler-forms` and `form-library-xml` emitters wrote to `dist/canonical/`, then `scripts/sync.mjs` copies them into the correct directory in the API.

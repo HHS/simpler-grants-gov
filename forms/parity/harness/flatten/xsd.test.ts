@@ -56,6 +56,27 @@ describe("xsdFields", () => {
     });
   });
 
+  it("reads a pattern as matching the whole value", () => {
+    const XSD = "https://example.test/Patterns.xsd";
+    const restricted = (name: string, pattern: string) =>
+      `<xs:element name="${name}"><xs:simpleType><xs:restriction base="xs:string"><xs:pattern value="${pattern}"/></xs:restriction></xs:simpleType></xs:element>`;
+    const patterns = xsdFields(
+      XSD,
+      () => `<?xml version="1.0"?>
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:p">
+          <xs:element name="Form"><xs:complexType><xs:sequence>
+            ${restricted("Id", "[0-9A-Z]{9}")}
+            ${restricted("Either", "Y|N")}
+            ${restricted("Grouped", "(Y|N)[|]")}
+          </xs:sequence></xs:complexType></xs:element>
+        </xs:schema>`,
+    );
+
+    expect(patterns.get("Id")?.rules.pattern).toBe("^[0-9A-Z]{9}$");
+    expect(patterns.get("Either")?.rules.pattern).toBe("^(?:Y|N)$");
+    expect(patterns.get("Grouped")?.rules.pattern).toBe("^(Y|N)[|]$");
+  });
+
   it("reads an attached file as one answer", () => {
     expect(flat.get("Sketch")).toEqual({
       order: 4,

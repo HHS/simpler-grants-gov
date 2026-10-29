@@ -23,6 +23,9 @@ const READABLE = new Set([undefined, "simple", "nested_object", "array"]);
  * children land in its parent's element; `nested_object` and `array` add a step on both sides
  * (`[]` on the JSON side for an array's items). Paths follow the plan's spellings, so they
  * compare with `json_path` and `xml_path` directly.
+ *
+ * `_xml_config.attachment_fields` maps root fields too, outside the rules. The API writes
+ * each after the rules, so they come last.
  */
 export function xmlTransformFields(rules: Json): XmlTransformFields {
   const fields: XmlTransformFields = {
@@ -31,6 +34,13 @@ export function xmlTransformFields(rules: Json): XmlTransformFields {
     byLink: new Map(),
   };
   let order = 0;
+
+  const add = (jsonPath: Path, xmlPath: Path) => {
+    const field = { order: order++, rules: {} };
+    fields.byJsonPath.set(jsonPath, field);
+    fields.byXmlPath.set(xmlPath, field);
+    fields.byLink.set(link(jsonPath, xmlPath), field);
+  };
 
   const walk = (level: Json, json: string[], xml: string[]): void => {
     for (const [key, rule] of Object.entries(level)) {
@@ -58,14 +68,17 @@ export function xmlTransformFields(rules: Json): XmlTransformFields {
         );
         continue;
       }
-      const jsonPath = render([...json, key]);
-      const xmlPath = [...xml, step].join("/");
-      const field = { order: order++, rules: {} };
-      fields.byJsonPath.set(jsonPath, field);
-      fields.byXmlPath.set(xmlPath, field);
-      fields.byLink.set(link(jsonPath, xmlPath), field);
+      add(render([...json, key]), [...xml, step].join("/"));
     }
   };
   walk(rules, [], []);
+  const config = (rules._xml_config ?? {}) as Json;
+  for (const [key, attachment] of Object.entries(
+    (config.attachment_fields ?? {}) as Record<string, Json>,
+  )) {
+    const element = String(attachment.xml_element);
+    const file = attachment.file_element ? String(attachment.file_element) : "";
+    add(key, file ? `${element}/${file}` : element);
+  }
   return fields;
 }
