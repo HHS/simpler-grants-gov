@@ -5,6 +5,7 @@ import {
 } from "src/services/correlationId/correlationId";
 import { logger } from "src/services/logger/simplerLogger";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
@@ -15,21 +16,26 @@ export async function GET(request: NextRequest) {
   const correlationId = await getCorrelationId();
   const awsTraceId = request.headers.get("X-Amz-Cf-Id");
   try {
+    const cookieStore = await cookies();
+    const hadSession = !!cookieStore.get("session")?.value;
     await deleteSession();
 
-    const apiResult = request.nextUrl.searchParams.get("message");
-    logger.info(
-      {
-        event: "logout",
-        correlation_id: correlationId,
-        awsTraceId,
-        apiResult:
-          apiResult && API_LOGOUT_RESULTS.includes(apiResult)
-            ? apiResult
-            : undefined,
-      },
-      "Session deleted on logout",
-    );
+    // a direct or repeated request without a session is not a logout
+    if (hadSession) {
+      const apiResult = request.nextUrl.searchParams.get("message");
+      logger.info(
+        {
+          event: "logout",
+          correlation_id: correlationId,
+          awsTraceId,
+          apiResult:
+            apiResult && API_LOGOUT_RESULTS.includes(apiResult)
+              ? apiResult
+              : undefined,
+        },
+        "Session deleted on logout",
+      );
+    }
 
     // Delete correlation_id on explicit logout only. Do not rotate
     // correlation_id if the user is implicitly logged out such as through

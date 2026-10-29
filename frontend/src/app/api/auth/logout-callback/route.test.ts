@@ -12,6 +12,17 @@ const clearCorrelationIdMock = jest.fn();
 const mockLoggerInfo = jest.fn();
 const mockLoggerError = jest.fn();
 const callOrder: string[] = [];
+let mockSessionCookie: string | undefined;
+
+jest.mock("next/headers", () => ({
+  cookies: () =>
+    Promise.resolve({
+      get: (name: string) =>
+        name === "session" && mockSessionCookie !== undefined
+          ? { name, value: mockSessionCookie }
+          : undefined,
+    }),
+}));
 
 jest.mock("src/services/auth/sessionUtils", () => ({
   deleteSession: (): unknown => deleteSessionMock(),
@@ -45,6 +56,9 @@ const logoutCallback = (query = "") =>
 // note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
 // is to throw an error
 describe("/api/auth/logout-callback GET handler", () => {
+  beforeEach(() => {
+    mockSessionCookie = "an-encrypted-session";
+  });
   afterEach(() => {
     jest.clearAllMocks();
     callOrder.length = 0;
@@ -95,6 +109,26 @@ describe("/api/auth/logout-callback GET handler", () => {
       "Session deleted on logout",
     );
   });
+
+  it.each([
+    ["no session cookie", undefined],
+    ["an empty session cookie", ""],
+  ])(
+    "does not log a logout with %s, but still deletes, clears and redirects",
+    async (_, sessionCookie) => {
+      mockSessionCookie = sessionCookie;
+
+      const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
+        logoutCallback("?message=success"),
+      );
+
+      expect(deleteSessionMock).toHaveBeenCalledTimes(1);
+      expect(clearCorrelationIdMock).toHaveBeenCalledTimes(1);
+      expect(redirectError.digest).toContain(";/logout;");
+      expect(mockLoggerInfo).not.toHaveBeenCalled();
+      expect(mockLoggerError).not.toHaveBeenCalled();
+    },
+  );
 
   it("redirects to the error page and logs an authentication request failure when the session cannot be deleted", async () => {
     const deleteError = new Error("cookie failure");
