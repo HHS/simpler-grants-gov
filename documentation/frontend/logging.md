@@ -37,7 +37,7 @@ There is no request scoped logging context, so ad hoc logs only include `awsTrac
 
 ## Requests
 
-Requests log from the Next JS proxy. An attempt is made to filter out Next JS page prefetch requests from logging to avoid noise, and health check requests are sampled.
+Requests log from the Next JS proxy. An attempt is made to filter out Next JS page prefetch requests from logging to avoid noise, and health check requests are sampled. The value of the `token` query parameter (the Login.gov token on `/api/auth/callback`) is replaced with `REDACTED` in logged URLs.
 
 ## Responses
 

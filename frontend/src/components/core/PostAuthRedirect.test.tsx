@@ -15,6 +15,12 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
 }));
 
+const mockPostUserEvent = jest.fn();
+
+jest.mock("src/services/event/postUserEvent", () => ({
+  postUserEvent: (event: unknown) => mockPostUserEvent(event) as unknown,
+}));
+
 const mockGetItem = jest.spyOn(SessionStorage, "getItem");
 const mockSetItem = jest.spyOn(SessionStorage, "setItem");
 const mockRemoveItem = jest.spyOn(SessionStorage, "removeItem");
@@ -135,5 +141,60 @@ describe("PostAuthRedirect", () => {
     render(<PostAuthRedirect />);
 
     expect(mockSetItem).not.toHaveBeenCalledWith("showPivError", "true");
+  });
+
+  describe("destination events", () => {
+    it("reports a restored destination once under Strict Mode without the destination", () => {
+      sessionStorage.setItem(
+        "login-redirect",
+        "/search?query=test&utm_source=grants.gov",
+      );
+
+      render(
+        <StrictMode>
+          <PostAuthRedirect trackDestination={true} />
+        </StrictMode>,
+      );
+
+      expect(mockPostUserEvent).toHaveBeenCalledTimes(1);
+      expect(mockPostUserEvent).toHaveBeenCalledWith({
+        name: "destination_restored",
+      });
+    });
+
+    it.each([
+      [null, "missing"],
+      ["", "missing"],
+      ["https://malicious-site.com/steal", "invalid"],
+      ["//evil.com/path", "invalid"],
+      ["/api/auth/callback?token=secret", "invalid"],
+    ])(
+      "reports %p as rejected with reason %p and no destination",
+      (saved, reason) => {
+        mockGetItem.mockReturnValue(saved);
+
+        render(<PostAuthRedirect trackDestination={true} />);
+
+        expect(mockReplace).toHaveBeenCalledWith("/");
+        expect(mockPostUserEvent).toHaveBeenCalledTimes(1);
+        expect(mockPostUserEvent).toHaveBeenCalledWith({
+          name: "destination_rejected",
+          properties: { reason },
+        });
+        const sent = JSON.stringify(mockPostUserEvent.mock.calls);
+        expect(sent).not.toContain("malicious");
+        expect(sent).not.toContain("evil");
+        expect(sent).not.toContain("secret");
+      },
+    );
+
+    it("does not report destination events unless tracking is requested, as on /logout", () => {
+      mockGetItem.mockReturnValue("/newsletter");
+
+      render(<PostAuthRedirect />);
+
+      expect(mockReplace).toHaveBeenCalledWith("/newsletter");
+      expect(mockPostUserEvent).not.toHaveBeenCalled();
+    });
   });
 });

@@ -82,6 +82,44 @@ The application refreshes tokens to extend the user's session without requiring 
 1. **Frontend Behavior**:
    - The refreshed session is returned to the frontend, ensuring the user remains authenticated without interruption.
 
+## Observability
+
+Authentication lifecycle events go through the existing logging paths. Server-side events are logged with the Pino logger (`simplerLogger`). Client-side events are sent with `postUserEvent`, and `/api/events` logs them with the `correlationId` from the cookie.
+
+| Event                           | Logged from                           | When                                                                                                  | Properties                                                                       |
+| ------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `authentication_initiated`      | client: `LoginLink`, Header "Sign in" | the user clicks Sign in / Create account                                                              | `pivRequired` (boolean)                                                          |
+| `callback_received`             | server: `/api/auth/callback`          | every callback request                                                                                | `tokenPresent`, `pivRequiredError` (booleans)                                    |
+| `session_created`               | server: `/api/auth/callback`          | the `session` cookie was set                                                                          | none                                                                             |
+| `session_creation_failed`       | server: `/api/auth/callback`          | `createSession` threw (logged at error level)                                                         | `err`                                                                            |
+| `destination_restored`          | client: `/login` (`PostAuthRedirect`) | a valid saved destination is used                                                                     | none                                                                             |
+| `destination_rejected`          | client: `/login` (`PostAuthRedirect`) | `/` is used instead of a saved destination                                                            | `reason`: `missing` (nothing saved) or `invalid` (saved value failed validation) |
+| `session_expired`               | client: `UserProvider`                | a signed-in user is found signed out after their session expiry time                                  | none                                                                             |
+| `logout`                        | server: `/api/auth/logout-callback`   | the frontend session was deleted at the end of an explicit sign out                                   | `apiResult`: `success` or `error`, as reported by the API logout, when present   |
+| `authentication_request_failed` | server                                | an authentication request failed for a configuration or infrastructure reason (logged at error level) | `authRequest`, plus `reason` or `status`                                         |
+
+`authentication_request_failed` covers:
+
+- `authRequest: "login"`, `reason: "login_url_not_configured"`: `AUTH_LOGIN_URL` is missing.
+- `authRequest: "logout"`, `reason: "logout_url_not_configured"`: `AUTH_LOGOUT_URL` is missing.
+- `authRequest: "logout_callback"`: the session could not be deleted at the end of sign out.
+- `authRequest: "session_refresh"`, `status`: refreshing an expiring token failed with anything other than a 401 or 403. Network errors and API Gateway errors are included (API Gateway errors report a status of `0`).
+
+Expected outcomes are not logged as failures. These include a callback without a token, PIV required, signing out without a session, the API rejecting a token on refresh, and a rejected destination.
+
+Notes:
+
+- `logout` records the completion of sign out, not the click. Session expiry is never counted as a logout.
+- `session_expired` is not logged for anonymous visitors, failed session requests, or a signed-out response before the expiry time (for example after signing out in another tab).
+- Destination events never include the destination. They are only logged on `/login`; the `/logout` page does not log them.
+- Tokens, session cookies, secrets and destinations are never logged. The `token` query parameter is redacted from request log URLs.
+
+### Correlation IDs
+
+Server-side events carry `correlation_id` and client-side events carry `correlationId`. Both come from the same `correlation_id` cookie, so a query should match either attribute. See [Correlation ID and request URLs](./analytics.md#correlation-id-and-request-urls) for the request log queries.
+
+The correlation ID only identifies Simpler-side requests. It is not passed through Login.gov, and it is not guaranteed to be present on `/api/auth/callback` (for example when the cookie has expired or is new). Sign out deletes it after `logout` is logged. Treat the segments before and after Login.gov as separate unless their correlation IDs match.
+
 ## Diagrams
 
 ### Token Creation

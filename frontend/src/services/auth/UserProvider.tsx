@@ -5,13 +5,20 @@ import { useGetCookie } from "cookies-next";
 import noop from "lodash/noop";
 import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 import { UserContext } from "src/services/auth/useUser";
+import { postUserEvent } from "src/services/event/postUserEvent";
 import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";
 import { debouncedUserFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
 import { UserProfile } from "src/types/authTypes";
 import { isExpired, isExpiring } from "src/utils/dateUtil";
 
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export default function UserProvider({
   featureFlagDefaults,
@@ -29,6 +36,7 @@ export default function UserProvider({
   const [hasBeenLoggedOut, setHasBeenLoggedOut] = useState<boolean>(false);
   const [defaultFeatureFlags] = useState<FeatureFlags>(featureFlagDefaults);
   const [userFeatureFlags, setUserFeatureFlags] = useState<FeatureFlags>({});
+  const reportedExpiration = useRef<number>(undefined);
 
   // a workaround, as setting this in default state value results in hydration error
   useEffect(() => {
@@ -57,6 +65,15 @@ export default function UserProvider({
         setUserFetchError(undefined);
         setIsLoading(false);
         if (localUser?.isLoggedIn && !fetchedUser.isLoggedIn) {
+          // concurrent refreshes share one debounced fetch, so report each session's expiry once.
+          // a signed out response before the expiry time (e.g. logout in another tab) is not an expiry
+          if (
+            isExpired(localUser.expiresAt) &&
+            reportedExpiration.current !== localUser.expiresAt
+          ) {
+            reportedExpiration.current = localUser.expiresAt;
+            postUserEvent({ name: "session_expired" });
+          }
           setHasBeenLoggedOut(true);
           router.refresh();
         }
