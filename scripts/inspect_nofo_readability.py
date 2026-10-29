@@ -383,7 +383,10 @@ class Inspector:
         ).get("WebACL")
         if not acl:
             raise InspectionError("no_web_acl_association")
-        self.waf_metric = acl.get("VisibilityConfig", {}).get("MetricName")
+        web_acl_name = acl.get("Name")
+        if not isinstance(web_acl_name, str) or not web_acl_name:
+            raise InspectionError("web_acl_name_missing")
+        self.waf_web_acl_name = web_acl_name
         self.rule_metrics = {
             key: next(
                 (
@@ -479,14 +482,14 @@ class Inspector:
                 ("memory", "MemoryUtilization"),
             )
         ]
-        if getattr(self, "waf_metric", None):
+        if getattr(self, "waf_web_acl_name", None):
             requests += [
                 (
                     f"{key}_{metric}",
                     "AWS/WAFV2",
                     metric,
                     [
-                        {"Name": "WebACL", "Value": self.waf_metric},
+                        {"Name": "WebACL", "Value": self.waf_web_acl_name},
                         {"Name": "Rule", "Value": rule},
                         {"Name": "Region", "Value": REGION},
                     ],
