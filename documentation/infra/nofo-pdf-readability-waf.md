@@ -113,12 +113,20 @@ and restoration path in the execution issue. Confirm public uploads are off in
 Builder configuration and by the unavailable-page baseline. The inspection does
 not read database-backed feature flags.
 
-Review changes only to `pdf_readability_waf` in
-`infra/nofos/app-config/infra-dev.tf`. Keep the threshold at 10 and the window at
-300 seconds. Do not edit shared modules, other environments, recipients, IAM or
-managed rules. Inspect the deployment plan for unrelated changes; stop for review
-if present. The existing deployment path also runs migrations and deploys the
-application, so it is not an isolated WAF update.
+For each activation or restoration stage, update `pdf_readability_waf` in
+`infra/nofos/app-config/infra-dev.tf` **and** the matching expected mode in
+`infra/nofos/app-config/tests/pdf_readability_waf.tftest.hcl`. The test must
+continue to assert the rate threshold, dev-only opt-in and every other
+environment's null configuration. Update only the temporary mode expectation:
+rate `block` for rate and emergency stages, and emergency `true` only for the
+emergency stage. The final restoration change must return both the configuration
+and test expectation to rate `count` and emergency `false`.
+
+Keep the threshold at 10 and the window at 300 seconds. Do not edit shared
+modules, other environments, recipients, IAM or managed rules. Inspect the
+deployment plan for unrelated changes; stop for review if present. The existing
+deployment path also runs migrations and deploys the application, so it is not
+an isolated WAF update.
 
 **Activation still needs reviewed configuration changes.** This procedure does
 not supply a new toggle or grant AWS permissions. Agree the review and deployment
@@ -145,11 +153,11 @@ do not publish response bodies, cookies, IP addresses or raw logs.
 
 | Stage | Reviewed configuration | Request ceiling | Required evidence |
 | --- | --- | --- | --- |
-| Baseline | rate `count`, emergency `false` | One GET and one empty POST per path, plus GET `/health`: 9 | Record each baseline without following redirects. Canonical GET shows unavailable (200); empty POST may be rejected by CSRF (403), so status alone cannot prove WAF interception. Health remains available. |
-| Rate enforcement | rate `block`, emergency `false` | Up to 44 empty POSTs distributed across the four paths, at most one every two seconds; one GET per path and GET `/health`: 49 | Verify effective modes first. Corroborate 429s with rate-rule BlockedRequests. GETs and health retain baseline behavior. Record each form actually verified. |
+| Baseline | rate `count`, emergency `false`; baseline Terraform expectation | One GET and one empty POST per path, plus GET `/health`: 9 | Record each baseline without following redirects. Canonical GET shows unavailable (200); empty POST may be rejected by CSRF (403), so status alone cannot prove WAF interception. Health remains available. |
+| Rate enforcement | rate `block`, emergency `false`; matching stage-specific Terraform expectation | Up to 44 empty POSTs distributed across the four paths, at most one every two seconds; one GET per path and GET `/health`: 49 | Verify effective modes first. Corroborate 429s with rate-rule BlockedRequests. GETs and health retain baseline behavior. Record each form actually verified. |
 | Rate recovery | Keep rate `block`, emergency `false` | Stop burst; at most one empty POST per minute, up to 10, plus one GET per path: 14 | Return to baseline after the rate window. Record elapsed time and the last burst request. |
-| Emergency enforcement | rate `block`, emergency `true` | One GET and empty POST per path, plus GET `/health`: 9 | All eight scoped requests return 403; emergency BlockedRequests corroborate interception. Health remains available. The higher-priority emergency rule terminates before the rate rule. |
-| Restoration | rate `count`, emergency `false` | Repeat baseline: 9 | Inspection confirms original modes; expected disabled-page responses and unrelated-route availability return. |
+| Emergency enforcement | rate `block`, emergency `true`; matching stage-specific Terraform expectation | One GET and empty POST per path, plus GET `/health`: 9 | All eight scoped requests return 403; emergency BlockedRequests corroborate interception. Health remains available. The higher-priority emergency rule terminates before the rate rule. |
+| Restoration | rate `count`, emergency `false`; baseline Terraform expectation restored | Repeat baseline: 9 | Inspection confirms original modes; expected disabled-page responses and unrelated-route availability return. |
 
 The whole session has a **90-request ceiling**. Each active rate/recovery phase
 has a 10-minute wall-clock ceiling excluding deployment time. Stop POST traffic
