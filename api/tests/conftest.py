@@ -658,7 +658,7 @@ def get_sent_emails():
 
 @pytest.fixture
 def sent_email_tags(ses_client, monkeypatch):
-    """Record the EmailTags of each SES send, since moto does not store them on sent messages"""
+    """Record the EmailTags and headers of each SES send, since moto does not store them on sent messages"""
     sent = []
     real_send_email = ses_client.send_email
 
@@ -667,6 +667,10 @@ def sent_email_tags(ses_client, monkeypatch):
             SimpleNamespace(
                 to_address=kwargs["Destination"]["ToAddresses"][0],
                 email_tags={tag["Name"]: tag["Value"] for tag in kwargs.get("EmailTags", [])},
+                headers={
+                    header["Name"]: header["Value"]
+                    for header in kwargs["Content"]["Simple"].get("Headers", [])
+                },
             )
         )
         return real_send_email(**kwargs)

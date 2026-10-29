@@ -183,6 +183,56 @@ def task_summary(definition):
     }, container.get("logConfiguration", {}).get("options", {}).get("awslogs-group")
 
 
+def expected_scope(key):
+    """Exact supported deployed shape; mismatches are not a claim of no coverage."""
+    transforms = [{"Priority": 0, "Type": "NONE"}]
+    path = {
+        "RegexMatchStatement": {
+            "RegexString": "^/readability-checker/?$|^/readability/?$",
+            "FieldToMatch": {"UriPath": {}},
+            "TextTransformations": transforms,
+        }
+    }
+    if key == "emergency":
+        method = {
+            "RegexMatchStatement": {
+                "RegexString": "^(GET|POST)$",
+                "FieldToMatch": {"Method": {}},
+                "TextTransformations": transforms,
+            }
+        }
+    else:
+        method = {
+            "ByteMatchStatement": {
+                "SearchString": "POST",
+                "PositionalConstraint": "EXACTLY",
+                "FieldToMatch": {"Method": {}},
+                "TextTransformations": transforms,
+            }
+        }
+    return {"AndStatement": {"Statements": [path, method]}}
+
+
+def scope_matches(statement, key):
+    # AWS CLI serializes blob SearchString as base64. Accept only the two
+    # fixed representations of POST, never decode/print arbitrary payloads.
+    statement = json.loads(json.dumps(statement))
+    if key == "upload_rate":
+        for child in statement.get("AndStatement", {}).get("Statements", []):
+            byte = child.get("ByteMatchStatement", {})
+            if byte.get("SearchString") == "UE9TVA==":
+                byte["SearchString"] = "POST"
+    expected = expected_scope(key)
+    actual_children = statement.get("AndStatement", {}).get("Statements", [])
+    expected_children = expected["AndStatement"]["Statements"]
+    return (
+        set(statement) == {"AndStatement"}
+        and set(statement["AndStatement"]) == {"Statements"}
+        and len(actual_children) == 2
+        and all(child in actual_children for child in expected_children)
+    )
+
+
 def waf_summary(acl):
     rules = acl.get("Rules", [])
     selected = {}
@@ -193,6 +243,18 @@ def waf_summary(acl):
         rate = rule.get("Statement", {}).get("RateBasedStatement", {})
         action = next(iter(rule.get("Action", {})), "unknown")
         selected[key] = {
+            "scope_matches_reviewed_paths_and_methods": scope_matches(
+                (
+                    rate.get("ScopeDownStatement", {})
+                    if key == "upload_rate"
+                    else rule.get("Statement", {})
+                ),
+                key,
+            ),
+            "rule_metric_name_matches_rule_name": rule.get("VisibilityConfig", {}).get(
+                "MetricName"
+            )
+            == name,
             "priority": number(rule.get("Priority")),
             "action": action if action in {"Count", "Block"} else "other",
             "metrics_enabled": rule.get("VisibilityConfig", {}).get(
@@ -322,6 +384,17 @@ class Inspector:
         if not acl:
             raise InspectionError("no_web_acl_association")
         self.waf_metric = acl.get("VisibilityConfig", {}).get("MetricName")
+        self.rule_metrics = {
+            key: next(
+                (
+                    r.get("VisibilityConfig", {}).get("MetricName")
+                    for r in acl.get("Rules", [])
+                    if r.get("Name") == name
+                ),
+                None,
+            )
+            for key, name in RULES.items()
+        }
         return waf_summary(acl)
 
     def dashboard(self):
@@ -419,7 +492,8 @@ class Inspector:
                     ],
                     "Sum",
                 )
-                for key, rule in RULES.items()
+                for key, rule in self.rule_metrics.items()
+                if isinstance(rule, str) and rule
                 for metric in ("CountedRequests", "BlockedRequests")
             ]
         result = {}
@@ -443,6 +517,16 @@ class Inspector:
                 statistic,
             )
             result[key] = {"datapoints_last_hour": len(data.get("Datapoints", []))}
+            if namespace == "AWS/WAFV2":
+                values = [
+                    row["Sum"]
+                    for row in data.get("Datapoints", [])
+                    if number(row.get("Sum")) is not None
+                ]
+                result[key]["sum_last_hour"] = sum(values) if values else None
+        for key, metric_name in getattr(self, "rule_metrics", {}).items():
+            if not isinstance(metric_name, str) or not metric_name:
+                result[key + "_metric_query"] = {"status": "metric_name_missing"}
         return result
 
     def logs(self):
