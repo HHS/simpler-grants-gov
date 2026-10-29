@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
-import { applicationTestUserId, LOGIN_URL } from "src/constants/auth";
+import { LOGIN_URL } from "src/constants/auth";
 import { ExternalRoutes } from "src/constants/routes";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
@@ -39,6 +39,39 @@ type PrimaryLink = {
 
 const homeRegexp = /^\/(?:e[ns])?$/;
 
+/*
+  nav links going to external sites need to:
+  - not be preloaded
+  - include an "external link" icon
+  - open in a new tab
+*/
+const ExternalNavLink = ({
+  href = "",
+  classes,
+  onClick,
+  text,
+}: {
+  href?: string;
+  classes?: string;
+  onClick: () => void;
+  text: string;
+}) => {
+  return (
+    <a
+      href={href}
+      key={href}
+      className={classes}
+      target="_blank"
+      onClick={onClick}
+    >
+      <span className="icon-btn">
+        {text}
+        <USWDSIcon name="launch" className="usa-icon--size-2" />
+      </span>
+    </a>
+  );
+};
+
 const NavLink = ({
   href = "",
   classes,
@@ -50,27 +83,20 @@ const NavLink = ({
   onClick: () => void;
   text: string;
 }) => {
-  let iconBtnClass, linkTarget;
-
   if (isExternalLink(href)) {
-    iconBtnClass = "icon-btn";
-    linkTarget = "_blank";
+    return (
+      <ExternalNavLink
+        href={href}
+        classes={classes}
+        onClick={onClick}
+        text={text}
+      />
+    );
   }
 
   return (
-    <Link
-      href={href}
-      key={href}
-      className={classes}
-      target={linkTarget}
-      onClick={onClick}
-    >
-      <span className={iconBtnClass}>
-        {text}
-        {isExternalLink(href) && (
-          <USWDSIcon name="launch" className="usa-icon--size-2" />
-        )}
-      </span>
+    <Link href={href} key={href} className={classes} onClick={onClick}>
+      {text}
     </Link>
   );
 };
@@ -119,7 +145,7 @@ const NavLinks = ({
         ],
       },
     ];
-    if (!user?.token) {
+    if (!user?.isLoggedIn) {
       return anonymousNavLinks;
     }
 
@@ -187,6 +213,8 @@ const NavLinks = ({
     useState<IndexType>(null);
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentNavItemIndex(getCurrentNavItemIndex(path));
   }, [path, getCurrentNavItemIndex]);
 
@@ -247,27 +275,26 @@ const NavLinks = ({
       );
     });
 
-    // add user account nav  depending on login status
-    if (!user?.token) {
+    // add user account nav depending on login status
+    if (!user?.isLoggedIn) {
       items.push(
-        <NavLink
-          key="sign-in"
+        <a
           href={LOGIN_URL}
-          onClick={() => {
-            storeCurrentPage();
-            closeDropdownAndMobileNav();
-          }}
-          text={t("login")}
-          classes={clsx({
+          key="sign-in"
+          className={clsx({
             "usa-nav__link": true,
             "text-normal": true,
           })}
-        />,
+          onClick={() => {
+            storeCurrentPage(location.pathname, location.search);
+            closeDropdownAndMobileNav();
+          }}
+        >
+          {t("login")}
+        </a>,
       );
     } else {
       const accountIndex = navLinkList.length;
-      const isApplicationTestUser =
-        localDev && user?.user_id === applicationTestUserId;
       items.push(
         <NavDropdown
           key="account"
@@ -288,8 +315,11 @@ const NavLinks = ({
               onClick={closeDropdownAndMobileNav}
               text={t("notifications")}
             />,
-            isApplicationTestUser && <TestApplicationLink />,
-            <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
+            localDev && <TestApplicationLink key="test-application" />,
+            <SignOutNavLink
+              key="logout"
+              closeDropdownAndMobileNav={closeDropdownAndMobileNav}
+            />,
           ]}
           setActiveNavDropdownIndex={setActiveNavDropdownIndex}
         />,
@@ -304,8 +334,7 @@ const NavLinks = ({
     navLinkList,
     setActiveNavDropdownIndex,
     t,
-    user?.token,
-    user?.user_id,
+    user?.isLoggedIn,
     localDev,
   ]);
 

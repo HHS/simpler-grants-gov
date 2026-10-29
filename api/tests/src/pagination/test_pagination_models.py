@@ -1,6 +1,5 @@
 import pytest
 
-from src.adapters.search.opensearch_response import SearchResponse
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 
 
@@ -22,11 +21,7 @@ def test_from_search_response(
     total_records, page_size, expected_total_records, expected_total_pages
 ):
     pagination_params = PaginationParams(page_offset=1, page_size=page_size)
-    search_response = SearchResponse(
-        total_records=total_records, records=[], aggregations={}, scroll_id=None
-    )
-
-    info = PaginationInfo.from_search_response(pagination_params, search_response)
+    info = PaginationInfo.from_search_response(pagination_params, total_records)
 
     assert info.total_records == expected_total_records
     assert info.total_pages == expected_total_pages

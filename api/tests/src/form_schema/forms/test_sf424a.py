@@ -1,10 +1,17 @@
-import pytest
+from pathlib import Path
 
+import pytest
+from lxml import etree as lxml_etree
+
+from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
 )
+from src.services.xml_generation.models import XMLGenerationRequest
+from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.validation.xsd_validator import XSDValidator
 from tests.lib.data_factories import setup_application_for_form_validation
 
 
@@ -307,6 +314,136 @@ def test_sf424a_v1_0_empty_line_item(full_valid_json_v1_0, sf424a_v1_0):
         assert validation_issue.field in EXPECTED_REQUIRED_FIELDS
 
 
+def test_sf424a_v1_0_row_1_always_required(sf424a_v1_0):
+    """Row 1 activity_title is required even when only later rows hold data."""
+    data = {
+        "activity_line_items": [
+            {},
+            {"activity_title": "Line2", "budget_summary": {"total_amount": "5.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[0].activity_title"
+
+
+def test_sf424a_v1_0_empty_rows_2_4_not_required(sf424a_v1_0):
+    """Rows 2-4 without any data do not require activity_title."""
+    data = {
+        "activity_line_items": [{"activity_title": "Line1"}, {}, {}, {}],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+    assert len(validation_issues) == 0
+
+
+def test_sf424a_v1_0_row_required_when_section_a_data_entered(sf424a_v1_0):
+    """Row 3 Section A data with an empty Column A errors as required (ticket example)."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {"budget_summary": {"federal_new_or_revised_amount": "10.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[2].activity_title"
+
+    # Providing the title clears the error
+    data["activity_line_items"][2]["activity_title"] = "Line3"
+    assert len(validate_json_schema_for_form(data, sf424a_v1_0)) == 0
+
+
+def test_sf424a_v1_0_row_required_when_section_b_data_entered(sf424a_v1_0):
+    """Row 3 Section B user-entered data with an empty Column A errors as required."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {
+                "budget_categories": {
+                    "personnel_amount": "5.00",
+                    "total_direct_charge_amount": "5.00",
+                    "total_amount": "5.00",
+                }
+            },
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[2].activity_title"
+
+
+def test_sf424a_v1_0_row_not_required_with_only_autopopulated_totals(sf424a_v1_0):
+    """Auto-populated Section B totals alone do not make activity_title required."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {"budget_categories": {"total_direct_charge_amount": "0.00", "total_amount": "0.00"}},
+            {"budget_categories": {"total_direct_charge_amount": "0.00", "total_amount": "0.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+    assert len(validation_issues) == 0
+
+
+@pytest.mark.parametrize(
+    "section,data",
+    [
+        ("non_federal_resources", {"applicant_amount": "5.00", "total_amount": "5.00"}),
+        ("non_federal_resources", {"grant_program": "", "state_amount": "5.00"}),
+        ("federal_fund_estimates", {"first_year_amount": "5.00"}),
+    ],
+)
+def test_sf424a_v1_0_row_not_required_with_only_section_c_or_e_data(sf424a_v1_0, section, data):
+    """Sections C and E have their own optional Column A, so their data alone does not
+    make activity_title required. A blank Column A goes out as "N/A" in the XML."""
+    data = {
+        "activity_line_items": [{"activity_title": "Line1"}, {section: data}],
+        "confirmation": True,
+    }
+    assert validate_json_schema_for_form(data, sf424a_v1_0) == []
+
+
+def test_sf424a_v1_0_row_not_required_with_only_section_c_total(sf424a_v1_0):
+    """The auto-calculated Section C row total alone does not make activity_title required."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {"non_federal_resources": {"total_amount": "0.00"}},
+        ],
+        "confirmation": True,
+    }
+    assert validate_json_schema_for_form(data, sf424a_v1_0) == []
+
+
+def test_sf424a_v1_0_row_required_when_assistance_listing_number_entered(sf424a_v1_0):
+    """Section A Column B on its own counts as Section A data for the row."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {"assistance_listing_number": "93.001"},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert [(i.field, i.type) for i in validation_issues] == [
+        ("$.activity_line_items[1].activity_title", "required")
+    ]
+
+
 def test_sf424a_v1_0_no_line_items(full_valid_json_v1_0, sf424a_v1_0):
     data = full_valid_json_v1_0
     data["activity_line_items"] = []
@@ -584,6 +721,32 @@ def test_sf424a_v_1_0_auto_summation_full_data(
     }
 
 
+def test_sf424a_v_1_0_conditional_required_end_to_end(enable_factory_create, sf424a_v1_0):
+    """Through pre-population, empty rows stay optional and Section A data forces Column A."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {"budget_summary": {"federal_new_or_revised_amount": "10.00"}},
+            {},
+        ],
+        "confirmation": True,
+    }
+    app = setup_application_for_form_validation(
+        data,
+        json_schema=sf424a_v1_0.form_json_schema,
+        rule_schema=sf424a_v1_0.form_rule_schema,
+    )
+
+    validation_issues = validate_application_form(app, ApplicationAction.MODIFY)
+
+    # Pre-population injects budget_categories totals into every row, but only row 3
+    # (which has Section A data and no Column A value) is flagged as required.
+    required_issues = [i for i in validation_issues if i.type == "required"]
+    assert len(required_issues) == 1
+    assert required_issues[0].field == "$.activity_line_items[2].activity_title"
+
+
 def test_sf424a_v_1_0_total_budget_summary_sums_column_g(enable_factory_create, sf424a_v1_0):
     """Row 5 Column G should sum Column G (rows 1-4), not Row 5 Columns C-F."""
     data = {
@@ -657,3 +820,78 @@ def test_sf424a_v_1_0_total_budget_summary_column_g_differs_from_cf_sum(
 
     # Row 5 G = sum of Column G rows 1-4, which is 999999.00 (not 0.00 from C-F)
     assert app_json["total_budget_summary"]["total_amount"] == "999999.00"
+
+
+def test_sf424a_v_1_0_saved_form_generates_valid_xml(
+    enable_factory_create, verify_no_warning_error_logs, sf424a_v1_0
+):
+    """Runs the real save path (pre-population fills in the totals, including "0.00" on rows
+    left empty) and then generates the XML, the way a submission does.
+
+    Two rows are filled in with whole dollar amounts and Section C is only used on row 1,
+    leaving its Column A blank. Section D is left empty, and so are rows 3-4, as the UI
+    sends them."""
+    row = {
+        "assistance_listing_number": "93.001",
+        "budget_summary": {"federal_new_or_revised_amount": "11"},
+        "budget_categories": {"personnel_amount": "11", "travel_amount": "4"},
+        "federal_fund_estimates": {"grant_program": "Funds", "first_year_amount": "11"},
+    }
+    data = {
+        "activity_line_items": [
+            row
+            | {
+                "activity_title": "Activity 1",
+                "non_federal_resources": {"applicant_amount": "11"},
+            },
+            row | {"activity_title": "Activity 2"},
+            {},
+            {},
+        ],
+        "confirmation": True,
+    }
+    application_form = setup_application_for_form_validation(
+        data,
+        json_schema=sf424a_v1_0.form_json_schema,
+        rule_schema=sf424a_v1_0.form_rule_schema,
+    )
+    assert validate_application_form(application_form, ApplicationAction.MODIFY) == []
+
+    response = XMLGenerationService().generate_xml(
+        XMLGenerationRequest(
+            application_data=application_form.application_response,
+            transform_config=FORM_XML_TRANSFORM_RULES,
+        )
+    )
+    assert response.success, response.error_message
+    xml_data = response.xml_data
+
+    xsd_dir = (Path(__file__).parents[4] / "src/services/xml_generation/xsds").resolve()
+    result = XSDValidator(xsd_dir).validate_xml_for_form(xml_data, "SF424A-V1.0")
+    assert result["valid"], result["error_message"]
+
+    ns = {"SF424A": "http://apply.grants.gov/forms/SF424A-V1.0"}
+    title_attr = f"{{{ns['SF424A']}}}activityTitle"
+    root = lxml_etree.fromstring(xml_data.encode("utf-8"))
+
+    def titles(path: str) -> list[str | None]:
+        return [item.get(title_attr) for item in root.findall(path, ns)]
+
+    # Empty rows 3-4 are left out of every section, even though they got "0.00" totals
+    assert titles("SF424A:BudgetSummary/SF424A:SummaryLineItem") == ["Activity 1", "Activity 2"]
+    assert titles("SF424A:BudgetCategories/SF424A:CategorySet") == ["Activity 1", "Activity 2"]
+    # Section C has its own Column A: blank with amounts gives "N/A". Row 2 has nothing in
+    # Section C, so like legacy it's an empty line item with the Section A title
+    assert titles("SF424A:NonFederalResources/SF424A:ResourceLineItem") == ["N/A", "Activity 2"]
+    assert len(root.findall("SF424A:NonFederalResources/SF424A:ResourceLineItem", ns)[1]) == 0
+    # Nothing entered in Section D, so it's left out instead of a block of "0.00" totals
+    assert root.find("SF424A:BudgetForecastedCashNeeds", ns) is None
+    assert titles("SF424A:FederalFundsNeeded/SF424A:FundsLineItem") == ["Funds", "Funds"]
+    # Column B goes out as CFDANumber
+    assert [
+        element.text for element in root.findall(".//SF424A:SummaryLineItem/SF424A:CFDANumber", ns)
+    ] == ["93.001", "93.001"]
+    # Whole dollar amounts and calculated totals are written with 2 decimals
+    category_set = root.find("SF424A:BudgetCategories/SF424A:CategorySet", ns)
+    assert category_set.findtext("SF424A:BudgetPersonnelRequestedAmount", namespaces=ns) == "11.00"
+    assert category_set.findtext("SF424A:BudgetTotalAmount", namespaces=ns) == "15.00"

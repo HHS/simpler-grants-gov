@@ -1,5 +1,5 @@
 name: Deploy Metabase
-run-name: Deploy ${{ inputs.image_tag || github.ref_name }} to Metabase ${{ inputs.environment || 'nonprod' }}
+run-name: Deploy ${{ inputs.image_tag || 'current image' }} to Metabase ${{ inputs.environment || 'nonprod' }}
 
 on:
   push:
@@ -17,8 +17,11 @@ on:
         type: choice
         options:
           - dev
+          - infra-dev
           - staging
+          - infra-staging
           - training
+          - infra-training
           - grantee1
           - prod
       image_tag:
@@ -34,7 +37,8 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]') }}
+        # Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]') }}
     permissions:
       contents: read
       id-token: write
@@ -51,7 +55,7 @@ jobs:
           environment: ${{ matrix.envs }}
 
       - name: Deploy Metabase
-        run: make release-deploy APP_NAME=metabase ENVIRONMENT=${{ matrix.envs }} IMAGE_TAG=${{ inputs.image_tag || github.ref }}
+        run: make release-deploy APP_NAME=metabase ENVIRONMENT=${{ matrix.envs }} IMAGE_TAG=${{ inputs.image_tag }}
 
   send-slack-notification:
     if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))

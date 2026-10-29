@@ -1,7 +1,6 @@
 import logging
 
-from grants_shared.adapters import db
-
+from src.adapters import db
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType
 from src.db.models.user_models import User
 from src.db.models.workflow_models import WorkflowApproval

@@ -1,5 +1,0 @@
-This is my text file
-
-It has a few lines in it
-
-Hello

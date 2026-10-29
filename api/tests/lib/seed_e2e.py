@@ -1,38 +1,177 @@
 import logging
-import os
 import uuid
 
-import grants_shared.adapters.db as db
+from pydantic import Field
 
-from src.constants.static_role_values import E2E_TEST_USER_ROLE
-from src.util.file_util import write_to_file
+import src.adapters.db as db
+from src.constants.static_role_values import (
+    E2E_TEST_USER_MANAGER_ROLE,
+    OPPORTUNITY_PUBLISHER,
+    ORG_ADMIN,
+    ORG_MEMBER,
+)
+from src.util.env_config import PydanticBaseEnvConfig
+from tests.lib.seed_agencies_and_users import setup_agency
 from tests.lib.seed_data_utils import UserBuilder
+from tests.lib.seed_orgs_and_users import setup_org
+from tests.src.db.models.factories import AssistanceListingFactory
 
 logger = logging.getLogger(__name__)
 
 ###############################
 # This script will
-# * seed the local database with a user that can be used for fake or potentially real logins from automated e2e tests
-# * create an authorization token entry tied to that user, seeding the database accordingly
-# * write the resulting token into the e2e_token.tmp file (where it can be retrieved by CI processes for frontend / e2e use)
+# * seed the local database with one or more test users for fake or potentially real logins from
+#   automated e2e tests. Each is flagged via UserBuilder.with_e2e_test_user(), which grants
+#   E2E_TEST_USER_ROLE (the READ_TEST_USER_TOKEN privilege) so its auth token can be returned via
+#   POST /v1/internal/e2e-token.
+# * seed a "manager" user whose API key the e2e orchestrator uses to call
+#   POST /v1/internal/e2e-token (mirrors the staging manager-key flow)
+#
+# To add a new test user, add another UserBuilder(...).with_e2e_test_user()... block below with a
+# static user id.
 ###############################
 
+# Static UUID for the local E2E manager user. Documented to QA alongside the
+# test user UUIDs.
+E2E_MANAGER_USER_ID = uuid.UUID("c3d4e5f6-a7b8-4c5d-9e0f-1a2b3c4d5e6f")
 
-def _write_token_to_file(token: str) -> None:
-    path_to_tmp_token_file = os.path.join(os.path.dirname(__file__), "..", "..", "e2e_token.tmp")
-    token_declaration = 'E2E_USER_AUTH_TOKEN="' + token + '"'
-    write_to_file(path_to_tmp_token_file, token_declaration)
+# Dedicated agency for the E2E test user's grantor role. Kept separate from the
+# agencies in seed_agencies_and_users so opportunities created by E2E runs stay
+# isolated, and so the grantor opportunities page auto-selects a single agency.
+E2E_AGENCY_ID = uuid.UUID("d4e5f6a7-b8c9-4d5e-9f0a-1b2c3d4e5f60")
+
+# Fixed assistance listing the opportunity-creation E2E test enters on the
+# Create Opportunity page. Staging has real ALN data; local/CI must seed this
+# specific number or the create endpoint returns a 404.
+E2E_ASSISTANCE_LISTING_ID = uuid.UUID("e5f6a7b8-c9d0-4e5f-a0b1-2c3d4e5f6a70")
+E2E_ASSISTANCE_LISTING_NUMBER = "00.000"
+
+# Dedicated organization for E2E test users that need organization membership.
+# Mirrors the setup of the staging test user's organization. This id is
+# local-only and does not need to match staging's organization id.
+E2E_ORGANIZATION_ID = uuid.UUID("e5f6a7b8-c9d0-4e5f-8a0b-1c2d3e4f5061")
+
+# Additional identities equivalent to the primary test user above (same org,
+# same agency, same roles), seeded so concurrently-running local/CI workers
+# don't all mutate (create applications/opportunities as) the exact same
+# user. See utils/auth/sharded-test-user-utils.ts on the frontend side,
+# which picks one of these per concurrently-running worker. Sized to match
+# the default PLAYWRIGHT_WORKERS=10 in ci-frontend-e2e.yml, so each worker
+# gets its own user; grow it if the worker count is raised.
+E2E_PRIMARY_ORG_ADMIN_POOL_USER_IDS = [
+    uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"),  # pool[0] == primaryOrgAdmin above
+    uuid.UUID("f25c7491-7ebc-4f4f-8de6-3ac0594d9c64"),  # pool[1]
+    uuid.UUID("f35c7491-7ebc-4f4f-8de6-3ac0594d9c65"),  # pool[2]
+    uuid.UUID("f45c7491-7ebc-4f4f-8de6-3ac0594d9c66"),  # pool[3]
+    uuid.UUID("f55c7491-7ebc-4f4f-8de6-3ac0594d9c67"),  # pool[4]
+    uuid.UUID("f65c7491-7ebc-4f4f-8de6-3ac0594d9c68"),  # pool[5]
+    uuid.UUID("f75c7491-7ebc-4f4f-8de6-3ac0594d9c69"),  # pool[6]
+    uuid.UUID("f85c7491-7ebc-4f4f-8de6-3ac0594d9c6a"),  # pool[7]
+    uuid.UUID("f95c7491-7ebc-4f4f-8de6-3ac0594d9c6b"),  # pool[8]
+    uuid.UUID("fa5c7491-7ebc-4f4f-8de6-3ac0594d9c6c"),  # pool[9]
+]
+
+# "Sally's Soup Emporium": the organization the primary E2E user (one_org_user in
+# seed_orgs_and_users.py) is ORG_ADMIN of. Pool users must belong to it too so
+# application-creation tests can select the same organization.
+SALLY_ORG_ID = uuid.UUID("47d95649-c70d-44d9-ae78-68bf848e32f8")
+
+# Static id for the secondary E2E test user, a member of the E2E test organization.
+E2E_ORG_MEMBER_USER_ID = uuid.UUID("a7b8c9d0-e1f2-4a3b-8c4d-5e6f7a8b9c0d")
+# Static id for the local no-agency E2E test user.
+# This user is seeded ahead of the no-agency branch tests that need a
+# fully authenticated user with no agency memberships.
+E2E_NO_AGENCY_USER_ID = uuid.UUID("c0ffee00-1234-4e56-89ab-cdef01234567")
+
+
+class _SeedE2EConfig(PydanticBaseEnvConfig):
+    local_test_user_manager_api_key: str = Field(alias="LOCAL_TEST_USER_MANAGER_API_KEY")
 
 
 def _build_users_and_tokens(db_session: db.Session) -> None:
-    builder = (
-        # Reuse the seeded one_org_user so the spoofed E2E session always has
-        # organization membership (Sally's Soup Emporium) in local/CI runs.
-        UserBuilder(uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"), db_session, "user for e2e")
-        .with_jwt_auth()
-        .with_api_key("e2e-test-key")
-        .with_internal_role(E2E_TEST_USER_ROLE)
+    config = _SeedE2EConfig()
+
+    # Seed the assistance listing the create-opportunity E2E test references.
+    # merge() on a fixed id keeps this idempotent across repeated seed runs so
+    # get_assistance_listing's scalar_one_or_none lookup stays unambiguous.
+    db_session.merge(
+        AssistanceListingFactory.build(
+            assistance_listing_id=E2E_ASSISTANCE_LISTING_ID,
+            assistance_listing_number=E2E_ASSISTANCE_LISTING_NUMBER,
+            program_title="Test ALN",
+        ),
+        load=True,
     )
 
-    builder.build()
-    _write_token_to_file(builder.jwt_token)
+    e2e_agency = setup_agency(
+        db_session,
+        agency_id=E2E_AGENCY_ID,
+        agency_code="E2E",
+        agency_name="E2E Test Agency",
+    )
+    e2e_organization = setup_org(
+        db_session,
+        organization_id=E2E_ORGANIZATION_ID,
+        legal_business_name="E2E Test Organization",
+        uei="FAKEUEIE2E01",
+    )
+
+    # Primary test user. Reuses the seeded one_org_user id so the spoofed E2E session always has
+    # organization membership in local/CI runs.
+    (
+        UserBuilder(uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"), db_session, "user for e2e")
+        .with_e2e_test_user()
+        .with_api_key("e2e-test-key")
+        # Grantor role so the Create Opportunity link shows and opportunity
+        # creation E2E tests can create and publish opportunities.
+        .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+        .build()
+    )
+
+    # Additional identities equivalent to the primary test user above (same
+    # setup, different id), so concurrently-running local/CI workers each
+    # mutate a different "org admin" instead of all colliding on one. See
+    # E2E_PRIMARY_ORG_ADMIN_POOL_USER_IDS above and
+    # utils/auth/sharded-test-user-utils.ts on the frontend side.
+    sally_org = setup_org(
+        db_session,
+        organization_id=SALLY_ORG_ID,
+        legal_business_name="Sally's Soup Emporium",
+        uei="FAKEUEI11111",
+    )
+
+    for pool_user_id in E2E_PRIMARY_ORG_ADMIN_POOL_USER_IDS[1:]:
+        (
+            UserBuilder(pool_user_id, db_session, "user for e2e (pool)")
+            .with_e2e_test_user()
+            .with_organization(sally_org, roles=[ORG_ADMIN])
+            .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+            .build()
+        )
+
+    # Secondary test user with organization membership, mirroring the staging test user.
+    # Add agency membership so local invalid-agency failure path can be exercised.
+    (
+        UserBuilder(E2E_ORG_MEMBER_USER_ID, db_session, "e2e org member test user")
+        .with_e2e_test_user()
+        .with_organization(e2e_organization, roles=[ORG_MEMBER])
+        .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+        .build()
+    )
+
+    # Dedicated local user with no agency membership, used to verify the no-agency
+    # failure path on the grantor opportunities page.
+    (
+        UserBuilder(E2E_NO_AGENCY_USER_ID, db_session, "e2e no-agency test user")
+        .with_e2e_test_user()
+        .build()
+    )
+
+    # Manager user: holds the API key the e2e orchestrator uses to request
+    # tokens for any test user via POST /v1/internal/e2e-token.
+    (
+        UserBuilder(E2E_MANAGER_USER_ID, db_session, "e2e test user manager")
+        .with_api_key(config.local_test_user_manager_api_key)
+        .with_internal_role(E2E_TEST_USER_MANAGER_ROLE)
+        .build()
+    )

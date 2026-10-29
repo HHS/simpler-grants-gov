@@ -1,14 +1,24 @@
 import { identity } from "lodash";
 import {
   formatDate,
+  formatDateWithNoPreformattedExpectations,
   isExpired,
   isExpiring,
+  toLongMonthDate,
   toShortMonthDate,
 } from "src/utils/dateUtil";
 
 jest.mock("src/constants/auth", () => ({
   clientTokenRefreshInterval: 1000,
 }));
+
+describe("formatDateWithNoPreformattedExpectations", () => {
+  it("returns a human readable string for properly formatted dates", () => {
+    expect(
+      formatDateWithNoPreformattedExpectations(new Date("10-10-2024")),
+    ).toEqual("October 10, 2024");
+  });
+});
 
 describe("formatDate", () => {
   beforeEach(() => {
@@ -72,5 +82,15 @@ describe("toShortMonthDate", () => {
   });
   it("returns an empty string if input is invalid", () => {
     expect(toShortMonthDate("January 25th Twenty Twenty FIve")).toEqual("");
+  });
+});
+
+describe("toLongMonthDate", () => {
+  it("converts dates to the `long month` format", () => {
+    expect(toLongMonthDate("2025-01-25")).toEqual("January 25, 2025");
+    expect(toLongMonthDate("01-25-2025")).toEqual("January 25, 2025");
+  });
+  it("returns an empty string if input is invalid", () => {
+    expect(toLongMonthDate("January 25th Twenty Twenty FIve")).toEqual("");
   });
 });

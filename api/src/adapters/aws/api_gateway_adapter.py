@@ -1,3 +1,5 @@
+import csv
+import io
 import logging
 import uuid
 
@@ -11,6 +13,12 @@ from src.adapters.aws.aws_session import is_local_aws
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+
+class ApiKeyImportError(Exception):
+    """Raised when an API key import to AWS API Gateway doesn't produce the expected key."""
+
+    pass
 
 
 class ApiKeyImportResponse(BaseModel):
@@ -70,13 +78,7 @@ def import_api_key(
     if api_gateway_client is None:
         api_gateway_client = get_boto_api_gateway_client()
 
-    # Format the API key data as CSV for import
-    # AWS API Gateway expects CSV format: name,key,description,enabled,usageplanIds
-    # Header row is optional but improves readability and maintainability
-    usage_plan_ids_str = f'"{usage_plan_id}"' if usage_plan_id else ""
-    header = "name,key,description,enabled,usageplanIds"
-    data_row = f"{name},{api_key},{description or ''},{'true' if enabled else 'false'},{usage_plan_ids_str}"
-    csv_data = f"{header}\n{data_row}"
+    csv_data = _build_import_csv(api_key, name, description, enabled, usage_plan_id)
 
     try:
         response = api_gateway_client.import_api_keys(
@@ -94,7 +96,7 @@ def import_api_key(
 
     imported_key_ids = response.get("ids", [])
     if not imported_key_ids:
-        raise Exception("No API key IDs returned from import operation")
+        raise ApiKeyImportError("No API key IDs returned from import operation")
 
     key_id = imported_key_ids[0]
 
@@ -114,6 +116,17 @@ def import_api_key(
 
     api_key_response = ApiKeyImportResponse.model_validate(key_details)
 
+    if api_key_response.enabled != enabled:
+        logger.error(
+            "API key imported to AWS API Gateway with disabled state",
+            extra={
+                "gateway_key_id": api_key_response.id,
+                "expected_enabled": enabled,
+                "actual_enabled": api_key_response.enabled,
+            },
+        )
+        raise ApiKeyImportError("API key imported to AWS API Gateway with disabled state")
+
     if usage_plan_id:
         logger.info(
             "API key imported with usage plan association",
@@ -121,6 +134,20 @@ def import_api_key(
         )
 
     return api_key_response
+
+
+def _build_import_csv(
+    api_key: str, name: str, description: str | None, enabled: bool, usage_plan_id: str | None
+) -> str:
+    """Build the CSV body for the API Gateway import_api_keys call."""
+    output = io.StringIO()
+    writer = csv.writer(output, lineterminator="\n")
+    writer.writerow(["name", "key", "description", "enabled", "usageplanIds"])
+    writer.writerow(
+        [name, api_key, description or "", "true" if enabled else "false", usage_plan_id or ""]
+    )
+
+    return output.getvalue()
 
 
 _mock_import_responses: list[tuple[dict, ApiKeyImportResponse]] = []

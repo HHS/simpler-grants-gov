@@ -1,8 +1,8 @@
 import { RJSFSchema } from "@rjsf/utils";
-import Ajv from "ajv";
+import Ajv, { ValidateFunction } from "ajv";
 import addFormats from "ajv-formats";
 
-// JSON Schema for the UiSchema, accepts either a "field", "fieldList", or "section"
+// JSON Schema for the UiSchema, accepts a "field", "fieldList", "multiField", or "section"
 export const UiJsonSchema: RJSFSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "array",
@@ -12,20 +12,39 @@ export const UiJsonSchema: RJSFSchema = {
         $ref: "#/$defs/field",
       },
       {
+        $ref: "#/$defs/multiField",
+      },
+      {
         $ref: "#/$defs/fieldList",
       },
       {
         $ref: "#/$defs/section",
       },
+      {
+        $ref: "#/$defs/text",
+      },
     ],
   },
   $defs: {
+    text: {
+      type: "object",
+      properties: {
+        type: {
+          type: "string",
+          enum: ["text"],
+        },
+        name: { type: "string" },
+        content: { type: "string" },
+      },
+      required: ["type", "name", "content"],
+      additionalProperties: false,
+    },
     field: {
       type: "object",
       properties: {
         type: {
           type: "string",
-          enum: ["field", "multiField", "null"],
+          enum: ["field", "null"],
         },
         name: { type: "string" },
         schema: {
@@ -68,6 +87,7 @@ export const UiJsonSchema: RJSFSchema = {
           ],
         },
         attachmentType: { type: "string" },
+        printDescription: { type: "boolean" },
       },
       required: ["type"],
       anyOf: [
@@ -76,6 +96,91 @@ export const UiJsonSchema: RJSFSchema = {
         },
         {
           required: ["definition"],
+        },
+      ],
+      additionalProperties: false,
+    },
+    multiField: {
+      type: "object",
+      properties: {
+        type: {
+          type: "string",
+          enum: ["multiField"],
+        },
+        name: { type: "string" },
+        schema: {
+          $ref: "#/$defs/schema",
+        },
+        definition: {
+          oneOf: [
+            {
+              type: "string",
+              pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
+            },
+            {
+              type: "array",
+              items: {
+                type: "string",
+                pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
+              },
+            },
+          ],
+        },
+        widget: {
+          type: "string",
+          enum: [
+            "Budget424a",
+            "Budget424aSectionA",
+            "Budget424aSectionB",
+            "Budget424aSectionC",
+            "Budget424aSectionD",
+            "Budget424aSectionE",
+            "Budget424aSectionF",
+            "Budget424aTotalBudgetSummary",
+            "Table",
+          ],
+        },
+        children: {
+          $ref: "#/$defs/tableChildren",
+        },
+      },
+      required: ["type"],
+      allOf: [
+        {
+          if: {
+            properties: {
+              widget: {
+                const: "Table",
+              },
+            },
+            required: ["widget"],
+          },
+          then: {
+            required: ["name", "definition", "children"],
+            properties: {
+              definition: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "string",
+                  pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
+                },
+              },
+            },
+            not: {
+              required: ["schema"],
+            },
+          },
+          else: {
+            anyOf: [
+              {
+                required: ["schema"],
+              },
+              {
+                required: ["definition"],
+              },
+            ],
+          },
         },
       ],
       additionalProperties: false,
@@ -130,10 +235,16 @@ export const UiJsonSchema: RJSFSchema = {
                 $ref: "#/$defs/field",
               },
               {
+                $ref: "#/$defs/multiField",
+              },
+              {
                 $ref: "#/$defs/fieldList",
               },
               {
                 $ref: "#/$defs/section",
+              },
+              {
+                $ref: "#/$defs/text",
               },
             ],
           },
@@ -152,6 +263,7 @@ export const UiJsonSchema: RJSFSchema = {
         label: {
           type: "string",
         },
+        hideFieldListHeading: { type: "boolean" },
         minItemsHeading: { type: "string" },
         minItemsHelperText: { type: "string" },
         maxItemsHeading: { type: "string" },
@@ -165,24 +277,179 @@ export const UiJsonSchema: RJSFSchema = {
         children: {
           type: "array",
           items: {
-            $ref: "#/$defs/field",
+            anyOf: [
+              {
+                $ref: "#/$defs/field",
+              },
+              {
+                allOf: [
+                  {
+                    $ref: "#/$defs/multiField",
+                  },
+                  {
+                    // the sibling multiField ref already requires an object, so
+                    // declaring the type here only satisfies ajv's strictTypes check
+                    not: {
+                      type: "object",
+                      properties: {
+                        widget: {
+                          const: "Table",
+                        },
+                      },
+                      required: ["widget"],
+                    },
+                  },
+                ],
+              },
+            ],
           },
         },
       },
       required: ["type", "label", "name", "children"],
       additionalProperties: false,
     },
+    tableChildren: {
+      type: "object",
+      properties: {
+        columns: {
+          type: "array",
+          minItems: 1,
+          items: {
+            $ref: "#/$defs/tableColumn",
+          },
+        },
+        rows: {
+          type: "array",
+          minItems: 1,
+          items: {
+            $ref: "#/$defs/tableRow",
+          },
+        },
+      },
+      required: ["columns", "rows"],
+      additionalProperties: false,
+    },
+    tableColumn: {
+      type: "object",
+      properties: {
+        columnHeader: {
+          type: "string",
+        },
+        width: {
+          type: "number",
+          minimum: 1,
+          maximum: 100,
+          description:
+            "Optional column width as a percentage. Configured column widths cannot total more than 100.",
+        },
+      },
+      required: ["columnHeader"],
+      additionalProperties: false,
+    },
+    tableRow: {
+      type: "object",
+      properties: {
+        cells: {
+          type: "array",
+          minItems: 1,
+          items: {
+            $ref: "#/$defs/tableCell",
+          },
+        },
+      },
+      required: ["cells"],
+      additionalProperties: false,
+    },
+    tableCell: {
+      type: "object",
+      properties: {
+        type: {
+          type: "string",
+          enum: ["input", "readOnly", "plainText"],
+        },
+        definition: {
+          type: "string",
+          pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
+        },
+        staticContent: {
+          type: "string",
+        },
+        format: {
+          type: "string",
+          enum: ["integer", "decimal", "currency", "dollar", "percentage"],
+        },
+      },
+      required: ["type"],
+      allOf: [
+        {
+          if: {
+            properties: {
+              type: {
+                enum: ["input", "readOnly"],
+              },
+            },
+          },
+          then: {
+            required: ["definition"],
+            not: {
+              required: ["staticContent"],
+            },
+          },
+        },
+        {
+          if: {
+            properties: {
+              type: {
+                const: "plainText",
+              },
+            },
+          },
+          then: {
+            required: ["staticContent"],
+            not: {
+              anyOf: [
+                {
+                  required: ["definition"],
+                },
+                {
+                  required: ["format"],
+                },
+              ],
+            },
+          },
+        },
+      ],
+      additionalProperties: false,
+    },
   },
 };
 
+const buildAjv = () => {
+  const ajv = new Ajv({ allErrors: true, coerceTypes: true });
+  addFormats(ajv);
+
+  return ajv;
+};
+
+/*
+  Compiling a schema is codegen plus eval, and the ui schema is validated on every
+  application form request, so the validator for it is built once per process. Reading
+  `errors` straight after the synchronous call keeps this safe to share across requests.
+*/
+let uiSchemaValidator: ValidateFunction | undefined;
+
 export const validateUiSchema = (data: object) => {
-  return validateJsonBySchema(data, UiJsonSchema);
+  uiSchemaValidator = uiSchemaValidator ?? buildAjv().compile(UiJsonSchema);
+
+  if (uiSchemaValidator(data)) {
+    return false;
+  } else {
+    return uiSchemaValidator.errors;
+  }
 };
 
 export const validateJsonBySchema = (json: object, schema: RJSFSchema) => {
-  const ajv = new Ajv({ allErrors: true, coerceTypes: true });
-  addFormats(ajv);
-  const validate = ajv.compile(schema);
+  const validate = buildAjv().compile(schema);
 
   if (validate(json)) {
     return false;

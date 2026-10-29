@@ -3,12 +3,12 @@ from datetime import timedelta
 
 import boto3
 import pytest
-from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import FileScanStatus
 from src.db.models.file_upload_models import PendingFile
+from src.util import datetime_util
 from src.validation.validation_constants import ValidationErrorType
 
 URL = "/v1/files"

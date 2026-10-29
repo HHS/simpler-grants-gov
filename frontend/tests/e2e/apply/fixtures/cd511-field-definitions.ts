@@ -64,11 +64,11 @@ export const CD511_REQUIRED_FIELD_ERRORS: FieldError[] = [
   { fieldId: "project_name", message: "Project Name is required" },
   {
     fieldId: "contact_person--first_name",
-    message: "Contact Person First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "contact_person--last_name",
-    message: "Contact Person Last Name is required",
+    message: "Last Name is required",
   },
   { fieldId: "contact_person_title", message: "Title is required" },
 ];

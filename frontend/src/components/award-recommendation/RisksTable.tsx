@@ -7,6 +7,7 @@ import { AwardRecommendationSubmission } from "src/types/awardRecommendationType
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Pagination, Table } from "@trussworks/react-uswds";
 
@@ -16,6 +17,7 @@ interface RisksTableProps {
 
 export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
   const t = useTranslations("AwardRecommendation.risks");
+  const router = useRouter();
   const {
     selectedSubmissionIds,
     addSubmission,
@@ -86,6 +88,8 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
   };
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchSubmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awardRecommendationId, currentPage, pageSize, clientFetch]);
@@ -174,7 +178,9 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
               type="button"
               className="usa-button"
               onClick={() => {
-                /* TODO: Navigate to edit page */
+                router.push(
+                  `/grantor/award-recommendation/${awardRecommendationId}/risks/add`,
+                );
               }}
             >
               {t("editButton")}
@@ -236,7 +242,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
                 <td>
                   {appSubmission.application_submission_number ? (
                     <Link
-                      href={`/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
+                      href={`/grantor/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
                       className="usa-link"
                     >
                       {appSubmission.application_submission_number}

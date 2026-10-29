@@ -48,7 +48,7 @@ export const SaveSearchSelector = ({
   const [apiError, setApiError] = useState<Error | null>();
 
   const fetchSavedSearches = useCallback(() => {
-    if (!user?.token) {
+    if (!user?.isLoggedIn) {
       setApiError(new Error("Not logged in, can't fetch saved searches"));
     }
     setLoading(true);
@@ -66,7 +66,7 @@ export const SaveSearchSelector = ({
         setApiError(error as Error);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.token, setSavedSearches]);
+  }, [user?.isLoggedIn, setSavedSearches]);
 
   // note that selected value will be the search id since select values
   // cannot be objects. We then need to look up the the correct search in the list
@@ -93,6 +93,8 @@ export const SaveSearchSelector = ({
   // fetch saved searches on page load, log in, or on any new saved search
   // not explicitly dependent on user changes, but fetchSavedSearches is, so will still fire
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSavedSearches()
       .then(() => setRunPostFetchActions(true))
       .catch(noop);
@@ -108,6 +110,8 @@ export const SaveSearchSelector = ({
         savedSearchQueryValue ||
         (newSavedSearches.length && newSavedSearches[0]);
       if (savedSearchToSetInSelectAfterFetch) {
+        // TODO #9633
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedSavedSearch(savedSearchToSetInSelectAfterFetch);
       }
       setRunPostFetchActions(false);
@@ -134,6 +138,8 @@ export const SaveSearchSelector = ({
       searchParams.get("savedSearch") &&
       prevSearchParams?.get("savedSearch")
     ) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSavedSearch("");
       removeQueryParam("savedSearch");
     }

@@ -1,3 +1,4 @@
+
 module "staging_config" {
   source                            = "./env-config"
   project_name                      = local.project_name
@@ -7,11 +8,12 @@ module "staging_config" {
   network_name                      = "staging"
   domain_name                       = "api.staging.simpler.grants.gov"
   secondary_domain_names            = ["alb.staging.simpler.grants.gov"]
-  s3_cdn_domain_name                = "files.staging.simpler.grants.gov"
+  enable_api_gateway_domain_name    = false
   mtls_domain_name                  = "soap.staging.simpler.grants.gov"
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
+  database_engine_version           = "17.7"
   database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwtMjA3MTAxMDcwODY2NTUyNTU"
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
@@ -51,6 +53,7 @@ module "staging_config" {
     ENABLE_WORKFLOW_ENDPOINTS             = 1
     ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
     ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
@@ -64,8 +67,10 @@ module "staging_config" {
     # Workflow
     WORKFLOW_SERVICE_INTERNAL_USER_ID = "903bf2e6-b213-4744-9f95-66ccfd98a819"
 
-    # Job lock — only enabled in dev/staging while we validate it
     ENABLE_JOB_LOCK = "true"
+
+    # File upload stream duration
+    FILE_SCAN_RESULTS_MAX_DURATION_SECONDS = 900
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

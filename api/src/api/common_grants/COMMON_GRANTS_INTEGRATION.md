@@ -151,6 +151,33 @@ POST /common-grants/opportunities/search
 - **Transforms requests/responses** between CommonGrants and v1 formats
 - Returns `OpportunitiesSearchResponse`
 
+### Custom Filters
+
+The search endpoint accepts a `filters.customFilters` map that extends the standard CommonGrants filter set with Grants.gov-specific fields. Each entry is a `{operator, value}` object.
+
+| key | operator | value | notes |
+|---|---|---|---|
+| `agency` | `in` | array of agency codes (e.g. `["USAID"]`) | native agency codes (passthrough) |
+| `applicantType` | `in` | array of CommonGrants applicant-type values (e.g. `["government_state"]`) | mapped to native applicant types |
+| `fundingInstrument` | `in` | array of funding instrument values (e.g. `["grant"]`) | native values (passthrough) |
+| `costSharing` | `eq` | boolean (or the strings `"true"`/`"false"`) | matches `is_cost_sharing` |
+
+**Error behavior**: unsupported keys and invalid values are skipped — the search still runs with the valid filters applied — and the skipped filters are reported in `filterInfo.errors` in the response. An empty array value applies no filter for that key and is not an error. `agency` and `fundingInstrument` values are forwarded to the native search unchanged (not validated by this adapter); an unrecognized value matches no opportunities rather than producing an error.
+
+**Example request body** (agency + applicant type):
+
+```json
+{
+  "pagination": { "page": 1, "pageSize": 25 },
+  "filters": {
+    "customFilters": {
+      "agency": { "operator": "in", "value": ["USAID"] },
+      "applicantType": { "operator": "in", "value": ["government_state", "non_profit_with_501c3"] }
+    }
+  }
+}
+```
+
 ## OpenAPI Specification Generation & Validation
 
 The integration includes tools for generating and validating OpenAPI specifications for the CommonGrants Protocol endpoints.

@@ -61,9 +61,18 @@ export async function verifyFormStatusOnApplication(
 ): Promise<void> {
   await gotoWithRetry(page, applicationUrl, { waitUntil: "domcontentloaded" });
   // Wait for the forms table to be populated before asserting row status.
-  // domcontentloaded fires before async data is fetched; this replaces the
-  // old static 10s wait with a dynamic wait that is both faster on fast
-  // machines and more reliable on slow ones (e.g. Mobile Chrome in CI).
+  // The forms table may take time to render and populate with data after
+  // navigation, especially on slower connections or in CI environments.
+  // We wait for both the table and form links to ensure the page is ready.
+  try {
+    await page
+      .locator(".simpler-application-forms-table")
+      .first()
+      .waitFor({ state: "visible", timeout: 30000 });
+  } catch {
+    // Table may not always have this exact selector; fall back to waiting
+    // for form links which is more reliable across different page states
+  }
   await page
     .locator('a[href*="/form/"]')
     .first()
@@ -73,7 +82,7 @@ export async function verifyFormStatusOnApplication(
 
 /**
  * Verifies the post-save state on the form page (success alert or error alerts +
- * inline errors). Does NOT navigate — assumes the form page is currently active.
+ * inline errors). Does NOT navigate - assumes the form page is currently active.
  *
  * For "complete": checks success alert heading and "No errors were detected." text.
  * For "incomplete": checks the alert error list at the top and inline field errors;
@@ -81,7 +90,7 @@ export async function verifyFormStatusOnApplication(
  *
  * @param page Playwright Page object
  * @param status Expected status: "complete" or "incomplete"
- * @param expectedErrors Required when status is "incomplete" — list of field errors to verify inline
+ * @param expectedErrors Required when status is "incomplete" - list of field errors to verify inline
  * @param alertErrors Optional override for the alert banner error list. Defaults to expectedErrors.
  *   Use when a form's alert-level errors differ from its inline field errors (e.g. array-level
  *   validation errors that appear in the alert but have no corresponding inline element).

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getSession } from "src/services/auth/session";
-import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import { getOpportunityForGrantor } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { LayoutProps } from "src/types/generalTypes";
 
 import { getTranslations } from "next-intl/server";

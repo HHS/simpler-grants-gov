@@ -1,0 +1,43 @@
+name: Inspect Readability Calculator
+run-name: Inspect Readability Calculator in infra-dev
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inspect-nofo-readability-infra-dev
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    # Use only reviewed main-branch code and the fixed infra-dev account.
+    if: github.repository == 'HHS/simpler-grants-gov' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Load read-only session policy
+        id: policy
+        run: echo "json=$(jq -c . scripts/nofo_inspection_session_policy.json)" >> "$GITHUB_OUTPUT"
+      # Avoid the deployment credential wrapper: no Terraform init/apply or state reads.
+      - name: Authenticate to infra-dev with read-only session permissions
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::061664787759:role/simpler-grants-gov-github-actions
+          role-session-name: NofoReadabilityInspection
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+          unset-current-credentials: true
+          retry-max-attempts: 2
+          inline-session-policy: ${{ steps.policy.outputs.json }}
+      - name: Inspect deployed settings and publish sanitized summary
+        run: python3 scripts/inspect_nofo_readability.py

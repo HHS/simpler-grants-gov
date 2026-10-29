@@ -1,7 +1,10 @@
 import {
+  escapeRegExpString,
   findFirstWhitespace,
   formatTimestamp,
+  getAwsHeaders,
   getModifiedTimeDisplay,
+  getResponseInfo,
   isBasicallyAnObject,
   isCurrentPath,
   queryParamsToQueryString,
@@ -251,5 +254,53 @@ describe("isBasicallyAnObject", () => {
     expect(isBasicallyAnObject(new Set())).toEqual(true);
     expect(isBasicallyAnObject({ a: "value" })).toEqual(true);
     expect(isBasicallyAnObject(new Date())).toEqual(true);
+  });
+});
+
+describe("escapeRegExpString", () => {
+  it("escapes all relevant characters in a string for use in a regexp", () => {
+    expect(
+      escapeRegExpString(
+        `All of these should be escaped: \\ ^ $ * + ? . ( ) | { } [ ]`,
+      ),
+    ).toEqual(
+      "\\x41ll\\x20of\\x20these\\x20should\\x20be\\x20escaped\\x3a\\x20\\\\\\x20\\^\\x20\\$\\x20\\*\\x20\\+\\x20\\?\\x20\\.\\x20\\(\\x20\\)\\x20\\|\\x20\\{\\x20\\}\\x20\\[\\x20\\]",
+    );
+  });
+});
+
+describe("getAwsHeaders", () => {
+  it("returns the AWS and content type headers as structured fields", () => {
+    const headers = new Headers({
+      "x-amzn-requestid": "request-id",
+      "x-amz-apigw-id": "gateway-id",
+      "x-amzn-errortype": "ThrottlingException",
+      "Content-Type": "application/json",
+    });
+
+    expect(getAwsHeaders(headers)).toEqual({
+      apiRequestId: "request-id",
+      apiGatewayId: "gateway-id",
+      apiErrorType: "ThrottlingException",
+      contentType: "application/json",
+    });
+  });
+
+  it("returns null for headers that are not set", () => {
+    expect(getAwsHeaders(new Headers())).toEqual({
+      apiRequestId: null,
+      apiGatewayId: null,
+      apiErrorType: null,
+      contentType: null,
+    });
+  });
+});
+
+describe("getResponseInfo", () => {
+  it("returns whether the response was ok and its status", () => {
+    expect(getResponseInfo({ ok: false, status: 503 } as Response)).toEqual({
+      responseOk: false,
+      responseStatus: 503,
+    });
   });
 });

@@ -36,8 +36,15 @@ export const attachmentsToZipEntries = (
   if (!attachments || !attachments.length) {
     return [];
   }
+  // A zip missing a file would misrepresent what was actually submitted/published,
+  // so refuse to build it at all rather than silently omitting the broken attachment.
   const entries = attachments.reduce(
     (acc, attachment) => {
+      if (!attachment.download_path) {
+        throw new Error(
+          `Attachment "${attachment.file_name}" has no resolvable download_path`,
+        );
+      }
       const { zipEntries, claimedFilenames } = acc;
       const zipFilename = deduplicateFilename(
         attachment.file_name,

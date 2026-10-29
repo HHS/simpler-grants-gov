@@ -1,9 +1,12 @@
+import csv
+import io
 from unittest.mock import Mock, patch
 
 import pytest
 
 from src.adapters.aws.api_gateway_adapter import (
     ApiGatewayConfig,
+    ApiKeyImportError,
     ApiKeyImportResponse,
     _clear_mock_import_responses,
     _get_mock_import_responses,
@@ -127,7 +130,7 @@ class TestImportApiKeyFunction:
         )
 
         # Verify the boto3 calls were made correctly
-        expected_csv = "name,key,description,enabled,usageplanIds\nTest API Key,test-key-12345,Test description,true,"
+        expected_csv = "name,key,description,enabled,usageplanIds\nTest API Key,test-key-12345,Test description,true,\n"
         mock_boto_client.import_api_keys.assert_called_once_with(
             body=expected_csv.encode("utf-8"),
             format="csv",
@@ -173,7 +176,7 @@ class TestImportApiKeyFunction:
         )
 
         # Verify the CSV format includes the usage plan ID
-        expected_csv = 'name,key,description,enabled,usageplanIds\nTest API Key,test-key-12345,Test description,true,"test-plan-123"'
+        expected_csv = "name,key,description,enabled,usageplanIds\nTest API Key,test-key-12345,Test description,true,test-plan-123\n"
         mock_boto_client.import_api_keys.assert_called_once_with(
             body=expected_csv.encode("utf-8"),
             format="csv",
@@ -184,6 +187,75 @@ class TestImportApiKeyFunction:
         mock_boto_client.create_usage_plan_key.assert_not_called()
 
         assert response.id == "api-key-123"
+
+    @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
+    @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
+    def test_real_aws_import_values_with_commas_and_quotes(self, mock_get_client, mock_is_local):
+        """Test that commas and quotes in values don't shift the CSV columns."""
+        mock_is_local.return_value = False
+
+        mock_boto_client = Mock()
+        mock_get_client.return_value = mock_boto_client
+
+        mock_boto_client.import_api_keys.return_value = {"ids": ["api-key-123"], "warnings": []}
+        mock_boto_client.get_api_key.return_value = {
+            "id": "api-key-123",
+            "name": 'My "key", for testing',
+            "enabled": True,
+        }
+
+        import_api_key(
+            api_key="test-key-12345",
+            name='My "key", for testing',
+            description="API key for api_key_id=abc, user_id=def",
+            enabled=True,
+            usage_plan_id="test-plan-123",
+        )
+
+        body = mock_boto_client.import_api_keys.call_args.kwargs["body"].decode("utf-8")
+        rows = list(csv.DictReader(io.StringIO(body)))
+
+        assert rows == [
+            {
+                "name": 'My "key", for testing',
+                "key": "test-key-12345",
+                "description": "API key for api_key_id=abc, user_id=def",
+                "enabled": "true",
+                "usageplanIds": "test-plan-123",
+            }
+        ]
+
+    @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
+    @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
+    def test_real_aws_import_enabled_mismatch(self, mock_get_client, mock_is_local, caplog):
+        """Test that an error is raised if the imported key's enabled state doesn't match."""
+        mock_is_local.return_value = False
+
+        mock_boto_client = Mock()
+        mock_get_client.return_value = mock_boto_client
+
+        mock_boto_client.import_api_keys.return_value = {"ids": ["api-key-123"], "warnings": []}
+        mock_boto_client.get_api_key.return_value = {
+            "id": "api-key-123",
+            "name": "Test API Key",
+            "enabled": False,
+        }
+
+        with pytest.raises(
+            ApiKeyImportError, match="API key imported to AWS API Gateway with disabled state"
+        ):
+            import_api_key(api_key="test-key-12345", name="Test API Key", enabled=True)
+
+        error_records = [
+            record
+            for record in caplog.records
+            if record.message == "API key imported to AWS API Gateway with disabled state"
+        ]
+        assert len(error_records) == 1
+        assert error_records[0].levelname == "ERROR"
+        assert error_records[0].gateway_key_id == "api-key-123"
+        assert error_records[0].expected_enabled is True
+        assert error_records[0].actual_enabled is False
 
     @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
     @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
@@ -235,7 +307,9 @@ class TestImportApiKeyFunction:
         # Mock response with no IDs
         mock_boto_client.import_api_keys.return_value = {"ids": [], "warnings": []}
 
-        with pytest.raises(Exception, match="No API key IDs returned from import operation"):
+        with pytest.raises(
+            ApiKeyImportError, match="No API key IDs returned from import operation"
+        ):
             import_api_key(api_key="test-key-12345", name="Test API Key", enabled=True)
 
     def test_csv_format_generation(self):

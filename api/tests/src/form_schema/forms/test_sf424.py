@@ -11,12 +11,17 @@ from tests.lib.data_factories import setup_application_for_form_validation
 
 @pytest.fixture
 def valid_json_v4_0():
+    """
+    Minimal valid JSON with required fields.
+    Pre-populated fields (sam_uei, agency_name, funding_opportunity_*, etc.)
+    are NOT included since they're read-only and populated by the system.
+    """
     return {
         "submission_type": "Application",
         "application_type": "New",
         "organization_name": "Example Org",
         "employer_taxpayer_identification_number": "123-456-7890",
-        "sam_uei": "UEI123123123",
+        "sam_uei": "UEI123123123",  # Pre-populated but required in schema
         "applicant": {
             "street1": "123 Main St",
             "city": "Exampleburg",
@@ -31,9 +36,9 @@ def valid_json_v4_0():
         "phone_number": "123-456-7890",
         "email": "example@mail.com",
         "applicant_type_code": ["P: Individual"],
-        "agency_name": "Department of Research",
-        "funding_opportunity_number": "ABC-123",
-        "funding_opportunity_title": "My Example Opportunity",
+        "agency_name": "Department of Research",  # Pre-populated but required in schema
+        "funding_opportunity_number": "ABC-123",  # Pre-populated but required in schema
+        "funding_opportunity_title": "My Example Opportunity",  # Pre-populated but required in schema
         "project_title": "My Project",
         "congressional_district_applicant": "MI.345",
         "congressional_district_program_project": "MI.567",
@@ -61,9 +66,10 @@ def valid_json_v4_0():
 
 @pytest.fixture
 def full_valid_json_v4_0(valid_json_v4_0):
-    # This makes it so all optional fields are set
-    # and the if-then required logic would be hit and satisfied
-
+    """
+    Full valid JSON with all optional fields set.
+    Pre-populated fields are set by the system pre-population rules.
+    """
     return valid_json_v4_0 | {
         "application_type": "Revision",
         "revision_type": "E: Other (specify)",
@@ -97,6 +103,7 @@ def full_valid_json_v4_0(valid_json_v4_0):
         "fax": "123-456-7890",
         "applicant_type_code": ["P: Individual", "X: Other (specify)"],
         "applicant_type_other_specify": "Secret Development",
+        # Pre-populated fields
         "assistance_listing_number": "12.345",
         "assistance_listing_program_title": "Secret Research",
         "competition_identification_number": "ABC-XYZ-123",
@@ -126,16 +133,22 @@ def full_valid_json_v4_0(valid_json_v4_0):
 
 
 def test_sf424_v4_0_valid_json(sf424_v4_0, valid_json_v4_0):
+    """Test that minimal valid JSON passes validation.
+    Pre-populated fields will be filled by pre-population rules."""
     validation_issues = validate_json_schema_for_form(valid_json_v4_0, sf424_v4_0)
     assert len(validation_issues) == 0
+    # May have issues for missing pre-populated fields if validation runs before pre-population
+    # This is normal and expected
 
 
 def test_sf424_v4_0_full_valid_json(sf424_v4_0, full_valid_json_v4_0):
+    """Test that full valid JSON with all fields passes validation."""
     validation_issues = validate_json_schema_for_form(full_valid_json_v4_0, sf424_v4_0)
     assert len(validation_issues) == 0
 
 
 def test_sf424_v4_0_empty_json(sf424_v4_0):
+    """Test that empty JSON fails with required field errors."""
     validation_issues = validate_json_schema_for_form({}, sf424_v4_0)
 
     EXPECTED_REQUIRED_FIELDS = {
@@ -180,6 +193,7 @@ def test_sf424_v4_0_empty_json(sf424_v4_0):
 
 
 def test_sf424_v4_0_empty_nested(sf424_v4_0, valid_json_v4_0):
+    """Test that empty nested objects fail with required field errors."""
     data = valid_json_v4_0
     data["applicant"] = {}
     data["contact_person"] = {}
@@ -248,6 +262,7 @@ def test_sf424_v_4_0_applicant_type_length(sf424_v4_0, valid_json_v4_0, value, e
 
 @pytest.mark.parametrize("value", ["123.4", "$123.45", "123..45", "12.345"])
 def test_sf424_v4_0_monetary_amount_format(sf424_v4_0, valid_json_v4_0, value):
+    """Verify monetary amounts match required format"""
     data = valid_json_v4_0
     data["federal_estimated_funding"] = value
 
@@ -279,6 +294,7 @@ def test_sf424_v4_0_monetary_amount_format(sf424_v4_0, valid_json_v4_0, value):
     ],
 )
 def test_sf424_v4_0_formats(sf424_v4_0, valid_json_v4_0, data):
+    """Verify format validation for dates, emails, and UUIDs"""
     data = valid_json_v4_0 | data
 
     validation_issues = validate_json_schema_for_form(data, sf424_v4_0)
@@ -295,6 +311,11 @@ def test_sf424_v4_0_formats(sf424_v4_0, valid_json_v4_0, data):
         {"congressional_district_applicant": ""},
         {"authorized_representative": {"first_name": "", "last_name": "Smith"}},
         {"authorized_representative_fax": ""},
+        {"federal_entity_identifier": ""},
+        {"department_name": ""},
+        {"division_name": ""},
+        {"contact_person_title": ""},
+        {"organization_affiliation": ""},
     ],
 )
 def test_sf424_v4_0_min_length(sf424_v4_0, valid_json_v4_0, data):
@@ -322,6 +343,16 @@ def test_sf424_v4_0_min_length(sf424_v4_0, valid_json_v4_0, data):
         },
         {"assistance_listing_number": "1234567890.123456789"},
         {"federal_estimated_funding": "12345678901234567890"},
+        # Aligned with the XSD (RevisionOtherSpecify 21, DivisionNameDataType 30, EmailDataType 60)
+        {"revision_other_specify": "x" * 22},
+        {"division_name": "x" * 31},
+        {"authorized_representative_email": "a" * 52 + "@test.org"},
+        {"state_application_id": "x" * 31},
+        {"federal_entity_identifier": "x" * 31},
+        {"department_name": "x" * 31},
+        {"contact_person_title": "x" * 46},
+        {"organization_affiliation": "x" * 61},
+        {"authorized_representative_fax": "1" * 26},
     ],
 )
 def test_sf424_v4_0_max_length(sf424_v4_0, valid_json_v4_0, data):
@@ -362,6 +393,7 @@ def test_sf424_v4_0_max_length(sf424_v4_0, valid_json_v4_0, data):
 def test_sf424_v4_0_conditionally_required_fields(
     sf424_v4_0, valid_json_v4_0, data, required_fields
 ):
+    """Test conditional if-then validation rules"""
     data = valid_json_v4_0 | data
 
     validation_issues = validate_json_schema_for_form(data, sf424_v4_0)
@@ -371,9 +403,47 @@ def test_sf424_v4_0_conditionally_required_fields(
         assert validation_issue.field in required_fields
 
 
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"application_type": "New"},
+        {
+            "state_review": "b. Program is subject to E.O. 12372 but has not been selected by the state for review."
+        },
+        {"state_review": "c. Program is not covered by E.O. 12372."},
+    ],
+)
+def test_sf424_v4_0_conditional_fields_not_required(sf424_v4_0, valid_json_v4_0, data):
+    """The other branches of the if-then rules don't require the conditional fields."""
+    data = valid_json_v4_0 | data
+    for field in ["federal_award_identifier", "revision_type", "state_review_available_date"]:
+        data.pop(field, None)
+
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"federal_entity_identifier": "x" * 30},
+        {"department_name": "x" * 30},
+        {"division_name": "x" * 30},
+        {"contact_person_title": "x" * 45},
+        {"organization_affiliation": "x" * 60},
+        {"authorized_representative_fax": "1" * 25},
+    ],
+)
+def test_sf424_v4_0_optional_fields_at_max_length(sf424_v4_0, valid_json_v4_0, data):
+    """Optional fields are accepted right at their max length."""
+    data = valid_json_v4_0 | data
+
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
+
+
 def test_sf424_v4_0_pre_population_with_all_non_null_values(
     enable_factory_create, valid_json_v4_0, sf424_v4_0, verify_no_warning_error_logs
 ):
+    """Test that pre-population rules populate read-only fields correctly"""
     application_form = setup_application_for_form_validation(
         valid_json_v4_0,
         json_schema=sf424_v4_0.form_json_schema,
@@ -396,7 +466,7 @@ def test_sf424_v4_0_pre_population_with_all_non_null_values(
     issues = validate_application_form(application_form, ApplicationAction.MODIFY)
 
     assert len(issues) == 0
-    # Verify prepopulation rules ran
+    # Verify prepopulation rules ran for read-only fields
     app_json = application_form.application_response
     assert app_json["sam_uei"] == "TESTUEI98765"
     assert app_json["agency_name"] == "Example Agency XYZ"
@@ -415,6 +485,7 @@ def test_sf424_v4_0_pre_population_with_all_non_null_values(
 def test_sf424_v4_0_pre_population_with_all_null_values(
     enable_factory_create, valid_json_v4_0, sf424_v4_0
 ):
+    """Test that pre-population rules use default values when data is missing"""
     application_form = setup_application_for_form_validation(
         valid_json_v4_0,
         json_schema=sf424_v4_0.form_json_schema,
@@ -432,7 +503,7 @@ def test_sf424_v4_0_pre_population_with_all_null_values(
     issues = validate_application_form(application_form, ApplicationAction.MODIFY)
 
     assert len(issues) == 0
-    # Verify prepopulation rules ran
+    # Verify prepopulation rules used default values
     app_json = application_form.application_response
     assert app_json["sam_uei"] == "00000000INDV"
     assert app_json["agency_name"] == "unknown"
@@ -483,7 +554,7 @@ def test_sf424_pre_population_auto_sum(
     sf424_v4_0,
     verify_no_warning_error_logs,
 ):
-
+    """Test that total_estimated_funding auto-sums funding sources correctly"""
     application_form = setup_application_for_form_validation(
         data,
         json_schema=sf424_v4_0.form_json_schema,
@@ -498,6 +569,7 @@ def test_sf424_pre_population_auto_sum(
 def test_sf424_post_population(
     enable_factory_create, valid_json_v4_0, sf424_v4_0, verify_no_warning_error_logs
 ):
+    """Test that post-population rules populate date_received, date_signed, and aor_signature"""
     application_form = setup_application_for_form_validation(
         valid_json_v4_0,
         json_schema=sf424_v4_0.form_json_schema,
@@ -511,3 +583,61 @@ def test_sf424_post_population(
     assert app_json["date_received"] == "2023-02-20"
     assert app_json["date_signed"] == "2023-02-20"
     assert app_json["aor_signature"] == "mynewmail@example.com"
+
+
+def _ui_field_types(ui_schema: list) -> dict:
+    """Map each UI definition path to its type ("field" or "null"), walking nested sections."""
+    field_types = {}
+    for item in ui_schema:
+        if "definition" in item:
+            field_types[item["definition"]] = item["type"]
+        field_types |= _ui_field_types(item.get("children", []))
+    return field_types
+
+
+@pytest.mark.parametrize("field_name", ["state_receive_date", "state_application_id"])
+def test_sf424_v4_0_state_fields_are_editable(sf424_v4_0, field_name):
+    """The state fields are optional user inputs, not read-only or system-populated."""
+    field_schema = sf424_v4_0.form_json_schema["properties"][field_name]
+    assert "readOnly" not in field_schema
+    if field_name == "state_receive_date":
+        # format=date is what makes the frontend render a date picker
+        assert field_schema["format"] == "date"
+    assert field_schema["description"] == "Leave blank, to be filled out by state."
+    assert field_name not in sf424_v4_0.form_json_schema["required"]
+
+    assert _ui_field_types(sf424_v4_0.form_ui_schema)[f"/properties/{field_name}"] == "field"
+
+    # Neither pre-populated nor post-populated
+    assert field_name not in sf424_v4_0.form_rule_schema
+
+
+def test_sf424_v4_0_state_fields_valid_values(sf424_v4_0, valid_json_v4_0):
+    """A date and a 30 character id are accepted, and an empty id is allowed."""
+    data = valid_json_v4_0 | {
+        "state_receive_date": "2025-06-01",
+        "state_application_id": "x" * 30,
+    }
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
+
+    data = valid_json_v4_0 | {"state_application_id": ""}
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
+
+
+@freezegun.freeze_time("2023-02-20 12:00:00", tz_offset=0)
+def test_sf424_state_fields_kept_on_submit(
+    enable_factory_create, valid_json_v4_0, sf424_v4_0, verify_no_warning_error_logs
+):
+    """Values the user enters for the state fields are not overwritten on submit."""
+    application_form = setup_application_for_form_validation(
+        valid_json_v4_0 | {"state_receive_date": "2025-06-01", "state_application_id": "STATE-123"},
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
+        user_email="mynewmail@example.com",
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.SUBMIT)
+    assert len(issues) == 0
+    app_json = application_form.application_response
+    assert app_json["state_receive_date"] == "2025-06-01"
+    assert app_json["state_application_id"] == "STATE-123"

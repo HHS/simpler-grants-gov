@@ -2,10 +2,10 @@ import logging
 import uuid
 from uuid import UUID
 
-import grants_shared.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import (
@@ -48,6 +48,7 @@ def _assign_application_owner_role(
         extra={
             "application_id": application_user.application_id,
             "user_id": application_user.user_id,
+            "role": "application_owner",
         },
     )
     # Add an audit event for the user being added as part of app creation
@@ -86,11 +87,7 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
             )
 
 
-def create_application(
-    db_session: db.Session,
-    user: User,
-    json_data: dict,
-) -> Application:
+def create_application(db_session: db.Session, user: User, json_data: dict) -> Application:
     """
     Create a new application for a competition.
     """
@@ -99,6 +96,7 @@ def create_application(
     application_name = json_data.get("application_name")
     organization_id = json_data.get("organization_id")
     intends_to_add_organization = json_data.get("intends_to_add_organization")
+    application_id = json_data.get("application_id")
 
     # Validate that organization_id and intends_to_add_organization are not both set
     if organization_id is not None and intends_to_add_organization is True:
@@ -167,14 +165,16 @@ def create_application(
 
     # Create a new application
     application = Application(
-        application_id=uuid.uuid4(),
+        application_id=application_id or uuid.uuid4(),
         competition=competition,
+        competition_id=competition.competition_id,
         application_name=application_name,
         application_status=ApplicationStatus.IN_PROGRESS,
         organization_id=organization_id,  # Set the organization ID if provided
         intends_to_add_organization=intends_to_add_organization,
     )
     db_session.add(application)
+    add_application_metadata_to_logs(application)
     add_audit_event(
         db_session=db_session,
         application=application,
@@ -209,10 +209,9 @@ def create_application(
             "application_id": application.application_id,
             "competition_id": competition_id,
             "organization_id": organization_id,
+            "intends_to_add_organization": intends_to_add_organization,
+            "is_simpler_grants_enabled": competition.is_simpler_grants_enabled,
         },
     )
-
-    # Add application metadata to logs
-    add_application_metadata_to_logs(application)
 
     return application

@@ -1,11 +1,11 @@
-import grants_shared.adapters.db as db
-from grants_shared.util import datetime_util
-from grants_shared.util.local import error_if_not_local
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.auth.api_jwt_auth import generate_jwt
+import src.adapters.db as db
+from src.auth.jwt import generate_jwt
 from src.db.models.user_models import User, UserTokenSession
+from src.util import datetime_util
+from src.util.local import error_if_not_local
 
 
 def get_local_users(db_session: db.Session) -> list[dict]:
@@ -64,7 +64,7 @@ def _get_user_jwt(db_session: db.Session, user: User) -> str | None:
     if user_token_session is None:
         return None
 
-    return generate_jwt(user_token_session, datetime_util.utcnow(), user.email)
+    return generate_jwt(user_token_session, user, datetime_util.utcnow(), user.email)
 
 
 def _get_user_api_key(user: User) -> str | None:

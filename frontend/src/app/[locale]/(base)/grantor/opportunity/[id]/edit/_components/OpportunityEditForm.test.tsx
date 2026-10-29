@@ -38,47 +38,29 @@ jest.mock("src/hooks/useClientFetch", () => ({
 }));
 
 const initialValues: OpportunityEditFormValues = {
-  opportunityNumber: "ABC-123",
-  title: "Test opportunity",
-  awardSelectionMethod: "discretionary",
-  awardSelectionMethodExplanation: "",
-  description: "Summary text",
-  fundingType: "grant",
-  costSharing: false,
-  publishDate: "2026-03-11",
-  closeDate: "2026-04-11",
-  closeDateExplanation: "",
-  fundingCategories: "education",
-  fundingCategoryExplanation: "",
-  expectedNumberOfAwards: "3",
-  estimatedTotalProgramFunding: "500000",
-  awardMinimum: "1000",
-  awardMaximum: "10000",
-  eligibleApplicants: ["individuals"],
-  additionalEligibilityInfo: "",
-  additionalInfoUrl: "https://example.com",
-  additionalInfoUrlText: "More information",
-  grantorContactDetails: "Grants team",
-  contactEmail: "grants@example.com",
-  contactEmailText: "Email the grants team",
-};
-
-const testOpportunityKeyInformation = {
-  title: "Test opportunity",
-  agency: "Test agency",
-  assistanceListings: "12.345",
-  opportunityNumber: "ABC-123",
-  opportunityStage: "Forecasted",
-  awardSelectionMethod: "discretionary",
-  awardSelectionMethodExplanation: "Standard review",
-};
-
-const emptyInitialValues: OpportunityEditFormValues = {
-  ...initialValues,
-  publishDate: "",
-  fundingType: "",
-  fundingCategories: "",
-  eligibleApplicants: [],
+  opportunity_number: "ABC-123",
+  opportunity_title: "Test opportunity",
+  category: "discretionary",
+  category_explanation: "",
+  summary_description: "Summary text",
+  funding_instruments: "grant",
+  is_cost_sharing: false,
+  post_date: "2026-03-11",
+  close_date: "2026-04-11",
+  close_date_description: "",
+  funding_categories: "education",
+  funding_category_description: "",
+  expected_number_of_awards: "3",
+  estimated_total_program_funding: "500000",
+  award_floor: "1000",
+  award_ceiling: "10000",
+  applicant_types: ["individuals"],
+  applicant_eligibility_description: "",
+  additional_info_url: "https://example.com",
+  additional_info_url_description: "More information",
+  agency_contact_description: "Grants team",
+  agency_email_address: "grants@example.com",
+  agency_email_address_description: "Email the grants team",
 };
 
 const renderOpportunityEditForm = (
@@ -89,18 +71,12 @@ const renderOpportunityEditForm = (
       opportunityId="opportunity-123"
       opportunitySummaryId="summary-456"
       initialValues={initialValues}
-      isDraft
-      opportunityKeyInformation={testOpportunityKeyInformation}
-      saveLabel="Save"
-      previewLabel="Preview"
-      publishLabel="Publish"
       {...props}
     />,
   );
 
 // ─── Rendering ───────────────────────────────────────────────────────────────
-// Verifies static structure: enum-backed controls, hidden fields, and
-// the edit-lock warning when isDraft=false.
+// Verifies static structure: enum-backed controls and hidden fields.
 describe("OpportunityEditForm — rendering", () => {
   beforeEach(() => {
     mockUseActionState.mockReturnValue([
@@ -144,27 +120,119 @@ describe("OpportunityEditForm — rendering", () => {
 
     expect(screen.getByDisplayValue("opportunity-123")).toHaveAttribute(
       "name",
-      "opportunityId",
+      "opportunity_id",
     );
     expect(screen.getByDisplayValue("summary-456")).toHaveAttribute(
       "name",
-      "opportunitySummaryId",
+      "opportunity_summary_id",
     );
     expect(screen.getByTestId("isForecast-input")).toHaveValue("true");
     expect(screen.getByDisplayValue("Test opportunity")).toHaveAttribute(
       "name",
-      "title",
+      "opportunity_title",
     );
     expect(screen.getByDisplayValue("discretionary")).toHaveAttribute(
       "name",
-      "awardSelectionMethod",
+      "category",
     );
   });
 
-  it("shows the non-draft warning when isDraft is false", () => {
-    renderOpportunityEditForm({ isDraft: false });
+  it("communicates applicant type selections to submitted form data using hidden fields", () => {
+    const mockFormAction = jest.fn<void, [FormData]>();
+    mockUseActionState.mockReturnValue([
+      { validationErrors: {} },
+      mockFormAction,
+      false,
+    ]);
+    render(
+      <OpportunityEditForm
+        opportunityId="opportunity-123"
+        opportunitySummaryId="summary-456"
+        initialValues={{ ...initialValues, applicant_types: [] }}
+      />,
+    );
 
-    expect(screen.getByText("content.draftOnlyWarning")).toBeInTheDocument();
+    const checkboxOne = screen.getByRole("checkbox", {
+      name: /for-profit organizations other than small businesses/i,
+    });
+
+    const checkboxTwo = screen.getByRole("checkbox", {
+      name: /individuals/i,
+    });
+
+    expect(checkboxOne).not.toBeChecked();
+    expect(checkboxTwo).not.toBeChecked();
+
+    fireEvent.click(checkboxOne);
+    expect(checkboxOne).toBeChecked();
+    fireEvent.click(
+      screen.getByRole("button", { name: "button.saveAndContinue" }),
+    );
+
+    expect(mockFormAction).toHaveBeenCalledTimes(1);
+    expect(mockFormAction).toHaveBeenCalledWith(expect.any(FormData));
+    expect(mockFormAction.mock.calls[0][0].get("applicant_types[0]")).toEqual(
+      "for_profit_organizations_other_than_small_businesses",
+    );
+
+    fireEvent.click(checkboxTwo);
+    expect(checkboxTwo).toBeChecked();
+    fireEvent.click(
+      screen.getByRole("button", { name: "button.saveAndContinue" }),
+    );
+
+    expect(mockFormAction).toHaveBeenCalledTimes(2);
+    expect(mockFormAction).toHaveBeenCalledWith(expect.any(FormData));
+    expect(mockFormAction.mock.calls[1][0].get("applicant_types[1]")).toEqual(
+      "individuals",
+    );
+  });
+
+  it("does not disable character-count fields (published opportunities are editable)", () => {
+    renderOpportunityEditForm();
+
+    expect(
+      screen.getByRole("textbox", { name: /labels\.description/i }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("textbox", { name: /labels\.grantorContactDetails/i }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.additionalInfoUrl" }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.additionalInfoUrlText" }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.contactEmail" }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.contactEmailText" }),
+    ).toBeEnabled();
+  });
+
+  it("does not disable fundingCategoryExplanation when fundingCategories is 'other'", () => {
+    renderOpportunityEditForm({
+      initialValues: { ...initialValues, funding_categories: "other" },
+    });
+
+    expect(
+      screen.getByRole("textbox", {
+        name: /labels\.fundingCategoryExplanation/i,
+      }),
+    ).toBeEnabled();
+  });
+
+  it("does not disable additionalEligibilityInfo when eligibleApplicants includes 'other'", () => {
+    renderOpportunityEditForm({
+      initialValues: { ...initialValues, applicant_types: ["other"] },
+    });
+
+    expect(
+      screen.getByRole("textbox", {
+        name: /labels\.additionalEligibilityInfo/i,
+      }),
+    ).toBeEnabled();
   });
 
   it("pre-checks eligibility checkboxes from initialValues", () => {
@@ -200,51 +268,6 @@ describe("OpportunityEditForm — alert banners", () => {
     jest.resetAllMocks();
   });
 
-  it("shows the newly created success alert when isNewlyCreated=true and no action messages", () => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {} },
-      jest.fn(),
-      false,
-    ]);
-
-    renderOpportunityEditForm({ isNewlyCreated: true });
-
-    expect(
-      screen.getByText("content.alerts.newOpportunityHeading"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("content.alerts.newOpportunityBody"),
-    ).toBeInTheDocument();
-  });
-
-  it("hides the newly created alert when formState.successMessage is present", () => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {}, successMessage: "Saved!" },
-      jest.fn(),
-      false,
-    ]);
-
-    renderOpportunityEditForm({ isNewlyCreated: true });
-
-    expect(
-      screen.queryByText("content.alerts.newOpportunityHeading"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("hides the newly created alert when formState.errorMessage is present", () => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {}, errorMessage: "Something failed" },
-      jest.fn(),
-      false,
-    ]);
-
-    renderOpportunityEditForm({ isNewlyCreated: true });
-
-    expect(
-      screen.queryByText("content.alerts.newOpportunityHeading"),
-    ).not.toBeInTheDocument();
-  });
-
   it("shows the error alert when formState.errorMessage is set", () => {
     mockUseActionState.mockReturnValue([
       { validationErrors: {}, errorMessage: "Save failed" },
@@ -274,8 +297,8 @@ describe("OpportunityEditForm — alert banners", () => {
     mockUseActionState.mockReturnValue([
       {
         validationErrors: {
-          fundingType: ["Funding type is required"],
-          closeDate: ["Close date must be a valid date"],
+          funding_instruments: ["Funding type is required"],
+          close_date: ["Close date must be a valid date"],
         },
       },
       jest.fn(),
@@ -321,7 +344,7 @@ describe("OpportunityEditForm — conditional fields", () => {
 
   it("shows the funding category explanation textarea when fundingCategories is 'other'", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, fundingCategories: "other" },
+      initialValues: { ...initialValues, funding_categories: "other" },
     });
 
     expect(
@@ -343,7 +366,7 @@ describe("OpportunityEditForm — conditional fields", () => {
 
   it("shows the close date explanation textarea when closeDate is empty", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, closeDate: "" },
+      initialValues: { ...initialValues, close_date: "" },
     });
 
     expect(
@@ -365,7 +388,7 @@ describe("OpportunityEditForm — conditional fields", () => {
 
   it("shows additional eligibility info textarea when 'other' is in eligibleApplicants", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, eligibleApplicants: ["other"] },
+      initialValues: { ...initialValues, applicant_types: ["other"] },
     });
 
     expect(
@@ -379,7 +402,7 @@ describe("OpportunityEditForm — conditional fields", () => {
     renderOpportunityEditForm({
       initialValues: {
         ...initialValues,
-        eligibleApplicants: ["unrestricted"],
+        applicant_types: ["unrestricted"],
       },
     });
 
@@ -420,7 +443,7 @@ describe("OpportunityEditForm — eligibility checkboxes", () => {
     renderOpportunityEditForm({
       initialValues: {
         ...initialValues,
-        eligibleApplicants: [
+        applicant_types: [
           "for_profit_organizations_other_than_small_businesses",
         ],
       },
@@ -435,7 +458,7 @@ describe("OpportunityEditForm — eligibility checkboxes", () => {
 
   it("toggles an eligibility checkbox on then off", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, eligibleApplicants: [] },
+      initialValues: { ...initialValues, applicant_types: [] },
     });
 
     const checkbox = screen.getByRole("checkbox", {
@@ -454,7 +477,7 @@ describe("OpportunityEditForm — eligibility checkboxes", () => {
   it("clicking one checkbox from each eligibility group updates state independently", () => {
     // Exercises the onToggle lambda in all five EligibilityCheckboxGroup instances
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, eligibleApplicants: [] },
+      initialValues: { ...initialValues, applicant_types: [] },
     });
 
     // education group
@@ -513,7 +536,7 @@ describe("OpportunityEditForm — save state", () => {
 
     expect(screen.getByDisplayValue("new-summary-789")).toHaveAttribute(
       "name",
-      "opportunitySummaryId",
+      "opportunity_summary_id",
     );
   });
 });
@@ -534,7 +557,7 @@ describe("OpportunityEditForm — funding details interactions", () => {
     jest.resetAllMocks();
   });
 
-  it("updates fundingType when the Select value changes", () => {
+  it("updates funding_instruments when the Select value changes", () => {
     renderOpportunityEditForm();
 
     const select = screen.getByRole("combobox", {
@@ -545,9 +568,9 @@ describe("OpportunityEditForm — funding details interactions", () => {
     expect(select).toHaveValue("cooperative_agreement");
   });
 
-  it("updates costSharing to true when the Yes radio is clicked", () => {
+  it("updates is_cost_sharing to true when the Yes radio is clicked", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, costSharing: false },
+      initialValues: { ...initialValues, is_cost_sharing: false },
     });
 
     const radio = screen.getByRole("radio", { name: /labels\.yes/i });
@@ -556,9 +579,9 @@ describe("OpportunityEditForm — funding details interactions", () => {
     expect(radio).toBeChecked();
   });
 
-  it("updates costSharing to false when the No radio is clicked", () => {
+  it("updates is_cost_sharing to false when the No radio is clicked", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, costSharing: true },
+      initialValues: { ...initialValues, is_cost_sharing: true },
     });
 
     const radio = screen.getByRole("radio", { name: /labels\.no/i });
@@ -591,7 +614,7 @@ describe("OpportunityEditForm — funding details interactions", () => {
     renderOpportunityEditForm({
       initialValues: {
         ...initialValues,
-        estimatedTotalProgramFunding: "750000",
+        estimated_total_program_funding: "750000",
       },
     });
 
@@ -615,7 +638,7 @@ describe("OpportunityEditForm — funding details interactions", () => {
 
   it("formats awardMaximum with commas from initialValues", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, awardMaximum: "5000" },
+      initialValues: { ...initialValues, award_ceiling: "5000" },
     });
 
     const input = screen.getByRole("textbox", {
@@ -627,7 +650,7 @@ describe("OpportunityEditForm — funding details interactions", () => {
 
   it("updates fundingCategoryExplanation when the textarea changes", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, fundingCategories: "other" },
+      initialValues: { ...initialValues, funding_categories: "other" },
     });
 
     const textarea = screen.getByRole("textbox", {
@@ -640,7 +663,7 @@ describe("OpportunityEditForm — funding details interactions", () => {
 
   it("updates closeDateExplanation when the textarea changes", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, closeDate: "" },
+      initialValues: { ...initialValues, close_date: "" },
     });
 
     const textarea = screen.getByRole("textbox", {
@@ -670,7 +693,7 @@ describe("OpportunityEditForm — eligibility and additional info interactions",
 
   it("updates additionalEligibilityInfo when the textarea changes", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, eligibleApplicants: ["other"] },
+      initialValues: { ...initialValues, applicant_types: ["other"] },
     });
 
     const textarea = screen.getByRole("textbox", {
@@ -760,22 +783,24 @@ describe("OpportunityEditForm — inline validation errors", () => {
     mockUseActionState.mockReturnValue([
       {
         validationErrors: {
-          fundingType: ["Funding type required"],
-          fundingCategory: ["Funding category required"],
-          expectedNumberOfAwards: ["Must be a number"],
-          estimatedTotalProgramFunding: ["Must be a number"],
-          awardMinimum: ["Award minimum invalid"],
-          awardMaximum: ["Award maximum invalid"],
-          publishDate: ["Publish date required"],
-          closeDate: ["Close date required"],
-          eligibleApplicants: ["Eligible applicants required"],
-          description: ["Description required"],
-          additionalInfoUrl: ["Invalid URL"],
-          additionalInfoUrlText: ["URL text required"],
-          grantorContactDetails: ["Contact details required"],
-          contactEmail: ["Invalid email"],
-          contactEmailText: ["Contact email text required"],
-          additionalEligibilityInfo: ["Additional eligibility info required"],
+          funding_instruments: ["Funding type required"],
+          funding_categores: ["Funding category required"],
+          expected_number_of_awards: ["Must be a number"],
+          estimated_total_program_funding: ["Must be a number"],
+          award_floor: ["Award minimum invalid"],
+          award_ceiling: ["Award maximum invalid"],
+          post_date: ["Publish date required"],
+          close_date: ["Close date required"],
+          applicant_types: ["Eligible applicants required"],
+          summary_description: ["Description required"],
+          additional_info_url: ["Invalid URL"],
+          additional_info_url_description: ["URL text required"],
+          agency_contact_description: ["Contact details required"],
+          agency_email_address: ["Invalid email"],
+          agency_email_address_description: ["Contact email text required"],
+          applicant_eligibility_description: [
+            "Additional eligibility info required",
+          ],
         },
       },
       jest.fn(),
@@ -786,7 +811,7 @@ describe("OpportunityEditForm — inline validation errors", () => {
       initialValues: {
         ...initialValues,
         // show the additionalEligibilityInfo field so its inline error renders
-        eligibleApplicants: ["other"],
+        applicant_types: ["other"],
       },
     });
 
@@ -796,53 +821,6 @@ describe("OpportunityEditForm — inline validation errors", () => {
     expect(
       screen.getAllByText("Additional eligibility info required"),
     ).toHaveLength(2);
-  });
-});
-
-// ─── Key information display ──────────────────────────────────────────────────
-// The read-only panel resolves values through fallbacks: empty fields show the
-// "not available" placeholder; unknown enum values render as-is.
-describe("OpportunityEditForm — key information display", () => {
-  beforeEach(() => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {} },
-      jest.fn(),
-      false,
-    ]);
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
-  it("renders 'not available' fallback when all key information fields are empty", () => {
-    renderOpportunityEditForm({
-      opportunityKeyInformation: {
-        title: "",
-        agency: "",
-        assistanceListings: "",
-        opportunityNumber: "",
-        opportunityStage: "",
-        awardSelectionMethod: "",
-        awardSelectionMethodExplanation: "",
-      },
-    });
-
-    // The || fallback fires for each field — all should show the not-available key
-    const notAvailableEls = screen.getAllByText("content.notAvailable");
-    expect(notAvailableEls.length).toBeGreaterThan(0);
-  });
-
-  it("falls back to the raw value when awardSelectionMethod is not a known enum", () => {
-    renderOpportunityEditForm({
-      initialValues: {
-        ...initialValues,
-        awardSelectionMethod: "unknown_method",
-      },
-    });
-
-    // find() returns undefined → ?.label is undefined → falls back to awardSelectionMethod value
-    expect(screen.getByText("unknown_method")).toBeInTheDocument();
   });
 });
 
@@ -863,7 +841,7 @@ describe("OpportunityEditForm — number formatting edge cases", () => {
 
   it("displays a non-numeric awardMinimum value as-is without formatting", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, awardMinimum: "abc" },
+      initialValues: { ...initialValues, award_floor: "abc" },
     });
 
     const input = screen.getByRole("textbox", {
@@ -876,7 +854,7 @@ describe("OpportunityEditForm — number formatting edge cases", () => {
 
   it("displays an empty awardMaximum as an empty string without formatting", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, awardMaximum: "" },
+      initialValues: { ...initialValues, award_ceiling: "" },
     });
 
     const input = screen.getByRole("textbox", {
@@ -904,46 +882,18 @@ describe("OpportunityEditForm — action buttons", () => {
     jest.resetAllMocks();
   });
 
-  it("renders Save, Preview, and Publish buttons", () => {
+  it("renders two Save buttons", () => {
     renderOpportunityEditForm();
-
-    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Preview" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
+    // NOTE: the third save button is in the header
+    expect(
+      screen.getByRole("button", { name: "button.saveAndGoBack" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "button.saveAndContinue" }),
+    ).toBeInTheDocument();
   });
 
-  it("enables the Publish button when all required fields are populated", () => {
-    renderOpportunityEditForm();
-
-    expect(screen.getByRole("button", { name: "Publish" })).toBeEnabled();
-  });
-
-  it("disables the Publish button when required fields are missing", () => {
-    renderOpportunityEditForm({ initialValues: emptyInitialValues });
-
-    expect(screen.getByRole("button", { name: "Publish" })).toBeDisabled();
-  });
-
-  it("disables Save and Publish while isPending is true", () => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {} },
-      jest.fn(),
-      true,
-    ]);
-
-    renderOpportunityEditForm();
-
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Publish" })).toBeDisabled();
-  });
-
-  it("Preview button is always disabled", () => {
-    renderOpportunityEditForm();
-
-    expect(screen.getByRole("button", { name: "Preview" })).toBeDisabled();
-  });
-
-  it("calls the form action when Save is clicked", () => {
+  it("calls the form action when saveAndGoBack is clicked", () => {
     const mockFormAction = jest.fn();
     mockUseActionState.mockReturnValue([
       { validationErrors: {} },
@@ -953,12 +903,14 @@ describe("OpportunityEditForm — action buttons", () => {
 
     renderOpportunityEditForm();
 
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "button.saveAndGoBack" }),
+    );
 
     expect(mockFormAction).toHaveBeenCalledTimes(1);
   });
 
-  it("calls the form action when Publish is clicked", () => {
+  it("calls the form action when saveAndContinue is clicked", () => {
     const mockFormAction = jest.fn();
     mockUseActionState.mockReturnValue([
       { validationErrors: {} },
@@ -968,7 +920,9 @@ describe("OpportunityEditForm — action buttons", () => {
 
     renderOpportunityEditForm();
 
-    fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "button.saveAndContinue" }),
+    );
 
     expect(mockFormAction).toHaveBeenCalledTimes(1);
   });

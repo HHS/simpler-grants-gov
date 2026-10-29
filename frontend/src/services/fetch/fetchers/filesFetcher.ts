@@ -1,0 +1,89 @@
+import axios from "axios";
+import { ApiRequestError } from "src/errors";
+import { logger } from "src/services/logger/simplerLogger";
+import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
+
+import { fetchFileUploadWithMethod } from "./fetchers";
+
+/*
+  These three calls made in sequence form the full file upload process
+
+  1. fetchFileUploadDetails
+  Calls API to create a pending file record and obtain details necessary to call to S3 to begin uploading the file
+  Returns a pending_file_id that will be used to call fetchFileScanStatus to track upload progress
+
+  2. startFileUpload
+  Using the url and body returned from fetchFileUploadDetails, calls to s3 to upload the file. Note that the "body" returned
+  from fetchFileUploadDetails is combined with the file in a new FormData to form the body of the s3 request
+
+  3. fetchFileScanStatus
+  Calls to the API to fetch a stream that will update as the upload process progresses. Stream will be consumed by
+  the calling handler and results streamed onward to the client
+*/
+
+export const fetchFileUploadDetails = async (
+  fileName: string,
+  mimeType: string,
+): Promise<FileUploadDetailsResponse> => {
+  const uploadDetailsResponse = await fetchFileUploadWithMethod("POST")({
+    body: {
+      file_name: fileName,
+      mime_type: mimeType,
+    },
+  });
+  const responseJson = (await uploadDetailsResponse.json()) as {
+    data: FileUploadDetailsResponse;
+  };
+  return responseJson.data;
+};
+
+// uses the url and body parameters return by the API in the fetchFileUploadDetails call
+export const uploadFileToS3 = async (
+  url: string,
+  body: OptionalStringDict,
+  file: File,
+): Promise<boolean> => {
+  // TODO: throwing here will cause a batched chunk, I believe because the behavior is to batch chunks queued between
+  // asynchronous calls. We can either make this asynchronous somehow, or build behavior into the stream reader to split batched
+  // chunks on read (ex. split at `}{`)
+  const formData = new FormData();
+
+  Object.entries(body).forEach(([key, value]) => {
+    if (value && key !== "file") {
+      formData.append(key, value);
+    }
+  });
+  formData.append("file", file);
+
+  try {
+    await axios.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  } catch (e) {
+    const defaultErrorMessage = "Error uploading file to S3";
+    if (axios.isAxiosError(e)) {
+      // Non 2XX response status
+      if (e.response) {
+        logger.error({ status: e.response.status }, defaultErrorMessage);
+      }
+    } else {
+      logger.error({ err: e }, defaultErrorMessage);
+    }
+    throw new ApiRequestError(defaultErrorMessage);
+  }
+  return true;
+};
+
+// opens a stream with the API to fetch scan status
+export const fetchFileScanStatus = async (
+  pendingFileId: string,
+): Promise<ReadableStream<Uint8Array>> => {
+  const fileScanStatusResponse = await fetchFileUploadWithMethod("GET")({
+    subPath: `/${pendingFileId}/results`,
+  });
+  // may need to do some work here if the body isn't readable as a string in the end
+  return fileScanStatusResponse.body as unknown as ReadableStream<Uint8Array>;
+};

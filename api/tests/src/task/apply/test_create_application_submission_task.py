@@ -1,20 +1,27 @@
+import logging
+import uuid
 import zipfile
 from decimal import Decimal
 from io import BytesIO
 
 import pytest
-from sqlalchemy import update
+from sqlalchemy import select, text, update
+from sqlalchemy.orm import Session
 
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
-from src.db.models.competition_models import Application
+from src.db.models.competition_models import Application, Form
 from src.form_schema.forms import SF424_v4_0
+from src.form_schema.registry.form_template_registry import form_template_registry
+from src.services.applications.create_application_submission import (
+    ApplicationSubmissionMetrics,
+    FileMetadata,
+    SubmissionContainer,
+    create_manifest_text,
+)
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
     CreateApplicationSubmissionTask,
-    FileMetadata,
-    SubmissionContainer,
-    create_manifest_text,
 )
 from src.util import file_util
 from tests.conftest import BaseTestClass
@@ -65,6 +72,12 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             update(Application).values(application_status=ApplicationStatus.ACCEPTED)
         )
         db_session.commit()
+        # Track registry keys added by this test for cleanup
+        registry_keys_before = set(form_template_registry._registry.keys())
+        yield
+        # Remove any custom forms added to the singleton registry during this test
+        for key in set(form_template_registry._registry.keys()) - registry_keys_before:
+            del form_template_registry._registry[key]
 
     @pytest.fixture
     def create_submission_task(self, db_session, s3_config):
@@ -79,27 +92,76 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
         return CreateApplicationSubmissionTask(db_session, pdf_generation_config=pdf_config)
 
-    def test_run_task(self, db_session, create_submission_task):
+    def test_run_task(self, db_session, create_submission_task, caplog):
+        main_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="Main Test Form",
+            short_form_name="main_test",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        form_template_registry.register(main_form, major_version=1)
+
         application_without_attachments = ApplicationFactory.create(
-            with_forms=True,
+            with_forms=False,
             application_status=ApplicationStatus.SUBMITTED,
             has_submitted_by_user=True,
+            competition__competition_forms=[],
+        )
+        ApplicationFormFactory.create(
+            application=application_without_attachments,
+            competition_form__competition=application_without_attachments.competition,
+            competition_form__form=main_form,
         )
         app_without_attachments_form_file_names = [
             f"{f.form.short_form_name}.pdf"
             for f in application_without_attachments.application_forms
         ]
         # Add another application form that is not required and was marked to not be included in submission
+        skip_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="Skip Test Form",
+            short_form_name="skip_test",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        form_template_registry.register(skip_form, major_version=1)
         skipped_app_form = ApplicationFormFactory.create(
             application=application_without_attachments,
             competition_form__competition=application_without_attachments.competition,
+            competition_form__form=skip_form,
             competition_form__is_required=False,
             is_included_in_submission=False,
         )
         application_without_attachments.application_forms.append(skipped_app_form)
 
+        attachments_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="Attachments Test Form",
+            short_form_name="attachments_test",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        form_template_registry.register(attachments_form, major_version=1)
+
         application_with_attachments = ApplicationFactory.create(
-            with_forms=True, application_status=ApplicationStatus.SUBMITTED
+            with_forms=False,
+            application_status=ApplicationStatus.SUBMITTED,
+            competition__competition_forms=[],
+        )
+        ApplicationFormFactory.create(
+            application=application_with_attachments,
+            competition_form__competition=application_with_attachments.competition,
+            competition_form__form=attachments_form,
         )
         app_with_attachments_form_file_names = [
             f"{f.form.short_form_name}.pdf" for f in application_with_attachments.application_forms
@@ -137,6 +199,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             with_forms=True, application_status=ApplicationStatus.ACCEPTED
         )
 
+        caplog.set_level(logging.INFO)
         create_submission_task.run()
 
         # Validate the submission without attachments
@@ -164,6 +227,17 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             == application_without_attachments.submitted_by
         )
 
+        # Every audit event log must carry a real application_id - it is the join key
+        # for the Apply funnel dashboards, and the record is not flushed when we log
+        audit_log_records = [
+            record for record in caplog.records if record.message == "Added application audit event"
+        ]
+        assert audit_log_records
+        assert all(record.application_id is not None for record in audit_log_records)
+        assert application_without_attachments.application_id in {
+            record.application_id for record in audit_log_records
+        }
+
         # Validate the submission with attachments.
         # All attachments are orphaned (not referenced in any form response via attachment_fields),
         # so none should appear in the zip.
@@ -188,18 +262,31 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert len(not_picked_up_app2.application_submissions) == 0
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 2
-        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 0
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_PROCESSED_COUNT] == 2
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_ATTACHMENT_COUNT] == 0
         apps_processed = [application_with_attachments, application_without_attachments]
         assert (
-            metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT]
+            metrics[ApplicationSubmissionMetrics.APPLICATION_FORM_COUNT]
             == sum([len(app.application_forms) for app in apps_processed]) - 1
         )  # Not counting the one app form that we skip
 
     def test_run_task_excludes_orphaned_attachments(self, db_session, create_submission_task):
         """Referenced attachments are included in the zip; orphaned ones are excluded."""
+        attachment_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="Orphan Test Form",
+            short_form_name="orphan_test",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        form_template_registry.register(attachment_form, major_version=1)
+
         application = ApplicationFactory.create(
             application_status=ApplicationStatus.SUBMITTED,
+            competition__competition_forms=[],
         )
 
         referenced_attachment = ApplicationAttachmentFactory.create(
@@ -216,6 +303,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         app_form = ApplicationFormFactory.create(
             application=application,
             competition_form__competition=application.competition,
+            competition_form__form=attachment_form,
             application_response={
                 "attachment_field": str(referenced_attachment.application_attachment_id),
             },
@@ -253,7 +341,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 1
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_ATTACHMENT_COUNT] == 1
 
     def test_run_task_with_erroring_application(
         self, db_session, create_submission_task, monkeypatch
@@ -266,7 +354,9 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             raise Exception("It errors")
 
         monkeypatch.setattr(
-            create_submission_task, "process_application_attachments", erroring_function
+            create_submission_task.application_submission_builder,
+            "process_application_attachments",
+            erroring_function,
         )
 
         create_submission_task.run_task()
@@ -277,15 +367,34 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert len(application.application_submissions) == 0
 
         metrics = create_submission_task.metrics
-        assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 1
+        assert metrics[ApplicationSubmissionMetrics.APPLICATION_PROCESSED_COUNT] == 1
         assert metrics[create_submission_task.Metrics.ERROR_COUNT] == 1
 
     def test_xml_generation_unsupported_form(self, db_session, enable_factory_create, s3_config):
         """Test that submission succeeds gracefully when form doesn't support XML."""
+        # Create a form with no XML config
+        no_xml_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="No XML Form",
+            short_form_name="no_xml_form",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        form_template_registry.register(no_xml_form, major_version=1)
+
         # Create application with a form that doesn't support XML
         application = ApplicationFactory.create(
-            with_forms=True,
+            with_forms=False,
             application_status=ApplicationStatus.SUBMITTED,
+            competition__competition_forms=[],
+        )
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form__competition=application.competition,
+            competition_form__form=no_xml_form,
         )
 
         # Create task with XML generation ENABLED
@@ -333,9 +442,8 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             competition__competition_forms=[],
         )
 
-        sf424 = db_session.merge(SF424_v4_0, load=True)
         competition_form = CompetitionFormFactory.create(
-            competition=application.competition, form=sf424, is_required=True
+            competition=application.competition, form=SF424_v4_0, is_required=True
         )
         ApplicationFormFactory.create(
             application=application,
@@ -358,6 +466,37 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
         assert submission.project_title == "my fun title"
         assert submission.total_requested_amount == Decimal("456.78")
+
+    def test_locked_applications_do_not_get_picked_up_by_fetch_applications(
+        self, db_session, enable_factory_create, create_submission_task
+    ):
+        task = create_submission_task
+        unlocked_application_ids = [
+            ApplicationFactory.create(application_status=ApplicationStatus.SUBMITTED).application_id
+            for _ in range(3)
+        ]
+        locked_application_id = ApplicationFactory.create(
+            application_status=ApplicationStatus.SUBMITTED
+        ).application_id
+        engine = db_session.get_bind().engine
+        with Session(engine) as lock_session, Session(engine) as fetch_session:
+            # Lock the application
+            lock_session.scalars(
+                select(Application)
+                .where(Application.application_id == locked_application_id)
+                .with_for_update()
+            ).one()
+            fetch_session.execute(text("SET LOCAL lock_timeout = '2s'"))
+            result_1 = task.fetch_applications()
+            # Fetch application skips locked application
+            assert locked_application_id not in [a.application_id for a in result_1]
+            assert set(unlocked_application_ids) == set([a.application_id for a in result_1])
+            # Unlock the application
+            lock_session.rollback()
+            fetch_session.rollback()
+            result_2 = task.fetch_applications()
+            # Fetch application picks up formerly unlocked application
+            assert locked_application_id in [a.application_id for a in result_2]
 
 
 def test_get_file_name_in_zip():

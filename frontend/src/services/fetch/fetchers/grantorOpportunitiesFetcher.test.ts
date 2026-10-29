@@ -1,16 +1,28 @@
+import { ApiRequestError } from "src/errors";
 import {
+  createCompetitionForGrantor,
   createOpportunity,
+  saveCompetitionInstructions,
   searchOpportunitiesByAgency,
+  updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { CompetitionSaveRequest } from "src/types/competitionsResponseTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
 
-// Mock the main fetchGrantorWithMethod and the sub-method it calls, fetch
+// Mock the grantor agencies/opportunities requesters and the sub-method they call, fetch
 const mockFetcher = jest.fn();
-const mockFetchGrantorWithMethod = jest.fn((_args: unknown) => mockFetcher);
+const mockFetchGrantorAgenciesWithMethod = jest.fn(
+  (_args: unknown) => mockFetcher,
+);
+const mockFetchGrantorOpportunityWithMethod = jest.fn(
+  (_args: unknown) => mockFetcher,
+);
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  fetchGrantorWithMethod: (arg: unknown): unknown =>
-    mockFetchGrantorWithMethod(arg),
+  fetchGrantorAgenciesWithMethod: (arg: unknown): unknown =>
+    mockFetchGrantorAgenciesWithMethod(arg),
+  fetchGrantorOpportunityWithMethod: (arg: unknown): unknown =>
+    mockFetchGrantorOpportunityWithMethod(arg),
 }));
 
 // ---------------------------------------------
@@ -52,10 +64,10 @@ describe("searchOpportunitiesByAgency", () => {
       data: fakeAgencyResponseData,
       pagination_info: { total_pages: 1, total_records: 4 },
     });
-    expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetchGrantorAgenciesWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorAgenciesWithMethod).toHaveBeenCalledWith("POST");
     expect(mockFetcher).toHaveBeenCalledWith({
-      subPath: "agencies/123-ABC-456-DEF/opportunities",
+      subPath: "123-ABC-456-DEF/opportunities",
       body: pageBody,
     });
   });
@@ -131,8 +143,8 @@ describe("searchOpportunitiesByAgency", () => {
       data: errMsg,
       pagination_info: undefined,
     });
-    expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetchGrantorAgenciesWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorAgenciesWithMethod).toHaveBeenCalledWith("POST");
   });
 
   it("propagates network errors", async () => {
@@ -168,10 +180,9 @@ describe("createOpportunity", () => {
     const result = await createOpportunity(createOppSchema);
 
     expect(result).toEqual(createOppSchema);
-    expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledWith("POST");
     expect(mockFetcher).toHaveBeenCalledWith({
-      subPath: "opportunities",
       body: createOppSchema,
     });
   });
@@ -188,8 +199,8 @@ describe("createOpportunity", () => {
     const result = await createOpportunity(createOppSchema);
 
     expect(result).toEqual(errMsg);
-    expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledWith("POST");
   });
 
   it("propagates network errors", async () => {
@@ -197,5 +208,151 @@ describe("createOpportunity", () => {
     await expect(createOpportunity(createOppSchema)).rejects.toThrow(
       "Network failure",
     );
+  });
+});
+
+// ---------------------------------------------
+// Tests for opportunity competitions
+// ---------------------------------------------
+const competitionData: CompetitionSaveRequest = {
+  competition_title: "",
+  opening_date: null,
+  closing_date: null,
+  contact_info: null,
+  open_to_applicants: ["individual", "organization"],
+};
+
+describe("createCompetitionForGrantor", () => {
+  beforeEach(() => {
+    mockFetcher.mockResolvedValue({
+      json: () =>
+        Promise.resolve({ data: { competition_id: "new-competition-id" } }),
+    });
+  });
+  afterEach(() => jest.clearAllMocks());
+
+  it("calls fetchGrantorOpportunityWithMethod with POST, the correct subPath, and returns the parsed JSON response", async () => {
+    const result = await createCompetitionForGrantor(
+      "opp-123",
+      competitionData,
+    );
+
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetcher).toHaveBeenCalledWith({
+      subPath: "opp-123/competitions",
+      body: competitionData,
+    });
+    expect(result).toEqual({ data: { competition_id: "new-competition-id" } });
+  });
+
+  it("includes public_competition_id in the request body", async () => {
+    const competitionWithPublicId: CompetitionSaveRequest = {
+      ...competitionData,
+      public_competition_id: "PUBLIC-COMP-789",
+    };
+
+    await createCompetitionForGrantor("opp-123", competitionWithPublicId);
+
+    expect(mockFetcher).toHaveBeenCalledWith({
+      subPath: "opp-123/competitions",
+      body: competitionWithPublicId,
+    });
+  });
+});
+
+describe("updateCompetitionForGrantor", () => {
+  beforeEach(() => {
+    mockFetcher.mockResolvedValue({ json: () => Promise.resolve({}) });
+  });
+  afterEach(() => jest.clearAllMocks());
+
+  it("calls fetchGrantorOpportunityWithMethod with PUT and the correct subPath", async () => {
+    await updateCompetitionForGrantor(
+      "opp-123",
+      "compete-321",
+      competitionData,
+    );
+
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledWith("PUT");
+    expect(mockFetcher).toHaveBeenCalledWith({
+      subPath: "opp-123/competitions/compete-321",
+      body: competitionData,
+    });
+  });
+
+  it("throws a 422 error with validation error messages", async () => {
+    const mockErrors: Array<{
+      field: string;
+      message: string;
+      type: string;
+      value: string | null;
+    }> = [
+      {
+        field: "open_to_applicants",
+        message: "Shorter than minimum length 1.",
+        type: "min_length",
+        value: null,
+      },
+      {
+        field: "competition_title",
+        message: "Must not be empty.",
+        type: "required",
+        value: "",
+      },
+    ];
+
+    const apiError = new ApiRequestError(
+      "Validation error",
+      "ValidationError",
+      422,
+      { errors: mockErrors } as unknown as Record<string, unknown>,
+    );
+    mockFetcher.mockRejectedValue(apiError);
+
+    // verify that it throws the error
+    await expect(
+      updateCompetitionForGrantor("opp-123", "compete-321", competitionData),
+    ).rejects.toThrow(ApiRequestError);
+  });
+});
+
+describe("saveCompetitionInstructions", () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it("calls fetchGrantorOpportunityWithMethod with POST, the correct subPath and body, and returns the parsed JSON response", async () => {
+    const responseBody = {
+      data: {
+        competition_instruction_id: "instruction-123",
+        file_name: "instructions.pdf",
+        created_at: "2026-08-20T00:00:00Z",
+      },
+    };
+    mockFetcher.mockResolvedValue({
+      json: () => Promise.resolve(responseBody),
+    });
+
+    const result = await saveCompetitionInstructions(
+      "opp-123",
+      "compete-321",
+      "pending-file-456",
+    );
+
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetcher).toHaveBeenCalledWith({
+      subPath: "opp-123/competitions/compete-321/instructions",
+      body: { pending_file_id: "pending-file-456" },
+    });
+    expect(result).toEqual(responseBody);
+  });
+
+  it("propagates request errors", async () => {
+    mockFetcher.mockRejectedValue(new Error("Network failure"));
+
+    await expect(
+      saveCompetitionInstructions("opp-123", "compete-321", "pending-file-456"),
+    ).rejects.toThrow("Network failure");
   });
 });

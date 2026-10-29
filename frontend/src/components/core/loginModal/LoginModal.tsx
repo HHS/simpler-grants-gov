@@ -2,7 +2,6 @@
 
 import { RefObject } from "react";
 import {
-  ButtonGroup,
   ModalFooter,
   ModalRef,
   ModalToggleButton,
@@ -29,17 +28,22 @@ export const LoginModal = ({
   closeText: string;
   modalId: string;
 }) => {
+  // Derived once so the aria-describedby and the element it names cannot drift.
+  const descriptionId = `${modalId}-description`;
+
   return (
     <SimplerModal
       modalId={modalId}
       modalRef={modalRef}
       titleText={titleText}
+      descriptionId={descriptionId}
       className="text-wrap"
     >
       <LoginModalBody
         buttonText={buttonText}
         closeText={closeText}
         descriptionText={descriptionText}
+        descriptionId={descriptionId}
         helpText={helpText}
         modalRef={modalRef}
       />
@@ -51,38 +55,46 @@ export const LoginModalBody = ({
   buttonText,
   closeText,
   descriptionText,
+  descriptionId,
   helpText,
   modalRef,
 }: {
   buttonText: string;
   closeText: string;
   descriptionText: string;
+  descriptionId?: string;
   helpText: string;
   modalRef: RefObject<ModalRef | null>;
 }) => {
   return (
     <>
       <p>{helpText}</p>
-      <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
+      <p id={descriptionId} className="font-sans-2xs margin-y-4">
+        {descriptionText}
+      </p>
       <ModalFooter>
-        <ButtonGroup>
-          <LoginLink className="usa-button">
-            {buttonText}
-            <USWDSIcon
-              className="usa-icon margin-right-05 margin-left-neg-05"
-              name="launch"
-              key="login-gov-link-icon"
-            />
-          </LoginLink>
-          <ModalToggleButton
-            modalRef={modalRef}
-            closer
-            unstyled
-            className="padding-105 text-center"
-          >
-            {closeText}
-          </ModalToggleButton>
-        </ButtonGroup>
+        <div className="usa-button-group">
+          <div className="usa-button-group__item">
+            <LoginLink className="usa-button">
+              {buttonText}
+              <USWDSIcon
+                className="usa-icon margin-right-05 margin-left-neg-05"
+                name="launch"
+                key="login-gov-link-icon"
+              />
+            </LoginLink>
+          </div>
+          <div className="usa-button-group__item">
+            <ModalToggleButton
+              modalRef={modalRef}
+              closer
+              unstyled
+              className="padding-105 text-center"
+            >
+              {closeText}
+            </ModalToggleButton>
+          </div>
+        </div>
       </ModalFooter>
     </>
   );

@@ -2,17 +2,14 @@ import {
   fakeOrganizationDetailsResponse,
   fakeUserPrivilegesResponse,
 } from "src/utils/testing/fixtures";
-import { storeCurrentPage, userRoleForOrganization } from "src/utils/userUtils";
+import {
+  getSafeLoginRedirect,
+  isSafeLoginRedirect,
+  storeCurrentPage,
+  userRoleForOrganization,
+} from "src/utils/userUtils";
 
 const mockSetItem = jest.fn<void, [string, string]>();
-
-const mockLocation = {
-  pathname: "/test-path",
-  search: "?param=value",
-};
-
-// Save the original location
-const originalLocation = global.location;
 
 jest.mock("src/services/sessionStorage/sessionStorage", () => {
   return {
@@ -67,37 +64,89 @@ describe("userRoleForOrganization", () => {
 });
 
 describe("storeCurrentPage", () => {
-  beforeEach(() => {
-    Object.defineProperty(global, "location", {
-      configurable: true,
-      value: { ...mockLocation },
-      writable: true,
-    });
-
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  afterAll(() => {
-    Object.defineProperty(global, "location", {
-      configurable: true,
-      value: originalLocation,
-      writable: true,
-    });
-  });
-
   it("should store URL in session storage if pathname and search", () => {
-    Object.defineProperty(global, "location", {
-      value: { pathname: "path", search: "/search" },
-    });
-    storeCurrentPage();
+    storeCurrentPage("path", "/search");
     expect(mockSetItem).toHaveBeenCalledWith("login-redirect", "path/search");
   });
 
+  it("stores the full pathname and query", () => {
+    storeCurrentPage("/search", "?query=test&utm_source=grants.gov");
+    expect(mockSetItem).toHaveBeenCalledWith(
+      "login-redirect",
+      "/search?query=test&utm_source=grants.gov",
+    );
+  });
+
+  it("replaces the saved destination when authentication is started again", () => {
+    storeCurrentPage("/newsletter", "");
+    storeCurrentPage("/workspace/applications", "");
+    expect(mockSetItem).toHaveBeenCalledTimes(2);
+    expect(mockSetItem).toHaveBeenLastCalledWith(
+      "login-redirect",
+      "/workspace/applications",
+    );
+  });
+
   it("should not store URL in session storage if pathname and search are empty", () => {
-    Object.defineProperty(global, "location", {
-      value: { pathname: "", search: "" },
-    });
-    storeCurrentPage();
+    storeCurrentPage("", "");
     expect(mockSetItem).not.toHaveBeenCalled();
+  });
+});
+
+describe("isSafeLoginRedirect / getSafeLoginRedirect", () => {
+  it.each([
+    "/",
+    "/newsletter",
+    "/workspace/applications",
+    "/search?query=test&status=forecasted",
+    "/search?query=test&utm_source=grants.gov",
+    "/es/search?query=test",
+    "/apiary",
+    "/developers/api-dashboard",
+  ])("accepts %p unchanged", (destination) => {
+    expect(isSafeLoginRedirect(destination)).toBe(true);
+    expect(getSafeLoginRedirect(destination)).toBe(destination);
+  });
+
+  it.each([
+    null,
+    undefined,
+    "",
+    "newsletter",
+    "https://example.com",
+    "javascript:alert(1)",
+    "//example.com",
+    "///example.com",
+    "/\\example.com",
+    "/\\/example.com",
+    "/foo\\bar",
+    "/\t/example.com",
+    "/new\nsletter",
+    "/ search",
+    "/search?query=%E0%A4%A",
+    "/login",
+    "/login/",
+    "/login/callback",
+    "/login?pivError=true",
+    "/LOGIN",
+    "/logout",
+    "/logout/callback",
+    "/maintenance",
+    "/unauthenticated",
+    "/error",
+    "/api",
+    "/api/foo",
+    "/api/auth/login",
+    "/%61pi/foo",
+    "/search/../api/foo",
+    "/dev",
+    "/dev/feature-flags",
+  ])("rejects %p and falls back to /", (destination) => {
+    expect(isSafeLoginRedirect(destination)).toBe(false);
+    expect(getSafeLoginRedirect(destination)).toBe("/");
   });
 });

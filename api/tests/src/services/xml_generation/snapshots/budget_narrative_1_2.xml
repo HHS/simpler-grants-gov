@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<BudgetNarrativeAttachments_1_2:BudgetNarrativeAttachments_1_2 xmlns:BudgetNarrativeAttachments_1_2="http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" BudgetNarrativeAttachments_1_2:FormVersion="1.2">
+  <BudgetNarrativeAttachments_1_2:Attachments>
+    <att:AttachedFile>
+      <att:FileName>budget_narrative.pdf</att:FileName>
+      <att:MimeType>application/pdf</att:MimeType>
+      <att:FileLocation att:href="budget_narrative.pdf"/>
+      <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+    </att:AttachedFile>
+  </BudgetNarrativeAttachments_1_2:Attachments>
+</BudgetNarrativeAttachments_1_2:BudgetNarrativeAttachments_1_2>

@@ -3,51 +3,55 @@ import logging
 import os
 from typing import Any
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-import grants_shared.logs
-import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
-from grants_shared.api.schemas import response_schema
-from grants_shared.util.local import error_if_not_local
 from pydantic import Field
 
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
+import src.logs
+import src.logs.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
+from src.adapters.oauth.login_gov.login_gov_jwt import initialize_login_gov_config
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
+from src.api.application_v1 import application_v1_blueprint
 from src.api.award_recommendations_alpha import award_recommendation_blueprint
 from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.files_v1 import file_blueprint as files_v1_blueprint
 from src.api.form_alpha import form_blueprint
+from src.api.form_v1 import form_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
+from src.api.maintenance_mode import register_maintenance_mode_handler
 from src.api.opportunities_grantor_v1 import (
     opportunity_grantor_blueprint as opportunities_grantor_v1_blueprint,
 )
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
 from src.api.response import restructure_error_response
+from src.api.schemas import response_schema
 from src.api.users.user_blueprint import user_blueprint
 from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig
-from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
-from src.auth.login_gov_jwt_auth import initialize_login_gov_config
+from src.auth.jwt import initialize_jwt_auth
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.services.files.local_file_scanner import setup_local_file_scanner
+from src.submission_consumer import submission_consumer_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +65,11 @@ This API is in active development as we build out new functionalities for Simple
 Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
+
+# Paths that continue to serve normally while maintenance mode is on. /health must
+# stay reachable so ALB target-group and Docker healthchecks do not recycle tasks
+# during a planned-maintenance window.
+MAINTENANCE_MODE_ALLOWLIST = frozenset({"/health"})
 
 
 class EndpointConfig(PydanticBaseEnvConfig):
@@ -96,6 +105,10 @@ def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
 
     setup_logging(app)
+    # Registered after setup_logging so the logging before_request handlers run
+    # first (rejections still produce start/end request logs), and before auth so
+    # unauthenticated clients see a 503 rather than a 401 during maintenance.
+    register_maintenance_mode_handler(app, MAINTENANCE_MODE_ALLOWLIST)
     init_newrelic()
     register_db_client(app)
 
@@ -124,7 +137,7 @@ def create_app() -> APIFlask:
 
 
 def setup_logging(app: APIFlask) -> None:
-    grants_shared.logs.init(__package__)
+    src.logs.init(__package__)
     flask_logger.init_app(logging.root, app, "simpler-grants")
 
 
@@ -203,8 +216,11 @@ def register_blueprints(app: APIFlask) -> None:
 
     # Endpoints for apply functionality
     app.register_blueprint(application_blueprint)
+    app.register_blueprint(application_v1_blueprint)
     app.register_blueprint(form_blueprint)
+    app.register_blueprint(form_v1_blueprint)
     app.register_blueprint(competition_blueprint)
+    app.register_blueprint(submission_consumer_blueprint)
 
     if endpoint_config.enable_award_recommendation_endpoints:
         app.register_blueprint(award_recommendation_blueprint)

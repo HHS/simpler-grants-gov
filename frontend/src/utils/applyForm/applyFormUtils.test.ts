@@ -10,7 +10,6 @@ import {
   formatValidationWarning,
   getFieldListLabelFromDefinition,
   getFieldNameForHtml,
-  getFieldPathFromHtml,
   getFieldSchema,
   getFieldsForNav,
   getHtmlFieldForWarning,
@@ -442,12 +441,6 @@ describe("getRequiredProperties", () => {
   });
 });
 
-describe("getFieldPathFromHtml", () => {
-  it("converts field name to JSON pointer path", () => {
-    expect(getFieldPathFromHtml("foo--bar")).toBe("/foo/bar");
-  });
-});
-
 describe("jsonPointerToPath", () => {
   it("converts pointer to JSON path", () => {
     expect(jsonSchemaPointerToPath("/properties/foo/properties/bar")).toBe(
@@ -876,6 +869,7 @@ describe("addPrintWidgetToFields", () => {
         type: "field" as const,
         definition: "/properties/name" as const,
         schema: { title: "Name", type: "string" },
+        printDescription: true,
       },
       {
         type: "field" as const,
@@ -892,6 +886,7 @@ describe("addPrintWidgetToFields", () => {
         type: "field",
         definition: "/properties/name",
         schema: { title: "Name", type: "string" },
+        printDescription: true,
         widget: "Print",
       },
       {
@@ -1123,34 +1118,7 @@ describe("addPrintWidgetToFields", () => {
     ]);
   });
 
-  it("preserves empty array objects up to minItems", () => {
-    const result = pruneEmptyNestedFields(
-      {
-        contact_people_test: [{ first_name: "Jane" }, {}],
-      },
-      {
-        type: "object",
-        properties: {
-          contact_people_test: {
-            type: "array",
-            minItems: 2,
-            items: {
-              type: "object",
-              properties: {
-                first_name: { type: "string" },
-              },
-            },
-          },
-        },
-      },
-    );
-
-    expect(result).toEqual({
-      contact_people_test: [{ first_name: "Jane" }, {}],
-    });
-  });
-
-  it("prunes empty array objects beyond minItems", () => {
+  it("preserves empty object array entries so FieldList validation can return child-level errors", () => {
     const result = pruneEmptyNestedFields(
       {
         contact_people_test: [{ first_name: "Jane" }, {}, {}],
@@ -1173,7 +1141,7 @@ describe("addPrintWidgetToFields", () => {
     );
 
     expect(result).toEqual({
-      contact_people_test: [{ first_name: "Jane" }, {}],
+      contact_people_test: [{ first_name: "Jane" }, {}, {}],
     });
   });
 
@@ -1423,6 +1391,68 @@ describe("addPrintWidgetToFields", () => {
           fieldListLabel: "Contact People",
         }),
       ]);
+    });
+
+    describe("required field inside a missing nested object", () => {
+      const buildFormSchema = (nameTitle?: string): RJSFSchema => ({
+        type: "object",
+        properties: {
+          registrant: {
+            type: "object",
+            required: ["individual"],
+            properties: {
+              individual: {
+                type: "object",
+                ...(nameTitle ? { title: nameTitle } : {}),
+                required: ["first_name", "last_name"],
+                properties: {
+                  first_name: { type: "string", title: "First Name" },
+                  last_name: { type: "string", title: "Last Name" },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const warnings = [
+        {
+          field: "$.registrant.individual",
+          message: "'individual' is a required property",
+          type: "required",
+          value: null,
+        },
+      ];
+
+      it("shows only the field title when the parent object has no title", () => {
+        const result = findValidationErrors(
+          warnings,
+          "/properties/registrant/properties/individual/properties/first_name",
+          undefined,
+          buildFormSchema(),
+          [],
+        );
+
+        expect(result).toEqual([
+          expect.objectContaining({ formatted: "First Name is required" }),
+        ]);
+      });
+
+      it("keeps the parent title as a prefix when the parent sets one", () => {
+        const result = findValidationErrors(
+          warnings,
+          "/properties/registrant/properties/individual/properties/last_name",
+          undefined,
+          buildFormSchema("Contact Person"),
+          [],
+        );
+
+        expect(result).toEqual([
+          expect.objectContaining({
+            formatted: "Contact Person Last Name is required",
+          }),
+        ]);
+      });
     });
   });
 });

@@ -29,7 +29,7 @@ global.Response = class Response {
       json: jest.fn().mockResolvedValue(data),
       status: init?.status || 200,
       ...init,
-    } as MockResponse;
+    };
   }
 } as unknown as typeof globalThis.Response;
 
@@ -45,6 +45,7 @@ const mockFilters = {
 const createRequest = (body: Record<string, unknown>) =>
   ({
     json: jest.fn().mockResolvedValue(body),
+    headers: new Headers(),
   }) as unknown as NextRequest;
 
 describe("listAwardRecommendationSubmissions", () => {

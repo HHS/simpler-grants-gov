@@ -8,6 +8,13 @@
 import { difference, isNumber } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 
+// workaround for RegExp.escape not being fully supported yet
+declare global {
+  interface RegExpConstructor {
+    escape?(str: string): string;
+  }
+}
+
 // Refer to tests to see how this works in practice
 export const splitMarkup = (
   markupString: string,
@@ -171,10 +178,21 @@ export const getModifiedTimeDisplay = (
   return formatTimestamp(updated_at);
 };
 
-export const printAwsHeaders = (headers: Headers): string => {
-  return `requestid: ${headers.get("x-amzn-requestid") || "not set"}, apigw-id: ${headers.get("x-amz-apigw-id") || "not set"}, amzn-errortype: ${headers.get("x-amzn-errortype") || "not set"}, content-type: ${headers.get("Content-Type") || "not set"}`;
-};
+export const getAwsHeaders = (headers: Headers) => ({
+  apiRequestId: headers.get("x-amzn-requestid"),
+  apiGatewayId: headers.get("x-amz-apigw-id"),
+  apiErrorType: headers.get("x-amzn-errortype"),
+  contentType: headers.get("Content-Type"),
+});
 
-export const printResponseInfo = (response: Response): string => {
-  return `Ok?: ${response.ok ? "ok" : "no"}, status: ${response.status}`;
+export const getResponseInfo = (response: Response) => ({
+  responseOk: response.ok,
+  responseStatus: response.status,
+});
+
+// polyfill for RegExp.escape found here https://stackoverflow.com/a/6969486
+export const escapeRegExpString = (regexpString: string) => {
+  return RegExp.escape
+    ? RegExp.escape(regexpString)
+    : regexpString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };

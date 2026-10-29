@@ -71,18 +71,39 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
             "grants_gov_tracking_number": f"{GRANTS_GOV_TRACKING_NUMBER}"
         }
 
-    def test_confirm_application_delivery_request_validates_there_is_a_grants_gov_tracking_number_exists(
+    def test_confirm_application_delivery_request_raises_validation_error_when_grantsgovtrackingnumber_is_none(
         self,
     ):
         request_xml = (
-            "<soapenv:Envelope "
-            'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            "<?xml version='1.0' encoding='UTF-8'?>"
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soapenv:Body>"
+            "<agen:ConfirmApplicationDeliveryRequest "
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            '<gran:GrantsGovTrackingNumber xsi:nil="true"/>'
+            "</agen:ConfirmApplicationDeliveryRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        soap_operation_dict = get_soap_operation_dict(
+            request_xml, "ConfirmApplicationDeliveryRequest"
+        )
+        with pytest.raises(SOAPFaultException) as e:
+            grantors_schemas.ConfirmApplicationDeliveryRequest(**soap_operation_dict)
+        assert e.value.message == INVALID_TRACKING_NUMBER_ERR
+
+    def test_confirm_application_delivery_request_raises_validation_error_when_grantsgovtrackingnumber_is_missing(
+        self,
+    ):
+        request_xml = (
+            "<?xml version='1.0' encoding='UTF-8'?>"
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soapenv:Body>"
+            "<agen:ConfirmApplicationDeliveryRequest "
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
             'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-            "<soapenv:Header/>"
-            "<soapenv:Body>"
-            "<agen:ConfirmApplicationDeliveryRequest>"
-            "<gran:GrantsGovTrackingNumber></gran:GrantsGovTrackingNumber>"
             "</agen:ConfirmApplicationDeliveryRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -225,10 +246,10 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
 
     def test_can_convert_confirm_application_delivery_response_dict_to_mtom_message(self):
         response_xml_bytes = (
-            f"--uuid:{BOUNDARY_UUID}"
-            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
-            "Content-Transfer-Encoding: binary"
-            "Content-ID: <root.message@cxf.apache.org>"
+            f"--uuid:{BOUNDARY_UUID}\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
             '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
             "<soap:Body>"
             "<ns2:ConfirmApplicationDeliveryResponse "
@@ -279,5 +300,4 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
         mtom_response = build_mtom_response_from_dict(
             result, raw_uuid=BOUNDARY_UUID, root="", namespaces=ns
         )
-        cleaned_mtom_response = mtom_response.decode().replace("\n", "").encode("utf-8")
-        assert cleaned_mtom_response == response_xml_bytes
+        assert mtom_response == response_xml_bytes

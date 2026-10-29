@@ -1,0 +1,4 @@
+bucket       = "simpler-grants-gov-049145893907-us-east-1-tf"
+key          = "infra/account.tfstate"
+region       = "us-east-1"
+use_lockfile = true

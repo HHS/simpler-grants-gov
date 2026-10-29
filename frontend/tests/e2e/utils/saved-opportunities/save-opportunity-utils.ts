@@ -1,0 +1,131 @@
+import { expect, type Page } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
+
+const { targetEnv } = playwrightEnv;
+
+/**
+ * Asserts that the Saved Opportunities page is fully rendered and the
+ * opportunity link is visible. Called after the "newly saved" path to
+ * confirm the page has settled before returning to the caller.
+ *
+ * @param page  - Playwright Page instance
+ * @param title - Exact opportunity title expected to be visible
+ */
+
+async function assertSavedOpportunitiesPageReady(
+  page: Page,
+
+  title: string,
+): Promise<void> {
+  const timeout = targetEnv !== "local" ? 30000 : 5000;
+
+  await expect(page).toHaveTitle("Saved opportunities | Simpler.Grants.gov", {
+    timeout,
+  });
+
+  await expect(page.getByRole("link", { name: title })).toBeVisible({
+    timeout,
+  });
+}
+
+/**
+* Navigates to the Search page, searches for an opportunity by title,
+* opens its detail page, and saves it via the save button.
+* Waits for the save button to confirm the save completed before navigating.
+* Returns to the Saved Opportunities page on completion.
+*
+* @param page  - Playwright Page instance
+* @param title - Exact opportunity title to search for (e.g. "TEST-APPLY-ORG-IND-OT01")
+
+*/
+
+export async function saveOpportunityViaSearch(
+  page: Page,
+
+  title: string,
+): Promise<void> {
+  // Navigate directly to Search - avoids mobile hamburger nav state
+
+  await page.goto("/search");
+  await page.waitForURL(/\/search/);
+
+  // Search for the opportunity by title
+  const searchBox = page.getByRole("searchbox", {
+    name: /Tip: Use a minus sign to/,
+  });
+
+  await searchBox.click();
+
+  await searchBox.fill(title);
+
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+
+  // Open the opportunity detail page from search results
+  // On Webkit the click can land before results are hydrated and is silently
+  // ignored, so retry the click until we actually land on the detail page.
+  const resultLink = page.getByRole("link", { name: title }).first();
+  await expect(async () => {
+    if (!/\/opportunity\//.test(page.url())) {
+      await resultLink.click({ timeout: 5000 });
+    }
+    await page.waitForURL(/\/opportunity\//, { timeout: 8000 });
+  }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000, 3000] });
+
+  // Save the opportunity via the save button
+  // Webkit can ignore a click made before hydration, so re-click only while the
+  // button still shows the unsaved state (never toggles an already-saved item).
+  const saveButton = page.getByTestId("simpler-save-button");
+  await expect(async () => {
+    const text = (await saveButton.textContent()) ?? "";
+    if (!/saved/i.test(text)) {
+      await saveButton.click({ timeout: 5000 });
+    }
+    await expect(saveButton).toContainText(/saved/i, { timeout: 5000 });
+  }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000, 3000] });
+
+  // Return to Saved Opportunities via direct navigation - avoids mobile nav state
+  await page.goto("/saved-opportunities");
+  await page.waitForURL(/saved-opportunities/);
+
+  // Confirm the page has settled and the opportunity link is visible
+  await assertSavedOpportunitiesPageReady(page, title);
+}
+
+/**
+ * Ensures an opportunity is saved in the user's workspace before assertions run.
+ * - If already saved: verifies the page is settled and ready
+ * - If not saved: searches for it, saves it, then returns to Saved Opportunities
+ *
+ * Precondition: page must already be on the Saved Opportunities URL.
+ *
+ * @param page  - Playwright Page instance
+ * @param title - Exact opportunity title to check/save
+ */
+
+export async function ensureOpportunityIsSaved(
+  page: Page,
+
+  title: string,
+): Promise<void> {
+  const timeout = targetEnv !== "local" ? 30000 : 5000;
+
+  await expect(page).toHaveTitle("Saved opportunities | Simpler.Grants.gov", {
+    timeout,
+  });
+
+  let isAlreadySaved = false;
+  try {
+    await expect(
+      page.getByRole("link", { name: title, exact: true }),
+    ).toBeVisible({ timeout: 3000 });
+    isAlreadySaved = true;
+  } catch {
+    isAlreadySaved = false;
+  }
+
+  if (!isAlreadySaved) {
+    await saveOpportunityViaSearch(page, title);
+  } else {
+    await assertSavedOpportunitiesPageReady(page, title);
+  }
+}

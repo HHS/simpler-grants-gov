@@ -97,6 +97,16 @@ export default function SubscriptionForm() {
           errorMessage: t("errors.alreadySubscribed"),
           validationErrors: {},
         });
+      } else if (data.errorCode === "invalidEmail") {
+        setSubscribeErrorState({
+          errorMessage: "",
+          validationErrors: { email: [t("errors.invalidEmail")] },
+        });
+      } else if (data.errorCode === "tooManyRequests") {
+        setSubscribeErrorState({
+          errorMessage: t("errors.tooManyRequests"),
+          validationErrors: {},
+        });
       } else {
         setSubscribeErrorState({
           errorMessage: serverError,

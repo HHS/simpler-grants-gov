@@ -68,7 +68,10 @@ def test_get_all_returns_all_registered_forms():
     registry.register(form_a, major_version=1)
     registry.register(form_b, major_version=1)
 
-    assert set(registry.get_all()) == {form_a, form_b}
+    result = registry.get_all()
+    assert len(result) == 2
+    assert form_a in result
+    assert form_b in result
 
 
 def test_get_all_empty_registry():
@@ -218,7 +221,9 @@ def test_get_raises_for_wrong_major_version():
 
 
 def test_all_forms_are_registered_on_startup():
-
+    # Clear any forms accumulated by other tests (this singleton is shared across the suite)
+    # then re-initialize to verify exactly the expected forms are registered.
+    form_template_registry._registry.clear()
     init_form_registry()
 
     forms = form_template_registry.get_all()

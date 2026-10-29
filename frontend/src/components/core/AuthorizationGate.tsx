@@ -7,7 +7,6 @@ import { getSession } from "src/services/auth/session";
 import { checkUserPrivilege } from "src/services/fetch/fetchers/userFetcher";
 import {
   AuthorizedData,
-  FetchedResource,
   FetchedResourceMap,
   ResourcePromiseDefinitions,
 } from "src/types/authTypes";
@@ -79,7 +78,7 @@ const resolveAndFormatResources = (
             [resourceName]: {
               data: resourceData,
               statusCode: 200,
-            } as FetchedResource,
+            },
           };
         })
         .catch((e: Error) => {
@@ -87,7 +86,7 @@ const resolveAndFormatResources = (
             [resourceName]: {
               error: e.message,
               statusCode: parseErrorStatus(e),
-            } as FetchedResource,
+            },
           };
         });
     },
@@ -101,7 +100,6 @@ const resolveAndFormatResources = (
 // since we'll consider a non-403 as unauthorized, children should check for errors
 // first before checking "authorized"
 const checkRequiredPrivileges = async (
-  token: string,
   userId: string,
   privileges: UserPrivilegeDefinition[],
 ): Promise<UserPrivilegeResult[]> => {
@@ -150,7 +148,6 @@ export async function AuthorizationGate({
   // check privileges
   if (requiredPrivileges) {
     userPrivileges = await checkRequiredPrivileges(
-      session.token,
       session.user_id,
       requiredPrivileges,
     );

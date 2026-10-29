@@ -19,33 +19,83 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
-  # Not fixed in GA Python yet
+  # zipfile: bzip2/LZMA/Zstandard members pre-allocate memory from an
+  # attacker-controlled size
+  # Fix only in pre-release Python 3.15 (3.15.0rc2); fix in GA 3.14.8
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 05/13/26
-  - vulnerability: CVE-2025-15366
+  # Last checked: 10/02/2026
+  - vulnerability: CVE-2026-15310
 
   # Not fixed in GA Python yet
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 05/13/2026
+  # Last checked: 10/02/2026
   - vulnerability: CVE-2025-15367
 
-  # Not fixed in GA Python yet
-  # Last checked 05/13/2026
-  - vulnerability: CVE-2026-7210
-
-  # unicodedata DoS (excessive CPU consumption). Fix only in pre-release
-  # Python 3.15 (3.15.0b2); no fix in any GA 3.14.x release yet.
+  # urllib.request.HTTPPasswordMgr: stored credentials matched without regard to
+  # URL scheme, so https:// credentials were reused over http://
+  # Fix only in pre-release Python 3.15 (3.15.0rc2); fix in GA 3.14.8
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 06/08/2026
-  - vulnerability: CVE-2026-3276
+  # Last checked: 10/02/2026
+  - vulnerability: CVE-2026-15806
 
-  # base64 altchars input-validation flaw. Marked "will not fix" in 3.14
-  # (deprecation warning only); real fix deferred to a future Python release.
+  # stringprep / idna codec: RFC 3454 tables B.2 and B.3 matched against current
+  # Unicode attributes instead of Unicode 3.2.0
+  # Fix only in pre-release Python 3.15 (3.15.0rc2); fix in GA 3.14.8
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 06/08/2026
-  - vulnerability: CVE-2025-12781
+  # Last checked: 10/02/2026
+  - vulnerability: CVE-2026-17084
 
-  # Fix only in pre-release Python 3.15 (3.15.0b2); no fix in any GA 3.14.x yet.
+  # dompurify via isomorphic-dompurify
+  # Major version upgrade required, will do after 8/12 release
+  # Last checked: 08/11/2026
+  - vulnerability: GHSA-55q2-fjhq-7xh7
+
+  # tarfile: hardlink fallback ignores a custom extraction filter's None result.
+  # Python 3.14.8 is still affected; the 3.14 backport merged after that release.
+  # Grype lists fixes in 3.12.15, 3.13.16 and pre-release 3.15.0, but there is
+  # no released fix on our 3.14 runtime line yet. Remove this exception once
+  # python:3.14-slim includes the backport and Grype recognizes the fixed version.
+  # Advisory: https://www.cve.org/CVERecord?id=CVE-2026-87910
+  # Backport: https://github.com/python/cpython/pull/157307
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 06/08/2026
-  - vulnerability: CVE-2026-7774
+  # Last checked: 10/02/2026
+  - vulnerability: CVE-2026-87910
+
+  # tempfile.TemporaryDirectory: race condition in cleanup lets an attacker who
+  # can modify the tree swap a directory for a symlink, so files outside the
+  # temporary directory can be deleted or have permissions/flags reset.
+  # Python 3.14.8 is still affected. The fix is merged for 3.15 (3.15.0rc3) but
+  # has not been backported to 3.14, and there is no released 3.14 fix. Grype
+  # lists the fix only in 3.15.0. Remove this exception once python:3.14-slim
+  # includes a fixed 3.14 release and Grype recognizes it.
+  # Advisory: https://www.cve.org/CVERecord?id=CVE-2026-12345
+  # Upstream issue: https://github.com/python/cpython/issues/157579
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 10/03/2026
+  - vulnerability: CVE-2026-12345
+  # CPython, tarfile issue with checking files on file systems that don't support symlinks, so not us
+  # might be fixed in 3.14.8 but that just came out
+  # https://github.com/python/cpython/issues/157265
+  # Last checked: 10/02/2026
+  - vulnerability: CVE-2026-87910
+
+  # rustls 0.23.45 statically linked in the uv binary (/usr/bin/uv) from the python base image
+  # Fixed in rustls 0.23.46; uv bumped it on main (astral-sh/uv#22959) but no uv release ships it yet (latest 0.13.6)
+  # Remove once a uv release includes rustls >= 0.23.46 and UV_VERSION in api/docker-python-base is bumped
+  # Last checked: 10/28/2026
+  - vulnerability: GHSA-c8m5-c952-6cm4
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-h2v8-394m-p7vv
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-vp88-798v-h67f
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-w44r-93j7-qv28
+    package:
+      name: rustls
+      type: rust-crate

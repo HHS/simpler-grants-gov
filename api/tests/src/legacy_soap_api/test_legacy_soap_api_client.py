@@ -9,7 +9,6 @@ import pytest
 import pytz
 import requests
 from botocore.exceptions import ClientError
-from grants_shared.util.datetime_util import make_timezone_aware, parse_grants_gov_date
 from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
@@ -27,9 +26,15 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
+from src.util.datetime_util import make_timezone_aware, parse_grants_gov_date
 from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
@@ -106,7 +111,9 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         # Create an opportunity with a competition
         package_id = "PKG-SOAPCLIENT11"
         CompetitionFactory.create(
-            opportunity=OpportunityFactory.create(), legacy_package_id=package_id
+            opportunity=OpportunityFactory.create(),
+            legacy_package_id=package_id,
+            legacy_competition_id=1234,
         )
         mock_proxy_request_response = MagicMock()
         mock_proxy_request.return_value = mock_proxy_request_response
@@ -123,7 +130,9 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
     def test_get_opportunity_list_by_package_id(self, db_session, enable_factory_create):
         package_id = "PKG-00260155"
         opportunity = OpportunityFactory.create()
-        CompetitionFactory.create(opportunity=opportunity, legacy_package_id=package_id)
+        CompetitionFactory.create(
+            opportunity=opportunity, legacy_package_id=package_id, legacy_competition_id=1234
+        )
         client = get_simpler_applicants_soap_client(
             mock_requests.get_opportunity_list_by_package_id_request(package_id).encode(),
             db_session,
@@ -244,8 +253,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         )
 
         # Expected XML is formatted for visual aid and minified for equality.
-        expected_simpler_soap_response_xml = minify_xml(
-            f"""
+        expected_simpler_soap_response_xml = minify_xml(f"""
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <ns2:GetOpportunityListResponse xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:ns3="http://schemas.xmlsoap.org/wsdl/" xmlns:ns4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns5="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
@@ -267,8 +275,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
             </ns5:OpportunityDetails>
         </ns2:GetOpportunityListResponse>
     </soap:Body>
-</soap:Envelope>"""
-        )
+</soap:Envelope>""")
 
         # This is only testing the simpler soap response so we can leave proxy response empty.
         mock_proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
@@ -379,6 +386,7 @@ class TestSimplerBaseSOAPClient:
                 force_list_attributes=("OpportunityDetails",),
                 key_indexes={"OpportunityDetails": "CompetitionID"},
                 compare_endpoints=False,
+                soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
                 namespace_keymap={
                     "GetOpportunityListResponse": "ns2",
                 },
@@ -423,8 +431,8 @@ class TestSimplerSOAPGetApplicationZip:
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition = CompetitionFactory(
-            opportunity=opportunity,
+        competition = CompetitionFactory.create(
+            opportunity=opportunity, public_competition_id="CDE-123"
         )
         application = ApplicationFactory.create(competition=competition)
         submission = ApplicationSubmissionFactory.create(application=application)
@@ -437,7 +445,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -453,28 +461,50 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
+            mock_uuid4.side_effect = [ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                '--uuid:cccccccc-1111-2222-3333-dddddddddddd\nContent-Type: application/xop+xml; charset=UTF-8; type="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org'
-                '>\n\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns2:GetApplicationZipResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns11="htt'
-                'p://schemas.xmlsoap.org/wsdl/" xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" xmlns'
-                ':ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" xmlns:ns6="http://apply.grants.gov/system/GrantsP'
-                'ackage-V1.0" xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" xmlns:ns3="http://apply.grants.gov'
-                '/system/GrantsTemplate-V1.0" xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0"><ns2:FileDataHandler>'
-                '<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb-0001@apply.grants.gov"/></ns2:FileDataHandler></ns2:GetApplicationZipResp'
-                f"onse></soap:Body></soap:Envelope>\n--uuid:cccccccc-1111-2222-3333-dddddddddddd\n{submission_text}\n--uuid:cccccccc-1111-2222-3333-dddddddddddd--"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+                '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+                "<soap:Body>"
+                "<ns2:GetApplicationZipResponse "
+                'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+                'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+                'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+                'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+                'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+                'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+                'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+                'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+                'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+                'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+                'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+                "<ns2:FileDataHandler>"
+                f'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:{submission.application_submission_id}-1@apply.grants.gov"/>'
+                "</ns2:FileDataHandler>"
+                "</ns2:GetApplicationZipResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>\r\n"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
+                "Content-Type: application/octet-stream\r\n"
+                "Content-Transfer-Encoding: binary\r\n"
+                f"Content-ID: <{submission.application_submission_id}-1@apply.grants.gov>\r\n"
+                'Content-Disposition: attachment;name="AgencyApplicationDownload.zip"\r\n\r\n'
+                f"{submission_text}\r\n"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd--"
             ).encode("utf-8")
             assert isinstance(result.data, Iterator)
             assert b"".join(list(result.data)) == expected
             assert result.status_code == 200
             assert result.headers == {
                 "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
-                "MIME-Version": "1.0",
             }
 
-    def test_get_simpler_soap_response_can_access_endpoint_if_certificate_user_has_privileges(
+    def test_get_simpler_soap_response_returns_mtom_xml_handles_alternate_request_body(
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
@@ -482,8 +512,95 @@ class TestSimplerSOAPGetApplicationZip:
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition = CompetitionFactory(
-            opportunity=opportunity,
+        competition = CompetitionFactory.create(
+            opportunity=opportunity, public_competition_id="CDE-123"
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
+        response = requests.get(submission.download_path, timeout=10)
+        submission_text = response.content.decode()
+        request_xml_bytes = (
+            "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            "Content-ID: <0.urn:uuid:9467EB4D41266EA2C91784229922208@apache.org>\r\n\r\n"
+            "<?xml version='1.0' encoding='UTF-8'?>"
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>\r\n"
+            "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207--"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [ADDITIONAL_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            expected = (
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+                '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+                "<soap:Body>"
+                "<ns2:GetApplicationZipResponse "
+                'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+                'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+                'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+                'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+                'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+                'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+                'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+                'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+                'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+                'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+                'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+                "<ns2:FileDataHandler>"
+                f'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:{submission.application_submission_id}-1@apply.grants.gov"/>'
+                "</ns2:FileDataHandler>"
+                "</ns2:GetApplicationZipResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>\r\n"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
+                "Content-Type: application/octet-stream\r\n"
+                "Content-Transfer-Encoding: binary\r\n"
+                f"Content-ID: <{submission.application_submission_id}-1@apply.grants.gov>\r\n"
+                'Content-Disposition: attachment;name="AgencyApplicationDownload.zip"\r\n\r\n'
+                f"{submission_text}\r\n"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd--"
+            ).encode("utf-8")
+            assert isinstance(result.data, Iterator)
+            assert b"".join(list(result.data)) == expected
+            assert result.status_code == 200
+            assert result.headers == {
+                "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+            }
+
+    def test_get_simpler_soap_response_returns_soap_action_in_header(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory.create(
+            opportunity=opportunity, public_competition_id="CDE-123"
         )
         application = ApplicationFactory.create(competition=competition)
         submission = ApplicationSubmissionFactory.create(application=application)
@@ -494,7 +611,50 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [ADDITIONAL_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            assert result.headers == {
+                "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+            }
+
+    def test_get_simpler_soap_response_can_access_endpoint_if_certificate_user_has_privileges(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory.create(
+            opportunity=opportunity, public_competition_id="CDE-123"
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -535,7 +695,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -575,7 +735,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -597,7 +757,7 @@ class TestSimplerSOAPGetApplicationZip:
                 "GetObject",
             )
             response = client.get_simpler_soap_response(mock_proxy_response)
-            msg = f"Unable to retrieve file legacy_tracking_number {submission.legacy_tracking_number} from s3 file location."
+            msg = f"Unable to retrieve file legacy_tracking_number GRANT{submission.legacy_tracking_number} from s3 file location."
             assert msg in caplog.messages
             assert response.data == mock_proxy_response.data
             assert response.status_code == mock_proxy_response.status_code
@@ -629,12 +789,9 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        response = client.get_simpler_soap_response(mock_proxy_response)
-        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER
-        msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
-        assert msg in caplog.messages
-        assert response.data == mock_proxy_response.data
-        assert response.status_code == mock_proxy_response.status_code
+        with pytest.raises(SOAPFaultException, match="ApplicationSubmission not found"):
+            client.get_simpler_soap_response(mock_proxy_response)
+        assert "Unable to find submission." in caplog.messages
 
 
 class TestSimplerSOAPGetSubmissionListExpanded:
@@ -646,14 +803,16 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         application_status=ApplicationStatus.ACCEPTED,
         opportunity_assistance_listing=True,
         has_organization=True,
-        legacy_competition_id=1,
+        legacy_competition_id=1234,
         submitted_at=DT_EST_AWARE,
+        public_competition_id="ABC-324",
     ):
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition = CompetitionFactory(
+        competition = CompetitionFactory.create(
             opportunity=opportunity,
             legacy_package_id=legacy_package_id,
             legacy_competition_id=legacy_competition_id,
+            public_competition_id=public_competition_id,
             opportunity_assistance_listing=(
                 OpportunityAssistanceListingFactory.create(opportunity=opportunity)
                 if opportunity_assistance_listing
@@ -710,9 +869,10 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
-                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
-                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 '<ns2:GetSubmissionListExpandedResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
@@ -735,20 +895,20 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListExpandedResponse>"
                 "</soap:Body>"
-                "</soap:Envelope>"
-                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+                "</soap:Envelope>\r\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
             assert result.status_code == 200
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
-                "MIME-Version": "1.0",
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects(
@@ -792,10 +952,10 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
-                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-                "Content-Transfer-Encoding: binary\n"
-                "Content-ID: <root.message@cxf.apache.org>\n\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 "<ns2:GetSubmissionListExpandedResponse "
@@ -822,6 +982,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -835,20 +996,20 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application_2.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity_2.uei}</UEI>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListExpandedResponse>"
                 "</soap:Body>"
-                "</soap:Envelope>\n"
+                "</soap:Envelope>\r\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
             assert result.status_code == 200
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
-                "MIME-Version": "1.0",
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects_merges_response_from_proxy_and_simpler(
@@ -918,6 +1079,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
+            "<CompetitionID>ABC-324</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "<UEI>E9T7F9N2ERR4</UEI>"
@@ -933,10 +1095,10 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
-                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-                "Content-Transfer-Encoding: binary\n"
-                "Content-ID: <root.message@cxf.apache.org>\n\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 "<ns2:GetSubmissionListExpandedResponse "
@@ -963,6 +1125,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
+                f"<CompetitionID>ABC-324</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "<UEI>E9T7F9N2ERR4</UEI>"
@@ -976,6 +1139,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -989,13 +1153,14 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application_2.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity_2.uei}</UEI>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListExpandedResponse>"
                 "</soap:Body>"
-                "</soap:Envelope>\n"
+                "</soap:Envelope>\r\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
@@ -1055,6 +1220,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1070,10 +1236,10 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
-                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-                "Content-Transfer-Encoding: binary\n"
-                "Content-ID: <root.message@cxf.apache.org>\n\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 "<ns2:GetSubmissionListExpandedResponse "
@@ -1100,13 +1266,14 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "<UEI>E9T7F9N2ERR4</UEI>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListExpandedResponse>"
                 "</soap:Body>"
-                "</soap:Envelope>\n"
+                "</soap:Envelope>\r\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
@@ -1147,9 +1314,10 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
-                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
-                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 '<ns2:GetSubmissionListExpandedResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
@@ -1172,6 +1340,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -1179,7 +1348,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</ns2:GetSubmissionListExpandedResponse>"
                 "</soap:Body>"
                 "</soap:Envelope>"
-                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+                "\r\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
 
@@ -1223,9 +1392,10 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 mock_parse.side_effect = Exception()
                 result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
-                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
-                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 '<ns2:GetSubmissionListExpandedResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
@@ -1248,14 +1418,15 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListExpandedResponse>"
                 "</soap:Body>"
-                "</soap:Envelope>"
-                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+                "</soap:Envelope>\r\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
             assert "Failed to parse submission list XML response" in caplog.messages
@@ -1263,6 +1434,8 @@ class TestSimplerSOAPGetSubmissionListExpanded:
     def test_get_simpler_soap_response_returns_valid_submission_info_from_proxy_and_skips_invalid(
         self, db_session, enable_factory_create, mock_s3_bucket, caplog
     ):
+        """Invalid SubmissionInfo records from the proxy are skipped and logged; valid records
+        and Simpler submissions are still returned."""
         agency = AgencyFactory.create()
         sam_gov_entity = SamGovEntityFactory.create(
             has_debt_subject_to_offset=True, has_exclusion_status=True
@@ -1320,6 +1493,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1338,9 +1512,10 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
-                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
-                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 '<ns2:GetSubmissionListExpandedResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
@@ -1363,6 +1538,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1376,6 +1552,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -1383,10 +1560,401 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</ns2:GetSubmissionListExpandedResponse>"
                 "</soap:Body>"
                 "</soap:Envelope>"
-                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+                "\r\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert "Skipping invalid submission due to validation error" in caplog.messages
             assert result.data == expected
+
+
+class TestSimplerSOAPGetApplicationListExpanded:
+    def setup_application_submission(
+        self,
+        agency,
+        legacy_package_id="PKG00118065",
+        sam_gov_entity=None,
+        application_status=ApplicationStatus.ACCEPTED,
+        opportunity_assistance_listing=True,
+        has_organization=True,
+        legacy_competition_id=1234,
+        submitted_at=DT_EST_AWARE,
+        public_competition_id="ABC-324",
+    ):
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            legacy_package_id=legacy_package_id,
+            legacy_competition_id=legacy_competition_id,
+            public_competition_id=public_competition_id,
+            opportunity_assistance_listing=(
+                OpportunityAssistanceListingFactory.create(opportunity=opportunity)
+                if opportunity_assistance_listing
+                else None
+            ),
+        )
+        application_kwargs = dict(
+            competition=competition,
+            application_status=application_status,
+            submitted_at=submitted_at,
+        )
+        if has_organization:
+            application_kwargs = application_kwargs | {
+                "organization": (
+                    OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+                    if sam_gov_entity
+                    else OrganizationFactory.create()
+                )
+            }
+        application = ApplicationFactory.create(**application_kwargs)
+        return ApplicationSubmissionFactory.create(application=application)
+
+    def test_get_simpler_soap_response_returns_mtom_xml(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        """Verifies the full MTOM XML response for GetApplicationListExpanded.
+
+        Asserts that:
+        - ExpandedApplicationInfo elements are present with all expected fields
+        - CompetitionID is included
+        - UEI is NOT included (not in the supported fields table for this endpoint)
+        - Response is wrapped in a valid MTOM envelope with correct Content-Type header
+        """
+        agency = AgencyFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
+        application = submission.application
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationListExpandedRequest>"
+            "</agen:GetApplicationListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            expected = (
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+                '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+                "<soap:Body>"
+                '<ns2:GetApplicationListExpandedResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
+                '1="http://schemas.xmlsoap.org/wsdl/" xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynops'
+                'is-V2.0" xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" xmlns:ns8="htt'
+                'p://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/'
+                'AgencyManagePackage-V1.0" xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" xmlns:ns5="'
+                'http://apply.grants.gov/system/GrantsOpportunity-V1.0" xmlns:ns4="http://apply.grants.gov/system/Gr'
+                'antsRelatedDocument-V1.0" xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" xmlns:ns2='
+                '"http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns="http://apply.grants.gov/system/Gra'
+                'ntsCommonElements-V1.0">'
+                "<ns2:Success>true</ns2:Success>"
+                "<ns2:AvailableApplicationNumber>1</ns2:AvailableApplicationNumber>"
+                "<ns2:ExpandedApplicationInfo>"
+                f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
+                f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
+                f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
+                "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
+                "<SubmissionMethod>web</SubmissionMethod>"
+                f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
+                "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
+                "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
+                "<ActiveExclusions>Yes</ActiveExclusions>"
+                "</ns2:ExpandedApplicationInfo>"
+                "</ns2:GetApplicationListExpandedResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>\r\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+            ).encode("utf-8")
+            assert result.data == expected
+            assert result.status_code == 200
+            assert result.headers == {
+                "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+            }
+
+    def test_get_simpler_soap_response_returns_only_legacy_when_filter_matches_only_proxy(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        """When a filter matches only Legacy Grants.gov applications, only those are returned.
+
+        A GrantsGovTrackingNumber filter is applied for a tracking number that exists only
+        in the proxy response. Simpler's DB returns zero results. The merged response
+        contains only the legacy application.
+        """
+        agency = AgencyFactory.create()
+        # Simpler submission exists but won't match the filter (different tracking number)
+        self.setup_application_submission(agency)
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        legacy_tracking_number = "GRANT00839196"
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
+            f"<gran:FilterValue>{legacy_tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetApplicationListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        proxy_data = (
+            "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
+            "Content-Transfer-Encoding: binary"
+            "Content-ID: <root.message@cxf.apache.org>"
+            '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soap:Body>"
+            "<ns2:GetApplicationListExpandedResponse "
+            'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<ns2:Success>true</ns2:Success>"
+            "<ns2:AvailableApplicationNumber>1</ns2:AvailableApplicationNumber>"
+            "<ns2:ExpandedApplicationInfo>"
+            "<FundingOpportunityNumber>LEGACY-OPP-001</FundingOpportunityNumber>"
+            "<CFDANumber>00.000</CFDANumber>"
+            f"<GrantsGovTrackingNumber>{legacy_tracking_number}</GrantsGovTrackingNumber>"
+            "<ns2:ReceivedDateTime>2025-11-20T12:24:13.000-05:00</ns2:ReceivedDateTime>"
+            "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
+            "<SubmissionMethod>Workspace</SubmissionMethod>"
+            "<SubmissionTitle>Legacy App</SubmissionTitle>"
+            "<PackageID>PKG00119475</PackageID>"
+            "<CompetitionID>LEGACY-COMP-001</CompetitionID>"
+            "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
+            "<ActiveExclusions>No</ActiveExclusions>"
+            "</ns2:ExpandedApplicationInfo>"
+            "</ns2:GetApplicationListExpandedResponse>"
+            "</soap:Body>"
+            "</soap:Envelope>"
+            "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca--"
+        )
+        mock_proxy_response = SOAPResponse(data=proxy_data, status_code=200, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            response_xml = result.data if isinstance(result.data, bytes) else b"".join(result.data)
+            assert b"GRANT00839196" in response_xml
+            assert response_xml.count(b"ExpandedApplicationInfo") == 2  # open + close tag = 1 entry
+            assert result.status_code == 200
+
+    def test_get_simpler_soap_response_merges_proxy_and_simpler_applications(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        """Verifies that Simpler and Legacy Grants.gov applications are merged in the response.
+
+        A Simpler application (from DB) and a Legacy application (from proxy XML) are
+        both present in the response, sorted most-recent first.
+        """
+        agency = AgencyFactory.create()
+        submission = self.setup_application_submission(agency, submitted_at=DT_EST_AWARE_EARLIER)
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationListExpandedRequest>"
+            "</agen:GetApplicationListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        proxy_data = (
+            "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
+            "Content-Transfer-Encoding: binary"
+            "Content-ID:"
+            "<root.message@cxf.apache.org>"
+            '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soap:Body>"
+            "<ns2:GetApplicationListExpandedResponse "
+            'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<ns2:Success>true</ns2:Success>"
+            "<ns2:AvailableApplicationNumber>1</ns2:AvailableApplicationNumber>"
+            "<ns2:ExpandedApplicationInfo>"
+            "<FundingOpportunityNumber>LEGACY-OPP-001</FundingOpportunityNumber>"
+            "<CFDANumber>00.000</CFDANumber>"
+            "<GrantsGovTrackingNumber>GRANT00839196</GrantsGovTrackingNumber>"
+            "<ns2:ReceivedDateTime>2025-11-20T12:24:13.000-05:00</ns2:ReceivedDateTime>"
+            "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
+            "<SubmissionMethod>Workspace</SubmissionMethod>"
+            "<SubmissionTitle>Legacy App</SubmissionTitle>"
+            "<PackageID>PKG00119475</PackageID>"
+            "<CompetitionID>LEGACY-COMP-001</CompetitionID>"
+            "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
+            "<ActiveExclusions>No</ActiveExclusions>"
+            "</ns2:ExpandedApplicationInfo>"
+            "</ns2:GetApplicationListExpandedResponse>"
+            "</soap:Body>"
+            "</soap:Envelope>"
+            "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca--"
+        )
+        mock_proxy_response = SOAPResponse(data=proxy_data, status_code=200, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            response_xml = result.data if isinstance(result.data, bytes) else b"".join(result.data)
+            # Both applications present
+            assert b"GRANT00839196" in response_xml  # legacy proxy app
+            assert (
+                f"GRANT{submission.legacy_tracking_number}".encode() in response_xml
+            )  # simpler app
+            # Legacy app (newer) appears before Simpler app (older) — sorted most-recent first
+            legacy_pos = response_xml.find(b"GRANT00839196")
+            simpler_pos = response_xml.find(f"GRANT{submission.legacy_tracking_number}".encode())
+            assert legacy_pos < simpler_pos
+            # UEI absent from both
+            assert b"UEI" not in response_xml
+            assert result.status_code == 200
+
+    def test_get_simpler_soap_response_ignores_malformed_proxy_response_and_logs(
+        self, db_session, enable_factory_create, mock_s3_bucket, caplog
+    ):
+        """Malformed proxy XML is ignored; Simpler applications are still returned and the error is logged."""
+        agency = AgencyFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationListExpandedRequest>"
+            "</agen:GetApplicationListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(
+            data=b"<somegarbage>1235</somegarbage>", status_code=200, headers={}
+        )
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            with patch(
+                "src.legacy_soap_api.grantors.services.get_application_list_expanded_response.parse_submissions_from_proxy"
+            ) as mock_parse:
+                mock_parse.side_effect = Exception()
+                result = client.get_simpler_soap_response(mock_proxy_response)
+            response_xml = result.data if isinstance(result.data, bytes) else b"".join(result.data)
+            # Simpler application still present despite proxy failure
+            assert f"GRANT{submission.legacy_tracking_number}".encode() in response_xml
+            assert b"ExpandedApplicationInfo" in response_xml
+            assert "Failed to parse application list XML response" in caplog.messages
+
+    def test_get_simpler_soap_response_returns_valid_expanded_application_info_from_proxy_and_skips_invalid(
+        self, db_session, enable_factory_create, mock_s3_bucket, caplog
+    ):
+        """Invalid ExpandedApplicationInfo records from the proxy are skipped and logged; valid
+        records and Simpler applications are still returned."""
+        agency = AgencyFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationListExpandedRequest>"
+            "</agen:GetApplicationListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        # Proxy returns one valid and one invalid (missing required structure) ExpandedApplicationInfo
+        proxy_data = (
+            "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
+            "Content-Transfer-Encoding: binary"
+            "Content-ID: <root.message@cxf.apache.org>"
+            '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soap:Body>"
+            "<ns2:GetApplicationListExpandedResponse "
+            'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<ns2:ExpandedApplicationInfo>"
+            "<FundingOpportunityNumber>VALID-OPP-001</FundingOpportunityNumber>"
+            "<GrantsGovTrackingNumber>GRANT00839196</GrantsGovTrackingNumber>"
+            "<ns2:ReceivedDateTime>2025-11-20T12:24:13.000-05:00</ns2:ReceivedDateTime>"
+            "</ns2:ExpandedApplicationInfo>"
+            # Invalid: unparseable ReceivedDateTime triggers a Pydantic validation error
+            "<ns2:ExpandedApplicationInfo>"
+            "<ns2:ReceivedDateTime>NOT-A-VALID-DATETIME</ns2:ReceivedDateTime>"
+            "</ns2:ExpandedApplicationInfo>"
+            "</ns2:GetApplicationListExpandedResponse>"
+            "</soap:Body>"
+            "</soap:Envelope>"
+            "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca--"
+        )
+        mock_proxy_response = SOAPResponse(data=proxy_data, status_code=200, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            response_xml = result.data if isinstance(result.data, bytes) else b"".join(result.data)
+            # Simpler application present
+            assert f"GRANT{submission.legacy_tracking_number}".encode() in response_xml
+            # Valid proxy record present; only the invalid record is skipped
+            assert b"GRANT00839196" in response_xml
+            assert "Skipping invalid submission due to validation error" in caplog.messages
 
 
 class TestSimplerSOAPGetSubmissionList:
@@ -1398,14 +1966,16 @@ class TestSimplerSOAPGetSubmissionList:
         application_status=ApplicationStatus.ACCEPTED,
         opportunity_assistance_listing=True,
         has_organization=True,
-        legacy_competition_id=1,
+        legacy_competition_id=1234,
         submitted_at=DT_EST_AWARE,
+        public_competition_id="ABC-123",
     ):
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition = CompetitionFactory(
+        competition = CompetitionFactory.create(
             opportunity=opportunity,
             legacy_package_id=legacy_package_id,
             legacy_competition_id=legacy_competition_id,
+            public_competition_id=public_competition_id,
             opportunity_assistance_listing=(
                 OpportunityAssistanceListingFactory.create(opportunity=opportunity)
                 if opportunity_assistance_listing
@@ -1462,9 +2032,10 @@ class TestSimplerSOAPGetSubmissionList:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
-                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
-                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 '<ns2:GetSubmissionListResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
@@ -1487,19 +2058,19 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListResponse>"
                 "</soap:Body>"
                 "</soap:Envelope>"
-                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+                "\r\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
             assert result.status_code == 200
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
-                "MIME-Version": "1.0",
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects(
@@ -1543,10 +2114,10 @@ class TestSimplerSOAPGetSubmissionList:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
-                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-                "Content-Transfer-Encoding: binary\n"
-                "Content-ID: <root.message@cxf.apache.org>\n\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 "<ns2:GetSubmissionListResponse "
@@ -1573,6 +2144,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1585,19 +2157,19 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application_2.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListResponse>"
                 "</soap:Body>"
-                "</soap:Envelope>\n"
+                "</soap:Envelope>\r\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
             assert result.status_code == 200
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
-                "MIME-Version": "1.0",
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects_merges_response_from_proxy_and_simpler(
@@ -1667,6 +2239,7 @@ class TestSimplerSOAPGetSubmissionList:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "</ns2:SubmissionInfo>"
@@ -1681,10 +2254,10 @@ class TestSimplerSOAPGetSubmissionList:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
-                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-                "Content-Transfer-Encoding: binary\n"
-                "Content-ID: <root.message@cxf.apache.org>\n\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 "<ns2:GetSubmissionListResponse "
@@ -1711,6 +2284,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1723,6 +2297,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1735,12 +2310,13 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application_2.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListResponse>"
                 "</soap:Body>"
-                "</soap:Envelope>\n"
+                "</soap:Envelope>\r\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
@@ -1800,6 +2376,7 @@ class TestSimplerSOAPGetSubmissionList:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "</ns2:SubmissionInfo>"
@@ -1814,10 +2391,10 @@ class TestSimplerSOAPGetSubmissionList:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
-                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-                "Content-Transfer-Encoding: binary\n"
-                "Content-ID: <root.message@cxf.apache.org>\n\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 "<ns2:GetSubmissionListResponse "
@@ -1844,12 +2421,13 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListResponse>"
                 "</soap:Body>"
-                "</soap:Envelope>\n"
+                "</soap:Envelope>\r\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
@@ -1890,9 +2468,10 @@ class TestSimplerSOAPGetSubmissionList:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
-                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
-                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 '<ns2:GetSubmissionListResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
@@ -1915,13 +2494,14 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListResponse>"
                 "</soap:Body>"
                 "</soap:Envelope>"
-                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+                "\r\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
 
@@ -1965,9 +2545,10 @@ class TestSimplerSOAPGetSubmissionList:
                 mock_parse.side_effect = Exception()
                 result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
-                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
-                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 '<ns2:GetSubmissionListResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
@@ -1990,13 +2571,14 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListResponse>"
                 "</soap:Body>"
                 "</soap:Envelope>"
-                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+                "\r\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
             assert "Failed to parse submission list XML response" in caplog.messages
@@ -2004,6 +2586,8 @@ class TestSimplerSOAPGetSubmissionList:
     def test_get_simpler_soap_response_returns_valid_submission_info_from_proxy_and_skips_invalid(
         self, db_session, enable_factory_create, mock_s3_bucket, caplog
     ):
+        """Invalid SubmissionInfo records from the proxy are skipped and logged; valid records
+        and Simpler submissions are still returned."""
         agency = AgencyFactory.create()
         sam_gov_entity = SamGovEntityFactory.create(
             has_debt_subject_to_offset=True, has_exclusion_status=True
@@ -2061,6 +2645,7 @@ class TestSimplerSOAPGetSubmissionList:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "</ns2:SubmissionInfo>"
@@ -2078,9 +2663,10 @@ class TestSimplerSOAPGetSubmissionList:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
-                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
-                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
                 '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                 "<soap:Body>"
                 '<ns2:GetSubmissionListResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
@@ -2103,6 +2689,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -2115,13 +2702,14 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListResponse>"
                 "</soap:Body>"
                 "</soap:Envelope>"
-                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+                "\r\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert "Skipping invalid submission due to validation error" in caplog.messages
             assert result.data == expected

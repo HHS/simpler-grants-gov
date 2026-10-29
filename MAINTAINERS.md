@@ -7,6 +7,7 @@ This is a list of maintainers for this project. Team members include:
 * [Aaron Couch](https://github.com/acouch)
 * [Brandon Tabaska](https://github.com/btabaska)
 * [Bruk Abebe](https://github.com/babebe)
+* [Dan Hudlow](https://github.com/hudlow)
 * [Doug Schrashun](https://github.com/doug-s-nava)
 * [Freddie Yebra](https://github.com/freddieyebra)
 * [Josh Osborne](https://github.com/joshtonava)
@@ -25,6 +26,11 @@ This is a list of maintainers for this project. Team members include:
 * [Hao Wang](https://github.com/hao10282025-sudo)
 * [Kenny Krug](https://github.com/kkrug)
 * [Daniel Ghazvini](https://github.com/dghazvini)
+* [Nasiruddin Khazi](https://github.com/nkhazi)
+* [Michael Slater](https://github.com/mike-slater)
+* [Shawn VanderJagt](https://github.com/shawnvanderjagt)
+* [Bethany Alcamo](https://github.com/balcamo)
+* [Branford Harris](https://github.com/afrothundr)
 
 ## Content and Design
 

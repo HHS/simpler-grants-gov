@@ -1,0 +1,52 @@
+import { readError } from "src/errors";
+import { getSession } from "src/services/auth/session";
+import { getWorkflowDetails } from "src/services/fetch/fetchers/workflowFetcher";
+import { logger } from "src/services/logger/simplerLogger";
+
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  const { id } = await context.params;
+
+  if (!id) {
+    return NextResponse.json(
+      { error: "Workflow ID is required" },
+      { status: 400 },
+    );
+  }
+
+  const currentSession = await getSession();
+  if (!currentSession) {
+    return NextResponse.json(
+      { error: "Not logged in, cannot retrieve workflow details" },
+      { status: 401 },
+    );
+  }
+
+  try {
+    const workflowDetails = await getWorkflowDetails(id);
+
+    return NextResponse.json({ data: workflowDetails });
+  } catch (e) {
+    logger.error(
+      {
+        err: e,
+        workflowId: id,
+        awsTraceId: request.headers.get("X-Amz-Cf-Id"),
+      },
+      "Error fetching workflow details",
+    );
+    const { status, message, cause } = readError(e as Error, 500);
+
+    return NextResponse.json(
+      {
+        error: message,
+        errorType: cause?.type,
+      },
+      { status },
+    );
+  }
+}

@@ -6,7 +6,7 @@ import { LoginLink } from "src/components/core/LoginButton";
 const mockStoreCurrentPage = jest.fn();
 
 jest.mock("src/utils/userUtils", () => ({
-  storeCurrentPage: () => mockStoreCurrentPage() as unknown,
+  storeCurrentPage: (arg: unknown) => mockStoreCurrentPage(arg) as unknown,
 }));
 
 describe("LoginLink", () => {
@@ -25,5 +25,6 @@ describe("LoginLink", () => {
     await userEvent.click(signInButton);
 
     expect(mockStoreCurrentPage).toHaveBeenCalled();
+    expect(mockStoreCurrentPage).toHaveBeenCalledWith("/");
   });
 });

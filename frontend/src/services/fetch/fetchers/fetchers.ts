@@ -5,15 +5,21 @@ import {
   EndpointConfig,
   fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
+  fetchCompetitionFormsEndpoint,
   fetchFormEndpoint,
+  fetchFormsEndpoint,
   fetchOpportunityEndpoint,
+  fetchWorkflowEndpoint,
+  getApplicationForPrintEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicApplicationsEndpointV1,
   toDynamicAwardRecommendationEndpoint,
+  toDynamicFilesEndpoint,
+  toDynamicGrantorAgenciesEndpoint,
   toDynamicGrantorOpportunityEndpoint,
-  toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
@@ -126,13 +132,22 @@ export const fetchOpportunity = cache(
 
 export const fetchForm = cache(requesterForEndpoint(fetchFormEndpoint));
 
+export const fetchForms = cache(requesterForEndpoint(fetchFormsEndpoint));
+
 export const fetchCompetition = cache(
   requesterForEndpoint(fetchCompetitionEndpoint),
+);
+
+export const fetchCompetitionForms = cache(
+  requesterForEndpoint(fetchCompetitionFormsEndpoint),
 );
 
 export const fetchApplicationWithMethod = (
   type: "POST" | "GET" | "PUT" | "DELETE",
 ) => requesterForEndpoint(toDynamicApplicationsEndpoint(type));
+
+export const fetchApplicationWithMethodV1 = (type: "POST") =>
+  requesterForEndpoint(toDynamicApplicationsEndpointV1(type));
 
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
@@ -165,5 +180,15 @@ export const fetchGrantorOpportunityWithMethod = (
   type: "POST" | "DELETE" | "GET" | "PUT",
 ) => requesterForEndpoint(toDynamicGrantorOpportunityEndpoint(type));
 
-export const fetchGrantorWithMethod = (type: "POST") =>
-  requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+export const fetchGrantorAgenciesWithMethod = (
+  type: "POST" | "GET" | "PUT" | "DELETE",
+) => requesterForEndpoint(toDynamicGrantorAgenciesEndpoint(type));
+
+export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
+  requesterForEndpoint(toDynamicFilesEndpoint(type));
+
+export const getApplicationForPrint = requesterForEndpoint(
+  getApplicationForPrintEndpoint,
+);
+
+export const fetchWorkflow = cache(requesterForEndpoint(fetchWorkflowEndpoint));

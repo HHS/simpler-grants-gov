@@ -2,11 +2,12 @@
 
 from datetime import date
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
+import src.adapters.db as db
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
+from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_XML_TRANSFORM_RULES
 from src.services.xml_generation.constants import Namespace
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
@@ -16,7 +17,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -26,7 +26,7 @@ class TestSubmissionXMLAssembler:
     """Test cases for SubmissionXMLAssembler."""
 
     @pytest.fixture
-    def sample_application(self, enable_factory_create, db_session: db.Session):
+    def sample_application(self, enable_factory_create, db_session: db.Session, create_test_form):
         """Create a sample application with SF424 form for testing."""
         agency = AgencyFactory.create()
 
@@ -50,7 +50,7 @@ class TestSubmissionXMLAssembler:
         )
 
         # Create SF424 form with XML transform config
-        sf424_form = FormFactory.create(
+        sf424_form = create_test_form(
             form_name="Application for Federal Assistance (SF-424)",
             short_form_name="SF424_4_0",
             form_version="4.0",
@@ -113,11 +113,16 @@ class TestSubmissionXMLAssembler:
         assert app_form.form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_mixed_support(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test getting supported forms when some forms are unsupported."""
         # Add an unsupported form to the application
-        unsupported_form = FormFactory.create(
+        unsupported_form = create_test_form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
@@ -141,14 +146,19 @@ class TestSubmissionXMLAssembler:
         assert app_form.form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_none_supported(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test getting supported forms when no forms are supported."""
         # Remove the SF424 form and add only unsupported forms
         sample_application.application_forms = []
         db_session.flush()
 
-        unsupported_form = FormFactory.create(
+        unsupported_form = create_test_form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
@@ -208,7 +218,7 @@ class TestSubmissionXMLAssembler:
         xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
         schema_location = root.get(f"{xsi_ns}schemaLocation")
         assert schema_location is not None
-        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
+        assert "oppTEST-OPP-001-cfda12.345-cidTEST-COMP-001.xsd" in schema_location
         assert "None.xsd" not in schema_location
 
         # Verify footer element
@@ -240,8 +250,27 @@ class TestSubmissionXMLAssembler:
         xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
         schema_location = root.get(f"{xsi_ns}schemaLocation")
         assert schema_location is not None
-        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
+        assert "oppTEST-OPP-001-cfda12.345-cidTEST-COMP-001.xsd" in schema_location
         assert "None.xsd" not in schema_location
+
+    def test_generate_complete_submission_xml_omits_cid_without_competition_id(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that schema location has no competition ID suffix when the competition has none."""
+        sample_application.competition.public_competition_id = None
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
+        schema_location = root.get(f"{xsi_ns}schemaLocation")
+        assert schema_location is not None
+        assert schema_location.endswith("/oppTEST-OPP-001-cfda12.345.xsd")
+        assert "-cid" not in schema_location
 
     def test_generate_complete_submission_xml_contains_header_data(
         self, sample_application, sample_application_submission
@@ -371,14 +400,19 @@ class TestSubmissionXMLAssembler:
         assert "GRANT12345678" in xml_string  # Tracking number
 
     def test_generate_complete_submission_xml_no_supported_forms(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that XML generation raises error when no supported forms."""
         # Remove the SF424 form and add only unsupported forms
         sample_application.application_forms = []
         db_session.flush()
 
-        unsupported_form = FormFactory.create(
+        unsupported_form = create_test_form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
@@ -416,7 +450,7 @@ class TestSubmissionXMLAssembler:
         assert result is None
 
     def test_generate_complete_submission_xml_with_only_unsupported_forms(
-        self, enable_factory_create, db_session
+        self, enable_factory_create, db_session, create_test_form
     ):
         """Test that XML generation returns None when only unsupported forms are present with XML generation enabled."""
         # Create application infrastructure
@@ -439,7 +473,7 @@ class TestSubmissionXMLAssembler:
         )
 
         # Create an UNSUPPORTED form (SF-424A doesn't have XML transform config)
-        unsupported_form = FormFactory.create(
+        unsupported_form = create_test_form(
             form_name="Budget Information - Non-Construction Programs",
             short_form_name="SF424A_1_1",
             form_version="1.1",
@@ -577,11 +611,13 @@ class TestSubmissionXMLAssembler:
 
         assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
 
-        # Should raise error because empty data is invalid
-        with pytest.raises(Exception) as exc_info:
-            assembler._generate_form_xml(empty_form)
+        # An empty response now generates a minimal document (just the root element with
+        # its required attributes); all form elements are optional at the generation layer.
+        form_xml = assembler._generate_form_xml(empty_form)
 
-        assert "XML generation failed" in str(exc_info.value)
+        assert form_xml
+        root = lxml_etree.fromstring(form_xml.encode("utf-8"))
+        assert root is not None
 
     def test_assembler_uses_application_data(
         self, sample_application, sample_application_submission
@@ -610,11 +646,16 @@ class TestSubmissionXMLAssembler:
         assert Namespace.GLOB in root.nsmap.values()
 
     def test_get_supported_forms_filters_non_required_not_included(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=False are filtered out."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = create_test_form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",
@@ -644,11 +685,16 @@ class TestSubmissionXMLAssembler:
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_includes_non_required_when_included(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=True are included."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = create_test_form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",
@@ -696,11 +742,16 @@ class TestSubmissionXMLAssembler:
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_filters_non_required_null_is_included(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=None are filtered out."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = create_test_form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",
@@ -728,3 +779,71 @@ class TestSubmissionXMLAssembler:
         # Should only return SF424_4_0 (required), not the optional form
         assert len(supported_forms) == 1
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
+
+
+class TestSubmissionXMLAssemblerClosingTags:
+    """Empty SF-424A line items keep their closing tag in the full submission XML, the way
+    legacy writes them, even though the assembler parses each form's XML again."""
+
+    @pytest.fixture
+    def sf424a_submission(self, enable_factory_create, db_session: db.Session, create_test_form):
+        opportunity = OpportunityFactory.create(opportunity_number="TEST-OPP-424A")
+        competition = CompetitionFactory.create(opportunity=opportunity, competition_forms=[])
+        application = ApplicationFactory.create(competition=competition)
+        sf424a_form = create_test_form(
+            form_name="Budget Information for Non-Construction Programs (SF-424A)",
+            short_form_name="SF424A",
+            form_version="1.0",
+            json_to_xml_schema=SF424A_XML_TRANSFORM_RULES,
+        )
+        competition_form = CompetitionFormFactory.create(competition=competition, form=sf424a_form)
+        # Section A filled in, Sections B, C and E left empty (only pre-populated totals)
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "activity_line_items": [
+                    {
+                        "activity_title": f"Activity {row}",
+                        "budget_summary": {"federal_new_or_revised_amount": "10"},
+                        "budget_categories": {
+                            "total_direct_charge_amount": "0.00",
+                            "total_amount": "0.00",
+                        },
+                        "non_federal_resources": {"total_amount": "0.00"},
+                    }
+                    for row in (1, 2)
+                ],
+                "total_non_federal_resources": {"total_amount": "0.00"},
+                "confirmation": True,
+            },
+        )
+        return application, ApplicationSubmissionFactory.create(
+            application=application, legacy_tracking_number=87654321
+        )
+
+    @pytest.mark.parametrize("pretty_print", [True, False])
+    def test_empty_line_items_keep_closing_tag(self, sf424a_submission, pretty_print):
+        assembler = SubmissionXMLAssembler(*sf424a_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=pretty_print)
+
+        for line_item in ("CategorySet", "ResourceLineItem", "FundsLineItem"):
+            for row in (1, 2):
+                assert (
+                    f'<SF424A:{line_item} SF424A:activityTitle="Activity {row}">'
+                    f"</SF424A:{line_item}>"
+                ) in xml_string
+            assert f"<SF424A:{line_item} " in xml_string
+            assert 'SF424A:activityTitle="Activity 1"/>' not in xml_string
+
+    def test_closing_tag_config_is_per_form(self, sf424a_submission):
+        assembler = SubmissionXMLAssembler(*sf424a_submission)
+
+        assert assembler._get_empty_elements_with_closing_tag("SF424A") == [
+            "CategorySet",
+            "ResourceLineItem",
+            "FundsLineItem",
+        ]
+        # Forms that don't ask for it keep writing empty elements as before
+        assert assembler._get_empty_elements_with_closing_tag("SF424_4_0") == []

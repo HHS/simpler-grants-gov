@@ -7,19 +7,22 @@ responses is consistent and functioning as intended.
 
 import dataclasses
 
-import grants_shared.logs
 import pytest
-from apiflask import APIBlueprint, APIKeyHeaderAuth
-from grants_shared.api.schemas.extension import Schema, fields
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
-from grants_shared.util.dict_util import flatten_dict
+from apiflask import APIBlueprint, APIFlask, APIKeyHeaderAuth
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 from werkzeug.http import HTTP_STATUS_CODES
 
-import src.app as app_entry
-from src.api.response import ApiResponse, ValidationErrorDetail
+import src.logs
+from src.api.response import ApiResponse, ValidationErrorDetail, restructure_error_response
 from src.api.route_utils import raise_flask_error
-from tests.src.schemas.schema_validation_utils import (
+from src.api.schemas.extension import Schema, fields
+from src.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    ErrorResponseSchema,
+    WarningMixinSchema,
+)
+from src.util.dict_util import flatten_dict
+from tests.lib.schema_validation_utils import (
     FieldTestSchema,
     get_expected_validation_errors,
     get_invalid_field_test_schema_req,
@@ -90,21 +93,20 @@ def api_method(test_id, req):
 
 @pytest.fixture
 def simple_app(monkeypatch):
-    def stub(app):
-        pass
+    # Create a minimal app that restructures error responses
+    app = APIFlask(__name__, title="test_app")
 
-    # We want all the configurational setup for the app, but
-    # don't want the DB clients or blueprints to keep setup simpler
-    monkeypatch.setattr(app_entry, "register_db_client", stub)
-    monkeypatch.setattr(app_entry, "register_blueprints", stub)
-    monkeypatch.setattr(app_entry, "setup_logging", stub)
+    app.config["HTTP_ERROR_SCHEMA"] = ErrorResponseSchema
+    app.config["VALIDATION_ERROR_SCHEMA"] = ErrorResponseSchema
 
-    app = app_entry.create_app()
+    @app.error_processor
+    def error_processor(error):
+        return restructure_error_response(error)
 
     # To avoid re-initializing logging everytime we
     # setup the app, we disabled it above and do it here
     # in case you want it while running your tests
-    with grants_shared.logs.init(__package__):
+    with src.logs.init(__package__):
         yield app
 
 

@@ -1,9 +1,6 @@
 from enum import StrEnum
 from typing import Any
 
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
-from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from marshmallow import pre_dump
 
 from src.api.opportunities_v1.opportunity_schemas import (
@@ -11,6 +8,9 @@ from src.api.opportunities_v1.opportunity_schemas import (
     SavedOpportunityResponseV1Schema,
 )
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicationStatus,
     ExternalUserType,
@@ -130,6 +130,20 @@ class UserLoginSchema(Schema):
     )
 
 
+class UserLoginGovLogoutCallbackSchema(Schema):
+    # This is defining the inputs we receive on the callback from login.gov's
+    # logout endpoint and must match:
+    # https://developers.login.gov/oidc/logout/
+    state = fields.String(
+        metadata={
+            "description": "The state value originally provided by us when calling login.gov"
+        },
+        # We don't use the state, but it can be passed, so allow it to be missing/null.
+        required=False,
+        allow_none=True,
+    )
+
+
 class UserTokenRefreshResponseSchema(AbstractResponseSchema):
     # No data returned
     data = fields.MixinField(metadata={"example": None})
@@ -233,7 +247,7 @@ class UserSavedSearchesRequestSchema(Schema):
     )
 
 
-class UserSavedSearchesResponseSchema(AbstractResponseSchema):
+class UserSavedSearchesResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     data = fields.List(
         fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}
     )
@@ -444,12 +458,6 @@ class UserApiKeySchema(Schema):
             "example": "Production API Key",
         }
     )
-    key_id = fields.String(
-        metadata={
-            "description": "The actual API key identifier to use for authentication",
-            "example": "k8w2Xd9Zq1mN3pR7sT5vY4uI",
-        }
-    )
     is_active = fields.Boolean(
         metadata={"description": "Whether the API key is currently active", "example": True}
     )
@@ -465,8 +473,20 @@ class UserApiKeySchema(Schema):
     )
 
 
+class CreatedUserApiKeySchema(UserApiKeySchema):
+    # Only returned when a key is created, the raw key can't be read back after that
+    key_id = fields.String(
+        metadata={
+            "description": "The actual API key to use for authentication. This is only returned once, when the key is created",
+            "example": "k8w2Xd9Zq1mN3pR7sT5vY4uI",
+        }
+    )
+
+
 class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(UserApiKeySchema, metadata={"description": "The newly created API key"})
+    data = fields.Nested(
+        CreatedUserApiKeySchema, metadata={"description": "The newly created API key"}
+    )
 
 
 class UserApiKeyDeleteResponseSchema(AbstractResponseSchema):
@@ -501,7 +521,22 @@ class UserApiKeyListResponseSchema(AbstractResponseSchema):
 
 
 class UserUpdateProfileRequestSchema(UserProfile):
-    pass
+    first_name = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={
+            "description": "The first name of the user",
+            "example": "John",
+        },
+    )
+    last_name = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={
+            "description": "The last name of the user",
+            "example": "Smith",
+        },
+    )
 
 
 class UserUpdateProfileResponseSchema(AbstractResponseSchema):
@@ -523,7 +558,7 @@ class RoleSchema(Schema):
         resource_role: (
             ApplicationUserRole | OrganizationUserRole | InternalUserRole | AgencyUserRole
         ),
-        **kwargs: Any
+        **kwargs: Any,
     ) -> dict:
         role = resource_role.role
         return {
@@ -871,3 +906,29 @@ class SetUserSavedOpportunityNotificationRequestSchema(Schema):
 
 class SetUserSavedOpportunityNotificationResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserSetAllOpportunitiesNotificationPreferenceRequestSchema(Schema):
+    is_enabled = fields.Boolean(
+        required=True,
+        metadata={
+            "description": "Value to indicate whether the specified notification type is enabled"
+        },
+    )
+
+
+class UserSetAllOpportunitiesNotificationPreferenceResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class AllOpportunitiesNotificationPreferenceSchema(Schema):
+    is_enabled = fields.Boolean(
+        metadata={
+            "description": "Whether the user receives the daily email of all new opportunities",
+            "example": False,
+        }
+    )
+
+
+class UserAllOpportunitiesNotificationResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(AllOpportunitiesNotificationPreferenceSchema)

@@ -8,7 +8,6 @@ type MinimalResponse = {
   json: () => Promise<unknown>;
 };
 
-const getSessionMock = jest.fn<Promise<{ token: string } | null>, []>();
 const addOrganizationToApplicationMock = jest.fn<
   Promise<{ message: string; data: { application_id: string } }>,
   [{ applicationId: string; organizationId: string }]
@@ -38,18 +37,11 @@ type NextResponseModuleMock = {
   };
 };
 
-jest.mock(
-  "next/server",
-  (): NextResponseModuleMock => ({
-    NextResponse: {
-      json: (body: unknown, init?: JsonResponseInit) =>
-        nextResponseJsonMock(body, init),
-    },
-  }),
-);
-
-jest.mock("src/services/auth/session", () => ({
-  getSession: (): Promise<{ token: string } | null> => getSessionMock(),
+jest.mock("next/server", (): NextResponseModuleMock => ({
+  NextResponse: {
+    json: (body: unknown, init?: JsonResponseInit) =>
+      nextResponseJsonMock(body, init),
+  },
 }));
 
 jest.mock("src/services/fetch/fetchers/addOrganizationToApplication", () => ({
@@ -89,20 +81,7 @@ describe("transferOwnershipHandler", () => {
     );
   });
 
-  it("returns 401 when session is missing", async () => {
-    getSessionMock.mockResolvedValueOnce(null);
-
-    const response = (await transferOwnershipHandler(
-      createFakeRequest({ organization_id: "org-123" }),
-      { params: Promise.resolve({ applicationId: "app-123" }) },
-    )) as unknown as MinimalResponse;
-
-    expect(response.status).toBe(401);
-  });
-
   it("returns 400 when organization_id is missing", async () => {
-    getSessionMock.mockResolvedValueOnce({ token: "fakeToken" });
-
     const response = (await transferOwnershipHandler(createFakeRequest({}), {
       params: Promise.resolve({ applicationId: "app-123" }),
     })) as unknown as MinimalResponse;
@@ -111,8 +90,6 @@ describe("transferOwnershipHandler", () => {
   });
 
   it("returns 200 and calls addOrganizationToApplication on success", async () => {
-    getSessionMock.mockResolvedValueOnce({ token: "fakeToken" });
-
     addOrganizationToApplicationMock.mockResolvedValueOnce({
       message: "Success",
       data: { application_id: "app-123" },
@@ -140,8 +117,6 @@ describe("transferOwnershipHandler", () => {
   });
 
   it("returns 500 when addOrganizationToApplication throws", async () => {
-    getSessionMock.mockResolvedValueOnce({ token: "fakeToken" });
-
     addOrganizationToApplicationMock.mockRejectedValueOnce(new Error("Boom"));
 
     const response = (await transferOwnershipHandler(

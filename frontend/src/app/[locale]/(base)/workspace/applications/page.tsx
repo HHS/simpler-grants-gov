@@ -1,5 +1,5 @@
 import { UnauthorizedError } from "src/errors";
-import { fetchApplications } from "src/services/fetch/fetchers/applicationsFetcher";
+import { fetchApplications } from "src/services/fetch/fetchers/userApplicationsFetcher";
 import {
   ApplicationDetail,
   ApplicationStatus,

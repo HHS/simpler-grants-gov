@@ -1,7 +1,8 @@
-import grants_shared.adapters.db as db
-from grants_shared.adapters.db import flask_db
+import click
 
+import src.adapters.db as db
 import src.adapters.search as search
+from src.adapters.db import flask_db
 from src.adapters.search import flask_opensearch
 from src.constants.lookup_constants import JobType
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex
@@ -13,14 +14,20 @@ from src.task.ecs_background_task import ecs_background_task
 @load_search_data_blueprint.cli.command(
     "load-opportunity-data", help="Load opportunity data from our database to the search index"
 )
+@click.option(
+    "--full-refresh/--no-full-refresh",
+    default=True,
+    help="Rebuild the entire search index (default). Use --no-full-refresh for incremental sync.",
+)
 @flask_db.with_db_session()
 @flask_opensearch.with_search_client()
 @ecs_background_task(task_name=JobType.LOAD_OPPORTUNITY_DATA_OPENSEARCH)
 def load_opportunity_data(
     search_client: search.SearchClient,
     db_session: db.Session,
+    full_refresh: bool = True,
 ) -> None:
-    LoadOpportunitiesToIndex(db_session, search_client).run()
+    LoadOpportunitiesToIndex(db_session, search_client, full_refresh=full_refresh).run()
 
 
 @load_search_data_blueprint.cli.command(

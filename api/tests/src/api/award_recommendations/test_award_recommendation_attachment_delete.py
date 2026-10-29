@@ -46,8 +46,6 @@ def award_recommendation(opportunity):
         opportunity=opportunity,
         award_recommendation_status=AwardRecommendationStatus.DRAFT,
         is_deleted=False,
-        review_workflow=None,
-        review_workflow_id=None,
     )
 
 
@@ -149,8 +147,6 @@ class TestDeleteAwardRecommendationAttachment404:
             opportunity=opportunity,
             award_recommendation_status=AwardRecommendationStatus.DRAFT,
             is_deleted=False,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         _, _, token = create_user_in_agency_with_jwt(
@@ -192,8 +188,6 @@ class TestDeleteAwardRecommendationAttachment404:
             opportunity=opportunity,
             award_recommendation_status=AwardRecommendationStatus.DRAFT,
             is_deleted=True,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         attachment = AwardRecommendationAttachmentFactory.create(
             award_recommendation=deleted_award_recommendation,

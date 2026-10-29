@@ -31,6 +31,14 @@ variable "enable_https" {
   default     = false
 }
 
+variable "enable_cdn_alias" {
+  type        = bool
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  default     = true
+}
+
 variable "enable_identity_provider" {
   type        = bool
   description = "Enables identity provider"
@@ -46,6 +54,12 @@ variable "enable_notifications" {
 variable "environment" {
   description = "name of the application environment (e.g. dev, staging, prod)"
   type        = string
+}
+
+variable "app_environment_name" {
+  description = "environment name the app sees in its ENVIRONMENT variable and New Relic labels; defaults to var.environment"
+  type        = string
+  default     = null
 }
 
 variable "extra_identity_provider_callback_urls" {

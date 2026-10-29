@@ -5,6 +5,7 @@ import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import {
@@ -65,8 +66,8 @@ export default async function SavedOpportunities({
   if (session?.token) {
     try {
       organizations = await getUserOrganizations(session.user_id);
-    } catch (error: unknown) {
-      console.error("Unable to fetch user organizations", error);
+    } catch (e: unknown) {
+      logger.error({ err: e }, "Unable to fetch user organizations");
       hasOrganizationsError = true;
     }
   }

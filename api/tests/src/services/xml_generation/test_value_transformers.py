@@ -221,6 +221,47 @@ class TestMapValues:
         assert "not found in mappings" in str(exc_info.value)
         assert "Prime" in str(exc_info.value)
 
+    def test_map_values_passthrough_unknown(self):
+        """Test that unmapped values are returned as-is when passthrough_unknown=True."""
+        mappings = {
+            "a. ...the state under...": "a. ...the State under...",
+            "b. ...the state for review.": "b. ...the State for review.",
+        }
+        # Values in mappings are normalized
+        assert (
+            transform_map_values("a. ...the state under...", mappings, passthrough_unknown=True)
+            == "a. ...the State under..."
+        )
+        assert (
+            transform_map_values("b. ...the state for review.", mappings, passthrough_unknown=True)
+            == "b. ...the State for review."
+        )
+        # Values not in mappings are passed through unchanged
+        assert (
+            transform_map_values(
+                "c. Program is not covered by E.O. 12372.", mappings, passthrough_unknown=True
+            )
+            == "c. Program is not covered by E.O. 12372."
+        )
+
+    def test_map_values_passthrough_unknown_false_raises(self):
+        """Test that passthrough_unknown=False (default) still raises on unmapped values."""
+        mappings = {"old": "new"}
+        with pytest.raises(ValueTransformationError):
+            transform_map_values("unknown", mappings, passthrough_unknown=False)
+
+    def test_map_values_passthrough_via_apply_value_transformation(self):
+        """Test passthrough_unknown through the apply_value_transformation interface."""
+        config = {
+            "type": "map_values",
+            "params": {
+                "mappings": {"old_value": "new_value"},
+                "passthrough_unknown": True,
+            },
+        }
+        assert apply_value_transformation("old_value", config) == "new_value"
+        assert apply_value_transformation("unmapped_value", config) == "unmapped_value"
+
     def test_map_values_none_handling(self):
         """Test handling of None values."""
         mappings = {"None": "No Value", "Something": "Has Value"}

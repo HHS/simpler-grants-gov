@@ -1,13 +1,16 @@
+import json
+import logging
 import uuid
 from datetime import timedelta
 
 import apiflask.exceptions
+import boto3
 import pytest
-from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, Privilege
 from src.form_schema.rule_processing.json_rule_field_population import UNKNOWN_VALUE
 from src.services.applications.submit_application import submit_application
+from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
     ApplicationFactory,
@@ -16,7 +19,6 @@ from tests.src.db.models.factories import (
     ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     LinkExternalUserFactory,
     RoleFactory,
     UserFactory,
@@ -33,14 +35,24 @@ SIMPLE_JSON_SCHEMA = {
 }
 
 
+@pytest.fixture
+def submission_sqs_queue(monkeypatch, mock_sqs):
+    sqs = boto3.client("sqs", region_name="us-east-1")
+    queue = sqs.create_queue(QueueName="test-submission-queue")
+    monkeypatch.setenv("WORKFLOW_QUEUE_URL", queue["QueueUrl"])
+    return queue["QueueUrl"]
+
+
 # Tests for the main submit_application function
-def test_submit_application_success(enable_factory_create, db_session):
+def test_submit_application_success(
+    enable_factory_create, db_session, create_test_form, submission_sqs_queue
+):
     """Test successful submission of an application in IN_PROGRESS state."""
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -77,12 +89,14 @@ def test_submit_application_success(enable_factory_create, db_session):
     assert application.submitted_by == user.user_id
 
 
-def test_submit_application_with_missing_required_form(enable_factory_create, db_session):
+def test_submit_application_with_missing_required_form(
+    enable_factory_create, db_session, create_test_form
+):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -107,9 +121,11 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
     )
 
 
-def test_submit_application_with_invalid_required_form(enable_factory_create, db_session, user):
+def test_submit_application_with_invalid_required_form(
+    enable_factory_create, db_session, user, create_test_form
+):
     competition = CompetitionFactory.create(competition_forms=[])
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -139,12 +155,12 @@ def test_submit_application_with_invalid_required_form(enable_factory_create, db
     )
 
 
-def test_submit_application_with_invalid_field(enable_factory_create, db_session):
+def test_submit_application_with_invalid_field(enable_factory_create, db_session, create_test_form):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -184,7 +200,9 @@ def test_submit_application_not_found(db_session, enable_factory_create):
     assert f"Application with ID {non_existent_id} not found" in excinfo.value.message
 
 
-def test_submit_application_organization_required_but_missing(enable_factory_create, db_session):
+def test_submit_application_organization_required_but_missing(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that submitting an application without an organization when required returns 422."""
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
@@ -193,7 +211,7 @@ def test_submit_application_organization_required_but_missing(enable_factory_cre
         competition_forms=[],
         open_to_applicants={CompetitionOpenToApplicant.ORGANIZATION},  # Only org allowed
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     # Create application WITHOUT organization
@@ -231,13 +249,15 @@ def test_submit_application_organization_required_but_missing(enable_factory_cre
     )
 
 
-def test_submit_application_signature_post_processing(enable_factory_create, db_session):
+def test_submit_application_signature_post_processing(
+    enable_factory_create, db_session, create_test_form, submission_sqs_queue
+):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1),
         competition_forms=[],
     )
-    form = FormFactory.create(
+    form = create_test_form(
         form_json_schema={
             "type": "object",
             "properties": {
@@ -302,3 +322,96 @@ def test_submit_application_signature_post_processing(enable_factory_create, db_
     assert submitted_application2.application_forms[0].application_response == {
         "signature": UNKNOWN_VALUE
     }
+
+
+def test_submit_application_puts_application_message_on_queue(
+    enable_factory_create, db_session, create_test_form, submission_sqs_queue, monkeypatch, caplog
+):
+    caplog.set_level(logging.INFO)
+    today = get_now_us_eastern_date()
+    competition = CompetitionFactory.create(
+        closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
+    )
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
+    )
+    user = UserFactory.create()
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+    sqs = boto3.client("sqs", region_name="us-east-1")
+
+    with db_session.begin():
+        updated_application = submit_application(db_session, application.application_id, user)
+
+    messages = sqs.receive_message(
+        QueueUrl=submission_sqs_queue, MaxNumberOfMessages=10, VisibilityTimeout=0
+    )
+    assert len(messages["Messages"]) == 1
+    body = json.loads(messages["Messages"][0]["Body"])
+    assert body["application_id"] == str(updated_application.application_id)
+    assert body["submitted_by_user_id"] == str(user.user_id)
+    log = next(
+        r
+        for r in caplog.records
+        if r.message == "Successfully sent application submission message to queue"
+    )
+    assert log.application_id == updated_application.application_id
+    assert log.submitted_by_user_id == user.user_id
+
+
+def test_exceptions_raised_by_sending_message_to_queue_are_logged_but_not_raised(
+    enable_factory_create, db_session, create_test_form, submission_sqs_queue, monkeypatch, caplog
+):
+    caplog.set_level(logging.INFO)
+    today = get_now_us_eastern_date()
+    competition = CompetitionFactory.create(
+        closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
+    )
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=competition, form=form)
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
+    )
+    user = UserFactory.create()
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+    monkeypatch.setenv("WORKFLOW_QUEUE_URL", "QueueDoesNotExist.com")
+    sqs = boto3.client("sqs", region_name="us-east-1")
+
+    with db_session.begin():
+        updated_application = submit_application(db_session, application.application_id, user)
+
+    messages = sqs.receive_message(
+        QueueUrl=submission_sqs_queue, MaxNumberOfMessages=10, VisibilityTimeout=0
+    )
+    assert messages.get("Messages", None) is None
+    assert updated_application.application_status == ApplicationStatus.SUBMITTED
+    log = next(
+        r
+        for r in caplog.records
+        if r.message
+        == "Failed to queue application submission message - the scheduled submission task will process this application"
+    )
+    assert log.application_id == updated_application.application_id
+    with pytest.raises(StopIteration):
+        next(
+            r
+            for r in caplog.records
+            if r.message == "Successfully sent application submission message to queue"
+        )

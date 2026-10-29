@@ -36,6 +36,8 @@ resource "aws_efs_file_system" "clamav" {
   # checkov:skip=CKV2_AWS_18:DB is fully regenerable by the freshclam Lambda; backups add cost for no benefit
   encrypted = true
 
+  throughput_mode = "elastic"
+
   lifecycle_policy {
     transition_to_ia = "AFTER_30_DAYS"
   }

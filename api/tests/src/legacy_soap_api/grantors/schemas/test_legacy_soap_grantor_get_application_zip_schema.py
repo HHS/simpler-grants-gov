@@ -1,11 +1,12 @@
 import io
-import uuid
-from unittest.mock import patch
 
 import pytest
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
+from src.legacy_soap_api.grantors.schemas.grants_gov_tracking_number_schema import (
+    INVALID_TRACKING_NUMBER_ERR,
+)
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
 from src.legacy_soap_api.legacy_soap_api_client import SimplerGrantorsS2SClient
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
@@ -20,7 +21,6 @@ from tests.src.db.models.factories import (
 )
 
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
-CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
 BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
 
 
@@ -57,24 +57,26 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
             operation_name="GetApplicationZipRequest",
             auth=auth,
         )
-        with patch.object(uuid, "uuid4", return_value=CID_UUID):
-            client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_application_zip_request().to_soap_envelope_dict(
-                operation_name="GetApplicationZipResponse"
-            )
-            result.pop("_mtom_file_stream")
-            expected = {
-                "Envelope": {
-                    "Body": {
-                        "ns2:GetApplicationZipResponse": {
-                            "ns2:FileDataHandler": {
-                                "xop:Include": {"@href": f"cid:{CID_UUID}-0001@apply.grants.gov"}
+        client = SimplerGrantorsS2SClient(soap_request, db_session)
+        result = client.get_application_zip_request().to_soap_envelope_dict(
+            operation_name="GetApplicationZipResponse"
+        )
+        result.pop("_mtom_file_stream")
+        expected = {
+            "Envelope": {
+                "Body": {
+                    "ns2:GetApplicationZipResponse": {
+                        "ns2:FileDataHandler": {
+                            "xop:Include": {
+                                "@href": f"cid:{submission.application_submission_id}-1@apply.grants.gov"
                             }
                         }
                     }
                 }
-            }
-            assert result == expected
+            },
+            "_content_id": f"{submission.application_submission_id}-1@apply.grants.gov",
+        }
+        assert result == expected
 
     def test_get_soap_request_dict_turns_request_xml_to_dict(self, db_session):
         request_xml_bytes = (
@@ -126,7 +128,7 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
         result = grantors_schemas.GetApplicationZipRequest(**soap_request_dict)
         assert result.grants_gov_tracking_number == GRANTS_GOV_TRACKING_NUMBER
 
-    def test_get_pydantic_error_if_request_xml_does_not_have_tracking_number(self, db_session):
+    def test_get_error_if_request_xml_does_not_have_tracking_number(self, db_session):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -149,4 +151,49 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
         soap_request_dict = client.get_soap_request_dict()
         with pytest.raises(SOAPFaultException) as exc_info:
             grantors_schemas.GetApplicationZipRequest(**soap_request_dict)
-        assert exc_info.value.message == "No grants_gov_tracking_number provided."
+        assert exc_info.value.message == INVALID_TRACKING_NUMBER_ERR
+        assert (
+            exc_info.value.fault.faultstring
+            == "Failed to validate request. cvc-pattern-valid: Value is not facet-valid with respect to pattern 'GRANT[0-9]{8}' for type 'GrantsGovTrackingNumberType'."
+        )
+
+    def test_get_application_zip_request_schema_handles_a_dict_for_the_grants_gov_tracking_number(
+        self,
+        db_session,
+    ):
+        request_xml_bytes = (
+            "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            "Content-ID: <0.urn:uuid:9467EB4D41266EA2C91784229922208@apache.org>\r\n\r\n"
+            "<?xml version='1.0' encoding='UTF-8'?>"
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">'
+            '<soapenv:Body><agen:GetApplicationZipRequest xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0">'
+            '<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT80000038</gran:GrantsGovTrackingNumber>'
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>\r\n"
+            "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207--"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+        )
+        client = SimplerGrantorsS2SClient(soap_request, db_session)
+        soap_request_dict = client.get_soap_request_dict()
+        expected = {
+            "@xmlns:agen": "http://apply.grants.gov/services/AgencyWebServices-V2.0",
+            "GrantsGovTrackingNumber": {
+                "@xmlns:gran": "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
+                "#text": "GRANT80000038",
+            },
+        }
+        assert soap_request_dict == expected
+        get_application_zip_request_schema = grantors_schemas.GetApplicationZipRequest(
+            **soap_request_dict
+        )
+        assert get_application_zip_request_schema.grants_gov_tracking_number == "GRANT80000038"

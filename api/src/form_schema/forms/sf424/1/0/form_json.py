@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -133,6 +134,8 @@ FORM_JSON_SCHEMA = {
             "type": "string",
             "title": "Other Explanation",
             "description": "Please specify the type of revision. This field is required if E. Other is checked.",
+            # Grants.gov XSD caps RevisionOtherSpecify at 21 characters
+            "maxLength": 21,
         },
         "date_received": {
             "type": "string",
@@ -168,21 +171,21 @@ FORM_JSON_SCHEMA = {
             "maxLength": 25,
         },
         "state_receive_date": {
-            # A user will never fill this in, it's just on the form for agencies to use
+            # The instructions say to leave this blank for the state, but the legacy
+            # XSD allows a value, so the user is still able to fill it in.
             "type": "string",
             "title": "Date Received By State",
             "description": "Leave blank, to be filled out by state.",
             "format": "date",
-            "readOnly": True,
         },
         "state_application_id": {
-            # A user will never fill this in, it's just on the form for agencies to use
+            # Same as state_receive_date: meant for the state, but editable to match
+            # the legacy XSD.
             "type": "string",
             "title": "State Application Identifier",
             "description": "Leave blank, to be filled out by state.",
             "minLength": 0,
             "maxLength": 30,
-            "readOnly": True,
         },
         "organization_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
@@ -218,7 +221,9 @@ FORM_JSON_SCHEMA = {
             "title": "Division Name",
             "description": "Enter the name of primary organizational division, office, or major subdivision which will undertake the assistance activity.",
             "minLength": 1,
-            "maxLength": 100,
+            # Based on DivisionNameDataType (maxLength 30)
+            # https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd
+            "maxLength": 30,
         },
         "contact_person": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
@@ -489,6 +494,8 @@ FORM_JSON_SCHEMA = {
             "format": "email",
             "title": "AOR email",
             "description": "Enter a valid email Address.",
+            "minLength": 1,
+            "maxLength": 60,
         },
         "aor_signature": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
@@ -546,13 +553,13 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "name": "date_received_by_state",
         "label": "6. Date Received by State",
-        "children": [{"type": "null", "definition": "/properties/state_receive_date"}],
+        "children": [{"type": "field", "definition": "/properties/state_receive_date"}],
     },
     {
         "type": "section",
         "name": "state_application_identifier",
         "label": "7. State Application Identifier",
-        "children": [{"type": "null", "definition": "/properties/state_application_id"}],
+        "children": [{"type": "field", "definition": "/properties/state_application_id"}],
     },
     {
         "type": "section",
@@ -561,7 +568,7 @@ FORM_UI_SCHEMA = [
         "children": [
             {"type": "field", "definition": "/properties/organization_name"},
             {"type": "field", "definition": "/properties/employer_taxpayer_identification_number"},
-            {"type": "field", "definition": "/properties/sam_uei"},
+            {"type": "null", "definition": "/properties/sam_uei"},
             {"type": "field", "definition": "/properties/applicant/properties/street1"},
             {"type": "field", "definition": "/properties/applicant/properties/street2"},
             {"type": "field", "definition": "/properties/applicant/properties/city"},
@@ -616,15 +623,15 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "name": "federal_agency",
         "label": "10. Name of Federal Agency",
-        "children": [{"type": "field", "definition": "/properties/agency_name"}],
+        "children": [{"type": "null", "definition": "/properties/agency_name"}],
     },
     {
         "type": "section",
         "name": "assistance_listing",
         "label": "11. Assistance Listing Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/assistance_listing_number"},
-            {"type": "field", "definition": "/properties/assistance_listing_program_title"},
+            {"type": "null", "definition": "/properties/assistance_listing_number"},
+            {"type": "null", "definition": "/properties/assistance_listing_program_title"},
         ],
     },
     {
@@ -632,8 +639,8 @@ FORM_UI_SCHEMA = [
         "name": "funding_opportunity",
         "label": "12. Funding Opportunity Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/funding_opportunity_number"},
-            {"type": "field", "definition": "/properties/funding_opportunity_title"},
+            {"type": "null", "definition": "/properties/funding_opportunity_number"},
+            {"type": "null", "definition": "/properties/funding_opportunity_title"},
         ],
     },
     {
@@ -641,8 +648,8 @@ FORM_UI_SCHEMA = [
         "name": "competition_identification",
         "label": "13. Competition Identification Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/competition_identification_number"},
-            {"type": "field", "definition": "/properties/competition_identification_title"},
+            {"type": "null", "definition": "/properties/competition_identification_number"},
+            {"type": "null", "definition": "/properties/competition_identification_title"},
         ],
     },
     {
@@ -863,12 +870,20 @@ FORM_XML_TRANSFORM_RULES = {
     # Core application information - direct field mappings
     "submission_type": {"xml_transform": {"target": "SubmissionType"}},
     "application_type": {"xml_transform": {"target": "ApplicationType"}},
+    "revision_type": {"xml_transform": {"target": "RevisionType"}},
+    "revision_other_specify": {"xml_transform": {"target": "RevisionOtherSpecify"}},
     "date_received": {
         "xml_transform": {
             "target": "DateReceived",
             "null_handling": "include_null",
         }
     },
+    "applicant_id": {"xml_transform": {"target": "ApplicantID"}},
+    "federal_entity_identifier": {"xml_transform": {"target": "FederalEntityIdentifier"}},
+    "federal_award_identifier": {"xml_transform": {"target": "FederalAwardIdentifier"}},
+    # Optional; only written to the XML when the user fills them in.
+    "state_receive_date": {"xml_transform": {"target": "StateReceiveDate"}},
+    "state_application_id": {"xml_transform": {"target": "StateApplicationID"}},
     # Applicant information - direct field mappings
     "organization_name": {"xml_transform": {"target": "OrganizationName"}},
     "employer_taxpayer_identification_number": {
@@ -888,25 +903,34 @@ FORM_XML_TRANSFORM_RULES = {
         "zip_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
         "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
     },
+    "department_name": {"xml_transform": {"target": "DepartmentName"}},
+    "division_name": {"xml_transform": {"target": "DivisionName"}},
     # Contact person - nested structure with GlobalLibrary namespace for names
+    # Order must match HumanNameDataType: PrefixName, FirstName, MiddleName, LastName, SuffixName
     "contact_person": {
         "xml_transform": {"target": "ContactPerson", "type": "nested_object"},
+        "prefix": {"xml_transform": {"target": "PrefixName", "namespace": "globLib"}},
         "first_name": {
             "xml_transform": {
                 "target": "FirstName",
                 "namespace": "globLib",
             }
         },
+        "middle_name": {"xml_transform": {"target": "MiddleName", "namespace": "globLib"}},
         "last_name": {
             "xml_transform": {
                 "target": "LastName",
                 "namespace": "globLib",
             }
         },
+        "suffix": {"xml_transform": {"target": "SuffixName", "namespace": "globLib"}},
     },
+    # XSD element for the contact person's title is just "Title"
+    "contact_person_title": {"xml_transform": {"target": "Title"}},
+    "organization_affiliation": {"xml_transform": {"target": "OrganizationAffiliation"}},
     # Contact information - direct field mappings
     "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
-    "fax_number": {"xml_transform": {"target": "Fax"}},
+    "fax": {"xml_transform": {"target": "Fax"}},
     "email": {"xml_transform": {"target": "Email"}},
     # One-to-many mapping - applicant type codes (must come before agency_name per XSD)
     "applicant_type_code_mapping": {
@@ -918,6 +942,18 @@ FORM_XML_TRANSFORM_RULES = {
                 "source_field": "applicant_type_code",
                 "target_pattern": "ApplicantTypeCode{index}",
                 "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+                # Normalize legacy casing: option H was stored with lowercase "state"
+                # but the XSD requires capital "State".
+                # passthrough_unknown=True leaves all other option codes unchanged.
+                "item_value_transform": {
+                    "type": "map_values",
+                    "params": {
+                        "mappings": {
+                            "H: Public/state Controlled Institution of Higher Education": "H: Public/State Controlled Institution of Higher Education",
+                        },
+                        "passthrough_unknown": True,
+                    },
+                },
             },
         }
     },
@@ -934,13 +970,20 @@ FORM_XML_TRANSFORM_RULES = {
     "competition_identification_title": {
         "xml_transform": {"target": "CompetitionIdentificationTitle"}
     },
+    # Attachment placeholders below map a field to itself only to reserve its XSD
+    # sequence position; the attachment transformer emits the actual element.
+    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
     # Project information - direct field mappings
     "project_title": {"xml_transform": {"target": "ProjectTitle"}},
+    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
     "congressional_district_applicant": {
         "xml_transform": {"target": "CongressionalDistrictApplicant"}
     },
     "congressional_district_program_project": {
         "xml_transform": {"target": "CongressionalDistrictProgramProject"}
+    },
+    "additional_congressional_districts": {
+        "xml_transform": {"target": "additional_congressional_districts"}
     },
     "project_start_date": {"xml_transform": {"target": "ProjectStartDate"}},
     "project_end_date": {"xml_transform": {"target": "ProjectEndDate"}},
@@ -993,6 +1036,19 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "StateReview",
             "null_handling": "default_value",
             "default_value": NO_VALUE,  # Use constant from value_transformers
+            # Normalize legacy casing: form enum and stored values use lowercase "state",
+            # but the XSD requires capital "State" in options a and b.
+            # passthrough_unknown=True ensures option c (and any future values) pass through unchanged.
+            "value_transform": {
+                "type": "map_values",
+                "params": {
+                    "mappings": {
+                        "a. This application was made available to the state under the Executive Order 12372 Process for review on": "a. This application was made available to the State under the Executive Order 12372 Process for review on",
+                        "b. Program is subject to E.O. 12372 but has not been selected by the state for review.": "b. Program is subject to E.O. 12372 but has not been selected by the State for review.",
+                    },
+                    "passthrough_unknown": True,
+                },
+            },
         }
     },
     "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
@@ -1002,13 +1058,7 @@ FORM_XML_TRANSFORM_RULES = {
             "value_transform": {"type": "boolean_to_yes_no"},
         }
     },
-    # Attachment fields - pass through as-is for attachment transformer
     "debt_explanation": {"xml_transform": {"target": "debt_explanation"}},
-    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
-    "additional_congressional_districts": {
-        "xml_transform": {"target": "additional_congressional_districts"}
-    },
-    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
     "certification_agree": {
         "xml_transform": {
             "target": "CertificationAgree",
@@ -1016,24 +1066,14 @@ FORM_XML_TRANSFORM_RULES = {
         }
     },
     # Authorized representative - nested structure with GlobalLibrary namespace for names
+    # Order must match HumanNameDataType: PrefixName, FirstName, MiddleName, LastName, SuffixName
     "authorized_representative": {
         "xml_transform": {"target": "AuthorizedRepresentative", "type": "nested_object"},
-        "first_name": {
-            "xml_transform": {
-                "target": "FirstName",
-                "namespace": "globLib",
-                "null_handling": "default_value",
-                "default_value": "John",
-            }
-        },
-        "last_name": {
-            "xml_transform": {
-                "target": "LastName",
-                "namespace": "globLib",
-                "null_handling": "default_value",
-                "default_value": "Doe",
-            }
-        },
+        "prefix": {"xml_transform": {"target": "PrefixName", "namespace": "globLib"}},
+        "first_name": {"xml_transform": {"target": "FirstName", "namespace": "globLib"}},
+        "middle_name": {"xml_transform": {"target": "MiddleName", "namespace": "globLib"}},
+        "last_name": {"xml_transform": {"target": "LastName", "namespace": "globLib"}},
+        "suffix": {"xml_transform": {"target": "SuffixName", "namespace": "globLib"}},
     },
     "authorized_representative_title": {
         "xml_transform": {"target": "AuthorizedRepresentativeTitle"}
@@ -1044,6 +1084,7 @@ FORM_XML_TRANSFORM_RULES = {
     "authorized_representative_email": {
         "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
     },
+    "authorized_representative_fax": {"xml_transform": {"target": "AuthorizedRepresentativeFax"}},
     "aor_signature": {"xml_transform": {"target": "AORSignature"}},
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
 }
@@ -1058,6 +1099,7 @@ SF424_v4_0 = Form(
     form_version="4.0",
     agency_code="SGG",
     omb_number="4040-0004",
+    expiration_date=date(2029, 3, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

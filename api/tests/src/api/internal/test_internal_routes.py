@@ -1,12 +1,21 @@
 import uuid
+from unittest.mock import patch
 
-from sqlalchemy import select
+import pytest
+from sqlalchemy import func, select
 
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import Privilege, RoleType
-from src.db.models.user_models import InternalUserRole, UserApiKey
+from src.auth.api_key_config import ApiKeyConfig
+from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
+from src.auth.auth_handler import AuthHandler
+from src.constants.lookup_constants import Privilege, RoleType, UserType
+from src.constants.static_role_values import INTERNAL_S3_SCANNER_ROLE_ID
+from src.db.models.user_models import InternalUserRole, User, UserApiKey
+from src.services.internal.setup_file_scan_scanner_user import _generate_unique_key_id
+from src.util.api_key_gen import hash_api_key_id
 
 INTERNAL_ROLES_URL = "/v1/internal/roles"
+SCANNER_USER_URL = "/v1/internal/file-scan-scanner-user"
 
 
 def setup_admin_privileges(db_session, api_key_value):
@@ -15,14 +24,16 @@ def setup_admin_privileges(db_session, api_key_value):
     Checks for existing keys to avoid IntegrityError.
     """
     existing_key = db_session.execute(
-        select(UserApiKey).where(UserApiKey.key_id == api_key_value)
+        select(UserApiKey).where(
+            UserApiKey.key_id_hash == hash_api_key_id(api_key_value, ApiKeyConfig().pepper)
+        )
     ).scalar_one_or_none()
 
     if existing_key:
         user = existing_key.user
     else:
         user = factories.UserFactory.create()
-        factories.UserApiKeyFactory.create(user=user, key_id=api_key_value)
+        factories.UserApiKeyFactory.create(user=user, raw_key=api_key_value)
 
     admin_role = factories.RoleFactory.create(
         role_name=f"Internal Admin {uuid.uuid4()}", privileges=[Privilege.MANAGE_INTERNAL_ROLES]
@@ -140,3 +151,153 @@ def test_update_internal_role_invalid_input(
     )
 
     assert resp.status_code == 422
+
+
+def test_setup_scanner_user_success(
+    client, db_session, internal_admin_user_api_key, enable_factory_create
+):
+    """Provisions the scanner user, its INTERNAL_S3_SCAN role, and returns a generated key"""
+    setup_admin_privileges(db_session, internal_admin_user_api_key)
+    scanner_user_id = uuid.uuid4()
+
+    resp = client.post(
+        SCANNER_USER_URL,
+        headers={"X-API-Key": internal_admin_user_api_key},
+        json={"user_id": str(scanner_user_id)},
+    )
+
+    assert resp.status_code == 200
+    data = resp.get_json()["data"]
+    assert data["user_id"] == str(scanner_user_id)
+    generated_key = data["api_key"]
+    assert generated_key
+
+    user = db_session.scalars(select(User).where(User.user_id == scanner_user_id)).one()
+    assert user.user_type == UserType.INTERNAL_SYSTEM_USER
+    assert any(link.role_id == INTERNAL_S3_SCANNER_ROLE_ID for link in user.internal_user_roles)
+
+    # The returned key is the one persisted for the scanner user, and is active.
+    key = db_session.scalars(
+        select(UserApiKey).where(
+            UserApiKey.key_id_hash == hash_api_key_id(generated_key, ApiKeyConfig().pepper)
+        )
+    ).one()
+    assert key.user_id == scanner_user_id
+    assert str(key.api_key_id) == data["api_key_id"]
+    assert key.is_active is True
+    assert key.key_id_hash == hash_api_key_id(generated_key, ApiKeyConfig().pepper)
+
+
+def test_setup_scanner_user_idempotent_user_and_role(
+    client, db_session, internal_admin_user_api_key, enable_factory_create
+):
+    """Re-running keeps a single user + role link but mints a fresh key each call (rotation)"""
+    setup_admin_privileges(db_session, internal_admin_user_api_key)
+    scanner_user_id = uuid.uuid4()
+
+    keys = []
+    for _ in range(2):
+        resp = client.post(
+            SCANNER_USER_URL,
+            headers={"X-API-Key": internal_admin_user_api_key},
+            json={"user_id": str(scanner_user_id)},
+        )
+        assert resp.status_code == 200
+        keys.append(resp.get_json()["data"]["api_key"])
+
+    # Each call returns a distinct, newly generated key.
+    assert keys[0] != keys[1]
+
+    assert (
+        db_session.scalar(
+            select(func.count()).select_from(User).where(User.user_id == scanner_user_id)
+        )
+        == 1
+    )
+    assert (
+        db_session.scalar(
+            select(func.count())
+            .select_from(InternalUserRole)
+            .where(InternalUserRole.user_id == scanner_user_id)
+        )
+        == 1
+    )
+    # Both rotations are persisted against the same user.
+    assert (
+        db_session.scalar(
+            select(func.count())
+            .select_from(UserApiKey)
+            .where(UserApiKey.user_id == scanner_user_id)
+        )
+        == 2
+    )
+
+
+def test_setup_scanner_user_unauthorized(client, enable_factory_create):
+    """Requests without valid auth are rejected (401)"""
+    resp = client.post(SCANNER_USER_URL, json={"user_id": str(uuid.uuid4())})
+    assert resp.status_code == 401
+
+
+def test_setup_scanner_user_forbidden(client, user_api_key_id, enable_factory_create):
+    """Users without the manage_internal_roles privilege are rejected (403)"""
+    resp = client.post(
+        SCANNER_USER_URL,
+        headers={"X-API-Key": user_api_key_id},
+        json={"user_id": str(uuid.uuid4())},
+    )
+
+    assert resp.status_code == 403
+    assert resp.get_json()["message"] == "Forbidden"
+
+
+def test_setup_scanner_user_invalid_input(
+    client, internal_admin_user_api_key, enable_factory_create
+):
+    """Missing the required user_id field is a 422"""
+    resp = client.post(
+        SCANNER_USER_URL, headers={"X-API-Key": internal_admin_user_api_key}, json={}
+    )
+    assert resp.status_code == 422
+
+
+def test_setup_scanner_user_collision_checked_on_hash(
+    client, db_session, internal_admin_user_api_key, enable_factory_create
+):
+    """A generated scanner key whose hash is already stored is skipped for a new one."""
+    setup_admin_privileges(db_session, internal_admin_user_api_key)
+    pepper = ApiKeyConfig().pepper
+    taken_key_id = "TAKEN_SCANNER_KEY_1234567"
+    # Stored under a different raw key_id, so only the hash matches
+    factories.UserApiKeyFactory.create(key_id_hash=hash_api_key_id(taken_key_id, pepper))
+
+    with patch(
+        "src.services.internal.setup_file_scan_scanner_user.generate_api_key_id"
+    ) as mock_generate:
+        mock_generate.side_effect = [taken_key_id, "FRESH_SCANNER_KEY_1234567"]
+        resp = client.post(
+            SCANNER_USER_URL,
+            headers={"X-API-Key": internal_admin_user_api_key},
+            json={"user_id": str(uuid.uuid4())},
+        )
+
+    assert resp.status_code == 200
+    assert resp.get_json()["data"]["api_key"] == "FRESH_SCANNER_KEY_1234567"
+    assert mock_generate.call_count == 2
+
+
+def test_setup_scanner_user_key_generation_max_retries(db_session, enable_factory_create):
+    """Gives up with KeyGenerationError when every generated hash is already taken."""
+    taken_key_id = "TAKEN_SCANNER_KEY_7654321"
+    factories.UserApiKeyFactory.create(
+        key_id_hash=hash_api_key_id(taken_key_id, ApiKeyConfig().pepper)
+    )
+
+    with patch(
+        "src.services.internal.setup_file_scan_scanner_user.generate_api_key_id",
+        return_value=taken_key_id,
+    ) as mock_generate:
+        with pytest.raises(KeyGenerationError):
+            _generate_unique_key_id(AuthHandler(db_session))
+
+    assert mock_generate.call_count == MAX_KEY_GENERATION_RETRIES

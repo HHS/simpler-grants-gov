@@ -65,13 +65,11 @@ def upgrade():
 
     # Create triggers for each table
     for table in tables:
-        op.execute(
-            f"""
+        op.execute(f"""
             CREATE TRIGGER {table}_queue_trigger
             AFTER INSERT OR UPDATE ON api.{table}
             FOR EACH ROW EXECUTE FUNCTION api.update_opportunity_search_queue();
-        """
-        )
+        """)
 
 
 def downgrade():

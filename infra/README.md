@@ -53,6 +53,21 @@ This project relies on Make targets in the [root Makefile](../Makefile), which i
 
 Generally you should use the Make targets or the underlying bin scripts, but you can call the underlying terraform commands if needed. See [making-infra-changes](../documentation/infra/making-infra-changes.md) for more details.
 
+### 🛡️ Account safety guards
+
+Each environment maps to an AWS account: the network config in [`project-config/networks.tf`](./project-config/networks.tf) has an `account_name`, and that name resolves to an account id via the matching `infra/accounts/<account_name>.<account_id>.s3.tfbackend` file. When environments live in different accounts, it's easy to run an apply with the wrong AWS profile/SSO role active and target the wrong account.
+
+To prevent that, the environment-scoped root modules (`networks`, `[app_name]/service`, `[app_name]/database`) refuse to run against the wrong account, using two complementary guards:
+
+1. **Provider `allowed_account_ids`** — each `provider "aws"` block is restricted to the account the environment/network is configured for. If the active credentials are for a different account, the AWS provider errors out before making any changes. This covers `plan`, `apply`, **and `destroy`**.
+2. **`aws-account-guard` module** ([`modules/aws-account-guard`](./modules/aws-account-guard)) — a `data.aws_caller_identity` postcondition that fails during `plan` with a clear, actionable message naming the target account.
+
+Both resolve the expected account id from the same source of truth — the provider-less [`account-id-by-name`](./modules/account-id-by-name) module, which reads the `infra/accounts/<account_name>.<account_id>.s3.tfbackend` filename. Keeping that resolver provider-less is what lets the `allowed_account_ids` provider argument reference it without creating a dependency cycle.
+
+If you hit an error like `Wrong AWS account: the active credentials belong to account <X>, but <...> must be deployed to account <Y>`, switch to the correct AWS profile / SSO role for that environment's account (e.g. `export AWS_PROFILE=...`) and retry.
+
+> **Note:** the `build-repository` layer is intentionally **not** guarded this way — it can be deployed to more than one account from the same code, so it has no single expected account. Its backstop is that each account has its own state bucket (`simpler-grants-gov-<account_id>-<region>-tf`), so a wrong-account run fails on the S3 backend.
+
 ## 💻 Development
 
 ### 1️⃣ First time initialization

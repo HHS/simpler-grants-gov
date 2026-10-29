@@ -2,10 +2,10 @@
 
 import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
-import { useFormStatus } from "react-dom";
 import { handleFormAction } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/actions";
 import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import {
+  AttachmentsUploadingCounter,
   FormattedFormValidationWarning,
   FormValidationWarning,
   UiSchema,
@@ -13,14 +13,19 @@ import {
 import { Attachment } from "src/types/attachmentTypes";
 import { getFieldsForNav } from "src/utils/applyForm/applyFormUtils";
 import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFieldListWarningsAfterDelete";
+import {
+  formatTimestamp,
+  getModifiedTimeDisplay,
+} from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
 import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
-import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
+import { Alert, FormGroup } from "@trussworks/react-uswds";
 
 import { FormFields } from "src/components/apply-form/FormFields";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
+import ApplyFormActionButtons from "./ApplyFormActionButtons";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 
 type Translator = ((
@@ -35,14 +40,14 @@ type Translator = ((
 
 interface WidgetSupport {
   validationWarnings:
-    | FormattedFormValidationWarning[]
-    | FormValidationWarning[];
+    FormattedFormValidationWarning[] | FormValidationWarning[];
   deletedEntryIndexesByFieldListPath: Record<string, number[]>;
   onFieldListEntryDelete: (
     fieldListPath: string,
     deletedEntryIndex: number,
   ) => void;
   markFormDirty?: () => void;
+  attachmentsUploadingCounter?: AttachmentsUploadingCounter;
 }
 
 interface ApplyFormFormContext {
@@ -61,6 +66,8 @@ const ApplyForm = ({
   attachments,
   isBudgetForm = false,
   applicationStatus,
+  createdAt,
+  updatedAt,
 }: {
   applicationId: string;
   formId: string;
@@ -68,17 +75,26 @@ const ApplyForm = ({
   savedFormData: object;
   uiSchema: UiSchema;
   validationWarnings:
-    | FormattedFormValidationWarning[]
-    | FormValidationWarning[]
-    | null;
+    FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
   isBudgetForm?: boolean;
   applicationStatus?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }) => {
-  const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;
   const isFormLocked = applicationStatus !== "in_progress";
+
+  const lastUpdatedAt = updatedAt || createdAt;
+
+  const isCreated =
+    !updatedAt ||
+    getModifiedTimeDisplay(updatedAt, createdAt || updatedAt, "created") ===
+      "created";
+  const formStatus = isCreated ? "created" : "updated";
+  const isFormSaved = Boolean(lastUpdatedAt);
+
   const required = translate.rich("required", {
     abr: (content) => (
       <abbr
@@ -104,6 +120,7 @@ const ApplyForm = ({
     deletedEntryIndexesByFieldListPath,
     setDeletedEntryIndexesByFieldListPath,
   ] = useState<Record<string, number[]>>({});
+  const [attachmentsUploading, setAttachmentsUploading] = useState<number>(0);
 
   useNavigationGuard({
     enabled: formChanged || attachmentsChanged,
@@ -154,13 +171,25 @@ const ApplyForm = ({
         FormattedFormValidationWarning[] | FormValidationWarning[] | null
       >((rebasedWarnings, deletedEntryIndex) => {
         return rebaseFieldListWarningsAfterDelete({
-          rawErrors: rebasedWarnings as FormattedFormValidationWarning[] | null,
+          rawErrors: rebasedWarnings,
           fieldListPath,
           deletedEntryIndex,
         });
       }, currentWarnings);
     }, validationWarnings);
   }, [validationWarnings, deletedEntryIndexesByFieldListPath]);
+
+  const attachmentsUploadingCounter: AttachmentsUploadingCounter = useMemo(
+    () => ({
+      incrementAttachmentsProcessing: () =>
+        setAttachmentsUploading((prevState) => prevState + 1),
+      decrementAttachmentsProcessing: () =>
+        setAttachmentsUploading((prevState) =>
+          prevState === 0 ? prevState : prevState - 1,
+        ),
+    }),
+    [],
+  );
 
   const formContextValue = useMemo<ApplyFormFormContext>(
     () => ({
@@ -171,6 +200,7 @@ const ApplyForm = ({
         deletedEntryIndexesByFieldListPath,
         onFieldListEntryDelete: handleFieldListEntryDelete,
         markFormDirty: handleFormEdited,
+        attachmentsUploadingCounter,
       },
     }),
     [
@@ -178,6 +208,7 @@ const ApplyForm = ({
       displayValidationWarnings,
       formObject,
       formSchema,
+      attachmentsUploadingCounter,
     ],
   );
 
@@ -204,22 +235,30 @@ const ApplyForm = ({
       }}
       noValidate
     >
-      <div className="display-flex flex-justify">
-        <div>{required}</div>
+      <div className="display-flex flex-align-center flex-justify margin-bottom-2">
+        <div>
+          {required}
+          {isFormSaved && lastUpdatedAt && (
+            <div className="margin-top-1">
+              {formStatus === "updated"
+                ? `${translate("lastUpdatedMessage")} ${formatTimestamp(lastUpdatedAt)}`
+                : `${translate("createdMessage")} ${formatTimestamp(lastUpdatedAt)}`}
+            </div>
+          )}
+        </div>
         {!isFormLocked && (
-          <Button
-            data-testid="apply-form-save"
-            type="submit"
-            name="apply-form-button"
-            className="margin-top-0"
-            value="save"
-            onClick={() => {
+          <ApplyFormActionButtons
+            applicationId={applicationId}
+            onSaveClick={() => {
               setFormChanged(false);
               setAttachmentsChanged(false);
             }}
-          >
-            {pending ? "Saving..." : "Save"}
-          </Button>
+            returnToApplicationText={translate("returnToApplication")}
+            savingText={translate("saving")}
+            savingAndRefreshingText={translate("savingAndRefreshing")}
+            disableSaveButton={attachmentsUploading !== 0}
+            saveDisabledTooltipText={translate("saveDisabledTooltipMessage")}
+          />
         )}
       </div>
       <div className="usa-in-page-nav-container">
@@ -227,11 +266,7 @@ const ApplyForm = ({
           <ApplyFormMessage
             saved={saved}
             error={error}
-            validationWarnings={
-              displayValidationWarnings as
-                | FormattedFormValidationWarning[]
-                | null
-            }
+            validationWarnings={displayValidationWarnings}
             isBudgetForm={isBudgetForm}
           />
           <AttachmentsProvider
@@ -239,13 +274,7 @@ const ApplyForm = ({
           >
             <FormFields
               key={saved ? "after-save" : "before-save"}
-              errors={
-                saved
-                  ? (displayValidationWarnings as
-                      | FormattedFormValidationWarning[]
-                      | null)
-                  : null
-              }
+              errors={saved ? displayValidationWarnings : null}
               formData={formObject}
               schema={formSchema}
               uiSchema={uiSchema}

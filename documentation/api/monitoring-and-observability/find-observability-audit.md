@@ -213,20 +213,28 @@ Similarly, opportunity GET routes log `opportunity_id` and `legacy_opportunity_i
 
 All of these logs are forwarded to New Relic Logs and CloudWatch via the FluentBit sidecar and are queryable via NRQL.
 
-### 3.2 Frontend: New Relic Browser Custom Attributes
+### 3.2 Frontend: New Relic Browser `search_attempt` PageAction
 
-[`SearchAnalytics.tsx`](../../../frontend/src/components/search/SearchAnalytics.tsx) sets NR browser custom attributes for search parameters on every search page load:
+[`SearchAnalytics.tsx`](../../../frontend/src/app/%5Blocale%5D/(base)/search/_components/SearchAnalytics.tsx) sends a NR Browser `PageAction` event named `search_attempt` each time the search state changes (including the initial search page load):
 
 ```typescript
-// For each search query parameter:
-setNewRelicCustomAttribute(key, value || "");
-// Results in NR attributes like: search_param_query, search_param_status, etc.
+// One event per search state, containing every active approved search param
+newrelic.addPageAction("search_attempt", {
+  search_param_status: "posted,forecasted",
+  search_param_agency: "HHS",
+  search_param_page: "1",
+  search_param_query_length: 0,
+  search_filter_count: 2,
+});
 ```
+
+Only params in the `expectedQueryParamKeys` allow list are sent, and only when they have a value. See [frontend analytics](../../frontend/analytics.md#custom-attributes--events) for the full event shape.
+
+This replaced page-level NR Browser custom attributes (`setCustomAttribute`), which were rarely attached to the relevant `BrowserInteraction` and undercounted filter usage.
 
 This allows querying NR Browser for which search parameters users are using, but:
 - Does not track result counts or response times
 - Does not track individual search sessions
-- Has a known cleanup timing issue (attributes may persist during route transitions)
 - Only covers search pages, not opportunity views or saved items
 
 ### 3.3 Frontend: Google Analytics Events
@@ -264,7 +272,7 @@ The backend already logs meaningful search metrics via `add_extra_data_to_curren
 | Search filters used | Yes | `request.body.filters.*` in NR Logs |
 | Search result counts | Yes | `response.pagination.total_records` in NR Logs |
 | Zero-result searches | Derivable | Query NR Logs for `total_records = 0` |
-| Search filters usage (frontend) | Partial | NR Browser custom attributes, GA events |
+| Search filters usage (frontend) | Partial | NR Browser `search_attempt` PageAction, GA events |
 | Opportunity view counts | Yes | NR APM transaction counts + NR Logs (`opportunity_id`) |
 | Save opportunity rates | Partial | Auto-logged: URL rule, duration, `auth.user_id`. Not attached: opportunity ID (would need explicit instrumentation; not available from response code) |
 | Saved search usage | Partial | Auto-logged: URL rule, duration, `auth.user_id`. Not attached: search request params (could follow same pattern as search endpoint) |
@@ -277,7 +285,7 @@ The backend already logs meaningful search metrics via `add_extra_data_to_curren
 |--------|-----------------|---------------|
 | NR APM Transactions | Per-endpoint throughput, latency, errors | NRQL queries |
 | NR Logs (via FluentBit) | Search params, result counts, opportunity IDs per request | NRQL queries on Log type |
-| NR Browser | Page views, search param custom attributes | NRQL queries |
+| NR Browser | Page views, `search_attempt` PageAction search params | NRQL queries |
 | Google Analytics | `search_attempt` and `search_term` events | GA Dashboard |
 | API Database | Saved opportunities, saved searches tables | Direct SQL |
 | OpenSearch | Search index data, query logs | OpenSearch Dashboards (if enabled) |
@@ -309,7 +317,7 @@ No Metabase dashboards exist for Find functionality. All existing queries focus 
 ### Moderate Gaps
 
 4. **Save/unsave and saved search endpoints lack structured business attributes** — Unlike search and opportunity view routes, these endpoints don't attach key business attributes: save endpoints omit the opportunity ID, and saved search endpoints omit the search request. Adding this instrumentation would enable save rate and usage pattern analysis.
-5. **Frontend analytics split across two systems** — Search data is split between NR Browser (custom attributes) and Google Analytics (`search_attempt`, `search_term` events), making holistic analysis difficult.
+5. **Frontend analytics split across two systems** — Search data is split between NR Browser (`search_attempt` PageAction) and Google Analytics (`search_attempt`, `search_term` events), making holistic analysis difficult.
 6. **No dashboard backups** — All 8 NR dashboards are manually created in the UI with no backup or version history. Changes are at risk of being accidentally lost.
 7. **OpenSearch-native metrics not imported** — OpenSearch has its own metrics (index health, query performance, shard stats) that are not yet imported into New Relic.
 
@@ -524,6 +532,65 @@ Tracks creation and activity of saved searches. Watch for declining creation vol
 **Panels**: Unique Users Saving Searches, Search Activity by Day of Week, Search Activity by Hour of Day, Sort Usage Frequency, Query Length Distribution
 
 Highlights when and how users search and save. Watch for drops in unique savers, unusual time-based spikes/drops, heavy use of specific sorts, or many very short/empty queries.
+
+#### Search param queries
+
+Panels based on frontend search params (`search_param_*`) should query the `search_attempt` `PageAction` event (see [3.2](#32-frontend-new-relic-browser-search_attempt-pageaction)), not custom attributes on `BrowserInteraction`. Each event holds every active filter for one search state, so calculate each filter independently rather than with `FACET CASES`, which counts each search toward only its first matching filter. Percentages across filters can add up to more than 100%.
+
+Each page change also sends a `search_attempt`. Panels that measure filter or tool adoption only count first-page search states (`AND search_param_page = '1'`) so that paging through results does not multiply filter usage. Session-based panels using `uniqueCount(session)` can use all `search_attempt` events, since paging does not add sessions.
+
+When no `status` param is set, the search applies the default statuses, so `search_param_status` only counts explicit status selections.
+
+Data from before this instrumentation change (custom attributes on `BrowserInteraction`) is not directly comparable to `search_attempt` `PageAction` data. Dashboard windows should initially begin at the deployment of this change, or visibly note the instrumentation change.
+
+```sql
+-- Tools Usage Distribution: share of first-page search attempts using each tool
+FROM PageAction
+SELECT
+  percentage(count(*), WHERE search_param_query IS NOT NULL) AS 'Keyword',
+  percentage(count(*), WHERE search_param_status IS NOT NULL) AS 'Status',
+  percentage(count(*), WHERE search_param_fundingInstrument IS NOT NULL) AS 'Funding instrument',
+  percentage(count(*), WHERE search_param_eligibility IS NOT NULL) AS 'Eligibility',
+  percentage(count(*), WHERE search_param_agency IS NOT NULL OR search_param_topLevelAgency IS NOT NULL) AS 'Agency',
+  percentage(count(*), WHERE search_param_assistanceListingNumber IS NOT NULL) AS 'Assistance listing',
+  percentage(count(*), WHERE search_param_category IS NOT NULL) AS 'Category',
+  percentage(count(*), WHERE search_param_closeDate IS NOT NULL) AS 'Close date',
+  percentage(count(*), WHERE search_param_postedDate IS NOT NULL) AS 'Posted date',
+  percentage(count(*), WHERE search_param_costSharing IS NOT NULL) AS 'Cost sharing',
+  percentage(count(*), WHERE search_param_sortby IS NOT NULL) AS 'Sort',
+  percentage(count(*), WHERE search_param_savedSearch IS NOT NULL) AS 'Saved search'
+WHERE actionName = 'search_attempt' AND search_param_page = '1'
+SINCE 30 days ago
+
+-- Sessions Using Search Filters (Last 30 Days)
+FROM PageAction
+SELECT
+  filter(uniqueCount(session), WHERE search_param_status IS NOT NULL
+    OR search_param_fundingInstrument IS NOT NULL
+    OR search_param_eligibility IS NOT NULL
+    OR search_param_agency IS NOT NULL
+    OR search_param_topLevelAgency IS NOT NULL
+    OR search_param_assistanceListingNumber IS NOT NULL
+    OR search_param_category IS NOT NULL
+    OR search_param_closeDate IS NOT NULL
+    OR search_param_postedDate IS NOT NULL
+    OR search_param_costSharing IS NOT NULL) / uniqueCount(session) * 100 AS '% of search sessions using filters'
+WHERE actionName = 'search_attempt'
+SINCE 30 days ago
+
+-- Sort Usage Frequency (no sortby param means the default sort)
+FROM PageAction
+SELECT count(*)
+WHERE actionName = 'search_attempt' AND search_param_page = '1'
+FACET if(search_param_sortby IS NULL, 'default', search_param_sortby)
+SINCE 30 days ago
+
+-- Query Length Distribution (searches with a keyword)
+FROM PageAction
+SELECT histogram(search_param_query_length, 100, 20)
+WHERE actionName = 'search_attempt' AND search_param_page = '1' AND search_param_query_length > 0
+SINCE 30 days ago
+```
 
 ## 9.4 Open Search Health
 

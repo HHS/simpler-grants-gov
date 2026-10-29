@@ -1,7 +1,9 @@
 data "aws_vpc" "network" {
   filter {
-    name   = "tag:Name"
-    values = [module.project_config.network_configs[var.environment_name].vpc_name]
+    name = "tag:Name"
+    # Resolve the VPC by the environment's network_name so the environment name
+    # and its VPC/network name may differ (e.g. infra-dev -> infra-dev-simpler-grants).
+    values = [local.network_config.vpc_name]
   }
 }
 
@@ -52,6 +54,8 @@ terraform {
 
 provider "aws" {
   region = local.database_config.region
+  # Refuse to operate against the wrong account (covers plan/apply/destroy).
+  allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
   }
@@ -63,6 +67,21 @@ module "project_config" {
 
 module "app_config" {
   source = "../app-config"
+}
+
+# Resolve the account this environment must deploy to (used by the provider's
+# allowed_account_ids below and by the guard), then short-circuit plan/apply if
+# the active AWS credentials are for a different account.
+module "expected_account" {
+  source       = "../../modules/account-id-by-name"
+  account_name = local.network_config.account_name
+  accounts_dir = "${path.module}/../../accounts"
+}
+
+module "account_guard" {
+  source              = "../../modules/aws-account-guard"
+  expected_account_id = module.expected_account.account_id
+  context             = "the ${var.environment_name} analytics database"
 }
 
 data "aws_security_groups" "aws_services" {
@@ -90,12 +109,16 @@ module "database" {
   instance_count                 = local.database_config.instance_count
   max_capacity                   = local.database_config.max_capacity
   min_capacity                   = local.database_config.min_capacity
+  engine_version                 = local.database_config.engine_version
   enable_http_endpoint           = true
   vpc_id                         = data.aws_vpc.network.id
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
-  database_subnet_group_name     = var.environment_name
-  environment_name               = var.environment_name
-  grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
-  newrelic_entity_guid           = local.database_config.newrelic_entity_guid
+  # The DB subnet group is created by the networks layer under the network's name,
+  # so reference it by network_name (not environment_name).
+  database_subnet_group_name   = local.environment_config.network_name
+  environment_name             = var.environment_name
+  grants_gov_oracle_cidr_block = local.network_config.grants_gov_oracle_cidr_block
+  newrelic_entity_guid         = local.database_config.newrelic_entity_guid
+  snapshot_identifier          = var.database_snapshot_id
 }

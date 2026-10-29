@@ -2,14 +2,22 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
+from sqlalchemy import select
 
-from src.constants.lookup_constants import CompetitionOpenToApplicant, Privilege
+from src.constants.lookup_constants import (
+    CompetitionOpenToApplicant,
+    OpportunityAuditEvent,
+    Privilege,
+)
+from src.db.models.opportunity_models import OpportunityAudit
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
 
 
 def create_competition_update_request(
     competition_title="Updated Proposal for Advanced Research",
+    public_competition_id="UPDATED-123-456",
+    grace_period=10,
     opening_date=None,
     closing_date=None,
     contact_info="Jane Doe\nUpdatedEmail@updated.com",
@@ -29,6 +37,8 @@ def create_competition_update_request(
 
     return {
         "competition_title": competition_title,
+        "public_competition_id": public_competition_id,
+        "grace_period": grace_period,
         "opening_date": opening_date,
         "closing_date": closing_date,
         "contact_info": contact_info,
@@ -58,6 +68,8 @@ def existing_competition(grantor_auth_data, enable_factory_create):
     competition = CompetitionFactory.create(
         opportunity=opportunity,
         competition_title="Original Competition Title",
+        public_competition_id="ORIGINAL-123-456",
+        grace_period=3,
         opening_date=date.today(),
         closing_date=date.today() + timedelta(days=30),
         contact_info="Original Contact\noriginal@example.com",
@@ -67,7 +79,7 @@ def existing_competition(grantor_auth_data, enable_factory_create):
     return opportunity, competition
 
 
-def test_competition_update_successful(client, grantor_auth_data, existing_competition):
+def test_competition_update_successful(client, db_session, grantor_auth_data, existing_competition):
     """Test successful competition update"""
     _, _, token, _ = grantor_auth_data
     opportunity, competition = existing_competition
@@ -87,6 +99,8 @@ def test_competition_update_successful(client, grantor_auth_data, existing_compe
     # Verify updated fields
     competition_data = response_json["data"]
     assert competition_data["competition_title"] == update_request["competition_title"]
+    assert competition_data["public_competition_id"] == update_request["public_competition_id"]
+    assert competition_data["grace_period"] == update_request["grace_period"]
     assert competition_data["closing_date"] == update_request["closing_date"]
     assert competition_data["contact_info"] == update_request["contact_info"]
     assert set(competition_data["open_to_applicants"]) == set(update_request["open_to_applicants"])
@@ -96,6 +110,42 @@ def test_competition_update_successful(client, grantor_auth_data, existing_compe
     assert competition_data["opportunity_id"] == str(opportunity.opportunity_id)
     assert competition_data["opening_date"] is not None
     assert competition_data["opportunity_assistance_listing"] is not None
+
+    audit_rows = (
+        db_session.execute(
+            select(OpportunityAudit).where(
+                OpportunityAudit.opportunity_id == opportunity.opportunity_id
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(audit_rows) == 1
+    assert audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.COMPETITION_UPDATED
+    assert audit_rows[0].competition is not None
+
+
+def test_competition_update_without_optional_fields(
+    client, grantor_auth_data, existing_competition
+):
+    """Test that omitting public_competition_id and grace_period preserves the existing values"""
+    _, _, token, _ = grantor_auth_data
+    opportunity, competition = existing_competition
+
+    update_request = create_competition_update_request()
+    del update_request["public_competition_id"]
+    del update_request["grace_period"]
+
+    response = client.put(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions/{competition.competition_id}",
+        json=update_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    competition_data = response.get_json()["data"]
+    assert competition_data["public_competition_id"] == "ORIGINAL-123-456"
+    assert competition_data["grace_period"] == 3
 
 
 def test_competition_update_with_invalid_jwt_token(client, existing_competition):

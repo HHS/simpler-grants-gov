@@ -1,0 +1,85 @@
+{
+  "name": "Issue Title",
+  "display": "table",
+  "visualization_settings": {
+    "table.columns": [
+      {
+        "name": "title",
+        "enabled": true
+      },
+      {
+        "name": "ghid",
+        "enabled": false
+      },
+      {
+        "name": "url",
+        "enabled": true
+      },
+      {
+        "name": "id",
+        "enabled": true
+      }
+    ],
+    "table.pivot_column": "issue_id",
+    "table.cell_column": "is_closed",
+    "column_settings": {
+      "[\"name\",\"title\"]": {
+        "column_title": "Title"
+      },
+      "[\"name\",\"url\"]": {
+        "view_as": "link",
+        "column_title": "Link",
+        "link_text": "{{ghid}}",
+        "link_url": "{{url}}"
+      },
+      "[\"name\",\"id\"]": {
+        "column_title": "Internal ID"
+      }
+    }
+  },
+  "template_tags": {
+    "ghid": {
+      "widget-type": "string/contains",
+      "name": "ghid",
+      "type": "dimension",
+      "id": "5f3963e4-0603-4072-91b9-276052a882da",
+      "dimension": [
+        "field",
+        282,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Ghid",
+      "options": {
+        "case-sensitive": false
+      },
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_issue",
+        "column": "ghid"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "id": "5f3963e4-0603-4072-91b9-276052a882da",
+      "type": "string/contains",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "ghid"
+        ]
+      ],
+      "name": "Ghid",
+      "slug": "ghid",
+      "required": true,
+      "options": {
+        "case-sensitive": false
+      }
+    }
+  ]
+}

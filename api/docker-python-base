@@ -1,7 +1,7 @@
 #==============================================
 # Stage 0: UV binary source
 #==============================================
-ARG UV_VERSION=0.11.15
+ARG UV_VERSION=0.12.23
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 
 #==============================================
@@ -9,7 +9,7 @@ FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.5
+ARG PYTHON_VERSION=3.14.8
 ARG PY_MM=3.14
 ARG PIP_VERSION=26.0
 
@@ -63,22 +63,22 @@ RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
     ln -sf /usr/local/bin/python3 /usr/local/bin/python && \
     ln -sf /usr/local/bin/pip3 /usr/local/bin/pip
 
-# Ensure virtualenv embeds patched pip (25.3) for offline venv creation
-RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
+# Ensure virtualenv embeds patched pip (25.3) for offline venv creation; >=21.14.13 fixes GHSA-cx6f-vjhg-g3cc
+RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=21.14.13"
 
 # Install UV
 # https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
 # Version is pinned via the UV_VERSION build arg / uv stage at the top of this file.
 COPY --from=uv /uv /uvx /bin/
 
-# Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
-RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
+# Upgrade urllib3 to fix security vulnerabilities (GHSA-8988-9cw3-xx77, GHSA-vxq7-64xx-v4gw, GHSA-gh4c-6fx4-qh6g)
+RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.8.0"
 
 # Upgrade filelock to fix GHSA-w853-jp5j-5j7f
 RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
 
-# Upgrade cryptography to fix GHSA-m959-cc7f-wv43
-RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=46.0.7"
+# Upgrade cryptography to fix GHSA-m959-cc7f-wv43, GHSA-537c-gmf6-5ccf, and GHSA-g6cj-pr64-35w5
+RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=50.0.0"
 
 # Upgrade idna to fix GHSA-65pc-fj4g-8rjx
 RUN python3 -m pip install --no-cache-dir --upgrade "idna>=3.15"
@@ -148,29 +148,63 @@ RUN dnf install -y \
       libffi-devel && \
     # Update packages with security vulnerabilities
     dnf update -y \
-      libcap-2.73-1.amzn2023.0.7 \
       lz4-libs-1.9.4-1.amzn2023.0.3 \
       binutils-2.41-50.amzn2023.0.5 \
-      glib2-2.82.2-767.amzn2023 \
-      curl-minimal-8.17.0-1.amzn2023.0.3 \
-      libcurl-minimal-8.17.0-1.amzn2023.0.3 \
-      kernel6.18-headers-6.18.30-61.116.amzn2023 \
       glibc-2.34-231.amzn2023.0.4 \
       glibc-common-2.34-231.amzn2023.0.4 \
       glibc-devel-2.34-231.amzn2023.0.4 \
       glibc-gconv-extra-2.34-231.amzn2023.0.4 \
       glibc-headers-x86-2.34-231.amzn2023.0.4 \
       glibc-minimal-langpack-2.34-231.amzn2023.0.4 \
-      python3-pip-wheel-21.3.1-2.amzn2023.0.19 \
-      krb5-libs-1.21.3-7.amzn2023.0.1 \
-      rust-toolset-srpm-macros-1.95.0-1.amzn2023.0.2 \
       libgcrypt-1.10.2-1.amzn2023.0.3 \
       libsolv-0.7.22-1.amzn2023.0.4 \
       gnutls-3.8.10-4.amzn2023.0.2 && \
-    # CVE-2026-1757: libxml2 memory leak in xmllint (ALAS2023-2026-1446)
-    dnf update -y --releasever=2023.10.20260302 \
-      libxml2-2.10.4-1.amzn2023.0.18 \
-      libxml2-devel-2.10.4-1.amzn2023.0.18 && \
+    dnf update -y --releasever=2023.12.20260706 \
+      sqlite-3.40.0-1.amzn2023.0.8 \
+      sqlite-libs-3.40.0-1.amzn2023.0.8 \
+      gnupg2-minimal-2.3.7-1.amzn2023.0.9 \
+      libblkid-2.37.4-1.amzn2023.0.5 \
+      libmount-2.37.4-1.amzn2023.0.5 \
+      libsmartcols-2.37.4-1.amzn2023.0.5 \
+      libuuid-2.37.4-1.amzn2023.0.5 && \
+    # July ALAS batch: krb5-libs (1939), libacl (1986)
+    dnf update -y --releasever=2023.12.20260727 \
+      krb5-libs-1.21.3-8.amzn2023.0.1 \
+      libacl-2.4.0-1.amzn2023.0.1 && \
+    # August ALAS batch: gawk (ALAS2023-2026-2035), glib2 (2028)
+    dnf update -y --releasever=2023.12.20260803 \
+      gawk-5.1.0-3.amzn2023.0.4 \
+      glib2-2.82.2-771.amzn2023 && \
+    dnf update -y --releasever=2023.12.20260817 \
+      wget-1.21.3-1.amzn2023.0.5 && \
+    dnf update -y --releasever=2023.12.20260914 \
+      expat-2.8.3-1.amzn2023.0.1 && \
+    # Late-September ALAS batch: libxml2 (3122), rpm suite (3125)
+    dnf update -y --releasever=2023.12.20260928 \
+      libxml2-2.10.4-1.amzn2023.0.21 \
+      libxml2-devel-2.10.4-1.amzn2023.0.21 \
+      rpm-4.16.1.3-29.amzn2023.0.8 \
+      rpm-libs-4.16.1.3-29.amzn2023.0.8 \
+      rpm-build-libs-4.16.1.3-29.amzn2023.0.8 \
+      rpm-sign-libs-4.16.1.3-29.amzn2023.0.8 \
+      python3-rpm-4.16.1.3-29.amzn2023.0.8 && \
+    # October ALAS batch: openssl (3204), python3-pip-wheel (3175), rust-toolset-srpm-macros (3170)
+    dnf update -y --releasever=2023.12.20261012 \
+      openssl-3.5.8-1.amzn2023.0.3 \
+      openssl-libs-3.5.8-1.amzn2023.0.3 \
+      openssl-devel-3.5.8-1.amzn2023.0.3 \
+      openssl-fips-provider-latest-3.5.8-1.amzn2023.0.3 \
+      python3-pip-wheel-21.3.1-2.amzn2023.0.22 \
+      rust-toolset-srpm-macros-1.98.1-1.amzn2023 && \
+    # Late-October ALAS batch: curl (3267), libcap (3255), pcre2 (3269), ca-certificates (3306), kernel6.18-headers (3251)
+    dnf update -y --releasever=2023.12.20261026 \
+      curl-minimal-8.21.0-5.amzn2023.0.3 \
+      libcurl-minimal-8.21.0-5.amzn2023.0.3 \
+      libcap-2.73-1.amzn2023.0.8 \
+      pcre2-10.40-1.amzn2023.0.5 \
+      pcre2-syntax-10.40-1.amzn2023.0.5 \
+      ca-certificates-2025.2.76-1.0.amzn2023.0.4 \
+      kernel6.18-headers-6.18.56-125.164.amzn2023 && \
     dnf clean all && \
     # Remove the system Python RPMs
     (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \

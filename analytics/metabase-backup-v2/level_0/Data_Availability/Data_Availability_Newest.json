@@ -1,0 +1,19 @@
+{
+  "name": "Data Availability - Newest",
+  "display": "object",
+  "visualization_settings": {
+    "table.columns": [
+      {
+        "name": "maximum_date",
+        "enabled": true
+      }
+    ],
+    "column_settings": {
+      "[\"name\",\"maximum_date\"]": {
+        "column_title": "Newest Dateset:",
+        "date_abbreviate": true,
+        "date_style": "MMMM D, YYYY"
+      }
+    }
+  }
+}

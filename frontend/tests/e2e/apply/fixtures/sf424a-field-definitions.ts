@@ -398,6 +398,8 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
 };
 
 // Top alert validation errors for SF-424A blank-save behavior.
+// Only row 1 (index 0) Column A is always required. Rows 2-4 are conditionally
+// required and stay optional when their row has no Section A or B data.
 export const SF424A_ALERT_ERRORS: FieldError[] = [
   {
     fieldId: "activity_line_items[0]--activity_title",

@@ -5,7 +5,11 @@ from unittest.mock import patch
 import pytest
 from pydantic import Field, ValidationError
 
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     BaseSOAPSchema,
     FaultMessage,
@@ -88,6 +92,7 @@ def test_legacy_soap_api_request_raises_error_if_soap_config_privileges_are_none
             namespace_keymap={
                 "GetApplicationZipResponse": "ns2",
             },
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetApplicationZip",
             privileges=None,
         )
         request_xml_bytes = (

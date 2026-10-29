@@ -1,16 +1,16 @@
 import uuid
 from collections.abc import Sequence
 
-import grants_shared.adapters.db as db
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
 from src.db.models.user_models import User
 from src.db.models.workflow_models import WorkflowAudit
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
-from src.services.service_utils import apply_sorting
+from src.pagination.sorting_util import apply_sorting
 from src.services.workflows.get_workflow import get_workflow_and_verify_access
 
 
@@ -47,7 +47,7 @@ def get_workflow_audits(
         )
     )
 
-    stmt = apply_sorting(stmt, WorkflowAudit, params.pagination.sort_order)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, WorkflowAudit)
 
     # Paginate the results
     paginator: Paginator[WorkflowAudit] = Paginator(

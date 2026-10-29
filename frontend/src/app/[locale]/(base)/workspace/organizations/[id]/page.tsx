@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import { OrganizationDetail } from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationDetail";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -23,15 +23,14 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   let title = `${t("OrganizationDetail.pageTitle")} | Simpler.Grants.gov`;
   try {
-    const session = await getSession();
-    if (!session?.token) {
-      throw new Error("not logged in");
-    }
     const organizationDetails = await getOrganizationDetails(id);
     title = `${t("OrganizationDetail.pageTitle")}: ${organizationDetails.sam_gov_entity.legal_business_name || ""} | Simpler.Grants.gov`;
-  } catch (error) {
-    console.error("Failed to render page title due to API error", error);
-    if (parseErrorStatus(error as ApiRequestError) === 404) {
+  } catch (e) {
+    logger.error(
+      { err: e, organizationId: id },
+      "Failed to render page title due to API error",
+    );
+    if (parseErrorStatus(e as ApiRequestError) === 404) {
       return notFound();
     }
   }

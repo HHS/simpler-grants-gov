@@ -4,9 +4,6 @@ from pathlib import Path
 from urllib.parse import quote
 
 import click
-import grants_shared.adapters.db as db
-import grants_shared.logs
-import grants_shared.util.datetime_util as datetime_util
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
@@ -14,6 +11,9 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 from sqlalchemy import select
 
+import src.adapters.db as db
+import src.logs
+import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
@@ -91,11 +91,16 @@ def get_or_create_legacy_certificate(db_session, agency, serial_number):
         select(LegacyCertificate).where(LegacyCertificate.serial_number == serial_number)
     )
     if legacy_certificate is None:
+        tcertificate = factories.StagingTcertificatesFactory.create(
+            agencyid=agency.agency_code,
+            serial_num=serial_number,
+            expirationdate=UTC_NOW.date() + timedelta(days=365),
+        )
         legacy_certificate = factories.LegacyAgencyCertificateFactory(
             agency_id=agency.agency_id,
             agency=agency,
-            serial_number=serial_number,
-            expiration_date=UTC_NOW.date() + timedelta(days=365),
+            serial_number=tcertificate.serial_num,
+            expiration_date=tcertificate.expirationdate,
         )
         agency_user = factories.AgencyUserFactory.create(
             agency=agency, user=legacy_certificate.user
@@ -141,6 +146,7 @@ def _build_legacy_certificate_and_submission(
     print(encoded)
 
     print("\nFOR LOCAL VALIDATION TESTING USE THESE IN THE SOAP-API.ENV:")
+
     print(f"CERT_DATA={cert_text!r}\n")
     with open(path_key) as f:
         key_text = f.read()
@@ -165,7 +171,7 @@ def _build_legacy_certificate_and_submission(
     help="Agency code to use (defaults to agency of first submission it can find)",
 )
 def seed_local_soap_certificate(dir_path: str | None, agency_code: str | None = None) -> None:
-    with grants_shared.logs.init("seed_local_soap_certificate"):
+    with src.logs.init("seed_local_soap_certificate"):
         logger.info("Running seed script for local soap certificate testing")
         db_client = db.PostgresDBClient()
         with db_client.get_session() as db_session:

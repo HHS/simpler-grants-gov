@@ -4,6 +4,7 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
+  UiSchemaText,
 } from "src/types/applyForm/types";
 import {
   getRequiredProperties,
@@ -29,6 +30,7 @@ type RootBudgetFormContext = {
  * - section        > container for grouping fields
  * - field          > a standard renderable field
  * - fieldList      > a repeatable group of fields
+ * - multiField     > a specialized widget that can render multiple fields
  * - null           > placeholder / intentionally empty node
  *
  * When traversing the UiSchema tree we must ensure that we only attempt
@@ -54,13 +56,34 @@ type RootBudgetFormContext = {
  *
  * - `fieldList` nodes are always renderable
  * - `field` nodes contain either `definition` or `schema`
+ * - `multiField` nodes can represent specialized widgets such as Table
  * - `section` nodes contain `children` instead and are excluded
  */
 const isRenderableFieldNode = (
   node: UiSchema[number],
 ): node is UiSchemaField | UiSchemaFieldList => {
-  return node.type === "fieldList" || "definition" in node || "schema" in node;
+  return (
+    node.type === "fieldList" ||
+    node.type === "multiField" ||
+    "definition" in node ||
+    "schema" in node
+  );
 };
+
+/**
+ * `text` nodes are static text rendered inline between other section
+ * children (e.g. a footnote after a specific field), rather than an
+ * actual form field.
+ *
+ * Handled directly here instead of through the widget pipeline because
+ * there's no schema field or data value behind it - just text to display.
+ * Wrapped in a usa-form-group so spacing matches the surrounding fields.
+ */
+const renderTextNode = (node: UiSchemaText): JSX.Element => (
+  <div key={node.name} className="usa-form-group">
+    <p className="margin-y-0">{node.content}</p>
+  </div>
+);
 
 /*
   Runs through the UI Schema to produce a rendered array of field widgets and sections
@@ -116,6 +139,14 @@ export const FormFields = ({
           name: node.name,
           description: node.description,
         });
+      } else if (node.type === "text") {
+        // A section's children get walked through twice: once right here in this
+        // forEach, and again below in the `sectionFields` map that actually
+        // builds the section. Only render here if there's no parent section,
+        // otherwise this text node would be shown twice.
+        if (!parent) {
+          renderedFields = [...renderedFields, renderTextNode(node)];
+        }
       } else if (!isRenderableFieldNode(node)) {
         throw new Error("child field missing definition and schema");
       } else if (!parent) {
@@ -125,7 +156,7 @@ export const FormFields = ({
           node.type === "fieldList"
             ? false
             : isFieldRequired(
-                (node.definition || node.schema?.title || "") as string,
+                node.definition || node.schema?.title || "",
                 requiredFieldPaths,
               );
 
@@ -137,13 +168,31 @@ export const FormFields = ({
           requiredField,
         });
 
+        /*
+         * Standard widgets, FieldList, and Table currently share the existing
+         * widget-rendering pipeline.
+         *
+         * Composite widget props are intentionally bridged through
+         * `UswdsWidgetProps` here because renderWidget/widgetComponents is the
+         * existing shared integration point. The individual widgets receive
+         * their more specific prop types inside their component adapters.
+         */
         const field = renderWidget({
           type: widgetConfig.type,
-          props: { ...widgetConfig.props, formContext, isFormLocked },
+          props: {
+            ...widgetConfig.props,
+            formContext,
+            isFormLocked,
+          },
           definition: "definition" in node ? node.definition : undefined,
         });
 
         if (field) {
+          /*
+           * Prefer a schema-supplied name for stable React keys.
+           * Definition-based fields may not have a name, so their definition
+           * is used as the fallback stable identifier.
+           */
           const nodeKey =
             node.name ??
             ("definition" in node ? node.definition?.toString() : undefined);
@@ -166,7 +215,12 @@ export const FormFields = ({
     // iteration above) and wrapped in a section here.
     if (parent) {
       const sectionFields = uiSchema.map((node) => {
-        // assume that any child fields of a section are defined fields, no support for sub sections
+        // `text` nodes are static text, not a defined field; render them inline as-is.
+        if (node.type === "text") {
+          return renderTextNode(node);
+        }
+
+        // assume that any other child fields of a section are defined fields, no support for sub sections
         if (!isRenderableFieldNode(node)) {
           throw new Error("section child is not a defined field");
         }
@@ -181,7 +235,7 @@ export const FormFields = ({
           node.type === "fieldList"
             ? false
             : isFieldRequired(
-                (node.definition || node.schema?.title || "") as string,
+                node.definition || node.schema?.title || "",
                 requiredFieldPaths,
               );
 
@@ -195,7 +249,11 @@ export const FormFields = ({
 
         return renderWidget({
           type: widgetConfig.type,
-          props: { ...widgetConfig.props, formContext, isFormLocked },
+          props: {
+            ...widgetConfig.props,
+            formContext,
+            isFormLocked,
+          },
           definition: "definition" in node ? node.definition : undefined,
         });
       });

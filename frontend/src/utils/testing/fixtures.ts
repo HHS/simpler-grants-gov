@@ -7,6 +7,7 @@ import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { UserProfile } from "src/types/authTypes";
 import {
   AwardRecommendationDetails,
+  AwardRecommendationListItem,
   AwardRecommendationStatus,
   AwardRecommendationSubmission,
 } from "src/types/awardRecommendationTypes";
@@ -71,6 +72,37 @@ export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
   },
   created_at: "2026-01-01T00:00:00Z",
 };
+
+export const mockAwardRecommendationListItem: AwardRecommendationListItem = {
+  award_recommendation_id:
+    mockAwardRecommendationDetails.award_recommendation_id,
+  award_recommendation_number:
+    mockAwardRecommendationDetails.award_recommendation_number,
+  award_recommendation_status:
+    mockAwardRecommendationDetails.award_recommendation_status,
+  opportunity: mockAwardRecommendationDetails.opportunity,
+  award_recommendation_summary: {
+    total_received_count:
+      mockAwardRecommendationDetails.award_recommendation_summary
+        ?.total_received_count ?? 0,
+  },
+};
+
+export const mockAwardRecommendationListItemNoSubmissions: AwardRecommendationListItem =
+  {
+    ...mockAwardRecommendationListItem,
+    award_recommendation_id: "no-submissions-award-rec-id",
+    award_recommendation_number: "AR-26-0003",
+    award_recommendation_summary: { total_received_count: 0 },
+  };
+
+export const mockDraftAwardRecommendationListItem: AwardRecommendationListItem =
+  {
+    ...mockAwardRecommendationListItem,
+    award_recommendation_id: "draft-award-rec-id",
+    award_recommendation_number: "AR-26-0002",
+    award_recommendation_status: "draft",
+  };
 
 export const mockAwardRecommendationSubmissions: AwardRecommendationSubmission[] =
   [
@@ -198,6 +230,8 @@ export const mockOpportunityDetail = {
     funding_instruments: null,
     is_cost_sharing: null,
     version_number: 1,
+    opportunity_summary_id: "1",
+    updated_at: "2024-01-01T00:00:00Z",
   },
 };
 
@@ -632,7 +666,6 @@ export const fakeCompetition = {
 export const baseApiKey: ApiKey = {
   api_key_id: "test-key-id",
   key_name: "Test API Key",
-  key_id: "abc123",
   created_at: "2023-01-01T00:00:00Z",
   last_used: null,
   is_active: true,
@@ -645,7 +678,6 @@ export const usedApiKey: ApiKey = {
   ...baseApiKey,
   api_key_id: "used-key-id",
   key_name: "Used API Key",
-  key_id: "def456",
   last_used: "2023-06-01T12:00:00Z",
 };
 
@@ -656,7 +688,6 @@ export const inactiveApiKey: ApiKey = {
   ...baseApiKey,
   api_key_id: "inactive-key-id",
   key_name: "Inactive API Key",
-  key_id: "ghi789",
   is_active: false,
   last_used: "2023-05-01T10:30:00Z",
 };
@@ -669,7 +700,6 @@ export const longNameApiKey: ApiKey = {
   api_key_id: "long-name-key-id",
   key_name:
     "This is a very long API key name that might cause display issues in the UI",
-  key_id: "jkl012",
 };
 
 /**
@@ -679,7 +709,6 @@ export const specialCharApiKey: ApiKey = {
   ...baseApiKey,
   api_key_id: "special-char-key-id",
   key_name: "API Key with Special-Characters & Symbols!",
-  key_id: "mno345",
 };
 
 /**
@@ -855,8 +884,7 @@ export const fakeTestUser: TestUser = {
 };
 
 export const fakeUserProfile: UserProfile = {
-  token: "a token",
-  user_id: "an id",
+  isLoggedIn: true,
 };
 
 export const mockApplicationSubmission: ApplicationSubmission = {

@@ -8,10 +8,15 @@ from freezegun import freeze_time
 
 import tests.src.db.models.factories as factories
 from src.legacy_soap_api.legacy_soap_api_auth import (
+    SOAP_ACTION_HEADER_KEY,
     SOAPClientCertificate,
     SOAPClientMissingCertificate,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, get_soap_config
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    get_soap_config,
+)
 from src.legacy_soap_api.legacy_soap_api_proxy import (
     get_proxy_headers,
     get_proxy_response,
@@ -42,6 +47,18 @@ def test_get_proxy_response(enable_factory_create, monkeypatch, db_session):
     with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send:
         get_proxy_response(soap_request)
         mock_send.assert_called_once_with(ANY, stream=True, cert=None, timeout=3600)
+
+
+def test_get_proxy_response_passes_soap_action_header(
+    enable_factory_create, monkeypatch, db_session
+):
+    soap_request = create_soap_request(SOAP_PAYLOAD)
+    with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send:
+        get_proxy_response(soap_request)
+        assert (
+            mock_send.call_args_list[0][0][0].headers.get(SOAP_ACTION_HEADER_KEY, "")
+            == f"{GRANTOR_SOAP_ACTION_PATH}/GetApplicationZip"
+        )
 
 
 @freeze_time("2024-04-03 12:00:00", tz_offset=0)
@@ -138,7 +155,8 @@ def test_request_gets_correct_proxy_url_when_request_has_auth_for_applicants(ena
         assert mock_request.call_args_list[0][0][0].url == expected
 
 
-def test_request_gets_correct_proxy_headers_when_no_auth(enable_factory_create):
+def test_request_gets_correct_proxy_headers_when_no_auth(enable_factory_create, caplog):
+    caplog.set_level(logging.INFO)
     soap_request = create_soap_request(SOAP_PAYLOAD)
     soap_request.auth = None
     soap_request.headers = {"X-Gg-S2S-Uri": "https://google.com/xyz", "x": "1"}
@@ -146,6 +164,12 @@ def test_request_gets_correct_proxy_headers_when_no_auth(enable_factory_create):
     headers = get_proxy_headers(soap_request, config, soap_request.auth)
     expected = {"x": "1"}
     assert headers == expected
+    record = next(
+        r
+        for r in caplog.records
+        if r.message == "soap_client: filtered headers being sent to legacy"
+    )
+    assert list(record.filtered_header_keys) == ["x"]
 
 
 def test_request_gets_correct_proxy_headers_when_there_is_auth(enable_factory_create):
@@ -156,7 +180,10 @@ def test_request_gets_correct_proxy_headers_when_there_is_auth(enable_factory_cr
     ) as mock_generate_soap_jwt:
         mock_generate_soap_jwt.return_value = "123456"
         headers = get_proxy_headers(soap_request, config, soap_request.auth)
-        expected = {"S2S_PARTNER_CERTID_JWT_B64": "MTIzNDU2"}
+        expected = {
+            "S2S_PARTNER_CERTID_JWT_B64": "MTIzNDU2",
+            "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/GetApplicationZip",
+        }
         assert headers == expected
 
 

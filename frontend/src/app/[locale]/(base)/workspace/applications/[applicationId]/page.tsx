@@ -3,8 +3,11 @@ import TopLevelError from "src/app/[locale]/(base)/error/page";
 import ApplicationContainer from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationContainer";
 import { ApplicationHistoryCardProps } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationHistoryTable";
 import { ApplicationDetailsCardProps } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/InformationCard";
-import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import {
+  ApiRequestError,
+  MissingAuthError,
+  parseErrorStatus,
+} from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getApplicationDetails,
@@ -12,6 +15,7 @@ import {
   getLatestApplicationSubmission,
 } from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -34,12 +38,8 @@ interface ApplicationLandingPageProps {
 }
 
 async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
-  const userSession = await getSession();
   const t = await getTranslations("Application");
 
-  if (!userSession || !userSession.token) {
-    return <TopLevelError />;
-  }
   const { applicationId } = await params;
   let details = {} as ApplicationDetailsCardProps;
   let historyDetails = [] as ApplicationHistoryCardProps;
@@ -49,9 +49,9 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     const response = await getApplicationDetails(applicationId);
 
     if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving application details for (${applicationId})`,
-        response,
+      logger.error(
+        { applicationId, statusCode: response.status_code },
+        "Error retrieving application details",
       );
       // TODO #9637
       // eslint-disable-next-line react-hooks/error-boundaries
@@ -63,9 +63,13 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       String(opportunityId),
     );
     if (opportunityResponse.status_code !== 200) {
-      console.error(
-        `Error retrieving opportunity details for (${opportunityId})`,
-        response,
+      logger.error(
+        {
+          applicationId,
+          opportunityId,
+          statusCode: opportunityResponse.status_code,
+        },
+        "Error retrieving opportunity details",
       );
       // TODO #9637
       // eslint-disable-next-line react-hooks/error-boundaries
@@ -73,10 +77,13 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     }
     opportunity = opportunityResponse.data;
   } catch (e) {
+    if (e instanceof MissingAuthError) {
+      return <TopLevelError />;
+    }
     if (parseErrorStatus(e as ApiRequestError) === 404) {
-      console.error(
-        `Error retrieving application details for application (${applicationId})`,
-        e,
+      logger.error(
+        { err: e, applicationId },
+        "Error retrieving application details",
       );
       notFound();
     }
@@ -85,17 +92,17 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   try {
     const historyResponse = await getApplicationHistory(applicationId);
     if (historyResponse.status_code !== 200) {
-      console.error(
-        `Error retrieving application history details for (${applicationId})`,
-        historyResponse,
+      logger.error(
+        { applicationId, statusCode: historyResponse.status_code },
+        "Error retrieving application history details",
       );
     } else {
       historyDetails = historyResponse.data;
     }
   } catch (e) {
-    console.error(
-      `Error retrieving application history details for (${applicationId})`,
-      e,
+    logger.error(
+      { err: e, applicationId },
+      "Error retrieving application history details",
     );
   }
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { postUserEvent } from "src/services/event/postUserEvent";
 import { OpportunityDocument } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 
@@ -30,13 +33,26 @@ const DocumentTable = ({
         {documents.map((document, index) => (
           <tr key={index}>
             <td data-label={t("tableColFileName")}>
-              <Link
-                target="_blank"
-                href={document.download_path}
-                id={`opportunity-document-link-${opportunityId}-${document.file_name}`}
-              >
-                {document.file_name}
-              </Link>
+              {document.download_path ? (
+                <Link
+                  target="_blank"
+                  href={document.download_path}
+                  id={`opportunity-document-link-${opportunityId}-${document.file_name}`}
+                  onClick={() => {
+                    postUserEvent({
+                      name: "click_download_opportunity_document",
+                      properties: {
+                        opportunityId,
+                        fileName: document.file_name,
+                      },
+                    });
+                  }}
+                >
+                  {document.file_name}
+                </Link>
+              ) : (
+                document.file_name
+              )}
             </td>
             <td data-label={t("tableColDescription")}>
               <div>{document.file_description}</div>

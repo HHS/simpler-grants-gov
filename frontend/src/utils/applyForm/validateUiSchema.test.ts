@@ -68,12 +68,371 @@ describe("validateFormData", () => {
         {
           type: "field",
           definition: "/properties/TestField",
+          printDescription: true,
         },
       ];
 
       const schemaErrors = validateUiSchema(validUiSchema);
 
       expect(schemaErrors).toBeFalsy();
+    });
+
+    it("should validate a Table multiField UI schema", () => {
+      const validUiSchema: UiSchema = [
+        {
+          type: "section",
+          name: "table_demo",
+          label: "Table Demo",
+          children: [
+            {
+              type: "multiField",
+              name: "summary_table",
+              widget: "Table",
+              definition: [
+                "/properties/first_value",
+                "/properties/second_value",
+              ],
+              children: {
+                columns: [
+                  {
+                    columnHeader: "Item",
+                    width: 40,
+                  },
+                  {
+                    columnHeader: "First Value",
+                    width: 30,
+                  },
+                  {
+                    columnHeader: "Second Value",
+                    width: 30,
+                  },
+                ],
+                rows: [
+                  {
+                    cells: [
+                      {
+                        type: "input",
+                        definition: "/properties/first_value",
+                        format: "integer",
+                      },
+                      {
+                        type: "readOnly",
+                        definition: "/properties/second_value",
+                        format: "dollar",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ];
+
+      const schemaErrors = validateUiSchema(validUiSchema);
+
+      expect(schemaErrors).toBeFalsy();
+    });
+
+    it("should validate each supported Table numeric format", () => {
+      const validUiSchema: UiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+          definition: [
+            "/properties/integer_value",
+            "/properties/decimal_value",
+            "/properties/currency_value",
+            "/properties/dollar_value",
+            "/properties/percentage_value",
+          ],
+          children: {
+            columns: [
+              {
+                columnHeader: "Item",
+              },
+              {
+                columnHeader: "Integer",
+              },
+              {
+                columnHeader: "Decimal",
+              },
+              {
+                columnHeader: "Currency",
+              },
+              {
+                columnHeader: "Dollar",
+              },
+              {
+                columnHeader: "Percentage",
+              },
+            ],
+            rows: [
+              {
+                cells: [
+                  {
+                    type: "input",
+                    definition: "/properties/integer_value",
+                    format: "integer",
+                  },
+                  {
+                    type: "readOnly",
+                    definition: "/properties/decimal_value",
+                    format: "decimal",
+                  },
+                  {
+                    type: "readOnly",
+                    definition: "/properties/currency_value",
+                    format: "currency",
+                  },
+                  {
+                    type: "readOnly",
+                    definition: "/properties/dollar_value",
+                    format: "dollar",
+                  },
+                  {
+                    type: "readOnly",
+                    definition: "/properties/percentage_value",
+                    format: "percentage",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ];
+
+      const schemaErrors = validateUiSchema(validUiSchema);
+
+      expect(schemaErrors).toBeFalsy();
+    });
+
+    it("should invalidate a Table cell with an unsupported numeric format", () => {
+      const invalidUiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+          definition: ["/properties/first_value"],
+          children: {
+            columns: [
+              {
+                columnHeader: "Item",
+              },
+              {
+                columnHeader: "First Value",
+              },
+            ],
+            rows: [
+              {
+                rowHeader: "First Row",
+                cells: [
+                  {
+                    type: "input",
+                    definition: "/properties/first_value",
+                    format: "money",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ] as unknown as UiSchema;
+
+      const schemaErrors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(schemaErrors)).toBe(true);
+
+      const hasInvalidFormatError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+
+          return (
+            instancePath === "/0/children/rows/0/cells/0/format" &&
+            message.includes("must be equal to one of the allowed values")
+          );
+        });
+
+      expect(hasInvalidFormatError).toBe(true);
+    });
+
+    it("should invalidate a plainText Table cell with a numeric format", () => {
+      const invalidUiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+          definition: ["/properties/first_value"],
+          children: {
+            columns: [
+              {
+                columnHeader: "Item",
+              },
+              {
+                columnHeader: "First Value",
+              },
+            ],
+            rows: [
+              {
+                rowHeader: "First Row",
+                cells: [
+                  {
+                    type: "plainText",
+                    staticContent: "Static content",
+                    format: "currency",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ] as unknown as UiSchema;
+
+      const schemaErrors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(schemaErrors)).toBe(true);
+
+      const hasPlainTextFormatError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+
+          return (
+            instancePath === "/0/children/rows/0/cells/0" &&
+            message.includes("must NOT be valid")
+          );
+        });
+
+      expect(hasPlainTextFormatError).toBe(true);
+    });
+
+    it("should invalidate a Table multiField without required configuration", () => {
+      const invalidUiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+        },
+      ] as unknown as UiSchema;
+
+      const schemaErrors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(schemaErrors)).toBe(true);
+
+      const hasMissingTableConfigurationError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+
+          return (
+            instancePath === "/0" &&
+            (message.includes("definition") || message.includes("children"))
+          );
+        });
+
+      expect(hasMissingTableConfigurationError).toBe(true);
+    });
+
+    it("should invalidate a Table multiField without definition", () => {
+      const invalidUiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+          children: {
+            columns: [
+              {
+                columnHeader: "Item",
+              },
+            ],
+            rows: [
+              {
+                cells: [
+                  {
+                    type: "plainText",
+                    staticContent: "First Row",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ] as unknown as UiSchema;
+
+      const schemaErrors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(schemaErrors)).toBe(true);
+
+      const hasMissingDefinitionError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+
+          return instancePath === "/0" && message.includes("definition");
+        });
+
+      expect(hasMissingDefinitionError).toBe(true);
+    });
+
+    it("should invalidate a plainText table cell without staticContent", () => {
+      const invalidUiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+          definition: ["/properties/first_value"],
+          children: {
+            columns: [
+              {
+                columnHeader: "Item",
+              },
+            ],
+            rows: [
+              {
+                cells: [
+                  {
+                    type: "plainText",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ] as unknown as UiSchema;
+
+      const schemaErrors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(schemaErrors)).toBe(true);
+
+      const hasMissingStaticContentError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+
+          return (
+            instancePath === "/0/children/rows/0/cells/0" &&
+            message.includes("staticContent")
+          );
+        });
+
+      expect(hasMissingStaticContentError).toBe(true);
     });
 
     it("should show an error for an invalid UI schema", () => {
@@ -143,6 +502,131 @@ describe("validateFormData", () => {
         });
 
       expect(hasFieldListChildrenError).toBe(true);
+    });
+
+    it("should validate fieldList with hideFieldListHeading", () => {
+      const validUiSchema = [
+        {
+          type: "fieldList",
+          label: "Test",
+          name: "test",
+          hideFieldListHeading: true,
+          children: [
+            {
+              type: "field",
+              definition: "/properties/TestField",
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      const errors = validateUiSchema(validUiSchema);
+
+      expect(errors).toBeFalsy();
+    });
+
+    it("should invalidate fieldList with a Table child", () => {
+      const invalidUiSchema = [
+        {
+          type: "fieldList",
+          label: "Test",
+          name: "test",
+          children: [
+            {
+              type: "multiField",
+              name: "summary_table",
+              widget: "Table",
+              definition: ["/properties/first_value"],
+              children: {
+                columns: [
+                  {
+                    columnHeader: "Item",
+                  },
+                ],
+                rows: [
+                  {
+                    cells: [
+                      {
+                        type: "plainText",
+                        staticContent: "First Row",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      const errors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(errors)).toBe(true);
+
+      const hasFieldListTableError =
+        Array.isArray(errors) &&
+        errors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          return instancePath.startsWith("/0/children/0");
+        });
+
+      expect(hasFieldListTableError).toBe(true);
+    });
+
+    it("should validate a section with a text node child", () => {
+      const validUiSchema: UiSchema = [
+        {
+          type: "section",
+          name: "test",
+          label: "test",
+          children: [
+            {
+              type: "text",
+              name: "test_note",
+              content: "Some static copy shown between fields.",
+            },
+            {
+              type: "field",
+              definition: "/properties/TestField",
+            },
+          ],
+        },
+      ];
+
+      const errors = validateUiSchema(validUiSchema);
+
+      expect(errors).toBeFalsy();
+    });
+
+    it("should invalidate a text node missing content", () => {
+      const invalidUiSchema = [
+        {
+          type: "section",
+          name: "test",
+          label: "test",
+          children: [
+            {
+              type: "text",
+              name: "test_note",
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      const errors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(errors)).toBe(true);
+
+      const hasMissingContentError =
+        Array.isArray(errors) &&
+        errors.some((error) => {
+          const message =
+            typeof error.message === "string" ? error.message : "";
+          return message.includes("content");
+        });
+
+      expect(hasMissingContentError).toBe(true);
     });
   });
 });

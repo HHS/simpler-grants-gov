@@ -2,6 +2,7 @@
 
 import { getSession } from "src/services/auth/session";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { logger } from "src/services/logger/simplerLogger";
 import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { SavedOpportunitiesScope } from "src/types/opportunity/savedOpportunitiesTypes";
 import {
@@ -107,7 +108,10 @@ export const fetchSavedOpportunities = async (
 ): Promise<MinimalOpportunity[]> => {
   try {
     const session = await getSession();
-    if (!session || !session.token) {
+    // Supplementary data: this renders on pages available to logged-out users, so a
+    // missing token degrades to an empty list rather than throwing (unlike required-data
+    // fetchers such as fetchApplications, which throw MissingAuthError).
+    if (!session?.token) {
       return [];
     }
     const savedOpportunities = await getSavedOpportunities(
@@ -117,8 +121,8 @@ export const fetchSavedOpportunities = async (
       organizationIdsFilter,
     );
     return savedOpportunities;
-  } catch (error: unknown) {
-    console.error("Error fetching saved opportunities:", error);
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Error fetching saved opportunities");
     return [];
   }
 };

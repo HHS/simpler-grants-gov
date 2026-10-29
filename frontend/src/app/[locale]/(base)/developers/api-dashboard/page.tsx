@@ -1,6 +1,13 @@
+import {
+  ApiKeyAlert,
+  ApiKeyAlertProvider,
+} from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyAlertProvider";
 import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
 import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
-import { fetchApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
+import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
+import { getSession } from "src/services/auth/session";
+import { handleListApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
@@ -13,12 +20,17 @@ export const revalidate = 0;
 export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "ApiDashboard" });
-  let apiKeys;
+  let apiKeyResponse;
+
+  const session = await getSession();
+  if (!session?.token) {
+    return <Unauthenticated />;
+  }
 
   try {
-    apiKeys = await fetchApiKeys();
+    apiKeyResponse = await handleListApiKeys(session.user_id);
   } catch (e) {
-    console.error("Failed to fetch API keys:", e);
+    logger.error({ err: e }, "Failed to fetch API keys");
     return (
       <>
         <div className="grid-container margin-y-5">
@@ -30,13 +42,17 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
   }
 
   return (
-    <div className="grid-container margin-y-5">
-      <div className="flex-justify margin-bottom-4">
+    // wraps the whole page so opening any API key modal clears the API key confirmation
+    <ApiKeyAlertProvider>
+      <div className="grid-container margin-y-5">
         <h1>{t("heading")}</h1>
-        <CreateApiKeyButton />
-      </div>
+        <div className="margin-bottom-4">
+          <CreateApiKeyButton />
+        </div>
 
-      <ApiKeyTable apiKeys={apiKeys} />
-    </div>
+        <ApiKeyAlert />
+        <ApiKeyTable apiKeys={apiKeyResponse.data} />
+      </div>
+    </ApiKeyAlertProvider>
   );
 }

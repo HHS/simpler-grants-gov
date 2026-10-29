@@ -1,5 +1,3 @@
-import { UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import { Organization } from "src/types/applicationResponseTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import {
@@ -17,10 +15,6 @@ import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 export const getOrganizationDetails = async (
   organizationId: string,
 ): Promise<Organization> => {
-  const session = await getSession();
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
   const resp = await fetchOrganizationWithMethod("GET")({
     subPath: organizationId,
   });
@@ -41,12 +35,6 @@ export const getUserOrganizations = async (
 export const getOrganizationUsers = async (
   organizationId: string,
 ): Promise<UserDetail[]> => {
-  const session = await getSession();
-
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
-
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/users`,
     body: {
@@ -71,12 +59,6 @@ export const getOrganizationUsers = async (
 export const getOrganizationRoles = async (
   organizationId: string,
 ): Promise<UserRole[]> => {
-  const session = await getSession();
-
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
-
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/roles/list`,
   });
@@ -104,12 +86,6 @@ export const inviteUserToOrganization = async (requestData: {
 export const getOrganizationPendingInvitations = async (
   organizationId: string,
 ): Promise<OrganizationPendingInvitation[]> => {
-  const session = await getSession();
-
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
-
   const response = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/invitations/list`,
     body: {
@@ -142,12 +118,6 @@ export const updateOrganizationUserRoles = async (
   userId: string,
   roleIds: string[],
 ): Promise<UserDetail> => {
-  const session = await getSession();
-
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
-
   const resp = await fetchOrganizationWithMethod("PUT")({
     subPath: `${organizationId}/users/${userId}`,
     body: { role_ids: roleIds },
@@ -168,12 +138,6 @@ export const removeOrganizationUser = async (
   organizationId: string,
   userId: string,
 ): Promise<UserDetail> => {
-  const session = await getSession();
-
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
-
   const resp = await fetchOrganizationWithMethod("DELETE")({
     subPath: `${organizationId}/users/${userId}`,
   });
@@ -192,12 +156,6 @@ export const removeOrganizationUser = async (
 export const getOrganizationLegacyUsers = async (
   organizationId: string,
 ): Promise<OrganizationLegacyUser[]> => {
-  const session = await getSession();
-
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
-
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/legacy-users`,
     body: {

@@ -116,7 +116,24 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
             ]
           }
         },
+        # See scheduled_jobs.tf for why only the ECS launch-failure errors are
+        # retried and States.TaskFailed is left terminal.
+        "Retry" : local.ecs_run_task_retry,
+        "Catch" : local.ecs_run_task_catch,
         "End" : true
+      },
+      # Terminal failure state. Unlike scheduled jobs, the command here comes
+      # from the triggering S3 event rather than from config, so it is read off
+      # the execution input to identify which upload failed.
+      "JobFailed" : {
+        "Type" : "Fail",
+        "Error" : "FileUploadJobFailed",
+        # See scheduled_jobs.tf: the caught error is passed as arguments rather
+        # than interpolated. task_command is not read off the input here either
+        # -- States.JsonToString raises States.Runtime if the key is absent
+        # (e.g. a console re-run with a trimmed payload), which would discard
+        # the very error this state exists to report.
+        "CausePath" : "States.Format('File upload job ${each.key} (${var.service_name}) failed in ${var.environment_name}. ${local.job_failed_cause_suffix}"
       }
     }
   })

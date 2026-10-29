@@ -37,9 +37,7 @@ jest.mock(
         {showShareButton ? (
           <button
             type="button"
-            onClick={(event) =>
-              onShareClick?.(event.currentTarget as HTMLButtonElement)
-            }
+            onClick={(event) => onShareClick?.(event.currentTarget)}
           >
             Open share modal
           </button>

@@ -1,30 +1,11 @@
-import logging
-import uuid
 from uuid import UUID
 
-from grants_shared.adapters import db
-from grants_shared.util.api_key_gen import generate_api_key_id
-from sqlalchemy import select
-
-from src.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
+from src.adapters import db
+from src.api.response import ValidationErrorDetail
+from src.api.route_utils import raise_flask_error
+from src.auth.api_key_handler import SimplerApiKeyHandler
 from src.db.models.user_models import UserApiKey
-
-logger = logging.getLogger(__name__)
-
-# Maximum number of retries for key generation
-MAX_KEY_GENERATION_RETRIES = 5
-
-
-class KeyGenerationError(Exception):
-    """Raised when unable to generate a unique API key after multiple retries."""
-
-    pass
-
-
-class ApiGatewayIntegrationError(Exception):
-    """Raised when there's an error integrating with AWS API Gateway."""
-
-    pass
+from src.validation.validation_constants import ValidationErrorType
 
 
 class CreateApiKeyParams:
@@ -34,86 +15,56 @@ class CreateApiKeyParams:
         self.key_name = json_data["key_name"]
 
 
-def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> UserApiKey:
+def _check_blank_key_name(key_name: str) -> None:
+    """Raise 422 if key_name is blank after stripping whitespace.
+
+    The schema's Length(min=1) validates the raw input, so a whitespace-only
+    value like ' ' passes schema validation but strips to ''. Catch that here.
+    """
+    if not key_name:
+        raise_flask_error(
+            422,
+            message="API key name cannot be blank",
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=ValidationErrorType.MIN_LENGTH,
+                    field="key_name",
+                    message="API key name cannot be blank",
+                )
+            ],
+        )
+
+
+def _check_duplicate_key_name(
+    db_session: db.Session, user_id: UUID, key_name: str, exclude_api_key_id: UUID | None = None
+) -> None:
+    """Raise 422 if the user already has a key with this name (case-insensitive, trimmed)."""
+    existing_keys = SimplerApiKeyHandler(db_session).get_user_api_keys(user_id)
+    normalized = key_name.strip().lower()
+    for key in existing_keys:
+        if exclude_api_key_id and key.api_key_id == exclude_api_key_id:
+            continue
+        if key.key_name.strip().lower() == normalized:
+            raise_flask_error(
+                422,
+                message="An API key with this name already exists",
+                validation_issues=[
+                    ValidationErrorDetail(
+                        type=ValidationErrorType.DUPLICATE_API_KEY_NAME,
+                        field="key_name",
+                        message="An API key with this name already exists",
+                    )
+                ],
+            )
+
+
+def create_api_key(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> tuple[UserApiKey, str]:
     params = CreateApiKeyParams(json_data)
+    key_name = params.key_name.strip()
 
-    key_name = params.key_name
-    is_active = True
+    _check_blank_key_name(key_name)
+    _check_duplicate_key_name(db_session, user_id, key_name)
 
-    # Generate a unique key_id with collision detection
-    key_id = _generate_unique_key_id(db_session)
-
-    # Create the new API key in our database first
-    api_key = UserApiKey(
-        api_key_id=uuid.uuid4(),
-        user_id=user_id,
-        key_name=key_name,
-        key_id=key_id,
-        is_active=is_active,
-    )
-    db_session.add(api_key)
-
-    # Import the API key to AWS API Gateway
-    _import_api_key_to_aws_gateway(api_key)
-
-    logger.info(
-        "Created new API key",
-        extra={
-            "api_key_id": api_key.api_key_id,
-            "user_id": user_id,
-            "key_name": key_name,
-            "is_active": is_active,
-        },
-    )
-
-    return api_key
-
-
-def _import_api_key_to_aws_gateway(api_key: UserApiKey) -> None:
-    """Import an API key to AWS API Gateway and associate it with a usage plan"""
-    try:
-        config = ApiGatewayConfig()
-
-        gateway_response = import_api_key(
-            api_key=api_key.key_id,
-            name=api_key.key_name,
-            description=f"API key for user {api_key.user_id}",
-            enabled=api_key.is_active,
-            usage_plan_id=config.default_usage_plan_id,
-        )
-
-        logger.info(
-            "Successfully imported API key to AWS API Gateway and associated with usage plan",
-            extra={
-                "api_key_id": api_key.api_key_id,
-                "gateway_key_id": gateway_response.id,
-                "usage_plan_id": config.default_usage_plan_id,
-            },
-        )
-
-    except Exception as e:
-        # Re-raise as a domain-specific exception without additional logging
-        # since the AWS adapter already logs the underlying error
-        raise ApiGatewayIntegrationError("Failed to import API key to AWS API Gateway") from e
-
-
-def _generate_unique_key_id(db_session: db.Session) -> str:
-    for _attempt in range(MAX_KEY_GENERATION_RETRIES):
-        key_id = generate_api_key_id()
-
-        # Check if this key_id already exists
-        existing_key = db_session.execute(
-            select(UserApiKey).filter(UserApiKey.key_id == key_id)
-        ).scalar_one_or_none()
-
-        if existing_key is None:
-            return key_id
-
-    # If we get here, we failed to generate a unique key after all retries
-    logger.error(
-        "Failed to generate unique key_id after maximum retries",
-        extra={"max_retries": MAX_KEY_GENERATION_RETRIES},
-    )
-    raise KeyGenerationError(
-        f"Unable to generate unique API key after {MAX_KEY_GENERATION_RETRIES} attempts"
-    )
+    return SimplerApiKeyHandler(db_session).create_api_key(user_id, key_name)

@@ -24,7 +24,7 @@ jest.mock("next-intl/server", () => ({
 
 const applications = jest.fn().mockResolvedValue([]);
 
-jest.mock("src/services/fetch/fetchers/applicationsFetcher", () => ({
+jest.mock("src/services/fetch/fetchers/userApplicationsFetcher", () => ({
   fetchApplications: () => applications() as Promise<ApplicationDetail[]>,
 }));
 

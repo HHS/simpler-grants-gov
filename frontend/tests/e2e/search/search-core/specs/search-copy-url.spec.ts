@@ -7,16 +7,16 @@
 import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { waitForURLContainsQueryParam } from "tests/e2e/playwrightUtils";
-import { fillSearchInputAndSubmit } from "tests/e2e/search/searchSpecUtil";
 import { VALID_TAGS } from "tests/e2e/tags";
+import { fillSearchInputAndSubmit } from "tests/e2e/utils/search/search-utils";
 
 const { baseUrl } = playwrightEnv;
 
-const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 test(
   "should copy search query URL to clipboard",
-  { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+  { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page }, { project }) => {
     // clipboard testing does not work in webkit
     if (project.name.match(/[Ww]ebkit/)) {

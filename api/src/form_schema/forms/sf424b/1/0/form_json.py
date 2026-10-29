@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -46,6 +47,8 @@ As the duly authorized representative of the applicant, I certify that the appli
 17. Will cause to be performed the required financial and compliance audits in accordance with the Single Audit Act Amendments of 1996 and OMB Circular No. A-133, "Audits of States, Local Governments, and Non-Profit Organizations."
 
 18. Will comply with all applicable requirements of all other Federal laws, executive orders, regulations, and policies governing this program.
+
+19. Will comply with the requirements of Section 106(g) of the Trafficking Victims Protection Act (TVPA) of 2000, as amended (22 U.S.C. 7104) which prohibits grant award recipients or a sub-recipient from (1) Engaging in severe forms of trafficking in persons during the period of time that the award is in effect (2) Procuring a commercial sex act during the period of time that the award is in effect or (3) Using forced labor in the performance of the award or subawards under the award.
 """
 
 FORM_JSON_SCHEMA = {
@@ -185,6 +188,7 @@ SF424b_v1_1 = Form(
     form_version="1.1",
     agency_code="SGG",
     omb_number="4040-0007",
+    expiration_date=date(2028, 7, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

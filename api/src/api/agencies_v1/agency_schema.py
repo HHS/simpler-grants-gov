@@ -1,9 +1,7 @@
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
-from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
-
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
-from src.api.schemas.response_schema import PaginationMixinSchema
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
 from src.constants.lookup_constants import OpportunityStatus
 from src.pagination.pagination_schema import generate_pagination_schema
 
@@ -40,10 +38,10 @@ class AgencySearchRequestSchema(Schema):
     )
     query_operator = fields.Enum(
         SearchQueryOperator,
-        load_default=SearchQueryOperator.OR,
+        load_default=SearchQueryOperator.AND,
         metadata={
             "description": "Query operator for combining search conditions",
-            "example": "OR",
+            "example": "AND",
         },
     )
     filters = fields.Nested(AgencySearchFilterV1Schema())

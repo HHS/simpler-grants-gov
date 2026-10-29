@@ -4,23 +4,23 @@ from datetime import datetime
 from typing import Any
 from urllib.parse import unquote
 
-import grants_shared.adapters.db as db
 import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-from grants_shared.util.datetime_util import get_now_us_eastern_date
 from pydantic import BaseModel, ConfigDict
 from requests.adapters import HTTPAdapter
 from sqlalchemy import func, select
 
+import src.adapters.db as db
 from src.auth.endpoint_access_util import can_access
 from src.db.models import staging
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
+from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY = "S2S_PARTNER_CERTID_JWT_B64"
 LOG_LOCAL_RESPONSE_HEADER_KEY = "Log-Local-Response"
 USE_SIMPLER_OVERRIDE_KEY = "Use-Simpler-Override"
 ENABLE_SIMPLER_ROUTE_KEY = "Enable-Simpler-Route"
+SOAP_ACTION_HEADER_KEY = "Soapaction"
 
 
 class SOAPClientCertificateNotConfigured(Exception):

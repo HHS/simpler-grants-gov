@@ -2,6 +2,13 @@
 # Security Hub
 #===================================
 
+locals {
+  # Security Hub standards subscriptions are governed by the organization's
+  # Security Hub *central configuration*, which is only managed from the
+  # delegated administrator account (local.admin_account_id).
+  manage_security_hub_standards = local.is_admin_account
+}
+
 # Enable Security Hub
 resource "aws_securityhub_account" "main" {
   enable_default_standards  = false
@@ -9,23 +16,44 @@ resource "aws_securityhub_account" "main" {
   auto_enable_controls      = true
 }
 
-# Enable security standards
+# Enable security standards (administrator account only -- see local above)
+moved {
+  from = aws_securityhub_standards_subscription.cis_1_2
+  to   = aws_securityhub_standards_subscription.cis_1_2[0]
+}
+moved {
+  from = aws_securityhub_standards_subscription.aws_foundational
+  to   = aws_securityhub_standards_subscription.aws_foundational[0]
+}
+moved {
+  from = aws_securityhub_standards_subscription.cis_1_4
+  to   = aws_securityhub_standards_subscription.cis_1_4[0]
+}
+moved {
+  from = aws_securityhub_standards_subscription.nist_800_53
+  to   = aws_securityhub_standards_subscription.nist_800_53[0]
+}
+
 resource "aws_securityhub_standards_subscription" "cis_1_2" {
+  count         = local.manage_security_hub_standards ? 1 : 0
   depends_on    = [aws_securityhub_account.main]
   standards_arn = "arn:aws:securityhub:::ruleset/cis-aws-foundations-benchmark/v/1.2.0"
 }
 
 resource "aws_securityhub_standards_subscription" "aws_foundational" {
+  count         = local.manage_security_hub_standards ? 1 : 0
   depends_on    = [aws_securityhub_account.main]
   standards_arn = "arn:aws:securityhub:${data.aws_region.current.name}::standards/aws-foundational-security-best-practices/v/1.0.0"
 }
 
 resource "aws_securityhub_standards_subscription" "cis_1_4" {
+  count         = local.manage_security_hub_standards ? 1 : 0
   depends_on    = [aws_securityhub_account.main]
   standards_arn = "arn:aws:securityhub:${data.aws_region.current.name}::standards/cis-aws-foundations-benchmark/v/1.4.0"
 }
 
 resource "aws_securityhub_standards_subscription" "nist_800_53" {
+  count         = local.manage_security_hub_standards ? 1 : 0
   depends_on    = [aws_securityhub_account.main]
   standards_arn = "arn:aws:securityhub:${data.aws_region.current.name}::standards/nist-800-53/v/5.0.0"
 }

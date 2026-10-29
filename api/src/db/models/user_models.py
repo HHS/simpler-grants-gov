@@ -1,25 +1,48 @@
 import uuid
 from datetime import date, datetime
+from typing import Any
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.util import datetime_util
-from sqlalchemy import ForeignKey, UniqueConstraint, and_
+from sqlalchemy import ForeignKey, Index, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
 
-from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType, UserType
+from src.constants.lookup_constants import (
+    ExternalUserType,
+    NotificationQueueStatus,
+    NotificationType,
+    Privilege,
+    RoleType,
+    UserType,
+)
 from src.db.models.agency_models import Agency
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.auth_base_models import (
+    BaseLinkExternalUser,
+    BaseLoginGovState,
+    BaseUser,
+    BaseUserApiKey,
+    BaseUserTokenSession,
+)
+from src.db.models.base import TimestampMixin
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
-from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
+from src.db.models.lookup.lookup_column import LookupColumn
+from src.db.models.lookup_models import (
+    LkExternalUserType,
+    LkNotificationQueueStatus,
+    LkNotificationType,
+    LkPrivilege,
+    LkRoleType,
+    LkUserType,
+)
 from src.db.models.opportunity_models import Opportunity
+from src.db.models.task_models import JobLog
+from src.util import datetime_util
 
 
-class User(ApiSchemaTable, TimestampMixin):
+class User(BaseUser, ApiSchemaTable, TimestampMixin):
     __tablename__ = "user"
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
@@ -83,6 +106,12 @@ class User(ApiSchemaTable, TimestampMixin):
         default=UserType.STANDARD,
     )
 
+    notification_preferences: Mapped[list[UserNotificationPreference]] = relationship(
+        "UserNotificationPreference",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def email(self) -> str | None:
         if self.linked_login_gov_external_user is not None:
@@ -106,12 +135,10 @@ class User(ApiSchemaTable, TimestampMixin):
         return [iur.role for iur in self.internal_user_roles]
 
 
-class LinkExternalUser(ApiSchemaTable, TimestampMixin):
+class LinkExternalUser(BaseLinkExternalUser, ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_external_user"
 
     link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-
-    external_user_id: Mapped[str] = mapped_column(index=True, unique=True)
 
     external_user_type: Mapped[ExternalUserType] = mapped_column(
         "external_user_type_id",
@@ -123,32 +150,29 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User)
 
-    email: Mapped[str] = mapped_column(index=True)
 
-
-class UserTokenSession(ApiSchemaTable, TimestampMixin):
+class UserTokenSession(BaseUserTokenSession, ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_token_session"
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
-    user: Mapped[User] = relationship(User)
-
     token_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
 
-    expires_at: Mapped[datetime]
+    user: Mapped[User] = relationship(User)
 
-    # When a user logs out, we set this flag to False.
-    is_valid: Mapped[bool] = mapped_column(default=True)
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.token_id": self.token_id,
+            "auth.user_id": self.user_id,
+        }
 
 
-class LoginGovState(ApiSchemaTable, TimestampMixin):
+class LoginGovState(BaseLoginGovState, ApiSchemaTable, TimestampMixin):
     """Table used to store temporary state during the OAuth login flow"""
 
     __tablename__ = "login_gov_state"
 
     login_gov_state_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
-
-    # https://openid.net/specs/openid-connect-core-1_0.html#NonceNotes
-    nonce: Mapped[uuid.UUID]
 
 
 class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
@@ -353,21 +377,23 @@ class SuppressedEmail(ApiSchemaTable, TimestampMixin):
     last_update_time: Mapped[datetime] = mapped_column(index=True)
 
 
-class UserApiKey(ApiSchemaTable, TimestampMixin):
+class UserApiKey(BaseUserApiKey, ApiSchemaTable, TimestampMixin):
     """API Key table for user authentication to the API"""
 
     __tablename__ = "user_api_key"
 
     api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    key_name: Mapped[str]
-    key_id: Mapped[str] = mapped_column(
-        unique=True, index=True, comment="AWS API Gateway key identifier"
-    )
+
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
-    last_used: Mapped[datetime | None]
-    is_active: Mapped[bool] = mapped_column(default=True)
 
     user: Mapped[User] = relationship(User, back_populates="api_keys", uselist=False)
+
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.api_key_id": self.api_key_id,
+            "auth.user_id": self.user_id,
+        }
 
 
 class Role(ApiSchemaTable, TimestampMixin):
@@ -526,3 +552,86 @@ class LegacyCertificate(ApiSchemaTable, TimestampMixin):
         UUID, ForeignKey(Organization.organization_id)
     )
     organization: Mapped[Organization | None] = relationship(Organization)
+
+
+class UserNotificationPreference(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_notification_preference"
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "notification_type_id"),
+        ApiSchemaTable.__table_args__,
+    )
+
+    user_notification_preference_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    is_enabled: Mapped[bool] = mapped_column(nullable=False)
+
+    notification_type: Mapped[NotificationType] = mapped_column(
+        "notification_type_id",
+        LookupColumn(LkNotificationType),
+        ForeignKey(LkNotificationType.notification_type_id),
+        nullable=False,
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
+    user: Mapped[User] = relationship(User, back_populates="notification_preferences")
+
+
+class NotificationJobContent(ApiSchemaTable, TimestampMixin):
+    """Rendered email content for a single run of a bulk notification job"""
+
+    __tablename__ = "notification_job_content"
+
+    notification_job_content_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    job_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(JobLog.job_id), unique=True)
+    job: Mapped[JobLog] = relationship(JobLog)
+
+    notification_type: Mapped[NotificationType] = mapped_column(
+        "notification_type_id",
+        LookupColumn(LkNotificationType),
+        ForeignKey(LkNotificationType.notification_type_id),
+        nullable=False,
+    )
+
+    subject: Mapped[str]
+    email_body: Mapped[str]
+
+
+class NotificationQueue(ApiSchemaTable, TimestampMixin):
+    """Work queue and per-recipient send log for a bulk notification job"""
+
+    __tablename__ = "notification_queue"
+
+    __table_args__ = (
+        UniqueConstraint("job_content_id", "user_id"),
+        # Supports the processor's drain query, which filters on status and orders by created_at
+        Index(
+            "notification_queue_status_created_at_idx", "notification_queue_status_id", "created_at"
+        ),
+        ApiSchemaTable.__table_args__,
+    )
+
+    notification_queue_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    job_content_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(NotificationJobContent.notification_job_content_id)
+    )
+    job_content: Mapped[NotificationJobContent] = relationship(NotificationJobContent)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
+    user: Mapped[User] = relationship(User)
+
+    status: Mapped[NotificationQueueStatus] = mapped_column(
+        "notification_queue_status_id",
+        LookupColumn(LkNotificationQueueStatus),
+        ForeignKey(LkNotificationQueueStatus.notification_queue_status_id),
+        nullable=False,
+    )
+
+    ses_message_id: Mapped[str | None]

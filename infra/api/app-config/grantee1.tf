@@ -12,6 +12,7 @@ module "grantee1_config" {
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
+  database_engine_version           = "17.7"
   database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwyNjY5ODkxMDczODI5NDA4MTg"
   database_deletion_protection      = false
   has_incident_management_service   = local.has_incident_management_service
@@ -58,6 +59,9 @@ module "grantee1_config" {
 
     # Reuse staging's login.gov sandbox app registration
     LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-staging-simpler-grants-gov"
+
+    # Virus scanning endpoints
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

@@ -18,7 +18,7 @@ const applicationDetailsObject: ApplicationDetail = {
 const errors = null;
 
 const meta = {
-  title: "Components/Application/CompetitionFormsTable",
+  title: "Components/Application/ApplicationFormsTable",
   component: ApplicationFormsTable,
   args: {
     errors,

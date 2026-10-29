@@ -1,0 +1,59 @@
+{
+  "name": "Deliverable Percent Done by Points",
+  "display": "scalar",
+  "visualization_settings": {
+    "scalar.field": "percent_complete"
+  },
+  "template_tags": {
+    "deliverable_title": {
+      "widget-type": "string/=",
+      "default": null,
+      "name": "deliverable_title",
+      "type": "dimension",
+      "id": "562cdd4d-d09b-4453-87b9-7ee0c7cdcd14",
+      "dimension": [
+        "field",
+        246,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Deliverable Title",
+      "options": null,
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_deliverable",
+        "column": "title"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "slug": "deliverable_title",
+      "name": "Deliverable Title",
+      "type": "string/=",
+      "values_source_type": "card",
+      "id": "562cdd4d-d09b-4453-87b9-7ee0c7cdcd14",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "deliverable_title"
+        ]
+      ],
+      "values_source_config": {
+        "card_id": 205,
+        "value_field": [
+          "field",
+          "title",
+          {
+            "base-type": "type/Text"
+          }
+        ]
+      },
+      "required": true
+    }
+  ]
+}

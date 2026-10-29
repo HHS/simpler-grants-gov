@@ -1,17 +1,18 @@
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import { AgencySelector } from "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector";
-import { UnauthorizedError } from "src/errors";
+import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
+import { MissingAuthError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchOpportunitiesByAgency } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import {
-  fetchUserAgencies,
-  UserAgency,
-} from "src/services/fetch/fetchers/userAgenciesFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
+import { formatTimestamp } from "src/utils/generalUtils";
 import {
   checkRequiredPrivileges,
   UserPrivilegeRequest,
@@ -24,10 +25,12 @@ import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import { PopoverMenu } from "src/components/core/PopoverMenu";
 import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
+import OpportunityStatusTag from "src/components/opportunity/OpportunityStatusTag";
 import OpportunitiesPagination from "./_components/OpportunitiesPagination";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
@@ -70,7 +73,11 @@ const OpportunitiesErrorPage = () => {
   );
 };
 
-const AgencyNotAuthorizedPage = ({ agencies }: { agencies: UserAgency[] }) => {
+const AgencyNotAuthorizedPage = ({
+  agencies,
+}: {
+  agencies: RelevantAgencyRecord[];
+}) => {
   const t = useTranslations("Opportunities");
   return (
     <OpportunitiesPageWrapper>
@@ -116,22 +123,37 @@ const NoAgenciesPage = () => {
   );
 };
 
-const EditAction = ({
+const ActionMenu = ({
   canUpdate,
   opportunityId,
+  status,
 }: {
   canUpdate: boolean;
   opportunityId: string;
+  status: string;
 }) => {
   const t = useTranslations("Opportunities");
-  return canUpdate ? (
-    <span>
-      <a href={`/grantor/opportunity/${opportunityId}/edit`}>
+
+  // Only show action menu for editable opportunities
+  const isEditable =
+    status.toLowerCase() === "draft" ||
+    status.toLowerCase() === "forecasted" ||
+    status.toLowerCase() === "posted";
+
+  if (!isEditable || !canUpdate) {
+    return null;
+  }
+
+  return (
+    <PopoverMenu>
+      <a
+        href={`/grantor/opportunity/${opportunityId}/overview`}
+        className="usa-button usa-button--unstyled width-full text-left padding-y-1 padding-x-2 hover:bg-base-lighter display-block text-no-underline"
+      >
         {t("actionButtons.edit")}
       </a>
-    </span>
-  ) : (
-    <span>{t("actionButtons.edit")}</span>
+      {/* TODO: Add Copy and Delete actions in separate ticket */}
+    </PopoverMenu>
   );
 };
 
@@ -141,16 +163,33 @@ const transformTableRowData = (
   _t: TFn,
 ) => {
   return userOpportunities.map((opportunity: BaseOpportunity) => {
+    const isSgmOpportunity = opportunity.is_simpler_grants_opportunity ?? false;
     const status = opportunity.is_draft
-      ? "Draft"
-      : opportunity.opportunity_status;
+      ? "draft"
+      : (opportunity.opportunity_status ?? "");
     const opportunityTitleUrl = opportunity.is_draft
       ? canUpdate
         ? `/grantor/opportunity/${opportunity.opportunity_id}/edit`
         : ``
       : `/opportunity/${opportunity.opportunity_id}`;
+
+    // Get funding instrument types from summary and format them
+    const fundingInstruments = opportunity.summary?.funding_instruments || [];
+    const formattedInstruments = fundingInstruments.map((instrument) =>
+      instrument
+        .split("_")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+        )
+        .join(" "),
+    );
+    const opportunityType =
+      formattedInstruments.length > 0 ? formattedInstruments.join(", ") : "";
+
+    // Format last updated date
+    const lastUpdated = formatTimestamp(opportunity.updated_at);
+
     return [
-      { cellData: opportunity.agency_name },
       {
         cellData: opportunityTitleUrl ? (
           <a href={opportunityTitleUrl}>{opportunity.opportunity_title}</a>
@@ -158,20 +197,25 @@ const transformTableRowData = (
           <span>{opportunity.opportunity_title}</span>
         ),
       },
+      { cellData: opportunity.opportunity_number },
+      { cellData: opportunityType },
+      { cellData: lastUpdated },
       {
-        cellData: status,
+        cellData: (
+          <OpportunityStatusTag
+            status={
+              opportunity.is_draft ? "draft" : opportunity.opportunity_status
+            }
+          />
+        ),
       },
       {
-        cellData: opportunity.is_draft ? (
-          <span>
-            <EditAction
-              canUpdate={canUpdate}
-              opportunityId={opportunity.opportunity_id}
-            />
-            , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
-          </span>
-        ) : (
-          "" // Don't show any actions for published opportunities
+        cellData: (
+          <ActionMenu
+            canUpdate={canUpdate && isSgmOpportunity}
+            opportunityId={opportunity.opportunity_id}
+            status={status}
+          />
         ),
       },
     ];
@@ -188,7 +232,7 @@ const OpportunitiesHeader = ({
 }: {
   userOpportunitiesCount: number;
   agencyName: string;
-  agencies: UserAgency[];
+  agencies: RelevantAgencyRecord[];
   currentAgencyId: string;
   isSingleAgency: boolean;
   canCreate: boolean;
@@ -240,8 +284,10 @@ const OpportunitiesTable = ({
   const t = useTranslations("Opportunities");
 
   const headerTitles: TableCellData[] = [
-    { cellData: t("tableHeadings.agency") },
     { cellData: t("tableHeadings.title") },
+    { cellData: t("tableHeadings.oppNumber") },
+    { cellData: t("tableHeadings.fundingInstrumentType") },
+    { cellData: t("tableHeadings.lastUpdated") },
     { cellData: t("tableHeadings.status") },
     { cellData: t("tableHeadings.actions") },
   ];
@@ -352,7 +398,8 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   )
     ? selectedAgencyParam[0]
     : selectedAgencyParam;
-  const currentPage = Number(resolvedSearchParams.page) || 1;
+  const parsedPage = Number(resolvedSearchParams.page);
+  const currentPage = parsedPage > 0 ? parsedPage : 1;
 
   // A. Check the user's session
   const userSession = await getSession();
@@ -361,13 +408,12 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   }
 
   // B. Get all Agencies this user belongs to
-  let userAgencies: UserAgency[];
+  let userAgencies: RelevantAgencyRecord[];
   try {
-    userAgencies = await fetchUserAgencies();
+    userAgencies = await getUserAgencies(userSession.user_id);
   } catch (error) {
-    console.error("Bad agencies", error);
-    if (error instanceof UnauthorizedError) {
-      throw error;
+    if (error instanceof MissingAuthError) {
+      return <Unauthenticated />;
     }
     return <OpportunitiesErrorPage />;
   }
@@ -383,7 +429,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
     redirect(`?agency=${sortedUserAgencies[0].agency_id}`);
   }
   const selectedAgency = sortedUserAgencies.find(
-    (a) => a.agency_id === selectedAgencyId,
+    (a) => a.agency_id.toString() === selectedAgencyId,
   );
   if (!selectedAgency) {
     return <AgencyNotAuthorizedPage agencies={sortedUserAgencies} />;
@@ -392,17 +438,17 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   // D. Check the user's privileges for the selected Agency
   let userPrivilegeResult: UserPrivilegeResult[];
   const userPrivilegeDef: UserPrivilegeRequest[] = getUserPrivilegeDefinition(
-    selectedAgency.agency_id,
+    selectedAgency.agency_id.toString(),
   );
   try {
     userPrivilegeResult = await checkRequiredPrivileges(
       userSession.user_id,
       userPrivilegeDef,
     );
-  } catch (error) {
-    console.error("Error fetching privileges", error);
-    if (error instanceof UnauthorizedError) {
-      throw error;
+  } catch (e) {
+    logger.error({ err: e }, "Error fetching privileges");
+    if (e instanceof UnauthorizedError) {
+      throw e;
     }
     return <OpportunitiesErrorPage />;
   }
@@ -416,19 +462,28 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   if (agencyUserAcccess.canView) {
     try {
       const data = await fetchOpportunities(
-        selectedAgency.agency_id,
+        selectedAgency.agency_id.toString(),
         currentPage,
       );
       userOpportunities = data.opportunities;
       totalRecords = data.totalRecords;
       totalPages = data.totalPages;
-    } catch (error) {
-      console.error("Error fetching Opportunities", error);
-      if (error instanceof UnauthorizedError) {
-        throw error;
+    } catch (e) {
+      logger.error({ err: e }, "Error fetching Opportunities");
+      if (e instanceof UnauthorizedError) {
+        throw e;
       }
       return <OpportunitiesErrorPage />;
     }
+  }
+
+  if (
+    agencyUserAcccess.canView &&
+    !userOpportunities.length &&
+    totalPages > 0 &&
+    currentPage > totalPages
+  ) {
+    redirect(`?agency=${selectedAgency.agency_id}&page=${totalPages}`);
   }
 
   // F. Render the page

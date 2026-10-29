@@ -1,5 +1,4 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
 import { isObject } from "lodash";
@@ -12,9 +11,14 @@ import {
   UiSchemaNode,
 } from "src/types/applyForm/types";
 import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
+import { formDataToObject } from "src/utils/formData/formDataToJson";
+import {
+  FORM_DATA_NESTING_DELIMITER,
+  getByPointer,
+  JSON_SCHEMA_NESTING_DELIMITER,
+  VALIDATION_ERROR_NESTING_DELIMITER,
+} from "src/utils/formData/formDataUtils";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
-
-import { formDataToObject } from "./formDataToJson";
 
 const nestedWarningsForField = ({
   definition,
@@ -119,22 +123,28 @@ export const findValidationErrors = (
   }) as SchemaField;
   const path = definition ? jsonSchemaPointerToPath(definition) : "";
   const fieldName = definition
-    ? definition.split("/")[definition.split("/").length - 1]
+    ? definition.split(JSON_SCHEMA_NESTING_DELIMITER)[
+        definition.split(JSON_SCHEMA_NESTING_DELIMITER).length - 1
+      ]
     : "";
   const directWarnings = errors.filter((error) => {
     if (error.field === path) {
       return true;
     }
     const fieldListMatch = definition?.match(
-      /^\/properties\/([^/]+)\/items\/properties\/([^/]+)$/,
+      /^\/properties\/([^/]+)\/items\/properties\/(.+)$/,
     );
 
     if (!fieldListMatch) {
       return false;
     }
-    const [, fieldListName, childFieldName] = fieldListMatch;
+    const [, fieldListName, childDefinitionPath] = fieldListMatch;
+    const childFieldPath = childDefinitionPath.replace(
+      /\/properties\//g,
+      VALIDATION_ERROR_NESTING_DELIMITER,
+    );
     return new RegExp(
-      `^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldName}$`,
+      `^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldPath}$`,
     ).test(error.field);
   });
 
@@ -178,6 +188,21 @@ export const findValidationErrors = (
   return [];
 };
 
+/**
+ * Identifies UI-schema nodes that are handled through the normal
+ * definition-backed field validation path.
+ *
+ * `multiField` combines multiple definition paths for one specialized widget,
+ * such as an SF-424A budget section or Table.
+ */
+const isDefinitionBackedFieldNode = (
+  node: UiSchemaNode,
+): node is UiSchemaField => {
+  return (
+    node.type === "field" || node.type === "multiField" || node.type === "null"
+  );
+};
+
 export const buildWarningTree = (
   uiSchema: UiSchema | UiSchemaField[] | UiSchemaNode,
   parent: UiSchema | UiSchemaField[] | UiSchemaNode | null,
@@ -190,7 +215,7 @@ export const buildWarningTree = (
   if (
     !Array.isArray(uiSchema) &&
     typeof uiSchema === "object" &&
-    "children" in uiSchema
+    (uiSchema.type === "section" || uiSchema.type === "fieldList")
   ) {
     return buildWarningTree(
       uiSchema.children,
@@ -202,7 +227,7 @@ export const buildWarningTree = (
   } else if (Array.isArray(uiSchema)) {
     const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
       (errors, node) => {
-        if ("children" in node) {
+        if (node.type === "section" || node.type === "fieldList") {
           const children = node.children;
           const nodeError = buildWarningTree(
             children,
@@ -212,7 +237,7 @@ export const buildWarningTree = (
             resolvedRootUiSchema,
           );
           return errors.concat(nodeError);
-        } else if (!parent && ("definition" in node || "schema" in node)) {
+        } else if (!parent && isDefinitionBackedFieldNode(node)) {
           const matchingWarnings = findValidationErrors(
             formValidationWarnings,
             Array.isArray(node.definition)
@@ -233,7 +258,7 @@ export const buildWarningTree = (
     if (parent) {
       const parentErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
         (errors, node) => {
-          if ("children" in node) {
+          if (node.type === "section" || node.type === "fieldList") {
             const nodeError = buildWarningTree(
               node.children,
               uiSchema,
@@ -242,7 +267,7 @@ export const buildWarningTree = (
               resolvedRootUiSchema,
             );
             return errors.concat(nodeError);
-          } else {
+          } else if (isDefinitionBackedFieldNode(node)) {
             const matchingWarnings = findValidationErrors(
               formValidationWarnings,
               Array.isArray(node.definition)
@@ -257,6 +282,7 @@ export const buildWarningTree = (
             }
             return errors;
           }
+          return errors;
         },
         [],
       );
@@ -281,7 +307,7 @@ export const getFieldSchema = ({
     return {
       ...(getByPointer(formSchema, definition) as object),
       ...schema,
-    } as RJSFSchema;
+    };
   } else if (definition) {
     return getByPointer(formSchema, definition) as RJSFSchema;
   }
@@ -297,10 +323,10 @@ export const getFieldNameForHtml = ({
   schema?: SchemaField;
 }): string => {
   if (definition) {
-    const definitionParts = definition.split("/");
+    const definitionParts = definition.split(JSON_SCHEMA_NESTING_DELIMITER);
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+      .join(FORM_DATA_NESTING_DELIMITER);
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
@@ -314,7 +340,7 @@ export function getHtmlFieldForWarning({
   schema?: SchemaField;
 }): string | undefined {
   const match = definition
-    ? definition.match(/^\/properties\/([^/]+)\/items\/properties\/([^/]+)$/)
+    ? definition.match(/^\/properties\/([^/]+)\/items\/properties\/(.+)$/)
     : null;
 
   if (!match) {
@@ -324,19 +350,26 @@ export function getHtmlFieldForWarning({
     });
   }
 
-  const [, fieldListName, childFieldName] = match;
+  const [, fieldListName, childDefinitionPath] = match;
+  const childFieldPath = childDefinitionPath.replace(
+    /\/properties\//g,
+    VALIDATION_ERROR_NESTING_DELIMITER,
+  );
+  const childHtmlPath = childFieldPath.replace(
+    /\./g,
+    FORM_DATA_NESTING_DELIMITER,
+  );
 
   const entryMatch = field?.match(
-    new RegExp(`^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldName}$`),
+    new RegExp(`^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldPath}$`),
   );
 
   if (entryMatch) {
     const [, entryIndex] = entryMatch;
-    return `${fieldListName}[${entryIndex}]--${childFieldName}`;
+    return `${fieldListName}[${entryIndex}]--${childHtmlPath}`;
   }
 
-  // Fallback: default to first row when no index is present
-  return `${fieldListName}[0]--${childFieldName}`;
+  return `${fieldListName}[0]--${childHtmlPath}`;
 }
 
 // Finds the parent FieldList label for a child field definition so it can be
@@ -353,7 +386,7 @@ export function getFieldListLabelFromDefinition({
   }
 
   const match = definition.match(
-    /^\/properties\/([^/]+)\/items\/properties\/[^/]+$/,
+    /^\/properties\/([^/]+)\/items\/properties\/.+$/,
   );
 
   if (!match) {
@@ -368,7 +401,10 @@ export function getFieldListLabelFromDefinition({
         return node.label;
       }
 
-      if ("children" in node && Array.isArray(node.children)) {
+      if (
+        (node.type === "section" || node.type === "fieldList") &&
+        Array.isArray(node.children)
+      ) {
         const nestedLabel = findFieldListLabel(node.children as UiSchema);
         if (nestedLabel) {
           return nestedLabel;
@@ -381,27 +417,6 @@ export function getFieldListLabelFromDefinition({
 
   return findFieldListLabel(uiSchema);
 }
-
-// transform a form data field name / id into a json path that can be used to reference the form schema
-export const getFieldPathFromHtml = (fieldName: string) =>
-  `/${fieldName.replace(/--/g, "/")}`;
-
-export const getByPointer = (target: object, path: string): unknown => {
-  if (!Object.keys(target).length) {
-    return;
-  }
-  try {
-    return getSchemaObjectFromPointer(target, path);
-  } catch (e) {
-    // this is not ideal, but it seems like the desired behavior is to return undefined if the
-    // path is not found on the target, and the library throws an error instead
-    if ((e as Error).message.includes("Invalid reference token:")) {
-      return undefined;
-    }
-    console.error("error referencing schema path", e, target, path);
-    throw e;
-  }
-};
 
 // changes a json pointer /properties/field_name/properties/field_child to path $.field_name.field_child
 export const jsonSchemaPointerToPath = (jsonPointer: string) => {
@@ -453,15 +468,19 @@ export function getFieldsForNav(
 
   if (!Array.isArray(schema)) return results;
   for (const item of schema) {
-    if ("children" in item && Array.isArray(item.children)) {
+    if (
+      (item.type === "section" || item.type === "fieldList") &&
+      Array.isArray(item.children)
+    ) {
       if (item.name && item.label) {
         results.push({ href: `form-section-${item.name}`, text: item.label });
       }
-      if (
-        Array.isArray(item.children) &&
-        item.children.every((child) => "label" in child && "name" in child)
-      ) {
-        results.push(...getFieldsForNav(item.children as unknown as UiSchema));
+      if (Array.isArray(item.children)) {
+        results.push(
+          ...getFieldsForNav(
+            item.children.filter((child) => child.type === "section"),
+          ),
+        );
       }
     }
   }
@@ -481,6 +500,28 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
   });
 };
 
+const getObjectItemSchema = (schema?: RJSFSchema): RJSFSchema | undefined => {
+  if (
+    schema?.items &&
+    !Array.isArray(schema.items) &&
+    typeof schema.items === "object"
+  ) {
+    return schema.items;
+  }
+
+  return undefined;
+};
+
+const shouldPreserveEmptyNestedObject = ({
+  key,
+  parentSchema,
+}: {
+  key: string;
+  parentSchema?: RJSFSchema;
+}): boolean => {
+  return Boolean(parentSchema?.required?.includes(key));
+};
+
 /**
  * Returns the schema for a child field from either the original schema shape
  * or the condensed schema shape.
@@ -496,10 +537,7 @@ const getChildSchema = ({
   schema?: RJSFSchema;
   key: string;
 }): RJSFSchema | undefined => {
-  return (schema?.properties?.[key] ??
-    (schema as Record<string, unknown> | undefined)?.[key]) as
-    | RJSFSchema
-    | undefined;
+  return (schema?.properties?.[key] ?? schema?.[key]) as RJSFSchema | undefined;
 };
 
 /**
@@ -521,44 +559,47 @@ const getChildSchema = ({
  * while extra empty entry beyond `minItems` can still be pruned.
  */
 export const pruneEmptyNestedFields = (
-  structuredFormData: object,
+  structuredFormData: object | undefined | null,
   schema?: RJSFSchema,
 ): object => {
+  if (!structuredFormData || typeof structuredFormData !== "object") {
+    return {};
+  }
+
   return Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
       const fieldSchema = getChildSchema({ schema, key });
 
       if (Array.isArray(value)) {
-        // Preserve empty object rows required by minItems. Without this,
-        // required FieldList rows can be pruned before backend validation,
-        // causing array-level minItems errors instead of child-field errors.
         const minimumItems =
           typeof fieldSchema?.minItems === "number" ? fieldSchema.minItems : 0;
+
+        const itemSchema = getObjectItemSchema(fieldSchema);
+
+        const isObjectArray = Boolean(
+          itemSchema && itemSchema.type === "object",
+        );
 
         const pruned = value.reduce(
           (prunedArray: unknown[], arrayItem, index) => {
             if (isBasicallyAnObject(arrayItem)) {
-              const itemSchema =
-                fieldSchema?.items &&
-                !Array.isArray(fieldSchema.items) &&
-                typeof fieldSchema.items === "object"
-                  ? (fieldSchema.items as RJSFSchema)
-                  : undefined;
-
               const prunedItem = pruneEmptyNestedFields(
                 arrayItem as object,
                 itemSchema,
               );
 
-              // Keep non-empty rows. Also keep empty rows while they are within
-              // the schema-required minimum item count.
-              if (!isEmptyField(prunedItem) || index < minimumItems) {
+              if (
+                !isEmptyField(prunedItem) ||
+                index < minimumItems ||
+                isObjectArray
+              ) {
                 prunedArray.push(prunedItem);
               }
-            } else if (
-              !isEmptyField(arrayItem) ||
-              (!isBasicallyAnObject(arrayItem) && arrayItem !== undefined)
-            ) {
+
+              return prunedArray;
+            }
+
+            if (arrayItem !== undefined && arrayItem !== null) {
               prunedArray.push(arrayItem);
             }
             return prunedArray;
@@ -568,15 +609,27 @@ export const pruneEmptyNestedFields = (
         acc[key] = pruned;
         return acc;
       }
-      if (!isBasicallyAnObject(value) && value !== undefined) {
-        acc[key] = value;
+      if (value === undefined || value === null) {
         return acc;
       }
-      if (isEmptyField(value)) {
+      if (!isBasicallyAnObject(value)) {
+        acc[key] = value;
         return acc;
       }
 
       const pruned = pruneEmptyNestedFields(value as object, fieldSchema);
+      if (isEmptyField(pruned)) {
+        if (
+          shouldPreserveEmptyNestedObject({
+            key,
+            parentSchema: schema,
+          })
+        ) {
+          acc[key] = {};
+        }
+
+        return acc;
+      }
 
       acc[key] = pruned;
       return acc;
@@ -590,23 +643,14 @@ export const shapeFormData = <T extends object>(
   formData: FormData,
   formSchema: RJSFSchema,
 ): T => {
-  formData.delete("$ACTION_REF_1");
-  formData.delete("$ACTION_1:0");
-  formData.delete("$ACTION_1:1");
-  formData.delete("$ACTION_REF_1");
-  formData.delete("$ACTION_KEY");
-  formData.delete("apply-form-button");
-
   const structuredFormData = formDataToObject(
     formData,
     condenseFormSchemaProperties(formSchema),
-    {
-      delimiter: "--",
-    },
+    undefined,
   );
   return pruneEmptyNestedFields(
     structuredFormData,
-    condenseFormSchemaProperties(formSchema) as RJSFSchema,
+    condenseFormSchemaProperties(formSchema),
   ) as T;
 };
 
@@ -697,9 +741,7 @@ export const processFormSchema = (
 } => {
   try {
     const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
-      extricateConditionalValidationRules(
-        (formSchema.properties ?? {}) as JSONSchema7,
-      );
+      extricateConditionalValidationRules(formSchema.properties ?? {});
     const condensedProperties = mergeAllOf({
       properties: propertiesWithoutComplexConditionals,
     } as JSONSchema7);
@@ -715,12 +757,13 @@ export const processFormSchema = (
     throw e;
   }
 };
+
 /*
   this will flatten any properties objects so that we can directly reference field paths
   within a json schema without traversing nested "properties". Any other object attributes
   and values are unchanged
 
-  ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
+  ex. { properties: { path: { properties: { nested: 'value' } } } becomes
       { path: { nested: 'value' } }
 */
 
@@ -745,7 +788,7 @@ export const condenseFormSchemaProperties = (schema: object): object => {
 };
 
 export const pointerToFieldName = (pointer: string): string => {
-  return pointer.replace("$.", "").replace(/\./g, "--");
+  return pointer.replace("$.", "").replace(/\./g, FORM_DATA_NESTING_DELIMITER);
 };
 
 export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
@@ -785,10 +828,10 @@ export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
             (child.widget === "AttachmentArray" ||
               child.widget === "Attachment")
           ) {
-            return { ...child, widget: "PrintAttachment" };
+            return { ...child, widget: "PrintAttachment" as const };
           }
 
-          return { ...child, widget: "Print" };
+          return { ...child, widget: "Print" as const };
         }),
       };
     }

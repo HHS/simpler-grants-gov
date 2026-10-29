@@ -32,7 +32,11 @@ runs:
         if [[ "${{ inputs.environment }}" == "shared" ]]; then
           network_name=$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -raw shared_network_name)
         else
-          network_name=$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -json environment_configs | jq -r ".${{ inputs.environment }}.network_name")
+          # Use --arg + .[$env] rather than ".${{ inputs.environment }}" so that
+          # environment names containing a hyphen (e.g. "infra-dev") are treated
+          # as a single key. A bare jq path like .infra-dev parses "-" as
+          # subtraction and fails with "jq: error: dev/0 is not defined".
+          network_name=$(terraform -chdir="infra/${{ inputs.app_name }}/app-config" output -json environment_configs | jq -r --arg env "${{ inputs.environment }}" '.[$env].network_name')
         fi
 
         echo "Network name retrieved: ${network_name}"

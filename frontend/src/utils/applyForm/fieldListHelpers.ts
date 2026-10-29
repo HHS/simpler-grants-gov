@@ -3,15 +3,14 @@ import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 /**
  * Returns validation warnings that apply to the FieldList as a whole.
  *
- * These include array-level validation issues (e.g. minItems, maxItems)
+ * These include array-level validation issues, such as minItems and maxItems,
  * that are associated with the FieldList field itself.
  *
- * Child field warnings are excluded by filtering out any warnings that
- * include a `definition`, since those represent nested field errors.
+ * Child field warnings are excluded by filtering out warnings with a
+ * `definition`, since those represent nested field errors.
  *
  * Results are deduplicated to avoid rendering duplicate messages.
  */
-
 export function getFieldListGroupErrors({
   rawErrors,
   fieldListPath,
@@ -29,6 +28,7 @@ export function getFieldListGroupErrors({
     .filter((warning) => warning.field === fieldListPath && !warning.definition)
     .forEach((warning) => {
       const warningKey = `${warning.field}-${warning.message}`;
+
       if (!uniqueWarnings.has(warningKey)) {
         uniqueWarnings.set(warningKey, warning);
       }
@@ -38,37 +38,42 @@ export function getFieldListGroupErrors({
 }
 
 /**
- * Returns validation messages for a specific child field within a specific
- * FieldList row.
+ * Returns validation messages for a child field within a specific FieldList entry.
  *
- * Row-aware warnings are matched first using the indexed warning path
- * (for example `$.contact_people_test[1].first_name`) so that identical
- * child fields across different rows do not share the same error state.
+ * FieldList children can be flat fields:
  *
- * If a warning does not include row-aware path information, the helper
- * falls back to matching by the child's schema `definition`.
+ *   $.contact_people[0].first_name
+ *
+ * or nested fields:
+ *
+ *   $.additional_sites[0].address.street1
+ *
+ * `storagePath` is used to build the row-aware validation path for both cases.
+ *
+ * If a warning does not include row-aware path information, this helper falls
+ * back to matching by the child schema `definition` for the first entry only.
  *
  * Results are deduplicated to prevent duplicate messages from rendering.
  */
-
 export function getFieldListChildErrors({
   rawErrors,
   fieldListPath,
   entryIndex,
-  storageKey,
+  storagePath,
   childDefinition,
 }: {
   rawErrors?: FormattedFormValidationWarning[];
   fieldListPath: string;
   entryIndex: number;
-  storageKey: string;
+  storagePath: string[];
   childDefinition: string;
 }): string[] {
   if (!rawErrors?.length) {
     return [];
   }
 
-  const rowAwareFieldPath = `${fieldListPath}[${entryIndex}].${storageKey}`;
+  const childFieldPath = storagePath.join(".");
+  const rowAwareFieldPath = `${fieldListPath}[${entryIndex}].${childFieldPath}`;
 
   return Array.from(
     new Set(
@@ -78,7 +83,6 @@ export function getFieldListChildErrors({
             return true;
           }
 
-          // Checks if the warning field includes a row index (e.g. [1])
           const hasIndexedFieldPath = /\[\d+\]/.test(warning.field);
 
           if (hasIndexedFieldPath) {

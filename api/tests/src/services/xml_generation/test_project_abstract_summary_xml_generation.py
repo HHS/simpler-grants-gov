@@ -9,11 +9,9 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSu
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.project_abstract_summary import (
     FORM_XML_TRANSFORM_RULES as PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
 )
@@ -180,6 +178,51 @@ class TestProjectAbstractSummaryXMLGeneration:
         # All elements should exist and be in order
         assert fon_pos < cfda_pos < org_pos < title_pos < abstract_pos
 
+    def test_generate_project_abstract_summary_xml_matches_legacy_grants_gov_structure(self):
+        """Generated XML matches the legacy Grants.gov output for issue #9132.
+
+        Reproduces the submission captured from legacy Grants.gov (legacy form ID 591)
+        and asserts every element, value, and the FormVersion attribute match. The only
+        difference between Simpler and legacy output is namespace-declaration placement
+        (legacy redeclares xmlns on every element; Simpler declares once at the root) and
+        which unused system namespaces are declared on the root, both semantically inert.
+        """
+        application_data = {
+            "funding_opportunity_number": "SIMP-PROJABSTRACTSUMMARY-07282026",
+            "assistance_listing_number": "00.000",
+            "applicant_name": "m h",
+            "project_title": "adsf",
+            "project_abstract": "asdfsdf",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data,
+            transform_config=PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
+        )
+
+        response = service.generate_xml(request)
+        assert response.success is True
+        assert response.xml_data is not None
+
+        pas_ns = "http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0"
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(response.xml_data.encode("utf-8"), parser=parser)
+
+        assert root.tag == f"{{{pas_ns}}}Project_AbstractSummary_2_0"
+        assert root.get(f"{{{pas_ns}}}FormVersion") == "2.0"
+
+        # Every child element, in XSD sequence order, matches the legacy submission.
+        expected_children = [
+            ("FundingOpportunityNumber", "SIMP-PROJABSTRACTSUMMARY-07282026"),
+            ("CFDANumber", "00.000"),
+            ("OrganizationName", "m h"),
+            ("ProjectTitle", "adsf"),
+            ("ProjectAbstract", "asdfsdf"),
+        ]
+        actual_children = [(lxml_etree.QName(child).localname, child.text) for child in root]
+        assert actual_children == expected_children
+
     def test_generate_project_abstract_summary_xml_long_abstract(self):
         """Test Project Abstract Summary XML generation with a long abstract (up to 4000 chars)."""
         long_abstract = (
@@ -239,9 +282,7 @@ class TestProjectAbstractSummaryXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def project_abstract_summary_application(
-        self, enable_factory_create, db_session: db.Session, seed_form_registry
-    ):
+    def project_abstract_summary_application(self, enable_factory_create, seed_form_registry):
         """Create an application with Project Abstract Summary form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -264,7 +305,7 @@ class TestProjectAbstractSummaryXSDValidation:
             competition_forms=[],
         )
 
-        pas_form = db_session.get(Form, ProjectAbstractSummary_v2_0.form_id)
+        pas_form = ProjectAbstractSummary_v2_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Project Abstract Summary Test Application"
@@ -295,7 +336,7 @@ class TestProjectAbstractSummaryXSDValidation:
         return application
 
     def test_project_abstract_summary_submission_xml_validates_against_xsd(
-        self, project_abstract_summary_application, xsd_validator, db_session
+        self, project_abstract_summary_application, xsd_validator
     ):
         """Test that complete Project Abstract Summary submission XML validates against XSD schema."""
         # Create application submission
@@ -345,7 +386,7 @@ class TestProjectAbstractSummaryXSDValidation:
         )
 
     def test_project_abstract_summary_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that Project Abstract Summary with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -369,7 +410,7 @@ class TestProjectAbstractSummaryXSDValidation:
             competition_forms=[],
         )
 
-        pas_form = db_session.get(Form, ProjectAbstractSummary_v2_0.form_id)
+        pas_form = ProjectAbstractSummary_v2_0
 
         application = ApplicationFactory.create(
             competition=competition,

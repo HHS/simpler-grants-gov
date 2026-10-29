@@ -105,6 +105,79 @@ resource "aws_kms_key" "db" {
   # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
+# Cross-account access for snapshot sharing, used by the cross-environment DB
+# restore workflow to seed one environment from another.
+#
+# Only created when var.snapshot_share_account_ids is non-empty, so environments
+# that share an AWS account (the legacy dev/staging/grantee/grantor set) are
+# untouched and keep the AWS default key policy.
+#
+# Attaching ANY policy replaces that default, which is why the first statement
+# re-grants full control to this account's root — without it the key would
+# become unmanageable, and AWS rejects policies that lock out the owner.
+resource "aws_kms_key_policy" "db" {
+  count  = length(var.snapshot_share_account_ids) > 0 ? 1 : 0
+  key_id = aws_kms_key.db.id
+  policy = data.aws_iam_policy_document.db_kms[0].json
+}
+
+data "aws_iam_policy_document" "db_kms" {
+  count = length(var.snapshot_share_account_ids) > 0 ? 1 : 0
+
+  # The kms:* / Resource "*" below is the account-root statement AWS requires on
+  # every key policy (see the note on aws_kms_key_policy.db). It cannot be
+  # narrowed without making the key unmanageable, and it is scoped to this
+  # account's own root. Same rationale as infra/modules/storage/encryption.tf.
+  # checkov:skip=CKV_AWS_109:Root account requires full KMS permissions to enable IAM-based access control
+  # checkov:skip=CKV_AWS_111:Root account requires full KMS permissions to enable IAM-based access control
+  # checkov:skip=CKV_AWS_356:A key policy's resource is always the key it is attached to; "*" is the only valid value
+
+  # Equivalent of the AWS default key policy. Required — see note above.
+  statement {
+    sid    = "EnableIAMUserPermissions"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+
+  # Let the target accounts decrypt a shared snapshot.
+  statement {
+    sid    = "AllowSnapshotShareTargetsToDecrypt"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = [for id in var.snapshot_share_account_ids : "arn:aws:iam::${id}:root"]
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey",
+    ]
+    resources = ["*"]
+  }
+
+  # CreateGrant is what RDS itself needs in the target account to restore from
+  # the encrypted snapshot. Scoped to grants made on behalf of an AWS service.
+  statement {
+    sid    = "AllowSnapshotShareTargetsToCreateGrants"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = [for id in var.snapshot_share_account_ids : "arn:aws:iam::${id}:root"]
+    }
+    actions   = ["kms:CreateGrant"]
+    resources = ["*"]
+    condition {
+      test     = "Bool"
+      variable = "kms:GrantIsForAWSResource"
+      values   = ["true"]
+    }
+  }
+}
+
 # Query Logging
 # -------------
 

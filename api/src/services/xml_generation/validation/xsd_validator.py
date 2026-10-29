@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import defusedxml.ElementTree as ET
 import xmlschema
 from lxml import etree
 
@@ -42,6 +43,24 @@ class XSDValidator:
             )
 
         self._schemas: dict[str, xmlschema.XMLSchema] = {}
+
+    def _build_local_locations(self) -> dict[str, str]:
+        """Build a namespace-to-local-path map from XSD files in xsd_dir.
+
+        This lets xmlschema resolve imports from local files instead of fetching
+        remote URLs, making validation faster and offline-capable.
+        """
+        locations: dict[str, str] = {}
+        for xsd_file in self.xsd_dir.glob("*.xsd"):
+            try:
+                tree = ET.parse(str(xsd_file))
+                root = tree.getroot()
+                ns = root.get("targetNamespace")
+                if ns:
+                    locations[ns] = str(xsd_file)
+            except Exception as e:
+                logger.warning("Failed to parse XSD file for locations map: %s (%s)", xsd_file, e)
+        return locations
 
     def get_xsd_path(self, form_name: str) -> Path:
         """Get the path to a stored XSD file.
@@ -90,7 +109,8 @@ class XSDValidator:
 
         try:
             logger.info(f"Loading XSD schema from: {xsd_path}")
-            schema = xmlschema.XMLSchema(str(xsd_path))
+            locations = self._build_local_locations()
+            schema = xmlschema.XMLSchema(str(xsd_path), locations=locations)
             self._schemas[cache_key] = schema
             return schema
 

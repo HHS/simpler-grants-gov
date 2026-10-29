@@ -43,6 +43,16 @@ export const toDynamicAwardRecommendationEndpoint = (
   };
 };
 
+export const toDynamicApplicationsEndpointV1 = (type: "POST") => {
+  return {
+    basePath: environment.API_URL,
+    version: "v1",
+    namespace: "applications",
+    method: type as ApiMethod,
+    requiresAuth: true,
+  };
+};
+
 export const toDynamicApplicationsEndpoint = (
   type: "POST" | "GET" | "PUT" | "DELETE",
 ) => {
@@ -60,6 +70,21 @@ export const fetchFormEndpoint = {
   version: "alpha",
   namespace: "forms",
   method: "GET" as ApiMethod,
+};
+
+export const fetchFormsEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "forms",
+  method: "GET" as ApiMethod,
+};
+
+export const fetchCompetitionFormsEndpoint = {
+  basePath: environment.API_URL,
+  version: "alpha",
+  namespace: "competitions",
+  method: "PUT" as ApiMethod,
+  requiresAuth: true,
 };
 
 export const fetchOpportunityEndpoint = {
@@ -116,11 +141,13 @@ export const toDynamicOrganizationsEndpoint = (
   };
 };
 
-export const toDynamicGrantorsEndpoint = (type: "POST") => {
+export const toDynamicGrantorAgenciesEndpoint = (
+  type: "POST" | "GET" | "PUT" | "DELETE",
+) => {
   return {
     basePath: environment.API_URL,
     version: "v1",
-    namespace: "grantors",
+    namespace: "grantors/agencies",
     method: type as ApiMethod,
     requiresAuth: true,
   };
@@ -147,9 +174,25 @@ export const getLocalUsersEndpoint = {
 
 // opting out of traditional X-SGG based auth since these requests will use the
 // internal auth token instead
-export const getApplicationForPrint = {
+export const getApplicationForPrintEndpoint = {
   basePath: environment.API_URL,
   version: "alpha",
   namespace: "applications",
   method: "GET" as ApiMethod,
+};
+
+export const toDynamicFilesEndpoint = (type: "POST" | "GET") => ({
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "files",
+  method: type as ApiMethod,
+  requiresAuth: true,
+});
+
+export const fetchWorkflowEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "workflows",
+  method: "GET" as ApiMethod,
+  requiresAuth: true,
 };

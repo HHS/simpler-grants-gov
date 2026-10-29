@@ -43,7 +43,7 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: true }),
       } as unknown as Response),
-    ) as unknown as typeof global.fetch;
+    );
 
     render(<SubscriptionForm />);
 
@@ -70,7 +70,7 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: true }),
       } as unknown as Response),
-    ) as unknown as typeof global.fetch;
+    );
 
     render(<SubscriptionForm />);
 
@@ -94,7 +94,7 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: false, errorCode: "server" }),
       } as unknown as Response),
-    ) as unknown as typeof global.fetch;
+    );
 
     render(<SubscriptionForm />);
 
@@ -111,6 +111,56 @@ describe("SubscriptionForm", () => {
     await waitFor(() => {
       const errorAlerts = screen.getAllByRole("alert");
       expect(errorAlerts.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  it("shows a field-level email error when the API returns invalidEmail", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({ success: false, errorCode: "invalidEmail" }),
+      } as unknown as Response),
+    );
+
+    render(<SubscriptionForm />);
+
+    const inputs = screen.getAllByTestId("textInput");
+    const nameInput = inputs.find((i) => i.id === "name")!;
+    const emailInput = inputs.find((i) => i.id === "email")!;
+    const button = screen.getByRole("button", { name: "form.button" });
+
+    fireEvent.change(nameInput, { target: { value: "Test User" } });
+    fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByText("errors.invalidEmail")).toBeInTheDocument();
+    });
+  });
+
+  it("shows a try-again message when the API returns tooManyRequests", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({ success: false, errorCode: "tooManyRequests" }),
+      } as unknown as Response),
+    );
+
+    render(<SubscriptionForm />);
+
+    const inputs = screen.getAllByTestId("textInput");
+    const nameInput = inputs.find((i) => i.id === "name")!;
+    const emailInput = inputs.find((i) => i.id === "email")!;
+    const button = screen.getByRole("button", { name: "form.button" });
+
+    fireEvent.change(nameInput, { target: { value: "Test User" } });
+    fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByText("errors.tooManyRequests")).toBeInTheDocument();
     });
   });
 });

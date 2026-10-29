@@ -1,7 +1,9 @@
-from grants_shared.api.schemas.extension import Schema, fields
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
-
-from src.api.schemas.response_schema import PaginationMixinSchema
+from src.api.schemas.extension import Schema, fields
+from src.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    FileResponseSchema,
+    PaginationMixinSchema,
+)
 from src.constants.lookup_constants import ExtractType
 from src.pagination.pagination_schema import generate_pagination_schema
 

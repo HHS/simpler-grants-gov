@@ -3,10 +3,10 @@ from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 import pytest
-from grants_shared.adapters import db
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
+from src.adapters import db
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -215,7 +215,6 @@ TOPAZ_STATUS = build_opp_and_version(
 class TestOpportunityNotification:
     @pytest.fixture
     def set_env_var_for_email_notification_config(self, monkeypatch):
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
 
     @pytest.fixture(autouse=True)
@@ -246,6 +245,9 @@ class TestOpportunityNotification:
         caplog,
         set_env_var_for_email_notification_config,
         notification_task,
+        ses_client,
+        get_sent_emails,
+        sent_email_tags,
     ):
         caplog.set_level(logging.INFO)
 
@@ -308,8 +310,6 @@ class TestOpportunityNotification:
             opportunity=opp_3, created_at=opp_3.created_at + timedelta(minutes=80)
         )
 
-        _clear_mock_responses()
-
         results = notification_task._get_latest_opportunity_versions()
 
         # assert that only the latest version is picked up for each user_saved_opportunity
@@ -341,6 +341,17 @@ class TestOpportunityNotification:
         )
         assert len(notification_logs) == 2
         assert {n.user_id for n in notification_logs} == {user.user_id, user_2.user_id}
+
+        # Verify both emails were sent via SES
+        # EmailNotificationTask runs every notification type, so assert on the
+        # recipients rather than the total number of messages SES received.
+        recipients = {email.destinations["ToAddresses"][0] for email in get_sent_emails()}
+        assert {user.email, user_2.email} <= recipients
+        assert {
+            sent.to_address
+            for sent in sent_email_tags
+            if sent.email_tags == {"email_type": EmailType.OPPORTUNITY_UPDATES}
+        } == {user.email, user_2.email}
 
         # Verify the log contains the correct metrics
         log_records = [
@@ -469,26 +480,38 @@ class TestOpportunityNotification:
     def test_with_no_prior_version_email_collections_with_latest_version(
         self, db_session, user, set_env_var_for_email_notification_config, caplog, notification_task
     ):
-        """Test that no notification is created when a new version exists but no prior version exist"""
+        """Test that when a new version exists but no prior version predates last_notified_at:
+        - no email is sent (nothing to diff)
+        - last_notified_at is advanced to the latest version's created_at so the
+          next change produces a proper diff (self-healing for the save-before-versioning race)
+        """
+        base_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
-        factories.UserSavedOpportunityFactory.create(
+        saved_opp = factories.UserSavedOpportunityFactory.create(
             user=user,
             opportunity=opportunity,
+            last_notified_at=base_time,
         )
-        factories.OpportunityVersionFactory.create(opportunity=opportunity)
+        # Version created after last_notified_at — triggers the notification check —
+        # but no version exists before last_notified_at, so opp.previous will be None.
+        latest_version = factories.OpportunityVersionFactory.create(
+            opportunity=opportunity, created_at=base_time + timedelta(minutes=30)
+        )
 
         results = notification_task.collect_email_notifications()
 
         assert len(results) == 0
-        # Verify the log contains the correct metrics
         log_records = [
             r
             for r in caplog.records
-            if "No previous version found for this opportunity"
-            and "No opportunities with prior versions for user" in r.message
+            if "No previous version found for this opportunity" in r.message
         ]
-
         assert len(log_records) == 1
+
+        # last_notified_at must advance to latest_version.created_at so that
+        # the next change has a valid baseline and the user is not silently skipped forever.
+        db_session.refresh(saved_opp)
+        assert saved_opp.last_notified_at == latest_version.created_at
 
     def test_no_updates_email_collections(
         self, db_session, user, set_env_var_for_email_notification_config, notification_task

@@ -1,10 +1,10 @@
 import logging
 from uuid import UUID
 
-from grants_shared.adapters import db
-
+from src.adapters import db
+from src.auth.api_key_handler import SimplerApiKeyHandler
 from src.db.models.user_models import UserApiKey
-from src.services.users.get_user_api_keys import get_user_api_key
+from src.services.users.create_api_key import _check_blank_key_name, _check_duplicate_key_name
 
 logger = logging.getLogger(__name__)
 
@@ -20,18 +20,15 @@ def rename_api_key(
     db_session: db.Session, user_id: UUID, api_key_id: UUID, json_data: dict
 ) -> UserApiKey:
     """Rename an existing API key for a user"""
+    handler = SimplerApiKeyHandler(db_session)
+
+    # Verify the key exists and belongs to this user before checking for name conflicts.
+    handler.get_user_api_key(user_id, api_key_id)
+
     params = RenameApiKeyParams(json_data)
+    key_name = params.key_name.strip()
 
-    api_key = get_user_api_key(db_session, user_id, api_key_id)
+    _check_blank_key_name(key_name)
+    _check_duplicate_key_name(db_session, user_id, key_name, exclude_api_key_id=api_key_id)
 
-    api_key.key_name = params.key_name
-
-    logger.info(
-        "Renamed API key",
-        extra={
-            "api_key_id": api_key.api_key_id,
-            "user_id": user_id,
-        },
-    )
-
-    return api_key
+    return handler.rename_api_key(user_id, api_key_id, key_name)

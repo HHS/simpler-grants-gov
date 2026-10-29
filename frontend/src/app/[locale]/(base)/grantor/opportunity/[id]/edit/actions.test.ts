@@ -2,15 +2,16 @@ import { identity } from "lodash";
 import { ApiRequestError } from "src/errors";
 import {
   createOpportunitySummaryForGrantor,
-  publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
-} from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
-import { buildOpportunitySummaryUpdateRequest } from "src/utils/opportunityEditFormConfig";
+} from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import {
+  createOpportunityAttachment,
+  deleteOpportunityAttachment,
+} from "src/services/fetch/fetchers/opportunityAttachmentFetcher";
 
 import {
   opportunityEditFormAction,
   saveOpportunityEditAction,
-  submitOpportunityAction,
   type OpportunityEditActionState,
 } from "./actions";
 
@@ -18,14 +19,15 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
-jest.mock(
-  "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher",
-  () => ({
-    createOpportunitySummaryForGrantor: jest.fn(),
-    updateOpportunitySummaryForGrantor: jest.fn(),
-    publishOpportunityForGrantor: jest.fn(),
-  }),
-);
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
+  createOpportunitySummaryForGrantor: jest.fn(),
+  updateOpportunitySummaryForGrantor: jest.fn(),
+}));
+
+jest.mock("src/services/fetch/fetchers/opportunityAttachmentFetcher", () => ({
+  createOpportunityAttachment: jest.fn(),
+  deleteOpportunityAttachment: jest.fn(),
+}));
 
 const mockRedirect = jest.fn();
 jest.mock("next/navigation", () => ({
@@ -44,8 +46,11 @@ const mockCreateOpportunitySummaryForGrantor = jest.mocked(
 const mockUpdateOpportunitySummaryForGrantor = jest.mocked(
   updateOpportunitySummaryForGrantor,
 );
-const mockPublishOpportunityForGrantor = jest.mocked(
-  publishOpportunityForGrantor,
+const mockCreateOpportunityAttachment = jest.mocked(
+  createOpportunityAttachment,
+);
+const mockDeleteOpportunityAttachment = jest.mocked(
+  deleteOpportunityAttachment,
 );
 
 const successfulSummaryUpdateResponse: Awaited<
@@ -92,25 +97,25 @@ const successfulSummaryUpdateResponse: Awaited<
 
 function buildValidFormData() {
   const formData = new FormData();
-  formData.set("opportunityId", "opp-123");
-  formData.set("title", "Example opportunity");
-  formData.set("awardSelectionMethod", "discretionary");
-  formData.set("description", "Summary text");
-  formData.set("publishDate", "2026-03-11");
-  formData.set("closeDate", "2026-04-11");
-  formData.set("contactEmail", "grants@example.com");
-  formData.set("funding-type-values", "grant");
-  formData.set("funding-category-values", "health");
-  formData.set("expectedNumberOfAwards", "5");
-  formData.set("estimatedTotalProgramFunding", "100000");
-  formData.set("awardMinimum", "1000");
-  formData.set("awardMaximum", "5000");
-  formData.append("eligibleApplicants", "state_governments");
-  formData.set("additionalEligibilityInfo", "Must be US-based");
-  formData.set("additionalInfoUrl", "https://example.com");
-  formData.set("additionalInfoUrlText", "More info");
-  formData.set("grantorContactDetails", "Program office");
-  formData.set("contactEmailText", "Email us");
+  formData.set("opportunity_id", "opp-123");
+  formData.set("opportunity_title", "Example opportunity");
+  formData.set("caetgory", "discretionary");
+  formData.set("summary_description", "Summary text");
+  formData.set("post_date", "2026-03-11");
+  formData.set("close_date", "2026-04-11");
+  formData.set("agency_email_address", "grants@example.com");
+  formData.set("funding_instruments", "grant");
+  formData.set("funding_categories", "health");
+  formData.set("expected_number_of_awards", "5");
+  formData.set("estimated_total_program_funding", "100000");
+  formData.set("award_floor", "1000");
+  formData.set("award_ceiling", "5000");
+  formData.set("applicant_types[0]", "state_governments");
+  formData.set("applicant_eligibility_description", "Must be US-based");
+  formData.set("additional_info_url", "https://example.com");
+  formData.set("additional_info_url_description", "More info");
+  formData.set("agency_contact_description", "Program office");
+  formData.set("agency_email_address_description", "Email us");
 
   return formData;
 }
@@ -122,60 +127,60 @@ describe("saveOpportunityEditAction", () => {
 
   it("returns validation errors only for API-required fields when form is empty", async () => {
     const formData = new FormData();
-    formData.set("opportunityId", "opp-123");
+    formData.set("opportunity_id", "opp-123");
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      publishDate: ["publishDate"],
-      fundingType: ["fundingType"],
-      fundingCategory: ["fundingCategory"],
-      eligibleApplicants: ["eligibleApplicants"],
+      post_date: ["publishDate"],
+      funding_instruments: ["fundingType"],
+      funding_categories: ["fundingCategory"],
+      applicant_types: ["eligibleApplicants"],
     });
   });
 
   it("returns only the format error for a non-empty invalid email", async () => {
     const formData = buildValidFormData();
-    formData.set("contactEmail", "not-an-email");
+    formData.set("agency_email_address", "not-an-email");
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      contactEmail: ["contactEmailInvalid"],
+      agency_email_address: ["contactEmailInvalid"],
     });
   });
 
   it("returns an award maximum error when award minimum exceeds award maximum", async () => {
     const formData = buildValidFormData();
-    formData.set("awardMinimum", "5000");
-    formData.set("awardMaximum", "1000");
+    formData.set("award_floor", "5000");
+    formData.set("award_ceiling", "1000");
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      awardMinimum: ["awardMinLessThanMax"],
-      awardMaximum: ["awardMinLessThanMax"],
+      award_floor: ["awardMinLessThanMax"],
+      award_ceiling: ["awardMaxGreaterThanMin"],
     });
   });
 
   it("returns exceedTotalFunding error when award min or max exceeds the total funding", async () => {
     const formData = buildValidFormData();
-    formData.set("estimatedTotalProgramFunding", "1000");
-    formData.set("awardMinimum", "5000");
-    formData.set("awardMaximum", "6000");
+    formData.set("estimated_total_program_funding", "1000");
+    formData.set("award_floor", "5000");
+    formData.set("award_ceiling", "6000");
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      awardMinimum: ["awardMinLessThanTotal"],
-      awardMaximum: ["awardMaxLessThanTotal"],
+      award_floor: ["awardMinLessThanTotal"],
+      award_ceiling: ["awardMaxLessThanTotal"],
     });
   });
 
   it("returns a close date error when close date is before publish date", async () => {
     const formData = buildValidFormData();
-    formData.set("publishDate", "2026-04-11");
-    formData.set("closeDate", "2026-03-11");
+    formData.set("post_date", "2026-04-11");
+    formData.set("close_date", "2026-03-11");
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
@@ -184,9 +189,9 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
-  it("maps an unparseable publishDate to a closeDateOrder error (format failure)", async () => {
+  it("maps an unparseable post_date to a closeDateOrder error (format failure)", async () => {
     const formData = buildValidFormData();
-    formData.set("publishDate", "not-a-date");
+    formData.set("post_date", "not-a-date");
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
@@ -195,9 +200,9 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
-  it("maps an unparseable closeDate to a closeDateOrder error (format failure)", async () => {
+  it("maps an unparseable close_date to a closeDateOrder error (format failure)", async () => {
     const formData = buildValidFormData();
-    formData.set("closeDate", "not-a-date");
+    formData.set("close_date", "not-a-date");
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
@@ -206,9 +211,9 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
-  it("returns an error when opportunityId is missing", async () => {
+  it("returns an error when opportunity_id is missing", async () => {
     const formData = buildValidFormData();
-    formData.delete("opportunityId"); // summary context is missing
+    formData.delete("opportunity_id"); // summary context is missing
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
@@ -217,11 +222,11 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
-  it("calls the summary create fetcher when no opportunitySummaryId and returns new summary ID", async () => {
+  it("calls the summary create fetcher when no opportunity_summary_id and returns new summary ID", async () => {
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("isForecast", "true");
-    // opportunitySummaryId not set
+    formData.set("opportunity_id", "opp-123");
+    formData.set("is_forecast", "true");
+    // opportunity_summary_id not set
 
     const createResponse: Awaited<
       ReturnType<typeof createOpportunitySummaryForGrantor>
@@ -282,8 +287,8 @@ describe("saveOpportunityEditAction", () => {
 
   it("calls the summary update fetcher and returns success", async () => {
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
       successfulSummaryUpdateResponse,
@@ -307,8 +312,8 @@ describe("saveOpportunityEditAction", () => {
 
   it("maps 403 to a permission error", async () => {
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
       new ApiRequestError("forbidden", "APIRequestError", 403),
@@ -323,8 +328,8 @@ describe("saveOpportunityEditAction", () => {
 
   it("maps 404 to a not found error", async () => {
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
       new ApiRequestError("missing", "APIRequestError", 404),
@@ -337,10 +342,12 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
-  it("maps 422 to a draft-state error", async () => {
+  it("maps an unexpected thrown 422 to a generic save error", async () => {
+    // A real 422 now resolves via allowedErrorStatuses rather than throwing (see tests
+    // below). This covers the defensive fallback if one is ever thrown some other way.
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
       new ApiRequestError("invalid", "APIRequestError", 422),
@@ -349,14 +356,140 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result).toEqual({
-      errorMessage: "draftOnly",
+      errorMessage: "genericError",
     });
+  });
+
+  it("maps 422 response field errors to inline validationErrors", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue({
+      ...successfulSummaryUpdateResponse,
+      status_code: 422,
+      errors: [
+        {
+          field: "award_floor",
+          message: "Not a valid integer.",
+          type: "invalid",
+        },
+        {
+          field: "award_ceiling",
+          message: "Not a valid integer.",
+          type: "invalid",
+        },
+      ],
+    });
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result).toEqual({
+      validationErrors: {
+        award_floor: ["Not a valid integer."],
+        award_ceiling: ["Not a valid integer."],
+      },
+      errorMessage: undefined,
+    });
+  });
+
+  it("maps 422 response errors with no matching form field to a top-level errorMessage", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue({
+      ...successfulSummaryUpdateResponse,
+      status_code: 422,
+      errors: [
+        {
+          field: "opportunity_summary_id",
+          message: "Only draft opportunity summaries can be updated.",
+          type: "invalid",
+        },
+      ],
+    });
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result).toEqual({
+      validationErrors: undefined,
+      errorMessage: "Only draft opportunity summaries can be updated.",
+    });
+  });
+
+  it("falls back to the response's top-level message when a 422 has an empty errors array", async () => {
+    // Business-rule errors like validate_opportunity_created_in_simpler_grants call
+    // raise_flask_error with a message and no validation_issues, so errors comes back
+    // empty and the real text lives only in the top-level message.
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue({
+      ...successfulSummaryUpdateResponse,
+      status_code: 422,
+      message: "Only opportunities created in Simpler Grants can be updated",
+      errors: [],
+    });
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result).toEqual({
+      validationErrors: undefined,
+      errorMessage:
+        "Only opportunities created in Simpler Grants can be updated",
+    });
+  });
+
+  it("strips comma-formatted currency fields before sending the update request", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+    formData.set("estimated_total_program_funding", "1,000,000");
+    formData.set("award_floor", "100,000");
+    formData.set("award_ceiling", "500,000");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    await saveOpportunityEditAction(initialState, formData);
+
+    const firstCall = mockUpdateOpportunitySummaryForGrantor.mock.calls[0];
+    expect(firstCall?.[0].body.estimated_total_program_funding).toBe(1000000);
+    expect(firstCall?.[0].body.award_floor).toBe(100000);
+    expect(firstCall?.[0].body.award_ceiling).toBe(500000);
+  });
+
+  it("strips comma-formatted currency fields before sending the create request", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    // opportunity_summary_id not set - takes the create path
+    formData.set("estimated_total_program_funding", "1,000,000");
+    formData.set("award_floor", "100,000");
+    formData.set("award_ceiling", "500,000");
+
+    mockCreateOpportunitySummaryForGrantor.mockResolvedValue({
+      message: "success",
+      status_code: 201,
+      data: { opportunity_summary_id: "new-sum-789" },
+    } as unknown as Awaited<
+      ReturnType<typeof createOpportunitySummaryForGrantor>
+    >);
+
+    await saveOpportunityEditAction(initialState, formData);
+
+    const firstCall = mockCreateOpportunitySummaryForGrantor.mock.calls[0];
+    expect(firstCall?.[0].body.estimated_total_program_funding).toBe(1000000);
+    expect(firstCall?.[0].body.award_floor).toBe(100000);
+    expect(firstCall?.[0].body.award_ceiling).toBe(500000);
   });
 
   it("maps 401 to an unauthenticated error", async () => {
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
       new ApiRequestError("unauthenticated", "APIRequestError", 401),
@@ -371,8 +504,8 @@ describe("saveOpportunityEditAction", () => {
 
   it("maps unknown failures to a generic save error", async () => {
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
       new Error("unexpected"),
@@ -384,159 +517,330 @@ describe("saveOpportunityEditAction", () => {
       errorMessage: "genericError",
     });
   });
-});
 
-describe("buildOpportunitySummaryUpdateRequest", () => {
-  it("maps current edit form fields into the summary update payload", () => {
-    const formData = new FormData();
-    formData.set("description", "Summary text");
-    formData.set("publishDate", "2026-03-11");
-    formData.set("closeDate", "2026-04-11");
-    formData.set("closeDateExplanation", "Rolling deadline");
-    formData.set("expectedNumberOfAwards", "12");
-    formData.set("estimatedTotalProgramFunding", "150000");
-    formData.set("awardMinimum", "1000");
-    formData.set("awardMaximum", "5000");
-    formData.set("additionalInfoUrl", "https://example.com");
-    formData.set("additionalInfoUrlText", "More info");
-    formData.set("funding-category-values", "health");
-    formData.set("fundingCategoryExplanation", "Other category notes");
-    formData.set("funding-type-values", "grant");
-    formData.set("costSharing", "true");
-    formData.append("eligibleApplicants", "small_businesses");
-    formData.append("eligibleApplicants", "state_governments");
-    formData.set("additionalEligibilityInfo", "Must be US-based");
-    formData.set("grantorContactDetails", "Program office");
-    formData.set("contactEmail", "grants@example.com");
-    formData.set("contactEmailText", "Email us");
+  describe("attachment processing", () => {
+    it("does not call the attachment create or delete fetchers when no held or deleted ids are present", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
 
-    expect(buildOpportunitySummaryUpdateRequest(formData)).toEqual({
-      is_cost_sharing: true,
-      summary_description: "Summary text",
-      post_date: "2026-03-11",
-      close_date: "2026-04-11",
-      close_date_description: "Rolling deadline",
-      expected_number_of_awards: 12,
-      estimated_total_program_funding: 150000,
-      award_floor: 1000,
-      award_ceiling: 5000,
-      additional_info_url: "https://example.com",
-      additional_info_url_description: "More info",
-      funding_categories: ["health"],
-      funding_category_description: "Other category notes",
-      funding_instruments: ["grant"],
-      applicant_types: ["small_businesses", "state_governments"],
-      applicant_eligibility_description: "Must be US-based",
-      agency_contact_description: "Program office",
-      agency_email_address: "grants@example.com",
-      agency_email_address_description: "Email us",
+      mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+        successfulSummaryUpdateResponse,
+      );
+
+      await saveOpportunityEditAction(initialState, formData);
+
+      expect(mockCreateOpportunityAttachment).not.toHaveBeenCalled();
+      expect(mockDeleteOpportunityAttachment).not.toHaveBeenCalled();
     });
-  });
-});
 
-describe("submitOpportunityAction", () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
+    it("does not process attachments when the summary update itself returns a 422", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
+      formData.set("held_pending_file_ids", JSON.stringify(["pending-1"]));
+      formData.set("deleted_attachment_ids", JSON.stringify(["attach-1"]));
 
-  it("returns validation errors and does not publish when save has validation errors", async () => {
-    const formData = new FormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
-    // publishDate missing - triggers validation error
+      mockUpdateOpportunitySummaryForGrantor.mockResolvedValue({
+        ...successfulSummaryUpdateResponse,
+        status_code: 422,
+        errors: [
+          {
+            field: "award_floor",
+            message: "Not a valid integer.",
+            type: "invalid",
+          },
+        ],
+      });
 
-    const result = await submitOpportunityAction(initialState, formData);
+      await saveOpportunityEditAction(initialState, formData);
 
-    expect(result.validationErrors).toEqual({
-      publishDate: ["publishDate"],
-      fundingType: ["fundingType"],
-      fundingCategory: ["fundingCategory"],
-      eligibleApplicants: ["eligibleApplicants"],
+      expect(mockCreateOpportunityAttachment).not.toHaveBeenCalled();
+      expect(mockDeleteOpportunityAttachment).not.toHaveBeenCalled();
     });
-    expect(mockPublishOpportunityForGrantor).not.toHaveBeenCalled();
-  });
 
-  it("returns the save error and does not publish when save fails with an API error", async () => {
-    const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    it("does not process attachments when the summary update itself throws", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
+      formData.set("held_pending_file_ids", JSON.stringify(["pending-1"]));
+      formData.set("deleted_attachment_ids", JSON.stringify(["attach-1"]));
 
-    mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
-      new ApiRequestError("forbidden", "APIRequestError", 403),
-    );
+      mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
+        new ApiRequestError("forbidden", "APIRequestError", 403),
+      );
 
-    const result = await submitOpportunityAction(initialState, formData);
+      await saveOpportunityEditAction(initialState, formData);
 
-    expect(result).toEqual({ errorMessage: "forbidden" });
-    expect(mockPublishOpportunityForGrantor).not.toHaveBeenCalled();
-  });
+      expect(mockCreateOpportunityAttachment).not.toHaveBeenCalled();
+      expect(mockDeleteOpportunityAttachment).not.toHaveBeenCalled();
+    });
 
-  it("returns the publish error when save succeeds but publish fails with 403", async () => {
-    const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    it("does not process attachments when the summary create itself returns a 422", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      // opportunity_summary_id not set - takes the create path
+      formData.set("held_pending_file_ids", JSON.stringify(["pending-1"]));
+      formData.set("deleted_attachment_ids", JSON.stringify(["attach-1"]));
 
-    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
-      successfulSummaryUpdateResponse,
-    );
-    mockPublishOpportunityForGrantor.mockRejectedValue(
-      new ApiRequestError("forbidden", "APIRequestError", 403),
-    );
+      mockCreateOpportunitySummaryForGrantor.mockResolvedValue({
+        message: "invalid",
+        status_code: 422,
+        errors: [
+          {
+            field: "award_floor",
+            message: "Not a valid integer.",
+            type: "invalid",
+          },
+        ],
+      } as unknown as Awaited<
+        ReturnType<typeof createOpportunitySummaryForGrantor>
+      >);
 
-    const result = await submitOpportunityAction(initialState, formData);
+      await saveOpportunityEditAction(initialState, formData);
 
-    expect(result).toEqual({ errorMessage: "forbidden" });
-  });
+      expect(mockCreateOpportunityAttachment).not.toHaveBeenCalled();
+      expect(mockDeleteOpportunityAttachment).not.toHaveBeenCalled();
+    });
 
-  it("returns the publish error when save succeeds but publish fails with 404", async () => {
-    const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    it("calls createOpportunityAttachment once per held pending file id on an update save", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
+      formData.set(
+        "held_pending_file_ids",
+        JSON.stringify(["pending-1", "pending-2"]),
+      );
 
-    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
-      successfulSummaryUpdateResponse,
-    );
-    mockPublishOpportunityForGrantor.mockRejectedValue(
-      new ApiRequestError("not found", "APIRequestError", 404),
-    );
+      mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+        successfulSummaryUpdateResponse,
+      );
+      mockCreateOpportunityAttachment.mockResolvedValue({
+        message: "success",
+        status_code: 200,
+      } as unknown as Awaited<ReturnType<typeof createOpportunityAttachment>>);
 
-    const result = await submitOpportunityAction(initialState, formData);
+      const result = await saveOpportunityEditAction(initialState, formData);
 
-    expect(result).toEqual({ errorMessage: "notFound" });
-  });
+      expect(mockCreateOpportunityAttachment).toHaveBeenCalledTimes(2);
+      expect(mockCreateOpportunityAttachment).toHaveBeenNthCalledWith(
+        1,
+        "opp-123",
+        "pending-1",
+      );
+      expect(mockCreateOpportunityAttachment).toHaveBeenNthCalledWith(
+        2,
+        "opp-123",
+        "pending-2",
+      );
+      expect(result).toEqual({ successMessage: "success" });
+    });
 
-  it("maps 401 from publish to an unauthenticated error", async () => {
-    const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    it("calls deleteOpportunityAttachment once per deleted attachment id on an update save", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
+      formData.set(
+        "deleted_attachment_ids",
+        JSON.stringify(["attach-1", "attach-2"]),
+      );
 
-    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
-      successfulSummaryUpdateResponse,
-    );
-    mockPublishOpportunityForGrantor.mockRejectedValue(
-      new ApiRequestError("unauthenticated", "APIRequestError", 401),
-    );
+      mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+        successfulSummaryUpdateResponse,
+      );
+      mockDeleteOpportunityAttachment.mockResolvedValue({
+        status_code: 200,
+        message: "success",
+      });
 
-    const result = await submitOpportunityAction(initialState, formData);
+      await saveOpportunityEditAction(initialState, formData);
 
-    expect(result).toEqual({ errorMessage: "unauthenticated" });
-  });
+      expect(mockDeleteOpportunityAttachment).toHaveBeenCalledTimes(2);
+      expect(mockDeleteOpportunityAttachment).toHaveBeenNthCalledWith(
+        1,
+        "opp-123",
+        "attach-1",
+      );
+      expect(mockDeleteOpportunityAttachment).toHaveBeenNthCalledWith(
+        2,
+        "opp-123",
+        "attach-2",
+      );
+    });
 
-  it("redirects to /grantor/opportunities when save and publish both succeed", async () => {
-    const formData = buildValidFormData();
-    formData.set("opportunitySummaryId", "sum-456");
+    it("processes held and deleted attachment ids on the summary create path too", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      // opportunity_summary_id not set - takes the create path
+      formData.set("held_pending_file_ids", JSON.stringify(["pending-1"]));
+      formData.set("deleted_attachment_ids", JSON.stringify(["attach-1"]));
 
-    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
-      successfulSummaryUpdateResponse,
-    );
-    mockPublishOpportunityForGrantor.mockResolvedValue(
-      // publishOpportunityAction discards the resolved value (only errors matter)
-      {} as Awaited<ReturnType<typeof publishOpportunityForGrantor>>,
-    );
+      mockCreateOpportunitySummaryForGrantor.mockResolvedValue({
+        message: "success",
+        status_code: 201,
+        data: { opportunity_summary_id: "new-sum-789" },
+      } as unknown as Awaited<
+        ReturnType<typeof createOpportunitySummaryForGrantor>
+      >);
+      mockCreateOpportunityAttachment.mockResolvedValue({
+        message: "success",
+        status_code: 200,
+      } as unknown as Awaited<ReturnType<typeof createOpportunityAttachment>>);
+      mockDeleteOpportunityAttachment.mockResolvedValue({
+        status_code: 200,
+        message: "success",
+      });
 
-    await submitOpportunityAction(initialState, formData);
+      await saveOpportunityEditAction(initialState, formData);
 
-    expect(mockRedirect).toHaveBeenCalledWith("/grantor/opportunities");
+      expect(mockCreateOpportunityAttachment).toHaveBeenCalledWith(
+        "opp-123",
+        "pending-1",
+      );
+      expect(mockDeleteOpportunityAttachment).toHaveBeenCalledWith(
+        "opp-123",
+        "attach-1",
+      );
+    });
+
+    it("still returns the newly created summary id when attachment processing fails on the create path, so a retry updates rather than duplicates the summary", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      // opportunity_summary_id not set - takes the create path
+      formData.set("held_pending_file_ids", JSON.stringify(["pending-1"]));
+
+      mockCreateOpportunitySummaryForGrantor.mockResolvedValue({
+        message: "success",
+        status_code: 201,
+        data: { opportunity_summary_id: "new-sum-789" },
+      } as unknown as Awaited<
+        ReturnType<typeof createOpportunitySummaryForGrantor>
+      >);
+      mockCreateOpportunityAttachment.mockResolvedValue({
+        message: "This pending file could not be attached.",
+        status_code: 422,
+        errors: [],
+      } as unknown as Awaited<ReturnType<typeof createOpportunityAttachment>>);
+
+      const result = await saveOpportunityEditAction(initialState, formData);
+
+      expect(result).toEqual({
+        errorMessage: "This pending file could not be attached.",
+        newOpportunitySummaryId: "new-sum-789",
+      });
+    });
+
+    it("still returns the newly created summary id when attachment processing throws (not just when it 422s) on the create path", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      // opportunity_summary_id not set - takes the create path
+      formData.set("held_pending_file_ids", JSON.stringify(["pending-1"]));
+
+      mockCreateOpportunitySummaryForGrantor.mockResolvedValue({
+        message: "success",
+        status_code: 201,
+        data: { opportunity_summary_id: "new-sum-789" },
+      } as unknown as Awaited<
+        ReturnType<typeof createOpportunitySummaryForGrantor>
+      >);
+      mockCreateOpportunityAttachment.mockRejectedValue(
+        new ApiRequestError("forbidden", "APIRequestError", 403),
+      );
+
+      const result = await saveOpportunityEditAction(initialState, formData);
+
+      expect(result).toEqual({
+        errorMessage: "forbidden",
+        newOpportunitySummaryId: "new-sum-789",
+      });
+    });
+
+    it("ignores a malformed held_pending_file_ids value instead of throwing", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
+      formData.set("held_pending_file_ids", "not-json");
+
+      mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+        successfulSummaryUpdateResponse,
+      );
+
+      const result = await saveOpportunityEditAction(initialState, formData);
+
+      expect(mockCreateOpportunityAttachment).not.toHaveBeenCalled();
+      expect(result).toEqual({ successMessage: "success" });
+    });
+
+    it("maps a failed attachment create to a generic save error", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
+      formData.set("held_pending_file_ids", JSON.stringify(["pending-1"]));
+
+      mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+        successfulSummaryUpdateResponse,
+      );
+      mockCreateOpportunityAttachment.mockRejectedValue(
+        new Error("attachment creation failed"),
+      );
+
+      const result = await saveOpportunityEditAction(initialState, formData);
+
+      expect(result).toEqual({ errorMessage: "genericError" });
+    });
+
+    it("surfaces a create-attachment 422's own message instead of a generic one, and stops before processing further ids", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
+      formData.set(
+        "held_pending_file_ids",
+        JSON.stringify(["pending-1", "pending-2"]),
+      );
+      formData.set("deleted_attachment_ids", JSON.stringify(["attach-1"]));
+
+      mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+        successfulSummaryUpdateResponse,
+      );
+      mockCreateOpportunityAttachment.mockResolvedValue({
+        message:
+          "This pending file has already been claimed by another attachment.",
+        status_code: 422,
+        errors: [],
+      } as unknown as Awaited<ReturnType<typeof createOpportunityAttachment>>);
+
+      const result = await saveOpportunityEditAction(initialState, formData);
+
+      expect(result).toEqual({
+        errorMessage:
+          "This pending file has already been claimed by another attachment.",
+      });
+      // stopped after the first held id failed - never tried the second held id or any deletes
+      expect(mockCreateOpportunityAttachment).toHaveBeenCalledTimes(1);
+      expect(mockDeleteOpportunityAttachment).not.toHaveBeenCalled();
+    });
+
+    it("surfaces a delete-attachment 422's own message instead of a generic one", async () => {
+      const formData = buildValidFormData();
+      formData.set("opportunity_id", "opp-123");
+      formData.set("opportunity_summary_id", "sum-456");
+      formData.set("deleted_attachment_ids", JSON.stringify(["attach-1"]));
+
+      mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+        successfulSummaryUpdateResponse,
+      );
+      mockDeleteOpportunityAttachment.mockResolvedValue({
+        status_code: 422,
+        message: "This attachment cannot be deleted after publication.",
+        errors: [],
+      });
+
+      const result = await saveOpportunityEditAction(initialState, formData);
+
+      expect(result).toEqual({
+        errorMessage: "This attachment cannot be deleted after publication.",
+      });
+    });
   });
 });
 
@@ -545,10 +849,132 @@ describe("opportunityEditFormAction", () => {
     jest.resetAllMocks();
   });
 
-  it("delegates to saveOpportunityEditAction when submitType is 'save'", async () => {
+  it("returns validation errors and does not publish when save has validation errors", async () => {
+    const formData = new FormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+    // post_date missing - triggers validation error
+
+    const result = await opportunityEditFormAction(initialState, formData);
+
+    expect(result.validationErrors).toEqual({
+      post_date: ["publishDate"],
+      funding_instruments: ["fundingType"],
+      funding_categories: ["fundingCategory"],
+      applicant_types: ["eligibleApplicants"],
+    });
+    expect(mockUpdateOpportunitySummaryForGrantor).not.toHaveBeenCalled();
+  });
+
+  it("returns the publish error when save succeeds but publish fails with 403", async () => {
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+    mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
+      new ApiRequestError("forbidden", "APIRequestError", 403),
+    );
+
+    const result = await opportunityEditFormAction(initialState, formData);
+
+    expect(result).toEqual({ errorMessage: "forbidden" });
+  });
+
+  it("returns the publish error when save succeeds but publish fails with 404", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+    mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
+      new ApiRequestError("not found", "APIRequestError", 404),
+    );
+
+    const result = await opportunityEditFormAction(initialState, formData);
+
+    expect(result).toEqual({ errorMessage: "notFound" });
+  });
+
+  it("maps 401 from publish to an unauthenticated error", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+    mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
+      new ApiRequestError("unauthenticated", "APIRequestError", 401),
+    );
+
+    const result = await opportunityEditFormAction(initialState, formData);
+
+    expect(result).toEqual({ errorMessage: "unauthenticated" });
+  });
+});
+
+describe("opportunityEditFormAction", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("delegates to saveOpportunityEditAction and redirects to the overview page when submitType = saveAndExit", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+    formData.set("submitType", "saveAndExit");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockRedirect).toHaveBeenCalledWith("../overview");
+  });
+
+  it("delegates to saveOpportunityEditAction and redirects to the overview page when submitType = saveAndGoBack", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+    formData.set("submitType", "saveAndGoBack");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockRedirect).toHaveBeenCalledWith("../overview");
+  });
+
+  it("delegates to saveOpportunityEditAction and redirects to the competition page when submitType = saveAndContinue", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+    formData.set("submitType", "saveAndContinue");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockRedirect).toHaveBeenCalledWith("../competition");
+  });
+
+  it("delegates to saveOpportunityEditAction and returns success when submitType none of three expected", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
     formData.set("submitType", "save");
 
     mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
@@ -558,27 +984,26 @@ describe("opportunityEditFormAction", () => {
     const result = await opportunityEditFormAction(initialState, formData);
 
     expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
-    expect(mockPublishOpportunityForGrantor).not.toHaveBeenCalled();
     expect(result).toEqual({ successMessage: "success" });
   });
 
-  it("delegates to submitOpportunityAction when submitType is 'publish'", async () => {
+  it("delegates to saveOpportunityEditAction and returns errors and does not redirect", async () => {
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
-    formData.set("opportunitySummaryId", "sum-456");
-    formData.set("submitType", "publish");
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+    formData.set("submitType", "saveAndContinue");
+    formData.set("agency_email_address", "not-an-email");
 
     mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
       successfulSummaryUpdateResponse,
     );
-    mockPublishOpportunityForGrantor.mockResolvedValue(
-      {} as Awaited<ReturnType<typeof publishOpportunityForGrantor>>,
-    );
 
-    await opportunityEditFormAction(initialState, formData);
+    const result = await opportunityEditFormAction(initialState, formData);
 
-    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
-    expect(mockPublishOpportunityForGrantor).toHaveBeenCalledTimes(1);
-    expect(mockRedirect).toHaveBeenCalledWith("/grantor/opportunities");
+    expect(mockUpdateOpportunitySummaryForGrantor).not.toHaveBeenCalledTimes(1);
+    expect(mockRedirect).not.toHaveBeenCalledWith("../competition");
+    expect(result.validationErrors).toEqual({
+      agency_email_address: ["contactEmailInvalid"],
+    });
   });
 });

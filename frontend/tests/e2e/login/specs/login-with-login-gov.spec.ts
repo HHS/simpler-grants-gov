@@ -11,8 +11,9 @@ import {
   findSignOutButton,
   performStagingLogin,
 } from "tests/e2e/utils/auth/perform-login-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 
-const { SMOKE, AUTH } = VALID_TAGS;
+const { SMOKE } = VALID_TAGS;
 
 const { baseUrl, targetEnv, testUserAuthKey, testUserEmail, testUserPassword } =
   playwrightEnv;
@@ -22,17 +23,12 @@ const TIMEOUT_REDIRECT = 90000;
 test.describe("Login.gov based authentication tests", () => {
   // Skip non-Chrome browsers in staging
   test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv === "staging") {
-      test.skip(
-        testInfo.project.name !== "Chrome",
-        "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-      );
-    }
+    skipNonChromeOnStaging(testInfo);
   });
 
   // Skip test if env missing
   const envMissing =
-    targetEnv !== "staging" ||
+    targetEnv === "local" ||
     !testUserEmail ||
     !testUserPassword ||
     !testUserAuthKey;
@@ -41,7 +37,7 @@ test.describe("Login.gov based authentication tests", () => {
   // Scenario: signs in with Login.gov MFA and reaches an authenticated state
   test(
     "Login.gov authentication with MFA",
-    { tag: [SMOKE, AUTH] },
+    { tag: [SMOKE] },
     async ({ page, context }: { page: Page; context: BrowserContext }) => {
       const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
 
@@ -57,7 +53,7 @@ test.describe("Login.gov based authentication tests", () => {
         // Given the user launches the application
         await page.goto(baseUrl, {
           waitUntil: "domcontentloaded",
-          timeout: targetEnv === "staging" ? 180000 : 60000,
+          timeout: targetEnv !== "local" ? 180000 : 60000,
         });
 
         // When the user clicks the "Sign in" button

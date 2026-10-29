@@ -50,7 +50,7 @@ const getSubmissionDetailHref = (
   awardRecommendationId: string,
   submissionId: string,
 ) =>
-  `/award-recommendation/${awardRecommendationId}/application-submissions/${submissionId}/edit`;
+  `/grantor/award-recommendation/${awardRecommendationId}/application-submissions/${submissionId}/edit`;
 
 const formatCellValue = (value?: string) => {
   if (!value) {
@@ -164,6 +164,8 @@ const SubmissionTable = ({
   };
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchSubmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awardRecommendationId, page, clientFetch]);
@@ -349,15 +351,12 @@ export const RecommendationSubmissionsSection = ({
               {t("recommendedAwards.heading")}
             </h3>
             {showRecommended && (
-              <a
+              <Link
                 className="text-bold text-underline"
-                href="#"
-                onClick={(event) => {
-                  event.preventDefault();
-                }}
+                href={`/grantor/award-recommendation/${awardRecommendationId}/application-submissions/edit`}
               >
                 {t("recommendedAwards.editLink")}
-              </a>
+              </Link>
             )}
           </div>
           <p className="text-base-dark margin-top-0">
@@ -370,15 +369,12 @@ export const RecommendationSubmissionsSection = ({
             />
           ) : (
             <div className="bg-base-lighter radius-md padding-y-2 padding-x-3">
-              <a
+              <Link
                 className="text-bold text-left display-block width-full text-underline"
-                href="#"
-                onClick={(event) => {
-                  event.preventDefault();
-                }}
+                href={`/grantor/award-recommendation/${awardRecommendationId}/application-submissions/edit`}
               >
                 {t("recommendedAwards.editLink")}
-              </a>
+              </Link>
             </div>
           )}
         </div>

@@ -1,13 +1,8 @@
-import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError, readError } from "src/errors";
 import { handleStartApplication } from "src/services/fetch/fetchers/applicationFetcher";
 
 export const startApplicationHandler = async (request: Request) => {
   try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError("No active session start application");
-    }
     const { competitionId, applicationName, organization } =
       (await request.json()) as {
         competitionId: string;

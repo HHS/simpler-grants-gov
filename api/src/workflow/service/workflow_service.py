@@ -2,9 +2,9 @@ import logging
 import uuid
 from typing import Any
 
-from grants_shared.adapters import db
 from sqlalchemy import select
 
+from src.adapters import db
 from src.constants.lookup_constants import WorkflowEntityType
 from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.award_recommendation_models import AwardRecommendation
@@ -78,7 +78,7 @@ def get_workflow_entity(
         return {"award_recommendation": award_recommendation}
 
     else:  # Any unconfigured entity types will result in an error
-        logger.warning("Entity type is not supported for workflow", extra=log_extra)  # type: ignore[unreachable]
+        logger.warning("Entity type is not supported for workflow", extra=log_extra)
         raise ImplementationMissingError("Entity type is not supported for workflow")
 
 

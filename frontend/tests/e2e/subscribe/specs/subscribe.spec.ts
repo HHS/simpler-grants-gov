@@ -16,7 +16,7 @@ const { FULL_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
 test.beforeEach(async ({ page }) => {
-  const timeout = targetEnv === "staging" ? 180000 : 60000;
+  const timeout = targetEnv !== "local" ? 180000 : 60000;
 
   // Background: Given I open "/newsletter"
   await page.goto("/newsletter", { waitUntil: "domcontentloaded", timeout });
@@ -33,7 +33,7 @@ test("has title", { tag: [FULL_REGRESSION] }, async ({ page }) => {
 /**
  * @scenario Show errors when submitting empty form
  */
-test("client side errors", async ({ page }) => {
+test("client side errors", { tag: [FULL_REGRESSION] }, async ({ page }) => {
   // When I click "Subscribe" button
   await page.getByRole("button", { name: /subscribe/i }).click();
 
@@ -51,8 +51,8 @@ test("client side errors", async ({ page }) => {
 /**
  * @scenario Subscribe with valid name and email
  */
-test("successful signup", async ({ page }) => {
-  // Mock the newsletter subscribe API so the test doesn't call Sendy
+test("successful signup", { tag: [FULL_REGRESSION] }, async ({ page }) => {
+  // Mock the newsletter subscribe API so the test doesn't call Mailchimp
   await page.route("**/api/newsletter/subscribe", async (route) => {
     await route.fulfill({
       status: 200,
@@ -83,7 +83,7 @@ test("successful signup", async ({ page }) => {
 /**
  * @scenario Show error when subscription fails
  */
-test("error during signup", async ({ page }) => {
+test("error during signup", { tag: [FULL_REGRESSION] }, async ({ page }) => {
   // Mock the newsletter subscribe API to return a server error
   await page.route("**/api/newsletter/subscribe", async (route) => {
     await route.fulfill({

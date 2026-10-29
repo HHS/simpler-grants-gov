@@ -1,10 +1,12 @@
+import logging
 import uuid
+from unittest import mock
 
 import opensearchpy
 import pytest
 
 from src.adapters.search import get_opensearch_config
-from src.adapters.search.opensearch_client import _get_connection_parameters
+from src.adapters.search.opensearch_client import SearchClient, _get_connection_parameters
 from tests.src.adapters.search.test_opensearch_query_builder import (
     CALL_OF_WINTER,
     WINTER,
@@ -46,6 +48,87 @@ def test_create_and_delete_index_duplicate(search_client):
     search_client.delete_index(index_name)
     with pytest.raises(Exception, match="no such index"):
         search_client.delete_index(index_name)
+
+
+def _snapshot_in_progress_error() -> opensearchpy.exceptions.RequestError:
+    return opensearchpy.exceptions.RequestError(
+        400,
+        "snapshot_in_progress_exception",
+        {"error": {"reason": "Cannot delete indices that are being snapshotted: [[some-index]]."}},
+    )
+
+
+@pytest.fixture
+def instant_delete_retries(monkeypatch):
+    # Avoid real waits between retries in delete_index
+    monkeypatch.setattr(
+        SearchClient._delete_index_with_retry.retry, "sleep", lambda *args, **kwargs: None
+    )
+
+
+def test_delete_index_snapshot_in_progress_is_skipped(
+    search_client, monkeypatch, instant_delete_retries, caplog
+):
+    caplog.set_level(logging.INFO)
+    index_name = f"test-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
+
+    delete_mock = mock.MagicMock(side_effect=_snapshot_in_progress_error())
+    monkeypatch.setattr(search_client._client.indices, "delete", delete_mock)
+
+    # A snapshot in progress should not fail the call
+    search_client.delete_index(index_name)
+
+    # Retried up to the max attempts before giving up
+    assert delete_mock.call_count == 3
+
+    skip_logs = [
+        r
+        for r in caplog.records
+        if r.message == "Skipping search index delete, snapshot in progress"
+    ]
+    assert len(skip_logs) == 1
+    assert skip_logs[0].index_name == index_name
+
+
+def test_delete_index_succeeds_after_snapshot_clears(
+    search_client, monkeypatch, instant_delete_retries
+):
+    index_name = f"test-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
+
+    real_delete = search_client._client.indices.delete
+    call_count = 0
+
+    def flaky_delete(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count < 3:
+            raise _snapshot_in_progress_error()
+        return real_delete(*args, **kwargs)
+
+    monkeypatch.setattr(search_client._client.indices, "delete", flaky_delete)
+
+    search_client.delete_index(index_name)
+
+    assert call_count == 3
+    assert search_client.index_exists(index_name) is False
+
+
+def test_delete_index_other_request_error_is_raised(
+    search_client, monkeypatch, instant_delete_retries
+):
+    index_name = f"test-index-{uuid.uuid4().int}"
+
+    other_error = opensearchpy.exceptions.RequestError(400, "some_other_exception", {})
+    delete_mock = mock.MagicMock(side_effect=other_error)
+    monkeypatch.setattr(search_client._client.indices, "delete", delete_mock)
+
+    with pytest.raises(opensearchpy.exceptions.RequestError, match="some_other_exception"):
+        search_client.delete_index(index_name)
+
+    # Non-snapshot errors are not retried
+    assert delete_mock.call_count == 1
 
 
 def test_bulk_upsert(search_client, generic_index):

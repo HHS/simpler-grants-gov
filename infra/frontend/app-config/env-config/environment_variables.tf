@@ -1,4 +1,6 @@
 locals {
+  app_environment_name = coalesce(var.app_environment_name, var.environment)
+
   # Map from environment variable name to environment variable value
   # This is a map rather than a list so that variables can be easily
   # overridden per environment using terraform's `merge` function
@@ -8,9 +10,9 @@ locals {
     # see https://github.com/newrelic/node-newrelic?tab=readme-ov-file#setup
     NODE_OPTIONS = "-r newrelic"
     # expose the current AWS Env to the FE Next Node Server at Runtime
-    ENVIRONMENT = var.environment
+    ENVIRONMENT = local.app_environment_name
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#labels
-    NEW_RELIC_LABELS = "app_name:${var.app_name};environment:${var.environment};service_name:${var.app_name}-${var.environment};serviceName:${var.app_name}-${var.environment};service.name:${var.app_name}-${var.environment};entity.name:${var.app_name}-${var.environment}"
+    NEW_RELIC_LABELS = "app_name:${var.app_name};environment:${local.app_environment_name};service_name:${var.app_name}-${local.app_environment_name};serviceName:${var.app_name}-${local.app_environment_name};service.name:${var.app_name}-${local.app_environment_name};entity.name:${var.app_name}-${local.app_environment_name}"
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#logging_config
     NEW_RELIC_LOG_ENABLED = "true"
     NEW_RELIC_LOG         = "stderr"
@@ -19,8 +21,10 @@ locals {
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#browser-variables
     NEW_RELIC_BROWSER_MONITORING_ATTRIBUTES_ENABLED = "true"
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#application-logging-enabled
-    # Turned off to avoid duplicate logging, and use logging from fluent bit instead
+    # Turned off to avoid duplicate logging, logs are forwarded from CloudWatch to New Relic instead
     NEW_RELIC_APPLICATION_LOGGING_ENABLED = "false"
+    # Node keep-alive (ms) must exceed the ALB idle_timeout (120s) or the ALB reuses closed sockets → 502
+    KEEP_ALIVE_TIMEOUT = "125000"
   }
 
   # Configuration for secrets
@@ -33,20 +37,20 @@ locals {
   #   }
   # }
   secrets = {
-    # Sendy API key to pass with requests for sendy subscriber endpoints.
-    SENDY_API_KEY = {
+    # Mailchimp API key to pass with requests for newsletter subscriber endpoints.
+    MAILCHIMP_API_KEY = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-api-key"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-api-key"
     },
-    # Sendy API base url for requests to manage subscribers.
-    SENDY_API_URL = {
+    # Mailchimp data center prefix (e.g. "us4") used to build the API base url.
+    MAILCHIMP_API_URL_PREFIX = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-api-url"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-api-url-prefix"
     },
-    # Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list.
-    SENDY_LIST_ID = {
+    # Mailchimp list ID for requests to manage subscribers to the Simpler Grants distribution list.
+    MAILCHIMP_LIST_ID = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-list-id"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-list-id"
     },
     # URL that the frontend uses to make fetch requests to the Grants API.
     API_URL = {
@@ -57,6 +61,11 @@ locals {
     AUTH_LOGIN_URL = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/auth-login-url"
+    },
+    # URL for the API logout route.
+    AUTH_LOGOUT_URL = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/auth-logout-url"
     },
     NEW_RELIC_APP_NAME = {
       manage_method     = "manual"
@@ -81,6 +90,14 @@ locals {
     FEATURE_MAINTENANCE_MODE = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-maintenance-mode"
+    },
+    FEATURE_MAINTENANCE_BANNER_ENABLED = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-maintenance-banner-enabled"
+    },
+    MAINTENANCE_BANNER_MESSAGE = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/maintenance-banner-message"
     },
     FEATURE_OPPORTUNITIES_LIST_OFF = {
       manage_method     = "manual"

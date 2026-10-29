@@ -1,17 +1,21 @@
 import uuid
 from collections.abc import Sequence
+from typing import Any, cast
 
-import grants_shared.adapters.db as db
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.award_recommendation_models import AwardRecommendation
+from src.db.models.award_recommendation_models import (
+    AwardRecommendation,
+    AwardRecommendationApplicationSubmission,
+)
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
@@ -19,10 +23,6 @@ from src.pagination.paginator import Paginator
 from src.pagination.sorting_util import apply_sorting
 from src.search.search_models import UuidSearchFilter
 from src.validation.validation_constants import ValidationErrorType
-
-COLUMN_MAPPING = {
-    "created_at": AwardRecommendation.created_at,
-}
 
 
 class AwardRecommendationListFilters(BaseModel):
@@ -77,9 +77,26 @@ def list_award_recommendations(
     agencies = verify_agencies_access(db_session, user, agency_ids)
     agency_codes = [a.agency_code for a in agencies]
 
+    # Create subquery for total_received_count to enable sorting
+    total_received_count_subquery = (
+        select(
+            AwardRecommendationApplicationSubmission.award_recommendation_id,
+            func.count(
+                AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id
+            ).label("total_received_count"),
+        )
+        .group_by(AwardRecommendationApplicationSubmission.award_recommendation_id)
+        .subquery()
+    )
+
     stmt = (
         select(AwardRecommendation)
         .join(Opportunity, Opportunity.opportunity_id == AwardRecommendation.opportunity_id)
+        .outerjoin(
+            total_received_count_subquery,
+            total_received_count_subquery.c.award_recommendation_id
+            == AwardRecommendation.award_recommendation_id,
+        )
         .where(
             AwardRecommendation.is_deleted.isnot(True),
             Opportunity.agency_code.in_(agency_codes),
@@ -92,7 +109,22 @@ def list_award_recommendations(
             selectinload(AwardRecommendation.award_recommendation_reviews),
         )
     )
-    stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING)
+
+    # Column mapping for sorting
+    column_mapping = {
+        "award_recommendation_number": AwardRecommendation.award_recommendation_number,
+        "opportunity_name": Opportunity.opportunity_title,
+        "opportunity_number": Opportunity.opportunity_number,
+        "total_received_count": func.coalesce(
+            total_received_count_subquery.c.total_received_count, 0
+        ),
+        "award_recommendation_status": AwardRecommendation.award_recommendation_status,
+        "created_at": AwardRecommendation.created_at,
+    }
+
+    stmt = apply_sorting(
+        stmt, params.pagination.sort_order, cast(Any, column_mapping), nulls_last=True
+    )
 
     paginator: Paginator[AwardRecommendation] = Paginator(
         AwardRecommendation,
@@ -103,4 +135,43 @@ def list_award_recommendations(
     paginated_results = paginator.page_at(page_offset=params.pagination.page_offset)
     pagination_info = PaginationInfo.from_pagination_params(params.pagination, paginator)
 
+    add_total_received_count_to_award_recommendations(db_session, paginated_results)
+
     return paginated_results, pagination_info
+
+
+def add_total_received_count_to_award_recommendations(
+    db_session: db.Session, award_recommendations: Sequence[AwardRecommendation]
+) -> None:
+    award_recommendation_ids = [
+        award_recommendation.award_recommendation_id
+        for award_recommendation in award_recommendations
+    ]
+
+    if not award_recommendation_ids:
+        return
+
+    count_rows = db_session.execute(
+        select(
+            AwardRecommendationApplicationSubmission.award_recommendation_id,
+            func.count(
+                AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id
+            ).label("total_received_count"),
+        )
+        .where(
+            AwardRecommendationApplicationSubmission.award_recommendation_id.in_(
+                award_recommendation_ids
+            )
+        )
+        .group_by(AwardRecommendationApplicationSubmission.award_recommendation_id)
+    ).all()
+    total_received_counts = {
+        row.award_recommendation_id: int(row.total_received_count) for row in count_rows
+    }
+
+    for award_recommendation in award_recommendations:
+        award_recommendation.award_recommendation_summary = {  # type: ignore[attr-defined]
+            "total_received_count": total_received_counts.get(
+                award_recommendation.award_recommendation_id, 0
+            )
+        }

@@ -4,7 +4,6 @@ from datetime import timedelta
 from os.path import join
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 
-from grants_shared.util.datetime_util import utcnow
 from requests import Request, Session
 
 from src.legacy_soap_api.legacy_soap_api_auth import (
@@ -30,6 +29,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_streamed_soap_response,
     log_local,
 )
+from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +43,18 @@ def get_proxy_headers(
     soap_auth: SOAPAuth | None,
 ) -> dict:
     # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
+    filtered_headers = filter_headers(
+        soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
+    )
+    logger.info(
+        "soap_client: filtered headers being sent to legacy",
+        extra={"filtered_header_keys": filtered_headers.keys()},
+    )
     if not soap_auth:
-        return filter_headers(
-            soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
-        )
+        return filtered_headers
     return {
-        S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(config, soap_auth.certificate)
+        S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(config, soap_auth.certificate),
+        **filtered_headers,
     }
 
 

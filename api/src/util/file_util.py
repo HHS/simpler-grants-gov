@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 from pathlib import Path
@@ -10,14 +11,23 @@ from botocore.config import Config
 from werkzeug.utils import secure_filename
 
 from src.adapters.aws import S3Config, get_boto_session, get_s3_client
-from src.app_config import AppConfig
+from src.util.env_config import PydanticBaseEnvConfig
+
+logger = logging.getLogger(__name__)
 
 ##################################
-# Path parsing utils
+# Configs
 ##################################
+
+
+class FileConfig(PydanticBaseEnvConfig):
+    # Maximum file upload size in bytes (2 GB)
+    max_file_upload_size_bytes: int = 2 * 1024 * 1024 * 1024
+
 
 # Module-level singleton for default S3Config
 _s3_config = None
+_file_config = None
 
 
 def get_default_s3_config() -> S3Config:
@@ -28,6 +38,21 @@ def get_default_s3_config() -> S3Config:
     if _s3_config is None:
         _s3_config = S3Config()
     return _s3_config
+
+
+def get_default_file_config() -> FileConfig:
+    """
+    Returns a singleton instance of FileConfig to avoid reading env vars repeatedly.
+    """
+    global _file_config
+    if _file_config is None:
+        _file_config = FileConfig()
+    return _file_config
+
+
+##################################
+# Path parsing utils
+##################################
 
 
 def is_s3_path(path: str | Path) -> bool:
@@ -65,7 +90,7 @@ def join(*parts: str) -> str:
 
 
 ##################################
-#  File operat
+#  File operations
 ##################################
 
 
@@ -122,6 +147,7 @@ def pre_sign_upload(
     content_type: str,
     metadata: dict[str, str],
     s3_config: S3Config | None = None,
+    include_if_none_match: bool = False,
 ) -> dict[str, Any]:
     """Generate a presigned POST URL + body for uploading a file to s3.
 
@@ -145,27 +171,45 @@ def pre_sign_upload(
         content_type: MIME type of the file being uploaded.
         metadata: Key→value pairs to attach as object metadata. Keys are
             passed through to s3 as ``x-amz-meta-<key>``.
+        s3_config: S3 configuration object, if not passed in, grabs the default s3_config
+        include_if_none_match: Whether to prevent a user from overwriting a file
     """
     if s3_config is None:
         s3_config = get_default_s3_config()
+
+    file_config = get_default_file_config()
 
     s3_client = get_s3_client(s3_config)
     bucket, key = split_s3_url(file_path)
 
     metadata_fields = {f"x-amz-meta-{k}": v for k, v in metadata.items()}
 
-    return s3_client.generate_presigned_post(
+    conditions = [
+        ["content-length-range", 1, file_config.max_file_upload_size_bytes],
+        {"Content-Type": content_type},
+        *[{k: v} for k, v in metadata_fields.items()],
+    ]
+
+    if include_if_none_match:
+        conditions.append({"IfNoneMatch": "*"})
+
+    presigned_post_result = s3_client.generate_presigned_post(
         Bucket=bucket,
         Key=key,
         Fields={"Content-Type": content_type, **metadata_fields},
-        Conditions=[
-            ["content-length-range", 1, AppConfig().max_file_upload_size_bytes],
-            {"Content-Type": content_type},
-            *[{k: v} for k, v in metadata_fields.items()],
-            {"IfNoneMatch": "*"},
-        ],
+        Conditions=conditions,
         ExpiresIn=s3_config.presigned_s3_duration,
     )
+
+    # When running locally, swap out the presigned url to replace s3mock with localhost
+    # We never set the endpoint url non-locally, this is local-only.
+    if s3_config.aws_s3_endpoint_url:
+        # Only relevant when local, due to docker path issues
+        presigned_post_result["url"] = presigned_post_result.get("url", "").replace(
+            s3_config.aws_s3_endpoint_url, "http://localhost:9090"
+        )
+
+    return presigned_post_result
 
 
 def get_file_length_bytes(path: str) -> int:
@@ -272,7 +316,17 @@ def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str, s3_config: S3Conf
     if not is_s3_path(file_path):
         raise ValueError(f"Expected s3:// path, got: {file_path}")
 
-    return file_path.replace(s3_config.public_files_bucket_path, cdn_url)
+    bucket_path = s3_config.public_files_bucket_path.rstrip("/")
+    if not file_path.startswith(f"{bucket_path}/"):
+        # e.g. after an S3 bucket rename/migration, file_path's bucket no longer
+        # matches what's configured. Checking the full prefix (not just a substring)
+        # avoids a similarly-named bucket silently matching.
+        raise ValueError(
+            f"file_path {file_path!r} does not match the configured "
+            f"public bucket {s3_config.public_files_bucket_path!r}"
+        )
+
+    return f"{cdn_url.rstrip('/')}{file_path[len(bucket_path):]}"
 
 
 def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) -> str:
@@ -286,3 +340,25 @@ def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) 
         return convert_public_s3_to_cdn_url(file_path, s3_config.cdn_url, s3_config)
     else:
         return pre_sign_file_location(file_path, s3_config)
+
+
+def safe_presign_or_s3_cdnify_url(file_location: str, **log_context: object) -> str | None:
+    """
+    Resolve a download URL for file_location, never exposing a raw s3:// URI.
+
+    convert_public_s3_to_cdn_url raises ValueError when file_location's bucket
+    doesn't match the configured PUBLIC_FILES_BUCKET, e.g. after an S3 bucket
+    rename/migration. Treat that failure mode as "unavailable" instead of
+    letting it bubble up as a 500.
+
+    log_context: identifying fields (e.g. attachment_id) from the caller, added
+    to the error log so a broken record can be found without parsing file_location.
+    """
+    try:
+        return presign_or_s3_cdnify_url(file_location)
+    except ValueError:
+        logger.error(
+            "download path could not be resolved to a CDN or presigned URL",
+            extra={"file_location": file_location, **log_context},
+        )
+        return None

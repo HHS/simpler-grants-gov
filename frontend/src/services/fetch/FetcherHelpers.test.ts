@@ -6,6 +6,7 @@ import {
   removeRedundantSlashes,
   throwError,
 } from "src/services/fetch/fetcherHelpers";
+import { logger } from "src/services/logger/simplerLogger";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 const getSessionMock = jest.fn();
@@ -99,6 +100,43 @@ describe("throwError", () => {
       type: "UnauthorizedError",
     });
   });
+
+  it("logs the response status and AWS headers as structured fields", async () => {
+    const loggerErrorSpy = jest
+      .spyOn(logger, "error")
+      .mockImplementation(() => undefined);
+
+    await wrapForExpectedError<Error>(() => {
+      throwError(
+        { data: {}, message: "unavailable", status_code: 503 },
+        "http://any.url",
+        {
+          ok: false,
+          status: 503,
+          headers: new Headers({
+            "x-amzn-requestid": "fake-request-id",
+            "Content-Type": "application/json",
+          }),
+        } as unknown as Response,
+      );
+    });
+
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      {
+        url: "http://any.url",
+        status_code: 503,
+        apiMessage: "unavailable",
+        responseOk: false,
+        responseStatus: 503,
+        apiRequestId: "fake-request-id",
+        apiGatewayId: null,
+        apiErrorType: null,
+        contentType: "application/json",
+      },
+      "API request error",
+    );
+    loggerErrorSpy.mockRestore();
+  });
 });
 
 describe("getDefaultHeaders", () => {
@@ -122,9 +160,8 @@ describe("getDefaultHeaders", () => {
 
   it("includes Content-Type header by default", async () => {
     // have to import here to make sure that the environment mock runs first
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
+    const { getDefaultHeaders } =
+      await import("src/services/fetch/fetcherHelpers");
     const headers = await getDefaultHeaders({});
     expect(headers["Content-Type"]).toEqual("application/json");
   });
@@ -132,9 +169,8 @@ describe("getDefaultHeaders", () => {
   it("includes X-API-KEY header when API_GW_AUTH is set", async () => {
     mockEnvironment.API_GW_AUTH = "test-api-key";
 
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
+    const { getDefaultHeaders } =
+      await import("src/services/fetch/fetcherHelpers");
     const headers = await getDefaultHeaders({});
     expect(headers["X-API-KEY"]).toEqual("test-api-key");
     expect(headers["Content-Type"]).toEqual("application/json");
@@ -142,25 +178,22 @@ describe("getDefaultHeaders", () => {
   it("does not include X-API-KEY header when API_GW_AUTH is not set", async () => {
     mockEnvironment.API_GW_AUTH = "";
 
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
+    const { getDefaultHeaders } =
+      await import("src/services/fetch/fetcherHelpers");
     const headers = await getDefaultHeaders({});
     expect(headers["X-API-KEY"]).toBeUndefined();
     expect(headers["Content-Type"]).toEqual("application/json");
   });
   it("does not include user auth token when not required", async () => {
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
+    const { getDefaultHeaders } =
+      await import("src/services/fetch/fetcherHelpers");
     const headers = await getDefaultHeaders({});
     expect(headers["X-SGG-Token"]).toEqual(undefined);
   });
   it("throws if auth token is required but not available", async () => {
     getSessionMock.mockResolvedValue(null);
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
+    const { getDefaultHeaders } =
+      await import("src/services/fetch/fetcherHelpers");
     const err = await wrapForExpectedError(() =>
       getDefaultHeaders({
         requiresUserAuthToken: true,
@@ -173,26 +206,23 @@ describe("getDefaultHeaders", () => {
   });
   it("includes user auth token from session when present and required", async () => {
     getSessionMock.mockResolvedValue({ token: "a token" });
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
+    const { getDefaultHeaders } =
+      await import("src/services/fetch/fetcherHelpers");
     const headers = await getDefaultHeaders({ requiresUserAuthToken: true });
     expect(headers["X-SGG-Token"]).toEqual("a token");
   });
   it("includes X-Correlation-Id header", async () => {
     const correlationIdValue = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
     getCorrelationIdMock.mockResolvedValue(correlationIdValue);
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
+    const { getDefaultHeaders } =
+      await import("src/services/fetch/fetcherHelpers");
     const headers = await getDefaultHeaders({});
     expect(headers["X-Correlation-Id"]).toEqual(correlationIdValue);
   });
   it("does not includes X-Correlation-Id header when cookie not set", async () => {
     getCorrelationIdMock.mockResolvedValue(undefined);
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
+    const { getDefaultHeaders } =
+      await import("src/services/fetch/fetcherHelpers");
     const headers = await getDefaultHeaders({});
     expect(headers["X-Correlation-Id"]).toEqual(undefined);
   });

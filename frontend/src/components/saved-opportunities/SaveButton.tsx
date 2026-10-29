@@ -8,6 +8,8 @@ import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 interface SaveButtonProps {
+  // Visually hidden text appended to the button label, e.g. which opportunity is being saved
+  accessibleContext?: string;
   buttonClick?: () => void;
   messageClick: () => void;
   // This is the id of the button which will be tied to the aria-describedby of the alert
@@ -23,6 +25,7 @@ interface SaveButtonProps {
 }
 
 const SaveButton = ({
+  accessibleContext,
   buttonClick,
   messageClick,
   buttonId,
@@ -39,18 +42,28 @@ const SaveButton = ({
   const type = error ? "error" : "success";
   return (
     <div className="display-flex flex-align-start">
+      {/* aria-disabled rather than disabled so keyboard focus stays on the button while the request runs */}
       <Button
         type="button"
-        disabled={loading}
+        aria-disabled={loading}
         id={buttonId}
         outline
-        onClick={buttonClick}
+        onClick={loading ? undefined : buttonClick}
         data-testid="simpler-save-button"
       >
         {loading ? (
           <>
-            <Spinner className="height-105 width-105 button-icon-large" />{" "}
+            {/* the loading text already describes the state, so keep the spinner out of the button name */}
+            <span aria-hidden="true">
+              <Spinner className="height-105 width-105 button-icon-large" />
+            </span>{" "}
             {loadingText}
+            {accessibleContext && (
+              <>
+                {" "}
+                <span className="usa-sr-only">{accessibleContext}</span>
+              </>
+            )}
           </>
         ) : (
           <>
@@ -61,6 +74,12 @@ const SaveButton = ({
               name={saved ? "star" : "star_outline"}
             />
             {text}
+            {accessibleContext && (
+              <>
+                {" "}
+                <span className="usa-sr-only">{accessibleContext}</span>
+              </>
+            )}
           </>
         )}
       </Button>

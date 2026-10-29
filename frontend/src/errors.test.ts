@@ -23,7 +23,7 @@ describe("BadRequestError (as an example of other error types)", () => {
     const error = new BadRequestError("Test Error", {
       searchInputs: dummySearchInputs,
     });
-    const { cause } = error as Error;
+    const { cause } = error;
     const errorData = cause as ParsedError;
 
     expect(errorData.type).toEqual("BadRequestError");
@@ -35,13 +35,13 @@ describe("BadRequestError (as an example of other error types)", () => {
 
   it("handles non-Error inputs correctly", () => {
     const error = new BadRequestError("Some string error");
-    const { message } = error as Error;
+    const { message } = error;
     expect(message).toEqual("Some string error");
   });
 
   it("sets a default message when error is not an instance of Error", () => {
     const error = new BadRequestError("");
-    const { message } = error as Error;
+    const { message } = error;
     expect(message).toEqual("Unknown Error");
   });
 
@@ -51,7 +51,7 @@ describe("BadRequestError (as an example of other error types)", () => {
       message: "a more detailed message",
       type: "a subtype",
     });
-    const { cause } = error as Error;
+    const { cause } = error;
     const errorData = cause as ParsedError;
 
     expect(errorData.details).toBeTruthy();

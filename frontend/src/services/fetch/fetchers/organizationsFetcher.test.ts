@@ -80,14 +80,6 @@ describe("getOrganizationDetails", () => {
       subPath: "org-123",
     });
   });
-
-  it("throws UnauthorizedError when session is missing or has no token", async () => {
-    mockGetSession.mockResolvedValue(null);
-
-    await expect(getOrganizationDetails("org-123")).rejects.toBeInstanceOf(
-      UnauthorizedError,
-    );
-  });
 });
 
 describe("getUserOrganizations", () => {
@@ -143,14 +135,6 @@ describe("getOrganizationUsers", () => {
       },
     });
   });
-
-  it("throws UnauthorizedError when session is missing or has no token", async () => {
-    mockGetSession.mockResolvedValue(null);
-
-    await expect(getOrganizationUsers("org-123")).rejects.toBeInstanceOf(
-      UnauthorizedError,
-    );
-  });
 });
 
 describe("getOrganizationRoles", () => {
@@ -173,14 +157,6 @@ describe("getOrganizationRoles", () => {
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123/roles/list",
     });
-  });
-
-  it("throws UnauthorizedError when session is missing or has no token", async () => {
-    mockGetSession.mockResolvedValue(null);
-
-    await expect(getOrganizationRoles("org-123")).rejects.toBeInstanceOf(
-      UnauthorizedError,
-    );
   });
 });
 
@@ -264,14 +240,6 @@ describe("getOrganizationPendingInvitations", () => {
       { invitee_email: "zeta@example.com" },
     ]);
   });
-
-  it("throws UnauthorizedError when session is missing or has no token", async () => {
-    mockGetSession.mockResolvedValue(null);
-
-    await expect(
-      getOrganizationPendingInvitations("org-123"),
-    ).rejects.toBeInstanceOf(UnauthorizedError);
-  });
 });
 
 describe("updateOrganizationUserRoles", () => {
@@ -300,14 +268,6 @@ describe("updateOrganizationUserRoles", () => {
         role_ids: ["role-1", "role-2"],
       },
     });
-  });
-
-  it("throws UnauthorizedError when session is missing or has no token", async () => {
-    mockGetSession.mockResolvedValue(null);
-
-    await expect(
-      updateOrganizationUserRoles("org-123", "user-1", ["role-1"]),
-    ).rejects.toBeInstanceOf(UnauthorizedError);
   });
 });
 
@@ -419,13 +379,5 @@ describe("getOrganizationLegacyUsers", () => {
         },
       },
     });
-  });
-
-  it("throws UnauthorizedError when session is missing or has no token", async () => {
-    mockGetSession.mockResolvedValue(null);
-
-    await expect(getOrganizationLegacyUsers("org-123")).rejects.toBeInstanceOf(
-      UnauthorizedError,
-    );
   });
 });

@@ -6,9 +6,7 @@ import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
-import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
-import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 function CheckboxWidget<
   T = unknown,
@@ -17,6 +15,7 @@ function CheckboxWidget<
 >({
   id,
   disabled,
+  additionalDescribedById,
   options,
   value,
   required,
@@ -31,29 +30,26 @@ function CheckboxWidget<
   const error = rawErrors.length > 0 ? true : undefined;
 
   const description = options?.description ?? schema.description;
-  const labelType = getLabelTypeFromOptions(
-    (options?.["widget-label"] as string | undefined) ?? undefined,
-  );
-
   const baseTitle = (schema.title ??
     (options as Record<string, unknown> | undefined)?.label ??
     "") as string;
 
   // Match radio pattern: input points to the label+desc block (and error) explicitly
-  const describedby = error ? `error-for-${id}` : `label-for-${id}`;
+  const describedby = [
+    error ? `error-for-${id}` : undefined,
+    additionalDescribedById,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-  const label =
-    required || Boolean(description) ? (
-      <DynamicFieldLabel
-        idFor={id}
-        title={baseTitle}
-        required={required}
-        description={description ?? ""}
-        labelType={labelType}
-      />
-    ) : (
-      baseTitle
-    );
+  const label = (
+    <>
+      {baseTitle}
+      {required && (
+        <span className="usa-hint usa-hint--required text-no-underline">*</span>
+      )}
+    </>
+  );
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -85,6 +81,7 @@ function CheckboxWidget<
         id={id}
         name={id}
         label={label}
+        labelDescription={description}
         value="true"
         defaultChecked={Boolean(value)}
         required={required}

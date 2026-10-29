@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -101,7 +102,7 @@ FORM_JSON_SCHEMA = {
             ],
             "properties": _SITE_LOCATION_PROPERTIES,
         },
-        # Additional site: address required when the site object is present.
+        # Additional site: address is required for each additional location entry.
         "site_location": {
             "type": "object",
             "required": ["address"],
@@ -173,8 +174,60 @@ FORM_UI_SCHEMA = [
         "name": "additional_sites",
         "children": [
             {
-                "type": "field",
-                "definition": "/properties/additional_sites",
+                "type": "fieldList",
+                "name": "additional_sites",
+                "label": "Additional Project/Performance Site Location",
+                "description": "Add up to 299 additional project/performance site locations.",
+                "children": [
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/submitting_as_individual",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/organization_name",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/uei",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/street1",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/street2",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/city",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/county",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/state",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/province",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/country",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/zip_code",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/congressional_district",
+                    },
+                ],
             },
         ],
     },
@@ -194,10 +247,6 @@ FORM_UI_SCHEMA = [
 ]
 
 FORM_RULE_SCHEMA = {
-    "primary_site": {
-        # Pre-populate UEI from the applicant organization
-        "uei": {"gg_pre_population": {"rule": "uei"}},
-    },
     # Validate the attachment ID exists on the application
     "additional_locations_attachment": {"gg_validation": {"rule": "attachment"}},
 }
@@ -206,23 +255,23 @@ FORM_RULE_SCHEMA = {
 # Helper to build site location field mappings for XML (shared between primary and additional sites)
 def _site_location_xml_fields() -> dict:
     return {
+        # Individual, OrganizationName, SAMUEI, Address, CongressionalDistrictProgramProject
+        # are defined locally in SiteLocationDataType (PerformanceSite_4_0 namespace).
+        # Their content types come from globLib, but the element names belong to the form namespace.
         "submitting_as_individual": {
             "xml_transform": {
                 "target": "Individual",
-                "namespace": "globLib",
                 "value_transform": {"type": "boolean_to_yes_no"},
             }
         },
         "organization_name": {
             "xml_transform": {
                 "target": "OrganizationName",
-                "namespace": "globLib",
             }
         },
         "uei": {
             "xml_transform": {
                 "target": "SAMUEI",
-                "namespace": "globLib",
             }
         },
         "address": {
@@ -230,6 +279,8 @@ def _site_location_xml_fields() -> dict:
                 "target": "Address",
                 "type": "nested_object",
             },
+            # Order matches AddressDataTypeV3 XSD sequence: Street1, Street2, City, County,
+            # State|Province (choice), ZipPostalCode, Country
             "street1": {
                 "xml_transform": {
                     "target": "Street1",
@@ -266,15 +317,15 @@ def _site_location_xml_fields() -> dict:
                     "namespace": "globLib",
                 }
             },
-            "country": {
-                "xml_transform": {
-                    "target": "Country",
-                    "namespace": "globLib",
-                }
-            },
             "zip_code": {
                 "xml_transform": {
                     "target": "ZipPostalCode",
+                    "namespace": "globLib",
+                }
+            },
+            "country": {
+                "xml_transform": {
+                    "target": "Country",
                     "namespace": "globLib",
                 }
             },
@@ -282,7 +333,6 @@ def _site_location_xml_fields() -> dict:
         "congressional_district": {
             "xml_transform": {
                 "target": "CongressionalDistrictProgramProject",
-                "namespace": "globLib",
             }
         },
     }
@@ -314,6 +364,7 @@ FORM_XML_TRANSFORM_RULES = {
             "additional_locations_attachment": {
                 "xml_element": "AttachedFile",
                 "type": "single_with_wrapper",
+                "file_element": "",  # content directly in <AttachedFile>, no inner wrapper
             },
         },
     },
@@ -342,11 +393,12 @@ ProjectPerformanceSiteLocation_v4_0 = Form(
     form_version="4.0",
     agency_code="SGG",
     omb_number="4040-0010",
+    expiration_date=date(2029, 8, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
-    form_instruction_id=None,
+    form_instruction_id=uuid.UUID("55608c6f-5b82-4be2-ac73-af549db4cbcd"),
     form_type=FormType.PROJECT_PERFORMANCE_SITE_LOCATION,
     sgg_version="1.0",
     is_deprecated=False,

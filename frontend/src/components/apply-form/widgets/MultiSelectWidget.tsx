@@ -73,7 +73,7 @@ export default function MultiSelect<
   const allOptions: ComboBoxOption[] = useMemo(() => opts ?? [], [opts]);
 
   const [selected, setSelected] = React.useState<string[]>(
-    toStringArray(value as string[]),
+    toStringArray(value),
   );
 
   const comboRef = useRef<ComboBoxRef>(null);
@@ -108,7 +108,7 @@ export default function MultiSelect<
   const syncUpstream = (next: string[]) => {
     setSelected(next);
     onChange(
-      enumOptionsValueForIndex<S>(next, allOptions, undefined) as unknown as T,
+      enumOptionsValueForIndex<S>(next, allOptions, undefined) as unknown,
     );
   };
 
@@ -151,7 +151,7 @@ export default function MultiSelect<
         idFor={idFor}
         title={title}
         required={required}
-        description={description as string}
+        description={description}
         labelType={labelType}
       />
       {error && (
@@ -193,9 +193,9 @@ export default function MultiSelect<
           onBlur: (e) => {
             // Commit exact match on blur, then bubble RJSF blur
             addByLabelOrValue(e.currentTarget.value);
-            onBlur(id, selected as unknown as T);
+            onBlur(id, selected);
           },
-          onFocus: () => onFocus(id, selected as unknown as T),
+          onFocus: () => onFocus(id, selected),
         }}
       />
 

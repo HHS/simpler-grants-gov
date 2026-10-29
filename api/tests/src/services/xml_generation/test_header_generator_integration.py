@@ -2,8 +2,7 @@
 
 from datetime import date
 
-import grants_shared.adapters.db as db
-
+import src.adapters.db as db
 from src.services.xml_generation.header_generator import generate_application_header_xml
 from tests.src.db.models.factories import (
     AgencyFactory,

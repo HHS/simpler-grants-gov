@@ -1,32 +1,29 @@
 import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 
 import { NextResponse } from "next/server";
 
-export const getUserOrganizations = async () => {
+export const getUserOrganizationsHandler = async () => {
   const currentSession = await getSession();
-  if (currentSession) {
-    try {
-      const organizationsResponse = await fetchUserWithMethod("GET")({
-        subPath: `${currentSession.user_id}/organizations`,
-      });
-      const responseBody = (await organizationsResponse.json()) as { data: [] };
-      return NextResponse.json(responseBody.data);
-    } catch (e) {
-      const { status, message } = readError(e as Error, 500);
-      return Response.json(
-        {
-          message: `Error attempting to fetch user organizations: ${message}`,
-        },
-        { status },
-      );
-    }
+  if (!currentSession) {
+    return NextResponse.json(
+      {
+        message: "Not logged in, cannot retrieve user organizations",
+      },
+      { status: 401 },
+    );
   }
-  return NextResponse.json(
-    {
-      message: "Not logged in, cannot retrieve user organizations",
-    },
-    { status: 401 },
-  );
+  try {
+    const organizations = await getUserOrganizations(currentSession.user_id);
+    return NextResponse.json(organizations);
+  } catch (e) {
+    const { status, message } = readError(e as Error, 500);
+    return Response.json(
+      {
+        message: `Error attempting to fetch user organizations: ${message}`,
+      },
+      { status },
+    );
+  }
 };

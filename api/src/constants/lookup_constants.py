@@ -156,8 +156,10 @@ class FormFamily(StrEnum):
 
 class FormType(StrEnum):
     SF424 = "SF424"
+    SF424_SHORT = "SF424Short"
     SF424A = "SF424A"
     SF424B = "SF424B"
+    SF424C = "SF424C"
     SF424D = "SF424D"
     SFLLL = "SFLLL"
     PROJECT_NARRATIVE_ATTACHMENT = "ProjectNarrativeAttachment"
@@ -173,6 +175,8 @@ class FormType(StrEnum):
 
     EPA_FORM_4700_4 = "EPAForm4700-4"
     EPA_KEY_CONTACTS = "EPAKeyContacts"
+
+    KEY_CONTACTS = "KeyContacts"
 
     ATTACHMENT_FORM = "AttachmentForm"
 
@@ -248,6 +252,9 @@ class AwardRecommendationStatus(StrEnum):
     DRAFT = "draft"
     IN_REVIEW = "in_review"
     APPROVED = "approved"
+    SUBMITTED = "submitted"
+    REVISION_REQUESTED = "revision_requested"
+    IN_REVISION = "in_revision"
 
 
 class AwardRecommendationType(StrEnum):
@@ -322,7 +329,16 @@ class Privilege(StrEnum):
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
+    # Award recommendation workflow privileges
+    PQC_REVIEWER = "pqc_reviewer"
+    GMS_REVIEWER = "gms_reviewer"
+    FMO_REVIEWER = "fmo_reviewer"
+    GMO_REVIEWER = "gmo_reviewer"
+    FINAL_AWARD_REC_APPROVER = "final_award_rec_approver"
+
     INTERNAL_S3_SCAN = "internal_s3_scan"
+
+    MANAGE_TEST_USER_TOKEN = "manage_test_user_token"
 
 
 class RoleType(StrEnum):
@@ -386,10 +402,20 @@ class OrganizationAuditEvent(StrEnum):
     USER_REMOVED = "user_removed"
 
 
+class OpportunityAuditEvent(StrEnum):
+    OPPORTUNITY_CREATED = "opportunity_created"
+    OPPORTUNITY_UPDATED = "opportunity_updated"
+    OPPORTUNITY_SUMMARY_CREATED = "opportunity_summary_created"
+    OPPORTUNITY_SUMMARY_UPDATED = "opportunity_summary_updated"
+    COMPETITION_CREATED = "competition_created"
+    COMPETITION_UPDATED = "competition_updated"
+
+
 class WorkflowType(StrEnum):
     OPPORTUNITY_PUBLISH = "opportunity_publish"
     APPLICATION_SUBMISSION = "application_submission"
     INITIAL_PROTOTYPE = "initial_prototype"
+    AWARD_RECOMMENDATION_REVIEW = "award_recommendation_review"
 
     # Because of how we use the workflow type to find
     # the state machine and its configuration, we need
@@ -410,6 +436,16 @@ class ApprovalType(StrEnum):
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
+    # Award recommendation workflow approvals
+    PQC_APPROVAL = "pqc_approval"
+    GMS_APPROVAL = "gms_approval"
+    FMO_APPROVAL = "fmo_approval"
+    GMO_APPROVAL = "gmo_approval"
+    AGENCY_APPROVAL = "agency_approval"
+    DEPARTMENTAL_APPROVAL = "departmental_approval"
+    INTERAGENCY_APPROVAL = "interagency_approval"
+    EXECUTIVE_APPROVAL = "executive_approval"
+
 
 class ApprovalResponseType(StrEnum):
     APPROVED = "approved"
@@ -420,6 +456,7 @@ class ApprovalResponseType(StrEnum):
 class WorkflowEntityType(StrEnum):
     OPPORTUNITY = "opportunity"
     APPLICATION = "application"
+    APPLICATION_SUBMISSION = "application_submission"
     AWARD_RECOMMENDATION = "award_recommendation"
 
 
@@ -442,6 +479,7 @@ class FileScanStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
     INFECTED = "infected"
+    PROCESSED = "processed"
 
 
 class JobType(StrEnum):
@@ -456,10 +494,22 @@ class JobType(StrEnum):
     CREATE_APPLICATION_SUBMISSION = "create-application-submission"
     SETUP_CERT_USER = "setup-cert-user"
     UPDATE_FORM_INSTRUCTION = "update-form-instruction"
-    UPDATE_FORM = "update-form"
     EMAIL_NOTIFICATIONS = "email-notifications"
     BUILD_AUTOMATIC_OPPORTUNITIES = "build-automatic-opportunities"
     SAM_EXTRACTS = "sam-extracts"
     LOAD_AGENCY_DATA_OPENSEARCH = "load-agency-data-opensearch"
     EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
-    LIST_FORMS = "list-forms"
+    CHECK_XSD_DRIFT = "check-xsd-drift"
+    NEW_OPPORTUNITY_NOTIFICATION = "new-opportunity-notification"
+
+
+class NotificationType(StrEnum):
+    ALL_NEW_OPPORTUNITIES = "all_new_opportunities"
+
+
+class NotificationQueueStatus(StrEnum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    SENT = "sent"
+    FAILED = "failed"
+    SUPPRESSED = "suppressed"

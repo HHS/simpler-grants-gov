@@ -12,12 +12,7 @@ import { HTMLAttributes } from "react";
 export type GeneralRecord = Record<string, unknown>;
 
 export type BroadlyDefinedWidgetValue =
-  | string
-  | GeneralRecord
-  | GeneralRecord[]
-  | string[]
-  | number
-  | boolean;
+  string | GeneralRecord | GeneralRecord[] | string[] | number | boolean;
 
 export type SchemaField = {
   type?: string;
@@ -75,9 +70,12 @@ export type WidgetTypes =
   | "Budget424aSectionD"
   | "Budget424aSectionE"
   | "Budget424aSectionF"
-  | "FieldList";
+  | "FieldList"
+  | "Table";
 
 type PropertyPath = `/properties/${string}`;
+
+export type DefinitionPath = PropertyPath | PropertyPath[];
 
 /**
  * Props passed to the FieldList widget.
@@ -104,6 +102,17 @@ type PropertyPath = `/properties/${string}`;
  *   The FieldList field name. Used to derive the base field path
  *   (e.g. $.fieldListName) for mapping validation warnings to the list.
  *
+ * hideFieldListHeading
+ *   Optional display flag for the FieldList heading.
+ *   When true, the top FieldList title is hidden, but each entry heading
+ *   still uses the `label` value (for example "Key Contact 1").
+ *
+ * additionalDescribedById
+ *   Optional accessibility identifier used to associate widgets rendered
+ *   inside a FieldList entry with that entry's heading. This allows
+ *   assistive technologies to announce both the field label and the
+ *   entry context (for example "Street 1, Additional Location 3").
+ *
  * groupDefinition
  *   Describes the fields that appear in each repeatable row.
  *
@@ -111,8 +120,8 @@ type PropertyPath = `/properties/${string}`;
  *   The current array of row values for the FieldList.
  *
  * minItems / maxItems
- *   Optional constraints for the number of rows allowed in the list.
- *   Used for validation and future control of add/remove behavior.
+ *   Constraints controlling the minimum and maximum number of entries
+ *   that can be rendered and submitted.
  *
  * rawErrors / requiredFields
  *   Validation information passed down from the form engine.
@@ -139,7 +148,9 @@ export type FieldListWidgetProps = {
     title?: string;
   };
   label: string;
+  hideFieldListHeading?: boolean;
   description?: string;
+  additionalDescribedById?: string;
   name: string;
   minItems?: number;
   minItemsHeading?: string;
@@ -160,8 +171,7 @@ export type FieldListWidgetProps = {
     rootFormData?: unknown;
     widgetSupport?: {
       validationWarnings?:
-        | FormattedFormValidationWarning[]
-        | FormValidationWarning[];
+        FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
       onFieldListEntryDelete?: (
         fieldListPath: string,
@@ -172,20 +182,120 @@ export type FieldListWidgetProps = {
   };
 };
 
-export type FieldListChildWidgetTypes = Exclude<WidgetTypes, "FieldList">;
+export type FieldListChildWidgetTypes = Exclude<
+  WidgetTypes,
+  "FieldList" | "Table"
+>;
+
+/**
+ * Configuration for a single child field rendered within a FieldList entry.
+ *
+ * baseId
+ *   Template id containing the entry index placeholder. The placeholder
+ *   is replaced at render time with the actual entry index.
+ *
+ * storagePath
+ *   Path used to read and write values within the entry object. Supports
+ *   nested object structures such as:
+ *
+ *     address.street1
+ *     address.city
+ *     address.country
+ */
 
 export type FieldListGroupItem = {
   widget: FieldListChildWidgetTypes;
   generalProps: Omit<UswdsWidgetProps, "id" | "value" | "key">;
   baseId: string;
   definition: string;
+  storagePath: string[];
 };
 
-export type DefinitionPath = PropertyPath | PropertyPath[];
+export type UiSchemaTableCellType = "input" | "readOnly" | "plainText";
 
-export type UiSchemaField = {
-  type: "field" | "multiField" | "null";
+export type UiSchemaTableNumberFormat =
+  "integer" | "decimal" | "currency" | "dollar" | "percentage";
+
+export type UiSchemaTableColumn = {
+  columnHeader: string;
+
+  /**
+   * Optional column width as a percentage.
+   * Configured column widths cannot total more than 100.
+   */
+  width?: number;
+};
+
+export type TableWidgetCellConfig =
+  | {
+      type: "input" | "readOnly";
+      definition: PropertyPath;
+
+      /**
+       * Optional display format for numeric values.
+       *
+       * Input cells should continue to use an editable numeric representation
+       * while read-only cells use this value for display formatting.
+       */
+      format?: UiSchemaTableNumberFormat;
+      staticContent?: undefined;
+    }
+  | {
+      type: "plainText";
+      staticContent: string;
+      definition?: undefined;
+      format?: undefined;
+    };
+
+export type UiSchemaTableRow = {
+  /**
+   * Cells rendered in the same order as the configured table columns.
+   */
+  cells: TableWidgetCellConfig[];
+};
+
+export type UiSchemaTableChildren = {
+  /**
+   * Includes each configured column for the table rows.
+   */
+  columns: UiSchemaTableColumn[];
+  rows: UiSchemaTableRow[];
+};
+
+export type TableWidgetProps = {
+  id: string;
+  key: string;
+  name?: string;
+  label?: string;
+  description?: string;
+  uiSchemaField: UiSchemaTableMultiField;
+};
+
+type UiSchemaBasicField = {
+  type: "field" | "null";
   widget?: WidgetTypes;
+  name?: string;
+  printDescription?: boolean;
+} & (
+  | {
+      definition: DefinitionPath;
+      schema?: undefined;
+    }
+  | { schema: SchemaField; definition?: undefined }
+  | {
+      definition: DefinitionPath;
+      schema: SchemaField;
+    }
+);
+
+/**
+ * Existing specialized multiField widgets retain their flat definition array.
+ * Table uses the same definition-backed multiField contract while `children`
+ * describes the Table widget's column, row, and cell layout.
+ */
+type UiSchemaMultiField = {
+  type: "multiField";
+  widget?: Exclude<WidgetTypes, "Table">;
   name?: string;
 } & (
   | {
@@ -199,6 +309,29 @@ export type UiSchemaField = {
     }
 );
 
+export type UiSchemaTableMultiField = {
+  type: "multiField";
+  widget: "Table";
+  name: string;
+  definition: PropertyPath[];
+  children: UiSchemaTableChildren;
+  schema?: undefined;
+};
+
+export type UiSchemaField =
+  UiSchemaBasicField | UiSchemaMultiField | UiSchemaTableMultiField;
+
+/**
+ * A standalone paragraph of static text rendered inline between other section
+ * children (e.g. a footnote that must appear after a specific field rather
+ * than as a description.
+ */
+export interface UiSchemaText {
+  type: "text";
+  name: string;
+  content: string;
+}
+
 export interface UiSchemaSection {
   type: "section";
   label: string;
@@ -207,29 +340,38 @@ export interface UiSchemaSection {
   description?: string;
 }
 
+/**
+ * Optional accessibility identifier applied to widgets rendered within
+ * each FieldList entry so child inputs can reference their entry heading.
+ */
+
 export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
+  // Hide the top FieldList title while still using `label` for per-entry headings.
+  hideFieldListHeading?: boolean;
   minItemsHeading?: string;
   minItemsHelperText?: string;
   maxItemsHeading?: string;
   maxItemsHelperText?: string;
   name: string;
   description?: string;
-  children: UiSchemaField[];
+  additionalDescribedById?: string;
+  children: Exclude<UiSchemaField, UiSchemaTableMultiField>[];
 }
 
-export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
+export type UiSchemaNode =
+  UiSchemaField | UiSchemaSection | UiSchemaFieldList | UiSchemaText;
+
 export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
-  | "text"
-  | "email"
-  | "number"
-  | "password"
-  | "search"
-  | "tel"
-  | "url";
+  "text" | "email" | "number" | "password" | "search" | "tel" | "url";
+
+export type AttachmentsUploadingCounter = {
+  incrementAttachmentsProcessing: () => void;
+  decrementAttachmentsProcessing: () => void;
+};
 
 // extends the WidgetProps type from rjsf for USWDS and this project implementation
 // see https://github.com/rjsf-team/react-jsonschema-form/blob/7395afcdee6aaea128d943dd17e126c4ed301e58/packages/utils/src/types.ts#L898
@@ -237,12 +379,15 @@ export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
-> extends GenericObjectType,
+>
+  extends
+    GenericObjectType,
     Pick<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
+  uiSchemaField?: UiSchemaField;
   // this needs to be locked down using a generic eventually
   value?: BroadlyDefinedWidgetValue;
   type?: string;
@@ -265,6 +410,7 @@ export interface UswdsWidgetProps<
     enumDisabled?: unknown;
     emptyValue?: string | undefined;
   };
+  additionalDescribedById?: string;
   formClassName?: string;
   inputClassName?: string;
   hideLabel?: boolean;
@@ -280,14 +426,14 @@ export interface UswdsWidgetProps<
     rootFormData?: unknown;
     widgetSupport?: {
       validationWarnings?:
-        | FormattedFormValidationWarning[]
-        | FormValidationWarning[];
+        FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
       onFieldListEntryDelete?: (
         fieldListPath: string,
         deletedEntryIndex: number,
       ) => void;
       markFormDirty?: () => void;
+      attachmentsUploadingCounter?: AttachmentsUploadingCounter;
     };
   };
 }

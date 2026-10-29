@@ -50,7 +50,7 @@ const withFeatureFlag = <P, R extends ReactNode>(
     return (
       <>
         {/* TODO #9637 */}
-        {/* eslint-disable-next-line react-hooks/static-components  */}
+        {}
         <ComponentWithFeatureFlag
           {...props}
           searchParams={props.searchParams}

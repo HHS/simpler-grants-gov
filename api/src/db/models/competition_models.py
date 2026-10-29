@@ -1,16 +1,15 @@
+import dataclasses
 import uuid
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.util.datetime_util import get_now_us_eastern_date
 from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+import src.form_schema.registry.form_template_registry as form_template_registry_module
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
     ApplicationStatus,
@@ -19,16 +18,18 @@ from src.constants.lookup_constants import (
     FormType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
 from src.db.models.entity_models import Organization
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import (
     LkApplicationAuditEvent,
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
     LkFormFamily,
-    LkFormType,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
-from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
+from src.util.datetime_util import get_now_us_eastern_date
+from src.util.file_util import pre_sign_file_location, safe_presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -144,6 +145,13 @@ class Competition(ApiSchemaTable, TimestampMixin):
             return False
         return self.has_open_date
 
+    @property
+    def is_legacy_package(self) -> bool:
+        """The competition is an application package from Grants.gov.
+        Only the Grants.gov transformation sets the legacy package ID.
+        """
+        return self.legacy_package_id is not None
+
 
 class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_instruction"
@@ -167,8 +175,8 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     legacy_competition_id: Mapped[int | None] = mapped_column(index=True)
 
     @property
-    def download_path(self) -> str:
-        return presign_or_s3_cdnify_url(self.file_location)
+    def download_path(self) -> str | None:
+        return safe_presign_or_s3_cdnify_url(self.file_location)
 
 
 class FormInstruction(ApiSchemaTable, TimestampMixin):
@@ -181,42 +189,34 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
     file_name: Mapped[str]
 
     @property
-    def download_path(self) -> str:
-        return presign_or_s3_cdnify_url(self.file_location)
+    def download_path(self) -> str | None:
+        return safe_presign_or_s3_cdnify_url(self.file_location)
 
 
-class Form(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "form"
+@dataclasses.dataclass
+class Form:
+    """In-memory form definition. The form DB table has been dropped; forms live in the registry."""
 
-    form_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    form_name: Mapped[str]
+    form_id: uuid.UUID
+    form_name: str
     # This is used for making files and should not contain spaces
-    short_form_name: Mapped[str]
-    form_version: Mapped[str]
-    agency_code: Mapped[str]
-    omb_number: Mapped[str | None]
-    legacy_form_id: Mapped[int | None] = mapped_column(index=True, unique=True)
-    active_at: Mapped[datetime | None]
-    inactive_at: Mapped[datetime | None]
-    form_json_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    form_ui_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    form_instruction_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey(FormInstruction.form_instruction_id), nullable=True
-    )
-    form_instruction: Mapped[FormInstruction | None] = relationship(
-        FormInstruction, cascade="all, delete-orphan", single_parent=True
-    )
-
-    form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
-    json_to_xml_schema: Mapped[dict | None] = mapped_column(JSONB)
-
-    form_type: Mapped[FormType | None] = mapped_column(
-        "form_type_id",
-        LookupColumn(LkFormType),
-        ForeignKey(LkFormType.form_type_id),
-    )
-    sgg_version: Mapped[str | None]
-    is_deprecated: Mapped[bool | None]
+    short_form_name: str
+    form_version: str
+    agency_code: str
+    form_json_schema: dict
+    form_ui_schema: dict
+    omb_number: str | None = None
+    expiration_date: date | None = None
+    legacy_form_id: int | None = None
+    active_at: datetime | None = None
+    inactive_at: datetime | None = None
+    form_instruction_id: uuid.UUID | None = None
+    form_instruction: FormInstruction | None = None  # populated at runtime by get_form service
+    form_rule_schema: dict | None = None
+    json_to_xml_schema: dict | None = None
+    form_type: FormType | None = None
+    sgg_version: str | None = None
+    is_deprecated: bool | None = None
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
@@ -237,10 +237,16 @@ class CompetitionForm(ApiSchemaTable, TimestampMixin):
     )
     competition: Mapped[Competition] = relationship(Competition)
 
-    form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id))
-    form: Mapped[Form] = relationship(Form)
+    form_id: Mapped[uuid.UUID] = mapped_column(UUID)
 
     is_required: Mapped[bool]
+
+    @property
+    def form(self) -> Form:
+        """Return the Form from the in-memory registry."""
+        return form_template_registry_module.form_template_registry.get_by_id_and_major_version(
+            form_template_registry_module.FormTemplateKey(self.form_id, 1)
+        )
 
 
 class Application(ApiSchemaTable, TimestampMixin):

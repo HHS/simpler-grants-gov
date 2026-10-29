@@ -3,7 +3,7 @@ import copy
 import jsonref
 import pytest
 
-import src.form_schema.forms  # noqa: F401
+import src.form_schema.forms  # ruff: ignore[unused-import]
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.form_schema.jsonschema_validator import validate_json_schema
 from src.form_schema.registry.form_template_registry import form_template_registry

@@ -11,7 +11,7 @@ locals {
 }
 
 resource "aws_s3_bucket" "access_logs" {
-  bucket_prefix = "${var.service_name}-access-logs"
+  bucket_prefix = local.s3_named_bucket_prefixes.access_logs
 
   # Use a separate line to support automated terraform destroy commands
   force_destroy = var.is_temporary

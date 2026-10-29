@@ -55,4 +55,6 @@ export interface FilledFormEntry {
   /** String values are exact matches; RegExp values validate format only. */
   expectedPrepopulatedFields: Record<string, string | RegExp>;
   userEnteredFieldTestIds: Record<string, string>;
+  /** Optional: expected section heading text (e.g. from fieldset) for specs that validate it */
+  expectedSectionHeading?: string | RegExp;
 }

@@ -20,7 +20,7 @@ def create_user_in_app(
     competition=None,
     role=None,
     privileges: list[Privilege] = None,
-    **kwargs
+    **kwargs,
 ) -> tuple[User, Application, str]:
     """
     Create a user and associates them with an application, optionally creating related roles and privileges.

@@ -13,7 +13,11 @@ from src.legacy_soap_api.grantors.services.update_application_info_response impo
     update_application_info,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
@@ -57,6 +61,7 @@ def _make_operation_config():
         request_operation_name="UpdateApplicationInfoRequest",
         response_operation_name="UpdateApplicationInfoResponse",
         privileges={Privilege.LEGACY_AGENCY_ASSIGNER},
+        soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/UpdateApplicationInfo",
     )
 
 

@@ -114,6 +114,7 @@ export default defineConfig(...vitalsPlugin, [
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
+          args: "all",
         },
       ],
 
@@ -129,6 +130,30 @@ export default defineConfig(...vitalsPlugin, [
       // typing a replacement function gets unnecessarily complex
       // see https://dev.to/tipsy_dev/advanced-typescript-reinventing-lodash-get-4fhe
       "you-dont-need-lodash-underscore/get": "off",
+    },
+  },
+  {
+    // server-side code logs through simplerLogger, see documentation/frontend/logging.md
+    files: [
+      "src/app/api/**/*.ts",
+      "src/app/**/actions.{ts,tsx}",
+      "src/app/**/page.tsx",
+      "src/services/auth/session.ts",
+      "src/services/auth/sessionUtils.ts",
+      "src/services/correlationId/**/*.ts",
+      "src/services/event/**/*.ts",
+      "src/services/fetch/**/*.ts",
+      "src/utils/apiUtils.ts",
+      "src/utils/getFormData.ts",
+      "src/i18n/request.ts",
+    ],
+    ignores: [
+      "**/*.test.*",
+      "src/services/fetch/fetchers/client*.ts",
+      "src/app/\\[locale\\]/\\(base\\)/login/page.tsx",
+    ],
+    rules: {
+      "no-console": ["error", {}],
     },
   },
 ]);

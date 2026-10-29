@@ -44,4 +44,30 @@ describe("Budget424aSectionA", () => {
     );
     expect(F1).toHaveValue("32.43");
   });
+
+  // pre-existing summation labels were removed to avoid confusion
+  it("does not render misleading summation labels", () => {
+    render(<Budget424aSectionA {...WidgetProps} />);
+
+    // Column G header
+    expect(screen.queryByText("(sum of C-F)")).not.toBeInTheDocument();
+
+    // Column G, rows 1-4
+    for (let row = 1; row <= 4; row++) {
+      expect(screen.queryByText(`Sum of row ${row}`)).not.toBeInTheDocument();
+    }
+
+    // Row 5, column A
+    expect(screen.queryByText("(sum of 1-4)")).not.toBeInTheDocument();
+
+    // Row 5, columns C-G
+    for (const column of ["C", "D", "E", "F", "G"]) {
+      expect(
+        screen.queryByText(`Sum of column ${column}`),
+      ).not.toBeInTheDocument();
+    }
+
+    // Still renders the plain "Total" labels
+    expect(screen.getAllByText("Total").length).toBeGreaterThan(0);
+  });
 });

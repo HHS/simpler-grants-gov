@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -725,7 +726,7 @@ FORM_XML_TRANSFORM_RULES = {
             },
             "application_info.additional_funding_explanation": {
                 "xml_transform": {
-                    "target": "AdditionalFundingExplanation",
+                    "target": "AddFundingExplanation",
                 }
             },
             "application_info.application_type": {
@@ -735,7 +736,7 @@ FORM_XML_TRANSFORM_RULES = {
             },
             "application_info.supplemental_grant_numbers": {
                 "xml_transform": {
-                    "target": "SupplementalGrantNumber",
+                    "target": "SupGrantNumber",
                 }
             },
             "primary_project_discipline": {
@@ -749,7 +750,7 @@ FORM_XML_TRANSFORM_RULES = {
             },
             "secondary_project_discipline": {
                 "xml_transform": {
-                    "target": "SecondaryProjFieldCode",
+                    "target": "ProjFieldCode2",
                     "value_transform": {
                         "type": "map_values",
                         "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
@@ -758,7 +759,7 @@ FORM_XML_TRANSFORM_RULES = {
             },
             "tertiary_project_discipline": {
                 "xml_transform": {
-                    "target": "TertiaryProjFieldCode",
+                    "target": "ProjFieldCode3",
                     "value_transform": {
                         "type": "map_values",
                         "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
@@ -777,7 +778,8 @@ SupplementaryNEHCoverSheet_v3_0 = Form(
     short_form_name="SupplementaryCoverSheetforNEHGrantPrograms",
     form_version="3.0",
     agency_code="SGG",
-    omb_number=None,
+    omb_number="3136-0134",
+    expiration_date=date(2027, 10, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

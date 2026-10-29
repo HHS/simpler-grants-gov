@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "s3_buckets" {
   for_each = var.s3_buckets
 
-  bucket_prefix = "${var.service_name}-${each.key}-"
+  bucket_prefix = local.s3_bucket_prefixes[each.key]
   force_destroy = false
   # checkov:skip=CKV2_AWS_62:Event notification not necessary for this bucket especially due to likely use of lifecycle rules
   # checkov:skip=CKV_AWS_18:Access logging was not considered necessary for this bucket
@@ -45,7 +45,10 @@ data "aws_iam_policy_document" "s3_buckets_put_access" {
       identifiers = concat(
         [aws_iam_role.app_service.arn],
         var.db_vars != null ? [aws_iam_role.migrator_task[0].arn] : [],
-        length(aws_iam_role.opensearch_write) > 0 ? [aws_iam_role.opensearch_write[0].arn] : []
+        length(aws_iam_role.opensearch_write) > 0 ? [aws_iam_role.opensearch_write[0].arn] : [],
+        # The submission consumer builds application submission zips in the
+        # draft files bucket (and reads attachments from it).
+        length(aws_iam_role.workflow_service) > 0 ? [aws_iam_role.workflow_service[0].arn] : []
       )
     }
   }

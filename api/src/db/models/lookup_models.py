@@ -1,11 +1,3 @@
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.db.models.lookup import (
-    Lookup,
-    LookupConfig,
-    LookupRegistry,
-    LookupStr,
-    LookupTable,
-)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.constants.lookup_constants import (
@@ -33,6 +25,9 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    NotificationQueueStatus,
+    NotificationType,
+    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityStatus,
     OrganizationAuditEvent,
@@ -45,6 +40,8 @@ from src.constants.lookup_constants import (
     WorkflowType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
+from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
 
 OPPORTUNITY_STATUS_CONFIG: LookupConfig[OpportunityStatus] = LookupConfig(
     [
@@ -203,6 +200,9 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.EPA_KEY_CONTACTS, 15),
         LookupStr(FormType.ATTACHMENT_FORM, 16),
         LookupStr(FormType.PROJECT_PERFORMANCE_SITE_LOCATION, 17),
+        LookupStr(FormType.KEY_CONTACTS, 18),
+        LookupStr(FormType.SF424C, 19),
+        LookupStr(FormType.SF424_SHORT, 20),
     ]
 )
 
@@ -263,6 +263,9 @@ AWARD_RECOMMENDATION_STATUS_CONFIG: LookupConfig[AwardRecommendationStatus] = Lo
         LookupStr(AwardRecommendationStatus.DRAFT, 1),
         LookupStr(AwardRecommendationStatus.IN_REVIEW, 2),
         LookupStr(AwardRecommendationStatus.APPROVED, 3),
+        LookupStr(AwardRecommendationStatus.SUBMITTED, 4),
+        LookupStr(AwardRecommendationStatus.REVISION_REQUESTED, 5),
+        LookupStr(AwardRecommendationStatus.IN_REVISION, 6),
     ]
 )
 
@@ -345,6 +348,12 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.UPDATE_AWARD_RECOMMENDATION, 30),
         LookupStr(Privilege.SUBMIT_AWARD_RECOMMENDATION, 31),
         LookupStr(Privilege.INTERNAL_S3_SCAN, 32),
+        LookupStr(Privilege.MANAGE_TEST_USER_TOKEN, 33),
+        LookupStr(Privilege.PQC_REVIEWER, 34),
+        LookupStr(Privilege.GMS_REVIEWER, 35),
+        LookupStr(Privilege.FMO_REVIEWER, 36),
+        LookupStr(Privilege.GMO_REVIEWER, 37),
+        LookupStr(Privilege.FINAL_AWARD_REC_APPROVER, 38),
     ]
 )
 
@@ -391,6 +400,7 @@ WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
         LookupStr(WorkflowType.BASIC_TEST_WORKFLOW, 4),
         LookupStr(WorkflowType.NO_CONCURRENT_TEST_WORKFLOW, 5),
         LookupStr(WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW, 6),
+        LookupStr(WorkflowType.AWARD_RECOMMENDATION_REVIEW, 7),
     ]
 )
 
@@ -399,6 +409,14 @@ APPROVAL_TYPE_CONFIG: LookupConfig[ApprovalType] = LookupConfig(
         LookupStr(ApprovalType.INITIAL_PROTOTYPE_APPROVAL, 1),
         LookupStr(ApprovalType.PROGRAM_OFFICER_APPROVAL, 2),
         LookupStr(ApprovalType.BUDGET_OFFICER_APPROVAL, 3),
+        LookupStr(ApprovalType.PQC_APPROVAL, 4),
+        LookupStr(ApprovalType.GMS_APPROVAL, 5),
+        LookupStr(ApprovalType.FMO_APPROVAL, 6),
+        LookupStr(ApprovalType.GMO_APPROVAL, 7),
+        LookupStr(ApprovalType.AGENCY_APPROVAL, 8),
+        LookupStr(ApprovalType.DEPARTMENTAL_APPROVAL, 9),
+        LookupStr(ApprovalType.INTERAGENCY_APPROVAL, 10),
+        LookupStr(ApprovalType.EXECUTIVE_APPROVAL, 11),
     ]
 )
 
@@ -418,12 +436,24 @@ ORGANIZATION_AUDIT_EVENT_CONFIG: LookupConfig[OrganizationAuditEvent] = LookupCo
     ]
 )
 
+OPPORTUNITY_AUDIT_EVENT_CONFIG: LookupConfig[OpportunityAuditEvent] = LookupConfig(
+    [
+        LookupStr(OpportunityAuditEvent.OPPORTUNITY_CREATED, 1),
+        LookupStr(OpportunityAuditEvent.OPPORTUNITY_UPDATED, 2),
+        LookupStr(OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED, 3),
+        LookupStr(OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED, 4),
+        LookupStr(OpportunityAuditEvent.COMPETITION_CREATED, 5),
+        LookupStr(OpportunityAuditEvent.COMPETITION_UPDATED, 6),
+    ]
+)
+
 FILE_SCAN_STATUS_CONFIG: LookupConfig[FileScanStatus] = LookupConfig(
     [
         LookupStr(FileScanStatus.PENDING, 1),
         LookupStr(FileScanStatus.IN_PROGRESS, 2),
         LookupStr(FileScanStatus.COMPLETE, 3),
         LookupStr(FileScanStatus.INFECTED, 4),
+        LookupStr(FileScanStatus.PROCESSED, 5),
     ]
 )
 
@@ -440,13 +470,29 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
         LookupStr(JobType.CREATE_APPLICATION_SUBMISSION, 9),
         LookupStr(JobType.SETUP_CERT_USER, 10),
         LookupStr(JobType.UPDATE_FORM_INSTRUCTION, 11),
-        LookupStr(JobType.UPDATE_FORM, 12),
         LookupStr(JobType.EMAIL_NOTIFICATIONS, 13),
         LookupStr(JobType.BUILD_AUTOMATIC_OPPORTUNITIES, 14),
         LookupStr(JobType.SAM_EXTRACTS, 15),
         LookupStr(JobType.LOAD_AGENCY_DATA_OPENSEARCH, 16),
         LookupStr(JobType.EXPORT_OPPORTUNITY_DATA, 17),
-        LookupStr(JobType.LIST_FORMS, 18),
+        LookupStr(JobType.CHECK_XSD_DRIFT, 18),
+        LookupStr(JobType.NEW_OPPORTUNITY_NOTIFICATION, 19),
+    ]
+)
+
+NOTIFICATION_TYPE_CONFIG: LookupConfig[NotificationType] = LookupConfig(
+    [
+        LookupStr(NotificationType.ALL_NEW_OPPORTUNITIES, 1),
+    ]
+)
+
+NOTIFICATION_QUEUE_STATUS_CONFIG: LookupConfig[NotificationQueueStatus] = LookupConfig(
+    [
+        LookupStr(NotificationQueueStatus.PENDING, 1),
+        LookupStr(NotificationQueueStatus.IN_PROGRESS, 2),
+        LookupStr(NotificationQueueStatus.SENT, 3),
+        LookupStr(NotificationQueueStatus.FAILED, 4),
+        LookupStr(NotificationQueueStatus.SUPPRESSED, 5),
     ]
 )
 
@@ -927,3 +973,46 @@ class LkJobType(ApiLookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkJobType:
         return LkJobType(job_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(OPPORTUNITY_AUDIT_EVENT_CONFIG)
+class LkOpportunityAuditEvent(ApiLookupTable, TimestampMixin):
+    __tablename__ = "lk_opportunity_audit_event"
+
+    opportunity_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkOpportunityAuditEvent:
+        return LkOpportunityAuditEvent(
+            opportunity_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(NOTIFICATION_TYPE_CONFIG)
+class LkNotificationType(ApiLookupTable, TimestampMixin):
+    __tablename__ = "lk_notification_type"
+
+    notification_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkNotificationType:
+        return LkNotificationType(
+            notification_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(NOTIFICATION_QUEUE_STATUS_CONFIG)
+class LkNotificationQueueStatus(ApiLookupTable, TimestampMixin):
+    __tablename__ = "lk_notification_queue_status"
+
+    notification_queue_status_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkNotificationQueueStatus:
+        return LkNotificationQueueStatus(
+            notification_queue_status_id=lookup.lookup_val,
+            description=lookup.get_description(),
+        )

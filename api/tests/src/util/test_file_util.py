@@ -1,13 +1,17 @@
 import os
+import uuid
 from urllib.parse import parse_qs, urlparse
 
 import boto3
+import faker
 import pytest
 from smart_open import open as smart_open
 
 import src.util.file_util as file_util
-import tests.src.db.models.factories as f
 from src.adapters.aws import S3Config
+from src.util.file_util import safe_presign_or_s3_cdnify_url
+
+fake = faker.Faker()
 
 
 def create_file(root_path, file_path):
@@ -171,7 +175,7 @@ def test_copy_file_s3(mock_s3_bucket, other_mock_s3_bucket):
     file_path = f"s3://{mock_s3_bucket}/my_file.txt"
 
     with file_util.open_stream(file_path, "w") as outfile:
-        outfile.write(f.fake.sentence(25))
+        outfile.write(fake.sentence(25))
 
     other_file_path = f"s3://{other_mock_s3_bucket}/my_new_file.txt"
     file_util.copy_file(file_path, other_file_path)
@@ -186,7 +190,7 @@ def test_copy_file_local_disk(tmp_path):
     file_path = tmp_path / "my_file.txt"
 
     with file_util.open_stream(file_path, "w") as outfile:
-        outfile.write(f.fake.sentence(25))
+        outfile.write(fake.sentence(25))
 
     other_file_path = tmp_path / "my_file2.txt"
     file_util.copy_file(file_path, other_file_path)
@@ -200,7 +204,7 @@ def test_copy_file_local_disk(tmp_path):
 def test_move_file_s3(mock_s3_bucket, other_mock_s3_bucket):
     file_path = f"s3://{mock_s3_bucket}/my_file_to_copy.txt"
 
-    contents = f.fake.sentence(25)
+    contents = fake.sentence(25)
     with file_util.open_stream(file_path, "w") as outfile:
         outfile.write(contents)
 
@@ -216,7 +220,7 @@ def test_move_file_s3(mock_s3_bucket, other_mock_s3_bucket):
 def test_move_file_local_disk(tmp_path):
     file_path = tmp_path / "my_file_to_move.txt"
 
-    contents = f.fake.sentence(25)
+    contents = fake.sentence(25)
     with file_util.open_stream(file_path, "w") as outfile:
         outfile.write(contents)
 
@@ -262,7 +266,7 @@ def test_convert_s3_to_cdn_url_invalid_path(s3_config):
 
 
 def test_write_to_file(tmp_path):
-    contents = f.fake.sentence(25)
+    contents = fake.sentence(25)
     file_path = tmp_path / "my_file_to_write.txt"
     assert file_util.file_exists(file_path) is False
     file_util.write_to_file(file_path, contents)
@@ -283,3 +287,50 @@ def test_pre_sign_file_location_uses_configured_duration(mock_s3_bucket):
 
     query = parse_qs(urlparse(url).query)
     assert int(query["X-Amz-Expires"][0]) == 900
+
+
+def test_presigned_post_local_override_with_s3_endpoint_url(mock_s3_bucket, s3_config):
+    file_id = uuid.uuid4()
+    user_id = uuid.uuid4()
+
+    s3_config.aws_s3_endpoint_url = "http://mocks3:9090"
+
+    result = file_util.pre_sign_upload(
+        file_path=f"s3://{mock_s3_bucket}/some/file.txt",
+        content_type="text/plain",
+        metadata={
+            "file-id": str(file_id),
+            "user-id": str(user_id),
+        },
+        s3_config=s3_config,
+    )
+
+    assert result["url"].startswith("http://localhost:9090")
+
+
+class TestSafePresignOrS3CdnifyUrl:
+
+    @pytest.fixture(autouse=True)
+    def reset_s3_config(self, monkeypatch):
+        # S3Config is a module-level singleton, force a rebuild from whatever
+        # env vars each test below sets.
+        monkeypatch.setattr(file_util, "_s3_config", None)
+
+    def test_safe_presign_or_s3_cdnify_url_returns_cdn_url_on_match(self, monkeypatch):
+        """When file_location's bucket matches PUBLIC_FILES_BUCKET, resolve to a real CDN url"""
+        monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://test-bucket")
+        monkeypatch.setenv("CDN_URL", "https://cdn.example.com")
+
+        download_path = safe_presign_or_s3_cdnify_url("s3://test-bucket/path/to/file.txt")
+
+        assert download_path == "https://cdn.example.com/path/to/file.txt"
+
+    def test_safe_presign_or_s3_cdnify_url_returns_none_on_bucket_mismatch(self, monkeypatch):
+        """A file_location whose bucket doesn't match PUBLIC_FILES_BUCKET (e.g. after
+        an S3 bucket rename/migration) must never surface as a raw s3:// URL"""
+        monkeypatch.setenv("PUBLIC_FILES_BUCKET", "s3://test-bucket")
+        monkeypatch.setenv("CDN_URL", "https://cdn.example.com")
+
+        download_path = safe_presign_or_s3_cdnify_url("s3://renamed-bucket/path/to/file.txt")
+
+        assert download_path is None

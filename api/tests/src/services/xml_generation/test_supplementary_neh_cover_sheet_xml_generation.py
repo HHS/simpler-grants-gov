@@ -3,11 +3,9 @@
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.supplementary_neh_cover_sheet import (
     FORM_XML_TRANSFORM_RULES as NEH_COVER_SHEET_TRANSFORM_RULES,
 )
@@ -219,9 +217,9 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         # Verify application info structure
         assert "ApplicationInfoGroup>" in xml_data
         assert "AdditionalFunding>Yes<" in xml_data  # Boolean converted to Yes
-        assert "AdditionalFundingExplanation>State humanities council<" in xml_data
+        assert "AddFundingExplanation>State humanities council<" in xml_data
         assert "TypeofApplication>Supplement<" in xml_data
-        assert "SupplementalGrantNumber>NEH-12345-20<" in xml_data
+        assert "SupGrantNumber>NEH-12345-20<" in xml_data
 
     def test_generate_neh_cover_sheet_xml_additional_funding_false(self):
         """Test NEH Cover Sheet XML generation with additional_funding=False."""
@@ -286,8 +284,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
         # Verify all three disciplines
         assert "ProjFieldCode>76<" in xml_data  # "Interdisciplinary: American Studies" -> "76"
-        assert "SecondaryProjFieldCode>4<" in xml_data  # "History: U.S. History" -> "4"
-        assert "TertiaryProjFieldCode>55<" in xml_data  # "Literature: American Literature" -> "55"
+        assert "ProjFieldCode2>4<" in xml_data  # "History: U.S. History" -> "4"
+        assert "ProjFieldCode3>55<" in xml_data  # "Literature: American Literature" -> "55"
 
     def test_generate_neh_cover_sheet_xml_without_optional_disciplines(self):
         """Test NEH Cover Sheet XML generation without optional secondary/tertiary disciplines."""
@@ -319,8 +317,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
         # Verify primary is present, secondary/tertiary are not
         assert "ProjFieldCode>40<" in xml_data  # "Languages: English" -> "40"
-        assert "SecondaryProjFieldCode" not in xml_data
-        assert "TertiaryProjFieldCode" not in xml_data
+        assert "ProjFieldCode2" not in xml_data
+        assert "ProjFieldCode3" not in xml_data
 
     def test_generate_neh_cover_sheet_xml_namespace_and_version(self):
         """Test that NEH Cover Sheet XML includes proper namespace and version attribute."""
@@ -497,9 +495,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def neh_cover_sheet_application(
-        self, enable_factory_create, db_session: db.Session, seed_form_registry
-    ):
+    def neh_cover_sheet_application(self, enable_factory_create, seed_form_registry):
         """Create an application with NEH Cover Sheet form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -522,7 +518,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
             competition_forms=[],
         )
 
-        neh_form = db_session.get(Form, SupplementaryNEHCoverSheet_v3_0.form_id)
+        neh_form = SupplementaryNEHCoverSheet_v3_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="NEH Cover Sheet Test Application"
@@ -557,9 +553,8 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
 
         return application
 
-    @pytest.mark.skip(reason="Fix existing skipped XSD validation tests #10424")
     def test_neh_cover_sheet_submission_xml_validates_against_xsd(
-        self, neh_cover_sheet_application, xsd_validator, db_session
+        self, neh_cover_sheet_application, xsd_validator
     ):
         """Test that complete NEH Cover Sheet submission XML validates against XSD schema."""
         # Create application submission
@@ -614,7 +609,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         )
 
     def test_neh_cover_sheet_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that NEH Cover Sheet with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -638,7 +633,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
             competition_forms=[],
         )
 
-        neh_form = db_session.get(Form, SupplementaryNEHCoverSheet_v3_0.form_id)
+        neh_form = SupplementaryNEHCoverSheet_v3_0
 
         application = ApplicationFactory.create(
             competition=competition,

@@ -29,16 +29,16 @@ def test_format_local_soap_response() -> None:
 
 def test_get_auth_error_response() -> None:
     err_response = get_auth_error_response()
-    err = b"""
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Body>
-        <soap:Fault>
-            <faultcode>soap:Server</faultcode>
-            <faultstring>Authorization error</faultstring>
-        </soap:Fault>
-    </soap:Body>
-</soap:Envelope>
-"""
+    err = (
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Authorization error</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode("utf-8")
     assert err in err_response.data
     assert err_response.status_code == 500
 

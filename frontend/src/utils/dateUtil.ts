@@ -12,6 +12,9 @@ dayjs.extend(timezone);
 
 export const getConfiguredDayJs = () => dayjs;
 
+export const formatDateWithNoPreformattedExpectations = (date: Date) =>
+  dayjs(date).format("LL");
+
 // Convert "2024-02-21" to "February 21, 2024"
 export function formatDate(dateStr: string | null): string {
   if (!dateStr || !dayjs(dateStr, "YYYY-MM-DD", true).isValid()) {
@@ -36,6 +39,12 @@ export function formatDateTime(dateStr: string | null): string {
 export const toShortMonthDate = (unformattedDate: string): string => {
   const dateInstance = dayjs(unformattedDate);
   return dateInstance.isValid() ? dateInstance.format("MMM D, YYYY") : "";
+};
+
+// "2025-01-15" -> "January 15, 2025"
+export const toLongMonthDate = (unformattedDate: string): string => {
+  const dateInstance = dayjs(unformattedDate);
+  return dateInstance.isValid() ? dateInstance.format("LL") : "";
 };
 
 export const isExpired = (expiration?: number) =>

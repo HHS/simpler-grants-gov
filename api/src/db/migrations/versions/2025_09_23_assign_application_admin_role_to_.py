@@ -23,9 +23,7 @@ def upgrade():
 
     # Insert Application Owner role assignments for all existing application owners
     # who don't already have the role
-    op.execute(
-        text(
-            """
+    op.execute(text("""
         INSERT INTO api.application_user_role (application_user_id, role_id, created_at, updated_at)
         SELECT
             au.application_user_id,
@@ -40,9 +38,7 @@ def upgrade():
             WHERE aur.application_user_id = au.application_user_id
             AND aur.role_id = :role_id
         );
-        """
-        ).params(role_id=APPLICATION_OWNER_ID)
-    )
+        """).params(role_id=APPLICATION_OWNER_ID))
 
     # ### end Alembic commands ###
 

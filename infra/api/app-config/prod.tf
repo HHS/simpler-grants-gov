@@ -7,11 +7,14 @@ module "prod_config" {
   network_name                      = "prod"
   domain_name                       = "api.simpler.grants.gov"
   secondary_domain_names            = ["alb.simpler.grants.gov"]
+  scanner_callback_domain_name      = "alb.simpler.grants.gov"
+  enable_secure_alb                 = false
   enable_https                      = true
   s3_cdn_domain_name                = "files.simpler.grants.gov"
   mtls_domain_name                  = "soap.simpler.grants.gov"
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
+  database_engine_version           = "17.7"
   database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXw3NTg3MzYwMjg2Njg1MjU2ODYy"
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
@@ -55,9 +58,10 @@ module "prod_config" {
   # Scale the search_data_instance_count number to meet your compute needs.
   # The search_data_instance_count should be a multiple of the number of availability zones.
   # Use the AWS Console to determine the number of availability zones in your region.
-  search_data_instance_type      = "or1.medium.search"
-  search_data_volume_size        = 20
-  search_data_instance_count     = 3
+  search_data_instance_type = "or1.medium.search"
+  search_data_volume_size   = 20
+  # 2 data nodes per availability zone across 3 AZs (must be a multiple of az zone count).
+  search_data_instance_count     = 6
   search_availability_zone_count = 3
   # Versions: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
   search_engine_version = "OpenSearch_2.15"
@@ -72,10 +76,11 @@ module "prod_config" {
     LOAD_AGENCY_SEARCH_REPLICA_COUNT = 2
 
     # Login.gov OAuth
-    LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
-    LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
-    LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
-    LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
+    LOGIN_GOV_ENDPOINT        = "https://secure.login.gov/"
+    LOGIN_GOV_JWK_ENDPOINT    = "https://secure.login.gov/api/openid_connect/certs"
+    LOGIN_GOV_AUTH_ENDPOINT   = "https://secure.login.gov/openid_connect/authorize"
+    LOGIN_GOV_TOKEN_ENDPOINT  = "https://secure.login.gov/api/openid_connect/token"
+    LOGIN_GOV_LOGOUT_ENDPOINT = "https://secure.login.gov/openid_connect/logout"
 
 
     # CommonGrants Protocol
@@ -97,9 +102,17 @@ module "prod_config" {
     FRONTEND_URL             = "https://simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
+
+    # Virus scanning endpoints
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
+
+    # Job lock — enabled in prod alongside incremental search sync wired into load-transform
+    ENABLE_JOB_LOCK = "true"
   }
   instance_cpu    = 2048
   instance_memory = 4096
+
+  scanner_provisioned_concurrency = 1
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.

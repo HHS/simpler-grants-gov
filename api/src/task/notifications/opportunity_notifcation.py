@@ -5,13 +5,10 @@ from datetime import datetime
 from typing import cast
 from uuid import UUID
 
-from grants_shared.adapters import db
-from grants_shared.util import datetime_util
-from grants_shared.util.dict_util import diff_nested_dicts
-from grants_shared.util.string_utils import truncate_html_inline
 from sqlalchemy import and_, desc, exists, func, select, tuple_, update
 from sqlalchemy.orm import aliased, selectinload
 
+from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Schema
 from src.constants.lookup_constants import FundingCategory, OpportunityCategory, OpportunityStatus
 from src.db.models.opportunity_models import OpportunityVersion
@@ -30,6 +27,9 @@ from src.task.notifications.constants import (
     UserEmailNotification,
     UserOpportunityUpdateContent,
 )
+from src.util import datetime_util
+from src.util.dict_util import diff_nested_dicts
+from src.util.string_utils import truncate_html_inline
 
 logger = logging.getLogger(__name__)
 
@@ -209,9 +209,22 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     (user_changed_opp.user_id, opp.opportunity_id)
                 )
                 if opp.previous is None:
-                    logger.error(
+                    # This happens when a user saved an opportunity during the window between
+                    # it being created/published and the versioning task running. Their
+                    # last_notified_at was set to save time, so no version predates it.
+                    # No email is sent (nothing to diff), but we advance last_notified_at to
+                    # the latest version's timestamp so the next change produces a proper diff.
+                    logger.warning(
                         "No previous version found for this opportunity",
                         extra={"user_id": user_id, "opportunity_id": opp.opportunity_id},
+                    )
+                    self.db_session.execute(
+                        update(UserSavedOpportunity)
+                        .where(
+                            UserSavedOpportunity.user_id == user_id,
+                            UserSavedOpportunity.opportunity_id == opp.opportunity_id,
+                        )
+                        .values(last_notified_at=opp.latest.created_at)
                     )
                     continue
                 updated_opps.append(opp)

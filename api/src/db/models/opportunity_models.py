@@ -2,9 +2,7 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.base import TimestampMixin
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Index, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -13,25 +11,29 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
+    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityStatus,
 )
 from src.db.models.agency_models import Agency
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
     LkFundingInstrument,
+    LkOpportunityAuditEvent,
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
-from src.util.file_util import presign_or_s3_cdnify_url
+from src.util.file_util import safe_presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
     from src.db.models.award_recommendation_models import AwardRecommendation
     from src.db.models.competition_models import Competition
     from src.db.models.entity_models import OrganizationSavedOpportunity
-    from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
+    from src.db.models.user_models import User, UserOpportunityNotificationLog, UserSavedOpportunity
     from src.db.models.workflow_models import Workflow
 
 
@@ -63,6 +65,9 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         index=True,
     )
     category_explanation: Mapped[str | None]
+
+    tagline: Mapped[str | None]
+    purpose_statement: Mapped[str | None]
 
     is_draft: Mapped[bool] = mapped_column(index=True)
 
@@ -120,6 +125,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     versions: Mapped[list[OpportunityVersion]] = relationship(
         "OpportunityVersion",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    opportunity_audits: Mapped[list[OpportunityAudit]] = relationship(
+        "OpportunityAudit",
         back_populates="opportunity",
         uselist=True,
         cascade="all, delete-orphan",
@@ -499,19 +511,46 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     @property
     def download_path(self) -> str | None:
         if self.file_location:
-            return presign_or_s3_cdnify_url(self.file_location)
+            return safe_presign_or_s3_cdnify_url(self.file_location)
         return None
 
 
 class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_change_audit"
 
+    # Partial index so the incremental search sync only scans records still queued for
+    # indexing. The predicate covers NULL as well as FALSE because the queue trigger
+    # inserts new rows without setting is_loaded_to_search.
+    __table_args__ = (
+        Index(
+            "opportunity_change_audit_is_loaded_to_search_idx",
+            "is_loaded_to_search",
+            postgresql_where="is_loaded_to_search IS NOT TRUE",
+        ),
+        ApiSchemaTable.__table_args__,
+    )
+
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+        UUID,
+        ForeignKey(Opportunity.opportunity_id, ondelete="CASCADE"),
+        primary_key=True,
+        index=True,
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]
     is_loaded_to_version_table: Mapped[bool | None] = mapped_column(index=True)
+
+
+class OpportunityIndexDeleteQueue(ApiSchemaTable, TimestampMixin):
+    """Opportunities that were deleted and still need to be removed from the search index.
+
+    Rows are inserted in the same transaction that deletes the opportunity, so there is
+    deliberately no foreign key to opportunity - the referenced row is gone by commit time.
+    """
+
+    __tablename__ = "opportunity_index_delete_queue"
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
 
 
 class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
@@ -552,6 +591,15 @@ class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
 class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_version"
 
+    # Expression index so queries can filter versions by status without a full table scan
+    __table_args__ = (
+        Index(
+            "opportunity_version_opportunity_status_idx",
+            text("(opportunity_data ->> 'opportunity_status')"),
+        ),
+        ApiSchemaTable.__table_args__,
+    )
+
     opportunity_version_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4
     )
@@ -562,3 +610,36 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity, back_populates="versions")
 
     opportunity_data: Mapped[dict] = mapped_column(JSONB)
+
+
+class OpportunityAudit(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_audit"
+
+    opportunity_audit_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), nullable=False, index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(
+        Opportunity, back_populates="opportunity_audits"
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
+    )
+    user: Mapped[User] = relationship("User")
+
+    opportunity_audit_event: Mapped[OpportunityAuditEvent] = mapped_column(
+        "opportunity_audit_event_id",
+        LookupColumn(LkOpportunityAuditEvent),
+        ForeignKey(LkOpportunityAuditEvent.opportunity_audit_event_id),
+        nullable=False,
+    )
+
+    # Only one of the following JSONB columns will be populated per row,
+    # depending on which entity was created or updated.
+    opportunity_data: Mapped[dict | None] = mapped_column("opportunity", JSONB)
+    nonforecast_opportunity_summary: Mapped[dict | None] = mapped_column(JSONB)
+    competition: Mapped[dict | None] = mapped_column(JSONB)

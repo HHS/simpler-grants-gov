@@ -1,15 +1,16 @@
 import logging
 
-from grants_shared.adapters import db
 from statemachine.event_data import EventData
 
+from src.adapters import db
 from src.auth.endpoint_access_util import get_users_with_privileges_for_agency
+from src.constants.email_constants import EmailType
 from src.db.models.user_models import User
 from src.task.notifications.config import get_email_config
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.service.approval_service import get_agency_for_workflow
 from src.workflow.util.workflow_util import send_workflow_email
-from src.workflow.workflow_errors import OpportunityWithoutAgencyError
+from src.workflow.workflow_errors import OpportunityWithoutAgencyError, UnexpectedStateError
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,10 @@ class WorkflowApprovalEmailListener:
         """
         Listen for events when a workflow enters a state that is also an approval.
         """
+        # Target shouldn't be None with how we define state machines
+        # but the library allows for it, so we have to be careful
+        if event_data.target is None:
+            raise UnexpectedStateError("Workflow transition is missing a target state")
         target_state = event_data.target.value
         log_extra = state_machine_event.get_log_extra() | {
             "source_state": event_data.source.value,
@@ -106,4 +111,5 @@ class WorkflowApprovalEmailListener:
                 user=user,
                 subject=subject,
                 message=approval_message,
+                email_type=EmailType.WORKFLOW_APPROVAL,
             )

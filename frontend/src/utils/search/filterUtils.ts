@@ -105,14 +105,21 @@ export const agenciesToNestedFilterOptions = (
     if (isTopLevelAgency(rawAgency)) {
       return [...acc, agencyOption];
     }
-    const parent = acc.find(
-      (agency: FilterOption) =>
-        agency.id === rawAgency.top_level_agency?.agency_code,
-    );
-    // parent should always already exist in the list because of the pre-sort, if it doesn't just skip the agency
+    const parentCode = rawAgency.top_level_agency?.agency_code;
+    // A dash in the agency code makes an agency look like a sub agency, but the API only
+    // populates top_level_agency when the code's prefix is a real agency, so a dashed code
+    // can legitimately have no parent at all (the API tracks these as orphaned child
+    // agencies). Surface them at the top level so they stay selectable in the filter
+    // rather than being dropped.
+    if (!parentCode) {
+      return [...acc, agencyOption];
+    }
+    const parent = acc.find((agency: FilterOption) => agency.id === parentCode);
+    // a referenced parent should already be in the list because of the pre-sort, if it
+    // isn't there is nothing to nest the agency under, so skip it
     if (!parent) {
       console.error(
-        `Parent agency not found: ${rawAgency.top_level_agency?.agency_code || "undefined"}`,
+        `Parent agency ${parentCode} referenced by ${rawAgency.agency_code} not found in filter options`,
       );
       return acc;
     }

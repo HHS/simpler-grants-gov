@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 from src.db.models.extract_models import ExtractMetadata
 from src.db.models.task_models import JobLog, JobStatus
+from src.task.base_task import BaseTask
 from src.task.task import Task
 from tests.src.db.models.factories import ExtractMetadataFactory, ExtractType
 
@@ -52,6 +53,53 @@ class DBFailingTask(Task):
     def run_task(self) -> None:
         # Simulate DB operation failing
         raise InvalidRequestError("DB Error", None, None)
+
+
+class InMemoryTask(BaseTask):
+    """BaseTask implementation that tracks job lifecycle in memory, with no DB table."""
+
+    def __init__(self, db_session):
+        super().__init__(db_session)
+        self.started = False
+        self.finish_succeeded: bool | None = None
+
+    def start_job(self) -> None:
+        self.started = True
+
+    def finish_job(self, job_succeeded: bool) -> None:
+        self.finish_succeeded = job_succeeded
+
+    def run_task(self) -> None:
+        self.set_metrics({"records_processed": 5})
+
+
+class InMemoryFailingTask(InMemoryTask):
+    """BaseTask implementation that fails during run_task"""
+
+    def run_task(self) -> None:
+        raise ValueError("Task failed")
+
+
+def test_base_task_runs_without_db_table(db_session):
+    """BaseTask drives the run lifecycle without any direct DB table dependency"""
+    task = InMemoryTask(db_session)
+    task.run()
+
+    assert task.started is True
+    assert task.finish_succeeded is True
+    assert task.metrics["records_processed"] == 5
+    assert "task_duration_sec" in task.metrics
+
+
+def test_base_task_finish_job_reports_failure(db_session):
+    """When run_task raises, BaseTask still calls finish_job indicating failure"""
+    task = InMemoryFailingTask(db_session)
+
+    with pytest.raises(ValueError):
+        task.run()
+
+    assert task.started is True
+    assert task.finish_succeeded is False
 
 
 def test_task_handles_general_error(db_session):

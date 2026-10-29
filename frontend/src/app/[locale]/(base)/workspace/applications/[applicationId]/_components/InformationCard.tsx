@@ -2,6 +2,7 @@
 
 import { EditAppFilingName } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/editAppFilingName/EditAppFilingName";
 import { TransferOwnershipModal } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/transferOwnership/TransferOwnershipModal";
+import { postUserEvent } from "src/services/event/postUserEvent";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
@@ -122,6 +123,9 @@ export const InformationCard = ({
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
   const { is_open } = applicationDetails.competition;
+  const applicationId = applicationDetails.application_id;
+  const opportunityId =
+    applicationDetails.competition.opportunity?.opportunity_id;
   const transferModalRef = useRef<ModalRef | null>(null);
   const transferModalId = "transfer-ownership-modal";
   const organizationEligible =
@@ -141,8 +145,12 @@ export const InformationCard = ({
     useState<boolean>(false);
 
   const openTransferModal = useCallback((): void => {
+    postUserEvent({
+      name: "click_transfer_ownership",
+      properties: { applicationId, opportunityId },
+    });
     setIsTransferModalOpen(true);
-  }, []);
+  }, [applicationId, opportunityId]);
 
   const handleTransferModalAfterClose = useCallback((): void => {
     setIsTransferModalOpen(false);
@@ -168,6 +176,12 @@ export const InformationCard = ({
                 type="button"
                 data-testid="application-instructions-download"
                 outline
+                onClick={() =>
+                  postUserEvent({
+                    name: "click_download_application_instructions",
+                    properties: { applicationId, opportunityId },
+                  })
+                }
               >
                 <USWDSIcon name="file_download" />
                 {t("applicationDownloadInstructions")}
@@ -210,6 +224,12 @@ export const InformationCard = ({
           data-testid="application-submission-download"
           disabled={submissionLoading}
           outline
+          onClick={() =>
+            postUserEvent({
+              name: "click_download_application_submission_zip",
+              properties: { applicationId, opportunityId },
+            })
+          }
         >
           <USWDSIcon name="file_download" />
           {t("applicationSubmissionZipDownload")}

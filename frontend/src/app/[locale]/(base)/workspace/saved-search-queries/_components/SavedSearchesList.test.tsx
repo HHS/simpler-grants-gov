@@ -174,6 +174,30 @@ describe("SavedSearchesList", () => {
     expect(definitionTwo).toHaveTextContent("category: Arts");
   });
 
+  it("does not display a status value for a search with no statuses selected", () => {
+    render(
+      <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
+        savedSearches={[
+          makeSavedSearchResult({
+            searchParams: {
+              query: "another search term",
+              status: "none",
+            },
+          }),
+        ]}
+        editText={"edit"}
+        deleteText={"delete"}
+        paramDisplayMapping={fakeParamDisplayMapping}
+      />,
+    );
+
+    const definition = screen.getByTestId("saved-search-definition");
+
+    expect(definition).toHaveTextContent("query: another search term");
+    expect(definition).not.toHaveTextContent("status:");
+  });
+
   it("renders edit and delete modal button items for each list item", async () => {
     render(
       <SavedSearchesList

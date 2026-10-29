@@ -1,5 +1,6 @@
-import { getSession } from "src/services/auth/session";
+import { MissingAuthError } from "src/errors";
 import { getOrganizationUsers } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { UserDetail } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
@@ -73,20 +74,22 @@ export const OrganizationRoster = async ({
   organizationId: string;
 }) => {
   const t = await getTranslations("OrganizationDetail.rosterTable");
-  const session = await getSession();
-  if (!session?.token) {
-    return (
-      <Alert headingLevel="h3" type="error">
-        not logged in
-      </Alert>
-    );
-  }
 
   let organizationUsers;
   try {
     organizationUsers = await getOrganizationUsers(organizationId);
   } catch (e) {
-    console.error(e);
+    if (e instanceof MissingAuthError) {
+      return (
+        <Alert headingLevel="h3" type="error">
+          not logged in
+        </Alert>
+      );
+    }
+    logger.error(
+      { err: e, organizationId },
+      "Unable to fetch organization users",
+    );
     return <GeneralErrorAlert />;
   }
 

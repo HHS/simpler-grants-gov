@@ -128,9 +128,9 @@ e2e-test-native: ## Run end-to-end tests
 ## Infra ##
 ###########
 
-infra-set-up-account: ## Configure and create resources for current AWS profile and save tfbackend file to infra/accounts/$ACCOUNT_NAME.ACCOUNT_ID.s3.tfbackend
+infra-set-up-account: ## Configure and create resources for current AWS profile and save tfbackend file to infra/accounts/$ACCOUNT_NAME.ACCOUNT_ID.s3.tfbackend. Optionally pass AWS_PROFILE=<profile> to target a specific AWS SSO profile.
 	@:$(call check_defined, ACCOUNT_NAME, human readable name for account e.g. "prod" or the AWS account alias)
-	./bin/set-up-current-account $(ACCOUNT_NAME)
+	$(if $(AWS_PROFILE),AWS_PROFILE=$(AWS_PROFILE)) ./bin/set-up-current-account $(ACCOUNT_NAME)
 
 infra-configure-network: ## Configure network $NETWORK_NAME
 	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)
@@ -157,7 +157,8 @@ infra-configure-app-service: ## Configure infra/$APP_NAME/service module's tfbac
 	./bin/create-tfbackend "infra/$(APP_NAME)/service" "$(ENVIRONMENT)"
 
 infra-update-current-account: ## Update infra resources for current AWS profile
-	./bin/terraform-init-and-apply infra/accounts `./bin/current-account-config-name`
+	TF_VAR_account_name="$$(./bin/current-account-config-name | cut -d. -f1)" \
+	./bin/terraform-init-and-apply infra/accounts "$$(./bin/current-account-config-name)"
 
 infra-update-network: ## Update network
 	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)
@@ -176,7 +177,8 @@ infra-update-app-database: ## Create or update $APP_NAME's database module for $
 
 infra-module-database-role-manager-archive: ## Build/rebuild role manager code package for Lambda deploys
 	pip3 install -r infra/modules/database/role_manager/requirements.txt -t infra/modules/database/role_manager/vendor --upgrade
-	zip -r infra/modules/database/role_manager.zip infra/modules/database/role_manager
+	rm -f infra/modules/database/role_manager.zip
+	cd infra/modules/database/role_manager && zip -r ../role_manager.zip . -x '*.DS_Store' -x '*__pycache__*'
 
 infra-update-app-database-roles: ## Create or update database roles and schemas for $APP_NAME's database in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -291,8 +293,7 @@ else
 	APP_NAME_ARG := "."
 endif
 
-ifdef IMAGE_TAG
-else
+ifeq ($(origin IMAGE_TAG),undefined)
 	ifdef GIT_REPO_AVAILABLE
 		IMAGE_TAG := $(shell git log --pretty=format:'%H' -n 1 "${ROOT_REV}" -- "${APP_NAME_ARG}")
 	else
@@ -317,7 +318,7 @@ release-publish: ## Publish release to $APP_NAME's build repository
 release-run-database-migrations: ## Run $APP_NAME's database migrations in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/run-database-migrations $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
+	./bin/run-database-migrations "$(APP_NAME)" "$(IMAGE_TAG)" "$(ENVIRONMENT)"
 
 release-run-setup-foreign-tables: ## Run setup-foreign-tables for $APP_NAME in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -327,7 +328,7 @@ release-run-setup-foreign-tables: ## Run setup-foreign-tables for $APP_NAME in $
 release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/deploy-release $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
+	./bin/deploy-release "$(APP_NAME)" "$(IMAGE_TAG)" "$(ENVIRONMENT)"
 
 invalidate-cloudfront-cache: ## Invalidate CloudFront cache for $ENVIRONMENT
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")

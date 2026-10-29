@@ -20,10 +20,16 @@ on:
         type: choice
         options:
           - dev
+          - infra-dev
           - staging
+          - infra-staging
           - training
+          - infra-training
           - grantee1
-          - grantee2
+          - grantor1
+          - infra-sgg2
+          - infra-sgg3
+          - infra-sgg1
           - prod
       version:
         required: true
@@ -71,14 +77,33 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]')  }}
+        # Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]')  }}
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
       version: ${{ inputs.version || github.ref }}
 
+  # Mirrors e2e-test-staging in cd-frontend.yml: an API-only merge changes
+  # staging too, and the apply flows depend on the API contract.
+  e2e-test-staging:
+    name: E2E Staging (post-deploy)
+    needs: [deploy]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    # Same group as cd-frontend.yml: newest post-deploy run wins.
+    concurrency:
+      group: staging-e2e-post-deploy
+      cancel-in-progress: true
+    uses: ./.github/workflows/e2e-deployed-env.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version || github.sha }}
+      target: staging
+      playwright_tags: "@smoke|@full-regression"
+      send_slack_notification: false
+
   send-slack-notification:
     if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
-    needs: [api-checks, vulnerability-scans, deploy]
+    needs: [api-checks, vulnerability-scans, deploy, e2e-test-staging]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit

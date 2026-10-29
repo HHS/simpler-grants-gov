@@ -76,6 +76,10 @@ export const messages = {
       watch: "Watch recordings of past Big Demos",
       watchLinks: [
         {
+          text: "June 30, 2026",
+          link: "https://youtu.be/AeHXvMamcnc?si=3dikqd4MU7zNZ5-q",
+        },
+        {
           text: "January 29, 2026",
           link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
         },
@@ -102,12 +106,14 @@ export const messages = {
       save: "Save",
       saved: "Saved",
       loading: "Updating",
+      accessibleContext: "opportunity: {title}",
     },
     saveMessage: {
-      save: "This opportunity was saved to <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
-      unsave: "This opportunity was unsaved.",
-      errorSave: "Error saving. Please try again.",
-      errorUnsave: "Error undoing save. Please try again.",
+      save: "<srOnly>This opportunity was saved. </srOnly>Manage notifications in <linkSavedOpportunities>Saved opportunities</linkSavedOpportunities>.",
+      unsave: "This opportunity was removed.",
+      errorSave: "Opportunity could not be saved. Please try again.",
+      errorUnsave: "Opportunity could not be unsaved. Please try again.",
+      dismiss: "Dismiss message",
     },
     saveloginModal: {
       button: "Sign in with Login.gov",
@@ -179,10 +185,27 @@ export const messages = {
           "You can apply as an individual or organization. To apply as part of an organization you must:",
       },
     },
+    header: {
+      agency: "Agency:",
+      assistanceListings: "Assistance Listings",
+      assistanceListingsUnavailable:
+        "Assistance listing number is not available.",
+      lastUpdated: "Last Updated:",
+      applyOnGrantsGov: "Apply on Grants.gov",
+      status: {
+        posted: "Open",
+        forecasted: "Forecasted",
+        closed: "Closed",
+        archived: "Archived",
+      },
+      statusAccessible: {
+        posted: "Open opportunity",
+        forecasted: "Forecasted opportunity",
+        closed: "Closed opportunity",
+        archived: "Archived opportunity",
+      },
+    },
     intro: {
-      agency: "Agency: ",
-      assistanceListings: "Assistance Listings:",
-      lastUpdated: "Last Updated: ",
       versionHistory: "View version history on Grants.gov",
     },
     description: {
@@ -272,35 +295,20 @@ export const messages = {
     pageTitle: "Edit opportunity",
     metaDescription:
       "Edit draft opportunity information and non-forecast summary fields.",
-    header: {
-      pageTitle: "Opportunity #: {number}",
-      lastUpdated: "Last updated:",
-      status: "Status:",
-      stageDraft: "Draft",
-      stageArchived: "Archived",
-      stageClosed: "Closed",
-      stageForecasted: "Forecasted",
-      stagePosted: "Open for applications",
-      saveButton: "Save",
-      previewButton: "Preview",
-      publishButton: "Publish",
-      navTitle: "On this page",
+    navTitle: "On this page",
+    button: {
+      backToOverview: "Back to overview page",
+      saveAndExit: "Save and exit",
+      saveAndGoBack: "Save and go back",
+      saveAndContinue: "Save and continue",
     },
     sections: {
-      keyInformation: "Key information",
       fundingDetails: "Funding details",
       eligibility: "Eligibility",
       additionalInformation: "Additional information",
       attachments: "Attachments",
     },
     labels: {
-      title: "Title",
-      agency: "Agency",
-      assistanceListings: "Assistance listings:",
-      opportunityNumber: "Opportunity number",
-      opportunityStage: "Opportunity stage",
-      awardSelectionMethod: "Award selection method",
-      awardSelectionMethodExplanation: "Award selection method explanation",
       fundingType: "Funding type",
       costSharing: "Cost sharing or matching requirements?",
       category: "Category",
@@ -329,16 +337,12 @@ export const messages = {
       eligibilityMiscellaneous: "Miscellaneous",
     },
     content: {
-      keyInformationIntro:
-        "Below is a summary of the key information for this opportunity. You can edit specific fields directly in this section.",
       fundingDetailsIntro:
         "Provide the financial structure of this opportunity. This includes the total funding available, expected number of awards, and critical dates for the application window.",
       eligibilityIntro:
         "Define who is eligible to apply for these funds. Select all applicable applicant types and provide any specific requirements or restrictions regarding organizational status or geographic location.",
       additionalInformationIntro:
         "Use this section to provide supplementary context, such as a summary of the program's goals, agency-specific links, and contact information for programmatic or technical inquiries.",
-      draftOnlyWarning:
-        "Only draft opportunities should be editable from this page.",
       notAvailable: "Not available",
       fundingTypeHint:
         "Select the legal relationship between the agency and the recipient",
@@ -381,9 +385,6 @@ export const messages = {
       alerts: {
         success: "Saved successfully",
         successBody: "Your changes have been saved.",
-        newOpportunityHeading: "Opportunity draft started",
-        newOpportunityBody:
-          "Your initial information has been saved. Complete the sections below to finish your opportunity details",
         genericError: "Unable to save draft opportunity details.",
         missingSummaryContext: "Missing opportunity summary context for save.",
         unauthenticated: "You must be signed in to update this opportunity.",
@@ -416,6 +417,8 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      expectedNumberOfAwardsInput:
+        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
       awardMinCurrencyInput:
         "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
@@ -427,14 +430,16 @@ export const messages = {
       awardMaxLessThanTotal:
         "Award maximum cannot exceed the Estimated Total Program Funding.",
       awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
+      awardMaxGreaterThanMin:
+        "Award maximum cannot be less than Award minimum.",
     },
     attachments: {
-      removeButton: "Remove",
       uploadLabel: "Upload files",
-      errorHeading: "Upload error",
-      errorUploadFailed: "Failed to upload {fileName}.",
-      errorDeleteFailed: "Failed to delete {fileName}.",
-      errorFileTooLarge: "{fileName} exceeds the 2GB file size limit.",
+      uploading: "Uploading...",
+      success:
+        "Success: File scan complete. Save this form to attach the file.",
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
     },
   },
   Application: {
@@ -557,16 +562,13 @@ export const messages = {
       fileSize: "File Size",
       uploadBy: "Upload by",
       uploadDate: "Upload date",
-      deleteModal: {
-        titleText: "Delete",
-        cancelDeleteCta: "Cancel",
-        cautionDeletingAttachment: "Caution, deleting attachment",
-        descriptionText:
-          "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
-        deleteFileCta: "Delete file",
-        deleteFilesCta: "Delete files",
-        deleting: "Deleting...",
-      },
+    },
+    attachmentUpload: {
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
+      success:
+        "Success: File scan complete. “Save” this form to attach the file.",
+      uploading: "Uploading...",
     },
     historyTable: {
       applicationHistory: "Application History",
@@ -604,9 +606,16 @@ export const messages = {
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
       fieldListWidget: {
-        deleteEntry: "Delete",
+        deleteEntry: "Delete this entry",
         addEntry: "Add another entry",
       },
+      returnToApplication: "Return to application",
+      saving: "Saving...",
+      savingAndRefreshing: "Save and refresh",
+      saveDisabledTooltipMessage:
+        "Save disabled while file upload is processing.",
+      lastUpdatedMessage: "This form was last updated on",
+      createdMessage: "This form was created on",
     },
     transferOwnershipModal: {
       title: "Transfer application ownership",
@@ -733,6 +742,8 @@ export const messages = {
       server:
         "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
       alreadySubscribed: "This email address has already been subscribed.",
+      tooManyRequests:
+        "Too many recent attempts. Please wait a few minutes and try again.",
     },
   },
   SubscriptionConfirmation: {
@@ -749,9 +760,9 @@ export const messages = {
     cta: "Change your mind?",
     buttonResub: "Re-subscribe",
   },
-  SendyDisclaimer: {
+  NewsletterDisclaimer: {
     disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "Simpler.Grants.gov newsletter subscriptions are powered by Mailchimp. Personal information is not stored within Simpler.Grants.gov.",
   },
   ErrorPages: {
     genericError: {
@@ -803,75 +814,72 @@ export const messages = {
     ],
   },
   ApiDashboard: {
-    pageTitle: "API dashboard | Simpler.Grants.gov",
+    pageTitle: "API keys | Simpler.Grants.gov",
     metaDescription: "Manage your API keys for Simpler.Grants.gov",
-    heading: "API dashboard",
+    heading: "API keys",
     errorLoadingKeys: "Failed to load API keys",
+    deleteSuccessMessage: 'API key "{keyName}" has been deleted successfully.',
+    renameSuccessMessage: 'API key "{originalName}" renamed to "{keyName}".',
     table: {
       headers: {
-        apiKey: "Name",
-        status: "Status",
-        secret: "Secret",
+        keyName: "Key name",
         created: "Created",
         lastUsed: "Last used",
-        modify: "Modify",
-      },
-      statuses: {
-        active: "Active",
-        inactive: "Inactive",
+        actions: "Actions",
       },
       dateLabels: {
-        created: "Created:",
-        lastUsed: "Last used:",
-        never: "Never",
+        never: "Never used",
       },
-      deleteButton: "Delete Key",
-      deleteButtonTitle: "Delete this API key",
-      emptyState:
-        "You don't have any API keys yet. Create your first API key to get started.",
+      emptyStateHeading: "You don't have any API keys.",
+      emptyStateDescription:
+        "Create an API key to authenticate your requests with the Simpler.Grants.gov API.",
     },
     modal: {
-      apiKeyNameLabel: "Name <required>(required)</required>",
-      placeholder: "e.g., Production API Key",
-      createTitle: "Create New API Key",
-      createDescription:
-        "Create a new key for use with the Simpler.Grants.gov API",
-      editDescription: "Change the name of your Simpler.Grants.gov API key",
-      createSuccessHeading: "Save your key",
-      editSuccessHeading: "API Key Renamed Successfully",
-      createSuccessMessage:
-        'Your API key "{keyName}" has been created successfully. Please save your secret key in a safe place. Keep it secure, as anyone with your API key can make requests on your behalf.',
-      editSuccessMessage:
-        'Your API key has been renamed from "{originalName}" to "{keyName}".',
-      close: "Close",
+      apiKeyNameLabel: "API key name <required>(required)</required>",
+      apiKeyNameHint: "e.g. Staging, iOS App, Production",
+      apiKeyNameDescription:
+        "Enter a descriptive name to identify how this key will be used. Your key name must be unique.",
+      createTitle: "Create a new API key",
+      createSubmitButtonText: "Create key",
+      createSuccessHeading: "API key created",
+      createSuccessAlertHeading: "Copy and save this key now",
+      createSuccessAlertMessage:
+        "For security, you will not be able to see or copy this key again.",
+      createSuccessKeyName: "<strong>Key name:</strong> {keyName}",
+      createdApiKeyLabel: "API key",
+      copyKey: "Copy key",
+      copied: "Copied",
+      done: "Done",
+      createErrorHeading: "Unable to create API key",
       createErrorMessage:
-        "There was an error creating your API key. Please try again.",
+        "Something went wrong on our end. Please try again in a few minutes.",
+      editErrorHeading: "Unable to rename API key",
       editErrorMessage:
-        "There was an error renaming your API key. Please try again.",
-      nameRequiredError: "API key name is required",
-      nameChangedError: "Please enter a different name",
-      editTitle: "Rename API Key",
-      createButtonText: "Create API Key",
-      editNameButtonText: "Edit Name",
+        "Something went wrong on our end. Please try again in a few minutes.",
+      nameRequiredError: "Enter a name for your API key.",
+      duplicateNameError:
+        "A key with this name already exists. Enter a different name.",
+      editTitle: 'Edit "{keyName}" API key name',
+      editTriggerText: "Edit name",
+      editTriggerKeyName: 'for "{keyName}" API key',
+      createButtonText: "Create API key",
       creating: "Creating...",
       saving: "Saving...",
-      saveChanges: "Save Changes",
+      saveChanges: "Save changes",
       cancel: "Cancel",
-      deleteTitle: "Delete API Key",
+      deleteTitle: 'Delete "{keyName}" API key?',
+      deleteTriggerText: "Delete",
+      deleteTriggerKeyName: '"{keyName}" API key',
       deleteDescription:
-        'To confirm deletion, type "delete" in the field below:',
+        "Any application or service using this key will immediately lose access to the API. This action cannot be undone.",
       deleteConfirmationLabel:
         'Type "delete" to confirm <required>(required)</required>',
-      deleteConfirmationPlaceholder: "delete",
-      deleteConfirmationError: 'Please type "delete" to confirm deletion',
-      deleteSuccessHeading: "API Key Deleted Successfully",
-      deleteSuccessMessage:
-        'Your API key "{keyName}" has been deleted successfully.',
+      deleteConfirmationError: "Text does not match.",
+      deleteErrorHeading: "Unable to delete API key",
       deleteErrorMessage:
-        "There was an error deleting your API key. Please try again.",
-      deleteButtonText: "Delete Key",
+        "Something went wrong on our end. Please try again in a few minutes.",
+      deleteButtonText: "Delete key",
       deleting: "Deleting...",
-      copyApiKey: "Copy API key",
     },
   },
   Header: {
@@ -919,6 +927,21 @@ export const messages = {
     description:
       "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
     button: "Sign in using PIV/CAC",
+  },
+  FormSelectModal: {
+    title: "Form Library",
+    heading: "Select Forms",
+    selectAll: "Select all",
+    buttons: {
+      cancel: "Cancel",
+      save: "Save",
+    },
+    requiredStates: {
+      required: "Required",
+      conditional: "Conditionally Required",
+      auto: "Auto added",
+      always: "Always required",
+    },
   },
   Footer: {
     agencyName: "Grants.gov",
@@ -970,6 +993,8 @@ export const messages = {
     authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
+    signIn: "Sign in",
+    createAccount: "Create account",
     unauthorizedExplanation: "This content is not available",
   },
   Search: {
@@ -1973,6 +1998,12 @@ export const messages = {
       },
     },
   },
+  CommonWordLimit: {
+    wordsAllowed: "words allowed",
+    wordsLeft: "{num, plural, =1 {1 word left} other {# words left}}",
+    wordsError:
+      "{num, plural, =1 {1 word over limit} other {# words over limit}}",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
@@ -2030,13 +2061,23 @@ export const messages = {
     tableHeadings: {
       agency: "Agency",
       title: "Title",
+      oppNumber: "Opp. Number",
+      fundingInstrumentType: "Funding Instrument Type",
+      lastUpdated: "Last Updated",
       status: "Status",
-      actions: "Actions",
+      actions: "Action",
     },
     actionButtons: {
       edit: "Edit",
       copy: "Copy",
       delete: "Delete",
+    },
+    statusTag: {
+      draft: "Draft",
+      posted: "Open",
+      forecasted: "Forecasted",
+      archived: "Archived",
+      closed: "Closed",
     },
   },
   Organizations: {
@@ -2050,6 +2091,30 @@ export const messages = {
     breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
+    list: {
+      pageTitle: "Award recommendations",
+      pageHeading: "Award recommendations",
+      numAwardRecommendations:
+        "{num, plural, =1 {1 Award recommendation} other {# Award recommendations}}",
+      createRecommendationButton: "Create recommendation",
+      agencyNotAuthorized:
+        "You do not have access to this agency's award recommendations.",
+      noAgencies: "You are not associated with any agencies.",
+      empty: "No award recommendations found.",
+      fetchError:
+        "We have encountered an error loading award recommendations. Please try again.",
+      columns: {
+        awardRecId: "Award Rec ID",
+        opportunityName: "Opportunity name",
+        opportunityId: "Opportunity ID",
+        applicationsReceived: "Applications received",
+        status: "Status",
+        action: "Action",
+      },
+      actions: {
+        delete: "Delete",
+      },
+    },
     summary: {
       showDescription: "Show full description",
       hideSummaryDescription: "Hide full description",
@@ -2080,6 +2145,56 @@ export const messages = {
       preview: "Preview",
       submitForReview: "Submit for review",
       backToEdit: "Back to Edit",
+      backToSubmissions: "Back to submissions",
+    },
+    save: {
+      success: "Your changes have been saved.",
+      error: "We encountered an error saving your changes. Please try again.",
+    },
+    submissionEdit: {
+      editTitle: "Edit {applicationSubmissionNumber}",
+      viewOriginalApplication: "View original application",
+    },
+    editRecommendations: {
+      pageTitle: "Edit recommendations",
+      metaDescription: "Edit award recommendations for multiple applications",
+      heading: "Edit recommendations",
+      pageHeading: "Recommend awards",
+      pageDescription:
+        "Select one or more applications to edit recommendations. Search by App #, program title, org name of UEI",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      showingRange: "Showing {start}-{end} of {total}",
+      loading: "Loading...",
+      errorLoading: "Error loading submissions. Please try again.",
+      editButton: "Edit",
+      bulkEditPageTitle: "Bulk Edit Recommendations",
+      bulkEditMetaDescription:
+        "Bulk edit award recommendations for selected applications",
+      bulkEditTitle: "Bulk Edit Recommendations",
+      selectedApplications: "Selected Applications",
+      submissionsSelected: "submissions selected",
+      bulkEditHeading: "Update Recommendation",
+      bulkEditDescription:
+        "Select a recommendation type to apply to all selected applications.",
+      recommendationType: "Recommendation Type",
+      noSelectionsMessage:
+        "No submissions selected. Please select submissions to edit.",
+      saveButton: "Save",
+      saving: "Saving...",
+      cancelButton: "Cancel",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Org Name",
+        uei: "UEI",
+        score: "Score",
+        recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
+      },
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2152,6 +2267,7 @@ export const messages = {
         recommendedWithoutFunding: "Recommended but not funded",
         notRecommended: "Not recommended",
       },
+      selectOnePlaceholder: "Select one",
       hasExceptionLabel: "Contains exceptions to selection method",
       commentsLabel: "Recommendation comments",
       commentsDescription:
@@ -2160,8 +2276,16 @@ export const messages = {
       exceptionDetailDescription:
         "Select one or more applications and explain any exceptions to the general selection method. For example, the reasons for any applications skipped on the merit review ranking or other similar exceptions.",
       fundingHeading: "Funding recommendations",
+      fundingDescription:
+        "Review and provide the updates to recommended funding as needed.",
+      applicationIdLabel: "Application ID",
       amountRequestedLabel: "Amount Requested",
       amountRecommendedLabel: "Amount Recommended",
+      totalLabel: "Total",
+      validationErrorHeading: "There is a problem with your recommendation",
+      recommendationRequired: "Select your recommendation",
+      exceptionDetailRequired: "Enter a reason for this exception",
+      amountRecommendedRequired: "Enter an amount recommended",
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
@@ -2170,10 +2294,15 @@ export const messages = {
       "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
+    awardRecommendationNotFound:
+      "Award recommendation not found. Please check the ID and try again.",
     errorHeadingAwardRecommendationSubmission:
       "Error fetching application submission details",
     awardRecommendationSubmissionFetchError:
       "Error fetching application submission data. Please try refreshing the page.",
+    errorHeadingAwardRecommendationRisk: "Error fetching risk details",
+    awardRecommendationRiskFetchError:
+      "Error fetching risk data. Please try refreshing the page.",
     recommendations: {
       heading: "Recommendations",
       editPageDescription:
@@ -2234,27 +2363,128 @@ export const messages = {
       heading: "Risks and Conditions",
       description:
         "Review and manage risks and conditions for application submissions",
+      pageHeading: "Recommend submissions",
+      pageDescription: "Select one or more applications to add conditions.",
+      editTitle: "Edit risks and conditions",
+      editPageTitle: "Edit Risk or Condition",
+      editMetaDescription: "Edit risk or condition for selected applications",
+      editRiskTitle: "Edit {riskNumber}",
+      addPageTitle: "Add Risk or Condition",
+      addMetaDescription: "Add risk or condition to selected applications",
+      addTitle: "Add risk or condition",
+      addHeading: "Add risk or condition",
+      addDescription:
+        "Add risk details and recommended terms or conditions for the selected applications",
       selectAll: "Select all",
       selectRow: "Select row for {appNumber}",
       selectedCount:
         "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      selectedApplications: "Selected applications",
       columns: {
         appNumber: "App #",
         projectTitle: "Project Title",
-        orgName: "Organization Name",
+        orgName: "Org Name",
         uei: "UEI",
+        score: "Score",
         recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
         risk: "Risk",
         condition: "Condition",
       },
       recommendationType: {
         recommended_for_funding: "Recommended",
       },
+      riskDetailsHeading: "Risk details",
+      riskSummaryLabel: "Risk summary",
+      riskSummaryHint:
+        "Any program or organization risks already identified at this time",
+      riskSummaryRequired: "Risk summary is required.",
+      recommendedConditionLabel: "Recommended term or condition",
+      recommendedConditionHint:
+        "Add any recommended conditions based on the risks identified",
+      selectConditionPlaceholder: "Select a condition",
+      condition1: "Condition 1",
+      condition2: "Condition 2",
+      condition3: "Condition 3",
+      cancelButton: "Cancel",
+      saveButton: "Save",
+      savingButton: "Saving...",
+      validationError: "Please fill in all required fields before saving.",
+      saveError: "Failed to save risk. Please try again.",
+      errorMessage: "Unable to load application submissions. Please try again.",
+      noSelectionsMessage:
+        "No applications selected. Please select applications from the Risks and Conditions page first.",
       defaultNone: "None",
       loading: "Loading submissions...",
       errorLoading: "Error loading submissions. Please try again.",
       showingRange: "Showing {start}-{end} of {total}",
       editButton: "Edit",
+    },
+    reviewForm: {
+      pageTitle: "Submit for Review | Simpler.Grants.gov",
+      pageDescription: "Submit award recommendation for review",
+      header: "Submit for Review",
+      loading: "Loading...",
+      contentCreator: {
+        title: "Submit for Review",
+      },
+      reviewer: {
+        title: "Review Award Recommendation",
+        question:
+          "Do you concur on behalf of the Grants Office that this document meets applicable grants management requirements?",
+        yesConcur: "Yes, approval obtained (attachment required)",
+        noIssues: "No, issues identified, changes needed (attachment required)",
+        hold: "Hold, review in progress",
+      },
+      fmo: {
+        title: "FMO Review",
+        question:
+          "Do you certify the availability of funds to support the recommendation documented in this document?",
+        fundsAvailable: "Yes, funds are available",
+        fundsContingent: "Yes, funds are contingent upon availability by",
+        dateLabel: "Date",
+        noCertification: "No, certification cannot be provided, changes needed",
+        hold: "Hold, review in progress",
+      },
+      reviewComment: {
+        label: "Review comments",
+        description: "Shown on the award recommendation document",
+      },
+      internalComment: {
+        checkboxLabel: "Add internal comments for your team",
+        label: "Internal comments",
+        description: "Only visible in workflow history",
+      },
+      supplementalDocuments: {
+        label: "Supplemental review documents",
+        description: "Choose the documents you'd like to include",
+        uploading: "Uploading document...",
+        uploadSuccess: "Document uploaded successfully",
+        uploadError: "Error uploading document. Please try again.",
+      },
+      attestation: {
+        contentCreator:
+          "I attest that I am providing my recommendation of the recipients identified in this document for award consideration",
+        reviewer:
+          "I attest that I am providing my approval of the recipients identified in this document for award consideration",
+      },
+      buttons: {
+        submit: "Submit review",
+        submitting: "Submitting...",
+        cancel: "Cancel",
+      },
+      errors: {
+        submitFailed: "Failed to submit review. Please try again.",
+        insufficientPrivileges:
+          "You do not have the required privileges to review award recommendations.",
+        invalidReviewerType:
+          "You do not have permission to review at this stage of the workflow.",
+        authFailed:
+          "Failed to authenticate user. Please sign in and try again.",
+        loadingFailed: "Failed to load review form. Please try again.",
+        noWorkflow: "No workflow is associated with this award recommendation.",
+      },
     },
   },
   CreateAwardRecommendation: {
@@ -2335,6 +2565,17 @@ export const messages = {
       "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
     ],
   },
+  OpportunityOverview: {
+    pageTitle: "Opportunity Overview",
+    pageApplication: "Smarter Grants Management",
+    metaDescription: "Opportunity publishing progress overview",
+    labels: {
+      editOpportunityLink: "Opportunity Summary",
+      competitionLink: "Application Package",
+      previewButton: "Preview",
+      publishButton: "Publish",
+    },
+  },
   CreateOpportunity: {
     pageTitle: "Create Opportunity",
     pageApplication: "Smarter Grants Management",
@@ -2356,6 +2597,12 @@ export const messages = {
       opportunityTitle: "Opportunity title",
       opportunityTitleDesc:
         "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
+      tagline: "Tagline",
+      taglineDesc:
+        "A specific one-sentence purpose statement that summarizes the highest-level goal.",
+      purposeStatement: "Purpose statement",
+      purposeStatementDesc:
+        "Provide a one-line statement that helps applicants understand the grant's purpose.",
       agency: "Agency",
       category: "Grant selection method",
       categoryDesc: "Choose the evaluation process used to award these funds.",
@@ -2364,7 +2611,7 @@ export const messages = {
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
       assistanceListingNumber: "Assistance listing number",
       assistanceListingNumberDesc:
-        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
+        "Enter the 5-digit code from SAM.gov (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
   },
@@ -2395,15 +2642,34 @@ export const messages = {
   OpportunityCompetition: {
     pageTitle: "Competition",
     metaDescription: "Set up competition details for this opportunity.",
-    sections: {
-      applicationRequirements: "Application requirements",
-      applicationRequirementsSubheader:
-        "What applicants must submit, how they'll be scored, and the format rules.",
-      submissionSetUp: "Submission set-up",
-      submissionSetUpSubheader:
+    leftNavTitle: "On this page",
+    applicationRequirements: "Application requirements",
+    applicationRequirementsSubheader:
+      "What applicants must submit, how they'll be scored, and the format rules.",
+    button: {
+      processing: "Processing...",
+      back: "Save and go back",
+      saveAndExit: "Save and exit",
+      saveAndContinue: "Save and continue",
+    },
+    alerts: {
+      success: "Saved successfully",
+      successBody: "Your changes have been saved.",
+      genericError: "Unable to save competition updates.",
+      unauthenticated: "You must be signed in to update this competition.",
+      forbidden: "You do not have permission to update this competition.",
+      notFound: "This competition could not be found.",
+      networkError: "A network error occurred.",
+      validationErrors: "Errors Found",
+      validationErrorBody: "Please correct the following errors:",
+    },
+    sectionSubmissionSetUp: {
+      header: "Submission set-up",
+      subHeader:
         "A competition is one apply-window inside an opportunity. Most opportunities have only one.",
-      competitionId: "Competition ID",
-      competitionIdHint: "An ID if this opportunity has multiple competitions.",
+      publicCompetitionId: "Competition ID",
+      publicCompetitionIdHint:
+        "An ID if this opportunity has multiple competitions.",
       competitionTitle: "Competition title",
       competitionTitleHint: "Shown to applicants. Plain language is best.",
       whoCanApply: "Who can apply?",
@@ -2412,31 +2678,61 @@ export const messages = {
       whoCanApplyOrganizationsOnly: "Organizations only",
       whoCanApplyIndividualsOnly: "Individuals only",
       whoCanApplyBoth: "Both organizations and individuals",
-      expectedNumberOfApplicants: "Expected number of applicants",
-      expectedNumberOfApplicantsHint: "A best estimate to plan for capacity",
-      expectedApplicationSize: "Expected application size",
-      expectedApplicationSizeHint:
-        "Approximate file size of a typical submission",
-      openDate: "Open date",
-      openDateHint: "First day to start applying.",
-      closeDate: "Close date",
-      closeDateHint: "Final deadline for all applications",
-      back: "Back",
-      saveAndFinishLater: "Save and finish later",
-      saveAndContinue: "Save and continue",
-      howDoesThisClose: "How does this opportunity close?",
-      howDoesThisCloseHint:
-        "Most federal opportunities have a single hard deadline. Choose another option only when the program runs differently.",
-      hardDeadline: "Hard deadline",
-      hardDeadlineHint: "All applications must be in by the close date.",
-      rollingDeadline: "Rolling deadline",
-      rollingDeadlineHint: "Applications are reviewed in cycles.",
-      continuousReview: "Continuous review",
-      continuousReviewHint: "No close date, open until further notice",
-      openAndCloseDates: "Open and close dates",
-      applicationChecklist: "Application checklist",
-      narrativeFormatInstructions: "Narrative format instructions",
-      navTitle: "On this page",
+    },
+    sectionSubmissionWindow: {
+      header: "Submission window",
+      subHeader: "When applicants can submit through this package.",
+      submissionsOpen: "Open date",
+      submissionsOpenHint: "First day applicants can apply",
+      submissionsClose: "Public close date",
+      submissionsCloseHint: "Deadline listed on Grants.gov",
+      gracePeriod: "Extension period",
+      gracePeriodHint: "Number of days accepted past public close date",
+    },
+    sectionApplicationChecklist: {
+      header: "Application checklist",
+    },
+    sectionNarrativeFormatInstructions: {
+      header: "Narrative format instructions",
+    },
+    sectionAgencyContact: {
+      header: "Agency contact",
+      subHeader:
+        "Grantor contact details. Provide the name, email, and phone number for the agency contact.",
+      fullName: "Full name",
+      personTitle: "Title",
+      emailAddress: "Email address",
+      emailAddressHint: "For example: example@mail.com",
+      phoneNumber: "Phone number",
+      phoneNumberHint: "10-digit, for example: (999) 999-9999",
+      error: {
+        requiredFullName: "Full name is required.",
+        requiredPhoneNumber: "Phone number is required.",
+        requiredEmail: "Email address is required.",
+        invalidEmail:
+          "Incorrect text format. Please ensure there are no spaces or missing characters.",
+      },
+    },
+    sectionApplicationInstructions: {
+      header: "Application instructions",
+      subHeader:
+        "Upload any supporting instructions needed for the application.",
+      uploadAFile: "Upload a file",
+      multipleFiles: "For multiple files, combine them into one zip file.",
+      uploadWidget: {
+        error:
+          "Processing failed due to a system error. Try uploading your file again.",
+        success:
+          "Success: File scan complete. “Save” this form to attach the file.",
+        uploading: "Uploading...",
+      },
+    },
+    sectionRequiredForms: {
+      header: "Forms in this package",
+      subHeader: "Select the forms applicants must complete.",
+      selectFormsButton: "Select forms",
+      labelForm: "Item",
+      labelRequirement: "Requirement",
     },
   },
   FeatureFlagsAdmin: {
@@ -2451,6 +2747,12 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+    backToOverview: "Back to overview page",
+    alerts: {
+      newOpportunityHeading: "Opportunity draft started",
+      newOpportunityBody:
+        "Your initial information has been saved. Complete the sections below to finish your opportunity details",
+    },
   },
   AwardRecommendationSelectFundingOpportunity: {
     pageTitle: "Select funding opportunity | Simpler.Grants.gov",
@@ -2459,24 +2761,74 @@ export const messages = {
       "Select a funding opportunity for your award recommendation",
     whichFundingOpportunity: "Which funding opportunity is this for?",
     cancelButtonText: "Cancel",
+    startButtonText: "Start",
+    columns: {
+      fundingOpportunityNumber: "Funding opp #",
+      fundingOpportunityName: "Funding opp name",
+      submittedApplications: "Submitted applications",
+      action: "Action",
+    },
   },
   FileInput: {
     existingFiles: {
       savedOn: "Saved on",
       delete: "Delete",
+      deleteError: "File could not be deleted. Please try again.",
     },
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
-      queued: "Queued",
-      uploading: "Uploading",
-      scanning: "Scanning",
-      success: "Success",
+      processing: "Processing file",
+      starting: "Starting upload",
+      uploading: "Uploading...",
+      startingScan: "Upload complete. Starting security scan",
+      scanning: "Upload complete. Running security scan...",
+      scanComplete: "Scan complete",
+      success: "Success. File uploaded and scanned",
       error: "Error",
-      scanFail: "Scan failed",
-      uploadError: "Upload error",
-      scanError: "Scan error",
-      postUploadError: "Post upload error",
+      uploadError: "Upload failed",
+      scanError: "Error running security scan",
+      postUploadError: "Error processing file",
+      missingFileId: "Error: missing file id",
+      preUploadError: "Pre upload error",
+      infected: "Security scan failed. File removed",
+      fileTooLarge:
+        "This file is too large. The maximum file size is {maxFileSize}.",
     },
+    deleteModal: {
+      titleText: "Delete",
+      cancelDeleteCta: "Cancel",
+      cautionDeletingAttachment: "Caution, deleting attachment",
+      descriptionText:
+        "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
+      deleteFileCta: "Delete file",
+      deleteFilesCta: "Delete files",
+      deleting: "Deleting...",
+    },
+  },
+  PrintViewErrorDiagnostics: {
+    heading: "PDF rendering failed",
+    description:
+      "This document is an error diagnostic page. The application form PDF could not be generated because the print page could not load or prepare the form data.",
+    supportInstructions:
+      "Please contact the support team and include the diagnostic details below.",
+    supportCenterHeading: "Grants.gov Support Center",
+    supportAvailability:
+      "We are available 24 hours a day 7 days a week excluding federal holidays.",
+    supportEmail: "support@grants.gov",
+    supportUnitedStatesPhone: "1-800-518-4726 (U.S.)",
+    supportInternationalPhone: "1-606-545-5035 (International)",
+    diagnosticDetailsHeading: "Diagnostic details",
+    applicationIdLabel: "Application ID",
+    applicationFormIdLabel: "Application form ID",
+    errorCategoryLabel: "Error category",
+    internalTokenHeaderPresentLabel: "Internal token header present",
+    yes: "Yes",
+    no: "No",
+  },
+  ProgressChecker: {
+    notStarted: "Not started",
+    inProgress: "In progress",
+    complete: "Complete",
   },
 };

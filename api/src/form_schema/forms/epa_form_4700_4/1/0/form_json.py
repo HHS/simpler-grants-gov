@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -339,6 +340,7 @@ FORM_XML_TRANSFORM_RULES = {
             "EPA4700_4_5_0": "http://apply.grants.gov/forms/EPA4700_4_5_0-V5.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
         "xml_structure": {
@@ -537,6 +539,7 @@ EPA_FORM_4700_4_v5_0 = Form(
     form_version="5.0",
     agency_code="SGG",
     omb_number="2030-0020",
+    expiration_date=date(2029, 2, 28),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

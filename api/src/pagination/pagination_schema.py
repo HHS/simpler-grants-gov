@@ -1,8 +1,8 @@
 from typing import Any
 
-from grants_shared.api.schemas.extension import Schema, fields, validators
 from marshmallow import pre_load
 
+from src.api.schemas.extension import Schema, fields, validators
 from src.pagination.pagination_models import SortDirection
 
 
@@ -125,7 +125,12 @@ def generate_pagination_schema(
             **page_offset_params,
         ),
     }
-    return BasePaginationSchema.from_dict(pagination_schema_fields, name=cls_name)  # type: ignore
+    # from_dict is typed against plain marshmallow Schema/Field rather than our
+    # extension subclasses, so the class it hands back doesn't line up statically.
+    return BasePaginationSchema.from_dict(  # type: ignore[return-value]
+        pagination_schema_fields,  # type: ignore[arg-type]
+        name=cls_name,
+    )
 
 
 class SortOrderSchema(Schema):

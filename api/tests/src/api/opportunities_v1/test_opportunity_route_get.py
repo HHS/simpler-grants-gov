@@ -1,7 +1,9 @@
 import uuid
+from datetime import date
 
 import pytest
 import requests
+from freezegun import freeze_time
 
 import src.util.file_util as file_util
 from tests.src.api.opportunities_v1.conftest import (
@@ -533,6 +535,37 @@ def test_get_opportunity_returns_cdn_urls_JWT(
     assert "s3://" not in attachment["download_path"]
 
 
+def test_get_opportunity_attachment_download_path_bucket_mismatch(
+    client,
+    monkeypatch_session,
+    enable_factory_create,
+    db_session,
+    other_mock_s3_bucket,
+    user_api_key_id,
+):
+    """A file_location whose bucket doesn't match PUBLIC_FILES_BUCKET (e.g. after
+    an S3 bucket rename/migration) must never surface as a raw s3:// URL"""
+    monkeypatch_session.setattr(file_util, "_s3_config", None)
+    monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
+
+    opportunity = OpportunityFactory.create(opportunity_attachments=[])
+    file_loc = f"s3://{other_mock_s3_bucket}/test_file_1.txt"
+    OpportunityAttachmentFactory.create(
+        file_location=file_loc, opportunity=opportunity, file_contents="Hello, world"
+    )
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": user_api_key_id}
+    )
+
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+    attachment = response_data["attachments"][0]
+
+    assert attachment["download_path"] is None
+    assert "s3://" not in str(attachment["download_path"])
+
+
 def test_get_opportunity_with_competitions_200(
     client, enable_factory_create, db_session, user_api_key_id
 ):
@@ -554,6 +587,35 @@ def test_get_opportunity_with_competitions_200(
     assert len(response_data["competitions"]) == 1
     assert response_data["competitions"][0]["competition_id"] == str(competition.competition_id)
     assert response_data["competitions"][0]["opportunity_id"] == str(opportunity.opportunity_id)
+
+
+@freeze_time("2025-01-15 12:00:00", tz_offset=0)
+def test_get_opportunity_package_only_competition_200(
+    client, enable_factory_create, user_api_key_id
+):
+    # A package only opportunity has a Grants.gov package but no current summary, so no status
+    opportunity = OpportunityFactory.create(current_opportunity_summary=None)
+    CompetitionFactory.create(
+        opportunity=opportunity,
+        legacy_package_id="PKG-00260155",
+        is_simpler_grants_enabled=False,
+        opening_date=date(2025, 1, 1),
+        closing_date=date(2025, 12, 31),
+    )
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": user_api_key_id}
+    )
+
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+
+    assert response_data["opportunity_status"] is None
+    assert len(response_data["competitions"]) == 1
+    response_competition = response_data["competitions"][0]
+    assert response_competition["has_open_date"] is True
+    assert response_competition["is_legacy_package"] is True
+    assert response_competition["is_open"] is False
 
 
 # JWT version of the get opportunity with competitions, regular endpoint

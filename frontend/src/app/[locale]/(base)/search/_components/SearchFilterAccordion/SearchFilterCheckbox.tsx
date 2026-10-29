@@ -30,13 +30,19 @@ const SearchFilterCheckbox = ({
   const getNameAttribute = () =>
     accordionTitle === "Agency" ? `agency-${option.id}` : option.id;
 
+  // Coerce to a boolean so the input stays controlled. When query.has() is false
+  // and parentSelected is undefined, the raw expression evaluates to undefined,
+  // which makes React treat the checkbox as uncontrolled and keep its previous
+  // checked state (for example after clearing filters).
+  const isChecked = Boolean(query.has(option.value) || parentSelected);
+
   return (
     <Checkbox
       id={option.id}
       name={getNameAttribute() || ""}
       label={<FilterOptionLabel option={option} facetCounts={facetCounts} />}
       onChange={handleChange}
-      checked={query.has(option.value) || parentSelected}
+      checked={isChecked}
       value={option.value || ""}
     />
   );

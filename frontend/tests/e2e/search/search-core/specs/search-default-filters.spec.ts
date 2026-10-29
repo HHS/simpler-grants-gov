@@ -5,15 +5,15 @@
  */
 
 import { expect, test } from "@playwright/test";
-import { expectCheckboxIDIsChecked } from "tests/e2e/search/searchSpecUtil";
 import { VALID_TAGS } from "tests/e2e/tags";
+import { expectCheckboxIDIsChecked } from "tests/e2e/utils/search/search-filter-utils";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE } = VALID_TAGS;
+const { DISCOVERY, SMOKE } = VALID_TAGS;
 
 // Scenario: Load search page with forecasted and open filters checked by default
 test(
   "should load search page with forecasted and open filters checked by default",
-  { tag: [GRANTEE, OPPORTUNITY_SEARCH, SMOKE] },
+  { tag: [SMOKE, DISCOVERY] },
   async ({ page }) => {
     // Given I am on the "Search funding opportunity" page
     await page.goto("/search");

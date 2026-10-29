@@ -133,15 +133,33 @@ def transform_truncate_string(value: Any, max_length: int) -> str:
     return value[:max_length] if len(value) > max_length else value
 
 
-def transform_map_values(value: Any, mappings: dict[str, Any], default: Any = None) -> Any:
+def transform_map_values(
+    value: Any,
+    mappings: dict[str, Any],
+    default: Any = None,
+    passthrough_unknown: bool = False,
+) -> Any:
     """Map input values to output values based on a configuration dictionary.
 
     This is a generic value mapper that allows form-specific value transformations
     to be configured rather than hardcoded.
 
+    Args:
+        value: Value to map
+        mappings: Dictionary of input → output value pairs
+        default: Value to return if input not found in mappings
+        passthrough_unknown: If True, return the original value unchanged when it is
+                                   not found in mappings. Use this when the mapping is
+                                   intentionally partial — e.g. normalizing only specific
+                                   legacy values while leaving all others as-is.
+                                   When False (default), an unmapped value raises an error.
+
     Example:
         transform_map_values("Prime", {"Prime": "Y: Yes", "SubAwardee": "N: No"})
         # Returns: "Y: Yes"
+
+        transform_map_values("c. Program is not covered by E.O. 12372.", {"a. old": "a. new"}, passthrough_unknown=True)
+        # Returns: "c. Program is not covered by E.O. 12372."  (not in mappings, returned as-is)
     """
     # Convert value to string for mapping lookup
     lookup_value = str(value)
@@ -150,6 +168,8 @@ def transform_map_values(value: Any, mappings: dict[str, Any], default: Any = No
         return mappings[lookup_value]
     elif default is not None:
         return default
+    elif passthrough_unknown:
+        return value
     else:
         raise ValueTransformationError(
             f"Value '{value}' not found in mappings. Valid values: {list(mappings.keys())}"

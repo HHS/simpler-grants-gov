@@ -8,6 +8,8 @@ from lxml import etree as lxml_etree
 from src.services.xml_generation.transformers.attachment_transformer import AttachmentTransformer
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 
+SF424_NS = "http://apply.grants.gov/forms/SF424_4_0-V4.0"
+
 
 class TestAttachmentTransformer:
     """Test cases for AttachmentTransformer."""
@@ -79,8 +81,8 @@ class TestAttachmentTransformer:
     def test_add_single_attachment_element(self):
         """Test adding a single attachment element.
 
-        type='single' adds content directly to the parent — no wrapper element is created.
-        All attachment fields use the att: and glob: namespace prefixes.
+        type='single' wraps the attachment content in a form-namespace element named
+        after xml_element (e.g. <AreasAffected>), with att: and glob: prefixed children.
         """
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
 
@@ -95,13 +97,15 @@ class TestAttachmentTransformer:
         }
 
         self.transformer._add_single_attachment_element(
-            root, "AreasAffected", attachment_data, self.nsmap
+            root, "AreasAffected", attachment_data, self.nsmap, {"type": "single"}
         )
 
         att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
         glob_ns = "http://apply.grants.gov/system/Global-V1.0"
 
-        # type='single' adds content directly to root — no <AreasAffected> wrapper
+        # type='single' wraps content in a <AreasAffected> element in the form namespace
+        root = root.find(f"{{{SF424_NS}}}AreasAffected")
+        assert root is not None
         assert root.find(f"{{{att_ns}}}FileName").text == "test_document.pdf"
         assert root.find(f"{{{att_ns}}}MimeType").text == "application/pdf"
         assert (
@@ -112,7 +116,6 @@ class TestAttachmentTransformer:
         assert hash_val.get(f"{{{glob_ns}}}hashAlgorithm") == "SHA-1"
         assert hash_val.text == "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q="
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_multiple_attachment_element(self):
         """Test adding a multiple attachment element."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -142,13 +145,12 @@ class TestAttachmentTransformer:
 
         group = root.find("AdditionalProjectTitle")
         assert group is not None
-        attached_files = group.findall("AttachedFile")
+        attached_files = group.findall(f"{{{att_ns}}}AttachedFile")
         assert len(attached_files) == 2
         assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "document1.pdf"
         assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "document2.xlsx"
         assert "spreadsheetml.sheet" in attached_files[1].find(f"{{{att_ns}}}MimeType").text
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_multiple_attachment_element_single_file(self):
         """Test adding multiple attachment element with single file."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -170,11 +172,10 @@ class TestAttachmentTransformer:
 
         group = root.find("AdditionalProjectTitle")
         assert group is not None
-        attached_files = group.findall("AttachedFile")
+        attached_files = group.findall(f"{{{att_ns}}}AttachedFile")
         assert len(attached_files) == 1
         assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "single_document.pdf"
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_multiple_attachment_element_direct_list(self):
         """Test adding multiple attachment element with direct list."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -201,7 +202,7 @@ class TestAttachmentTransformer:
         att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
 
         group = root.find("AdditionalProjectTitle")
-        attached_files = group.findall("AttachedFile")
+        attached_files = group.findall(f"{{{att_ns}}}AttachedFile")
         assert len(attached_files) == 2
         assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "list_document1.pdf"
         assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "list_document2.docx"
@@ -303,18 +304,19 @@ class TestAttachmentTransformer:
         att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
         glob_ns = "http://apply.grants.gov/system/Global-V1.0"
 
-        # type='single' adds content directly to root — no <AreasAffected> wrapper
-        assert root.find(f"{{{att_ns}}}FileName").text == "test_document.pdf"
-        assert root.find(f"{{{att_ns}}}MimeType").text == "application/pdf"
+        # type='single' wraps content in a <AreasAffected> element in the form namespace
+        wrapper = root.find(f"{{{SF424_NS}}}AreasAffected")
+        assert wrapper is not None
+        assert wrapper.find(f"{{{att_ns}}}FileName").text == "test_document.pdf"
+        assert wrapper.find(f"{{{att_ns}}}MimeType").text == "application/pdf"
         assert (
-            root.find(f"{{{att_ns}}}FileLocation").get(f"{{{att_ns}}}href")
+            wrapper.find(f"{{{att_ns}}}FileLocation").get(f"{{{att_ns}}}href")
             == "./attachments/test_document.pdf"
         )
-        hash_val = root.find(f"{{{glob_ns}}}HashValue")
+        hash_val = wrapper.find(f"{{{glob_ns}}}HashValue")
         assert hash_val.get(f"{{{glob_ns}}}hashAlgorithm") == "SHA-1"
         assert hash_val.text == "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q="
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_uuid_based_multiple_attachments(self):
         """Test adding multiple attachments using UUIDs."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -328,7 +330,7 @@ class TestAttachmentTransformer:
 
         group = root.find("AdditionalProjectTitle")
         assert group is not None
-        attached_files = group.findall("AttachedFile")
+        attached_files = group.findall(f"{{{att_ns}}}AttachedFile")
         assert len(attached_files) == 2
         assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "document1.pdf"
         assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "document2.xlsx"
@@ -362,7 +364,6 @@ class TestAttachmentTransformer:
         assert "not found in attachment mapping" in str(exc_info.value)
         assert "not-a-valid-uuid" in str(exc_info.value)
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_mixed_single_and_multiple_attachments(self):
         """Test adding both single and multiple attachments together."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -376,14 +377,15 @@ class TestAttachmentTransformer:
 
         att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
 
-        # type='single': content added directly to root, no <DebtExplanation> wrapper
-        filenames = root.findall(f"{{{att_ns}}}FileName")
-        assert any(f.text == "test_document.pdf" for f in filenames)
+        # type='single': wrapped in <DebtExplanation> in the form namespace
+        debt = root.find(f"{{{SF424_NS}}}DebtExplanation")
+        assert debt is not None
+        assert debt.find(f"{{{att_ns}}}FileName").text == "test_document.pdf"
 
         # type='multiple': wrapped in <AdditionalProjectTitle>
         group = root.find("AdditionalProjectTitle")
         assert group is not None
-        attached_files = group.findall("AttachedFile")
+        attached_files = group.findall(f"{{{att_ns}}}AttachedFile")
         assert len(attached_files) == 2
         assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "document1.pdf"
         assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "document2.xlsx"

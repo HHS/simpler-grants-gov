@@ -1,8 +1,7 @@
 # Called by seed_local_db when running `make seed-db-local`
 import logging
 
-import grants_shared.adapters.db as db
-
+import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.db.models.agency_models import Agency
 
@@ -438,6 +437,11 @@ AGENCIES_TO_CREATE = [
         "agency_code": "ARCHIVED",
         "agency_id": "add4bfff-e895-4ca9-92f4-38ed34055247",
         "agency_name": "Agency of archived opportunities",
+    },
+    {
+        "agency_code": "SGG",
+        "agency_id": "7f4e3d2c-1b0a-4f9e-8d7c-6b5a4f3e2d1c",
+        "agency_name": "Simpler Grants.gov",
     },
 ]
 

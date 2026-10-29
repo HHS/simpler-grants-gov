@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import {
   buildWarningTree,
   pointerToFieldName,
@@ -47,28 +48,23 @@ interface formPageProps {
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
   const { data, error } = await getFormData({ applicationId, appFormId });
-  const userSession = await getSession();
   const t = await getTranslations("Application");
-
-  if (!userSession || !userSession.token) {
-    return <TopLevelError />;
-  }
 
   let response;
   try {
     response = await getApplicationDetails(applicationId);
 
     if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving application details for (${applicationId})`,
-        response,
+      throw new ApiRequestError(
+        "API request error",
+        "APIRequestError",
+        response.status_code,
       );
-      return <TopLevelError />;
     }
   } catch (e) {
-    console.error(
-      `Error retrieving application details for (${applicationId})`,
-      e,
+    logger.error(
+      { err: e, applicationId },
+      "Error retrieving application details",
     );
     return <TopLevelError />;
   }
@@ -90,9 +86,12 @@ async function FormPage({ params }: formPageProps) {
     formSchema,
     formUiSchema,
     formValidationWarnings,
+    createdAt,
+    updatedAt,
   } = data;
 
-  const isBudgetForm = formName.includes("SF-424A");
+  const isBudgetForm =
+    formName.includes("SF-424A") || formName.includes("SF-424C");
 
   const warnings = isBudgetForm
     ? formValidationWarnings?.map((warning) => ({
@@ -136,6 +135,8 @@ async function FormPage({ params }: formPageProps) {
           attachments={applicationAttachments}
           isBudgetForm={isBudgetForm}
           applicationStatus={application_status}
+          createdAt={createdAt}
+          updatedAt={updatedAt}
         />
       </GridContainer>
     </>

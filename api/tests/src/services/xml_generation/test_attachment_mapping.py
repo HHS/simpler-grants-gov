@@ -1,10 +1,14 @@
 """Unit tests for attachment_mapping utility functions."""
 
 import logging
+import uuid
 from unittest.mock import patch
 
 import pytest
 
+from src.db.models.competition_models import Form as FormModel
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import form_template_registry
 from src.services.xml_generation.utils.attachment_mapping import (
     _collect_referenced_attachment_ids,
     create_attachment_mapping,
@@ -22,13 +26,28 @@ def make_form(application_response: dict, attachment_fields: list[str] | None = 
     attachment_fields is a list of field names that should be treated as
     attachment fields (marked with gg_validation: attachment in the rule schema).
     """
-    form = ApplicationFormFactory.build(application_response=application_response)
-    form.form.form_rule_schema = (
+    init_form_registry()
+    rule_schema = (
         {field: {"gg_validation": {"rule": "attachment"}} for field in attachment_fields}
         if attachment_fields
         else None
     )
-    return form
+    form_obj = FormModel(
+        form_id=uuid.uuid4(),
+        form_name="Test Form",
+        short_form_name="TestForm",
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema={"type": "object", "properties": {}},
+        form_ui_schema={},
+        form_rule_schema=rule_schema,
+        json_to_xml_schema=None,
+    )
+    form_template_registry.register(form_obj, major_version=1)
+    return ApplicationFormFactory.build(
+        application_response=application_response,
+        competition_form__form=form_obj,
+    )
 
 
 def make_application(attachments=None, forms=None):

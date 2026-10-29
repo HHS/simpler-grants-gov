@@ -1,8 +1,10 @@
 import uuid
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
-from src.db.models.competition_models import Form
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
+
+if TYPE_CHECKING:
+    from src.db.models.competition_models import Form
 
 
 class FormTemplateKey(NamedTuple):

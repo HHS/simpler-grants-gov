@@ -4,7 +4,6 @@ import { get } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   BroadlyDefinedWidgetValue,
-  FieldListChildWidgetTypes,
   FieldListGroupItem,
   FieldListWidgetProps,
   FormattedFormValidationWarning,
@@ -15,13 +14,12 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
-
 import {
   getByPointer,
-  getFieldNameForHtml,
   getFieldPathFromHtml,
-  getFieldSchema,
-} from "./applyFormUtils";
+} from "src/utils/formData/formDataUtils";
+
+import { getFieldNameForHtml, getFieldSchema } from "./applyFormUtils";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
@@ -36,66 +34,85 @@ type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
 const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
 
 /**
- * Builds the "baseId" used by FieldList widgets for each child field.
+ * Builds the template id used by FieldList child widgets.
  *
- * FieldList rows represent an array of grouped field values, where each row
- * is stored as an object and each child field maps to a single property
- * within that object.
+ * FieldList entries are array items, so each rendered child needs an id that
+ * includes the entry index:
  *
- * Instead of generating a concrete id for a specific row (for example `[0]`),
- * we generate a template id containing an index placeholder:
+ *   additional_sites[0]--address--street1
  *
- *   contact_people_test[~~index~~]--first_name
+ * At config-build time we do not know the rendered entry index yet, so this
+ * helper creates a template id with a placeholder:
  *
- * The FieldList widget later replaces `~~index~~` with the actual row index
- * when rendering each row.
+ *   additional_sites[~~index~~]--address--street1
  *
- * If the child field id already contains the FieldList segment, this helper
- * replaces that segment with the indexed version.
- *
- * Example:
- *
- *   childId: "topField--contacts--firstName"
- *
- * becomes:
- *
- *   "topField--contacts[~~index~~]--firstName"
- *
- * If the FieldList segment is not present in the child id, the helper falls
- * back to building the id from the FieldList name and the final field key.
- *
- * Example fallback:
- *
- *   childId: "topField--firstName"
- *
- * becomes:
- *
- *   "contacts[~~index~~]--firstName"
+ * The FieldList widget replaces `~~index~~` with the actual entry index while
+ * rendering.
  */
 export function buildFieldListBaseId({
   fieldListName,
-  childId,
+  storagePath,
 }: {
   fieldListName: string;
-  childId: string;
+  storagePath: string[];
 }): string {
-  const token = `--${fieldListName}--`;
-
-  if (childId.includes(token)) {
-    return childId.replace(
-      token,
-      `--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--`,
-    );
-  }
-
-  const childIdParts = childId.split("--");
-  const finalFieldKey = childIdParts[childIdParts.length - 1];
-
-  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
+  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${storagePath.join("--")}`;
 }
 
-// Assumes the FieldList field exists at the root of formSchema.properties.
-const getFieldListRequiredFields = ({
+/**
+ * Converts a FieldList child definition into the path where that child value
+ * lives inside a single entry object.
+ *
+ * Example:
+ *
+ *   /properties/additional_sites/items/properties/address/properties/street1
+ *
+ * becomes:
+ *
+ *   ["address", "street1"]
+ *
+ * Flat children still become a one-part path:
+ *
+ *   /properties/additional_sites/items/properties/organization_name
+ *   -> ["organization_name"]
+ */
+export function buildFieldListStoragePath({
+  fieldListName,
+  childDefinition,
+}: {
+  fieldListName: string;
+  childDefinition: string;
+}): string[] {
+  const fieldListPrefix = `/properties/${fieldListName}/items/properties/`;
+
+  if (!childDefinition.startsWith(fieldListPrefix)) {
+    const childDefinitionParts = childDefinition.split("/");
+    return [childDefinitionParts[childDefinitionParts.length - 1]];
+  }
+
+  return childDefinition
+    .replace(fieldListPrefix, "")
+    .split("/properties/")
+    .filter((pathPart) => pathPart.length > 0);
+}
+
+// FieldList currently supports root-level array fields only.
+/**
+ * Compute the list of required field paths for a root-level FieldList.
+ *
+ * This inspects the `items` schema of the named array property and
+ * expands any nested `required` entries into full slash-separated paths
+ * prefixed with the `fieldListName`.
+ *
+ * Example returned value:
+ *   ["additional_sites/address/street1", "additional_sites/organization_name"]
+ *
+ * @param formSchema - full RJSF form schema
+ * @param fieldListName - top-level property name of the array field
+ * @returns array of required field paths for items of the field list
+ */
+
+export const getFieldListRequiredFields = ({
   formSchema,
   fieldListName,
 }: {
@@ -103,8 +120,7 @@ const getFieldListRequiredFields = ({
   fieldListName: string;
 }): string[] => {
   const fieldListSchema = formSchema.properties?.[fieldListName] as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
 
   if (!fieldListSchema || fieldListSchema.type !== "array") {
     return [];
@@ -121,13 +137,57 @@ const getFieldListRequiredFields = ({
     return [];
   }
 
-  return itemSchema.required.map(
-    (requiredFieldName) => `${fieldListName}/${requiredFieldName}`,
-  );
+  /**
+   * Recursively expand required field names into full storage paths for
+   * FieldList items. Given a list of required field names at the current
+   * level and the schema `properties` for that level, this returns an array
+   * of full paths prefixed with the `fieldListName`.
+   *
+   * Example returned path: "additional_sites/address/street1"
+   */
+
+  const expandRequiredFields = (
+    requiredFieldNames: string[],
+    properties: RJSFSchema["properties"],
+    pathPrefix: string = "",
+  ): string[] => {
+    const expandedRequiredFieldPaths: string[] = [];
+    for (const fieldName of requiredFieldNames) {
+      const fieldPath = pathPrefix ? `${pathPrefix}/${fieldName}` : fieldName;
+      const fullPath = `${fieldListName}/${fieldPath}`;
+
+      expandedRequiredFieldPaths.push(fullPath);
+
+      // Note: only expands nested `required` for objects defined inline; it
+      // does NOT resolve `$ref`/shared schemas, so required fields inside
+      // referenced schemas won't be expanded.
+      // Check if this field is an object with nested required fields
+      const fieldSchema = properties?.[fieldName] as RJSFSchema | undefined;
+      if (
+        fieldSchema &&
+        fieldSchema.type === "object" &&
+        fieldSchema.properties &&
+        fieldSchema.required &&
+        Array.isArray(fieldSchema.required)
+      ) {
+        // Recursively expand nested required fields
+        const nestedRequired = expandRequiredFields(
+          fieldSchema.required,
+          fieldSchema.properties,
+          fieldPath,
+        );
+        expandedRequiredFieldPaths.push(...nestedRequired);
+      }
+    }
+
+    return expandedRequiredFieldPaths;
+  };
+
+  return expandRequiredFields(itemSchema.required, itemSchema.properties);
 };
 
 type FieldWidgetConfig = {
-  type: FieldListChildWidgetTypes;
+  type: Exclude<WidgetTypes, "FieldList">;
   props: UswdsWidgetProps;
 };
 
@@ -138,7 +198,7 @@ type FieldListConfig = {
 
 type FieldConfig = FieldWidgetConfig | FieldListConfig;
 
-// json schema doesn't describe UI so types are infered if widget not supplied
+// JSON schema doesn't describe UI, so widget types are inferred when not supplied.
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -223,6 +283,9 @@ export const getWarningsForField = ({
   });
 };
 
+// returns either the final slash delimited path segment from definition
+// or the "title" attribute from the field schema (with dashes for whitespace)
+// or "untitled"
 export const getNameFromDef = ({
   definition,
   schema,
@@ -249,7 +312,7 @@ const getBasicFieldInfo = ({
 }: {
   uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
-  formData: object;
+  formData: object; // this will be either the saved form JSON, or an empty FormData object (?s)
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<string> => {
   const { schema } = uiFieldObject;
@@ -264,6 +327,19 @@ const getBasicFieldInfo = ({
     schema,
     formSchema,
   }) as RJSFSchema;
+
+  /*
+    this section of code formats the field's name and path for various use cases
+    by way of example, where `definition` = `/properties/applicant/properties/state`
+      * `fieldName` = `state`
+        * used as a fallback ID in case htmlFieldName can't be computed
+        * seems like it'd be used for something else, like a label, but it's not
+      * `htmlFieldName` = `applicant--state`
+        * used for referencing data values within HTML form's FormData
+        * used for defining ID on each widget
+      * `formDataPath` =  `/applicant/state`
+        * used for retrieving data from saved form data JSON
+  */
   const fieldName = getNameFromDef({ definition, schema });
   const htmlFieldName = getFieldNameForHtml({ definition, schema });
   const formDataPath = getFieldPathFromHtml(htmlFieldName);
@@ -306,14 +382,14 @@ export const getBasicMultifieldInfo = ({
 }): FieldInfo<Record<string, unknown>> => {
   const { schema } = uiFieldObject;
   // the definition can be many things, but in this case we should have done the
-  // work ahead of time to determine that this definition will be an array
+  // work ahead of time to determine that this definition will be a string
   const definition = uiFieldObject.definition;
   if (!Array.isArray(definition)) {
     throw new Error("attempting to get multifield field info for basic field");
   }
   const fieldName = uiFieldObject.name ? uiFieldObject.name : "";
   if (!fieldName) {
-    console.error("name misssing from multiField definition");
+    console.error("name missing from multiField definition");
     throw new Error("Could not build field");
   }
   const fieldSchema = definition
@@ -409,8 +485,8 @@ export const getEnumOptions = ({
   );
 
   return widgetType === "Select"
-    ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
-    : ({ enumOptions } as WidgetOptions);
+    ? { enumOptions, emptyValue: "- Select -" }
+    : { enumOptions };
 };
 
 // handle complexity of branching for basic vs. multifield config logic
@@ -438,7 +514,9 @@ const getFieldInfo = ({
       errors,
       formSchema,
     });
-  } else if (typeof definition === "string") {
+  }
+
+  if (typeof definition === "string") {
     return getBasicFieldInfo({
       uiFieldObject,
       formData,
@@ -490,19 +568,26 @@ const getFieldListConfig = ({
         throw new Error("nested fieldList is not supported");
       }
 
-      const {
-        id: childId,
-        value: _value,
-        key: _key,
-        ...rest
-      } = childWidgetConfig.props;
+      if (childWidgetConfig.type === "Table") {
+        throw new Error("table inside fieldList is not supported");
+      }
+
+      const { value: _value, key: _key, ...rest } = childWidgetConfig.props;
+
+      // Build once so the renderer can use the same path for id generation,
+      // value lookup, and nested value updates.
+      const storagePath = buildFieldListStoragePath({
+        fieldListName: uiFieldObject.name,
+        childDefinition: childNode.definition,
+      });
 
       return {
         widget: childWidgetConfig.type,
         baseId: buildFieldListBaseId({
           fieldListName: uiFieldObject.name,
-          childId,
+          storagePath,
         }),
+        storagePath,
         generalProps: rest,
         definition: childNode.definition,
       };
@@ -520,8 +605,7 @@ const getFieldListConfig = ({
   });
 
   const fieldListSchema = formSchema.properties?.[uiFieldObject.name] as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
 
   return {
     type: "FieldList",
@@ -537,6 +621,7 @@ const getFieldListConfig = ({
       description: uiFieldObject.description,
       name: uiFieldObject.name,
       minItems: fieldListSchema?.minItems,
+      hideFieldListHeading: uiFieldObject.hideFieldListHeading,
       maxItems: fieldListSchema?.maxItems,
       groupDefinition,
       rawErrors: errors ?? [],
@@ -549,6 +634,7 @@ const getFieldListConfig = ({
     },
   };
 };
+
 // returns widget type and props for rendering data for a given JSON schema field
 export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors,
@@ -593,7 +679,6 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
     throw new Error("Could not build field");
   }
 
-  // should filter and match warnings to field earlier in the process
   const widgetType = determineFieldType({
     uiFieldObject,
     fieldSchema,
@@ -610,11 +695,13 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
         })
       : {};
 
+  const widgetId = htmlFieldName || uiFieldObject.name || fieldName;
+
   return {
-    type: widgetType as FieldListChildWidgetTypes,
+    type: widgetType as Exclude<WidgetTypes, "FieldList">,
     props: {
-      id: htmlFieldName,
-      key: htmlFieldName,
+      id: widgetId,
+      key: widgetId,
       disabled: uiFieldObject.type === "null",
       required: requiredField,
       minLength: fieldSchema?.minLength,
@@ -623,6 +710,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       rawErrors,
       value: value as V,
       options,
+      uiSchemaField: uiFieldObject,
     },
   };
 };

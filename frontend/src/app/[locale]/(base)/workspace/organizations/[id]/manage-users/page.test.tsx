@@ -123,7 +123,7 @@ jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
     getOrganizationRolesMock(...args),
 }));
 
-const PageTyped = Page as unknown as PageFn;
+const PageTyped = Page;
 
 describe("manage-users page", () => {
   beforeEach(() => {

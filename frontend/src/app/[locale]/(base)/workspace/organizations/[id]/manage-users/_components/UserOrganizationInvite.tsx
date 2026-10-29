@@ -1,5 +1,6 @@
-import { getSession } from "src/services/auth/session";
+import { MissingAuthError } from "src/errors";
 import { getOrganizationRoles } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { UserRole } from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -13,16 +14,21 @@ export async function UserOrganizationInvite({
 }) {
   // fetch roles for organization (this will happen in page gate eventually)
   const t = await getTranslations("ManageUsers.inviteUser");
-  const session = await getSession();
-  if (!session?.token) {
-    console.error("unable to display user invites, not logged in");
-    return;
-  }
   let organizationRoles: UserRole[] = [];
   try {
     organizationRoles = await getOrganizationRoles(organizationId);
   } catch (e) {
-    console.error("unable to fetch organization roles", e);
+    if (e instanceof MissingAuthError) {
+      logger.warn(
+        { organizationId },
+        "Unable to display user invites, not logged in",
+      );
+      return;
+    }
+    logger.error(
+      { err: e, organizationId },
+      "Unable to fetch organization roles",
+    );
   }
   return (
     <div className="border-2px border-primary radius-md padding-x-2 padding-y-4">

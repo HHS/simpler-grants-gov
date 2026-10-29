@@ -1,6 +1,5 @@
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
-
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import FileScanStatus
 
 
@@ -75,6 +74,26 @@ class CreatePresignedUploadResponseSchema(AbstractResponseSchema):
     data = fields.Nested(PresignedUploadDataSchema)
 
 
+class FileMetadataSchema(Schema):
+    file_size_bytes = fields.Integer(
+        metadata={
+            "description": "The size of the scanned file in bytes",
+        },
+    )
+    file_name = fields.String(
+        metadata={
+            "description": "The name of the scanned file",
+            "example": "example.pdf",
+        },
+    )
+    download_path = fields.String(
+        metadata={
+            "description": "A presigned URL the caller can use to download the scanned file",
+            "example": "https://example-bucket.s3.amazonaws.com/scanned/abc/example.pdf",
+        },
+    )
+
+
 class FileScanResultsDataSchema(Schema):
     status = fields.Enum(
         FileScanStatus,
@@ -82,6 +101,16 @@ class FileScanResultsDataSchema(Schema):
         metadata={
             "description": "The current scan status of the file",
             "example": FileScanStatus.PENDING,
+        },
+    )
+    file_metadata = fields.Nested(
+        FileMetadataSchema,
+        allow_none=True,
+        metadata={
+            "description": (
+                "Metadata for the scanned file. Populated only once the scan "
+                "status is complete; null for any other status."
+            ),
         },
     )
 

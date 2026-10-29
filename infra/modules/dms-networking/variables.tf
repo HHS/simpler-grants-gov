@@ -13,3 +13,9 @@ variable "grants_gov_oracle_cidr_block" {
 variable "environment_name" {
   type = string
 }
+
+variable "transit_gateway_id" {
+  type        = string
+  default     = null
+  description = "Route the Oracle CIDR through this transit gateway instead of the VPC peering"
+}

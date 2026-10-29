@@ -2,8 +2,7 @@ import logging
 from typing import Any
 from uuid import UUID
 
-import grants_shared.adapters.db as db
-
+import src.adapters.db as db
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.competition_models import Application

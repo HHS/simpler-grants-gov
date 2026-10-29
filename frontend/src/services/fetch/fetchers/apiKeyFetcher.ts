@@ -1,43 +1,26 @@
 import "server-only";
 
-import { getSession } from "src/services/auth/session";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
-import { ApiKey } from "src/types/apiKeyTypes";
-import { APIResponse } from "src/types/apiResponseTypes";
+import {
+  ApiKey,
+  ApiKeyResponse,
+  CreateApiKeyResponse,
+  RenameApiKeyResponse,
+} from "src/types/apiKeyTypes";
 
-// this is a duplicate - resolve with handleListApiKeys
-export const fetchApiKeys = async (): Promise<ApiKey[]> => {
-  const session = await getSession();
-  if (!session || !session.token) {
-    return [];
-  }
-
-  const body = {
-    pagination: {
-      page_offset: 1,
-      page_size: 25,
-      sort_order: [
-        {
-          order_by: "created_at",
-          sort_direction: "descending",
-        },
-      ],
-    },
-  };
-
-  const subPath = `${session.user_id}/api-keys/list`;
-  const resp = await fetchUserWithMethod("POST")({
-    subPath,
-    body,
-  });
-
-  const json = (await resp.json()) as { data: ApiKey[] };
-  return json.data;
-};
+// The API only returns the key on create, but copy over only the metadata on
+// list and rename anyway so a key can never end up in anything sent to the browser.
+const toApiKeyMetadata = (apiKey: ApiKey): ApiKey => ({
+  api_key_id: apiKey.api_key_id,
+  key_name: apiKey.key_name,
+  created_at: apiKey.created_at,
+  last_used: apiKey.last_used,
+  is_active: apiKey.is_active,
+});
 
 export const handleListApiKeys = async (
   userId: string,
-): Promise<APIResponse> => {
+): Promise<ApiKeyResponse> => {
   const body = {
     pagination: {
       page_offset: 1,
@@ -57,13 +40,16 @@ export const handleListApiKeys = async (
     body,
   });
 
-  return (await resp.json()) as APIResponse;
+  const response = (await resp.json()) as ApiKeyResponse;
+  return response.data
+    ? { ...response, data: response.data.map(toApiKeyMetadata) }
+    : response;
 };
 
 export const handleCreateApiKey = async (
   userId: string,
   keyName: string,
-): Promise<APIResponse> => {
+): Promise<CreateApiKeyResponse> => {
   const body = {
     key_name: keyName,
   };
@@ -74,14 +60,14 @@ export const handleCreateApiKey = async (
     body,
   });
 
-  return (await resp.json()) as APIResponse;
+  return (await resp.json()) as CreateApiKeyResponse;
 };
 
 export const handleRenameApiKey = async (
   userId: string,
   apiKeyId: string,
   keyName: string,
-): Promise<APIResponse> => {
+): Promise<RenameApiKeyResponse> => {
   const body = {
     key_name: keyName,
   };
@@ -92,17 +78,20 @@ export const handleRenameApiKey = async (
     body,
   });
 
-  return (await resp.json()) as APIResponse;
+  const response = (await resp.json()) as RenameApiKeyResponse;
+  return response.data
+    ? { ...response, data: toApiKeyMetadata(response.data) }
+    : response;
 };
 
 export const handleDeleteApiKey = async (
   userId: string,
   apiKeyId: string,
-): Promise<APIResponse> => {
+): Promise<ApiKeyResponse> => {
   const subPath = `${userId}/api-keys/${apiKeyId}`;
   const resp = await fetchUserWithMethod("DELETE")({
     subPath,
   });
 
-  return (await resp.json()) as APIResponse;
+  return (await resp.json()) as ApiKeyResponse;
 };

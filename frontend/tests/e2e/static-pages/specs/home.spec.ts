@@ -17,20 +17,20 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { STATIC, SMOKE, CORE_REGRESSION, FULL_REGRESSION } = VALID_TAGS;
+const { SMOKE, FULL_REGRESSION } = VALID_TAGS;
 
 const { targetEnv } = playwrightEnv;
 
 // Background: the user navigates to the home page "/"
 test.beforeEach(async ({ page }) => {
-  const timeout = targetEnv === "staging" ? 180000 : 60000;
+  const timeout = targetEnv !== "local" ? 180000 : 60000;
   await page.goto("/", { waitUntil: "domcontentloaded", timeout });
 });
 
 /**
  * @scenario Show the page title
  */
-test("has title", { tag: [STATIC, SMOKE] }, async ({ page }) => {
+test("has title", { tag: [SMOKE] }, async ({ page }) => {
   // Then the page title should match "Simpler.Grants.gov"
   await expect(page).toHaveTitle(/Simpler\.Grants\.gov/);
 });
@@ -40,7 +40,7 @@ test("has title", { tag: [STATIC, SMOKE] }, async ({ page }) => {
  */
 test(
   "clicking 'follow on GitHub' link opens a new tab pointed at Github repository",
-  { tag: [STATIC, FULL_REGRESSION] },
+  { tag: [FULL_REGRESSION] },
   async ({ page, context }) => {
     const pagePromise = context.waitForEvent("page");
 
@@ -63,7 +63,7 @@ test(
  */
 test(
   "skips to main content when navigating via keyboard",
-  { tag: [STATIC, FULL_REGRESSION] },
+  { tag: [FULL_REGRESSION] },
   async ({ page, browserName }) => {
     // Firefox does not tab through links automatically and requires updating preferences at the
     // system settings level; https://www.a11yproject.com/posts/macos-browser-keyboard-navigation/
@@ -100,7 +100,7 @@ test(
  */
 test(
   "displays mobile nav at mobile width",
-  { tag: [STATIC, SMOKE] },
+  { tag: [SMOKE] },
   async ({ page }, { project }) => {
     // Given the viewport is set to a mobile width
     if (project.name.match(/[Mm]obile/)) {
@@ -146,7 +146,7 @@ test(
  */
 test(
   "hides mobile nav at expected times",
-  { tag: [STATIC, CORE_REGRESSION] },
+  { tag: [FULL_REGRESSION] },
   async ({ page }, { project }) => {
     // Given the viewport is set to a mobile width
     if (project.name.match(/[Mm]obile/)) {

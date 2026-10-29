@@ -1,19 +1,19 @@
 import uuid
 from collections.abc import Sequence
 
-import grants_shared.adapters.db as db
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 
+import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationSubmission
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
+from src.pagination.sorting_util import apply_sorting
 from src.services.applications.get_application import get_application
-from src.services.service_utils import apply_sorting
 
 
 class ApplicationSubmissionsRequest(BaseModel):
@@ -32,7 +32,7 @@ def list_application_submissions(
     stmt: Select = select(ApplicationSubmission).where(
         ApplicationSubmission.application_id == application_id
     )
-    stmt = apply_sorting(stmt, ApplicationSubmission, params.pagination.sort_order)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, ApplicationSubmission)
 
     paginator: Paginator[ApplicationSubmission] = Paginator(
         ApplicationSubmission, stmt, db_session, page_size=params.pagination.page_size

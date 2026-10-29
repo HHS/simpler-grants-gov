@@ -1,4 +1,4 @@
-""" Marshmallow schemas for CommonGrants Protocol customFields
+"""Marshmallow schemas for CommonGrants Protocol customFields
 
 This file contains Marshmallow schemas that are part of the custom field portion of the specification.
 
@@ -12,8 +12,8 @@ as a new property.
 
 from typing import Any
 
-from grants_shared.api.schemas.extension import Schema, fields
-from grants_shared.api.schemas.extension import validators as validate
+from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension import validators as validate
 
 
 class CustomFieldType(fields.String):
@@ -25,7 +25,7 @@ class CustomFieldType(fields.String):
             metadata={
                 "description": "The JSON schema type to use when de-serializing the value field"
             },
-            **kwargs
+            **kwargs,
         )
 
 

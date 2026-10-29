@@ -1,9 +1,7 @@
 import logging
 from uuid import UUID
 
-import grants_shared.adapters.db as db
-from grants_shared.util.datetime_util import utcnow
-
+import src.adapters.db as db
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, Privilege
 from src.db.models.competition_models import Application
@@ -17,6 +15,8 @@ from src.services.applications.application_validation import (
     validate_forms,
 )
 from src.services.applications.get_application import get_application
+from src.services.applications.submission_queue import send_application_submission_message
+from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -61,4 +61,16 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
         audit_event=ApplicationAuditEvent.APPLICATION_SUBMITTED,
     )
 
+    _queue_application_submission(application, user)
+
     return application
+
+
+def _queue_application_submission(application: Application, user: User) -> None:
+    try:
+        send_application_submission_message(application.application_id, user.user_id)
+    except Exception:
+        logger.exception(
+            "Failed to queue application submission message - the scheduled submission task will process this application",
+            extra={"application_id": application.application_id},
+        )

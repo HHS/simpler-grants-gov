@@ -1,11 +1,11 @@
 "server only";
 
-import { ApiRequestError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError } from "src/errors";
 import {
   fetchUserWithMethod,
   searchAgencies,
 } from "src/services/fetch/fetchers/fetchers";
+import { logger } from "src/services/logger/simplerLogger";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
 import { getStatusValueForAgencySearch } from "src/utils/search/searchUtils";
@@ -67,13 +67,13 @@ export const searchAndFlattenAgencies = async (
       selectedStatuses: selectedStatuses || undefined,
     });
   } catch (e) {
-    console.error("Error searching agency options");
+    logger.error({ err: e }, "Error searching agency options");
     throw e;
   }
   try {
     return flattenAgencies(agencies);
   } catch (e) {
-    console.error("Error flattening agency search results");
+    logger.error({ err: e }, "Error flattening agency search results");
     throw e;
   }
 };
@@ -90,19 +90,4 @@ export const getUserAgencies = async (
   });
   const json = (await resp.json()) as { data: [] };
   return json.data;
-};
-
-export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
-  try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      // we shouldn't get there because the page should be checking authentication
-      throw new UnauthorizedError("No active session");
-    }
-    const agencies = await getUserAgencies(session.user_id);
-    return agencies;
-  } catch (e) {
-    console.error("Error fetching user agencies");
-    throw e;
-  }
 };

@@ -121,7 +121,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
       setValidationError(t("emptyNameError"));
       return;
     }
-    if (!user?.token) {
+    if (!user?.isLoggedIn) {
       return;
     }
     // send up a filtered set of params, converted to an object
@@ -151,7 +151,7 @@ export function SaveSearchModal({ onSave }: { onSave: (id: string) => void }) {
       });
   }, [
     savedSearchName,
-    user?.token,
+    user?.isLoggedIn,
     searchParams,
     t,
     validationError,

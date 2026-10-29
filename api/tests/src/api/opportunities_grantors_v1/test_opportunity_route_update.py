@@ -1,8 +1,10 @@
 import uuid
 
 import pytest
+from sqlalchemy import select
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
+from src.db.models.opportunity_models import OpportunityAudit
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import OpportunityFactory
 
@@ -21,10 +23,14 @@ def grantor_auth_data(db_session, enable_factory_create):
 def existing_opportunity(grantor_auth_data, enable_factory_create):
     """Create an opportunity belonging to the grantor's agency"""
     _, agency, _, _ = grantor_auth_data
-    return OpportunityFactory.create(agency_code=agency.agency_code, is_draft=True)
+    return OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=True
+    )
 
 
-def test_opportunity_update_200_full_update(client, grantor_auth_data, existing_opportunity):
+def test_opportunity_update_200_full_update(
+    client, db_session, grantor_auth_data, existing_opportunity
+):
     """Test updating all updatable fields"""
     _, _, token, _ = grantor_auth_data
 
@@ -44,6 +50,19 @@ def test_opportunity_update_200_full_update(client, grantor_auth_data, existing_
     assert data["data"]["opportunity_title"] == "Updated Title"
     assert data["data"]["category"] == "discretionary"
     assert data["data"]["category_explanation"] == "Updated explanation"
+
+    audit_rows = (
+        db_session.execute(
+            select(OpportunityAudit).where(
+                OpportunityAudit.opportunity_id == existing_opportunity.opportunity_id
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(audit_rows) == 1
+    assert audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.OPPORTUNITY_UPDATED
+    assert audit_rows[0].opportunity_data is not None
 
 
 def test_opportunity_update_200_api_key_auth(client, grantor_auth_data, existing_opportunity):
@@ -131,17 +150,47 @@ def test_opportunity_update_422_field_too_long(client, grantor_auth_data, existi
     assert resp.status_code == 422
 
 
-def test_opportunity_update_422_not_draft(client, grantor_auth_data, enable_factory_create):
-    """Test that updating a published (non-draft) opportunity returns 422"""
+def test_opportunity_update_422_published_non_sgm_opportunity(
+    client, grantor_auth_data, enable_factory_create
+):
+    """Test that updating a published non-SGM opportunity returns 422"""
     _, agency, token, _ = grantor_auth_data
-    published_opportunity = OpportunityFactory.create(
-        agency_code=agency.agency_code, is_draft=False
+    published_non_sgm_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=False, is_simpler_grants_opportunity=False
     )
 
     resp = client.put(
-        f"/v1/grantors/opportunities/{published_opportunity.opportunity_id}",
-        json={"opportunity_title": "Trying to update published", "category": "discretionary"},
+        f"/v1/grantors/opportunities/{published_non_sgm_opportunity.opportunity_id}",
+        json={
+            "opportunity_title": "Trying to update published non-SGM",
+            "category": "discretionary",
+        },
         headers={"X-SGG-Token": token},
     )
 
     assert resp.status_code == 422
+    assert (
+        "Only opportunities created in Simpler Grants can be updated" in resp.get_json()["message"]
+    )
+
+
+def test_opportunity_update_200_published_sgm_opportunity(
+    client, grantor_auth_data, enable_factory_create
+):
+    """Test that updating a published SGM opportunity succeeds"""
+    _, agency, token, _ = grantor_auth_data
+    published_sgm_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=False, is_simpler_grants_opportunity=True
+    )
+
+    resp = client.put(
+        f"/v1/grantors/opportunities/{published_sgm_opportunity.opportunity_id}",
+        json={
+            "opportunity_title": "Updated published SGM opportunity",
+            "category": "discretionary",
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 200
+    assert resp.get_json()["data"]["opportunity_title"] == "Updated published SGM opportunity"

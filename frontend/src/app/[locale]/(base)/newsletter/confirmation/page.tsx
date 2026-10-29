@@ -6,7 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
+import NewsletterDisclaimer from "src/components/newsletter/NewsletterDisclaimer";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -32,7 +32,7 @@ export default function SubscriptionConfirmation({
         <h1>{t("title")}</h1>
         <p>{t("paragraph1")}</p>
       </GridContainer>
-      <SendyDisclaimer />
+      <NewsletterDisclaimer />
     </div>
   );
 }

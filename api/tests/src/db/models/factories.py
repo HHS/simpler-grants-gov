@@ -16,13 +16,11 @@ from datetime import datetime, timedelta, timezone
 import factory
 import factory.fuzzy
 import faker
-import grants_shared.adapters.db as db
-import grants_shared.util.datetime_util as datetime_util
 from faker.providers import BaseProvider
-from grants_shared.db.models.lookup.lookup_registry import LookupRegistry
 from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
+import src.adapters.db as db
 import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
@@ -36,7 +34,10 @@ import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.db.models.workflow_models as workflow_models
+import src.util.datetime_util as datetime_util
+import tests.lib.db_test_models.db_test_models as db_test_models
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
+from src.auth.api_key_config import ApiKeyConfig
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
@@ -56,11 +57,13 @@ from src.constants.lookup_constants import (
     ExternalUserType,
     ExtractType,
     FileScanStatus,
-    FormType,
     FundingCategory,
     FundingInstrument,
     JobStatus,
     JobType,
+    NotificationQueueStatus,
+    NotificationType,
+    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
@@ -71,6 +74,7 @@ from src.constants.lookup_constants import (
     SamGovImportType,
     SamGovProcessingStatus,
     UserType,
+    WorkflowEntityType,
     WorkflowType,
 )
 from src.constants.static_role_values import (
@@ -83,9 +87,12 @@ from src.constants.static_role_values import (
 )
 from src.db.models import agency_models
 from src.db.models.agency_models import Agency
+from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
-from src.form_schema.forms import SF424_v4_0
+from src.form_schema.forms import SF424_v4_0, init_form_registry
 from src.util import file_util
+from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
+from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
 SCHEMA = OpportunityVersionSchema()
@@ -355,8 +362,7 @@ def get_db_session() -> db.Session:
     # _db_session is only set in the pytest fixture `enable_factory_create`
     # so that tests do not unintentionally write to the database.
     if _db_session is None:
-        raise Exception(
-            """Factory db_session is not initialized.
+        raise Exception("""Factory db_session is not initialized.
 
             If your tests don't need to cover database behavior, consider
             calling the `build()` method instead of `create()` on the factory to
@@ -364,8 +370,7 @@ def get_db_session() -> db.Session:
 
             If running tests that actually need data in the DB, pull in the
             `enable_factory_create` fixture to initialize the db_session.
-            """
-        )
+            """)
 
     return _db_session
 
@@ -444,6 +449,9 @@ class OpportunityFactory(BaseFactory):
     )
 
     is_draft = False  # Because we filter out drafts, just default these to False
+    is_simpler_grants_opportunity = (
+        False  # Default to imported opportunities; set True for SGM-created ones
+    )
 
     revision_number = 0  # We'll want to consider how we handle this when we add history
 
@@ -675,9 +683,13 @@ class OpportunitySummaryFactory(BaseFactory):
         unique=True,
     )
 
-    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    created_at = factory.Faker(
+        "date_time_between", start_date="-5y", end_date="-3y", tzinfo=timezone.utc
+    )
     updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
+        lambda o: fake.date_time_between(
+            start_date=o.created_at, end_date="-1y", tzinfo=timezone.utc
+        )
     )
 
     class Params:
@@ -975,6 +987,15 @@ class OpportunityChangeAuditFactory(BaseFactory):
     is_loaded_to_version_table = False
 
 
+class OpportunityIndexDeleteQueueFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityIndexDeleteQueue
+
+    # No SubFactory - the queue records opportunities that no longer exist, so the
+    # id does not need to resolve to an opportunity row.
+    opportunity_id = Generators.UuidObj
+
+
 class AwardRecommendationFactory(BaseFactory):
     class Meta:
         model = award_recommendation_models.AwardRecommendation
@@ -996,8 +1017,6 @@ class AwardRecommendationFactory(BaseFactory):
     other_key_information = sometimes_none(factory.Faker("paragraph"))
 
     is_deleted = False
-    review_workflow = factory.SubFactory("tests.src.db.models.factories.WorkflowFactory")
-    review_workflow_id = factory.LazyAttribute(lambda s: s.review_workflow.workflow_id)
 
 
 class AwardRecommendationAttachmentFactory(BaseFactory):
@@ -1369,7 +1388,11 @@ class UserApiKeyFactory(BaseFactory):
     user_id = factory.LazyAttribute(lambda k: k.user.user_id)
 
     key_name = factory.Faker("sentence", nb_words=3)
-    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+
+    key_id = factory.LazyAttribute(lambda obj: obj.raw_key)
+    key_id_hash = factory.LazyAttribute(
+        lambda obj: hash_api_key_id(obj.raw_key, ApiKeyConfig().pepper)
+    )
 
     last_used = sometimes_none(
         factory.Faker("date_time_between", start_date="-30d", end_date="now"), none_chance=0.3
@@ -1387,6 +1410,10 @@ class UserApiKeyFactory(BaseFactory):
 
         # Trait for unused keys
         never_used = factory.Trait(last_used=None)
+
+        # Not a column. Tests and fixtures send this as X-API-Key.
+        # Override this, not key_id: UserApiKeyFactory(raw_key="my-test-key").
+        raw_key = factory.LazyFunction(generate_api_key_id)
 
 
 class RoleFactory(BaseFactory):
@@ -1507,7 +1534,7 @@ class CompetitionFactory(BaseFactory):
     competition_forms = factory.RelatedFactoryList(
         "tests.src.db.models.factories.CompetitionFormFactory",
         factory_related_name="competition",
-        size=lambda: random.randint(1, 2),
+        size=1,
     )
 
     # Default to allowing both individual and organization applicants
@@ -1630,152 +1657,52 @@ class LinkCompetitionOpenToApplicantFactory(BaseFactory):
     )
 
 
-class FormFactory(BaseFactory):
-    class Meta:
-        model = competition_models.Form
-
-    form_id = Generators.UuidObj
-    form_name = "Test form"
-
-    # short_form_name will look like AB123A_1_2
-    short_form_name = factory.LazyAttribute(
-        lambda f: f"{fake.pystr_format(string_format="??###?")}_{f.form_version.replace('.', '_')}"
-    )
-    # Form version will be like 1.0, 4.5, etc.
-    form_version = factory.Faker("pystr_format", string_format="#.#")
-    agency_code = factory.Faker("agency_code")
-    form_instruction = None  # By default no instruction, use with_instruction trait for this
-
-    form_json_schema = {
-        "type": "object",
-        "title": "Test form for testing",
-        "required": ["Title", "Email", "Agreement"],
-        "properties": {
-            "Date": {"type": "string", "title": "Date of application ", "format": "date"},
-            "Email": {
-                "type": "string",
-                "title": "Email",
-                "format": "email",
-                "maxLength": 60,
-                "minLength": 1,
-            },
-            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
-            "Description": {
-                "type": "string",
-                "title": "Description for application",
-                "maxLength": 500,
-                "minLength": 0,
-            },
-            "ApplicationNumber": {
-                "type": "number",
-                "title": "Application number",
-                "maxLength": 120,
-                "minLength": 1,
-            },
-            "Location": {
-                "type": "string",
-                "title": "Location",
-                "description": "This should be overwritten",
-                "enum": ["Earth", "Moon", "Ort Cloud"],
-            },
-            "Vibe": {
-                "type": "string",
-                "title": "Vibe",
-                "description": "This describes the current state",
-                "enum": ["Vibing", "Not vibing"],
-            },
-            "Agreement": {
-                "type": "boolean",
-                "title": "I agree",
-                "description": "Agree to agree that the thing is the thing",
-            },
-        },
-    }
-    form_ui_schema = [
-        {"type": "field", "definition": "/properties/Title"},
-        {"type": "field", "definition": "/properties/Date"},
-        {"type": "field", "definition": "/properties/Description"},
-        {"type": "field", "definition": "/properties/Email"},
-        {
-            "type": "field",
-            "definition": "/properties/Location",
-            "schema": {"description": "Let us know where you are"},
-        },
-        {"type": "field", "definition": "/properties/ApplicationNumber"},
-        {"type": "field", "definition": "/properties/Vibe", "widget": "Radio"},
-        {"type": "field", "definition": "/properties/Agreement"},
-        {
-            "type": "field",
-            "schema": {
-                "type": "null",
-                "title": "Post populated",
-                "description": "Completed by Grants.gov upon submission.",
-            },
-        },
-    ]
-
-    form_type = FormType.SF424
-    sgg_version = "1.0"
-    is_deprecated = False
-
-    class Params:
-        with_instruction = factory.Trait(
-            form_instruction=factory.SubFactory(FormInstructionFactory),
-            form_instruction_id=factory.LazyAttribute(
-                lambda o: o.form_instruction.form_instruction_id if o.form_instruction else None
-            ),
-        )
-
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        warnings.warn(
-            "FormFactory is deprecated. Use seed_form_registry + registry forms "
-            "or direct Form(...) instantiation instead.",
-            DeprecationWarning,
-            stacklevel=3,
-        )
-        return super()._create(model_class, *args, **kwargs)
-
-    @classmethod
-    def _build(cls, model_class, *args, **kwargs):
-        warnings.warn(
-            "FormFactory is deprecated. Use Form(...) instantiation instead.",
-            DeprecationWarning,
-            stacklevel=3,
-        )
-        return super()._build(model_class, *args, **kwargs)
-
-
 def _get_default_competition_form() -> competition_models.Form:
-    """Return SF424 from the DB if seed_form_registry is active, else fall back to FormFactory."""
+    """Return SF424 for use as the default CompetitionForm form_id.
+
+    CompetitionForm.form is a registry-backed @property — form_id must resolve
+    to a registered form. SF424 is used as the fixed default for determinism.
+
+    Tests that need multiple CompetitionForms for the same competition must pass
+    form= explicitly with different forms. Tests that need a form with specific
+    behavior (e.g. no XML config) should construct Form(...) directly.
+    """
     if _db_session is None:
-        return FormFactory.build()
+        # Build mode (no DB session) only needs form_id; return the registry SF424
+        # so build() and create() resolve to the same deterministic default form.
+        return SF424_v4_0
 
     if not _seed_form_registry_active:
         warnings.warn(
-            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
-            "Falling back to FormFactory (deprecated).",
+            "CompetitionFormFactory: seed_form_registry not active — seeding SF424 automatically. "
+            "Add seed_form_registry to your test for explicit control.",
             DeprecationWarning,
             stacklevel=4,
         )
-        return FormFactory.create()
+
+    init_form_registry()
 
     session = get_db_session()
-    form = session.get(competition_models.Form, SF424_v4_0.form_id)
-    if form is None:
-        warnings.warn(
-            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
-            "Falling back to FormFactory (deprecated).",
-            DeprecationWarning,
-            stacklevel=4,
+
+    if (
+        SF424_v4_0.form_instruction_id is not None
+        and session.get(competition_models.FormInstruction, SF424_v4_0.form_instruction_id) is None
+    ):
+        FormInstructionFactory.create(
+            form_instruction_id=SF424_v4_0.form_instruction_id,
+            file_name=f"{SF424_v4_0.short_form_name}.txt",
         )
-        return FormFactory.create()
-    return form
+
+    return SF424_v4_0
 
 
 class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
+        # `form` is excluded so factory-boy uses it only to derive `form_id`
+        # and never tries to set it on the model. CompetitionForm.form is a
+        # read-only @property backed by the registry — it has no setter.
+        exclude = ["form"]
 
     competition = factory.SubFactory(CompetitionFactory, competition_forms=[])
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
@@ -1816,7 +1743,7 @@ class ApplicationFactory(BaseFactory):
             application_forms=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.ApplicationFormFactory",
                 factory_related_name="application",
-                size=lambda: random.randint(1, 3),
+                size=1,
                 # This SelfAttribute gets the competition we just made above
                 competition_form=factory.SubFactory(
                     CompetitionFormFactory,
@@ -2268,6 +2195,7 @@ class JobLogFactory(BaseFactory):
         model = task_models.JobLog
 
     job_id = Generators.UuidObj
+    job_type = factory.Faker("slug")
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
 
@@ -2637,26 +2565,12 @@ class StagingTsynopsisFactory(TsynopsisFactory, AbstractStagingFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
 
 
-class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
-    class Meta:
-        model = staging.synopsis.TsynopsisHist
-
-    revision_number = factory.Faker("random_int", min=1, max=25)
-
-
 class StagingTforecastFactory(TforecastFactory, AbstractStagingFactory):
     class Meta:
         model = staging.forecast.Tforecast
 
     opportunity = factory.SubFactory(StagingTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-
-class StagingTforecastHistFactory(StagingTforecastFactory):
-    class Meta:
-        model = staging.forecast.TforecastHist
-
-    revision_number = factory.Faker("random_int", min=1, max=25)
 
 
 class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory, AbstractStagingFactory):
@@ -2674,15 +2588,6 @@ class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory, AbstractStag
         )
 
 
-class StagingTapplicanttypesForecastHistFactory(StagingTapplicanttypesForecastFactory):
-    class Meta:
-        model = staging.forecast.TapplicanttypesForecastHist
-
-    forecast = factory.SubFactory(StagingTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class StagingTapplicanttypesSynopsisFactory(TapplicanttypesFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TapplicanttypesSynopsis
@@ -2696,15 +2601,6 @@ class StagingTapplicanttypesSynopsisFactory(TapplicanttypesFactory, AbstractStag
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
-
-
-class StagingTapplicanttypesSynopsisHistFactory(StagingTapplicanttypesSynopsisFactory):
-    class Meta:
-        model = staging.synopsis.TapplicanttypesSynopsisHist
-
-    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class StagingTfundactcatForecastFactory(TfundactcatFactory, AbstractStagingFactory):
@@ -2722,15 +2618,6 @@ class StagingTfundactcatForecastFactory(TfundactcatFactory, AbstractStagingFacto
         )
 
 
-class StagingTfundactcatForecastHistFactory(StagingTfundactcatForecastFactory):
-    class Meta:
-        model = staging.forecast.TfundactcatForecastHist
-
-    forecast = factory.SubFactory(StagingTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class StagingTfundactcatSynopsisFactory(TfundactcatFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TfundactcatSynopsis
@@ -2744,15 +2631,6 @@ class StagingTfundactcatSynopsisFactory(TfundactcatFactory, AbstractStagingFacto
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
-
-
-class StagingTfundactcatSynopsisHistFactory(StagingTfundactcatSynopsisFactory):
-    class Meta:
-        model = staging.synopsis.TfundactcatSynopsisHist
-
-    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class StagingTfundinstrForecastFactory(TfundinstrFactory, AbstractStagingFactory):
@@ -2770,15 +2648,6 @@ class StagingTfundinstrForecastFactory(TfundinstrFactory, AbstractStagingFactory
         )
 
 
-class StagingTfundinstrForecastHistFactory(StagingTfundinstrForecastFactory):
-    class Meta:
-        model = staging.forecast.TfundinstrForecastHist
-
-    forecast = factory.SubFactory(StagingTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class StagingTfundinstrSynopsisFactory(TfundinstrFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TfundinstrSynopsis
@@ -2792,15 +2661,6 @@ class StagingTfundinstrSynopsisFactory(TfundinstrFactory, AbstractStagingFactory
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
-
-
-class StagingTfundinstrSynopsisHistFactory(StagingTfundinstrSynopsisFactory):
-    class Meta:
-        model = staging.synopsis.TfundinstrSynopsisHist
-
-    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class StagingTgroupsFactory(AbstractStagingFactory):
@@ -2889,26 +2749,12 @@ class ForeignTsynopsisFactory(TsynopsisFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
 
 
-class ForeignTsynopsisHistFactory(ForeignTsynopsisFactory):
-    class Meta:
-        model = foreign.synopsis.TsynopsisHist
-
-    revision_number = factory.Faker("random_int", min=1, max=25)
-
-
 class ForeignTforecastFactory(TforecastFactory):
     class Meta:
         model = foreign.forecast.Tforecast
 
     opportunity = factory.SubFactory(ForeignTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-
-class ForeignTforecastHistFactory(ForeignTforecastFactory):
-    class Meta:
-        model = foreign.forecast.TforecastHist
-
-    revision_number = factory.Faker("random_int", min=1, max=25)
 
 
 class ForeignTapplicanttypesForecastFactory(TapplicanttypesFactory):
@@ -2921,15 +2767,6 @@ class ForeignTapplicanttypesForecastFactory(TapplicanttypesFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
 
-class ForeignTapplicanttypesForecastHistFactory(ForeignTapplicanttypesForecastFactory):
-    class Meta:
-        model = foreign.forecast.TapplicanttypesForecastHist
-
-    forecast = factory.SubFactory(ForeignTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class ForeignTapplicanttypesSynopsisFactory(TapplicanttypesFactory):
     class Meta:
         model = foreign.synopsis.TapplicanttypesSynopsis
@@ -2938,15 +2775,6 @@ class ForeignTapplicanttypesSynopsisFactory(TapplicanttypesFactory):
 
     synopsis = factory.SubFactory(ForeignTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-
-
-class ForeignTapplicanttypesSynopsisHistFactory(ForeignTapplicanttypesSynopsisFactory):
-    class Meta:
-        model = foreign.synopsis.TapplicanttypesSynopsisHist
-
-    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class ForeignTfundactcatForecastFactory(TfundactcatFactory):
@@ -2959,15 +2787,6 @@ class ForeignTfundactcatForecastFactory(TfundactcatFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
 
-class ForeignTfundactcatForecastHistFactory(ForeignTfundactcatForecastFactory):
-    class Meta:
-        model = foreign.forecast.TfundactcatForecastHist
-
-    forecast = factory.SubFactory(ForeignTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class ForeignTfundactcatSynopsisFactory(TfundactcatFactory):
     class Meta:
         model = foreign.synopsis.TfundactcatSynopsis
@@ -2976,15 +2795,6 @@ class ForeignTfundactcatSynopsisFactory(TfundactcatFactory):
 
     synopsis = factory.SubFactory(ForeignTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-
-
-class ForeignTfundactcatSynopsisHistFactory(ForeignTfundactcatSynopsisFactory):
-    class Meta:
-        model = foreign.synopsis.TfundactcatSynopsisHist
-
-    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class ForeignTfundinstrForecastFactory(TfundinstrFactory):
@@ -2997,15 +2807,6 @@ class ForeignTfundinstrForecastFactory(TfundinstrFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
 
-class ForeignTfundinstrForecastHistFactory(ForeignTfundinstrForecastFactory):
-    class Meta:
-        model = foreign.forecast.TfundinstrForecastHist
-
-    forecast = factory.SubFactory(ForeignTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class ForeignTfundinstrSynopsisFactory(TfundinstrFactory):
     class Meta:
         model = staging.synopsis.TfundinstrSynopsis
@@ -3014,15 +2815,6 @@ class ForeignTfundinstrSynopsisFactory(TfundinstrFactory):
 
     synopsis = factory.SubFactory(StagingTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-
-
-class ForeignTfundinstrSynopsisHistFactory(ForeignTfundinstrSynopsisFactory):
-    class Meta:
-        model = foreign.synopsis.TfundinstrSynopsisHist
-
-    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
@@ -3516,6 +3308,44 @@ class OrganizationAuditFactory(BaseFactory):
         )
 
 
+class OpportunityAuditFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityAudit
+
+    opportunity_audit_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    user = factory.SubFactory(UserFactory, with_profile=True)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    opportunity_audit_event = OpportunityAuditEvent.OPPORTUNITY_CREATED
+    opportunity_data = None
+    nonforecast_opportunity_summary = None
+    competition = None
+
+    class Params:
+        is_opportunity_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_CREATED,
+        )
+        is_opportunity_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_UPDATED,
+        )
+        is_summary_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED,
+        )
+        is_summary_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED,
+        )
+        is_competition_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_CREATED,
+        )
+        is_competition_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_UPDATED,
+        )
+
+
 class OrganizationSavedOpportunityFactory(BaseFactory):
     class Meta:
         model = entity_models.OrganizationSavedOpportunity
@@ -3587,44 +3417,63 @@ class WorkflowFactory(BaseFactory):
         model = workflow_models.Workflow
 
     workflow_id = Generators.UuidObj
-    workflow_type = factory.fuzzy.FuzzyChoice(WorkflowType)
+    workflow_type = WorkflowType.BASIC_TEST_WORKFLOW
     current_workflow_state = "start"
     is_active = True
 
-    # By default, we'll associate a workflow with an opportunity
-    # Use the params below to change this, or pass in your own.
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(
-        lambda e: e.opportunity.opportunity_id if e.opportunity is not None else None
-    )
+    opportunity = None
+    application = None
+    application_submission = None
+    award_recommendation = None
 
-    class Params:
-        has_opportunity = factory.Trait(
-            opportunity=factory.SubFactory(OpportunityFactory),
-            opportunity_id=factory.LazyAttribute(lambda e: e.opportunity.opportunity_id),
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        workflow_type = kwargs.get(
+            "workflow_type",
+            WorkflowType.BASIC_TEST_WORKFLOW,
         )
 
-        has_application = factory.Trait(
-            application=factory.SubFactory(ApplicationFactory),
-            application_id=factory.LazyAttribute(lambda e: e.application.application_id),
-            opportunity=None,
-        )
+        entity_fields = {
+            WorkflowEntityType.OPPORTUNITY: "opportunity",
+            WorkflowEntityType.APPLICATION: "application",
+            WorkflowEntityType.APPLICATION_SUBMISSION: "application_submission",
+            WorkflowEntityType.AWARD_RECOMMENDATION: "award_recommendation",
+        }
 
-        has_application_submission = factory.Trait(
-            application_submission=factory.SubFactory(ApplicationSubmissionFactory),
-            application_submission_id=factory.LazyAttribute(
-                lambda e: e.application_submission.application_submission_id
-            ),
-            opportunity=None,
-        )
+        supplied_entities = [
+            field_name
+            for field_name in entity_fields.values()
+            if kwargs.get(field_name) is not None
+        ]
 
-        has_award_recommendation = factory.Trait(
-            award_recommendation=factory.SubFactory(AwardRecommendationFactory),
-            award_recommendation_id=factory.LazyAttribute(
-                lambda e: e.award_recommendation.award_recommendation_id
-            ),
-            opportunity=None,
-        )
+        if len(supplied_entities) > 1:
+            raise ValueError(
+                "WorkflowFactory requires exactly one workflow entity; "
+                f"received: {', '.join(sorted(supplied_entities))}"
+            )
+
+        if not supplied_entities:
+            config, _ = WorkflowRegistry.get_state_machine_for_workflow_type(workflow_type)
+
+            factory_by_entity_type = {
+                WorkflowEntityType.OPPORTUNITY: OpportunityFactory,
+                WorkflowEntityType.APPLICATION: ApplicationFactory,
+                WorkflowEntityType.APPLICATION_SUBMISSION: (ApplicationSubmissionFactory),
+                WorkflowEntityType.AWARD_RECOMMENDATION: (AwardRecommendationFactory),
+            }
+
+            entity_factory = factory_by_entity_type.get(config.entity_type)
+            entity_field = entity_fields.get(config.entity_type)
+
+            if entity_factory is None or entity_field is None:
+                raise ValueError(
+                    "WorkflowFactory does not have a factory configured for "
+                    f"workflow entity type {config.entity_type}"
+                )
+
+            kwargs[entity_field] = entity_factory.create()
+
+        return super()._create(model_class, *args, **kwargs)
 
 
 class WorkflowEventHistoryFactory(BaseFactory):
@@ -3697,3 +3546,143 @@ class JobLockFactory(BaseFactory):
         lambda: fake.date_time_between(start_date="now", end_date="+1d", tzinfo=timezone.utc)
     )
     locked_by = Generators.UuidObj
+
+
+####################################
+# Test-only model factories
+#
+# Factories for the synthetic models in tests/lib/db_test_models, which exist to
+# exercise the generic DB, lookup, and auth base classes without coupling those
+# tests to the real application tables.
+####################################
+
+
+class ExampleTableFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.ExampleTable
+
+    example_id = Generators.UuidObj
+
+    description = factory.Faker("paragraph", nb_sentences=1)
+    my_count = factory.Faker("random_int", min=1, max=10)
+
+    friends = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.FriendTableFactory",
+        factory_related_name="example",
+        size=lambda: random.randint(1, 3),
+    )
+
+
+class FriendTableFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.FriendTable
+
+    friend_id = Generators.UuidObj
+
+    example = factory.SubFactory(ExampleTableFactory)
+    example_id = factory.LazyAttribute(lambda f: f.example.example_id)
+
+    friend_types = factory.Faker(
+        "random_elements",
+        length=random.randint(1, 3),
+        elements=[f for f in db_test_models.FriendType],
+        unique=True,
+    )
+
+
+class SharedUserFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedUser
+
+    shared_user_id = Generators.UuidObj
+
+
+class SharedLinkExternalUserFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedLinkExternalUser
+
+    link_external_user_id = Generators.UuidObj
+    external_user_id = Generators.UuidObj
+    shared_user = factory.SubFactory(SharedUserFactory)
+    shared_user_id = factory.LazyAttribute(lambda s: s.shared_user.shared_user_id)
+    email = factory.Faker("email")
+
+
+class SharedLoginGovStateFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedLoginGovState
+
+    shared_login_gov_state_id = Generators.UuidObj
+    nonce = Generators.UuidObj
+
+
+class SharedUserApiKeyFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedUserApiKey
+
+    shared_api_key_id = Generators.UuidObj
+
+    shared_user = factory.SubFactory(SharedUserFactory)
+    shared_user_id = factory.LazyAttribute(lambda k: k.shared_user.shared_user_id)
+
+    key_name = factory.Faker("sentence", nb_words=3)
+    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+    key_id_hash = factory.LazyAttribute(
+        lambda obj: hash_api_key_id(obj.key_id, ApiKeyConfig().pepper)
+    )
+
+    last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")
+
+    is_active = True
+
+
+class UserNotificationPreferenceFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserNotificationPreference
+
+    user_notification_preference_id = Generators.UuidObj
+    is_enabled = False
+
+    notification_type = factory.fuzzy.FuzzyChoice(NotificationType)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda u: u.user.user_id)
+
+
+class NotificationJobContentFactory(BaseFactory):
+    class Meta:
+        model = user_models.NotificationJobContent
+
+    notification_job_content_id = Generators.UuidObj
+
+    job = factory.SubFactory(JobLogFactory)
+    job_id = factory.LazyAttribute(lambda c: c.job.job_id)
+
+    notification_type = NotificationType.ALL_NEW_OPPORTUNITIES
+
+    subject = factory.Faker("sentence")
+    email_body = factory.LazyFunction(
+        lambda: f"<html><body><p>{fake.paragraph()}</p></body></html>"
+    )
+
+
+class NotificationQueueFactory(BaseFactory):
+    class Meta:
+        model = user_models.NotificationQueue
+
+    notification_queue_id = Generators.UuidObj
+
+    job_content = factory.SubFactory(NotificationJobContentFactory)
+    job_content_id = factory.LazyAttribute(lambda q: q.job_content.notification_job_content_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda q: q.user.user_id)
+
+    status = NotificationQueueStatus.PENDING
+    ses_message_id = None
+
+    class Params:
+        is_sent = factory.Trait(
+            status=NotificationQueueStatus.SENT,
+            ses_message_id=factory.Faker("uuid4"),
+        )

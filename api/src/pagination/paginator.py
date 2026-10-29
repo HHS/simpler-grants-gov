@@ -1,9 +1,10 @@
 import math
 from collections.abc import Sequence
 
-import grants_shared.adapters.db as db
-from grants_shared.db.models.base import Base
 from sqlalchemy import Select, func, inspect
+
+import src.adapters.db as db
+from src.db.models.base import Base
 
 DEFAULT_PAGE_SIZE = 25
 
@@ -16,7 +17,7 @@ class Paginator[T: Base]:
     Any usage of this should make sure that the select query passed in
     contains sorting information otherwise results may not be expected.
 
-    Expected usage::
+    Expected usage:
         from sqlalchemy import desc, select
 
         from src.db.models.opportunity_models import Opportunity
@@ -47,7 +48,7 @@ class Paginator[T: Base]:
         self.page_size = page_size
 
         self.total_records = _get_record_count(self.table_model, self.db_session, self.stmt)
-        self.total_pages = int(math.ceil(self.total_records / self.page_size))  # noqa: RUF046
+        self.total_pages = math.ceil(self.total_records / self.page_size)
 
     def page_at(self, page_offset: int) -> Sequence[T]:
         """

@@ -5,25 +5,28 @@ with only a few alterations.
 """
 
 import io
+import uuid
 from datetime import timedelta
 from urllib import parse
 
-import grants_shared.util.datetime_util as datetime_util
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
+import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import ApplicationForm
+from src.db.models.competition_models import ApplicationForm, Form
 from src.db.models.user_models import Role, User
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import form_template_registry
 from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
     SOAPAuth,
     SOAPClientCertificate,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_config import GRANTOR_SOAP_ACTION_PATH, SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -35,7 +38,6 @@ from tests.src.db.models.factories import (
     ApplicationUserFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     LegacyAgencyCertificateFactory,
     LinkExternalUserFactory,
     OpportunityAssistanceListingFactory,
@@ -67,6 +69,8 @@ def setup_application_for_form_validation(
     has_assistance_listing_number: bool = True,
     assistance_listing_number: str | None = None,
     assistance_listing_program_title: str | None = None,
+    link_assistance_listing_to_competition: bool = True,
+    extra_opportunity_assistance_listing_count: int = 0,
     public_competition_id: str | None = None,
     competition_title: str | None = None,
 ) -> ApplicationForm:
@@ -85,7 +89,7 @@ def setup_application_for_form_validation(
     if opportunity_title is not DEFAULT_VALUE:
         opp_params["opportunity_title"] = opportunity_title
 
-    opportunity = OpportunityFactory.create(**opp_params)
+    opportunity = OpportunityFactory.create(opportunity_assistance_listings=[], **opp_params)
 
     opportunity_assistance_listing = None
     if has_assistance_listing_number:
@@ -95,17 +99,34 @@ def setup_application_for_form_validation(
             "program_title": assistance_listing_program_title,
         }
         opportunity_assistance_listing = OpportunityAssistanceListingFactory.create(**params)
+        for _ in range(extra_opportunity_assistance_listing_count):
+            OpportunityAssistanceListingFactory.create(opportunity=opportunity)
 
     competition_params = {
         "opportunity": opportunity,
         "competition_forms": [],
         "competition_title": competition_title,
         "public_competition_id": public_competition_id,
-        "opportunity_assistance_listing": opportunity_assistance_listing,
+        "opportunity_assistance_listing": (
+            opportunity_assistance_listing if link_assistance_listing_to_competition else None
+        ),
     }
 
     competition = CompetitionFactory.create(**competition_params)
-    form = FormFactory.create(form_json_schema=json_schema, form_rule_schema=rule_schema)
+
+    init_form_registry()
+    form = Form(
+        form_id=uuid.uuid4(),
+        form_name="Test Form",
+        short_form_name="TestForm",
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema=json_schema,
+        form_ui_schema={},
+        form_rule_schema=rule_schema,
+        json_to_xml_schema=None,
+    )
+    form_template_registry.register(form, major_version=1)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     organization = None
@@ -199,14 +220,15 @@ def create_soap_request(
     soap_payload: bytes,
     log_local: bool = False,
     operation_name: str = "GetApplicationZipRequest",
-    full_path="/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
-    api_name=SimplerSoapAPI.GRANTORS,
+    full_path: str = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+    api_name: str = SimplerSoapAPI.GRANTORS,
 ) -> SOAPRequest:
     _, _, soap_certificate, _ = setup_cert_user(
         AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
     )
     headers = {
         "X-Gg-S2S-Uri": "https://google.com/xyz",
+        "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/{operation_name.removesuffix('Request')}",
     }
     if log_local:
         headers.update({f"{LOG_LOCAL_RESPONSE_HEADER_KEY}": "1"})

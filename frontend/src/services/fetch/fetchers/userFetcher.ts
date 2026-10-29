@@ -73,6 +73,20 @@ export const getUserInvitations = async (
   return json.data;
 };
 
+export const updateUserInvitation = async (
+  userId: string,
+  invitationId: string,
+  status: "accepted" | "rejected",
+): Promise<OrganizationInvitation> => {
+  const resp = await fetchUserWithMethod("POST")({
+    subPath: `${userId}/invitations/${invitationId}/organizations`,
+    body: { status },
+  });
+  const json = (await resp.json()) as { data: OrganizationInvitation };
+
+  return json.data;
+};
+
 export const getTestUsers = async (): Promise<TestUser[]> => {
   const resp = await fetchLocalUsers();
 
