@@ -44,4 +44,12 @@ export const SF424B_OPPORTUNITY_DATA: PrintViewFormData = {
   // No opportunity-derived prepopulated fields in form_json.py
   expectedPrepopulatedFields: {},
   buildTestData: buildSF424BHappyPathTestData,
+  // GrantApplication.xml elements for the submission zip spec.
+  // signature and date_signed are system post-populated; the spec supplies their values.
+  xmlFields: {
+    signature: { element: "SF424B:RepresentativeName" },
+    title: { element: "SF424B:RepresentativeTitle" },
+    applicant_organization: { element: "SF424B:ApplicantOrganizationName" },
+    date_signed: { element: "SF424B:SubmittedDate" },
+  },
 };

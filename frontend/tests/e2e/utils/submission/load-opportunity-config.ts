@@ -125,6 +125,7 @@ export function loadOpportunityConfig(
       buildTestData: entry.buildTestData,
       expectedPrepopulatedFields: entry.expectedPrepopulatedFields,
       userEnteredFieldTestIds,
+      xmlFields: entry.xmlFields,
     };
   });
 

@@ -37,6 +37,7 @@ import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
+import { buildExpectedXmlFields } from "tests/e2e/utils/submission/xml-field-utils";
 
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
@@ -52,10 +53,6 @@ const SF424B_ZIP_PDF_NAME = "SF424B.pdf";
 const SIGNATURE_VALUE = "simpler-grants-e2e-tester@navapbc.com";
 
 test.beforeEach(({ page: _ }, testInfo) => {
-  test.skip(
-    playwrightEnv.targetEnv !== "staging",
-    "Submission ZIP verification runs only against staging",
-  );
   skipNonChromeOnStaging(testInfo);
 });
 
@@ -121,24 +118,13 @@ test(
     const contents = await downloadAndUnzipSubmission(page);
 
     await test.step("Verify GrantApplication.xml field values", () => {
-      assertXmlContainsFields(contents, {
-        representative_name: {
-          element: "SF424B:RepresentativeName",
-          value: SIGNATURE_VALUE,
-        },
-        title: {
-          element: "SF424B:RepresentativeTitle",
-          value: testData.title,
-        },
-        applicant_organization: {
-          element: "SF424B:ApplicantOrganizationName",
-          value: testData.applicant_organization,
-        },
-        submitted_date: {
-          element: "SF424B:SubmittedDate",
-          value: submittedDate,
-        },
-      });
+      assertXmlContainsFields(
+        contents,
+        buildExpectedXmlFields(form, testData, {
+          signature: SIGNATURE_VALUE,
+          date_signed: submittedDate,
+        }),
+      );
     });
 
     await test.step("Verify SF424B.pdf form title and field values", async () => {
