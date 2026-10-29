@@ -57,14 +57,17 @@ def acl():
                 "Name": m.RULES["emergency"],
                 "Priority": 0,
                 "Action": {"Count": {}},
-                "VisibilityConfig": {"CloudWatchMetricsEnabled": True},
+                "VisibilityConfig": {
+                    "CloudWatchMetricsEnabled": True,
+                    "MetricName": "emergency-metric",
+                },
                 "Statement": {},
             },
             {
                 "Name": m.RULES["upload_rate"],
                 "Priority": 1,
                 "Action": {"Count": {}},
-                "VisibilityConfig": {},
+                "VisibilityConfig": {"MetricName": "rate-metric"},
                 "Statement": {
                     "RateBasedStatement": {
                         "Limit": 10,
@@ -187,11 +190,74 @@ class InspectionTests(unittest.TestCase):
         )
         self.assertEqual(results[-1]["status"], "observed")
 
+    def test_exact_scope_and_cli_blob_are_recognized_without_echoing(self):
+        for key in m.RULES:
+            scope = m.expected_scope(key)
+            self.assertTrue(m.scope_matches(scope, key))
+            scope["AndStatement"]["Statements"].reverse()
+            self.assertTrue(m.scope_matches(scope, key))
+            if key == "upload_rate":
+                scope["AndStatement"]["Statements"][0]["ByteMatchStatement"][
+                    "SearchString"
+                ] = "UE9TVA=="
+                self.assertTrue(m.scope_matches(scope, key))
+            scope["AndStatement"]["Statements"].append({"private": MARKER})
+            self.assertFalse(m.scope_matches(scope, key))
+        old = m.expected_scope("emergency")
+        old["AndStatement"]["Statements"][0]["RegexMatchStatement"][
+            "RegexString"
+        ] = "^/readability/?$"
+        self.assertFalse(m.scope_matches(old, "emergency"))
+
+    def test_metric_queries_use_deployed_metric_names_not_rule_names(self):
+        aws = FakeAws()
+        m.Inspector(aws).run()
+        waf_calls = [
+            args
+            for svc, op, args in aws.calls
+            if op == "get-metric-statistics" and "AWS/WAFV2" in args
+        ]
+        self.assertEqual(len(waf_calls), 4)
+        for args in waf_calls:
+            dims = json.loads(args[args.index("--dimensions") + 1])
+            rule = next(d["Value"] for d in dims if d["Name"] == "Rule")
+            self.assertIn(rule, ("emergency-metric", "rate-metric"))
+            self.assertEqual(
+                next(d["Value"] for d in dims if d["Name"] == "WebACL"), MARKER
+            )
+
+    def test_metric_sums_and_missing_names_are_explicit(self):
+        aws = FakeAws(
+            {
+                ("cloudwatch", "get-metric-statistics"): {
+                    "Datapoints": [
+                        {"Sum": 3},
+                        {"Sum": 2},
+                        {"Sum": MARKER},
+                        {"Sum": True},
+                    ]
+                }
+            }
+        )
+        rows = m.Inspector(aws).run()
+        metrics = next(r for r in rows if r["check"] == "metrics")["details"]
+        self.assertEqual(metrics["emergency_CountedRequests"]["sum_last_hour"], 5)
+        missing = acl()
+        del missing["Rules"][0]["VisibilityConfig"]["MetricName"]
+        aws = FakeAws({("wafv2", "get-web-acl-for-resource"): {"WebACL": missing}})
+        rows = m.Inspector(aws).run()
+        metrics = next(r for r in rows if r["check"] == "metrics")["details"]
+        self.assertEqual(
+            metrics["emergency_metric_query"]["status"], "metric_name_missing"
+        )
+        self.assertNotIn("emergency_CountedRequests", metrics)
+
     def test_empty_metrics_are_not_called_zero_usage(self):
         results = m.Inspector(FakeAws()).run()
         metrics = next(r for r in results if r["check"] == "metrics")["details"]
         self.assertEqual(len(metrics), 6)
-        self.assertTrue(all(v == {"datapoints_last_hour": 0} for v in metrics.values()))
+        self.assertTrue(all(v["datapoints_last_hour"] == 0 for v in metrics.values()))
+        self.assertIsNone(metrics["emergency_CountedRequests"]["sum_last_hour"])
 
     def test_missing_alarms_are_incomplete_not_success(self):
         results = m.Inspector(FakeAws({("cloudwatch", "describe-alarms"): {}})).run()
