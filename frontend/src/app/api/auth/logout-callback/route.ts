@@ -8,8 +8,6 @@ import { logger } from "src/services/logger/simplerLogger";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
-// the API reports how its own logout went, 
-// the frontend session is cleared
 const API_LOGOUT_RESULTS = ["success", "error"];
 
 export async function GET(request: NextRequest) {

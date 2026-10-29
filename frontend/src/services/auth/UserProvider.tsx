@@ -65,8 +65,7 @@ export default function UserProvider({
         setUserFetchError(undefined);
         setIsLoading(false);
         if (localUser?.isLoggedIn && !fetchedUser.isLoggedIn) {
-          // concurrent refreshes share one debounced fetch, so report each session's expiry once.
-          // a signed out response before the expiry time (e.g. logout in another tab) is not an expiry
+          // Report each expired session once; an earlier signed-out response is not an expiry.
           if (
             isExpired(localUser.expiresAt) &&
             reportedExpiration.current !== localUser.expiresAt
