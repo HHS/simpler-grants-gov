@@ -157,6 +157,33 @@ describe("InformationCard - Edit filing name button visibility", () => {
   });
 });
 
+describe("InformationCard - Close date", () => {
+  const defaultProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
+  };
+
+  it("shows the closing date without a hard-coded time", () => {
+    render(
+      <InformationCard
+        {...defaultProps}
+        applicationDetails={makeApplicationDetails({
+          competition: { closing_date: "2030-01-01" },
+        })}
+      />,
+    );
+
+    const closingDate = screen.getByText("2030-01-01");
+    expect(closingDate.closest("dd")).toHaveTextContent(/^2030-01-01$/);
+    expect(screen.queryByText(/11:59/)).not.toBeInTheDocument();
+  });
+});
+
 describe("InformationCard - Special instructions when Submitted", () => {
   const defaultProps = {
     applicationDetails: mockApplicationDetails,
