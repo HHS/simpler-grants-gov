@@ -53,12 +53,14 @@ DIFF = FormDiff(
     },
     out_of_order={
         "key_contacts.[].title": (
-            "The generated layout groups Project Role, Title and Organizational Affiliation "
-            "under a Role heading ahead of the name. The hand-written form, like the DAT and "
-            "XSD, asks for them after it."
+            "The generated layout asks for Title and Organizational Affiliation right after "
+            "Project Role, ahead of the name; the hand-written form, like the DAT and XSD, asks "
+            "for them after it. We're shuffling some fields to order similar questions more "
+            "consistently across forms, and we grouped these together to pave the way for a "
+            "standard 'Role' section, similar to 'Name' and 'Address'."
         ),
         "key_contacts.[].organizational_affiliation": (
-            "Grouped with Project Role and Title under the Role heading; see title."
+            "Asked right after Project Role and Title, ahead of the name; see title."
         ),
     },
 )
