@@ -25,7 +25,6 @@ on:
           - infra-staging
           - training
           - infra-training
-          - grantee1
           - grantor1
           - infra-sgg2
           - infra-sgg3

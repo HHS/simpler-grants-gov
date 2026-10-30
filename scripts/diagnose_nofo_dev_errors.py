@@ -24,6 +24,13 @@ WINDOWS = (
     ("2026-10-28T02:25:00+00:00", "2026-10-28T02:46:00+00:00"),
     ("2026-10-28T08:24:00+00:00", "2026-10-28T08:49:00+00:00"),
 )
+# Match the fields emitted by Builder's CustomJsonFormatter / request middleware.
+ERROR_FILTER = (
+    '{ ($.levelname = "ERROR") || ($.levelname = "CRITICAL") || '
+    "(($.status >= 500) && ($.status <= 599)) || "
+    "(($.status_code >= 500) && ($.status_code <= 599)) }"
+)
+WORKER_FILTER = '"WORKER TIMEOUT"'
 EXCEPTIONS = frozenset(
     (
         "OperationalError",
@@ -89,6 +96,7 @@ def route_family(value):
         return "home"
     for prefix in (
         "readability",
+        "readability-checker",
         "nofos",
         "composer",
         "compare",
@@ -129,7 +137,7 @@ def summarize_message(message, counts):
     counts["exception_" + kind] += 1
 
 
-def logs_report(logs, start, end, deadline):
+def logs_report(logs, start, end, deadline, pattern=ERROR_FILTER):
     counts = Counter()
     token = None
     seen = set()
@@ -144,6 +152,7 @@ def logs_report(logs, start, end, deadline):
             }
         args = dict(
             logGroupName=LOG_GROUP,
+            filterPattern=pattern,
             startTime=int(start.timestamp() * 1000),
             endTime=int(end.timestamp() * 1000),
             limit=500,
@@ -278,6 +287,9 @@ def report():
                 "start_utc": begin,
                 "end_utc_exclusive": finish,
                 "logs": safe_check(lambda: logs_report(logs, start, end, deadline)),
+                "worker_timeouts": safe_check(
+                    lambda: logs_report(logs, start, end, deadline, WORKER_FILTER)
+                ),
                 "metrics": safe_check(lambda: metrics_report(cw, start, end)),
                 "alarm_history": safe_check(lambda: alarm_report(cw, start, end)),
             }
@@ -288,6 +300,8 @@ def report():
         "limitations": [
             "Read-only triage, not a root-cause conclusion or current health check.",
             "Raw logs stay in process memory; no bodies, URLs, IDs, streams or exception messages are published.",
+            "Log scans cover only matching structured errors and worker-timeout markers; other text errors and split/prefixed JSON may be missed.",
+            "The two searches may overlap; do not add their counts together.",
             "Counts describe log events, not distinct requests; a request may produce several records.",
             "Route and exception labels are a fixed allowlist; unknown detail needs restricted investigation.",
             "Absent metrics are null, not zero; incomplete log scans cannot establish absence of errors.",
@@ -316,6 +330,8 @@ def main():
         complete = all(
             row["logs"]["status"] == "observed"
             and row["logs"]["details"]["complete"]
+            and row["worker_timeouts"]["status"] == "observed"
+            and row["worker_timeouts"]["details"]["complete"]
             and row["metrics"]["status"] == "observed"
             and row["alarm_history"]["status"] == "observed"
             and row["alarm_history"]["details"]["complete"]

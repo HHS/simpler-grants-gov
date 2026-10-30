@@ -146,7 +146,7 @@ def search_opportunities(
 
     # Fetch data from service
     search_request = OpportunitySearchRequest.model_validate(json_data)
-    opportunity_data, pagination_data, custom_filter_errors = (
+    opportunity_data, pagination_data, filter_errors = (
         CommonGrantsOpportunityService.search_opportunities(
             search_client,
             search_request,
@@ -166,7 +166,7 @@ def search_opportunities(
             sort_order=sorting_data.sort_order,
             errors=[],
         ),
-        filter_info=build_filter_info(filter_data, custom_filter_errors),
+        filter_info=build_filter_info(filter_data, filter_errors),
     )
 
     # Transform response data from CG pydantic to CG marshmallow

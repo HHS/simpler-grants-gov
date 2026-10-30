@@ -103,17 +103,22 @@ alarms. Production, other NOFO environments, and other services remain opted
 out. New pilot alarm actions start disabled; no email address or incident
 integration is invented. Existing generic alarm behavior is unchanged.
 
-AWS/WAFV2's `WebACL` dimension uses the ACL's **visibility metric name**, not
-its resource name or ARN. The existing service module default is the shared
-`WAF_Common_Protections` label. A monitored NOFO environment explicitly sets a
-unique label (`nofos-infra-dev-waf`) and exports its actual value to monitoring.
-The two rule metric names are `NOFO-PDFReadability-EmergencyBlock` and
-`NOFO-PDFReadability-UploadRate`; `Region` is also specified.
+The published NOFO dev rule series uses the ACL resource name
+(`nofos-infra-dev-wafv2-web-acl`) for the `WebACL` dimension. Pass the service
+module's `waf_web_acl_name` output to monitoring. The visibility metric name
+(`nofos-infra-dev-waf`) is distinct and must not be substituted in these queries.
+The `Rule` dimension still uses each rule's visibility metric name:
+`NOFO-PDFReadability-EmergencyBlock` and `NOFO-PDFReadability-UploadRate`;
+`Region` is also specified.
 
-This changes the dev ACL's metric identity without changing WAF actions or
-priorities. Old metric history remains under the old label. Review and update
-any external dev dashboard/alarms using that label, and verify the published
-metric dimensions after deployment. Other services retain their existing label.
+Read-only inspection on October 29 recovered eight emergency-rule matches in
+New Relic for October 28, 19:45–19:50 UTC under the resource-name dimension.
+The previous visibility-name queries returned no datapoints. This correction
+changes inspection/dashboard/alarm queries, not WAF actions, thresholds, metric
+publication settings or recipients. After dev deployment, verify the published
+series and corrected alarm dimensions before testing blocking. A rate-based
+rule's CountedRequests represents over-limit matches, not every scoped POST.
+See #13082 and the broader readiness tracker #12568.
 
 ## Alarm definitions
 

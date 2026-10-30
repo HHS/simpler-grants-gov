@@ -8,7 +8,7 @@ run-name: Seed ${{ inputs.target_environment }} DB from ${{ inputs.source_enviro
 # which stays as-is until cutover. The two cover different topologies:
 #
 #   restore-db-from-snapshot.yml  (existing, unchanged)
-#     api-staging -> grantee1 / grantor1
+#     api-staging -> grantor1
 #     All in account 315341936575. Same account, so it authenticates ONCE and
 #     restores an automated snapshot directly.
 #

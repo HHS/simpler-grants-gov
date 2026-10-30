@@ -119,6 +119,7 @@ class DevErrorTests(unittest.TestCase):
     def test_route_labels_never_include_ids_or_query_parameters(self):
         for value, expected in (
             ("/readability/?" + PRIVATE, "readability"),
+            ("/readability-checker/?" + PRIVATE, "readability-checker"),
             ("/nofos/private-id/readability-metrics", "nofos"),
             ("/admin/secret", "admin"),
             ("/", "home"),
@@ -128,6 +129,46 @@ class DevErrorTests(unittest.TestCase):
         ):
             with self.subTest(value=value):
                 self.assertEqual(triage.route_family(value), expected)
+
+    def test_filtered_queries_keep_timeout_results_separate(self):
+        def response(**args):
+            if args["filterPattern"] == triage.ERROR_FILTER:
+                return {
+                    "events": [
+                        {
+                            "message": json.dumps(
+                                {
+                                    "levelname": "ERROR",
+                                    "status": 503,
+                                    "url": "/readability-checker/?" + PRIVATE,
+                                    "exception_type": "TimeoutError",
+                                    "message": PRIVATE,
+                                }
+                            )
+                        }
+                    ]
+                }
+            self.assertEqual(args["filterPattern"], triage.WORKER_FILTER)
+            return {"events": [{"message": "[CRITICAL] WORKER TIMEOUT " + PRIVATE}]}
+
+        self.logs.filter_log_events.side_effect = response
+        status, output = self.run_main()
+        self.assertEqual(status, 0)
+        self.assertIn('"route_readability-checker": 1', output)
+        self.assertIn('"worker_timeout_markers": 1', output)
+        self.assertEqual(self.logs.filter_log_events.call_count, 4)
+
+    def test_timeout_query_failure_does_not_hide_structured_results(self):
+        def response(**args):
+            if args["filterPattern"] == triage.WORKER_FILTER:
+                raise ReadTimeoutError(endpoint_url=PRIVATE)
+            return {"events": [{"message": '{"status_code":502}'}]}
+
+        self.logs.filter_log_events.side_effect = response
+        status, output = self.run_main()
+        self.assertEqual(status, 1)
+        self.assertIn('"status_502": 1', output)
+        self.assertIn('"request_or_processing_failed"', output)
 
     def test_empty_page_with_token_is_followed(self):
         self.logs.filter_log_events.side_effect = [
@@ -257,16 +298,18 @@ class DevErrorTests(unittest.TestCase):
                 start, end = datetime.fromisoformat(begin), datetime.fromisoformat(
                     finish
                 )
-                logs_stub.add_response(
-                    "filter_log_events",
-                    {"events": []},
-                    {
-                        "logGroupName": triage.LOG_GROUP,
-                        "startTime": int(start.timestamp() * 1000),
-                        "endTime": int(end.timestamp() * 1000),
-                        "limit": 500,
-                    },
-                )
+                for pattern in (triage.ERROR_FILTER, triage.WORKER_FILTER):
+                    logs_stub.add_response(
+                        "filter_log_events",
+                        {"events": []},
+                        {
+                            "logGroupName": triage.LOG_GROUP,
+                            "filterPattern": pattern,
+                            "startTime": int(start.timestamp() * 1000),
+                            "endTime": int(end.timestamp() * 1000),
+                            "limit": 500,
+                        },
+                    )
                 for metric in (
                     "HTTPCode_Target_5XX_Count",
                     "HTTPCode_ELB_5XX_Count",
