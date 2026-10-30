@@ -93,7 +93,7 @@ class PreparationTests(unittest.TestCase):
             return {}
         raise AssertionError(operation)
 
-    def run_prepare(self, diagnose=False):
+    def run_prepare(self, diagnose=False, verify=False):
         with (
             patch.object(history, "aws", side_effect=self.aws),
             patch.object(history, "output", side_effect=["dev-cluster", "dev-nofo"]),
@@ -102,13 +102,74 @@ class PreparationTests(unittest.TestCase):
             patch.object(
                 history.sys,
                 "argv",
-                ["prepare-nofos-history-dev.py"] + (["--diagnose"] if diagnose else []),
+                ["prepare-nofos-history-dev.py"]
+                + (["--verify"] if verify else ["--diagnose"] if diagnose else []),
             ),
             patch.dict(
                 os.environ, {"GITHUB_REF": "refs/heads/main", "GITHUB_STEP_SUMMARY": ""}
             ),
         ):
             history.prepare()
+
+    def test_verification_reuses_read_only_task_and_prints_only_known_measurements(
+        self,
+    ):
+        self.logs = [
+            "NOFO_HISTORY_VERIFICATION "
+            + json.dumps(
+                {
+                    "status": "measured",
+                    "counts": dict.fromkeys(history.VERIFICATION_FIELDS, 0),
+                }
+            )
+        ]
+        capture = io.StringIO()
+        with redirect_stdout(capture):
+            self.run_prepare(verify=True)
+        launch = next(params for _, op, params in self.calls if op == "run-task")
+        command = launch["overrides"]["containerOverrides"][0]["command"][2]
+        self.assertIn(
+            "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY", command
+        )
+        self.assertIn("main()", command)
+        self.assertIn('TARGET = "d9bfd050-4d01-482b-847d-1e01b478838a"', command)
+        self.assertNotIn("e5664268-36af-43ca-bf49-61983533041b", command)
+        self.assertNotIn("--chunk-size", command)
+        self.assertNotIn("backfill_history_index", command)
+        self.assertLess(len(json.dumps(launch["overrides"]).encode()), 8192)
+        self.assertIn("does not authorize enabling", capture.getvalue())
+
+    def test_verification_rejects_payloads_missing_fields_and_non_integer_timings(self):
+        good = {
+            "status": "measured",
+            "counts": dict.fromkeys(history.VERIFICATION_FIELDS, 0),
+        }
+        for data in (
+            {"status": "private document", "counts": {}},
+            {"status": "measured", "counts": {}},
+            {
+                "status": "measured",
+                "counts": {**good["counts"], "first_page_ms": "private document"},
+            },
+            {"status": "measured", "counts": {**good["counts"], "private document": 1}},
+            {"status": "measured", "counts": {**good["counts"], "first_page_ms": True}},
+        ):
+            self.logs = ["NOFO_HISTORY_VERIFICATION " + json.dumps(data)]
+            capture = io.StringIO()
+            with (
+                redirect_stdout(capture),
+                self.assertRaisesRegex(RuntimeError, "Could not confirm"),
+            ):
+                self.run_prepare(verify=True)
+            self.assertNotIn("private document", capture.getvalue())
+
+    def test_missing_selected_document_does_not_claim_measurement_success(self):
+        self.logs = [
+            "NOFO_HISTORY_VERIFICATION "
+            + json.dumps({"status": "target_missing", "counts": {}})
+        ]
+        with self.assertRaisesRegex(RuntimeError, "Could not confirm"):
+            self.run_prepare(verify=True)
 
     def test_diagnostic_mode_runs_only_read_only_source(self):
         self.logs = [

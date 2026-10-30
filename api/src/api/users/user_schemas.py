@@ -9,7 +9,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
 )
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicationStatus,
@@ -247,7 +247,7 @@ class UserSavedSearchesRequestSchema(Schema):
     )
 
 
-class UserSavedSearchesResponseSchema(AbstractResponseSchema):
+class UserSavedSearchesResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     data = fields.List(
         fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}
     )

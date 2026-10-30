@@ -1,7 +1,9 @@
+import { LOGIN_REDIRECT_STORAGE_KEY } from "src/constants/auth";
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
+import { getSafeLoginRedirect } from "src/utils/userUtils";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "./USWDSIcon";
@@ -9,36 +11,33 @@ import { USWDSIcon } from "./USWDSIcon";
 type PostAuthRedirectProps = {
   checkPiv?: boolean;
   displayMessage?: string;
-  errorMessage: string;
 };
 
 export function PostAuthRedirect({
   checkPiv,
   displayMessage,
-  errorMessage,
 }: PostAuthRedirectProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  useEffect(() => {
-    try {
-      const redirectURL = SessionStorage.getItem("post-auth-redirect");
-      SessionStorage.removeItem("post-auth-redirect");
-      if (checkPiv && searchParams.get("pivError")) {
-        SessionStorage.setItem("showPivError", "true");
-      }
+  // the saved destination is cleared on the first run, so a repeated effect run
+  // (e.g. React Strict Mode) must not navigate again to the fallback
+  const hasRedirected = useRef(false);
 
-      if (redirectURL?.substring(0, 1) !== "/") {
-        router.push("/");
-      }
-      router.push(redirectURL || "/");
-      return () => {
-        return SessionStorage.removeItem("post-auth-redirect");
-      };
-    } catch (e) {
-      console.error(errorMessage, e);
-      router.push("/");
+  useEffect(() => {
+    if (hasRedirected.current) {
+      return;
     }
-  }, [router, searchParams, errorMessage, checkPiv]);
+    hasRedirected.current = true;
+
+    const destination = getSafeLoginRedirect(
+      SessionStorage.getItem(LOGIN_REDIRECT_STORAGE_KEY),
+    );
+    SessionStorage.removeItem(LOGIN_REDIRECT_STORAGE_KEY);
+    if (checkPiv && searchParams.get("pivError")) {
+      SessionStorage.setItem("showPivError", "true");
+    }
+    router.replace(destination);
+  }, [router, searchParams, checkPiv]);
 
   return (
     <GridContainer className="margin-y-5">

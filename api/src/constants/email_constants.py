@@ -10,3 +10,4 @@ class EmailType(StrEnum):
     ORG_SAVED_OPPORTUNITY = "org_saved_opportunity"
     ORG_INVITATION = "org_invitation"
     WORKFLOW_APPROVAL = "workflow_approval"
+    ALL_NEW_OPPORTUNITIES = "all_new_opportunities"
