@@ -7284,15 +7284,6 @@ components:
           - 'null'
           description: Whether the form is deprecated
           example: false
-        form_renderer:
-          description: The frontend renderer the form uses, which sets the format
-            of form_ui_schema
-          example: sgg
-          enum:
-          - sgg
-          - jsonforms
-          type:
-          - string
     CompetitionFormAlphaSchema:
       type: object
       properties:
