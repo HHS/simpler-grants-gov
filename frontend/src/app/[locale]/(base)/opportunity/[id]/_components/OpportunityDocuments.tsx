@@ -100,7 +100,7 @@ const OpportunityDocuments = ({
           </Table>
         </>
       ) : (
-        <p>{t("noDocuments")}</p>
+        <p className="width-full">{t("noDocuments")}</p>
       )}
     </Grid>
   );
