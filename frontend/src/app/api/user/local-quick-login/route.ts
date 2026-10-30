@@ -8,7 +8,7 @@ import { NextRequest } from "next/server";
 export async function POST(request: NextRequest) {
   const { jwt } = (await request.json()) as { jwt: string };
   if (!jwt) {
-    return redirect("/unauthenticated");
+    return redirect("/login");
   }
   try {
     await createSession(jwt, newExpirationDate());

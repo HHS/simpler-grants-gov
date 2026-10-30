@@ -16,6 +16,7 @@ export type OrganizationInviteValidationErrors = {
 export type OrganizationInviteResponse = {
   data?: OrganizationInviteRecord;
   errorMessage?: string;
+  errorCode?: "AUTH_REQUIRED";
   validationErrors?: OrganizationInviteValidationErrors;
   invitationCreated?: string; // organization invitation id of created invitation
 };
@@ -49,6 +50,7 @@ export const inviteUserAction = async (
   if (!session || !session.token || !session.user_id) {
     return {
       errorMessage: "Not logged in",
+      errorCode: "AUTH_REQUIRED",
     };
   }
 

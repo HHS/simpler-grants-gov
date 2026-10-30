@@ -11,6 +11,7 @@ export type SaveOpportunityForOrganizationActionState =
   | {
       success: boolean;
       error: string | null;
+      errorCode?: "AUTH_REQUIRED";
     }
   | undefined;
 
@@ -18,6 +19,7 @@ export type DeleteSavedOpportunityForOrganizationActionState =
   | {
       success: boolean;
       error: string | null;
+      errorCode?: "AUTH_REQUIRED";
     }
   | undefined;
 
@@ -49,6 +51,7 @@ export const saveOpportunityForOrganizationAction = async ({
     return {
       success: false,
       error: "Session has expired",
+      errorCode: "AUTH_REQUIRED",
     };
   }
 
@@ -93,6 +96,7 @@ export const deleteSavedOpportunityForOrganizationAction = async ({
     return {
       success: false,
       error: "Session has expired",
+      errorCode: "AUTH_REQUIRED",
     };
   }
 

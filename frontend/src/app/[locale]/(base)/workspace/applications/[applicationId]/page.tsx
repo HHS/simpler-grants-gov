@@ -23,6 +23,7 @@ import { notFound, redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
+import { UnauthenticatedMessage } from "src/components/core/UnauthenticatedMessage";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     opportunity = opportunityResponse.data;
   } catch (e) {
     if (e instanceof MissingAuthError) {
-      return <TopLevelError />;
+      return <UnauthenticatedMessage />;
     }
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       logger.error(

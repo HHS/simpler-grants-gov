@@ -11,6 +11,7 @@ export type UpdateSavedOpportunityNotificationPreferenceActionState =
   | {
       success: boolean;
       error: string | null;
+      errorCode?: "AUTH_REQUIRED";
     }
   | undefined;
 
@@ -30,6 +31,7 @@ export const updateSavedOpportunityNotificationPreferenceAction = async ({
     return {
       success: false,
       error: t("expiredSession"),
+      errorCode: "AUTH_REQUIRED",
     };
   }
 

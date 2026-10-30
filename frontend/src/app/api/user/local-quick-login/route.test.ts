@@ -54,4 +54,14 @@ describe("/api/user/local-quick-login POST handler", () => {
     );
     expect(JSON.stringify(mockLoggerError.mock.calls)).not.toContain("fakeJwt");
   });
+
+  it("returns through /login without creating a session when no jwt is sent", async () => {
+    const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
+      POST(quickLoginRequest("")),
+    );
+
+    expect(createSessionMock).not.toHaveBeenCalled();
+    expect(redirectError.digest).toContain(";/login;");
+    expect(redirectError.digest).not.toContain("/unauthenticated");
+  });
 });
