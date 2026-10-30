@@ -141,6 +141,20 @@ class TestLoadJsonForm:
         with pytest.raises(ValueError, match="expected a JSON object"):
             load_json_form(_write_inline(tmp_path, "[]"))
 
+    def test_misspelled_schema_file_rejected(self, tmp_path: Path) -> None:
+        form_path = _write_split(tmp_path, MINIMAL_FORM)
+        (form_path.parent / "rule_schemas.json").write_text("{}")
+
+        with pytest.raises(ValueError, match=r"unknown file\(s\): rule_schemas\.json"):
+            load_json_form(form_path)
+
+    def test_checksum_and_hidden_files_allowed(self, tmp_path: Path) -> None:
+        form_path = _write_split(tmp_path, MINIMAL_FORM)
+        (form_path.parent / "checksum").write_text("abc\n")
+        (form_path.parent / ".DS_Store").write_text("")
+
+        assert load_json_form(form_path).form_name == "Example"
+
     def test_non_ascii_text_read_as_utf8(self, tmp_path: Path) -> None:
         form_path = _write_inline(tmp_path, MINIMAL_FORM | {"form_name": "Café"})
 

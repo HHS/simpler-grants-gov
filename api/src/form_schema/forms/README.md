@@ -32,6 +32,7 @@ forms/
 
 - A version has exactly one of `form_json.py` or `form.json`.
 - Each schema file is optional. A field can't be declared both inline in `form.json` and in its schema file.
+- Any other file in the folder, apart from `checksum`, is an error.
 - The version checksum covers the schema files.
 
 All existing forms are version `1/0` in this structure. The `forms/__init__.py` at

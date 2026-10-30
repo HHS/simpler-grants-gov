@@ -12,6 +12,7 @@ from src.constants.lookup_constants import FormRenderer, FormType
 from src.db.models.competition_models import Form
 
 JSON_FORM_FILENAME = "form.json"
+CHECKSUM_FILENAME = "checksum"  # written by the lock-form-version task
 
 # Set by the get_form service on each request, so a form.json never declares it.
 _EXCLUDED_FIELDS = frozenset({"form_instruction"})
@@ -63,6 +64,7 @@ def load_json_form(form_path: Path) -> Form:
     if not isinstance(data, dict):
         raise ValueError(f"{form_path}: expected a JSON object at the top level")
 
+    _check_no_unknown_files(form_path.parent)
     data = _merge_schema_files(data, form_path.parent)
 
     return build_form_from_dict(data, form_path)
@@ -107,6 +109,25 @@ def _read_json(path: Path) -> Any:
         return json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as err:
         raise ValueError(f"{path}: invalid JSON: {err}") from err
+
+
+def _check_no_unknown_files(version_dir: Path) -> None:
+    """Reject files the loader would skip, like a misspelled schema file."""
+    known = {
+        JSON_FORM_FILENAME,
+        CHECKSUM_FILENAME,
+        *(schema_file.filename for schema_file in SCHEMA_FILES.values()),
+    }
+    unknown = sorted(
+        path.name
+        for path in version_dir.iterdir()
+        if path.is_file() and not path.name.startswith(".") and path.name not in known
+    )
+    if unknown:
+        raise ValueError(
+            f"{version_dir}: unknown file(s): {', '.join(unknown)}. "
+            f"Allowed files: {', '.join(sorted(known))}"
+        )
 
 
 def _merge_schema_files(data: dict[str, Any], version_dir: Path) -> dict[str, Any]:
