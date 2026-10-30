@@ -98,7 +98,7 @@ output "sqs_config" {
   value = local.sqs_config
 }
 
-output "workflow_service_config" {
+output "submission_consumer_config" {
   value = {
     enable        = var.enable_workflow_service
     cpu           = var.workflow_service_cpu
