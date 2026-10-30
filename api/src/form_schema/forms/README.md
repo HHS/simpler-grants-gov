@@ -13,9 +13,10 @@ forms/
             └── form_json.py  # form definition: FORM_JSON_SCHEMA, FORM_UI_SCHEMA, FORM_RULE_SCHEMA, FORM_XML_TRANSFORM_RULES, and the Form object
 ```
 
-A version may instead declare itself as a `form.json`, which is what the forms in
-[`../../../../forms`](../../../../forms) generate. It keeps its large documents in sibling
-schema files:
+A version may instead be declared using a `form.json` file, which is what the forms in
+[`../../../../forms`](../../../../forms) generate. Don't edit these files by hand: change
+the form's spec in `forms/` and run `npm run sync` from there. A `form.json` breaks
+its components (JSON schema, UI schema, etc.) into sibling schema files:
 
 ```
 forms/
@@ -118,6 +119,7 @@ Our forms require the following information to create:
 * `form_type` - FormType enum - This should be used to group forms of different versions together. Generally just name this similar to the short form name without any version info.
 * `sgg_version` - `1.0` - represents a version of a form in our system, all our forms will start at `1.0`
 * `is_deprecated` - `False` - this represents whether a form is deprecated, if it's a new form, it won't be deprecated
+* `form_renderer` - FormRenderer enum - which frontend renderer displays the form, and so the format of `form_ui_schema`. Defaults to `sgg`; forms generated from `forms/` use `jsonforms`.
 
 ## Building the JSON Schema
 The JSON schema is by far the most complex part of setting up a form
