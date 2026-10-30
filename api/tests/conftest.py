@@ -334,6 +334,8 @@ def opportunity_index_alias(search_client, monkeypatch_session):
     # Note we don't actually create anything, this is just a random name
     alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
     monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+    # Drop any search config cached before this ran so the alias above is picked up
+    monkeypatch_session.setattr("src.search.search_config._search_config", None)
     return alias
 
 

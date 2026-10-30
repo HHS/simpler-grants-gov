@@ -51,7 +51,7 @@ def definition(revision=2):
 def acl():
     return {
         "Name": MARKER,
-        "VisibilityConfig": {"MetricName": MARKER},
+        "VisibilityConfig": {"MetricName": "different-visibility-metric"},
         "Rules": [
             {
                 "Name": m.RULES["emergency"],
@@ -209,7 +209,7 @@ class InspectionTests(unittest.TestCase):
         ] = "^/readability/?$"
         self.assertFalse(m.scope_matches(old, "emergency"))
 
-    def test_metric_queries_use_deployed_metric_names_not_rule_names(self):
+    def test_metric_queries_use_acl_resource_name_and_rule_metric_names(self):
         aws = FakeAws()
         m.Inspector(aws).run()
         waf_calls = [
@@ -225,6 +225,23 @@ class InspectionTests(unittest.TestCase):
             self.assertEqual(
                 next(d["Value"] for d in dims if d["Name"] == "WebACL"), MARKER
             )
+
+    def test_missing_acl_name_does_not_fall_back_to_visibility_name(self):
+        data = acl()
+        del data["Name"]
+        aws = FakeAws({("wafv2", "get-web-acl-for-resource"): {"WebACL": data}})
+        rows = m.Inspector(aws).run()
+        self.assertEqual(
+            next(r for r in rows if r["check"] == "waf")["status"],
+            "web_acl_name_missing",
+        )
+        self.assertFalse(
+            any(
+                "AWS/WAFV2" in args
+                for _, op, args in aws.calls
+                if op == "get-metric-statistics"
+            )
+        )
 
     def test_metric_sums_and_missing_names_are_explicit(self):
         aws = FakeAws(
