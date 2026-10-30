@@ -52,9 +52,19 @@ FORM_JSON_SCHEMA = {
                     "description": "Enter the contact's organizational affiliation.",
                 },
                 "address": {
-                    # Use the full address (with county/province) per the epic:
+                    # Use the full address (with county/province)
                     # the Province field is shown at all times on this form.
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+                        # if country is US, zip_code must be at least 9 characters
+                        {
+                            "if": {
+                                "properties": {"country": {"const": "USA: UNITED STATES"}},
+                                "required": ["country"],
+                            },
+                            "then": {"properties": {"zip_code": {"minLength": 9}}},
+                        },
+                    ],
                 },
                 "phone": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],

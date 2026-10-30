@@ -226,7 +226,8 @@ def test_us_additional_site_missing_state_zip_district(project_performance_site_
 
 def test_min_length_violations(project_performance_site_location_v4_0):
     """Empty string values for string fields trigger minLength errors.
-    Note: state and country use enum validation (via shared address schema) and are excluded."""
+    Note: state and country use enum validation (via shared address schema) and are excluded.
+    Note: zip_code is excluded here because non-US zip has minLength=0."""
     data = {
         "primary_site": {
             "submitting_as_individual": True,
@@ -238,7 +239,6 @@ def test_min_length_violations(project_performance_site_location_v4_0):
                 "county": "",
                 "province": "",
                 "country": "GBR: UNITED KINGDOM",
-                "zip_code": "",
             },
         }
     }
@@ -249,9 +249,45 @@ def test_min_length_violations(project_performance_site_location_v4_0):
         "$.primary_site.address.city",
         "$.primary_site.address.county",
         "$.primary_site.address.province",
-        "$.primary_site.address.zip_code",
     ]
     validate_min_length(data, expected, project_performance_site_location_v4_0)
+
+
+def test_us_zip_code_min_length(project_performance_site_location_v4_0):
+    """US zip_code shorter than 9 characters fails minLength."""
+    data = {
+        "primary_site": {
+            "submitting_as_individual": True,
+            "address": {
+                "street1": "123 Main St",
+                "city": "Springfield",
+                "state": "IL: Illinois",
+                "country": "USA: UNITED STATES",
+                "zip_code": "12345",  # 5 chars — too short for US
+            },
+            "congressional_district": "IL-013",
+        }
+    }
+    issues = validate_json_schema_for_form(data, project_performance_site_location_v4_0)
+    assert len(issues) == 1
+    assert issues[0].type == "minLength"
+    assert issues[0].field == "$.primary_site.address.zip_code"
+
+
+def test_non_us_zip_code_any_length(project_performance_site_location_v4_0):
+    """Non-US zip_code has no minimum length — empty string is valid."""
+    data = {
+        "primary_site": {
+            "submitting_as_individual": True,
+            "address": {
+                "street1": "10 Downing St",
+                "city": "London",
+                "country": "GBR: UNITED KINGDOM",
+                "zip_code": "",
+            },
+        }
+    }
+    assert validate_json_schema_for_form(data, project_performance_site_location_v4_0) == []
 
 
 def test_max_length_violations(project_performance_site_location_v4_0):

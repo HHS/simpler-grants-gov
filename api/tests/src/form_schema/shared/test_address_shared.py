@@ -73,14 +73,14 @@ def test_shared_address_v1_address_min_length():
         "city": "",
         "state": "",
         "country": "",
-        "zip_code": "",
+        # zip_code excluded: minLength is 0 at the shared level
         "county": "",
         "province": "",
     }
     schema = build_schema(ADDRESS_SHARED_V1, "address")
     validation_issues = validate_json_schema({"my_field": data}, schema)
 
-    assert len(validation_issues) == 8
+    assert len(validation_issues) == 7
     for validation_issue in validation_issues:
         if validation_issue.field in ("$.my_field.country", "$.my_field.state"):
             assert validation_issue.type == "enum"
@@ -157,12 +157,12 @@ def test_shared_address_v1_simple_address_min_length():
         "street2": "",
         "city": "",
         "state": "",
-        "zip_code": "",
+        # zip_code excluded: minLength is 0 at the shared level
     }
     schema = build_schema(ADDRESS_SHARED_V1, "simple_address")
     validation_issues = validate_json_schema({"my_field": data}, schema)
 
-    assert len(validation_issues) == 5
+    assert len(validation_issues) == 4
     for validation_issue in validation_issues:
         if validation_issue.field == "$.my_field.state":
             assert validation_issue.type == "enum"
@@ -256,12 +256,12 @@ def test_shared_address_v1_simple_address_with_country_min_length():
         "city": "",
         "state": "",
         "country": "",
-        "zip_code": "",
+        # zip_code excluded: minLength is 0 at the shared level
     }
     schema = build_schema(ADDRESS_SHARED_V1, "simple_address_with_country")
     validation_issues = validate_json_schema({"my_field": data}, schema)
 
-    assert len(validation_issues) == 6
+    assert len(validation_issues) == 5
     for validation_issue in validation_issues:
         if validation_issue.field in ("$.my_field.country", "$.my_field.state"):
             assert validation_issue.type == "enum"

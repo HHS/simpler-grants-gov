@@ -49,7 +49,7 @@ export const buildSF424HappyPathTestData = (
     applicant_city: `City ${shortSuffix}`,
     applicant_state: "AL: Alabama",
     applicant_country: "USA: UNITED STATES",
-    applicant_zip_code: "12345",
+    applicant_zip_code: "12345-6789",
     // Section 8e – Dept / Division
     department_name: `Dept ${shortSuffix}`,
     division_name: `Div ${shortSuffix}`,

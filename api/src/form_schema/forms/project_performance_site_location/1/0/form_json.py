@@ -27,7 +27,17 @@ _SITE_LOCATION_PROPERTIES = {
         "description": "Enter the UEI associated with the organization where the project will be performed.",
     },
     "address": {
-        "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+        "allOf": [
+            {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+            # if country is US, zip_code must be at least 9 characters
+            {
+                "if": {
+                    "properties": {"country": {"const": "USA: UNITED STATES"}},
+                    "required": ["country"],
+                },
+                "then": {"properties": {"zip_code": {"minLength": 9}}},
+            },
+        ],
         "title": "Address",
         "description": "Enter the performance site address.",
     },
