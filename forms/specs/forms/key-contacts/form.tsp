@@ -13,7 +13,7 @@ namespace Forms.KeyContacts;
 
 /** KEY CONTACTS, Grants.gov version 2.0. */
 @Meta.form(#{ id: "key-contacts", formName: "KEY CONTACTS" })
-@Sgg.sync(#{ instructions: "b3ce463f-1f42-4444-90c6-1f1d2c39ad83" })
+@Sgg.sync(#{ formType: "KeyContacts", instructions: "b3ce463f-1f42-4444-90c6-1f1d2c39ad83" })
 @GrantsGov.form(#{
   legacyFormId: 683,
   shortFormName: "Key_Contacts",

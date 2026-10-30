@@ -25,6 +25,12 @@ model SyncOptions {
   sggVersion?: string;
 
   /**
+   * The form's `FormType` in the API, e.g. `KeyContacts`. Leave it out for a form that
+   * has no `FormType` yet.
+   */
+  formType?: string;
+
+  /**
    * The UUID of the form's instructions: a form instruction record in the API, uploaded to
    * each environment with the API's `update-form-instruction` task. Without it, the form has
    * no instructions to download.

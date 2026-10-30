@@ -5,6 +5,7 @@ import { stateKeys } from "./lib.js";
 export interface SyncOptions {
   xml: boolean;
   sggVersion: string;
+  formType?: string;
   instructions?: string;
 }
 
@@ -12,10 +13,11 @@ export interface SyncOptions {
 export const $sync = (
   ctx: DecoratorContext,
   target: Model,
-  options?: { xml?: boolean; sggVersion?: string; instructions?: string },
+  options?: { xml?: boolean; sggVersion?: string; formType?: string; instructions?: string },
 ) =>
   ctx.program.stateMap(stateKeys.sync).set(target, {
     xml: options?.xml ?? true,
     sggVersion: options?.sggVersion ?? "1.0",
+    ...(options?.formType && { formType: options.formType }),
     ...(options?.instructions && { instructions: options.instructions }),
   } satisfies SyncOptions);
