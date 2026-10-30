@@ -92,6 +92,7 @@ export interface UserDetailWithProfile {
 export interface UserProfileResponse {
   validationErrors?: UserProfileValidationErrors;
   errorMessage?: string;
+  errorCode?: "AUTH_REQUIRED";
   data?: UserDetailProfile;
   success?: boolean;
 }

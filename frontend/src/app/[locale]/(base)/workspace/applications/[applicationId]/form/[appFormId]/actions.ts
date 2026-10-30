@@ -15,6 +15,7 @@ import {
 type ApplyFormResponse = {
   applicationId: string;
   error: boolean;
+  errorCode?: "AUTH_REQUIRED";
   formData: object;
   formId: string;
   saved: boolean;
@@ -30,6 +31,7 @@ export async function handleFormAction(
     return {
       applicationId,
       error: true,
+      errorCode: "AUTH_REQUIRED" as const,
       formData,
       formId,
       saved: false,

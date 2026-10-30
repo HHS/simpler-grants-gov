@@ -43,6 +43,7 @@ describe("updateSavedOpportunityNotificationPreferenceAction", () => {
     expect(result).toEqual({
       success: false,
       error: "expiredSession",
+      errorCode: "AUTH_REQUIRED",
     });
 
     expect(
@@ -64,6 +65,7 @@ describe("updateSavedOpportunityNotificationPreferenceAction", () => {
     expect(result).toEqual({
       success: false,
       error: "expiredSession",
+      errorCode: "AUTH_REQUIRED",
     });
 
     expect(
