@@ -116,11 +116,16 @@ feature flags.
 The merge-triggered deployment builds Builder's current `main`; it does not
 honor a separately selected Builder version. For a bounded dev session, the
 named deployment owner must confirm that no unrelated Builder deployment is
-planned, record the actual deployed Builder commit after each stage, and repeat
-the baseline check after each deployment. Stop and investigate if that baseline
-changes unexpectedly. A formal Builder-main freeze or a revision-aware deployment
-path may be used when required by the environment, but neither is required for
-this dev-only procedure.
+planned, record the actual deployed Builder commit after each stage, and check
+the stage-specific responses below after each deployment, using that stage's
+existing request allowance rather than an additional baseline pass. During
+emergency blocking, expect WAF 403 on all scoped paths, not the application's
+unavailable page. Verify the stored public-uploads flag remains off through
+Builder administration or another authorized configuration read; the WAF 403
+cannot establish the application's flag state. Stop and investigate unexpected
+responses or configuration changes. A formal Builder-main freeze or a
+revision-aware deployment path may be used when required by the environment,
+but neither is required for this dev-only procedure.
 
 For each activation or restoration stage, update `pdf_readability_waf` in
 `infra/nofos/app-config/infra-dev.tf` **and** the matching expected mode in
@@ -168,7 +173,9 @@ do not publish response bodies, cookies, IP addresses or raw logs.
 | Emergency enforcement | rate `block`, emergency `true`; matching stage-specific Terraform expectation | One GET and empty POST per path, plus GET `/health`: 9 | All eight scoped requests return 403; emergency BlockedRequests corroborate interception. Health remains available. The higher-priority emergency rule terminates before the rate rule. |
 | Restoration | rate `count`, emergency `false`; baseline Terraform expectation restored | Repeat baseline: 9 | Inspection confirms original modes; expected disabled-page responses and unrelated-route availability return. |
 
-The whole session has a **90-request ceiling**. Each active rate/recovery phase
+The whole session has a **90-request ceiling**, including all post-deployment
+HTTP checks. Reserve the final nine requests for restoration; do not add a
+separate baseline pass between stages. Each active rate/recovery phase
 has a 10-minute wall-clock ceiling excluding deployment time. Stop POST traffic
 early once adequate interception evidence is obtained. Rate enforcement is
 approximate; request eleven is not a promised boundary. No block within these
