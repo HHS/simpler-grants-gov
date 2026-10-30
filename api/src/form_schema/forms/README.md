@@ -33,6 +33,7 @@ forms/
 - A version has exactly one of `form_json.py` or `form.json`.
 - Each schema file is optional. A field can't be declared both inline in `form.json` and in its schema file.
 - Any other file in the folder, apart from `checksum`, is an error.
+- JSON has no UUID, date or enum types, so `form.json` writes those values as strings (`"form_id": "1623b310-..."`, `"expiration_date": "2029-03-31"`, `"form_renderer": "jsonforms"`) and the loader parses them. `legacy_form_id` is a number, and `is_deprecated` is a boolean.
 - The version checksum covers the schema files.
 
 All existing forms are version `1/0` in this structure. The `forms/__init__.py` at
