@@ -172,6 +172,18 @@ describe("NotificationPreferenceCard", () => {
     );
   });
 
+  it("applies additional className to the card", () => {
+    const { container } = render(
+      <NotificationPreferenceCard {...baseProps} className="a" />,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(container.firstChild).toHaveClass(
+      "notification-preference-card",
+      "a",
+    );
+  });
+
   it("constructs aria-describedby from description id", () => {
     render(<NotificationPreferenceCard {...baseProps} />);
 
