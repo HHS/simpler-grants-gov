@@ -84,9 +84,10 @@ FORM_JSON_SCHEMA = {
             "type": "object",
             "required": ["name", "title", "address", "phone_number", "email"],
             "properties": {
+                # No title on purpose: the frontend prefixes required messages with the
+                # parent's title, which would read "Name First Name is required".
                 "name": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
-                    "title": "Name",
                     "description": "Enter the name.",
                 },
                 "title": {

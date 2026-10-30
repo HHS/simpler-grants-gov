@@ -678,3 +678,13 @@ def test_sf424_short_v3_0_post_population(
     assert app_json["date_received"] == "2023-02-20"
     assert app_json["authorized_representative_date_signed"] == "2023-02-20"
     assert app_json["aor_signature"] == "mynewmail@example.com"
+
+
+@pytest.mark.parametrize("group", ["project_director", "contact_person"])
+def test_sf424_short_v3_0_contact_name_has_no_title(sf424_short_v3_0, group):
+    """Without a title, required errors read "First Name is required" rather than
+    "Name First Name is required"."""
+    group_schema = sf424_short_v3_0.form_json_schema["properties"][group]["allOf"][0]
+    name_schema = group_schema["properties"]["name"]
+
+    assert all("title" not in part for part in [name_schema, *name_schema.get("allOf", [])])
