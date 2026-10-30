@@ -28,33 +28,33 @@ resource "aws_iam_role_policy_attachment" "opensearch_write_db_access" {
 }
 
 #--------------------
-# Workflow Service Role Attachments
+# Submission Consumer Role Attachments
 #--------------------
 
-resource "aws_iam_role_policy_attachment" "workflow_service_ingest" {
+resource "aws_iam_role_policy_attachment" "submission_consumer_ingest" {
   count = var.opensearch_ingest_policy_arn != null ? 1 : 0
 
-  role       = aws_iam_role.workflow_service[0].name
+  role       = aws_iam_role.submission_consumer[0].name
   policy_arn = var.opensearch_ingest_policy_arn
 }
 
-resource "aws_iam_role_policy_attachment" "workflow_service_runtime_logs" {
+resource "aws_iam_role_policy_attachment" "submission_consumer_runtime_logs" {
   count = var.opensearch_ingest_policy_arn != null ? 1 : 0
 
-  role       = aws_iam_role.workflow_service[0].name
+  role       = aws_iam_role.submission_consumer[0].name
   policy_arn = aws_iam_policy.runtime_logs.arn
 }
 
-resource "aws_iam_role_policy_attachment" "workflow_service_db_access" {
+resource "aws_iam_role_policy_attachment" "submission_consumer_db_access" {
   count = var.opensearch_ingest_policy_arn != null && var.db_vars != null ? 1 : 0
 
-  role       = aws_iam_role.workflow_service[0].name
+  role       = aws_iam_role.submission_consumer[0].name
   policy_arn = var.db_vars.app_access_policy_arn
 }
 
-resource "aws_iam_role_policy_attachment" "workflow_service_email_access" {
+resource "aws_iam_role_policy_attachment" "submission_consumer_email_access" {
   count = var.opensearch_ingest_policy_arn != null && length(var.pinpoint_app_id) > 0 ? 1 : 0
 
-  role       = aws_iam_role.workflow_service[0].name
+  role       = aws_iam_role.submission_consumer[0].name
   policy_arn = aws_iam_policy.email_access[0].arn
 }

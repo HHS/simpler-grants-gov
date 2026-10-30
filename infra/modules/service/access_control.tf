@@ -28,11 +28,11 @@ resource "aws_iam_role" "opensearch_write" {
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
-# Dedicated role for the workflow service
-resource "aws_iam_role" "workflow_service" {
+# Dedicated role for the submission consumer
+resource "aws_iam_role" "submission_consumer" {
   count = var.opensearch_ingest_policy_arn != null ? 1 : 0
 
-  name               = "${var.service_name}-workflow"
+  name               = "${var.service_name}-submission-consumer"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
