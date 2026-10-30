@@ -104,7 +104,7 @@ def schema_file_paths(version_dir: Path) -> list[Path]:
 def _read_json(path: Path) -> Any:
     """Decode a JSON file, naming the file in the error if it doesn't parse."""
     try:
-        return json.loads(path.read_text())
+        return json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as err:
         raise ValueError(f"{path}: invalid JSON: {err}") from err
 
