@@ -2,6 +2,7 @@
 
 import dataclasses
 import json
+import typing
 import uuid
 from datetime import date, datetime
 from pathlib import Path
@@ -13,6 +14,7 @@ from src.constants.lookup_constants import FormRenderer, FormType
 from src.db.models.competition_models import Form, FormInstruction
 from src.form_schema.forms._json_form import (
     JSON_FORM_FILENAME,
+    FormJson,
     build_form_from_dict,
     load_json_form,
 )
@@ -78,6 +80,47 @@ def _write_split(tmp_path: Path, data: dict[str, Any], name: str = "split") -> P
     (version_dir / JSON_FORM_FILENAME).write_text(json.dumps(envelope))
 
     return version_dir / JSON_FORM_FILENAME
+
+
+class TestFormJsonMatchesForm:
+    """FormJson declares every Form field with the same type and default, except these."""
+
+    # Set by the get_form service on each request, so a form.json never declares it.
+    FORM_ONLY_FIELDS = frozenset({"form_instruction"})
+    # A field here must also be dropped before build_form_from_dict passes it to Form.
+    FORM_JSON_ONLY_FIELDS: frozenset[str] = frozenset()
+    # Form annotates form_ui_schema as dict, but SGG forms store a list there.
+    DIFFERENT_TYPE_FIELDS = frozenset({"form_ui_schema"})
+
+    form_fields = {f.name: f for f in dataclasses.fields(Form)}
+    form_types = typing.get_type_hints(Form)
+    json_fields = FormJson.model_fields
+    shared_fields = sorted(set(form_fields) - FORM_ONLY_FIELDS)
+
+    def test_same_field_names(self) -> None:
+        assert set(self.json_fields) - self.FORM_JSON_ONLY_FIELDS == set(self.shared_fields)
+
+    def test_same_field_types(self) -> None:
+        same_type_fields = set(self.shared_fields) - self.DIFFERENT_TYPE_FIELDS
+        json_types = {name: self.json_fields[name].annotation for name in same_type_fields}
+        form_types = {name: self.form_types[name] for name in same_type_fields}
+        assert json_types == form_types
+
+    def test_same_field_defaults(self) -> None:
+        json_defaults = {
+            name: dataclasses.MISSING if field.is_required() else field.default
+            for name, field in self.json_fields.items()
+            if name in self.shared_fields
+        }
+        form_defaults = {name: self.form_fields[name].default for name in self.shared_fields}
+        assert json_defaults == form_defaults
+
+    def test_divergent_fields_listed_on_the_right_side(self) -> None:
+        """Catch an exception that no longer applies, like a field since added to both."""
+        assert self.FORM_ONLY_FIELDS <= set(self.form_fields) - set(self.json_fields)
+        assert self.FORM_JSON_ONLY_FIELDS <= set(self.json_fields) - set(self.form_fields)
+        for name in self.DIFFERENT_TYPE_FIELDS:
+            assert self.json_fields[name].annotation != self.form_types[name], name
 
 
 class TestLoadJsonForm:
@@ -188,23 +231,51 @@ class TestBuildFormFromDict:
     @pytest.mark.parametrize(
         ("field", "value", "error"),
         [
-            ("form_id", "not-a-uuid", "not a valid UUID"),
-            ("active_at", "the fifteenth", "not a valid ISO 8601 datetime"),
-            ("expiration_date", "March", "not a valid ISO 8601 date"),
-            ("form_type", "NotAForm", "not a known FormType"),
-            ("form_renderer", "rjsf", r"not a known FormRenderer \(sgg, jsonforms\)"),
+            ("form_id", "not-a-uuid", "form_id: Input should be a valid UUID"),
+            ("active_at", "the fifteenth", "active_at: Input should be a valid datetime"),
+            ("active_at", 1768435200, "active_at: Input should be a valid datetime"),
+            ("expiration_date", "March", "expiration_date: Input should be a valid date"),
+            ("form_type", "NotAForm", "form_type: Input should be 'SF424'"),
+            ("form_renderer", "rjsf", "form_renderer: Input should be 'sgg' or 'jsonforms'"),
         ],
     )
-    def test_unparseable_field_rejected(self, field: str, value: str, error: str) -> None:
+    def test_unparseable_field_rejected(self, field: str, value: Any, error: str) -> None:
         with pytest.raises(ValueError, match=error):
             build_form_from_dict(MINIMAL_FORM | {field: value}, Path("form.json"))
+
+    @pytest.mark.parametrize(
+        ("field", "value", "error"),
+        [
+            ("is_deprecated", "false", "is_deprecated: Input should be a valid boolean"),
+            ("form_id", 123, "form_id: UUID input should be a string"),
+            ("form_renderer", None, "form_renderer: Input should be 'sgg' or 'jsonforms'"),
+            ("form_name", None, "form_name: Input should be a valid string"),
+            ("legacy_form_id", "683", "legacy_form_id: Input should be a valid integer"),
+            ("legacy_form_id", True, "legacy_form_id: Input should be a valid integer"),
+            ("form_json_schema", [], "form_json_schema: Input should be an object"),
+            ("form_ui_schema", "", "form_ui_schema: Input should be an object"),
+        ],
+    )
+    def test_wrong_json_type_rejected(self, field: str, value: Any, error: str) -> None:
+        with pytest.raises(ValueError, match=error):
+            build_form_from_dict(MINIMAL_FORM | {field: value}, Path("form.json"))
+
+    @pytest.mark.parametrize("field", ["omb_number", "form_instruction_id", "is_deprecated"])
+    def test_null_allowed_for_optional_field(self, field: str) -> None:
+        form = build_form_from_dict(MINIMAL_FORM | {field: None}, Path("form.json"))
+        assert getattr(form, field) is None
+
+    def test_every_bad_field_reported(self) -> None:
+        data = MINIMAL_FORM | {"is_deprecated": "false", "legacy_form_id": "683"}
+        with pytest.raises(ValueError, match="legacy_form_id: .*; is_deprecated: "):
+            build_form_from_dict(data, Path("form.json"))
 
     def test_form_renderer_defaults_to_sgg(self) -> None:
         form = build_form_from_dict(MINIMAL_FORM, Path("form.json"))
         assert form.form_renderer is FormRenderer.SGG
 
     def test_unknown_field_rejected(self) -> None:
-        with pytest.raises(ValueError, match="unknown field"):
+        with pytest.raises(ValueError, match="form_nmae: Extra inputs are not permitted"):
             build_form_from_dict(MINIMAL_FORM | {"form_nmae": "typo"}, Path("form.json"))
 
     def test_missing_required_field_rejected(self) -> None:

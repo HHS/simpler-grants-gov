@@ -1,12 +1,12 @@
 """Build a Form from a form.json and the schema files beside it."""
 
-import dataclasses
 import json
 import uuid
-from collections.abc import Callable
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any, NamedTuple
+
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from src.constants.lookup_constants import FormRenderer, FormType
 from src.db.models.competition_models import Form
@@ -14,31 +14,38 @@ from src.db.models.competition_models import Form
 JSON_FORM_FILENAME = "form.json"
 CHECKSUM_FILENAME = "checksum"  # written by the lock-form-version task
 
-# Set by the get_form service on each request, so a form.json never declares it.
-_EXCLUDED_FIELDS = frozenset({"form_instruction"})
 
+class FormJson(BaseModel):
+    """The fields a form.json declares, mirroring the Form dataclass it builds.
 
-class _FieldParser(NamedTuple):
-    """How to parse a Form field that JSON stores as a string."""
+    Keep the fields in sync with Form: TestFormJsonMatchesForm in test_json_form.py
+    checks their names, types and defaults, and lists the fields that intentionally
+    differ, like form_instruction, which the get_form service sets on each request.
+    """
 
-    parse: Callable[[str], Any]
-    expected: str  # what the value should be, for the error message
+    # Strict, so "false" isn't read as a boolean or "683" as an integer. A string still
+    # fills a UUID, date or enum field when validating JSON text, since JSON has no such types.
+    model_config = ConfigDict(strict=True, extra="forbid")
 
-
-def _enum_parser(enum: type[FormType] | type[FormRenderer]) -> _FieldParser:
-    valid = ", ".join(member.value for member in enum)
-    return _FieldParser(enum, f"a known {enum.__name__} ({valid})")
-
-
-_FIELD_PARSERS = {
-    "form_id": _FieldParser(uuid.UUID, "a valid UUID"),
-    "form_instruction_id": _FieldParser(uuid.UUID, "a valid UUID"),
-    "active_at": _FieldParser(datetime.fromisoformat, "a valid ISO 8601 datetime"),
-    "inactive_at": _FieldParser(datetime.fromisoformat, "a valid ISO 8601 datetime"),
-    "expiration_date": _FieldParser(date.fromisoformat, "a valid ISO 8601 date"),
-    "form_type": _enum_parser(FormType),
-    "form_renderer": _enum_parser(FormRenderer),
-}
+    form_id: uuid.UUID
+    form_name: str
+    short_form_name: str
+    form_version: str
+    agency_code: str
+    form_json_schema: dict
+    form_ui_schema: dict | list  # a list for the SGG renderer, an object for JSON Forms
+    omb_number: str | None = None
+    expiration_date: date | None = None
+    legacy_form_id: int | None = None
+    active_at: datetime | None = None
+    inactive_at: datetime | None = None
+    form_instruction_id: uuid.UUID | None = None
+    form_rule_schema: dict | None = None
+    json_to_xml_schema: dict | None = None
+    form_type: FormType | None = None
+    sgg_version: str | None = None
+    is_deprecated: bool | None = None
+    form_renderer: FormRenderer = FormRenderer.SGG
 
 
 class SchemaFile(NamedTuple):
@@ -72,29 +79,15 @@ def load_json_form(form_path: Path) -> Form:
 
 def build_form_from_dict(data: dict[str, Any], path: Path) -> Form:
     """Build a Form from decoded JSON, parsing the fields JSON can't represent."""
-    allowed = {f.name for f in dataclasses.fields(Form)} - _EXCLUDED_FIELDS
-
-    unknown = sorted(set(data) - allowed)
-    if unknown:
-        raise ValueError(
-            f"{path}: unknown field(s): {', '.join(unknown)}. "
-            f"Allowed fields: {', '.join(sorted(allowed))}"
-        )
-
-    kwargs = dict(data)
-
-    for field, parser in _FIELD_PARSERS.items():
-        value = kwargs.get(field)
-        if isinstance(value, str):
-            try:
-                kwargs[field] = parser.parse(value)
-            except ValueError as err:
-                raise ValueError(f"{path}: {field} is not {parser.expected}: {value!r}") from err
-
     try:
-        return Form(**kwargs)
-    except TypeError as err:
-        raise ValueError(f"{path}: {err}") from err
+        # Validate JSON text, not the dict: strict mode reads a string as a UUID, date or
+        # enum only when it parses JSON.
+        form_json = FormJson.model_validate_json(json.dumps(data))
+    except ValidationError as err:
+        errors = "; ".join(f"{error['loc'][0]}: {error['msg']}" for error in err.errors())
+        raise ValueError(f"{path}: {errors}") from err
+
+    return Form(**form_json.model_dump())
 
 
 def schema_file_paths(version_dir: Path) -> list[Path]:
