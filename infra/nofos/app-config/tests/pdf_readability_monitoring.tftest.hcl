@@ -22,10 +22,10 @@ run "only_infra_dev_gets_private_routing_and_calculator_notifications" {
   }
   assert {
     condition = (
-      output.environment_configs["infra-dev"].service_config.pdf_readability_waf.rate_action == "block" &&
+      output.environment_configs["infra-dev"].service_config.pdf_readability_waf.rate_action == "count" &&
       output.environment_configs["infra-dev"].service_config.pdf_readability_waf.rate_limit == 10 &&
       !output.environment_configs["infra-dev"].service_config.pdf_readability_waf.emergency_block
     )
-    error_message = "The temporary dev rate-enforcement test must preserve the existing rate limit and leave emergency blocking off."
+    error_message = "Notification activation must leave dev WAF observation mode and the existing rate limit unchanged."
   }
 }
