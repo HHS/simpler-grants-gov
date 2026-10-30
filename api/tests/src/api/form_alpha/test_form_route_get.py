@@ -1,7 +1,7 @@
 import uuid
 from unittest import mock
 
-from src.constants.lookup_constants import FormType
+from src.constants.lookup_constants import FormRenderer, FormType
 from src.db.models.competition_models import FormInstruction
 from src.form_schema.forms import SF424_v4_0
 
@@ -103,7 +103,7 @@ def test_form_get_401_unauthorized(client, enable_factory_create, seed_form_regi
 def test_form_get_with_new_fields_200(
     client, user_api_key_id, enable_factory_create, seed_form_registry
 ):
-    """Test getting a form with form_type, sgg_version, and is_deprecated fields"""
+    """Test getting a form with form_type, sgg_version, is_deprecated and form_renderer fields"""
     # SF424_v4_0 has form_type=SF424, sgg_version="1.0", is_deprecated=False
     resp = client.get(f"/alpha/forms/{SF424_v4_0.form_id}", headers={"X-API-Key": user_api_key_id})
 
@@ -114,3 +114,4 @@ def test_form_get_with_new_fields_200(
     assert response_form["form_type"] == FormType.SF424.value
     assert response_form["sgg_version"] == "1.0"
     assert response_form["is_deprecated"] is False
+    assert response_form["form_renderer"] == FormRenderer.SGG.value

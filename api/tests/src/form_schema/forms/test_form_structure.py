@@ -5,6 +5,9 @@ from pathlib import Path
 
 import pytest
 
+from src.db.models.competition_models import Form
+from src.form_schema.forms._loader import DEFINITION_FILENAMES, load_versioned_form
+
 FORMS_ROOT = Path(__file__).parents[4] / "src" / "form_schema" / "forms"
 SKIP = {"__pycache__"}
 
@@ -31,10 +34,31 @@ def test_config_fields(form_dir: Path) -> None:
 def test_versioned_form_json_exists(form_dir: Path) -> None:
     versioned = [
         p
-        for p in form_dir.rglob("form_json.py")
+        for filename in DEFINITION_FILENAMES
+        for p in form_dir.rglob(filename)
         if re.fullmatch(r"\d+", p.parent.name) and re.fullmatch(r"\d+", p.parent.parent.name)
     ]
-    assert versioned, f"{form_dir.name} has no form_json.py at <major>/<minor>/form_json.py"
+    assert versioned, f"{form_dir.name} has no form_json.py or form.json at <major>/<minor>/"
+
+
+@pytest.mark.parametrize("form_dir", get_form_dirs(), ids=lambda d: d.name)
+def test_config_matches_each_version(form_dir: Path) -> None:
+    config = importlib.import_module(f"src.form_schema.forms.{form_dir.name}.config")
+    versions = [
+        f"{v.parent.name}.{v.name}"
+        for v in sorted(form_dir.glob("*/*"))
+        if v.is_dir() and re.fullmatch(r"\d+", v.name) and re.fullmatch(r"\d+", v.parent.name)
+    ]
+
+    for version in versions:
+        module = load_versioned_form(form_dir, version)
+        forms = [value for value in vars(module).values() if isinstance(value, Form)]
+        assert len(forms) == 1, f"{form_dir.name} v{version} defines {len(forms)} Forms"
+        form = forms[0]
+        assert form.form_id == config.FORM_ID, f"{form_dir.name} v{version} form_id"
+        assert (
+            form.short_form_name == config.SHORT_FORM_NAME
+        ), f"{form_dir.name} v{version} short_form_name"
 
 
 @pytest.mark.parametrize("form_dir", get_form_dirs(), ids=lambda d: d.name)
