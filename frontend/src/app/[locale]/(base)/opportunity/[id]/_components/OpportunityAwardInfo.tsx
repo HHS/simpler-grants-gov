@@ -13,6 +13,8 @@ type Props = {
 };
 
 type TranslationKeys =
+  | "programFunding"
+  | "expectedAwards"
   | "costSharing"
   | "fundingInstrument"
   | "opportunityCategory"
@@ -32,34 +34,46 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
       case "boolean":
         return content ? t("yes") : t("no");
       case "string":
-        return (
-          <p className="line-height-sans-1">
-            {formatStringReturnValue(content)}
-          </p>
-        );
-      case "object":
-        if (Array.isArray(content)) {
-          return content.length
-            ? content.map((content, index) => (
-                <p className="line-height-sans-1" key={`contentList-${index}`}>
-                  {formatStringReturnValue(content)}
-                </p>
-              ))
-            : "--";
+        return content.trim()
+          ? formatStringReturnValue(content)
+          : t("notSpecified");
+      case "object": {
+        const items = Array.isArray(content)
+          ? content.filter((item) => item.trim())
+          : [];
+        if (items.length) {
+          return (
+            <ul className="usa-list margin-y-0">
+              {items.map((item, index) => (
+                <li key={`contentList-${index}`}>
+                  {formatStringReturnValue(item)}
+                </li>
+              ))}
+            </ul>
+          );
         }
-        return "--";
+        return t("notSpecified");
+      }
       default:
-        return "--";
+        return t("notSpecified");
     }
   };
 
+  // formatCurrency returns an empty string for 0, which is a real amount
+  const formatAmount = (amount: number | null) =>
+    amount === 0 ? "$0" : formatCurrency(amount);
+
+  const fundingSummaryInfo = {
+    programFunding:
+      formatAmount(opportunityData.summary.estimated_total_program_funding) ||
+      t("notSpecified"),
+    expectedAwards:
+      opportunityData.summary.expected_number_of_awards ?? t("notSpecified"),
+  };
+
   const awardGridInfo = {
-    programFunding: formatCurrency(
-      opportunityData.summary.estimated_total_program_funding,
-    ),
-    expectedAwards: opportunityData.summary.expected_number_of_awards,
-    awardFloor: formatCurrency(opportunityData.summary.award_floor),
-    awardCeiling: formatCurrency(opportunityData.summary.award_ceiling),
+    awardFloor: formatAmount(opportunityData.summary.award_floor),
+    awardCeiling: formatAmount(opportunityData.summary.award_ceiling),
   };
 
   const awardSubInfo = {
@@ -74,8 +88,24 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
 
   return (
     <div className="margin-top-4">
-      <h2>Award</h2>
-      <Grid row className="margin-top-2 grid-gap-2">
+      <h2>{t("title")}</h2>
+      <div
+        className="border radius-md border-base-lighter padding-x-2 padding-y-1 margin-top-2 margin-bottom-2"
+        data-testid="opportunity-funding-summary"
+      >
+        <ul className="usa-list usa-list--unstyled">
+          {Object.entries(fundingSummaryInfo).map(([title, content]) => (
+            <li key={title} className="margin-y-1">
+              <strong>
+                {t(title as TranslationKeys)}
+                {":"}
+              </strong>{" "}
+              {content}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <Grid row className="grid-gap-2">
         {Object.entries(awardGridInfo).map(([title, content], index) => (
           <Grid
             className="margin-bottom-2"
@@ -89,16 +119,19 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
           </Grid>
         ))}
       </Grid>
-
-      {Object.entries(awardSubInfo).map(([title, content], index) => (
-        <div key={`awardInfo-${index}`}>
-          <p className={"text-bold"}>
-            {t(`${title as TranslationKeys}`)}
-            {":"}
-          </p>
-          <div>{formatSubContent(content)}</div>
-        </div>
-      ))}
+      <div className="border radius-md border-base-lighter padding-x-2 padding-y-1">
+        <ul className="usa-list usa-list--unstyled">
+          {Object.entries(awardSubInfo).map(([title, content]) => (
+            <li key={title} className="margin-y-105">
+              <span className="display-block text-bold">
+                {t(`${title as TranslationKeys}`)}
+                {":"}
+              </span>
+              {formatSubContent(content)}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

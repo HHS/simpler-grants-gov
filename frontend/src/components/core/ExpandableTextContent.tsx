@@ -9,18 +9,20 @@ export const ExpandableTextContent = ({
   hideCallToAction,
   splitAt = 600,
   splitIfLongerThan = 750,
+  emptyText = "--",
 }: {
   textContent: string;
   showCallToAction: string;
   hideCallToAction: string;
   splitAt?: number;
   splitIfLongerThan?: number;
+  emptyText?: string;
 }) => {
   if (textContent?.length < splitIfLongerThan) {
     return (
       <div
         dangerouslySetInnerHTML={{
-          __html: textContent ? DOMPurify.sanitize(textContent) : "--",
+          __html: textContent ? DOMPurify.sanitize(textContent) : emptyText,
         }}
       />
     );
@@ -34,7 +36,7 @@ export const ExpandableTextContent = ({
     return (
       <div
         dangerouslySetInnerHTML={{
-          __html: textContent ? DOMPurify.sanitize(textContent) : "--",
+          __html: textContent ? DOMPurify.sanitize(textContent) : emptyText,
         }}
       />
     );

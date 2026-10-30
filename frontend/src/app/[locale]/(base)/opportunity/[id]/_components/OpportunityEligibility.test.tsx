@@ -11,6 +11,18 @@ const fakeApplicantTypes = [
 ];
 
 describe("OpportunityEligibility", () => {
+  it("renders each applicant group as a level 3 heading", () => {
+    render(<OpportunityEligibility applicantTypes={fakeApplicantTypes} />);
+
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Government" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Nonprofit" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 4 })).not.toBeInTheDocument();
+  });
+
   it("renders the eligible applicant types with mapped values", () => {
     render(<OpportunityEligibility applicantTypes={fakeApplicantTypes} />);
 
