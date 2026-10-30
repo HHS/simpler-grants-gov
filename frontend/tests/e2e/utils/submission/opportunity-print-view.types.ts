@@ -1,4 +1,5 @@
 import type { FillFormConfig } from "tests/e2e/utils/common/types";
+import type { XmlFieldMap } from "tests/e2e/utils/submission/xml-field-utils";
 
 /**
  * Per-form print view configuration, exported from each form's data file.
@@ -20,9 +21,15 @@ export interface PrintViewFormData {
    * Called by buildHappyPathTestData() in print-view-utils.ts.
    */
   buildTestData: (suffix: number) => Record<string, string>;
+  /**
+   * Optional: field key -> GrantApplication.xml element, used by the submission
+   * zip spec. Keys match fill-data / expectedPrepopulatedFields keys, or system
+   * post-populated fields (e.g. signature) supplied by the spec at runtime.
+   */
+  xmlFields?: XmlFieldMap;
 }
 
-// Resolved form returned by the loader after mapping formKey → FillFormConfig
+// Resolved form returned by the loader after mapping formKey -> FillFormConfig
 export interface ResolvedPrintViewForm {
   formKey: string;
   formConfig: FillFormConfig;
@@ -31,11 +38,13 @@ export interface ResolvedPrintViewForm {
   /** String values are exact matches; RegExp values validate format only. */
   expectedPrepopulatedFields: Record<string, string | RegExp>;
   /**
-   * Maps fill-data key → print view testId.
+   * Maps fill-data key -> print view testId.
    * Derived from formConfig.fields using printTestId ?? testId.
    * Only includes fields that have at least one testId defined.
    */
   userEnteredFieldTestIds: Record<string, string>;
+  /** Passed through from PrintViewFormData for the submission zip spec. */
+  xmlFields?: XmlFieldMap;
 }
 
 // Resolved opportunity config returned by loadOpportunityConfig()

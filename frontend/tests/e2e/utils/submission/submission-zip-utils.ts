@@ -1,0 +1,240 @@
+/**
+ * Utilities for downloading, unzipping, and verifying the contents of an
+ * application submission zip file in Playwright e2e tests.
+ *
+ * The submission zip produced by CreateApplicationSubmissionTask contains:
+ *   - <ShortFormName>.pdf - one per included form (e.g. "SF424B.pdf")
+ *   - GrantApplication.xml - full submission XML (if XML generation is enabled)
+ *   - manifest.txt - human-readable manifest listing every file
+ *
+ * Uses @zip.js/zip.js (an existing project dependency, already used for zip
+ * handling in src/utils/opportunity/zipUtils.ts) rather than adding a new
+ * zip library.
+ */
+
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
+import { expect, type Page } from "@playwright/test";
+import * as zip from "@zip.js/zip.js";
+import { extractText } from "unpdf";
+
+// zip.js defaults to Web Workers, which aren't available in a plain Node
+// (Playwright test) process - run inline instead.
+zip.configure({ useWebWorkers: false });
+
+export interface ZipContents {
+  /** Raw bytes keyed by file name (e.g. "SF424B.pdf", "GrantApplication.xml") */
+  files: Map<string, Uint8Array>;
+}
+
+/**
+ * Waits for the submission zip to be ready, then for the download button to be enabled.
+ *
+ * The button is only rendered once the application status is ACCEPTED. Until then
+ * (status SUBMITTED) the page shows a "being prepared" message, and the page is
+ * server-rendered, so it must be reloaded to pick up the status change.
+ *
+ * @param page Playwright Page object, already on the application page
+ * @param timeoutMs How long to wait for the zip to be built (default 90s)
+ */
+export async function waitForSubmissionZipReady(
+  page: Page,
+  timeoutMs = 90_000,
+): Promise<void> {
+  const downloadButton = page.getByTestId("application-submission-download");
+  const preparingMessage = page.getByTestId(
+    "application-submission-download-message",
+  );
+
+  try {
+    await expect(async () => {
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await expect(downloadButton).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: timeoutMs, intervals: [2_000, 3_000, 5_000] });
+  } catch (error) {
+    const stillPreparing = await preparingMessage
+      .isVisible()
+      .catch(() => false);
+    throw new Error(
+      stillPreparing
+        ? `Submission zip was not ready after ${timeoutMs}ms: the application is still SUBMITTED ` +
+            "(the submission consumer / create-application-submission task has not processed it)."
+        : `Submission download button not found after ${timeoutMs}ms.`,
+      { cause: error },
+    );
+  }
+
+  await expect(downloadButton).toBeEnabled({ timeout: 10_000 });
+}
+
+/**
+ * Waits for the submission zip to be ready, clicks the download button,
+ * waits for the browser download event, saves the file to a temp path,
+ * unzips it in memory via @zip.js/zip.js, and returns a map of
+ * file name → bytes for every entry in the zip.
+ *
+ * @param page Playwright Page object
+ */
+export async function downloadAndUnzipSubmission(
+  page: Page,
+): Promise<ZipContents> {
+  await waitForSubmissionZipReady(page);
+
+  const downloadButton = page.getByTestId("application-submission-download");
+
+  const downloadPromise = page.waitForEvent("download");
+  await downloadButton.click();
+  const download = await downloadPromise;
+
+  const tmpPath = path.join(
+    os.tmpdir(),
+    `submission-${Date.now()}-${process.pid}.zip`,
+  );
+
+  try {
+    await download.saveAs(tmpPath);
+
+    const zipBytes = new Uint8Array(await fs.promises.readFile(tmpPath));
+    const files = new Map<string, Uint8Array>();
+
+    const zipReader = new zip.ZipReader(new zip.Uint8ArrayReader(zipBytes));
+
+    try {
+      const entries = await zipReader.getEntries();
+
+      for (const entry of entries) {
+        // Skip directory entries.
+        if (entry.directory || !entry.getData) continue;
+
+        const fileName = path.basename(entry.filename);
+        const data = await entry.getData(new zip.Uint8ArrayWriter());
+
+        files.set(fileName, data);
+      }
+    } finally {
+      await zipReader.close();
+    }
+
+    return { files };
+  } finally {
+    await fs.promises.unlink(tmpPath).catch(() => {
+      // Non-fatal cleanup failure.
+    });
+  }
+}
+
+/**
+ * Asserts that GrantApplication.xml exists in the zip and that its raw text
+ * contains each of the provided expected element/value pairs.
+ *
+ * @param contents ZipContents returned by downloadAndUnzipSubmission
+ * @param expectedFields Expected XML element/value pairs
+ */
+export function assertXmlContainsFields(
+  contents: ZipContents,
+  expectedFields: Record<string, { element: string; value: string }>,
+): void {
+  const xmlBytes = contents.files.get("GrantApplication.xml");
+
+  if (!xmlBytes) {
+    const available = [...contents.files.keys()].join(", ");
+
+    throw new Error(
+      `GrantApplication.xml not found in zip. Available files: ${available}`,
+    );
+  }
+
+  const xmlText = Buffer.from(xmlBytes).toString("utf-8");
+
+  const missing = Object.values(expectedFields)
+    .map(({ element, value }) => `<${element}>${value}</${element}>`)
+    .filter((expected) => !xmlText.includes(expected));
+
+  // Failure here is reported without hiding later checks in the test.
+  expect
+    .soft(missing, "GrantApplication.xml is missing expected elements")
+    .toEqual([]);
+}
+
+/**
+ * Extracts the text of a PDF in the zip, with all pages merged into one
+ * string. Whitespace is collapsed so assertions don't depend on PDF
+ * line breaks.
+ *
+ * @param contents ZipContents returned by downloadAndUnzipSubmission
+ * @param pdfFileName Entry name in the zip, e.g. "SF424B.pdf"
+ */
+export async function readPdfText(
+  contents: ZipContents,
+  pdfFileName: string,
+): Promise<string> {
+  const pdfBytes = contents.files.get(pdfFileName);
+
+  if (!pdfBytes) {
+    const available = [...contents.files.keys()].join(", ");
+
+    throw new Error(
+      `${pdfFileName} not found in zip. Available files: ${available}`,
+    );
+  }
+
+  // Pass the bytes (not a document proxy) so extractText creates and
+  // destroys the pdf.js document itself.
+  const { text } = await extractText(new Uint8Array(pdfBytes), {
+    mergePages: true,
+  });
+
+  return text.replace(/\s+/g, " ").trim();
+}
+
+/** Returns true if the text contains the string or matches the pattern. */
+function textMatches(text: string, item: string | RegExp): boolean {
+  return typeof item === "string" ? text.includes(item) : item.test(text);
+}
+
+/**
+ * Text that should never appear in any generated form PDF: template or
+ * serialization leaks and validation messages.
+ */
+export const COMMON_PDF_UNEXPECTED_TEXT: (string | RegExp)[] = [
+  "undefined",
+  "[object Object]",
+  "NaN",
+  /\bis required\b/i,
+];
+
+/**
+ * Asserts that the named PDF in the zip exists, has extractable text,
+ * contains each expected string or pattern, and contains none of the
+ * unexpected ones.
+ *
+ * @param contents ZipContents returned by downloadAndUnzipSubmission
+ * @param pdfFileName Entry name in the zip, e.g. "SF424B.pdf"
+ * @param expected Strings or patterns that must appear in the PDF text
+ * @param unexpected Strings or patterns that must NOT appear in the PDF text
+ */
+export async function assertPdfContainsText(
+  contents: ZipContents,
+  pdfFileName: string,
+  expected: (string | RegExp)[],
+  unexpected: (string | RegExp)[] = COMMON_PDF_UNEXPECTED_TEXT,
+): Promise<void> {
+  const pdfText = await readPdfText(contents, pdfFileName);
+
+  expect(
+    pdfText.length,
+    `${pdfFileName} has no extractable text`,
+  ).toBeGreaterThan(0);
+
+  const missing = expected.filter((item) => !textMatches(pdfText, item));
+  const present = unexpected.filter((item) => textMatches(pdfText, item));
+
+  // Lists every problem at once instead of stopping at the first.
+  expect
+    .soft(missing.map(String), `${pdfFileName} is missing expected text`)
+    .toEqual([]);
+  expect
+    .soft(present.map(String), `${pdfFileName} contains unexpected text`)
+    .toEqual([]);
+}
