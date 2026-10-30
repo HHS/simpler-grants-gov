@@ -38,6 +38,40 @@ describe("resolveExternalRequestUrl", () => {
     ).toBe("https://0.0.0.0:8000/search");
   });
 
+  it.each([[{ host: "grantee2.teams.simpler.grants.gov" }], [{}]])(
+    "redacts the Login.gov token from the callback URL with headers %p",
+    (headers) => {
+      const url = resolveExternalRequestUrl(
+        buildRequest(
+          "https://0.0.0.0:8000/api/auth/callback?token=raw.login.jwt&other=kept",
+          headers,
+        ),
+      );
+
+      expect(url).toMatch(/\/api\/auth\/callback\?token=REDACTED&other=kept$/);
+    },
+  );
+
+  it.each([
+    [
+      { host: "grantee2.teams.simpler.grants.gov" },
+      "https://grantee2.teams.simpler.grants.gov",
+    ],
+    [{}, "https://0.0.0.0:8000"],
+  ])(
+    "leaves a token param on an unrelated route unchanged with headers %p",
+    (headers, origin) => {
+      expect(
+        resolveExternalRequestUrl(
+          buildRequest(
+            "https://0.0.0.0:8000/some-route?token=ordinary-value",
+            headers,
+          ),
+        ),
+      ).toBe(`${origin}/some-route?token=ordinary-value`);
+    },
+  );
+
   it("ignores x-forwarded-host when it disagrees with the host header", () => {
     expect(
       resolveExternalRequestUrl(
