@@ -5,7 +5,7 @@ locals {
   # The opensearch-write role is used for OpenSearch sync jobs, separate from the migrator role which is only for DB migrations
   ingest_role_arn   = var.ingest_role_arn != null ? var.ingest_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-opensearch-write"
   query_role_arn    = var.query_role_arn != null ? var.query_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"
-  workflow_role_arn = var.workflow_role_arn != null ? var.workflow_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-workflow"
+  workflow_role_arn = var.workflow_role_arn != null ? var.workflow_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-submission-consumer"
 }
 
 # Master user credentials for the OpenSearch domain

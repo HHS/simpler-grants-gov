@@ -82,7 +82,7 @@ variable "sso_admin_role_arn" {
 }
 
 variable "workflow_role_arn" {
-  description = "The ARN of the IAM role used by the workflow service. Defaults to {service_name}-workflow role."
+  description = "The ARN of the IAM role used by the submission consumer. Defaults to {service_name}-submission-consumer role."
   type        = string
   default     = null
 }
