@@ -20,7 +20,8 @@ model SyncOptions {
 
   /**
    * The form's version in Simpler Grants, which the API reports as its legacy form version.
-   * Defaults to `1.0`, where every form starts.
+   * Defaults to `1.0`, where every form starts. Sync installs each version in its own
+   * `<major>/<minor>` folder.
    */
   sggVersion?: string;
 

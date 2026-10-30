@@ -22,7 +22,8 @@ model KeyContacts { ... }
   the API's `update-form-instruction` task (`api/src/task/forms/README.md`). Give each form
   its own record, even one that shares another form's PDF.
 - **`@Sgg.sync(#{ sggVersion: "1.1" })`** sets the form's version in Simpler Grants, its
-  `sgg_version`. It defaults to `1.0`.
+  `sgg_version`. It defaults to `1.0`. Sync installs each version in its own folder, so
+  `1.1` is written to `1/1/` beside `1/0/`.
 - **`@Sgg.sync(#{ formType: "KeyContacts" })`** sets the form's `form_type`, a value of
   the API's `FormType` enum. Leave it out for a form that has no `FormType` yet.
 
