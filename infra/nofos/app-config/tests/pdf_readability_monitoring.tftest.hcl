@@ -24,8 +24,8 @@ run "only_infra_dev_gets_private_routing_and_calculator_notifications" {
     condition = (
       output.environment_configs["infra-dev"].service_config.pdf_readability_waf.rate_action == "count" &&
       output.environment_configs["infra-dev"].service_config.pdf_readability_waf.rate_limit == 10 &&
-      !output.environment_configs["infra-dev"].service_config.pdf_readability_waf.emergency_block
+      output.environment_configs["infra-dev"].service_config.pdf_readability_waf.emergency_block
     )
-    error_message = "Notification activation must leave dev WAF observation mode and the existing rate limit unchanged."
+    error_message = "The temporary dev emergency-block test must preserve Count-mode rate limiting and the existing rate limit."
   }
 }

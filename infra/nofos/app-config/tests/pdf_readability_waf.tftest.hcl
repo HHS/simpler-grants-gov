@@ -6,7 +6,7 @@ mock_provider "external" {
   }
 }
 
-run "only_infra_dev_observes_pilot_requests" {
+run "only_infra_dev_emergency_block_test" {
   command = plan
 
   assert {
@@ -14,9 +14,9 @@ run "only_infra_dev_observes_pilot_requests" {
       for name, config in output.environment_configs : name == "infra-dev" ? (
         config.service_config.pdf_readability_waf.rate_limit == 10 &&
         config.service_config.pdf_readability_waf.rate_action == "count" &&
-        !config.service_config.pdf_readability_waf.emergency_block
+        config.service_config.pdf_readability_waf.emergency_block
       ) : config.service_config.pdf_readability_waf == null
     ])
-    error_message = "Only infra-dev may opt in, with both rules in Count. Production and all other environments must remain opted out."
+    error_message = "Only infra-dev may use the temporary emergency-block test mode; rate limiting, production and all other environments must remain non-blocking."
   }
 }
