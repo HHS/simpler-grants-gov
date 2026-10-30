@@ -2629,6 +2629,9 @@ export const messages = {
     savedOpportunitiesLabel: "Subscribe to saved opportunities",
     savedOpportunitiesDescription:
       "Get email updates about opportunities you have saved.",
+    allNewOpportunitiesLabel: "Subscribe to all new opportunities",
+    allNewOpportunitiesDescription:
+      "Get a daily email update about all new opportunities.",
     organizationSavedOpportunitiesDescription:
       "Get email updates for opportunities saved by you or your organization.",
     fetchError:

@@ -16,6 +16,7 @@ export interface NotificationPreferenceCardProps {
   isLoading?: boolean;
   hasError?: boolean;
   errorMessage?: string;
+  className?: string;
   onCheckedChange?: (checked: boolean) => void;
 }
 
@@ -29,6 +30,7 @@ export function NotificationPreferenceCard({
   isLoading = false,
   hasError = false,
   errorMessage,
+  className,
   onCheckedChange,
 }: NotificationPreferenceCardProps): ReactElement {
   const t = useTranslations("Notifications");
@@ -46,6 +48,7 @@ export function NotificationPreferenceCard({
     "radius-sm",
     "padding-3",
     hasError ? "notification-preference-card--error" : "",
+    className,
   ]
     .filter(Boolean)
     .join(" ");
