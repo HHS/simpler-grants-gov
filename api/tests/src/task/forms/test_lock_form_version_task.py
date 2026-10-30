@@ -21,7 +21,7 @@ def test_python_form_hashes_its_definition_and_config(tmp_path: Path) -> None:
     form_dir, version_dir = _write_form(tmp_path, {"form_json.py": "FORM_JSON_SCHEMA = {}\n"})
 
     expected = hashlib.sha256(
-        (version_dir / "form_json.py").read_bytes() + (form_dir / "config.py").read_bytes()
+        b"form_json.py\x0022\x00FORM_JSON_SCHEMA = {}\n" + b"config.py\x0016\x00FORM_ID = 'abc'\n"
     ).hexdigest()
     assert compute_version_hash(form_dir, version_dir) == expected
 
@@ -37,5 +37,17 @@ def test_changing_a_schema_file_changes_the_hash(tmp_path: Path) -> None:
     before = compute_version_hash(form_dir, version_dir)
 
     (version_dir / "ui_schema.json").write_text(json.dumps({"type": "Group", "elements": []}))
+
+    assert compute_version_hash(form_dir, version_dir) != before
+
+
+def test_moving_content_between_files_changes_the_hash(tmp_path: Path) -> None:
+    form_dir, version_dir = _write_form(
+        tmp_path, {"form.json": "{}", "json_schema.json": "{}", "ui_schema.json": "[]"}
+    )
+    before = compute_version_hash(form_dir, version_dir)
+
+    (version_dir / "json_schema.json").write_text("{}[]")
+    (version_dir / "ui_schema.json").write_text("")
 
     assert compute_version_hash(form_dir, version_dir) != before
