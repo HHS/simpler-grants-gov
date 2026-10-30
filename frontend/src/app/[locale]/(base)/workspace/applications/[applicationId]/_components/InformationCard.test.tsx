@@ -178,8 +178,10 @@ describe("InformationCard - Close date", () => {
       />,
     );
 
-    const closingDate = screen.getByText("2030-01-01");
-    expect(closingDate.closest("dd")).toHaveTextContent(/^2030-01-01$/);
+    const definitionTexts = screen
+      .getAllByRole("definition")
+      .map((definition) => definition.textContent);
+    expect(definitionTexts).toContain("2030-01-01");
     expect(screen.queryByText(/11:59/)).not.toBeInTheDocument();
   });
 });
