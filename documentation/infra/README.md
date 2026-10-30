@@ -26,6 +26,9 @@
 
 ## Operations
 
+- [NOFO dev overnight error diagnostic](./nofo-dev-error-diagnostic.md): reviewed,
+  read-only GitHub workflow for the fixed October 27–28, 2026 5xx incident windows.
+
 * [Prepare NOFO document history in dev](./prepare-nofo-document-history-dev.md)
 * [Check NOFO production history readiness](./check-nofo-production-history.md)
 * [NOFO PDF readability WAF controls and dev verification](./nofo-pdf-readability-waf.md)
