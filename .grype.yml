@@ -78,3 +78,24 @@ ignore:
   # https://github.com/python/cpython/issues/157265
   # Last checked: 10/02/2026
   - vulnerability: CVE-2026-87910
+
+  # rustls 0.23.45 statically linked in the uv binary (/usr/bin/uv) from the python base image
+  # Fixed in rustls 0.23.46; uv bumped it on main (astral-sh/uv#22959) but no uv release ships it yet (latest 0.13.6)
+  # Remove once a uv release includes rustls >= 0.23.46 and UV_VERSION in api/docker-python-base is bumped
+  # Last checked: 10/28/2026
+  - vulnerability: GHSA-c8m5-c952-6cm4
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-h2v8-394m-p7vv
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-vp88-798v-h67f
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-w44r-93j7-qv28
+    package:
+      name: rustls
+      type: rust-crate

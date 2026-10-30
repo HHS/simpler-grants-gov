@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-sgg1"]
+  environments = ["dev", "staging", "prod", "training", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-sgg1"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -59,7 +59,6 @@ locals {
     staging  = module.staging_config
     prod     = module.prod_config
     training = module.training_config
-    grantee1 = module.grantee1_config
     grantor1 = module.grantor1_config
     # infra-dev is a dev-like environment in the "dev" AWS account. Its api and
     # frontend run in the infra-dev VPC; its infra-dev-grants-management VPC holds a separate stub service
@@ -110,7 +109,6 @@ locals {
     dev            = "simpler-grants-gov"
     staging        = "simpler-grants-gov"
     prod           = "simpler-grants-gov"
-    grantee1       = "simpler-grants-gov"
     grantor1       = "simpler-grants-gov"
     infra-dev      = "dev"      # infra-dev environment lives in AWS account 061664787759
     infra-staging  = "staging"  # infra-staging environment lives in AWS account 317380566348
