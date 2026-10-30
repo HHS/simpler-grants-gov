@@ -27,6 +27,8 @@ model KeyContacts { ... }
   its own record, even one that shares another form's PDF.
 - **`@Sgg.sync(#{ sggVersion: "1.1" })`** sets the form's version in Simpler Grants, its
   `sgg_version`. It defaults to `1.0`.
+- **`@Sgg.sync(#{ formType: "KeyContacts" })`** sets the form's `form_type`, a value of
+  the API's `FormType` enum. Leave it out for a form that has no `FormType` yet.
 
 A form with `@Sgg.sync` must also have `@GrantsGov.form` (from
 [`form-library-xml`](../xml/)), the identity the API registers it under.
@@ -41,7 +43,7 @@ application.
 One file per form, and a rule schema for a form with attachments, under `dist/sgg/`:
 
 ```
-forms/<id>/sgg.json           { "sync": false | { "xml": false | "transform" | "mapping", "sggVersion", "instructions"? }, "grantsGov": { ... } | null }
+forms/<id>/sgg.json           { "sync": false | { "xml": false | "transform" | "mapping", "sggVersion", "formType"?, "instructions"? }, "grantsGov": { ... } | null }
 forms/<id>/rule-schema.json   { "<field>": { "gg_validation": { "rule": "attachment" } }, ... }
 ```
 

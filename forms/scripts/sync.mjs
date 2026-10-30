@@ -97,6 +97,7 @@ async function buildForm(id, { sync, grantsGov }) {
   if (grantsGov.expirationDate) form.expiration_date = grantsGov.expirationDate;
   if (grantsGov.legacyFormId !== undefined)
     form.legacy_form_id = grantsGov.legacyFormId;
+  if (sync.formType) form.form_type = sync.formType;
   if (sync.instructions) form.form_instruction_id = sync.instructions;
   const rules = await readRuleSchema(id);
   if (rules) form.form_rule_schema = rules;

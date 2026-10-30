@@ -7,6 +7,7 @@ export interface SyncOptions {
   /** The format sync installs the form's XML mapping in, or false for none. */
   xml: false | "transform" | "mapping";
   sggVersion: string;
+  formType?: string;
   instructions?: string;
 }
 
@@ -17,6 +18,7 @@ export const $sync = (
   options?: {
     xml?: boolean | "transform" | "mapping";
     sggVersion?: string;
+    formType?: string;
     instructions?: string;
   },
 ) =>
@@ -26,6 +28,7 @@ export const $sync = (
         ? "transform"
         : options.xml,
     sggVersion: options?.sggVersion ?? "1.0",
+    ...(options?.formType && { formType: options.formType }),
     ...(options?.instructions && { instructions: options.instructions }),
   } satisfies SyncOptions);
 
