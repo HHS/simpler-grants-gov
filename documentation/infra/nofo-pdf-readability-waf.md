@@ -108,10 +108,19 @@ The existing tools are sufficient for staged configuration changes:
 configuration and counters. The inspection session cannot change rules.
 
 Before activating either rule, record the operator, infrastructure reviewer,
-fallback contact, test window, selected SGG revision, pinned Builder image,
-and restoration path in the execution issue. Confirm public uploads are off in
-Builder configuration and by the unavailable-page baseline. The inspection does
-not read database-backed feature flags.
+fallback contact, test window, selected SGG revision, and restoration path in
+the execution issue. Confirm public uploads are off in Builder configuration and
+by the unavailable-page baseline. The inspection does not read database-backed
+feature flags.
+
+The merge-triggered deployment builds Builder's current `main`; it does not
+honor a separately selected Builder version. For a bounded dev session, the
+named deployment owner must confirm that no unrelated Builder deployment is
+planned, record the actual deployed Builder commit after each stage, and repeat
+the baseline check after each deployment. Stop and investigate if that baseline
+changes unexpectedly. A formal Builder-main freeze or a revision-aware deployment
+path may be used when required by the environment, but neither is required for
+this dev-only procedure.
 
 For each activation or restoration stage, update `pdf_readability_waf` in
 `infra/nofos/app-config/infra-dev.tf` **and** the matching expected mode in
