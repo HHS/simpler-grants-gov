@@ -17,7 +17,9 @@ FORMS_DIR = Path(__file__).parents[2] / "form_schema" / "forms"
 def compute_version_hash(form_dir: Path, version_dir: Path) -> str:
     """Return the SHA-256 hex digest of the version's files + config.py for a version directory.
 
-    Always hashes the version's files first, then config.py, so the digest is stable.
+    Always hashes the version's files first, then config.py, so the digest is stable. Each
+    file's name and length precede its contents, so moving content between files changes
+    the digest.
     """
     config_path = form_dir / "config.py"
 
@@ -25,9 +27,10 @@ def compute_version_hash(form_dir: Path, version_dir: Path) -> str:
         raise FileNotFoundError(f"config.py not found: {config_path}")
 
     h = hashlib.sha256()
-    for path in version_files(version_dir):
-        h.update(path.read_bytes())
-    h.update(config_path.read_bytes())
+    for path in [*version_files(version_dir), config_path]:
+        contents = path.read_bytes()
+        h.update(f"{path.name}\0{len(contents)}\0".encode())
+        h.update(contents)
     return h.hexdigest()
 
 
