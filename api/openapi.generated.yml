@@ -36,6 +36,7 @@ tags:
 - name: Form Alpha
 - name: Form V1
 - name: Competition Alpha
+- name: Submission_Consumer
 - name: Award Recommendation Alpha
 - name: CommonGrants Protocol
   description: CommonGrants-compliant API routes for searching opportunities to promote
@@ -9252,7 +9253,7 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    UserApiKeySchema:
+    CreatedUserApiKeySchema:
       type: object
       properties:
         api_key_id:
@@ -9264,10 +9265,6 @@ components:
           type: string
           description: Human-readable name for the API key
           example: Production API Key
-        key_id:
-          type: string
-          description: The actual API key identifier to use for authentication
-          example: k8w2Xd9Zq1mN3pR7sT5vY4uI
         is_active:
           type: boolean
           description: Whether the API key is currently active
@@ -9284,6 +9281,11 @@ components:
           format: date-time
           description: When this API key was created
           example: '2024-01-01T12:00:00Z'
+        key_id:
+          type: string
+          description: The actual API key to use for authentication. This is only
+            returned once, when the key is created
+          example: k8w2Xd9Zq1mN3pR7sT5vY4uI
     UserApiKeyCreateResponseSchema:
       type: object
       properties:
@@ -9295,7 +9297,7 @@ components:
           description: The newly created API key
           type:
           - object
-          $ref: '#/components/schemas/UserApiKeySchema'
+          $ref: '#/components/schemas/CreatedUserApiKeySchema'
         status_code:
           type: integer
           description: The HTTP status code
@@ -10371,6 +10373,34 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserApiKeySchema:
+      type: object
+      properties:
+        api_key_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the API key record
+          example: 123e4567-e89b-12d3-a456-426614174000
+        key_name:
+          type: string
+          description: Human-readable name for the API key
+          example: Production API Key
+        is_active:
+          type: boolean
+          description: Whether the API key is currently active
+          example: true
+        last_used:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when this API key was last used for authentication
+          example: '2024-01-15T10:30:00Z'
+        created_at:
+          type: string
+          format: date-time
+          description: When this API key was created
+          example: '2024-01-01T12:00:00Z'
     UserApiKeyListResponseSchema:
       type: object
       properties:
