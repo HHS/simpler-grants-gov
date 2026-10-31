@@ -47,6 +47,29 @@ class TestLoadLocalEnvVars:
 
         assert os.getenv("SKIP_VAR") is None
 
+    def test_does_not_override_existing_env_var(self, monkeypatch, tmp_path):
+        env_file = tmp_path / "local.env"
+        env_file.write_text("LOCAL_TEST_FROM_DOTENV=loaded_from_file\n")
+        monkeypatch.setenv("ENVIRONMENT", "local")
+        monkeypatch.setenv("LOCAL_TEST_FROM_DOTENV", "pre-existing")
+
+        load_local_env_vars(str(env_file))
+
+        # python-dotenv must not overwrite env vars that are already set;
+        # this is what protects real secrets when running locally
+        assert os.getenv("LOCAL_TEST_FROM_DOTENV") == "pre-existing"
+
+    def test_default_env_file_resolves_from_working_directory(self, monkeypatch, tmp_path):
+        local_env = tmp_path / "local.env"
+        local_env.write_text("DEFAULT_RESOLUTION_VAR=from_default\n")
+        monkeypatch.setenv("ENVIRONMENT", "local")
+        monkeypatch.delenv("DEFAULT_RESOLUTION_VAR", raising=False)
+        monkeypatch.chdir(tmp_path)
+
+        load_local_env_vars()
+
+        assert os.getenv("DEFAULT_RESOLUTION_VAR") == "from_default"
+
 
 class TestErrorIfNotLocal:
     def test_passes_when_environment_is_local(self, monkeypatch):
