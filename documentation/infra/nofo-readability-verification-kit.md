@@ -75,6 +75,12 @@ never infer a pass from merged code or an empty dashboard.
 
 ### 4. Only if existing evidence does not cover it
 
+The [separate dev task verification](nofo-readability-runtime-verification.md)
+can check selected analyzer cleanup, Linux setup and PostgreSQL-session
+admission without enabling public uploads. Review its coverage limits before
+using the output as deployed evidence; HTTP handling, ordinary-worker
+interruption, logging and production remain separate checks.
+
 - [ ] Coordinate rate enforcement and emergency block/restoration using the
   [existing bounded WAF procedure](nofo-pdf-readability-waf.md). Keep unrelated
   Builder pages available and restore the agreed modes. Empty requests can test
