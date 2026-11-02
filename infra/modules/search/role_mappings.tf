@@ -132,12 +132,12 @@ resource "aws_lambda_invocation" "configure_role_mappings" {
   function_name = aws_lambda_function.role_mappings.function_name
 
   input = jsonencode({
-    username           = random_password.opensearch_username.result
-    password           = random_password.opensearch_password.result
-    ingest_role_arn    = local.ingest_role_arn
-    query_role_arn     = local.query_role_arn
-    sso_admin_role_arn = var.sso_admin_role_arn
-    workflow_role_arn  = local.workflow_role_arn
+    username                     = random_password.opensearch_username.result
+    password                     = random_password.opensearch_password.result
+    ingest_role_arn              = local.ingest_role_arn
+    query_role_arn               = local.query_role_arn
+    sso_admin_role_arn           = var.sso_admin_role_arn
+    submission_consumer_role_arn = local.submission_consumer_role_arn
   })
 
   depends_on = [
@@ -146,11 +146,11 @@ resource "aws_lambda_invocation" "configure_role_mappings" {
   ]
 
   triggers = {
-    ingest_role_arn   = local.ingest_role_arn
-    query_role_arn    = local.query_role_arn
-    workflow_role_arn = local.workflow_role_arn
-    lambda_code_hash  = data.archive_file.role_mappings_lambda.output_base64sha256
-    domain_policy     = aws_opensearch_domain_policy.main.id
+    ingest_role_arn              = local.ingest_role_arn
+    query_role_arn               = local.query_role_arn
+    submission_consumer_role_arn = local.submission_consumer_role_arn
+    lambda_code_hash             = data.archive_file.role_mappings_lambda.output_base64sha256
+    domain_policy                = aws_opensearch_domain_policy.main.id
   }
 }
 
