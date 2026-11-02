@@ -12,10 +12,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import {
-  fieldDefinitionsSF424B,
-  SF424B_FORM_MATCHER,
-} from "tests/e2e/apply/fixtures/sf424b-field-definitions";
+import { SF424B_FORM_MATCHER } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -37,7 +34,10 @@ import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
-import { buildExpectedXmlFields } from "tests/e2e/utils/submission/xml-field-utils";
+import {
+  buildExpectedPdfText,
+  buildExpectedXmlFields,
+} from "tests/e2e/utils/submission/xml-field-utils";
 
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
@@ -53,10 +53,6 @@ const SF424B_ZIP_PDF_NAME = "SF424B.pdf";
 const SIGNATURE_VALUE = "simpler-grants-e2e-tester@navapbc.com";
 
 test.beforeEach(({ page: _ }, testInfo) => {
-  test.skip(
-    playwrightEnv.targetEnv !== "staging",
-    "Submission ZIP verification runs only against staging",
-  );
   skipNonChromeOnStaging(testInfo);
 });
 
@@ -121,27 +117,23 @@ test(
 
     const contents = await downloadAndUnzipSubmission(page);
 
+    // System post-populated at submission; not part of the typed test data.
+    const systemValues = {
+      signature: SIGNATURE_VALUE,
+      date_signed: submittedDate,
+    };
+
     await test.step("Verify GrantApplication.xml field values", () => {
       assertXmlContainsFields(
         contents,
-        buildExpectedXmlFields(form, testData, {
-          signature: SIGNATURE_VALUE,
-          date_signed: submittedDate,
-        }),
+        buildExpectedXmlFields(form, testData, systemValues),
       );
     });
 
     await test.step("Verify SF424B.pdf form title and field values", async () => {
-      const { title, applicant_organization, signature } =
-        fieldDefinitionsSF424B;
-
       await assertPdfContainsText(contents, SF424B_ZIP_PDF_NAME, [
         SF424B_FORM_MATCHER,
-        signature.field,
-        SIGNATURE_VALUE,
-        `${title.field}* ${testData.title}`,
-        `${applicant_organization.field}* ${testData.applicant_organization}`,
-        submittedDate,
+        ...buildExpectedPdfText(form, testData, systemValues),
       ]);
     });
   },

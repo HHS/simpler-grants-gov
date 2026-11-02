@@ -50,8 +50,9 @@ export async function waitForSubmissionZipReady(
   try {
     await expect(async () => {
       await page.reload({ waitUntil: "domcontentloaded" });
-      await expect(downloadButton).toBeVisible({ timeout: 3_000 });
-    }).toPass({ timeout: timeoutMs, intervals: [2_000, 3_000, 5_000] });
+      // Server-rendered: once the reload settles the button is either there or not.
+      await expect(downloadButton).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: timeoutMs, intervals: [3_000, 5_000] });
   } catch (error) {
     const stillPreparing = await preparingMessage
       .isVisible()

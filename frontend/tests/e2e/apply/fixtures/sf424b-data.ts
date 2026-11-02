@@ -47,9 +47,12 @@ export const SF424B_OPPORTUNITY_DATA: PrintViewFormData = {
   // GrantApplication.xml elements for the submission zip spec.
   // signature and date_signed are system post-populated; the spec supplies their values.
   xmlFields: {
-    signature: { element: "SF424B:RepresentativeName" },
-    title: { element: "SF424B:RepresentativeTitle" },
-    applicant_organization: { element: "SF424B:ApplicantOrganizationName" },
-    date_signed: { element: "SF424B:SubmittedDate" },
+    signature: { element: "SF424B:RepresentativeName", pdf: true },
+    title: { element: "SF424B:RepresentativeTitle", pdf: true },
+    applicant_organization: {
+      element: "SF424B:ApplicantOrganizationName",
+      pdf: true,
+    },
+    date_signed: { element: "SF424B:SubmittedDate", pdf: true },
   },
 };
