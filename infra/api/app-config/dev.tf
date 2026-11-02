@@ -63,10 +63,7 @@ module "dev_config" {
 
   service_override_extra_environment_variables = {
 
-    ENABLE_WORKFLOW_ENDPOINTS             = 1
-    ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
-    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
@@ -76,9 +73,6 @@ module "dev_config" {
     FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
-
-    # Workflow
-    WORKFLOW_SERVICE_INTERNAL_USER_ID = "5711f79c-2445-47c7-bbcb-c8caa293ffad"
 
     ENABLE_JOB_LOCK = "true"
   }

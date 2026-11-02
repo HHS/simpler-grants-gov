@@ -60,10 +60,7 @@ module "infra_dev_config" {
   search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
 
   service_override_extra_environment_variables = {
-    ENABLE_WORKFLOW_ENDPOINTS             = 1
-    ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
-    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
 
     LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-dev-simpler-grants-gov"
 
@@ -75,9 +72,6 @@ module "infra_dev_config" {
     FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
-
-    # Workflow
-    WORKFLOW_SERVICE_INTERNAL_USER_ID = "5711f79c-2445-47c7-bbcb-c8caa293ffad"
 
     ENABLE_JOB_LOCK = "true"
   }
