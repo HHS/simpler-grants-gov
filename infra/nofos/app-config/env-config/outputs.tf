@@ -31,9 +31,10 @@ output "service_config" {
       var.service_override_extra_environment_variables
     )
 
-    enable_pdf_readability_monitoring     = var.enable_pdf_readability_monitoring
-    monitoring_email_alert_recipients     = var.monitoring_email_alert_recipients
-    pdf_readability_alarm_actions_enabled = var.pdf_readability_alarm_actions_enabled
+    enable_pdf_readability_monitoring               = var.enable_pdf_readability_monitoring
+    monitoring_email_alert_recipients               = var.monitoring_email_alert_recipients
+    monitoring_email_alert_recipient_parameter_name = var.monitoring_email_alert_recipient_parameter_name
+    pdf_readability_alarm_actions_enabled           = var.pdf_readability_alarm_actions_enabled
 
     secrets = local.secrets
 

@@ -1,0 +1,42 @@
+name: Diagnose NOFO dev overnight errors
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagnose-nofo-dev-errors
+  cancel-in-progress: false
+
+jobs:
+  diagnose:
+    if: github.repository == 'HHS/simpler-grants-gov' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 7
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned AWS SDK
+        run: python3 -m pip install -r scripts/nofo_alert_setup_requirements.txt
+      - name: Load read-only diagnostic session policy
+        id: policy
+        run: echo "json=$(jq -c . scripts/nofo_dev_error_session_policy.json)" >> "$GITHUB_OUTPUT"
+      - name: Authenticate for the fixed dev investigation
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::061664787759:role/simpler-grants-gov-github-actions
+          role-session-name: NofoDevErrorDiagnostic
+          role-duration-seconds: 900
+          mask-aws-account-id: true
+          unset-current-credentials: true
+          retry-max-attempts: 2
+          inline-session-policy: ${{ steps.policy.outputs.json }}
+      - name: Summarize fixed error windows without publishing raw logs
+        run: python3 scripts/diagnose_nofo_dev_errors.py

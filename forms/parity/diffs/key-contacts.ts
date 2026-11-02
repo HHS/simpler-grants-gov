@@ -1,5 +1,10 @@
 import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
-import { FREE_TEXT_HELP, SHARED_HELP, standardLabel } from "./common.ts";
+import {
+  emailMinLength,
+  FREE_TEXT_HELP,
+  SHARED_HELP,
+  standardLabel,
+} from "./common.ts";
 
 /** The DAT stars State and Zip but answers "No" in its Required column; both are required only for a US address. */
 const conditionalStar = (label: string): Pinned => ({
@@ -110,35 +115,11 @@ const help: Record<string, Pinned> = {
     plan: "Enter the email address.",
     source: "Enter a valid Email Address. This field is required.",
   },
-  // key_contacts[].name.middle_name
-  "7-05": {
-    ...SHARED_HELP,
-    plan: "Enter the middle name.",
-    source: "Enter the Middle Name.",
-  },
-  // key_contacts[].address.street2
-  "7-11": {
-    ...SHARED_HELP,
-    plan: "Enter the second line of the street address.",
-    source: "Enter the second line of the Street Address.",
-  },
   // key_contacts[].address.county
   "7-13": {
     ...SHARED_HELP,
     plan: "Enter the county or parish.",
     source: "Enter the County.",
-  },
-  // key_contacts[].address.province
-  "7-15": {
-    ...SHARED_HELP,
-    plan: "Enter the province.",
-    source: "Enter the Province.",
-  },
-  // key_contacts[].fax
-  "7-19": {
-    ...SHARED_HELP,
-    plan: "Enter the fax number.",
-    source: "Enter the Fax Number.",
   },
 };
 
@@ -154,6 +135,8 @@ export const DIFF: FormDiff = {
   dat: {
     differingLabels: {
       "7-01": standardLabel("* Project Role", "* Contact 1 Project Role"),
+      "7-10": standardLabel("* Street 1", "* Street1"),
+      "7-11": standardLabel("Street 2", "Street2"),
       "7-13": standardLabel("County/Parish", "County"),
       "7-14": conditionalStar("State"),
       "7-17": conditionalStar("Zip / Postal Code"),
@@ -163,4 +146,6 @@ export const DIFF: FormDiff = {
     differingHelp: help,
     outOfOrder: { "7-08": ROLE_GROUP, "7-09": ROLE_GROUP },
   },
+  xsd: { differingRules: emailMinLength(["RoleOnProject/ContactEmail"]) },
+  jsonSchemaVsXsd: { differingRules: emailMinLength(["key_contacts[].email"]) },
 };

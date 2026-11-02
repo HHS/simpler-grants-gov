@@ -12,11 +12,28 @@ namespace SimplerForms.Sgg;
 /** How sync installs a form. */
 model SyncOptions {
   /**
-   * Whether to install the form's XML transform rules, so the API can write its
-   * submission XML. Defaults to true. Set it to false while the rules cannot produce a
-   * valid document yet, e.g. when they leave out required elements.
+   * Whether, and in which format, to install how the form's submission XML is built:
+   *
+   *   - `"transform"` (or `true`, the default): `xml_transform.json`, rules keyed by the
+   *     response's properties;
+   *   - `"mapping"`: `xml_mapping.json`, a mapping shaped like the XML;
+   *   - `false`: neither, while the form can't produce a valid document yet, e.g. when its
+   *     mapping leaves out required elements.
    */
-  xml?: boolean;
+  xml?: boolean | "transform" | "mapping";
+
+  /**
+   * The form's version in Simpler Grants, which the API reports as its legacy form version.
+   * Defaults to `1.0`, where every form starts.
+   */
+  sggVersion?: string;
+
+  /**
+   * The UUID of the form's instructions: a form instruction record in the API, uploaded to
+   * each environment with the API's `update-form-instruction` task. Without it, the form has
+   * no instructions to download.
+   */
+  instructions?: string;
 }
 
 /**
@@ -28,3 +45,10 @@ model SyncOptions {
  * `@GrantsGov.form`, the identity the API registers it under.
  */
 extern dec sync(target: Model, options?: valueof SyncOptions);
+
+/**
+ * This question's answer is the id of one of the application's uploads. The API checks
+ * each one still belongs to the application, with a `gg_validation` attachment rule in the
+ * form's rule schema.
+ */
+extern dec attachment(target: Scalar);

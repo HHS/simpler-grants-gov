@@ -27,7 +27,7 @@ module "dms_networking" {
 
 # Adding count above turns module.dms_networking into module.dms_networking[0]. This
 # moved block tells Terraform the existing (un-indexed) DMS resources in networks that
-# already have peering (dev/staging/prod/grantee1) are the same as the new [0]
+# already have peering (dev/staging/prod) are the same as the new [0]
 # instance, so they are NOT destroyed and recreated. It is a no-op for networks like
 # grantor1 that have no prior DMS state.
 moved {

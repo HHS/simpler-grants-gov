@@ -24,7 +24,6 @@ on:
         options:
           - dev
           - staging
-          - grantee1
           - infra-sgg2
           - infra-sgg3
           - infra-sgg1

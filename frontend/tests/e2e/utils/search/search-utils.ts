@@ -82,9 +82,7 @@ export async function selectSortBy(
 ) {
   const timeoutOption =
     targetEnv !== "local" ? { timeout: 60000 } : { timeout: 10000 };
-  const sortSelectElement = drawer
-    ? page.locator("#search-sort-by-select-drawer")
-    : page.locator("#search-sort-by-select").first();
+  const sortSelectElement = await getSortSelect(page, drawer);
 
   // Webkit needs extra handling for form interactions
   const browserType = getBrowserType(page, projectName);
@@ -103,12 +101,23 @@ export async function selectSortBy(
   await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);
 }
 
+// The mobile drawer select id is duplicated in the DOM (page + dialog), so a
+// bare id locator violates strict mode. Prefer the open dialog's copy, else
+// fall back to the first match.
+async function getSortSelect(page: Page, drawer: boolean) {
+  if (!drawer) return page.locator("#search-sort-by-select").first();
+  const inDialog = page
+    .getByRole("dialog")
+    .locator("#search-sort-by-select-drawer");
+  return (await inDialog.count()) > 0
+    ? inDialog.first()
+    : page.locator("#search-sort-by-select-drawer").first();
+}
+
 export async function expectSortBy(page: Page, value: string, drawer = false) {
   const timeoutOption =
     targetEnv !== "local" ? { timeout: 60000 } : { timeout: 10000 };
-  const sortSelectElement = drawer
-    ? page.locator("#search-sort-by-select-drawer")
-    : page.locator("#search-sort-by-select").first();
+  const sortSelectElement = await getSortSelect(page, drawer);
   await expect(sortSelectElement).toHaveValue(value, timeoutOption);
 }
 

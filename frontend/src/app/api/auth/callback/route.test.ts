@@ -34,15 +34,28 @@ describe("/api/auth/callback GET handler", () => {
     expect(redirectError.digest).toContain(";/login;");
   });
 
-  it("if no token exists on query param, does not call createSession and redirects to unauthenticated page", async () => {
+  it("if no token exists on query param, does not call createSession and returns through /login", async () => {
     const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
       GET(new NextRequest("https://simpler.grants.gov")),
     );
     expect(createSessionMock).toHaveBeenCalledTimes(0);
-    expect(redirectError.digest).toContain(";/unauthenticated;");
+    expect(redirectError.digest).toContain(";/login;");
+    expect(redirectError.digest).not.toContain("/unauthenticated");
   });
 
-  it("logs session creation failures without the token and redirects to the error page", async () => {
+  it("returns through /login with the PIV error flag when PIV is required", async () => {
+    const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
+      GET(
+        new NextRequest(
+          "https://simpler.grants.gov/?login_piv_required_error=true",
+        ),
+      ),
+    );
+    expect(createSessionMock).toHaveBeenCalledTimes(0);
+    expect(redirectError.digest).toContain(";/login?pivError=true;");
+  });
+
+  it("logs session creation failures without the token and returns through /login", async () => {
     const sessionError = new Error("session failure");
     createSessionMock.mockRejectedValueOnce(sessionError);
 
@@ -54,10 +67,20 @@ describe("/api/auth/callback GET handler", () => {
       ),
     );
 
-    expect(redirectError.digest).toContain(";/error;");
+    expect(redirectError.digest).toContain(";/login;");
+    expect(redirectError.digest).not.toContain("/error");
     expect(mockLoggerError).toHaveBeenCalledWith(
       { err: sessionError, awsTraceId: "trace-id" },
       "Error creating session",
+    );
+    expect(JSON.stringify(mockLoggerError.mock.calls)).not.toContain(
+      "fakeToken",
+    );
+  });
+
+  it("does not log the token on successful session creation", async () => {
+    await wrapForExpectedError(() =>
+      GET(new NextRequest("https://simpler.grants.gov/?token=fakeToken")),
     );
     expect(JSON.stringify(mockLoggerError.mock.calls)).not.toContain(
       "fakeToken",

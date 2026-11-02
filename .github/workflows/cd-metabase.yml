@@ -22,7 +22,6 @@ on:
           - infra-staging
           - training
           - infra-training
-          - grantee1
           - prod
       image_tag:
         description: "Metabase enterprise image tag to deploy (e.g., v1.50.10)"

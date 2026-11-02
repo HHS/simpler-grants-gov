@@ -43,20 +43,19 @@ locals {
   #
   # Only needed where source and target live in different AWS accounts. The
   # legacy environments (dev, staging, grantee*, grantor*) all share one account,
-  # so restores between them need no cross-account grant and they are absent
-  # here. The infra-* environments each have their own account, so seeding
+  # so restores between them need no cross-account grant; grantor1 is listed
+  # only as a target of infra-staging. The infra-* environments each have their own account, so seeding
   # infra-dev from infra-staging requires infra-staging's KMS key to name
   # infra-dev's account.
   #
   # Restores flow "down" from more-production-like environments, which is why
   # infra-staging grants the dev-account environments and not the reverse.
   #
-  # All four targets live in the same AWS account (061664787759), so this
-  # resolves to a single account id and one grant on infra-staging's key covers
-  # every one of them. The list is written out per environment anyway, so the
-  # intent stays readable if any of them later moves to its own account.
+  # The infra-* targets share the dev account (061664787759); grantor1 is in
+  # simpler-grants-gov (315341936575) until it is retired. distinct() below
+  # collapses this to one key-policy principal per account.
   snapshot_restore_targets = {
-    "infra-staging" = ["infra-sgg2", "infra-sgg3", "infra-sgg1", "infra-dev"]
+    "infra-staging" = ["infra-sgg2", "infra-sgg3", "infra-sgg1", "infra-dev", "grantor1"]
   }
 
   # distinct() because several target environments can share one AWS account

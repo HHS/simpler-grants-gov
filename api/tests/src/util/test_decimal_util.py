@@ -25,3 +25,7 @@ def test_quantize_decimal():
     assert quantize_decimal(Decimal("-1000.000001")) == Decimal("-1000.00")
     assert quantize_decimal(Decimal("100")) == Decimal("100")
     assert quantize_decimal(Decimal("20.1")) == Decimal("20.1")
+    # Halves round away from zero, not to the nearest even digit
+    assert quantize_decimal(Decimal("0.125")) == Decimal("0.13")
+    assert quantize_decimal(Decimal("0.025")) == Decimal("0.03")
+    assert quantize_decimal(Decimal("-0.125")) == Decimal("-0.13")

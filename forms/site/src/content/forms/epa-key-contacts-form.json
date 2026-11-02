@@ -130,7 +130,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "B1-10",
               "required": "No (per XSD; required when section is started per SGG implementation)",
               "type": "Text input",
@@ -142,7 +142,7 @@
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "B1-11",
               "required": false,
               "type": "Text input",
@@ -240,7 +240,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "authorized_representative.email",
               "xml_path": "EPA_KeyContacts_2_0:AuthorizedRepresentative/globLib:Email"
             }
@@ -356,7 +356,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "B2-10",
               "required": "No (per XSD; required when section is started per SGG implementation)",
               "type": "Text input",
@@ -368,7 +368,7 @@
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "B2-11",
               "required": false,
               "type": "Text input",
@@ -466,7 +466,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "payee.email",
               "xml_path": "EPA_KeyContacts_2_0:Payee/globLib:Email"
             }
@@ -582,7 +582,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "B3-10",
               "required": "No (per XSD; required when section is started per SGG implementation)",
               "type": "Text input",
@@ -594,7 +594,7 @@
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "B3-11",
               "required": false,
               "type": "Text input",
@@ -692,7 +692,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "administrative_contact.email",
               "xml_path": "EPA_KeyContacts_2_0:AdminstrativeContact/globLib:Email"
             }
@@ -808,7 +808,7 @@
           "children": [
             {
               "kind": "field",
-              "label": "Street1",
+              "label": "Street 1",
               "dat_field": "B4-10",
               "required": "No (per XSD; required when section is started per SGG implementation)",
               "type": "Text input",
@@ -820,7 +820,7 @@
             },
             {
               "kind": "field",
-              "label": "Street2",
+              "label": "Street 2",
               "dat_field": "B4-11",
               "required": false,
               "type": "Text input",
@@ -918,7 +918,7 @@
               "type": "Text input",
               "widget": "TextWidget",
               "help_text": "Enter the email address.",
-              "constraints": "minLength 1, maxLength 60, format email",
+              "constraints": "maxLength 60, format email",
               "json_path": "project_manager.email",
               "xml_path": "EPA_KeyContacts_2_0:ProjectManager/globLib:Email"
             }

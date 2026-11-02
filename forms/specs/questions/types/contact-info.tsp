@@ -16,12 +16,13 @@ namespace Questions.Types;
 @maxLength(25)
 scalar PhoneNumber extends string;
 
-// `globLib:EmailDataType` is minLength 1, maxLength 60, so both bounds are declared here.
+// `globLib:EmailDataType` is minLength 1, maxLength 60. The minimum is left out, as in the
+// API's hand-written forms: `format: email` already rejects an empty string, and two errors
+// for the same problem is confusing.
 /** Enter a valid email address. */
 @Meta.question(#{ id: "types/contact-info/email-address" })
 @Meta.tag(Catalogue.Tag.email)
 @UI.label("Email")
 @format("email")
-@minLength(1)
 @maxLength(60)
 scalar EmailAddress extends string;

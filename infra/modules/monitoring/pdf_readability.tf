@@ -34,7 +34,7 @@ resource "aws_cloudwatch_metric_alarm" "pdf_readability_waf_blocks" {
   ok_actions          = [aws_sns_topic.this.arn]
 
   dimensions = {
-    WebACL = var.pdf_readability_monitoring.waf_metric_name
+    WebACL = var.pdf_readability_monitoring.waf_web_acl_name
     Rule   = each.value
     Region = var.pdf_readability_monitoring.region
   }
@@ -89,12 +89,12 @@ resource "aws_cloudwatch_dashboard" "pdf_readability" {
           stat   = "Sum"
           metrics = concat([
             for key, rule in local.pdf_readability_waf_rules :
-            ["AWS/WAFV2", "CountedRequests", "WebACL", var.pdf_readability_monitoring.waf_metric_name, "Rule", rule, "Region", var.pdf_readability_monitoring.region, { label = "${key}: Count matches" }]
+            ["AWS/WAFV2", "CountedRequests", "WebACL", var.pdf_readability_monitoring.waf_web_acl_name, "Rule", rule, "Region", var.pdf_readability_monitoring.region, { label = "${key}: Count matches" }]
             ], [
             for key, rule in local.pdf_readability_waf_rules :
-            ["AWS/WAFV2", "BlockedRequests", "WebACL", var.pdf_readability_monitoring.waf_metric_name, "Rule", rule, "Region", var.pdf_readability_monitoring.region, { label = "${key}: blocked" }]
+            ["AWS/WAFV2", "BlockedRequests", "WebACL", var.pdf_readability_monitoring.waf_web_acl_name, "Rule", rule, "Region", var.pdf_readability_monitoring.region, { label = "${key}: blocked" }]
             ], [
-            ["AWS/WAFV2", "BlockedRequests", "WebACL", var.pdf_readability_monitoring.waf_metric_name, "Rule", "ALL", "Region", var.pdf_readability_monitoring.region, { label = "All-route WAF blocks" }]
+            ["AWS/WAFV2", "BlockedRequests", "WebACL", var.pdf_readability_monitoring.waf_web_acl_name, "Rule", "ALL", "Region", var.pdf_readability_monitoring.region, { label = "All-route WAF blocks" }]
           ])
         }
       },

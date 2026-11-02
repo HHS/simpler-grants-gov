@@ -134,6 +134,15 @@ describe("matches field labels", () => {
     );
     expect(result.fieldLabels).toEqual([]);
   });
+
+  it("ignores case differences", () => {
+    const result = compare(
+      { a: { label: "Zip / Postal Code" } },
+      { a: { label: "Zip / postal code" } },
+      { labels: true },
+    );
+    expect(result.fieldLabels).toEqual([]);
+  });
 });
 
 describe("matches help text", () => {
@@ -144,6 +153,15 @@ describe("matches help text", () => {
       { help: true },
     );
     expect(paths(result.helpText)).toEqual(["a"]);
+  });
+
+  it("ignores case differences", () => {
+    const result = compare(
+      { a: { help: "Enter the middle name." } },
+      { a: { help: "Enter the Middle Name." } },
+      { help: true },
+    );
+    expect(result.helpText).toEqual([]);
   });
 
   const recorded = {

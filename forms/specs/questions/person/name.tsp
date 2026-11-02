@@ -40,7 +40,7 @@ namespace NameParts {
   scalar Suffix extends string;
 }
 
-/** A person's name, in five parts. `HumanNameDataType` requires the first and last name. */
+/** A person's name, in five parts. First and last name are required. */
 @Meta.question(#{ id: "person/name" })
 @Meta.tag(Catalogue.Tag.person, Catalogue.Tag.name)
 @UI.label("Name")

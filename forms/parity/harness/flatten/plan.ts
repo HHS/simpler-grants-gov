@@ -40,6 +40,9 @@ export type PlanNode<F extends PlanField = PlanField> = F | PlanSection<F>;
 export interface Plan<F extends PlanField = PlanField> {
   slug: string;
   spec_id?: string;
+  omb_number?: string;
+  /** `MM/DD/YYYY`, as Grants.gov's form listing writes it. */
+  expiration_date?: string;
   xsd_url?: string;
   dat_url?: string;
   children?: PlanNode<F>[];

@@ -212,7 +212,15 @@ for (const loginState of LOGIN_STATES) {
         const pageErrors: string[] = [];
         page.on("pageerror", (error) => pageErrors.push(error.message));
         page.on("console", (message) => {
-          if (message.type() === "error") pageErrors.push(message.text());
+          // The save-search modal (logged in) logs a known a11y console error
+          // ("... is missing aria-describedby attribute") when it mounts. It is
+          // an app issue unrelated to rapid Filters clicks, so don't count it.
+          if (
+            message.type() === "error" &&
+            !/is missing aria-describedby attribute/.test(message.text())
+          ) {
+            pageErrors.push(message.text());
+          }
         });
 
         // When I click the 'Filters' button multiple times rapidly

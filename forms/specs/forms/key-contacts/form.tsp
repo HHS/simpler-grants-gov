@@ -4,13 +4,14 @@ import "simpler-forms";
 import "#forms/index.tsp";
 import "#questions/organization/index.tsp";
 
-import "./key-contact.tsp";
+import "./examples.tsp";
+import "./fragments.tsp";
 
 using SimplerForms;
 
 namespace Forms.KeyContacts;
 
-/** KEY CONTACTS (Grants.gov FID 683, v2.0) */
+/** KEY CONTACTS, Grants.gov version 2.0. */
 @Meta.form(#{ id: "key-contacts", formName: "KEY CONTACTS" })
 @GrantsGov.form(#{
   legacyFormId: 683,
@@ -18,20 +19,15 @@ namespace Forms.KeyContacts;
   formVersion: "2.0",
   agencyCode: "SGG",
   ombNumber: "4040-0010",
+  expirationDate: "2029-08-31",
 })
-@example(#{
-  applicantOrganizationName: "Acme Corporation",
-  keyContacts: #[
-    Forms.KeyContacts.Examples.principalInvestigator,
-    Forms.KeyContacts.Examples.projectManager
-  ],
-})
+@example(Examples.form)
 model KeyContacts {
   /** Enter the legal name of the applicant that will undertake the assistance activity. This field is required. */
   @UI.label("Applicant Organization Name")
   applicantOrganizationName: Questions.Organizations.OrgName;
 
-  /** You may enter up to four (4) Key Contacts. At least 1 (one) contact person is required. Additional contacts are optional. */
+  /** Enter between 1 and 4 key contacts and their role on the project. */
   @UI.label("Key Contacts")
   @minItems(1)
   @maxItems(4)

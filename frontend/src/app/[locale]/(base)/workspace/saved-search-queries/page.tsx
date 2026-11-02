@@ -1,5 +1,6 @@
+import OpportunitiesPagination from "src/app/[locale]/(base)/grantor/opportunities/_components/OpportunitiesPagination";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
-import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
+import { fetchSavedSearchesPage } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { logger } from "src/services/logger/simplerLogger";
 import { LocalizedPageProps } from "src/types/intl";
 import { FilterOption } from "src/types/search/searchFilterTypes";
@@ -13,6 +14,7 @@ import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
@@ -44,12 +46,22 @@ const NoSavedSearches = () => {
   );
 };
 
+type SavedSearchQueriesProps = LocalizedPageProps & {
+  searchParams?: Promise<{ page?: string }>;
+};
+
 export default async function SavedSearchQueries({
   params,
-}: LocalizedPageProps) {
+  searchParams,
+}: SavedSearchQueriesProps) {
   const { locale } = await params;
+  const { page: pageParam } = searchParams ? await searchParams : {};
+  const parsedPage = Number(pageParam);
+  const currentPage =
+    Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const t = await getTranslations({ locale, namespace: "SavedSearches" });
   let savedSearches;
+  let totalPages = 0;
   let agencyOptions: FilterOption[] = [];
 
   const paramDisplayMapping = validSearchQueryParamKeys.reduce(
@@ -61,7 +73,9 @@ export default async function SavedSearchQueries({
   );
 
   try {
-    savedSearches = await fetchSavedSearches();
+    const savedSearchPage = await fetchSavedSearchesPage(currentPage);
+    savedSearches = savedSearchPage.savedSearches;
+    totalPages = savedSearchPage.paginationInfo.total_pages;
   } catch (_e) {
     return (
       <>
@@ -71,6 +85,17 @@ export default async function SavedSearchQueries({
         <GeneralErrorAlert callToAction={t("error")} />
       </>
     );
+  }
+
+  // A page past the end (for example after deleting the last search on the final
+  // page, which refreshes in place) would otherwise show the "no saved searches"
+  // state even though earlier pages still have searches; send the user to the last page.
+  if (
+    savedSearches.length === 0 &&
+    totalPages > 0 &&
+    currentPage > totalPages
+  ) {
+    redirect(`/workspace/saved-search-queries?page=${totalPages}`);
   }
 
   try {
@@ -107,13 +132,25 @@ export default async function SavedSearchQueries({
       </GridContainer>
       <div className="padding-y-5">
         {savedSearches.length > 0 ? (
-          <SavedSearchesList
-            savedSearches={formattedSavedSearches}
-            paramDisplayMapping={paramDisplayMapping}
-            editText={t("edit")}
-            deleteText={t("delete")}
-            agencyOptions={agencyOptions}
-          />
+          <>
+            {totalPages > 1 && (
+              <div className="grid-container display-flex flex-justify-end margin-bottom-2">
+                <OpportunitiesPagination totalPages={totalPages} />
+              </div>
+            )}
+            <SavedSearchesList
+              savedSearches={formattedSavedSearches}
+              paramDisplayMapping={paramDisplayMapping}
+              editText={t("edit")}
+              deleteText={t("delete")}
+              agencyOptions={agencyOptions}
+            />
+            {totalPages > 1 && (
+              <div className="grid-container display-flex flex-justify-end margin-top-2">
+                <OpportunitiesPagination totalPages={totalPages} />
+              </div>
+            )}
+          </>
         ) : (
           <NoSavedSearches />
         )}

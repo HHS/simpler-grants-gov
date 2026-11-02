@@ -5,6 +5,7 @@ from email.utils import formatdate, make_msgid
 from pydantic import Field
 
 from src.adapters.aws.aws_session import is_local_aws
+from src.adapters.aws.ses_adapter import TRACE_ID_HEADER
 from src.adapters.aws.ses_adapter import send_email as send_ses_email
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -69,6 +70,7 @@ def send_email_to_address(
         subject=subject,
         message=message,
         email_tags=email_tags,
+        trace_id=trace_id,
     )
 
 
@@ -144,7 +146,7 @@ def send_local_email(
         email_message["Cc"] = ", ".join(cc_addresses)
     email_message["Date"] = formatdate(localtime=False, usegmt=True)
     email_message["Message-ID"] = make_msgid()
-    email_message["X-Simpler-Trace-Id"] = trace_id
+    email_message[TRACE_ID_HEADER] = trace_id
     if email_tags:
         # X-SES-MESSAGE-TAGS is how SES accepts tags over SMTP; X-Tags shows them as Mailpit tags
         email_message["X-SES-MESSAGE-TAGS"] = ", ".join(
