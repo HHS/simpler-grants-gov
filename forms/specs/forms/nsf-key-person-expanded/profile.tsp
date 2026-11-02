@@ -20,7 +20,7 @@ enum NSFProjectRole {
 
 /** Enter the person's NSF ID, if they have one. */
 @UI.label("NSF ID")
-@pattern("[0-9A-Z]{9}")
+@pattern("^[0-9A-Z]{9}$")
 scalar NSFID extends string;
 
 /**

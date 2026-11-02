@@ -12,3 +12,4 @@ options:
     property-casing: snake
   simpler-forms-sgg:
     emitter-output-dir: "{project-root}/dist/sgg"
+    property-casing: snake

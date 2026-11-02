@@ -3,6 +3,7 @@ import {
   ADDRESS_HEADING,
   BANK_WORDING,
   emailMinLength,
+  NINE_DIGIT_ZIP,
   unmappedAttachments,
   PROFILE_GROUPS,
 } from "./common.ts";
@@ -26,6 +27,20 @@ export const DIFF: FormDiff = {
   wording: BANK_WORDING,
   dat: {
     absentFromPlan: { "1-10": ADDRESS_HEADING, "2-10": ADDRESS_HEADING },
+    differingHelp: {
+      "1-17": {
+        plan: "Enter the zip / postal code. This field is required if the country is the United States.",
+        source:
+          "Pre-populated from the SF 424 (R&R). The nine-digit ZIP code (or ZIP+4) of Project Director. This field is required if the Project Director is located in the United States.",
+        ...NINE_DIGIT_ZIP,
+      },
+      "2-17": {
+        plan: "Enter the zip / postal code. This field is required if the country is the United States.",
+        source:
+          "Enter the nine-digit ZIP code (or ZIP+4) of Senior/Key Person. This field is required if the Senior/Key Person is located in the United States.",
+        ...NINE_DIGIT_ZIP,
+      },
+    },
     outOfOrder: {
       "1-07": PROFILE_GROUPS,
       "1-21": PROFILE_GROUPS,

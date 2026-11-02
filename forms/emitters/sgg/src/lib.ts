@@ -1,4 +1,13 @@
-import { createTypeSpecLibrary, paramMessage } from "@typespec/compiler";
+import {
+  createTypeSpecLibrary,
+  paramMessage,
+  type JSONSchemaType,
+} from "@typespec/compiler";
+
+export interface SggEmitterOptions {
+  /** Must match the `simpler-forms` emitter's, so rule schema keys name the schema's properties. */
+  "property-casing"?: "preserve" | "snake";
+}
 
 /**
  * A TypeSpec library of its own, rather than a plugin registered with `simpler-forms`.
@@ -35,6 +44,22 @@ export const $lib = createTypeSpecLibrary({
   },
   state: {
     sync: {},
+    attachment: {},
+  },
+  emitter: {
+    options: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        "property-casing": {
+          type: "string",
+          enum: ["preserve", "snake"],
+          nullable: true,
+          default: "preserve",
+        },
+      },
+      required: [],
+    } as JSONSchemaType<SggEmitterOptions>,
   },
 } as const);
 

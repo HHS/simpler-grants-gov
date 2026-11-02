@@ -41,3 +41,10 @@ model SyncOptions {
  * `@GrantsGov.form`, the identity the API registers it under.
  */
 extern dec sync(target: Model, options?: valueof SyncOptions);
+
+/**
+ * This question's answer is the id of one of the application's uploads. The API checks
+ * each one still belongs to the application, with a `gg_validation` attachment rule in the
+ * form's rule schema.
+ */
+extern dec attachment(target: Scalar);
