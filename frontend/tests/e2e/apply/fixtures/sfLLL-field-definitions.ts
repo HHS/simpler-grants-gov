@@ -99,7 +99,7 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   reportingEntity_zip: {
     testId: "reporting_entity--applicant_reporting_entity--address--zip_code",
     type: "text",
-    maxLength: 30, // address_shared.py.zip_code
+    maxLength: 10,
     section: "Section 4",
     field: "Zip Code",
   },
@@ -148,7 +148,7 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   primeEntity_zip: {
     testId: "reporting_entity--prime_reporting_entity--address--zip_code",
     type: "text",
-    maxLength: 30, // address_shared.py.zip_code
+    maxLength: 10,
     section: "Section 5",
     field: "Prime Zip Code",
   },
@@ -263,7 +263,7 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   lobbyingRegistrant_zip: {
     testId: "lobbying_registrant--address--zip_code",
     type: "text",
-    maxLength: 30, // address_shared.py.zip_code
+    maxLength: 10,
     section: "Section 10a",
     field: "Zip Code",
   },
@@ -332,7 +332,7 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   performingService_zip: {
     testId: "individual_performing_service--address--zip_code",
     type: "text",
-    maxLength: 30, // address_shared.py.zip_code
+    maxLength: 10,
     section: "Section 10b",
     field: "Zip Code",
   },
