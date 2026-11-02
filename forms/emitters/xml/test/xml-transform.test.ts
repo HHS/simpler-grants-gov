@@ -242,7 +242,9 @@ const valueSpec = (transform = "Transforms.Transformation.yesNo") => `
   namespace Mappings { enum Target { xml } }
 
   @Mapping.transforms(Transformation)
-  namespace Transforms { enum Transformation { yesNo: "boolean_to_yes_no" } }
+  namespace Transforms {
+    enum Transformation { yesNo: "boolean_to_yes_no", truncate: "truncate_string" }
+  }
   namespace Undeclared { enum Transformation { shout } }
 
   namespace Wire {
@@ -256,6 +258,8 @@ const valueSpec = (transform = "Transforms.Transformation.yesNo") => `
     @ns(Ns.Form)
     model Root {
       @Mapping.transform(${transform}) @name("Agrees") agrees: string;
+      @Mapping.transform(Transforms.Transformation.truncate, #{ max_length: 60 })
+      @name("Title") title?: string;
       @name("File") file?: AttachedFile;
     }
   }
@@ -265,6 +269,7 @@ const valueSpec = (transform = "Transforms.Transformation.yesNo") => `
     @Mapping.to(Mappings.Target.xml, Wire.Root)
     model Example {
       @Mapping.to(Mappings.Target.xml, Wire.Root.agrees) agrees: boolean;
+      @Mapping.to(Mappings.Target.xml, Wire.Root.title) title?: string;
       @Mapping.to(Mappings.Target.xml, Wire.Root.file) upload?: string;
     }
   }
@@ -293,6 +298,19 @@ describe("xmlTransform values", () => {
     });
   });
 
+  it("writes @Mapping.transform's params as the value_transform's", async () => {
+    const { result } = await valueRules();
+    expect(result.title).toEqual({
+      xml_transform: {
+        target: "Title",
+        value_transform: {
+          type: "truncate_string",
+          params: { max_length: 60 },
+        },
+      },
+    });
+  });
+
   it("rejects a transformation no @Mapping.transforms enum declares", async () => {
     const { program } = await valueRules("Undeclared.Transformation.shout");
     expectDiagnostics(program.diagnostics, {
@@ -312,6 +330,82 @@ describe("xmlTransform values", () => {
         file_element: "",
       },
     });
+  });
+});
+
+describe("xmlTransform attachments", () => {
+  /** An attachment inside an object element, and a list of them at the root. */
+  const attachmentSpec = `
+    import "simpler-forms";
+    import "@typespec/xml";
+    import "form-library-xml";
+    using SimplerForms;
+    using TypeSpec.Xml;
+
+    @Mapping.targets(Target)
+    namespace Mappings { enum Target { xml } }
+
+    namespace Wire {
+      @nsDeclarations
+      enum Ns { Form: "http://example.gov/form" }
+
+      @GrantsGov.attachment
+      scalar AttachedFile extends string;
+
+      @ns(Ns.Form)
+      model Person { @name("Name") name: string; @name("Sketch") sketch?: AttachedFile; }
+
+      @name("FormRoot")
+      @ns(Ns.Form)
+      model Root {
+        @name("Person") person: Person;
+        @name("Other") other?: AttachedFile[];
+      }
+    }
+
+    namespace Forms {
+      model Person {
+        @Mapping.to(Mappings.Target.xml, Wire.Person.name) name: string;
+        @Mapping.to(Mappings.Target.xml, Wire.Person.sketch) sketch?: string;
+      }
+
+      @Meta.form(#{ id: "example", formName: "Example" })
+      @Mapping.to(Mappings.Target.xml, Wire.Root)
+      model Example {
+        @Mapping.to(Mappings.Target.xml, Wire.Root.person) person: Person;
+        @Mapping.to(Mappings.Target.xml, Wire.Root.other) others?: string[];
+      }
+    }
+  `;
+
+  it("leaves out, with a warning, an attachment it would write as the upload's id", async () => {
+    const [{ program }] = await Tester.compileAndDiagnose(attachmentSpec);
+    const result = xmlTransform(
+      program,
+      lookup<Model>(program, "Forms.Example"),
+      lookup<EnumMember>(program, "Mappings.Target.xml"),
+      "snake",
+      "to",
+    )!;
+    expectDiagnostics(program.diagnostics, [
+      {
+        code: "form-library-xml/xml-transform-unsupported",
+        severity: "warning",
+        message:
+          "The XML transform rules leave out Sketch: it holds an attachment below the root, and the API writes an attachment only as a single file at the root.",
+      },
+      {
+        code: "form-library-xml/xml-transform-unsupported",
+        severity: "warning",
+        message:
+          "The XML transform rules leave out Other: it holds a list of attachments, and the API writes an attachment only as a single file at the root.",
+      },
+    ]);
+    expect(result.person).toEqual({
+      xml_transform: { target: "Person", type: "nested_object" },
+      name: { xml_transform: { target: "Name" } },
+    });
+    expect(result.others).toBeUndefined();
   });
 });
 

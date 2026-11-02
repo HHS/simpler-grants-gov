@@ -20,7 +20,12 @@ export const $transform = (
   ctx: DecoratorContext,
   target: ModelProperty,
   transform: EnumMember,
-) => ctx.program.stateMap(stateKeys.transform).set(target, transform);
+  params?: Record<string, unknown>,
+) => {
+  ctx.program.stateMap(stateKeys.transform).set(target, transform);
+  if (params)
+    ctx.program.stateMap(stateKeys.transformParams).set(target, params);
+};
 
 /**
  * The name of the transformation `@Mapping.transform` gives `property`, or `undefined` when
@@ -45,3 +50,11 @@ export const transformOf = (
   }
   return typeof member.value === "string" ? member.value : member.name;
 };
+
+/** The `params` `@Mapping.transform` gives `property`'s transformation, if any. */
+export const transformParamsOf = (
+  program: Program,
+  property: ModelProperty,
+): Record<string, unknown> | undefined =>
+  program.stateMap(stateKeys.transformParams).get(property) as
+    Record<string, unknown> | undefined;

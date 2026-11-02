@@ -5,9 +5,11 @@
  * JSON Forms `ui.json` per form. JSON Forms needs a self-contained schema, so the form's
  * schema is dereferenced here; its `examples` come straight from `@example` in the TypeSpec.
  */
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { JsonSchema, UISchemaElement } from "@jsonforms/core";
+import type { XmlMapping } from "@xml/index.ts";
 
 import { dereferenceFormSchema } from "./dereferenceSchema";
 
@@ -20,6 +22,8 @@ export interface FormSpec {
   uischema: UISchemaElement;
   /** The first `@example` declared on the form model, if any. */
   example?: Record<string, unknown>;
+  /** How to build the form's Grants.gov XML, for a form mapped to its XSD. */
+  xmlMapping?: XmlMapping;
 }
 
 const readJson = async (file: string) =>
@@ -53,5 +57,9 @@ export async function loadFormSpec(specId: string): Promise<FormSpec> {
   const uischema = (await readJson(
     path.join(formDir, "ui.json"),
   )) as unknown as UISchemaElement;
-  return { schema, uischema, example: schema.examples?.[0] };
+  const xmlMappingFile = path.join(formDir, "xml-mapping.json");
+  const xmlMapping = existsSync(xmlMappingFile)
+    ? ((await readJson(xmlMappingFile)) as unknown as XmlMapping)
+    : undefined;
+  return { schema, uischema, example: schema.examples?.[0], xmlMapping };
 }
