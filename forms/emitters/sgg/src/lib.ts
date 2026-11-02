@@ -41,6 +41,12 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`${"name"} has @Sgg.sync but no @GrantsGov.form, so it cannot be installed: the API registers a form under its Grants.gov short form name and version.`,
       },
     },
+    "sync-xml-transform-incomplete": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"name"} installs its XML as transform rules, which leave out ${"elements"}. Use @Sgg.sync(#{ xml: "mapping" }), which writes them.`,
+      },
+    },
   },
   state: {
     sync: {},

@@ -19,7 +19,8 @@ model KeyContacts { ... }
   while they can't produce a valid document yet.
 - **`@Sgg.sync(#{ xml: "mapping" })`** installs its XML mapping as `xml_mapping.json`, the
   format shaped like the XML, instead of `xml_transform.json`. The default is
-  `xml: "transform"`.
+  `xml: "transform"`, which is an error for a form whose transform rules would leave out
+  part of its XSD: a wrapper with no field of its own, or an attachment below the root.
 - **`@Sgg.sync(#{ instructions: "<uuid>" })`** points the form at its instructions: the
   `form_instruction_id` of a form instruction record, uploaded to each environment with
   the API's `update-form-instruction` task (`api/src/task/forms/README.md`). Give each form

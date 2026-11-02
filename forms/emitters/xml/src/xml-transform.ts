@@ -10,6 +10,7 @@ import { resolveEncodedName } from "@typespec/compiler";
 import { $lib as xmlLib, getNs, isAttribute } from "@typespec/xml";
 import {
   jsonPropertyName,
+  mappingTargets,
   modelProperties,
   resolveMapping,
   resolveMappingFrom,
@@ -117,6 +118,57 @@ export function xmlTransform(
       resolved.children.filter((node) => !attachments.includes(node)),
     ),
   };
+}
+
+/** An element `form`'s XML transform rules leave out, and why. */
+export interface XmlTransformGap {
+  element: string;
+  reason: string;
+}
+
+/**
+ * The elements `form`'s XML transform rules leave out, read from the `@Mapping.from` links of
+ * every mapping it is linked in: a wrapper with no property of its own, and everything inside
+ * it, or an attachment the API would write as its upload id. The XML mapping format writes
+ * them all, so an installer can refuse the rules for a form they don't fully describe.
+ */
+export function xmlTransformGaps(
+  program: Program,
+  form: Model,
+): XmlTransformGap[] {
+  return mappingTargets(program).flatMap((mapping) => {
+    const from = resolveMappingFrom(program, form, mapping);
+    if (!from) return [];
+    const wrappers = from.problems
+      .filter((p) => p.code === "simpler-forms/mapping-from-wrapper")
+      .map((p) => {
+        const t = p.target as ModelProperty;
+        return {
+          element: t.model ? `${t.model.name}.${t.name}` : t.name,
+          reason: "a wrapper with no field of its own",
+        };
+      });
+    const attachments = (
+      nodes: MappingNode[],
+      root: boolean,
+    ): XmlTransformGap[] =>
+      nodes.flatMap((node) => {
+        if (node.kind === "group") return attachments(node.children, false);
+        const shape = node.target && attachmentShape(program, node.target);
+        const gap = (reason: string) => [
+          { element: xmlName(program, node.target!), reason },
+        ];
+        if (shape === "list") return gap("a list of attachments");
+        // Only a single attachment at the root is written from its upload.
+        if (shape === "single" && !(root && node.kind === "leaf"))
+          return gap("an attachment below the root");
+        return attachments(node.children, false);
+      });
+    return [
+      ...new Map(wrappers.map((w) => [w.element, w])).values(),
+      ...attachments(from.resolved.children, true),
+    ];
+  });
 }
 
 class Rules {
