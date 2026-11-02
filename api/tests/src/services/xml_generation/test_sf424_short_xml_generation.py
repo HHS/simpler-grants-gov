@@ -81,7 +81,7 @@ _CONTACT = {
         "street1": "123 Main St",
         "city": "Washington",
         "state": "DC: District of Columbia",
-        "zip_code": "20001",
+        "zip_code": "20001-0001",
         "country": "USA: UNITED STATES",
     },
 }
@@ -95,7 +95,7 @@ _MINIMAL_DATA = {
         "street1": "123 Main St",
         "city": "Washington",
         "state": "DC: District of Columbia",
-        "zip_code": "20001",
+        "zip_code": "20001-0001",
         "country": "USA: UNITED STATES",
     },
     "applicant_type_code": ["C: City or Township Government"],
@@ -158,7 +158,7 @@ class TestSF424ShortXMLGeneration:
                     "street1": "456 Oak Ave",
                     "city": "Boston",
                     "state": "MA: Massachusetts",
-                    "zip_code": "02115",
+                    "zip_code": "02115-1234",
                     "country": "USA: UNITED STATES",
                 }
             }
@@ -168,7 +168,7 @@ class TestSF424ShortXMLGeneration:
         assert address is not None
         assert address.find(f"{{{GLOB_NS}}}Street1").text == "456 Oak Ave"
         assert address.find(f"{{{GLOB_NS}}}City").text == "Boston"
-        assert address.find(f"{{{GLOB_NS}}}ZipPostalCode").text == "02115"
+        assert address.find(f"{{{GLOB_NS}}}ZipPostalCode").text == "02115-1234"
 
     def test_applicant_type_code_one_to_many(self):
         """Multiple applicant type codes map to indexed ApplicantTypeCode elements."""
@@ -354,7 +354,7 @@ _SNAPSHOT_DATA = {
         "street2": "Suite 200",
         "city": "Boston",
         "state": "MA: Massachusetts",
-        "zip_code": "02115",
+        "zip_code": "02115-1234",
         "country": "USA: UNITED STATES",
     },
     "applicant_web_address": "https://example.edu",
@@ -379,7 +379,7 @@ _SNAPSHOT_DATA = {
             "street1": "456 University Ave",
             "city": "Boston",
             "state": "MA: Massachusetts",
-            "zip_code": "02115",
+            "zip_code": "02115-1234",
             "country": "USA: UNITED STATES",
         },
     },
@@ -400,7 +400,7 @@ _SNAPSHOT_DATA = {
             "street1": "456 University Ave",
             "city": "Boston",
             "state": "MA: Massachusetts",
-            "zip_code": "02115",
+            "zip_code": "02115-1234",
             "country": "USA: UNITED STATES",
         },
     },
