@@ -141,7 +141,7 @@ def contact_person_group():
             "city": "Exampleburg",
             "state": "NY: New York",
             "country": "USA: UNITED STATES",
-            "zip_code": "12345",
+            "zip_code": "12345-6789",  # 9+ chars required for US addresses
         },
     }
 
@@ -160,7 +160,7 @@ def valid_json_v3_0(contact_person_group):
             "city": "Exampleburg",
             "state": "NY: New York",
             "country": "USA: UNITED STATES",
-            "zip_code": "12345",
+            "zip_code": "12345-6789",  # 9+ chars required for US addresses
         },
         "applicant_type_code": ["P: Individual"],
         "employer_taxpayer_identification_number": "123-456-7890",
@@ -624,6 +624,33 @@ def test_sf424_short_v3_0_max_length(sf424_short_v3_0, valid_json_v3_0, data):
     validation_issues = validate_json_schema_for_form(data, sf424_short_v3_0)
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "maxLength"
+
+
+def test_sf424_short_v3_0_us_zip_code_min_length(sf424_short_v3_0, valid_json_v3_0):
+    """US zip_code shorter than 9 characters fails minLength."""
+    data = valid_json_v3_0 | {
+        "applicant": {
+            **valid_json_v3_0["applicant"],
+            "zip_code": "12345",  # 5 chars — too short for US
+        }
+    }
+    issues = validate_json_schema_for_form(data, sf424_short_v3_0)
+    assert len(issues) == 1
+    assert issues[0].type == "minLength"
+    assert issues[0].field == "$.applicant.zip_code"
+
+
+def test_sf424_short_v3_0_non_us_zip_code_any_length(sf424_short_v3_0, valid_json_v3_0):
+    """Non-US zip_code has no minimum length requirement."""
+    data = valid_json_v3_0 | {
+        "applicant": {
+            "street1": "1 Rue de la Paix",
+            "city": "Paris",
+            "country": "FRA: FRANCE",
+            "zip_code": "",  # empty is fine for non-US
+        }
+    }
+    assert validate_json_schema_for_form(data, sf424_short_v3_0) == []
 
 
 def test_sf424_short_v3_0_pre_population_with_all_non_null_values(

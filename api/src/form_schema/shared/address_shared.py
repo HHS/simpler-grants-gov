@@ -122,7 +122,7 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
         "type": "string",
         "title": "Zip / Postal Code",
         "description": "Enter the nine-digit Postal Code (e.g., ZIP Code). This field is required if the Country is the United States.",
-        "minLength": 1,
+        "minLength": 0,
         "maxLength": 30,
     },
     "state_code": {
