@@ -3,16 +3,19 @@
 XSD Reference: https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd
 """
 
+import copy
 from datetime import date
 from pathlib import Path
 
 import pytest
 from lxml import etree as lxml_etree
 
+from src.form_schema.forms.sf424_short import FORM_JSON_SCHEMA
 from src.form_schema.forms.sf424_short import (
     FORM_XML_TRANSFORM_RULES as SF424_SHORT_TRANSFORM_RULES,
 )
 from src.form_schema.forms.sf424_short import SF424Short_v3_0
+from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -27,20 +30,43 @@ from tests.src.db.models.factories import (
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
+from tests.src.form_schema.forms.conftest import setup_resolved_form
 
 NS = "http://apply.grants.gov/forms/SF424_Short_3_0-V3.0"
 GLOB_NS = "http://apply.grants.gov/system/GlobalLibrary-V2.0"
+XSD_NAME = "SF424_Short_3_0-V3.0"
+
+APPLICANT_TYPE_CODES = FORM_JSON_SCHEMA["properties"]["applicant_type_code"]["items"]["enum"]
+# Option H is stored with a lowercase "state"; the XSD enumeration spells it with "State".
+STORED_TYPE_H = "H: Public/state Controlled Institution of Higher Education"
+XSD_TYPE_H = "H: Public/State Controlled Institution of Higher Education"
 
 
-def _generate(application_data: dict) -> str:
+@pytest.fixture(scope="module")
+def resolved_form():
+    return setup_resolved_form(SF424Short_v3_0)
+
+
+def _generate(application_data: dict, transform_config: dict = SF424_SHORT_TRANSFORM_RULES) -> str:
     response = XMLGenerationService().generate_xml(
-        XMLGenerationRequest(
-            application_data=application_data, transform_config=SF424_SHORT_TRANSFORM_RULES
-        )
+        XMLGenerationRequest(application_data=application_data, transform_config=transform_config)
     )
     assert response.success is True
     assert response.xml_data is not None
     return response.xml_data
+
+
+def _root(xml_data: str) -> lxml_etree._Element:
+    return lxml_etree.fromstring(xml_data.encode("utf-8"))
+
+
+def _applicant_type_elements(xml_data: str) -> dict[str, str]:
+    """ApplicantTypeCode1-3 elements present in the XML, keyed by local name."""
+    return {
+        lxml_etree.QName(element).localname: element.text
+        for element in _root(xml_data)
+        if lxml_etree.QName(element).localname.startswith("ApplicantTypeCode")
+    }
 
 
 _CONTACT = {
@@ -253,6 +279,65 @@ class TestSF424ShortXMLGeneration:
         assert root.find(f"{{{NS}}}DateReceived") is not None
 
 
+class TestSF424ShortApplicantType:
+    def test_stored_option_h_uses_lowercase_state(self):
+        """The form only accepts the lowercase spelling, so that's what gets saved and what
+        the XML generation has to fix."""
+        assert STORED_TYPE_H in APPLICANT_TYPE_CODES
+        assert XSD_TYPE_H not in APPLICANT_TYPE_CODES
+
+    def test_option_h_is_written_with_xsd_casing(self):
+        xml_data = _generate({"applicant_type_code": [STORED_TYPE_H]})
+
+        assert _applicant_type_elements(xml_data) == {"ApplicantTypeCode1": XSD_TYPE_H}
+        assert STORED_TYPE_H not in xml_data
+
+    @pytest.mark.parametrize(
+        "applicant_type", [code for code in APPLICANT_TYPE_CODES if code != STORED_TYPE_H]
+    )
+    def test_other_options_are_written_unchanged(self, applicant_type):
+        xml_data = _generate({"applicant_type_code": [applicant_type]})
+
+        assert _applicant_type_elements(xml_data) == {"ApplicantTypeCode1": applicant_type}
+
+    def test_three_types_fill_every_slot_in_order(self):
+        """Three is the most the form allows. Option H in the last slot still gets fixed."""
+        xml_data = _generate(
+            {
+                "applicant_type_code": [
+                    "A: State Government",
+                    "X: Other (specify)",
+                    STORED_TYPE_H,
+                ]
+            }
+        )
+
+        assert _applicant_type_elements(xml_data) == {
+            "ApplicantTypeCode1": "A: State Government",
+            "ApplicantTypeCode2": "X: Other (specify)",
+            "ApplicantTypeCode3": XSD_TYPE_H,
+        }
+
+    def test_types_past_the_third_are_not_written(self):
+        """The XSD has no ApplicantTypeCode4, so anything past three is left out."""
+        xml_data = _generate(
+            {
+                "applicant_type_code": [
+                    "A: State Government",
+                    "B: County Government",
+                    "C: City or Township Government",
+                    "D: Special District Government",
+                ]
+            }
+        )
+
+        assert _applicant_type_elements(xml_data) == {
+            "ApplicantTypeCode1": "A: State Government",
+            "ApplicantTypeCode2": "B: County Government",
+            "ApplicantTypeCode3": "C: City or Township Government",
+        }
+
+
 # ---------------------------------------------------------------------------
 # Snapshot data — comprehensive case covering all required + key optional fields
 # ---------------------------------------------------------------------------
@@ -426,6 +511,71 @@ class TestSF424ShortXSDValidation:
         assert result[
             "valid"
         ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
+
+    @pytest.mark.parametrize(
+        "applicant_type_code,extra_fields",
+        [
+            ([STORED_TYPE_H], {}),
+            (["A: State Government", "C: City or Township Government", STORED_TYPE_H], {}),
+            (["X: Other (specify)"], {"applicant_type_other_specify": "Research Consortium"}),
+            (
+                ["A: State Government", "C: City or Township Government", "X: Other (specify)"],
+                {"applicant_type_other_specify": "x" * 30},
+            ),
+        ],
+    )
+    def test_applicant_type_validates_against_xsd(
+        self, xsd_validator, resolved_form, applicant_type_code, extra_fields
+    ):
+        data = _MINIMAL_DATA | {"applicant_type_code": applicant_type_code} | extra_fields
+        assert validate_json_schema_for_form(data, resolved_form) == []
+
+        xml_data = _generate(data)
+
+        other = _root(xml_data).find(f"{{{NS}}}ApplicantTypeOtherSpecify")
+        other_text = other.text if other is not None else None
+        assert other_text == extra_fields.get("applicant_type_other_specify")
+        result = xsd_validator.validate_xml_for_form(xml_data, XSD_NAME)
+        assert result["valid"], result["error_message"]
+
+    def test_option_h_without_the_casing_fix_fails_xsd(self, xsd_validator):
+        """Shows the casing fix is what keeps option H valid."""
+        rules = copy.deepcopy(SF424_SHORT_TRANSFORM_RULES)
+        one_to_many = rules["applicant_type_code_mapping"]["xml_transform"]["conditional_transform"]
+        del one_to_many["item_value_transform"]
+
+        xml_data = _generate(_MINIMAL_DATA | {"applicant_type_code": [STORED_TYPE_H]}, rules)
+
+        assert _applicant_type_elements(xml_data) == {"ApplicantTypeCode1": STORED_TYPE_H}
+        assert not xsd_validator.validate_xml_for_form(xml_data, XSD_NAME)["valid"]
+
+    @pytest.mark.parametrize(
+        "field,element,written_empty",
+        [
+            ("aor_signature", "AuthorizedRepresentativeSignature", False),
+            ("authorized_representative_date_signed", "AuthorizedRepresentativeDateSigned", False),
+            # date_received uses include_null, so it's written as an empty tag instead.
+            ("date_received", "DateReceived", True),
+        ],
+    )
+    def test_post_populated_field_missing_fails_xsd(
+        self, xsd_validator, resolved_form, field, element, written_empty
+    ):
+        """These three are required by the XSD but not by the JSON schema, because they're only
+        filled in on submit (see test_sf424_short_v3_0_post_population). Without them the XML
+        doesn't validate."""
+        data = {key: value for key, value in _MINIMAL_DATA.items() if key != field}
+        assert validate_json_schema_for_form(data, resolved_form) == []
+
+        xml_data = _generate(data)
+
+        found = _root(xml_data).find(f"{{{NS}}}{element}")
+        if written_empty:
+            assert found is not None
+            assert found.text is None
+        else:
+            assert found is None
+        assert not xsd_validator.validate_xml_for_form(xml_data, XSD_NAME)["valid"]
 
     def test_full_valid_validates_against_xsd(
         self, enable_factory_create, xsd_validator, seed_form_registry

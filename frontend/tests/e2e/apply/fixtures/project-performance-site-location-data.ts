@@ -33,7 +33,7 @@ export const buildPPSLHappyPathTestData = (
     "primary_site--address--county": `County ${shortSuffix}`,
     "primary_site--address--state": "AL: Alabama",
     "primary_site--address--country": "USA: UNITED STATES",
-    "primary_site--address--zip_code": "12345",
+    "primary_site--address--zip_code": "12345-6789",
     // Congressional district required when country is USA; exactly 6 chars
     "primary_site--congressional_district": "MD-000",
     // Optional attachment - included to exercise the file upload path
