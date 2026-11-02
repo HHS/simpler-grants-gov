@@ -23,6 +23,109 @@ def report():
 
 
 class RuntimeTests(unittest.TestCase):
+    def admission_fixture(self, iam=True):
+        events = []
+        generator = Mock(return_value="synthetic-token")
+
+        class Connection:
+            def __init__(self, name, token=None):
+                self.name = name
+                self.closed = False
+                self.statements = []
+                if iam:
+                    self.generate_iam_auth_token = token
+
+            def copy(self, alias):
+                # Model the IAM backend: the copied settings no longer contain
+                # the callback, so a newly constructed wrapper lacks it.
+                self.competitor = Connection(alias)
+                return self.competitor
+
+            @contextlib.contextmanager
+            def cursor(self):
+                if iam:
+                    if self.generate_iam_auth_token is not generator:
+                        raise RuntimeError("Missing IAM callback")
+                    self.generate_iam_auth_token()
+                events.append(self.name + ":cursor")
+                yield SimpleNamespace(execute=self.statements.append)
+
+            def close(self):
+                self.closed = True
+                events.append(self.name + ":close")
+
+        primary = Connection("primary", generator)
+        # These settings already exist on the primary before admission checks.
+        primary.statements = [
+            "SET default_transaction_read_only = on",
+            "SET statement_timeout = '5000'",
+        ]
+
+        class Busy(Exception):
+            code = "busy"
+
+        app = SimpleNamespace(connection=primary, PdfReadabilityError=Busy)
+        held = False
+
+        @contextlib.contextmanager
+        def analysis_slot():
+            nonlocal held
+            if held:
+                events.append("contended")
+                raise Busy()
+            held = True
+            try:
+                events.append(app.connection.name + ":lock")
+                yield
+            finally:
+                held = False
+
+        app._analysis_slot = analysis_slot
+        return primary, app, generator, events
+
+    def test_iam_copy_authenticates_and_final_flag_uses_open_primary(self):
+        primary, app, generator, events = self.admission_fixture()
+        checks = {}
+
+        def final_flag():
+            self.assertFalse(primary.closed)
+            self.assertFalse(primary.competitor.closed)
+            self.assertIn("SET default_transaction_read_only = on", primary.statements)
+            self.assertIn("SET statement_timeout = '5000'", primary.statements)
+            events.append("flag")
+            return True
+
+        with patch.object(runner.probe, "uploads_disabled", side_effect=final_flag):
+            runner.probe.verify_admission(checks, primary, app)
+        generator.assert_called_once()
+        self.assertTrue(checks["postgresql_contention"])
+        self.assertTrue(checks["postgresql_release"])
+        self.assertTrue(checks["public_uploads_still_disabled"])
+        self.assertLess(events.index("flag"), events.index("primary:close"))
+        self.assertTrue(primary.closed and primary.competitor.closed)
+        self.assertIs(app.connection, primary)
+
+    def test_plain_postgresql_connection_needs_no_iam_callback(self):
+        primary, app, generator, events = self.admission_fixture(iam=False)
+        checks = {}
+        with patch.object(runner.probe, "uploads_disabled", return_value=True):
+            runner.probe.verify_admission(checks, primary, app)
+        generator.assert_not_called()
+        self.assertTrue(all(checks.values()))
+        self.assertTrue(primary.closed and primary.competitor.closed)
+
+    def test_final_flag_query_failure_still_closes_both_connections(self):
+        primary, app, generator, events = self.admission_fixture()
+        checks = {}
+        with patch.object(
+            runner.probe, "uploads_disabled", side_effect=RuntimeError("query timeout")
+        ):
+            with self.assertRaises(RuntimeError):
+                runner.probe.verify_admission(checks, primary, app)
+        self.assertNotIn("public_uploads_still_disabled", checks)
+        self.assertTrue(primary.closed and primary.competitor.closed)
+        self.assertIs(app.connection, primary)
+
     def test_flag_read_uses_stored_value_or_default_without_writes(self):
         manager = Mock()
         settings = SimpleNamespace(

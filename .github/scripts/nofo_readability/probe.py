@@ -56,6 +56,36 @@ def uploads_disabled():
     return value is False
 
 
+def verify_admission(results, connection, app):
+    competitor = connection.copy(alias="readability_probe_competitor")
+    try:
+        # Builder's IAM backend removes this callback from settings_dict during
+        # initialization, so Django's copy() cannot reconstruct it on its own.
+        if hasattr(connection, "generate_iam_auth_token"):
+            competitor.generate_iam_auth_token = connection.generate_iam_auth_token
+        with competitor.cursor() as cursor:
+            cursor.execute("SET default_transaction_read_only = on")
+            cursor.execute("SET statement_timeout = '5000'")
+        with app._analysis_slot():
+            with patch.object(app, "connection", competitor):
+                try:
+                    with app._analysis_slot():
+                        results["postgresql_contention"] = False
+                except app.PdfReadabilityError as error:
+                    results["postgresql_contention"] = error.code == "busy"
+        with patch.object(app, "connection", competitor):
+            with app._analysis_slot():
+                results["postgresql_release"] = True
+        # Keep the primary session's read-only setting and five-second timeout
+        # in force for the final flag query; closing first opens a fresh session.
+        results["public_uploads_still_disabled"] = uploads_disabled()
+    finally:
+        try:
+            competitor.close()
+        finally:
+            connection.close()
+
+
 def exercise(results, fixtures):
     import django
 
@@ -186,25 +216,7 @@ sys.exit(worker.main())
         passed and isinstance(report, dict) and report.get("environment_ok") is True
     )
 
-    competitor = connection.copy(alias="readability_probe_competitor")
-    try:
-        with competitor.cursor() as cursor:
-            cursor.execute("SET default_transaction_read_only = on")
-            cursor.execute("SET statement_timeout = '5000'")
-        with app._analysis_slot():
-            with patch.object(app, "connection", competitor):
-                try:
-                    with app._analysis_slot():
-                        results["postgresql_contention"] = False
-                except app.PdfReadabilityError as error:
-                    results["postgresql_contention"] = error.code == "busy"
-        with patch.object(app, "connection", competitor):
-            with app._analysis_slot():
-                results["postgresql_release"] = True
-    finally:
-        competitor.close()
-        connection.close()
-    results["public_uploads_still_disabled"] = uploads_disabled()
+    verify_admission(results, connection, app)
 
 
 def main(encoded_fixtures):
