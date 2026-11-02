@@ -79,6 +79,4 @@ module "infra_sgg1_config" {
   # enable_command_execution = true
 
   enable_workflow_service = true
-
-  enable_processor_service = true
 }
