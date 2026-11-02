@@ -27,8 +27,8 @@ module "infra_dev_config" {
   enable_pdf_readability_monitoring               = true
   monitoring_email_alert_recipient_parameter_name = "/nofos/infra-dev/monitoring/alert-email"
   pdf_readability_alarm_actions_enabled           = true
-  # Observation first. Switch rate_action to block only for the coordinated
-  # synthetic dev test; public pilot enablement remains a separate decision.
+  # Restored observation mode after the coordinated synthetic dev rate test.
+  # Public pilot enablement remains off.
   pdf_readability_waf = {
     rate_limit      = 10
     rate_action     = "count"
