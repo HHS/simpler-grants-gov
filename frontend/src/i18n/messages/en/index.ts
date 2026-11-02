@@ -375,7 +375,6 @@ export const messages = {
     },
     competitionFormTable: {
       attachment: "Attachment",
-      attachmentUnavailable: "Unavailable",
       conditionalForms: "Conditionally-Required Forms",
       conditionalFormsDescription:
         "These forms may be required based on your situation. Review the <instructionsLink>opportunity instructions</instructionsLink> and let us know if you plan to submit each form. If so, you'll need to complete it and upload any required documents.",
@@ -383,6 +382,7 @@ export const messages = {
       form: "Form",
       instructions: "Instructions",
       include: "Include with application",
+      notApplicable: "Not Applicable",
       requiredForms: " Required Forms",
       status: "Status",
       statuses: {

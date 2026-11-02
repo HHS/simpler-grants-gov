@@ -31,7 +31,8 @@ jest.mock("next/navigation", () => ({
 // actually invokes its `instructionsLink` renderer.
 jest.mock("next-intl", () => ({
   useTranslations: () => {
-    const translationFunction = ((key: string) => key) as ((
+    const translationFunction = ((key: string) =>
+      key === "notApplicable" ? "Not Applicable" : key) as ((
       key: string,
     ) => string) & {
       rich: (
@@ -98,11 +99,49 @@ describe("ApplicationFormsTable", () => {
 
     expect(tables[0]).toHaveTextContent("ABC Project Form");
     expect(tables[0]).toHaveTextContent("in_progress");
-    expect(tables[0]).toHaveTextContent("attachmentUnavailable");
+    expect(tables[0]).toHaveTextContent("Not Applicable");
 
     expect(tables[1]).toHaveTextContent("DEF Project Form");
     expect(tables[1]).toHaveTextContent("complete");
     expect(tables[1]).toHaveTextContent("downloadInstructions");
+  });
+
+  it("shows Not Applicable when a conditionally required form has no instructions", () => {
+    const applicationDetailsWithMissingConditionalInstructions = {
+      ...applicationDetailsObject,
+      competition: {
+        ...applicationDetailsObject.competition,
+        competition_forms:
+          applicationDetailsObject.competition.competition_forms.map(
+            (competitionForm) =>
+              competitionForm.is_required
+                ? competitionForm
+                : {
+                    ...competitionForm,
+                    form: {
+                      ...competitionForm.form,
+                      form_instruction: undefined,
+                    },
+                  },
+          ),
+      },
+    } as ApplicationDetail;
+
+    render(
+      <ApplicationFormsTable
+        applicationForms={applicationForms}
+        competitionInstructionsDownloadPath="http://path-to-instructions.com"
+        errors={null}
+        applicationDetailsObject={
+          applicationDetailsWithMissingConditionalInstructions
+        }
+      />,
+    );
+
+    const tables = screen.getAllByTestId("table");
+
+    expect(tables[0]).toHaveTextContent("Not Applicable");
+    expect(tables[1]).toHaveTextContent("Not Applicable");
   });
 
   describe("Apply interaction events", () => {
