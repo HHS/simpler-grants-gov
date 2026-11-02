@@ -91,6 +91,10 @@ interruption, logging and production remain separate checks.
   not prove cleanup.
 - [ ] Coordinate any interrupted-worker/task cleanup check before performing it.
   Record whether files survive and the actual cleanup/task-replacement behavior.
+- [ ] For slow uploads, use the [observation gate and bounded test card](nofo-pdf-upload-assessment.md#slow-upload-observation-gate-and-first-test-card).
+  Current log access shows lifecycle/completion signals, not reliable active-worker
+  occupation. Resolve that gap before uploads; temporary flag changes need separate
+  explicit authorization. Plan review does not authorize execution.
 - [ ] Inspect relevant deployed logging destinations for the synthetic markers,
   identify any unexpected document/identity data, and record remaining scope
   limitations. Keep detailed runtime configuration and raw logs restricted.
