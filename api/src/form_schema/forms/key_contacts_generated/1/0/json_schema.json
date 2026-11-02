@@ -1,0 +1,811 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "applicant_organization_name": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/organization.name"
+        }
+      ],
+      "description": "Enter the legal name of the applicant that will undertake the assistance activity. This field is required.",
+      "title": "Applicant Organization Name"
+    },
+    "key_contacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/person.key-contact"
+      },
+      "minItems": 1,
+      "maxItems": 4,
+      "description": "Enter between 1 and 4 key contacts and their role on the project.",
+      "title": "Key Contacts"
+    }
+  },
+  "required": [
+    "applicant_organization_name",
+    "key_contacts"
+  ],
+  "examples": [
+    {
+      "applicant_organization_name": "Acme Corporation",
+      "key_contacts": [
+        {
+          "project_role": "Principal Investigator",
+          "name": {
+            "prefix": "Doctor",
+            "first_name": "Sue",
+            "middle_name": "Sally",
+            "last_name": "Storm",
+            "suffix": "Esquire"
+          },
+          "title": "Director",
+          "organizational_affiliation": "Acme University",
+          "address": {
+            "street1": "123 Main Street",
+            "street2": "Apt 123",
+            "city": "Placeville",
+            "state": "WY: Wyoming",
+            "zip_code": "56789-1234",
+            "country": "USA: UNITED STATES"
+          },
+          "phone": "1234567890",
+          "fax": "1112223333",
+          "email": "example@example.com"
+        },
+        {
+          "project_role": "Project Manager",
+          "name": {
+            "first_name": "Joe",
+            "last_name": "Smithers"
+          },
+          "address": {
+            "street1": "456 Rio",
+            "city": "Montevideo",
+            "province": "Montevideo",
+            "country": "URY: URUGUAY"
+          },
+          "phone": "1234567890",
+          "email": "person@place.com"
+        }
+      ]
+    }
+  ],
+  "description": "KEY CONTACTS, Grants.gov version 2.0.",
+  "$defs": {
+    "organization.name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Enter the legal name of the organization.",
+      "title": "Organization Name"
+    },
+    "person.key-contact": {
+      "type": "object",
+      "properties": {
+        "project_role": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.key-contact.project-role"
+            }
+          ],
+          "description": "Enter the individual's role on the project (e.g., project manager, fiscal contact).",
+          "title": "Project Role"
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name"
+            }
+          ],
+          "description": "Enter the person's name. First and last name are required.",
+          "title": "Name"
+        },
+        "title": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.title"
+            }
+          ],
+          "description": "Enter the position title.",
+          "title": "Title"
+        },
+        "address": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.address"
+            }
+          ],
+          "description": "Enter the person's complete address.",
+          "title": "Address"
+        },
+        "phone": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.phone-number"
+            }
+          ],
+          "description": "Enter the phone number.",
+          "title": "Phone Number"
+        },
+        "fax": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.fax-number"
+            }
+          ],
+          "description": "Enter the fax number.",
+          "title": "Fax Number"
+        },
+        "email": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.email"
+            }
+          ],
+          "description": "Enter the email address.",
+          "title": "Email"
+        },
+        "organizational_affiliation": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/organization.name"
+            }
+          ],
+          "description": "Enter the contact's organizational affiliation.",
+          "title": "Organizational Affiliation"
+        }
+      },
+      "required": [
+        "project_role",
+        "name",
+        "address",
+        "phone",
+        "email"
+      ],
+      "examples": [
+        {
+          "project_role": "Principal Investigator",
+          "name": {
+            "prefix": "Doctor",
+            "first_name": "Sue",
+            "middle_name": "Sally",
+            "last_name": "Storm",
+            "suffix": "Esquire"
+          },
+          "title": "Director",
+          "organizational_affiliation": "Acme University",
+          "address": {
+            "street1": "123 Main Street",
+            "street2": "Apt 123",
+            "city": "Placeville",
+            "state": "WY: Wyoming",
+            "zip_code": "56789-1234",
+            "country": "USA: UNITED STATES"
+          },
+          "phone": "1234567890",
+          "fax": "1112223333",
+          "email": "example@example.com"
+        }
+      ],
+      "title": "Key Contact"
+    },
+    "person.key-contact.project-role": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 45,
+      "description": "Enter the key contact's free-text role on this project."
+    },
+    "person.name": {
+      "type": "object",
+      "properties": {
+        "prefix": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.prefix"
+            }
+          ],
+          "title": "Prefix"
+        },
+        "first_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.first-name"
+            }
+          ],
+          "title": "First Name"
+        },
+        "middle_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.middle-name"
+            }
+          ],
+          "title": "Middle Name"
+        },
+        "last_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.last-name"
+            }
+          ],
+          "title": "Last Name"
+        },
+        "suffix": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.suffix"
+            }
+          ],
+          "title": "Suffix"
+        }
+      },
+      "required": [
+        "first_name",
+        "last_name"
+      ],
+      "description": "A person's name, in five parts. First and last name are required.",
+      "title": "Name"
+    },
+    "person.name.prefix": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the prefix."
+    },
+    "person.name.first-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 35,
+      "description": "Enter the first name."
+    },
+    "person.name.middle-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25,
+      "description": "Enter the middle name."
+    },
+    "person.name.last-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Enter the last name."
+    },
+    "person.name.suffix": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the suffix."
+    },
+    "person.title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 45,
+      "description": "Enter the position title.",
+      "title": "Title"
+    },
+    "person.address": {
+      "type": "object",
+      "properties": {
+        "street1": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.street-1"
+            }
+          ],
+          "description": "Enter the first line of the street address.",
+          "title": "Street 1"
+        },
+        "street2": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.street-2"
+            }
+          ],
+          "description": "Enter the second line of the street address.",
+          "title": "Street 2"
+        },
+        "city": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.city"
+            }
+          ],
+          "description": "Enter the city.",
+          "title": "City"
+        },
+        "county": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.county"
+            }
+          ],
+          "description": "Enter the county or parish.",
+          "title": "County/Parish"
+        },
+        "state": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/StateCode"
+            }
+          ],
+          "description": "Select the state. This field is required if the country is the United States.",
+          "title": "State"
+        },
+        "province": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.province"
+            }
+          ],
+          "description": "Enter the province.",
+          "title": "Province"
+        },
+        "country": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/CountryCode"
+            }
+          ],
+          "description": "Select the country.",
+          "title": "Country"
+        },
+        "zip_code": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.zip-code"
+            }
+          ],
+          "description": "Enter the zip / postal code. This field is required if the country is the United States.",
+          "title": "Zip / Postal Code"
+        }
+      },
+      "required": [
+        "street1",
+        "city",
+        "country"
+      ],
+      "description": "A person's address.",
+      "title": "Address",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "USA: UNITED STATES"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "required": [
+              "zip_code"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "USA: UNITED STATES"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "required": [
+              "state"
+            ]
+          }
+        }
+      ]
+    },
+    "StateCode": {
+      "type": "string",
+      "enum": [
+        "AL: Alabama",
+        "AK: Alaska",
+        "AZ: Arizona",
+        "AR: Arkansas",
+        "CA: California",
+        "CO: Colorado",
+        "CT: Connecticut",
+        "DE: Delaware",
+        "DC: District of Columbia",
+        "FL: Florida",
+        "GA: Georgia",
+        "HI: Hawaii",
+        "ID: Idaho",
+        "IL: Illinois",
+        "IN: Indiana",
+        "IA: Iowa",
+        "KS: Kansas",
+        "KY: Kentucky",
+        "LA: Louisiana",
+        "ME: Maine",
+        "MD: Maryland",
+        "MA: Massachusetts",
+        "MI: Michigan",
+        "MN: Minnesota",
+        "MS: Mississippi",
+        "MO: Missouri",
+        "MT: Montana",
+        "NE: Nebraska",
+        "NV: Nevada",
+        "NH: New Hampshire",
+        "NJ: New Jersey",
+        "NM: New Mexico",
+        "NY: New York",
+        "NC: North Carolina",
+        "ND: North Dakota",
+        "OH: Ohio",
+        "OK: Oklahoma",
+        "OR: Oregon",
+        "PA: Pennsylvania",
+        "RI: Rhode Island",
+        "SC: South Carolina",
+        "SD: South Dakota",
+        "TN: Tennessee",
+        "TX: Texas",
+        "UT: Utah",
+        "VT: Vermont",
+        "VA: Virginia",
+        "WA: Washington",
+        "WV: West Virginia",
+        "WI: Wisconsin",
+        "WY: Wyoming",
+        "AS: American Samoa",
+        "FM: Federated States of Micronesia",
+        "GU: Guam",
+        "MH: Marshall Islands",
+        "MP: Northern Mariana Islands",
+        "PW: Palau",
+        "PR: Puerto Rico",
+        "VI: Virgin Islands",
+        "FQ: Baker Island",
+        "HQ: Howland Island",
+        "DQ: Jarvis Island",
+        "JQ: Johnston Atoll",
+        "KQ: Kingman Reef",
+        "MQ: Midway Islands",
+        "BQ: Navassa Island",
+        "LQ: Palmyra Atoll",
+        "WQ: Wake Island",
+        "AA: Armed Forces Americas (except Canada)",
+        "AE: Armed Forces Europe, the Middle East, and Canada",
+        "AP: Armed Forces Pacific"
+      ],
+      "description": "US State or Territory Code",
+      "title": "State"
+    },
+    "CountryCode": {
+      "type": "string",
+      "enum": [
+        "AFG: AFGHANISTAN",
+        "XQZ: AKROTIRI",
+        "ALB: ALBANIA",
+        "DZA: ALGERIA",
+        "AND: ANDORRA",
+        "AGO: ANGOLA",
+        "AIA: ANGUILLA",
+        "ATA: ANTARCTICA",
+        "ATG: ANTIGUA AND BARBUDA",
+        "ARG: ARGENTINA",
+        "ARM: ARMENIA",
+        "ABW: ARUBA",
+        "XAC: ASHMORE AND CARTIER ISLANDS",
+        "AUS: AUSTRALIA",
+        "AUT: AUSTRIA",
+        "AZE: AZERBAIJAN",
+        "BHS: BAHAMAS, THE",
+        "BHR: BAHRAIN",
+        "BGD: BANGLADESH",
+        "BRB: BARBADOS",
+        "XBI: BASSAS DA INDIA",
+        "BLR: BELARUS",
+        "BEL: BELGIUM",
+        "BLZ: BELIZE",
+        "BEN: BENIN",
+        "BMU: BERMUDA",
+        "BTN: BHUTAN",
+        "BOL: BOLIVIA",
+        "BES: BONAIRE, SINT EUSTATIUS, AND SABA",
+        "BIH: BOSNIA AND HERZEGOVINA",
+        "BWA: BOTSWANA",
+        "BVT: BOUVET ISLAND",
+        "BRA: BRAZIL",
+        "IOT: BRITISH INDIAN OCEAN TERRITORY",
+        "BRN: BRUNEI",
+        "BGR: BULGARIA",
+        "BFA: BURKINA FASO",
+        "MMR: BURMA",
+        "BDI: BURUNDI",
+        "CPV: CABO VERDE",
+        "KHM: CAMBODIA",
+        "CMR: CAMEROON",
+        "CAN: CANADA",
+        "CYM: CAYMAN ISLANDS",
+        "CAF: CENTRAL AFRICAN REPUBLIC",
+        "TCD: CHAD",
+        "CHL: CHILE",
+        "CHN: CHINA",
+        "CXR: CHRISTMAS ISLAND",
+        "CPT: CLIPPERTON ISLAND",
+        "CCK: COCOS (KEELING) ISLANDS",
+        "COL: COLOMBIA",
+        "COM: COMOROS",
+        "COG: CONGO (BRAZZAVILLE)",
+        "COD: CONGO (KINSHASA)",
+        "COK: COOK ISLANDS",
+        "XCS: CORAL SEA ISLANDS",
+        "CRI: COSTA RICA",
+        "CIV: CÔTE D’IVOIRE",
+        "HRV: CROATIA",
+        "CUB: CUBA",
+        "CUW: CURAÇAO",
+        "CYP: CYPRUS",
+        "CZE: CZECHIA",
+        "DNK: DENMARK",
+        "XXD: DHEKELIA",
+        "DGA: DIEGO GARCIA",
+        "DJI: DJIBOUTI",
+        "DMA: DOMINICA",
+        "DOM: DOMINICAN REPUBLIC",
+        "ECU: ECUADOR",
+        "EGY: EGYPT",
+        "SLV: EL SALVADOR",
+        "XAZ: ENTITY 1",
+        "XCR: ENTITY 2",
+        "XCY: ENTITY 3",
+        "XKM: ENTITY 4",
+        "XKN: ENTITY 5",
+        "AX3: ENTITY 6",
+        "GNQ: EQUATORIAL GUINEA",
+        "ERI: ERITREA",
+        "EST: ESTONIA",
+        "SWZ: ESWATINI",
+        "ETH: ETHIOPIA",
+        "XEU: EUROPA ISLAND",
+        "FLK: FALKLAND ISLANDS (ISLAS MALVINAS)",
+        "FRO: FAROE ISLANDS",
+        "FJI: FIJI",
+        "FIN: FINLAND",
+        "FRA: FRANCE",
+        "GUF: FRENCH GUIANA",
+        "PYF: FRENCH POLYNESIA",
+        "ATF: FRENCH SOUTHERN AND ANTARCTIC LANDS",
+        "GAB: GABON",
+        "GMB: GAMBIA, THE",
+        "XGZ: GAZA STRIP",
+        "GEO: GEORGIA",
+        "DEU: GERMANY",
+        "GHA: GHANA",
+        "GIB: GIBRALTAR",
+        "XGL: GLORIOSO ISLANDS",
+        "GRC: GREECE",
+        "GRL: GREENLAND",
+        "GRD: GRENADA",
+        "GLP: GUADELOUPE",
+        "GTM: GUATEMALA",
+        "GGY: GUERNSEY",
+        "GIN: GUINEA",
+        "GNB: GUINEA-BISSAU",
+        "GUY: GUYANA",
+        "HTI: HAITI",
+        "HMD: HEARD ISLAND AND MCDONALD ISLANDS",
+        "HND: HONDURAS",
+        "HKG: HONG KONG",
+        "HUN: HUNGARY",
+        "ISL: ICELAND",
+        "IND: INDIA",
+        "IDN: INDONESIA",
+        "IRN: IRAN",
+        "IRQ: IRAQ",
+        "IRL: IRELAND",
+        "IMN: ISLE OF MAN",
+        "ISR: ISRAEL",
+        "ITA: ITALY",
+        "JAM: JAMAICA",
+        "XJM: JAN MAYEN",
+        "JPN: JAPAN",
+        "JEY: JERSEY",
+        "JOR: JORDAN",
+        "XJN: JUAN DE NOVA ISLAND",
+        "KAZ: KAZAKHSTAN",
+        "KEN: KENYA",
+        "KIR: KIRIBATI",
+        "PRK: KOREA, NORTH",
+        "KOR: KOREA, SOUTH",
+        "XKS: KOSOVO",
+        "KWT: KUWAIT",
+        "KGZ: KYRGYZSTAN",
+        "LAO: LAOS",
+        "LVA: LATVIA",
+        "LBN: LEBANON",
+        "LSO: LESOTHO",
+        "LBR: LIBERIA",
+        "LBY: LIBYA",
+        "LIE: LIECHTENSTEIN",
+        "LTU: LITHUANIA",
+        "LUX: LUXEMBOURG",
+        "MAC: MACAU",
+        "MDG: MADAGASCAR",
+        "MWI: MALAWI",
+        "MYS: MALAYSIA",
+        "MDV: MALDIVES",
+        "MLI: MALI",
+        "MLT: MALTA",
+        "MTQ: MARTINIQUE",
+        "MRT: MAURITANIA",
+        "MUS: MAURITIUS",
+        "MYT: MAYOTTE",
+        "MEX: MEXICO",
+        "MDA: MOLDOVA",
+        "MCO: MONACO",
+        "MNG: MONGOLIA",
+        "MNE: MONTENEGRO",
+        "MSR: MONTSERRAT",
+        "MAR: MOROCCO",
+        "MOZ: MOZAMBIQUE",
+        "NAM: NAMIBIA",
+        "NRU: NAURU",
+        "NPL: NEPAL",
+        "NLD: NETHERLANDS",
+        "NCL: NEW CALEDONIA",
+        "NZL: NEW ZEALAND",
+        "NIC: NICARAGUA",
+        "NER: NIGER",
+        "NGA: NIGERIA",
+        "NIU: NIUE",
+        "NFK: NORFOLK ISLAND",
+        "MKD: NORTH MACEDONIA",
+        "NOR: NORWAY",
+        "OMN: OMAN",
+        "PAK: PAKISTAN",
+        "PAN: PANAMA",
+        "PNG: PAPUA NEW GUINEA",
+        "XPR: PARACEL ISLANDS",
+        "PRY: PARAGUAY",
+        "PER: PERU",
+        "PHL: PHILIPPINES",
+        "PCN: PITCAIRN ISLANDS",
+        "POL: POLAND",
+        "PRT: PORTUGAL",
+        "QAT: QATAR",
+        "REU: REUNION",
+        "ROU: ROMANIA",
+        "RUS: RUSSIA",
+        "RWA: RWANDA",
+        "BLM: SAINT BARTHELEMY",
+        "SHN: SAINT HELENA, ASCENSION, AND TRISTAN DA CUNHA",
+        "KNA: SAINT KITTS AND NEVIS",
+        "LCA: SAINT LUCIA",
+        "MAF: SAINT MARTIN",
+        "SPM: SAINT PIERRE AND MIQUELON",
+        "VCT: SAINT VINCENT AND THE GRENADINES",
+        "WSM: SAMOA",
+        "SMR: SAN MARINO",
+        "STP: SAO TOME AND PRINCIPE",
+        "SAU: SAUDI ARABIA",
+        "SEN: SENEGAL",
+        "SRB: SERBIA",
+        "SYC: SEYCHELLES",
+        "SLE: SIERRA LEONE",
+        "SGP: SINGAPORE",
+        "SXM: SINT MAARTEN",
+        "SVK: SLOVAKIA",
+        "SVN: SLOVENIA",
+        "SLB: SOLOMON ISLANDS",
+        "SOM: SOMALIA",
+        "ZAF: SOUTH AFRICA",
+        "SGS: SOUTH GEORGIA AND SOUTH SANDWICH ISLANDS",
+        "SSD: SOUTH SUDAN",
+        "ESP: SPAIN",
+        "XSP: SPRATLY ISLANDS",
+        "LKA: SRI LANKA",
+        "SDN: SUDAN",
+        "SUR: SURINAME",
+        "XSV: SVALBARD",
+        "SWE: SWEDEN",
+        "CHE: SWITZERLAND",
+        "SYR: SYRIA",
+        "TWN: TAIWAN",
+        "TJK: TAJIKISTAN",
+        "TZA: TANZANIA",
+        "THA: THAILAND",
+        "TLS: TIMOR-LESTE",
+        "TGO: TOGO",
+        "TKL: TOKELAU",
+        "TON: TONGA",
+        "TTO: TRINIDAD AND TOBAGO",
+        "XTR: TROMELIN ISLAND",
+        "TUN: TUNISIA",
+        "TUR: TURKEY",
+        "TKM: TURKMENISTAN",
+        "TCA: TURKS AND CAICOS ISLANDS",
+        "TUV: TUVALU",
+        "UGA: UGANDA",
+        "UKR: UKRAINE",
+        "ARE: UNITED ARAB EMIRATES",
+        "GBR: UNITED KINGDOM",
+        "USA: UNITED STATES",
+        "URY: URUGUAY",
+        "UZB: UZBEKISTAN",
+        "VUT: VANUATU",
+        "VAT: VATICAN CITY",
+        "VEN: VENEZUELA",
+        "VNM: VIETNAM",
+        "VGB: VIRGIN ISLANDS, BRITISH",
+        "WLF: WALLIS AND FUTUNA",
+        "XWB: WEST BANK",
+        "ESH: WESTERN SAHARA",
+        "YEM: YEMEN",
+        "ZMB: ZAMBIA",
+        "ZWE: ZIMBABWE"
+      ],
+      "description": "Country Code",
+      "title": "Country"
+    },
+    "types.address.street-1": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "Enter the first line of the street address."
+    },
+    "types.address.street-2": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "Enter the second line of the street address."
+    },
+    "types.address.city": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 35,
+      "description": "Enter the city."
+    },
+    "types.address.county": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30,
+      "description": "Enter the county or parish."
+    },
+    "types.address.province": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30,
+      "description": "Enter the province."
+    },
+    "types.address.zip-code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30,
+      "description": "Enter the zip / postal code."
+    },
+    "person.phone-number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25,
+      "description": "Enter the daytime telephone number.",
+      "title": "Phone Number"
+    },
+    "person.fax-number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25,
+      "description": "Enter the fax number.",
+      "title": "Fax Number"
+    },
+    "person.email": {
+      "type": "string",
+      "maxLength": 60,
+      "format": "email",
+      "description": "Enter a valid email address.",
+      "title": "Email"
+    }
+  }
+}

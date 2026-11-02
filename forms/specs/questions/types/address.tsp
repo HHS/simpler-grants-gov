@@ -49,7 +49,9 @@ namespace AddressParts {
 
 // State and Province are alternatives, not independent fields. `AddressDataTypeV3` in
 // GlobalLibrary-V2.0.xsd wraps them in an `xs:choice`, so the rule lives on the question
-// rather than on each form: State is enabled only for a US address, Province is hidden for one.
+// rather than on each form: Province is hidden for a US address. State stays enabled, as in
+// SGG's hand-written forms, because it comes before Country: disabling it until Country is
+// chosen leaves it out of the Tab order. How to enforce the choice is tracked in #12975.
 // `AddressDataTypeV3` requires Street1, City and Country; Grants.gov requires State and Zip for
 // a US address.
 /** Enter an address. */
@@ -77,7 +79,6 @@ model Address {
 
   /** Select the state. This field is required if the country is the United States. */
   @UI.label("State")
-  @UI.enabledWhen(Address.country, Questions.Types.CountryCode.USA)
   state?: Questions.Types.StateCode;
 
   /** Enter the province. */

@@ -160,18 +160,15 @@ describe.each([
 });
 
 describe("UI layout", () => {
-  it("lays out each key contacts entry with its Role group first", async () => {
+  it("lays out each key contacts entry with its role first and no sub-sections", async () => {
     const { uischema } = await loadFormSpec("key-contacts");
     const [contacts] = (uischema as unknown as UiNode).elements ?? [];
     expect(contacts?.label).toBe("Key Contacts");
     const list = contacts?.elements?.[1];
     expect(list?.scope).toBe("#/properties/key_contacts");
-    expect(groupLabels(list?.options?.detail ?? { type: "Group" })).toEqual([
-      "Role",
-      "Name",
-      "Address",
-      "Contact Information",
-    ]);
+    const detail = list?.options?.detail ?? { type: "Group" };
+    expect(groupLabels(detail)).toEqual([]);
+    expect(detail.elements?.[0]?.scope).toBe("#/properties/project_role");
   });
 
   it("labels each EPA role section from its layout", async () => {
