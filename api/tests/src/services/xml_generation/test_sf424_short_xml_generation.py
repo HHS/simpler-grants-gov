@@ -168,7 +168,7 @@ class TestSF424ShortXMLGeneration:
         assert address is not None
         assert address.find(f"{{{GLOB_NS}}}Street1").text == "456 Oak Ave"
         assert address.find(f"{{{GLOB_NS}}}City").text == "Boston"
-        assert address.find(f"{{{GLOB_NS}}}ZipPostalCode").text == "02115"
+        assert address.find(f"{{{GLOB_NS}}}ZipPostalCode").text == "02115-1234"
 
     def test_applicant_type_code_one_to_many(self):
         """Multiple applicant type codes map to indexed ApplicantTypeCode elements."""
