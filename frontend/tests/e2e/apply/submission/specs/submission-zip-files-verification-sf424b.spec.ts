@@ -26,6 +26,10 @@ import {
 import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import { buildHappyPathTestData } from "tests/e2e/utils/submission/print-view-utils";
 import {
+  buildExpectedPdfText,
+  buildExpectedXmlFields,
+} from "tests/e2e/utils/submission/submission-field-utils";
+import {
   assertPdfContainsText,
   assertXmlContainsFields,
   downloadAndUnzipSubmission,
@@ -34,10 +38,6 @@ import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
-import {
-  buildExpectedPdfText,
-  buildExpectedXmlFields,
-} from "tests/e2e/utils/submission/xml-field-utils";
 
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
@@ -52,6 +52,8 @@ const SF424B_ZIP_PDF_NAME = "SF424B.pdf";
 // System post-populated signature (SF424B:RepresentativeName): the e2e user's email.
 const SIGNATURE_VALUE = "simpler-grants-e2e-tester@navapbc.com";
 
+// Runs only against staging, in Chrome. The submission zip is built by the
+// submission consumer/task, which does not run in the local e2e environment.
 test.beforeEach(({ page: _ }, testInfo) => {
   test.skip(
     playwrightEnv.targetEnv !== "staging",

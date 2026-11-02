@@ -1,26 +1,27 @@
 /**
- * Helpers for verifying GrantApplication.xml content in the submission zip.
+ * Helpers for verifying the submission zip contents (GrantApplication.xml and form PDFs).
  *
- * Each form's data file declares `xmlFields` (field key → XML element) next to
- * its opportunity metadata. buildExpectedXmlFields() combines that mapping with
- * the generated happy-path test data, so specs don't hand-write expectations.
+ * Each form's data file declares `submissionFields` next to its opportunity metadata.
+ * The build* functions combine that mapping with the generated happy-path test data,
+ * so specs don't hand-write expectations.
  *
  * Kept free of zip/pdf imports because form data files import from here.
  */
 
-export interface XmlFieldMapping {
-  /** Qualified element name in GrantApplication.xml, e.g. "SF424B:RepresentativeTitle". */
-  element: string;
+export interface SubmissionFieldMapping {
+  /** Qualified element in GrantApplication.xml, e.g. "SF424B:RepresentativeTitle". Omit to skip the XML check. */
+  xmlElement?: string;
   /** Converts the fill/print value to the XML value (e.g. "No" → "N: No"). Default: as-is. */
-  transform?: (value: string) => string;
+  xmlTransform?: (value: string) => string;
   /**
-   * Also assert the raw (untransformed) value appears in the form's PDF.
-   * Opt-in: only for fields rendered as-is in the PDF (not dates, currency, yes/no).
+   * Assert the raw value appears in the form's PDF. This is an existence check on
+   * the text (not tied to a field id), so only enable it for fields rendered as-is.
    */
-  pdf?: boolean;
+  verifyInPdf?: boolean;
 }
 
-export type XmlFieldMap = Record<string, XmlFieldMapping>;
+/** Keyed by form field key (same keys as the fill data / expectedPrepopulatedFields). */
+export type SubmissionFieldMap = Record<string, SubmissionFieldMapping>;
 
 /** "Yes"/"true" → "Y: Yes", anything else → "N: No" (API boolean_to_yes_no transform). */
 export const xmlYesNo = (value: string): string =>
@@ -56,50 +57,61 @@ const mergeValues = (
  */
 export function buildExpectedXmlFields(
   form: {
-    xmlFields?: XmlFieldMap;
+    submissionFields?: SubmissionFieldMap;
     expectedPrepopulatedFields: Record<string, string | RegExp>;
   },
   testData: Record<string, string>,
   systemValues: Record<string, string> = {},
 ): Record<string, { element: string; value: string }> {
-  if (!form.xmlFields) {
-    throw new Error("Form has no xmlFields mapping defined");
+  if (!form.submissionFields) {
+    throw new Error("Form has no submissionFields mapping defined");
   }
 
   const values = mergeValues(form, testData, systemValues);
 
   return Object.fromEntries(
-    Object.entries(form.xmlFields).map(([key, { element, transform }]) => {
-      const raw = values[key];
-      if (raw === undefined) {
-        throw new Error(`No value available for XML field "${key}"`);
-      }
-      return [key, { element, value: transform ? transform(raw) : raw }];
-    }),
+    Object.entries(form.submissionFields).flatMap(
+      ([key, { xmlElement, xmlTransform }]) => {
+        if (!xmlElement) return [];
+        const raw = values[key];
+        if (raw === undefined) {
+          throw new Error(`No value available for XML field "${key}"`);
+        }
+        return [
+          [
+            key,
+            {
+              element: xmlElement,
+              value: xmlTransform ? xmlTransform(raw) : raw,
+            },
+          ],
+        ];
+      },
+    ),
   );
 }
 
 /**
  * Builds the strings expected in the form's PDF: the raw value of every field
- * flagged `pdf: true` in xmlFields. Same value sources and throw-on-missing
- * behavior as buildExpectedXmlFields, so one mapping drives both checks.
+ * flagged `verifyInPdf` in submissionFields. Same value sources and throw-on-missing
+ * behavior as buildExpectedXmlFields.
  */
 export function buildExpectedPdfText(
   form: {
-    xmlFields?: XmlFieldMap;
+    submissionFields?: SubmissionFieldMap;
     expectedPrepopulatedFields: Record<string, string | RegExp>;
   },
   testData: Record<string, string>,
   systemValues: Record<string, string> = {},
 ): string[] {
-  if (!form.xmlFields) {
-    throw new Error("Form has no xmlFields mapping defined");
+  if (!form.submissionFields) {
+    throw new Error("Form has no submissionFields mapping defined");
   }
 
   const values = mergeValues(form, testData, systemValues);
 
-  return Object.entries(form.xmlFields)
-    .filter(([, { pdf }]) => pdf)
+  return Object.entries(form.submissionFields)
+    .filter(([, { verifyInPdf }]) => verifyInPdf)
     .map(([key]) => {
       const raw = values[key];
       if (raw === undefined) {

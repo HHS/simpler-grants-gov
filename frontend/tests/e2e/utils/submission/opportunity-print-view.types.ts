@@ -1,5 +1,5 @@
 import type { FillFormConfig } from "tests/e2e/utils/common/types";
-import type { XmlFieldMap } from "tests/e2e/utils/submission/xml-field-utils";
+import type { SubmissionFieldMap } from "tests/e2e/utils/submission/submission-field-utils";
 
 /**
  * Per-form print view configuration, exported from each form's data file.
@@ -26,7 +26,7 @@ export interface PrintViewFormData {
    * zip spec. Keys match fill-data / expectedPrepopulatedFields keys, or system
    * post-populated fields (e.g. signature) supplied by the spec at runtime.
    */
-  xmlFields?: XmlFieldMap;
+  submissionFields?: SubmissionFieldMap;
 }
 
 // Resolved form returned by the loader after mapping formKey -> FillFormConfig
@@ -44,7 +44,7 @@ export interface ResolvedPrintViewForm {
    */
   userEnteredFieldTestIds: Record<string, string>;
   /** Passed through from PrintViewFormData for the submission zip spec. */
-  xmlFields?: XmlFieldMap;
+  submissionFields?: SubmissionFieldMap;
 }
 
 // Resolved opportunity config returned by loadOpportunityConfig()
