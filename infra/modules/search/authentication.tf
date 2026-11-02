@@ -5,7 +5,7 @@ locals {
   # The opensearch-write role is used for OpenSearch sync jobs, separate from the migrator role which is only for DB migrations
   ingest_role_arn   = var.ingest_role_arn != null ? var.ingest_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-opensearch-write"
   query_role_arn    = var.query_role_arn != null ? var.query_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"
-  workflow_role_arn = var.workflow_role_arn != null ? var.workflow_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-submission-consumer"
+  submission_consumer_arn = var.submission_consumer_role_arn != null ? var.submission_consumer_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-submission-consumer"
 }
 
 # Master user credentials for the OpenSearch domain
@@ -191,13 +191,13 @@ data "aws_iam_policy_document" "iam_access_control" {
     ]
   }
 
-  # Workflow service role - read and write access for workflow processing
+  # Submission Consumer service role - read and write access for submission processing
   statement {
-    sid    = "WorkflowRoleAccess"
+    sid    = "SubmissionConsumerRoleAccess"
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = [local.workflow_role_arn]
+      identifiers = [local.submission_consumer_role_arn]
     }
     actions = [
       "es:ESHttpPost",
