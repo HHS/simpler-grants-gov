@@ -74,32 +74,30 @@ def transform_status_to_cg(v1_status: OpportunityStatus) -> OppStatusOptions:
     return cg_status
 
 
-def transform_status_from_cg(cg_status: OppStatusOptions) -> str:
+# Normalized CommonGrants status values (the four spec options plus SGG custom
+# statuses) -> native OpportunityStatus.
+STATUS_FROM_CG_MAP = {
+    OppStatusOptions.FORECASTED.value: OpportunityStatus.FORECASTED,
+    OppStatusOptions.OPEN.value: OpportunityStatus.POSTED,
+    OppStatusOptions.CLOSED.value: OpportunityStatus.CLOSED,
+    OppStatusOptions.CUSTOM.value: OpportunityStatus.ARCHIVED,
+    OpportunityStatus.ARCHIVED.value: OpportunityStatus.ARCHIVED,
+}
+
+
+def transform_status_from_cg(cg_status: str) -> OpportunityStatus | None:
     """
-    Transform CG enum value to v1 enum value.
+    Transform a requested CG status value to the v1 enum value.
+
+    Matching is case-insensitive and ignores surrounding whitespace.
 
     Args:
-        OppStatusOptions: The CG enum value
+        cg_status: The raw status value from the request
 
     Returns:
-        v1_status: The v1 enum value
+        v1_status: The v1 enum value, or None if the value is unsupported
     """
-
-    STATUS_FROM_CG_MAP = {
-        OppStatusOptions.FORECASTED: OpportunityStatus.FORECASTED,
-        OppStatusOptions.OPEN: OpportunityStatus.POSTED,
-        OppStatusOptions.CLOSED: OpportunityStatus.CLOSED,
-        OppStatusOptions.CUSTOM: OpportunityStatus.ARCHIVED,
-    }
-
-    v1_status = STATUS_FROM_CG_MAP.get(cg_status, None)
-    if not v1_status:
-        logger.error(
-            f"Transform failed for field `status`: unexpected OpportunityStatusOptions value: {cg_status}"
-        )
-        v1_status = OpportunityStatus.FORECASTED
-
-    return v1_status
+    return STATUS_FROM_CG_MAP.get(cg_status.strip().lower())
 
 
 # CommonGrants applicant-type values -> native ApplicantType values.
@@ -385,6 +383,8 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
         # Transform status
         v1_status = opp_data.get("opportunity_status", OpportunityStatus.POSTED)
         cg_status = transform_status_to_cg(v1_status)
+        # Custom statuses carry the v1 value (e.g. "archived") so clients can round-trip it
+        cg_custom_status = str(v1_status) if cg_status == OppStatusOptions.CUSTOM else None
 
         # Create timeline
         post_date = summary.get("post_date") if isinstance(summary, dict) else summary.post_date
@@ -436,7 +436,7 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
             id=opportunity_id,
             title=title,
             description=description,
-            status=OppStatus(value=cg_status),
+            status=OppStatus(value=cg_status, customValue=cg_custom_status),
             keyDates=timeline,
             funding=OppFunding(
                 totalAmountAvailable=total_amount_money,
@@ -690,14 +690,14 @@ def build_money_range_filter(
 
 def build_filter_info(
     filters: OppFilters | None,
-    custom_filter_errors: list[str] | None = None,
+    filter_errors: list[str] | None = None,
 ) -> FilterInfo:
     """
     Helper function to build FilterInfo from CommonGrants filters.
 
     Args:
         filters: The CommonGrants filters to transform
-        custom_filter_errors: customFilters errors already derived by
+        filter_errors: status and customFilters errors already derived by
             transform_search_request_from_cg; surfaced here instead of re-parsing
 
     Returns:
@@ -722,7 +722,7 @@ def build_filter_info(
 
     return FilterInfo(
         filters=applied_filters,
-        errors=custom_filter_errors or [],
+        errors=filter_errors or [],
     )
 
 
@@ -742,7 +742,7 @@ def transform_search_request_from_cg(
         search_query: Optional search query string
 
     Returns:
-        tuple: (v1 search parameters, customFilters errors for the response)
+        tuple: (v1 search parameters, filter errors for the response)
     """
     # Convert pagination
     v1_pagination = {
@@ -760,9 +760,26 @@ def transform_search_request_from_cg(
     # Convert filters
     v1_filters = {}
 
+    filter_errors: list[str] = []
+
     if filters.status and filters.status.value:
-        v1_statuses = [transform_status_from_cg(cg_status) for cg_status in filters.status.value]
-        v1_filters["opportunity_status"] = {"one_of": v1_statuses}
+        v1_statuses: list[OpportunityStatus] = []
+        unsupported_statuses: list[str] = []
+        for cg_status in filters.status.value:
+            v1_status = transform_status_from_cg(cg_status)
+            if v1_status is None:
+                unsupported_statuses.append(cg_status)
+                filter_errors.append(f'status: unsupported value "{cg_status}"')
+            elif v1_status not in v1_statuses:
+                v1_statuses.append(v1_status)
+
+        if unsupported_statuses:
+            logger.warning(
+                "Dropping unsupported values from status filter",
+                extra={"unsupported_statuses": unsupported_statuses},
+            )
+        if v1_statuses:
+            v1_filters["opportunity_status"] = {"one_of": v1_statuses}
 
     if filters.close_date_range:
         if filters.close_date_range.value.min:
@@ -784,6 +801,7 @@ def transform_search_request_from_cg(
     # Apply recognized customFilters; surface errors for the response's filterInfo
     applied_custom, custom_filter_errors = build_custom_filters(filters.custom_filters)
     v1_filters.update(applied_custom)
+    filter_errors.extend(custom_filter_errors)
 
     # Build the complete v1 search parameters
     v1_params: dict[str, object] = {
@@ -798,7 +816,7 @@ def transform_search_request_from_cg(
     if v1_filters:
         v1_params["filters"] = v1_filters
 
-    return v1_params, custom_filter_errors
+    return v1_params, filter_errors
 
 
 def transform_validation_error_from_cg(

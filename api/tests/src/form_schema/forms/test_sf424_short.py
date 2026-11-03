@@ -141,7 +141,7 @@ def contact_person_group():
             "city": "Exampleburg",
             "state": "NY: New York",
             "country": "USA: UNITED STATES",
-            "zip_code": "12345",
+            "zip_code": "12345-6789",  # 9+ chars required for US addresses
         },
     }
 
@@ -160,7 +160,7 @@ def valid_json_v3_0(contact_person_group):
             "city": "Exampleburg",
             "state": "NY: New York",
             "country": "USA: UNITED STATES",
-            "zip_code": "12345",
+            "zip_code": "12345-6789",  # 9+ chars required for US addresses
         },
         "applicant_type_code": ["P: Individual"],
         "employer_taxpayer_identification_number": "123-456-7890",
@@ -626,6 +626,33 @@ def test_sf424_short_v3_0_max_length(sf424_short_v3_0, valid_json_v3_0, data):
     assert validation_issues[0].type == "maxLength"
 
 
+def test_sf424_short_v3_0_us_zip_code_min_length(sf424_short_v3_0, valid_json_v3_0):
+    """US zip_code shorter than 9 characters fails minLength."""
+    data = valid_json_v3_0 | {
+        "applicant": {
+            **valid_json_v3_0["applicant"],
+            "zip_code": "12345",  # 5 chars — too short for US
+        }
+    }
+    issues = validate_json_schema_for_form(data, sf424_short_v3_0)
+    assert len(issues) == 1
+    assert issues[0].type == "minLength"
+    assert issues[0].field == "$.applicant.zip_code"
+
+
+def test_sf424_short_v3_0_non_us_zip_code_any_length(sf424_short_v3_0, valid_json_v3_0):
+    """Non-US zip_code has no minimum length requirement."""
+    data = valid_json_v3_0 | {
+        "applicant": {
+            "street1": "1 Rue de la Paix",
+            "city": "Paris",
+            "country": "FRA: FRANCE",
+            "zip_code": "",  # empty is fine for non-US
+        }
+    }
+    assert validate_json_schema_for_form(data, sf424_short_v3_0) == []
+
+
 def test_sf424_short_v3_0_pre_population_with_all_non_null_values(
     enable_factory_create, valid_json_v3_0, sf424_short_v3_0, verify_no_warning_error_logs
 ):
@@ -678,3 +705,13 @@ def test_sf424_short_v3_0_post_population(
     assert app_json["date_received"] == "2023-02-20"
     assert app_json["authorized_representative_date_signed"] == "2023-02-20"
     assert app_json["aor_signature"] == "mynewmail@example.com"
+
+
+@pytest.mark.parametrize("group", ["project_director", "contact_person"])
+def test_sf424_short_v3_0_contact_name_has_no_title(sf424_short_v3_0, group):
+    """Without a title, required errors read "First Name is required" rather than
+    "Name First Name is required"."""
+    group_schema = sf424_short_v3_0.form_json_schema["properties"][group]["allOf"][0]
+    name_schema = group_schema["properties"]["name"]
+
+    assert all("title" not in part for part in [name_schema, *name_schema.get("allOf", [])])

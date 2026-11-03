@@ -42,7 +42,11 @@ FORM_JSON_SCHEMA = {
                     "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("state")}],
                 },
                 "zip_code": {
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("zip_code")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("zip_code")},
+                        # zip_code always required (enforced above) with minLength 1
+                        {"minLength": 1},
+                    ],
                 },
             },
         },

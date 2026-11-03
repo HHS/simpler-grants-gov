@@ -5,9 +5,9 @@ variables {
   load_balancer_arn_suffix = "app/nofos-infra-dev/abc123"
   application_log_group    = "service/nofos-infra-dev"
   pdf_readability_monitoring = {
-    waf_metric_name = "nofos-infra-dev-waf"
-    cluster_name    = "nofos-infra-dev"
-    region          = "us-east-1"
+    waf_web_acl_name = "nofos-infra-dev-wafv2-web-acl"
+    cluster_name     = "nofos-infra-dev"
+    region           = "us-east-1"
   }
 }
 
@@ -53,7 +53,7 @@ run "waf_alarms_use_metric_identity_and_blocks_only" {
     condition = alltrue([
       for alarm in aws_cloudwatch_metric_alarm.pdf_readability_waf_blocks :
       alarm.namespace == "AWS/WAFV2" && alarm.metric_name == "BlockedRequests" &&
-      alarm.dimensions["WebACL"] == "nofos-infra-dev-waf" && alarm.dimensions["Region"] == "us-east-1" &&
+      alarm.dimensions["WebACL"] == "nofos-infra-dev-wafv2-web-acl" && alarm.dimensions["Region"] == "us-east-1" &&
       alarm.statistic == "Sum" && alarm.period == 60 && alarm.threshold == 1 &&
       alarm.treat_missing_data == "notBreaching"
     ])
@@ -69,7 +69,7 @@ run "capacity_alarms_require_sustained_service_utilization" {
   command = plan
   variables {
     pdf_readability_monitoring = {
-      waf_metric_name  = "nofos-infra-dev-waf"
+      waf_web_acl_name = "nofos-infra-dev-wafv2-web-acl"
       cluster_name     = "nofos-infra-dev"
       region           = "us-east-1"
       cpu_threshold    = 75
@@ -108,7 +108,7 @@ run "dashboard_json_has_valid_metric_rows_and_scoped_dimensions" {
   assert {
     condition = alltrue([
       for metric in jsondecode(aws_cloudwatch_dashboard.pdf_readability[0].dashboard_body).widgets[1].properties.metrics :
-      metric[0] == "AWS/WAFV2" && metric[2] == "WebACL" && metric[3] == "nofos-infra-dev-waf" && metric[6] == "Region" && metric[7] == "us-east-1"
+      metric[0] == "AWS/WAFV2" && metric[2] == "WebACL" && metric[3] == "nofos-infra-dev-wafv2-web-acl" && metric[6] == "Region" && metric[7] == "us-east-1"
     ])
     error_message = "WAF series must use the visibility metric name, not an ACL resource name."
   }
@@ -187,7 +187,7 @@ run "reject_invalid_capacity_threshold" {
   command = plan
   variables {
     pdf_readability_monitoring = {
-      waf_metric_name  = "nofos-infra-dev-waf"
+      waf_web_acl_name = "nofos-infra-dev-wafv2-web-acl"
       cluster_name     = "nofos-infra-dev"
       region           = "us-east-1"
       memory_threshold = 101

@@ -78,3 +78,8 @@ To release a tag:
 - [`check-nofos-history-production`](./check-nofos-history-production.yml): runs a
   bounded read-only production index/coverage preflight without backfill or switch
   changes. See [instructions](../../documentation/infra/check-nofo-production-history.md).
+
+- [`diagnose-nofo-dev-errors`](./diagnose-nofo-dev-errors.yml), displayed as
+  **Diagnose NOFO dev overnight errors**: reads the two fixed October 27–28, 2026
+  incident windows and publishes a summary without raw logs. See the
+  [diagnostic guide](../../documentation/infra/nofo-dev-error-diagnostic.md).

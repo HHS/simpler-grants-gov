@@ -42,7 +42,7 @@ or broader permission is necessary.
 | WAF | ACL association discovered through the service's target group; pilot rule modes, priorities, threshold/window and IP aggregation; metrics/sampling settings | Exact request matching, actual throttling, emergency block timing or live protection |
 | Dashboard/alarms | Dashboard widget count; four expected alarm states, thresholds, notification settings and destination counts | Correct rendering, valid threshold selection, recipient identity or delivery |
 | Subscriptions | Email/HTTPS/other subscription counts and pending-confirmation count for the fixed NOFO monitoring topic | That the intended inbox is subscribed, messages arrive or someone responds |
-| Metrics | Datapoint counts in the last hour for ECS CPU/memory and WAF pilot Count/Block series using the observed ACL metric name | Zero traffic when data is absent, full-upload latency, worker occupancy or alarm correctness |
+| Metrics | Datapoint counts in the last hour for ECS CPU/memory and WAF pilot Count/Block series using the observed ACL resource name and rule visibility metric names | Zero traffic when data is absent, full-upload latency, worker occupancy or alarm correctness |
 | Application log configuration | Retention and subscription-filter counts for the running containers' configured log groups | Content redaction, actual forwarding or infrastructure-wide logging coverage |
 
 The service's configured task-definition revision and the running revisions can

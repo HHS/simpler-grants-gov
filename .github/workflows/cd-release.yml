@@ -33,7 +33,6 @@ on:
           - dev
           - staging
           - training
-          - grantee1
           - grantor1
           - prod
       version:

@@ -3,6 +3,8 @@
  * flattened field holds, what a check reports, and how a form records known differences.
  */
 
+import type { XmlFormat } from "./xml.ts";
+
 // ---------------------------------------------------------------------------------------
 // Paths
 // ---------------------------------------------------------------------------------------
@@ -183,6 +185,11 @@ export interface Wording {
 export interface FormDiff {
   /** The plan's `slug`. Its `spec_id` names the compiled form. */
   slug: string;
+  /**
+   * The XML format the form is checked in. Defaults to `xml-transform`; a form whose XSD wraps
+   * fields in elements with no field of their own needs `xml-mapping`, which can write them.
+   */
+  xml?: XmlFormat;
   /** Labels and help the form takes from its questions rather than from the DAT. */
   wording?: Wording;
   dat?: Registers;

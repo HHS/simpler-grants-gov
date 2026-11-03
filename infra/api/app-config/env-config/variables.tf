@@ -259,7 +259,7 @@ variable "database_newrelic_entity_guid" {
 
 variable "database_deletion_protection" {
   type        = bool
-  description = "Whether to enable deletion protection on the RDS cluster. When null, derives from whether the environment is grantee1."
+  description = "Whether to enable deletion protection on the RDS cluster."
   default     = true
 }
 

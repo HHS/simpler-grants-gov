@@ -293,6 +293,7 @@ def test_send_email_to_address_uses_ses_when_local_capture_is_disabled(monkeypat
         subject="An SES message",
         message="<p>Hello from SES</p>",
         email_tags={"email_type": "opportunity_updates"},
+        trace_id="trace-ses",
     )
 
 

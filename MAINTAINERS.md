@@ -7,6 +7,7 @@ This is a list of maintainers for this project. Team members include:
 * [Aaron Couch](https://github.com/acouch)
 * [Brandon Tabaska](https://github.com/btabaska)
 * [Bruk Abebe](https://github.com/babebe)
+* [Dan Hudlow](https://github.com/hudlow)
 * [Doug Schrashun](https://github.com/doug-s-nava)
 * [Freddie Yebra](https://github.com/freddieyebra)
 * [Josh Osborne](https://github.com/joshtonava)

@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - scripts/inspect_nofo_readability.py
+      - scripts/diagnose_nofo_dev_errors.py
+      - scripts/nofo_dev_error_session_policy.json
+      - scripts/nofo_alert_setup_requirements.txt
+      - scripts/tests/test_nofo_dev_errors.py
+      - .github/workflows/diagnose-nofo-dev-errors.yml
       - scripts/nofo_inspection_session_policy.json
       - scripts/tests/test_nofo_inspection.py
       - .github/workflows/inspect-nofo-readability.yml
@@ -12,6 +17,11 @@ on:
     branches: [main]
     paths:
       - scripts/inspect_nofo_readability.py
+      - scripts/diagnose_nofo_dev_errors.py
+      - scripts/nofo_dev_error_session_policy.json
+      - scripts/nofo_alert_setup_requirements.txt
+      - scripts/tests/test_nofo_dev_errors.py
+      - .github/workflows/diagnose-nofo-dev-errors.yml
       - scripts/nofo_inspection_session_policy.json
       - scripts/tests/test_nofo_inspection.py
       - .github/workflows/inspect-nofo-readability.yml
@@ -29,4 +39,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Run offline inspection tests (no AWS credentials or network)
-        run: python3 -m unittest discover -s scripts/tests -p test_nofo_inspection.py -v
+        run: |
+          python3 -m pip install -r scripts/nofo_alert_setup_requirements.txt
+          python3 -m unittest discover -s scripts/tests -p test_nofo_inspection.py -v
+          python3 -m unittest discover -s scripts/tests -p test_nofo_dev_errors.py -v

@@ -12,9 +12,11 @@ SSM **SecureString** parameter path containing exactly one email address. NOFO
 exposes it as `monitoring_email_alert_recipient_parameter_name` in each environment
 module. Both default to null. The infra-dev configuration now selects
 `/nofos/infra-dev/monitoring/alert-email`; every other environment retains null.
-Public recipient lists remain empty, and calculator alarm actions remain off
-everywhere. Applying this dev configuration creates the private SNS email
-subscription; confirmation and delivery verification are separate steps.
+Public recipient lists remain empty. Infra-dev now selects calculator alarm
+actions on after the controlled alarm/recovery check and both inbox receipts;
+other environments remain off. Applying the configuration is still required
+for the dev action setting to take effect. See the
+[activation and threshold review](nofo-pdf-readability-monitoring.md#dev-notification-activation-and-threshold-review).
 
 The encrypted parameter was created successfully in
 [setup run 40514626054](https://github.com/HHS/simpler-grants-gov/actions/runs/40514626054).
@@ -94,8 +96,8 @@ labelled test arrived and record that receipt. A timeout can leave publication
 status uncertain; check privately before manually retrying to avoid duplicate
 messages. An access denial needs the specific SNS permission reviewed, not broad
 role access. This direct topic test does not prove CloudWatch alarm/recovery
-delivery. Calculator alarm actions remain off pending the separately coordinated
-alarm/recovery check and explicit activation decision.
+delivery. This direct test does not activate calculator actions; the environment
+setting is changed separately through review and deployment.
 
 ## Controlled CloudWatch alarm and recovery test
 
@@ -140,8 +142,8 @@ SNS test subject. Record the workflow link and receipt of each state, without
 copying addresses, subscription links or email bodies into public evidence.
 A green workflow confirms successful notification actions and cleanup, not inbox
 receipt, threshold evaluation, calculator alarm configuration, or public release
-readiness. Existing calculator notification actions remain off pending separate
-review and activation.
+readiness. The test does not change existing calculator notification actions;
+activation is a separate reviewed environment change.
 
 If the run fails, inspect the sanitized result and cleanup step before retrying.
 If the runner is forcibly stopped, cleanup cannot be guaranteed. Infrastructure

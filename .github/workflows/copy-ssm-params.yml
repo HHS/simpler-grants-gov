@@ -16,7 +16,6 @@ on:
         required: true
         type: choice
         options:
-          - grantee1
           - grantor1
       app:
         description: Which app's parameters to copy

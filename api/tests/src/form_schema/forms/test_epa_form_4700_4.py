@@ -226,6 +226,24 @@ def test_epa_form_v5_0_max_length(epa_form_4700_4_v5_0):
     validate_max_length(data, EXPECTED_ERROR_FIELDS, epa_form_4700_4_v5_0)
 
 
+def test_epa_form_v5_0_zip_code_empty_fails(minimal_valid_form_v5_0, epa_form_4700_4_v5_0):
+    """Empty zip_code fails minLength — zip_code is always required with a minimum length of 1."""
+    data = minimal_valid_form_v5_0
+    data["applicant_address"]["zip_code"] = ""
+    issues = validate_json_schema_for_form(data, epa_form_4700_4_v5_0)
+    assert len(issues) == 1
+    assert issues[0].type == "minLength"
+    assert issues[0].field == "$.applicant_address.zip_code"
+
+
+def test_epa_form_v5_0_zip_code_short_valid(minimal_valid_form_v5_0, epa_form_4700_4_v5_0):
+    """zip_code with only 1 character is valid — minimum length is 1."""
+    data = minimal_valid_form_v5_0
+    data["applicant_address"]["zip_code"] = "1"
+    issues = validate_json_schema_for_form(data, epa_form_4700_4_v5_0)
+    assert issues == []
+
+
 def test_epa_form_v5_0_email_format(minimal_valid_form_v5_0, epa_form_4700_4_v5_0):
     data = minimal_valid_form_v5_0
     data["point_of_contact_email"] = "not-an-email"

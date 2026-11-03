@@ -151,7 +151,7 @@ def test_epa_key_contact_v2_0_min_length(epa_key_contact_v2_0):
                 "street1": "",
                 "street2": "",
                 "city": "",
-                "zip_code": "",
+                # zip_code excluded: non-US zip has minLength=0
                 "country": "CAN: CANADA",
             },
             "phone": "",
@@ -170,11 +170,71 @@ def test_epa_key_contact_v2_0_min_length(epa_key_contact_v2_0):
         "$.payee.address.street1",
         "$.payee.address.street2",
         "$.payee.address.city",
-        "$.payee.address.zip_code",
         "$.payee.phone",
         "$.payee.fax",
     ]
     validate_min_length(data, EXPECTED_ERROR_FIELDS, epa_key_contact_v2_0)
+
+
+def test_epa_key_contact_v2_0_us_zip_required(epa_key_contact_v2_0):
+    """US address requires zip_code."""
+    data = {
+        "payee": {
+            "name": {"first_name": "Bob", "last_name": "Smith"},
+            "address": {
+                "street1": "123 Main St",
+                "city": "Springfield",
+                "state": "IL: Illinois",
+                "country": "USA: UNITED STATES",
+            },
+            "phone": "555-555-5555",
+        }
+    }
+    from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+
+    issues = validate_json_schema_for_form(data, epa_key_contact_v2_0)
+    assert len(issues) == 1
+    assert issues[0].type == "required"
+    assert issues[0].field == "$.payee.address.zip_code"
+
+
+def test_epa_key_contact_v2_0_us_zip_any_length_valid(epa_key_contact_v2_0):
+    """US zip_code has no minimum length beyond being present."""
+    from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+
+    data = {
+        "payee": {
+            "name": {"first_name": "Bob", "last_name": "Smith"},
+            "address": {
+                "street1": "123 Main St",
+                "city": "Springfield",
+                "state": "IL: Illinois",
+                "country": "USA: UNITED STATES",
+                "zip_code": "12345",  # 5 chars — valid, no minimum length requirement
+            },
+            "phone": "555-555-5555",
+        }
+    }
+    assert validate_json_schema_for_form(data, epa_key_contact_v2_0) == []
+
+
+def test_epa_key_contact_v2_0_non_us_zip_optional(epa_key_contact_v2_0):
+    """Non-US zip_code is optional and has no minimum length."""
+    from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+
+    data = {
+        "payee": {
+            "name": {"first_name": "Bob", "last_name": "Smith"},
+            "address": {
+                "street1": "456 Rio",
+                "city": "Montevideo",
+                "country": "URY: URUGUAY",
+                "zip_code": "",  # empty is fine for non-US
+            },
+            "phone": "555-555-5555",
+        }
+    }
+    assert validate_json_schema_for_form(data, epa_key_contact_v2_0) == []
 
 
 def test_epa_key_contact_v2_0_max_length(epa_key_contact_v2_0):
