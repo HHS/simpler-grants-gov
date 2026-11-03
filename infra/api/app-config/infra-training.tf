@@ -69,7 +69,7 @@ module "infra_training_config" {
   # Defaults to `false`, matching training. Uncomment the next line to enable.
   # enable_command_execution = true
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
 
   scanner_provisioned_concurrency = 1
 }
