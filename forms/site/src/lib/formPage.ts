@@ -58,12 +58,19 @@ export function mountFormPage(root: Document, host: Window): () => void {
   const staticRows = [
     ...root.querySelectorAll<HTMLElement>("[data-static-field-id]"),
   ];
+  const hasComparison = [
+    ...root.querySelectorAll<HTMLElement>("[data-panel]"),
+  ].some((panel) => panel.dataset.hasComparison === "true");
   const stopStaticField = $selectedFieldId.subscribe((id) => {
-    if (!staticRows.length || !id) return;
+    if (hasComparison || !id) return;
     const row = staticRows.find((entry) => entry.dataset.staticFieldId === id);
     if (!row)
       $linkNotice.set("That field no longer exists. Showing the field tree.");
     else {
+      if (new URLSearchParams(host.location.search).has("check"))
+        $linkNotice.set(
+          "Comparisons are not available for this form. Showing the field details.",
+        );
       revealField(root, id);
       for (const details of row.querySelectorAll<HTMLDetailsElement>("details"))
         details.open = true;

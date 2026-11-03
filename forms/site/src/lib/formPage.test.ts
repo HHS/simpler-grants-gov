@@ -270,6 +270,9 @@ class Element extends EventTarget {
   querySelector() {
     return this.target;
   }
+  querySelectorAll() {
+    return [];
+  }
 }
 function documentFor(
   tabs: Element[],
@@ -285,11 +288,31 @@ function documentFor(
           ? panels
           : selector === "[data-field-id]"
             ? rows
-            : [],
+            : selector === "[data-static-field-id]"
+              ? rows.filter((row) => row.dataset.staticFieldId)
+              : [],
     querySelector: () => notice,
   } as unknown as Document;
 }
 describe("the rendered panel adapter", () => {
+  it("does not invent a comparison on a static plan-only field link", () => {
+    const page = new Page("?field=name&check=plan-vs-dat-help-text");
+    const row = new Element({ fieldId: "name", staticFieldId: "name" });
+    const notice = new Element();
+    stop = mountFormPage(documentFor([], [], notice, [row]), page.host());
+    expect(row.scrolled).toBe(true);
+    expect(row.focused).toBe(true);
+    expect(notice.textContent).toContain("Comparisons are not available");
+  });
+
+  it("shows a stale-field notice on a catalog record with no plan or comparison", () => {
+    const page = new Page("?field=removed&check=plan-vs-dat-help-text");
+    const notice = new Element();
+    stop = mountFormPage(documentFor([], [], notice), page.host());
+    expect(notice.hidden).toBe(false);
+    expect(notice.textContent).toContain("field no longer exists");
+  });
+
   it("restores a linked panel and Back/Forward into visible panels and ARIA tab state", async () => {
     const page = new Page("?tab=data");
     const tabs = [new Element({ tab: "fields" }), new Element({ tab: "data" })];
