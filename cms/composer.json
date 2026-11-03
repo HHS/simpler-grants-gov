@@ -1,0 +1,88 @@
+{
+  "name": "hhs/simpler-grants-gov-cms",
+  "description": "Headless Drupal CMS that manages editorial content for Simpler.Grants.gov",
+  "type": "project",
+  "license": "CC0-1.0",
+  "homepage": "https://github.com/HHS/simpler-grants-gov",
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  ],
+  "require": {
+    "composer/installers": "^2.3",
+    "drupal/core-composer-scaffold": "^11.4",
+    "drupal/core-recommended": "^11.4",
+    "drush/drush": "^13.8"
+  },
+  "require-dev": {
+    "drupal/core-dev": "^11.4"
+  },
+  "conflict": {
+    "drupal/drupal": "*"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "drupal/core-composer-scaffold": true,
+      "php-http/discovery": true,
+      "phpstan/extension-installer": true,
+      "symfony/runtime": true,
+      "tbachert/spi": true
+    },
+    "optimize-autoloader": true,
+    "platform": {
+      "php": "8.5.12"
+    },
+    "sort-packages": true
+  },
+  "extra": {
+    "drupal-scaffold": {
+      "locations": {
+        "web-root": "web/"
+      },
+      "file-mapping": {
+        "[project-root]/.editorconfig": false,
+        "[project-root]/.gitattributes": false,
+        "[project-root]/recipes/README.txt": false,
+        "[web-root]/INSTALL.txt": false,
+        "[web-root]/README.md": false,
+        "[web-root]/example.gitignore": false,
+        "[web-root]/web.config": false
+      }
+    },
+    "installer-paths": {
+      "web/core": [
+        "type:drupal-core"
+      ],
+      "web/libraries/{$name}": [
+        "type:drupal-library"
+      ],
+      "web/modules/contrib/{$name}": [
+        "type:drupal-module"
+      ],
+      "web/profiles/contrib/{$name}": [
+        "type:drupal-profile"
+      ],
+      "web/themes/contrib/{$name}": [
+        "type:drupal-theme"
+      ],
+      "drush/Commands/contrib/{$name}": [
+        "type:drupal-drush"
+      ],
+      "web/modules/custom/{$name}": [
+        "type:drupal-custom-module"
+      ],
+      "web/profiles/custom/{$name}": [
+        "type:drupal-custom-profile"
+      ],
+      "web/themes/custom/{$name}": [
+        "type:drupal-custom-theme"
+      ]
+    }
+  }
+}
