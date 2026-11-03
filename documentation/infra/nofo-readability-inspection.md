@@ -108,7 +108,7 @@ Initial email setup and actual subscription/delivery testing remain separate;
 this workflow does not subscribe an address or notify anyone. Slack/New Relic
 integration is deferred under
 [#12950](https://github.com/HHS/simpler-grants-gov/issues/12950).
-Production inspection and public upload enablement are outside this workflow.
+Public upload enablement is outside the scope of both inspection workflows.
 Builder [#968](https://github.com/HHS/simpler-grants-pdf-builder/issues/968) remains
 the public-release decision tracker.
 

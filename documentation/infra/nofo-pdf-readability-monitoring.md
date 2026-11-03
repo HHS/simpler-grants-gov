@@ -250,3 +250,15 @@ Authenticated Builder saved readability history remains outside this pilot.
 References: [AWS WAF dimensions](https://docs.aws.amazon.com/waf/latest/developerguide/waf-metrics.html),
 [ECS service metrics](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/available-metrics.html),
 and [Builder release gate](https://github.com/HHS/simpler-grants-pdf-builder/issues/968).
+
+
+## Prepare the production email parameter
+
+Add the intended recipient as the private Actions secret `NOFO_PROD_ALERT_EMAIL`.
+After review and merge, manually run **Set up private NOFO production alert email**
+from **main**. It creates the encrypted `/nofos/prod/monitoring/alert-email`
+parameter in the production account. It refuses to overwrite an existing
+parameter. If one exists, confirm its configuration privately before proceeding.
+
+Creating the parameter is separate from deploying the subscription. Keep public
+uploads disabled and verify delivery before enabling calculator alarm actions.
