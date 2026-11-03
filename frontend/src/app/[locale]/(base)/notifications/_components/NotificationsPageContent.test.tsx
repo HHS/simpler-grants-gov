@@ -181,7 +181,7 @@ describe("NotificationsPageContent", () => {
       expect(getAllNewOpportunitiesCheckbox()).toBeEnabled();
     });
 
-    it("displays as off and shows an error when turning off fails", async () => {
+    it("displays as on and shows an error when turning off fails", async () => {
       mockUpdateAllOpportunitiesNotificationPreferenceAction.mockResolvedValue({
         success: false,
         error: SAVE_ERROR,
@@ -204,7 +204,7 @@ describe("NotificationsPageContent", () => {
         expect(screen.getByRole("alert")).toHaveTextContent(SAVE_ERROR);
       });
 
-      expect(getAllNewOpportunitiesCheckbox()).not.toBeChecked();
+      expect(getAllNewOpportunitiesCheckbox()).toBeChecked();
     });
 
     it("falls back to the default error message when the action returns nothing", async () => {

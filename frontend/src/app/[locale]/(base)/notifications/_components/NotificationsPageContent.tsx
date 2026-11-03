@@ -104,7 +104,6 @@ export function NotificationsPageContent({
     savePreference: (
       nextValue: boolean,
     ) => Promise<UpdateNotificationPreferenceActionState>,
-    { turnOffOnError = false }: { turnOffOnError?: boolean } = {},
   ): void {
     const currentValue = preferenceValues[preferenceKey] ?? false;
     const nextValue = !currentValue;
@@ -121,13 +120,6 @@ export function NotificationsPageContent({
       if (!actionResult?.success) {
         setErrorPreferenceKey(preferenceKey);
         setPageLevelErrorMessage(actionResult?.error ?? SAVE_ERROR_MESSAGE);
-
-        if (turnOffOnError) {
-          setPreferenceValues((previousValues) => ({
-            ...previousValues,
-            [preferenceKey]: false,
-          }));
-        }
         return;
       }
 
@@ -232,7 +224,6 @@ export function NotificationsPageContent({
                 updateAllOpportunitiesNotificationPreferenceAction({
                   isEnabled,
                 }),
-              { turnOffOnError: true },
             );
           }}
         />
