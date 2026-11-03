@@ -1,0 +1,549 @@
+{
+  "title": "Application for Federal Assistance (SF-424)",
+  "slug": "sf424",
+  "omb_number": "4040-0004",
+  "expiration_date": "03/31/2029",
+  "fid_url": "https://www.grants.gov/forms/form-items-description/fid/713",
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/SF424_4_0-V4.0_F713.pdf",
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
+  "apps_count": 132937,
+  "status": "prioritized",
+  "family": ["SF-424"],
+  "category": "Key Personnel & Contact Forms",
+  "widgets": [
+    "TextWidget",
+    "SelectWidget",
+    "RadioWidget",
+    "CheckboxWidget",
+    "ApplicationAttachmentWidget"
+  ],
+  "sgg_form_id": "sf424",
+  "description": "The standard cover page form used for most federal grant applications. Collects applicant organization information, project details, estimated funding, and authorized representative certification.",
+  "new_concepts": ["TextWidget", "SelectWidget", "RadioWidget", "CheckboxWidget"],
+  "notes": [
+    "Contact Person is OPTIONAL per XSD (minOccurs=0) but DAT marks First/Last Name as required",
+    "Department/Division use V1 types (maxLength 30), unlike R&R forms which use V2 (maxLength 100)"
+  ],
+  "risks": [
+    "Revision Type enum has combination values (e.g. AC: Increase Award, Increase Duration) that may need a custom widget",
+    "State Review under E.O. 12372 references external process not modeled in SGG"
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Type of Submission",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Submission Type",
+          "dat_field": "01-0",
+          "required": true,
+          "type": "Radio group",
+          "widget": "RadioWidget",
+          "help_text": "Select the type of submission. Check 'Application' for a new or revised application.",
+          "constraints": "enum [Preapplication, Application, Changed/Corrected Application]",
+          "json_path": "submission_type",
+          "xml_path": "SF424_4_0:SubmissionType"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Type of Application",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Application Type",
+          "dat_field": "02-0",
+          "required": true,
+          "type": "Radio group",
+          "widget": "RadioWidget",
+          "help_text": "Select the type for this application: New, Continuation, or Revision.",
+          "constraints": "enum [New, Continuation, Revision]",
+          "json_path": "application_type",
+          "xml_path": "SF424_4_0:ApplicationType"
+        },
+        {
+          "kind": "field",
+          "label": "Revision Type",
+          "dat_field": "02-04",
+          "required": "Conditional (when Application Type = 'Revision')",
+          "type": "Dropdown",
+          "widget": "SelectWidget",
+          "help_text": "If Revision, select the appropriate letter(s) indicating the type of revision.",
+          "constraints": "enum [A: Increase Award, B: Decrease Award, C: Increase Duration, D: Decrease Duration, E: Other, AC, AD, BC, BD]",
+          "json_path": "revision_type",
+          "xml_path": "SF424_4_0:RevisionType"
+        },
+        {
+          "kind": "field",
+          "label": "Other Revision Explanation",
+          "dat_field": "02-05",
+          "required": "Conditional (when Revision Type includes 'E: Other')",
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "If 'Other' revision type is selected, provide a brief explanation.",
+          "constraints": "maxLength 21",
+          "json_path": "revision_other_explanation",
+          "xml_path": "SF424_4_0:RevisionOtherSpecify"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Administrative Information",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Date Received",
+          "dat_field": "03-0",
+          "required": true,
+          "type": "Date input",
+          "widget": "TextWidget",
+          "help_text": "Enter the date the application was received by the federal agency.",
+          "constraints": "xs:date",
+          "json_path": "date_received",
+          "xml_path": "SF424_4_0:DateReceived"
+        },
+        {
+          "kind": "field",
+          "label": "Applicant Identifier",
+          "dat_field": "04-0",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the applicant's own internal identifier for this application, if applicable.",
+          "constraints": "ApplicantIDDataType",
+          "json_path": "applicant_identifier",
+          "xml_path": "SF424_4_0:ApplicantID"
+        },
+        {
+          "kind": "field",
+          "label": "Federal Entity Identifier",
+          "dat_field": "05-A",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the federal entity identifier assigned by the federal agency, if applicable.",
+          "constraints": "FederalIDDataType",
+          "json_path": "federal_entity_identifier",
+          "xml_path": "SF424_4_0:FederalEntityIdentifier"
+        },
+        {
+          "kind": "field",
+          "label": "Federal Award Identifier",
+          "dat_field": "05-B",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the federal award identifier for continuation or revision applications.",
+          "constraints": "ProjectAwardNumberDataType",
+          "json_path": "federal_award_identifier",
+          "xml_path": "SF424_4_0:FederalAwardIdentifier"
+        },
+        {
+          "kind": "field",
+          "label": "Date Received by State",
+          "dat_field": "06-1",
+          "required": false,
+          "type": "Date input",
+          "widget": "TextWidget",
+          "help_text": "Enter the date the application was received by the state, if applicable.",
+          "constraints": "xs:date",
+          "json_path": "date_received_by_state",
+          "xml_path": "SF424_4_0:StateReceiveDate"
+        },
+        {
+          "kind": "field",
+          "label": "State Application Identifier",
+          "dat_field": "07-0",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the state application identifier, if applicable.",
+          "constraints": "maxLength 30",
+          "json_path": "state_application_identifier",
+          "xml_path": "SF424_4_0:StateApplicationID"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Applicant Information",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Legal Name",
+          "dat_field": "08-a",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the legal name of the applicant that will undertake the assistance activity.",
+          "constraints": "maxLength 60",
+          "json_path": "applicant.legal_name",
+          "xml_path": "SF424_4_0:OrganizationName"
+        },
+        {
+          "kind": "field",
+          "label": "EIN/TIN",
+          "dat_field": "08-b",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the employer/taxpayer identification number as assigned by the IRS.",
+          "constraints": "EmployerIDDataType",
+          "json_path": "applicant.ein",
+          "xml_path": "SF424_4_0:EmployerTaxpayerIdentificationNumber"
+        },
+        {
+          "kind": "field",
+          "label": "UEI",
+          "dat_field": "08-c",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the Unique Entity Identifier (UEI) from SAM.gov.",
+          "constraints": "length 12",
+          "json_path": "applicant.uei",
+          "xml_path": "SF424_4_0:SAMUEI"
+        },
+        {
+          "kind": "field",
+          "label": "Street1",
+          "dat_field": "08-d1",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "Enter the first line of the applicant's street address.",
+          "constraints": "maxLength 55",
+          "json_path": "applicant.address.street1",
+          "xml_path": "SF424_4_0:Applicant/globLib:Street1"
+        },
+        {
+          "kind": "field",
+          "label": "Street2",
+          "dat_field": "08-d2",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 55",
+          "json_path": "applicant.address.street2",
+          "xml_path": "SF424_4_0:Applicant/globLib:Street2"
+        },
+        {
+          "kind": "field",
+          "label": "City",
+          "dat_field": "08-d3",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 35",
+          "json_path": "applicant.address.city",
+          "xml_path": "SF424_4_0:Applicant/globLib:City"
+        },
+        {
+          "kind": "field",
+          "label": "County/Parish",
+          "dat_field": "08-d4",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 30",
+          "json_path": "applicant.address.county",
+          "xml_path": "SF424_4_0:Applicant/globLib:County"
+        },
+        {
+          "kind": "field",
+          "label": "State",
+          "dat_field": "08-d5",
+          "required": "Conditional (when Country = 'USA')",
+          "type": "Dropdown",
+          "widget": "SelectWidget",
+          "help_text": "Select the state for the applicant's address. Required for US addresses.",
+          "constraints": "StateCodeDataType",
+          "json_path": "applicant.address.state",
+          "xml_path": "SF424_4_0:Applicant/globLib:State"
+        },
+        {
+          "kind": "field",
+          "label": "Country",
+          "dat_field": "08-d7",
+          "required": true,
+          "type": "Dropdown",
+          "widget": "SelectWidget",
+          "constraints": "CountryCodeDataType",
+          "json_path": "applicant.address.country",
+          "xml_path": "SF424_4_0:Applicant/globLib:Country"
+        },
+        {
+          "kind": "field",
+          "label": "Zip / Postal Code",
+          "dat_field": "08-d8",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 30",
+          "json_path": "applicant.address.zip_code",
+          "xml_path": "SF424_4_0:Applicant/globLib:ZipPostalCode"
+        },
+        {
+          "kind": "field",
+          "label": "Department Name",
+          "dat_field": "08-e1",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 30",
+          "json_path": "applicant.department",
+          "xml_path": "SF424_4_0:DepartmentName"
+        },
+        {
+          "kind": "field",
+          "label": "Division Name",
+          "dat_field": "08-e2",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 30",
+          "json_path": "applicant.division",
+          "xml_path": "SF424_4_0:DivisionName"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Project Information",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Descriptive Title of Project",
+          "dat_field": "15-0",
+          "required": true,
+          "type": "Text area",
+          "widget": "TextWidget",
+          "help_text": "Enter a brief descriptive title of the project.",
+          "constraints": "maxLength 200",
+          "json_path": "project_title",
+          "xml_path": "SF424_4_0:ProjectTitle"
+        },
+        {
+          "kind": "field",
+          "label": "Proposed Start Date",
+          "dat_field": "17-1",
+          "required": true,
+          "type": "Date input",
+          "widget": "TextWidget",
+          "constraints": "xs:date",
+          "json_path": "proposed_start_date",
+          "xml_path": "SF424_4_0:ProposedProjectPeriod/SF424_4_0:ProposedStartDate"
+        },
+        {
+          "kind": "field",
+          "label": "Proposed End Date",
+          "dat_field": "17-2",
+          "required": true,
+          "type": "Date input",
+          "widget": "TextWidget",
+          "constraints": "xs:date",
+          "json_path": "proposed_end_date",
+          "xml_path": "SF424_4_0:ProposedProjectPeriod/SF424_4_0:ProposedEndDate"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Estimated Funding",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Federal",
+          "dat_field": "18-a",
+          "required": true,
+          "type": "Currency input",
+          "widget": "TextWidget",
+          "constraints": "BudgetTotalDataType (totalDigits 14, fractionDigits 2)",
+          "json_path": "estimated_funding.federal",
+          "xml_path": "SF424_4_0:EstimatedProjectFunding/SF424_4_0:TotalFederalFunding"
+        },
+        {
+          "kind": "field",
+          "label": "Applicant",
+          "dat_field": "18-b",
+          "required": true,
+          "type": "Currency input",
+          "widget": "TextWidget",
+          "constraints": "BudgetTotalDataType",
+          "json_path": "estimated_funding.applicant",
+          "xml_path": "SF424_4_0:EstimatedProjectFunding/SF424_4_0:TotalApplicantShareFunding"
+        },
+        {
+          "kind": "field",
+          "label": "State",
+          "dat_field": "18-c",
+          "required": true,
+          "type": "Currency input",
+          "widget": "TextWidget",
+          "constraints": "BudgetTotalDataType",
+          "json_path": "estimated_funding.state",
+          "xml_path": "SF424_4_0:EstimatedProjectFunding/SF424_4_0:TotalStateFunding"
+        },
+        {
+          "kind": "field",
+          "label": "Local",
+          "dat_field": "18-d",
+          "required": true,
+          "type": "Currency input",
+          "widget": "TextWidget",
+          "constraints": "BudgetTotalDataType",
+          "json_path": "estimated_funding.local",
+          "xml_path": "SF424_4_0:EstimatedProjectFunding/SF424_4_0:TotalLocalFunding"
+        },
+        {
+          "kind": "field",
+          "label": "Other",
+          "dat_field": "18-e",
+          "required": true,
+          "type": "Currency input",
+          "widget": "TextWidget",
+          "constraints": "BudgetTotalDataType",
+          "json_path": "estimated_funding.other",
+          "xml_path": "SF424_4_0:EstimatedProjectFunding/SF424_4_0:TotalOtherFunding"
+        },
+        {
+          "kind": "field",
+          "label": "Program Income",
+          "dat_field": "18-f",
+          "required": true,
+          "type": "Currency input",
+          "widget": "TextWidget",
+          "constraints": "BudgetTotalDataType",
+          "json_path": "estimated_funding.program_income",
+          "xml_path": "SF424_4_0:EstimatedProjectFunding/SF424_4_0:TotalProgramIncomeFunding"
+        },
+        {
+          "kind": "field",
+          "label": "Total",
+          "dat_field": "18-g",
+          "required": true,
+          "type": "Currency input",
+          "widget": "TextWidget",
+          "constraints": "BudgetTotalDataType",
+          "json_path": "estimated_funding.total",
+          "xml_path": "SF424_4_0:EstimatedProjectFunding/SF424_4_0:TotalEstimatedFunding"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Authorized Representative",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Prefix",
+          "dat_field": "21-f01",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 10",
+          "json_path": "aor.name.prefix",
+          "xml_path": "SF424_4_0:AORInfo/globLib:PrefixName",
+          "post_populated": "From the user's SAM.gov AOR profile"
+        },
+        {
+          "kind": "field",
+          "label": "First Name",
+          "dat_field": "21-f02",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 35",
+          "json_path": "aor.name.first_name",
+          "xml_path": "SF424_4_0:AORInfo/globLib:FirstName",
+          "post_populated": "From the user's SAM.gov AOR profile"
+        },
+        {
+          "kind": "field",
+          "label": "Last Name",
+          "dat_field": "21-f04",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 60",
+          "json_path": "aor.name.last_name",
+          "xml_path": "SF424_4_0:AORInfo/globLib:LastName",
+          "post_populated": "From the user's SAM.gov AOR profile"
+        },
+        {
+          "kind": "field",
+          "label": "Title",
+          "dat_field": "21-f06",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 45",
+          "json_path": "aor.title",
+          "xml_path": "SF424_4_0:AORInfo/SF424_4_0:Title"
+        },
+        {
+          "kind": "field",
+          "label": "Phone Number",
+          "dat_field": "21-f08",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 25",
+          "json_path": "aor.phone",
+          "xml_path": "SF424_4_0:AORInfo/SF424_4_0:PhoneNumber",
+          "post_populated": "From the user's SAM.gov AOR profile"
+        },
+        {
+          "kind": "field",
+          "label": "Email",
+          "dat_field": "21-f10",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 60",
+          "json_path": "aor.email",
+          "xml_path": "SF424_4_0:AORInfo/SF424_4_0:Email",
+          "post_populated": "From the user's SAM.gov AOR profile"
+        },
+        {
+          "kind": "field",
+          "label": "I Agree",
+          "dat_field": "21-3",
+          "required": true,
+          "type": "Checkbox",
+          "widget": "CheckboxWidget",
+          "help_text": "Certification that the information is true, complete, and accurate.",
+          "json_path": "aor.i_agree",
+          "xml_path": "SF424_4_0:AORInfo/SF424_4_0:AgreementToCertify"
+        },
+        {
+          "kind": "field",
+          "label": "Signature",
+          "dat_field": "21-4",
+          "required": true,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "constraints": "maxLength 60",
+          "json_path": "aor.signature",
+          "xml_path": "SF424_4_0:AORInfo/SF424_4_0:AORSignature",
+          "post_populated": "System-generated from authenticated user"
+        },
+        {
+          "kind": "field",
+          "label": "Date Signed",
+          "dat_field": "21-5",
+          "required": true,
+          "type": "Date input",
+          "widget": "TextWidget",
+          "constraints": "xs:date",
+          "json_path": "aor.date_signed",
+          "xml_path": "SF424_4_0:AORInfo/SF424_4_0:AORSignedDate",
+          "post_populated": "System-generated timestamp"
+        }
+      ]
+    }
+  ]
+}

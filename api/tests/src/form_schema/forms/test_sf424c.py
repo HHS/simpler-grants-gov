@@ -125,6 +125,43 @@ def test_sf424c_v2_0_percentage_negative(sf424c_v2_0):
     assert validation_issues[0].field == "$.federal_funding.federal_percentage_share"
 
 
+@pytest.mark.parametrize("percentage", [0, 100])
+def test_sf424c_v2_0_percentage_boundaries_valid(sf424c_v2_0, percentage):
+    """Federal percentage share accepts the inclusive 0 and 100 bounds."""
+    data = {"federal_funding": {"federal_percentage_share": percentage}}
+    validation_issues = validate_json_schema_for_form(data, sf424c_v2_0)
+    assert len(validation_issues) == 0
+
+
+@pytest.mark.parametrize(
+    "row,amount,is_valid",
+    [
+        # User-entered rows allow up to 10 whole digits, matching the XSD EnteredAmountType max
+        ("construction", "0.00", True),
+        ("construction", "9999999999.99", True),
+        ("construction", "10000000000.00", False),
+        # Calculated rows allow up to 12 whole digits, matching the XSD SubtotalType max
+        ("subtotal_1", "999999999999.99", True),
+        ("subtotal_1", "1000000000000.00", False),
+        # Amounts need exactly 2 decimal places when a decimal is present
+        ("construction", "1.5", False),
+        ("construction", "1.234", False),
+    ],
+)
+def test_sf424c_v2_0_monetary_amount_boundaries(sf424c_v2_0, row, amount, is_valid):
+    """Monetary amounts are validated at the edges of the digit limits and decimal format."""
+    data = {"budget_information": {row: {"total_cost": amount}}}
+    validation_issues = validate_json_schema_for_form(data, sf424c_v2_0)
+
+    if is_valid:
+        assert len(validation_issues) == 0
+    else:
+        # Over-length amounts fail both the pattern and maxLength checks
+        assert {issue.field for issue in validation_issues} == {
+            f"$.budget_information.{row}.total_cost"
+        }
+
+
 def test_sf424c_v2_0_construction_total_cost_only_is_valid_when_provided(sf424c_v2_0):
     """construction with only total_cost is schema-valid when provided."""
     data = {"budget_information": {"construction": {"total_cost": "0.00"}}}
@@ -234,6 +271,70 @@ def test_sf424c_v2_0_rules_negative_column_c_blocked(enable_factory_create, sf42
     assert len(validation_errors) > 0
     error_fields = {e.field for e in validation_errors}
     assert any("total_allowable_cost" in f for f in error_fields)
+
+
+def test_sf424c_v2_0_rules_negative_total_project_costs_blocked(enable_factory_create, sf424c_v2_0):
+    """When project_income exceeds subtotal_2, the resulting negative total_project_costs is rejected."""
+    data = {
+        "budget_information": {
+            "construction": {"total_cost": "100000.00", "non_allowable_cost": "0.00"},
+            "project_income": {"total_cost": "200000.00", "non_allowable_cost": "0.00"},
+        }
+    }
+    application_form = setup_application_for_form_validation(
+        data,
+        json_schema=sf424c_v2_0.form_json_schema,
+        rule_schema=sf424c_v2_0.form_rule_schema,
+    )
+    validation_errors = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    bi = application_form.application_response["budget_information"]
+    assert bi["total_project_costs"]["total_cost"] == "-100000.00"
+    assert bi["total_project_costs"]["total_allowable_cost"] == "-100000.00"
+
+    error_fields = {e.field for e in validation_errors}
+    assert "$.budget_information.total_project_costs.total_cost" in error_fields
+    assert "$.budget_information.total_project_costs.total_allowable_cost" in error_fields
+
+
+@pytest.mark.parametrize(
+    "total_cost,percentage,expected_share",
+    [
+        # Exact halves round up rather than to the nearest even cent
+        ("0.05", 50, "0.03"),
+        ("1.25", 10, "0.13"),
+        ("0.01", 50, "0.01"),
+        # Non-halves round to the nearest cent
+        ("0.01", 33, "0.00"),
+        ("100.01", 33, "33.00"),
+        ("100.02", 33, "33.01"),
+        # Full share of a large amount stays exact
+        ("9999999999.99", 100, "9999999999.99"),
+    ],
+)
+def test_sf424c_v2_0_rules_federal_funding_share_rounding(
+    enable_factory_create,
+    verify_no_warning_error_logs,
+    sf424c_v2_0,
+    total_cost,
+    percentage,
+    expected_share,
+):
+    """federal_funding_share rounds total_project_costs * percentage / 100 to the nearest cent, halves up."""
+    data = {
+        "budget_information": {"construction": {"total_cost": total_cost}},
+        "federal_funding": {"federal_percentage_share": percentage},
+    }
+    application_form = setup_application_for_form_validation(
+        data,
+        json_schema=sf424c_v2_0.form_json_schema,
+        rule_schema=sf424c_v2_0.form_rule_schema,
+    )
+    validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    federal_funding = application_form.application_response["federal_funding"]
+    assert federal_funding["total_project_costs"] == total_cost
+    assert federal_funding["federal_funding_share"] == expected_share
 
 
 def test_sf424c_v2_0_rules_calculated_fields_always_populated(

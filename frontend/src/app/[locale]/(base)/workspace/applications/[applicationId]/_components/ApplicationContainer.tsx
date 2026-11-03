@@ -48,7 +48,7 @@ const ApplicationContainer = ({
   const applicationDetailsObject = applicationDetails;
 
   const { user } = useUser();
-  const token = user?.token || null;
+  const isLoggedIn = Boolean(user?.isLoggedIn);
   const t = useTranslations("Application");
   const router = useRouter();
 
@@ -69,7 +69,7 @@ const ApplicationContainer = ({
     : "";
 
   const handleSubmit = useCallback(() => {
-    if (!token) {
+    if (!isLoggedIn) {
       return;
     }
 
@@ -94,7 +94,7 @@ const ApplicationContainer = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [applicationId, token, router]);
+  }, [applicationId, isLoggedIn, router]);
 
   return (
     <>

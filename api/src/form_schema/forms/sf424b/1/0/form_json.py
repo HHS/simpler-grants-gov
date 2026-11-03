@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -187,6 +188,7 @@ SF424b_v1_1 = Form(
     form_version="1.1",
     agency_code="SGG",
     omb_number="4040-0007",
+    expiration_date=date(2028, 7, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

@@ -3,7 +3,6 @@
 import logging
 from uuid import UUID
 
-import grants_shared.adapters.db as db
 from common_grants_sdk.schemas.pydantic import (
     OppFilters,
     OpportunityBase,
@@ -14,6 +13,7 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedResultsInfo,
 )
 
+import src.adapters.db as db
 import src.adapters.search as search
 from src.services.opportunities_v1.get_opportunity import get_opportunity
 from src.services.opportunities_v1.search_opportunities import search_opportunities
@@ -93,7 +93,7 @@ class CommonGrantsOpportunityService:
         pagination = search_request.pagination or PaginatedBodyParams()
 
         # Convert search request to v1 format
-        v1_search_params, custom_filter_errors = transform_search_request_from_cg(
+        v1_search_params, filter_errors = transform_search_request_from_cg(
             filters, sorting, pagination, search_request.search
         )
 
@@ -117,4 +117,4 @@ class CommonGrantsOpportunityService:
             totalPages=pagination_data_v1.total_pages,
         )
 
-        return opportunity_data_cg, paginated_results_info_cg, custom_filter_errors
+        return opportunity_data_cg, paginated_results_info_cg, filter_errors

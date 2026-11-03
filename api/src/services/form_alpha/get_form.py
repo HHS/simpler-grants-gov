@@ -1,8 +1,7 @@
 import uuid
 
-import grants_shared.adapters.db as db
-from grants_shared.api.route_utils import raise_flask_error
-
+import src.adapters.db as db
+from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Form, FormInstruction
 from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
 

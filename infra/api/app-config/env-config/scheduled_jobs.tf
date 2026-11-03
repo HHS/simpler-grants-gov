@@ -64,7 +64,7 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    grantee1 = [
+    "infra-sgg2" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -73,8 +73,8 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    # Mirrors grantee1.
-    "infra-grantee1" = [
+    # Mirrors infra-sgg2.
+    "infra-sgg3" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -83,25 +83,7 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    grantee2 = [
-      "flask",
-      "data-migration",
-      "load-transform",
-      "--load",
-      "--transform",
-      "--set-current",
-      "--store-version"
-    ],
-    # Mirrors grantee2.
-    "infra-grantee2" = [
-      "flask",
-      "data-migration",
-      "load-transform",
-      "--load",
-      "--transform",
-      "--set-current",
-      "--store-version"
-    ],
+    # Mirrors infra-sgg3.
     grantor1 = [
       "flask",
       "data-migration",
@@ -112,7 +94,7 @@ locals {
       "--store-version"
     ],
     # Mirrors grantor1.
-    "infra-grantor1" = [
+    "infra-sgg1" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -165,12 +147,10 @@ locals {
     "infra-staging"  = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
     training         = ["flask", "task", "sam-extracts"]
     "infra-training" = ["flask", "task", "sam-extracts"]
-    grantee1         = ["flask", "task", "sam-extracts"]
-    "infra-grantee1" = ["flask", "task", "sam-extracts"]
-    grantee2         = ["flask", "task", "sam-extracts"]
-    "infra-grantee2" = ["flask", "task", "sam-extracts"]
+    "infra-sgg2"     = ["flask", "task", "sam-extracts"]
+    "infra-sgg3"     = ["flask", "task", "sam-extracts"]
     grantor1         = ["flask", "task", "sam-extracts"]
-    "infra-grantor1" = ["flask", "task", "sam-extracts"]
+    "infra-sgg1"     = ["flask", "task", "sam-extracts"]
     prod             = ["flask", "task", "sam-extracts"]
   }
   setup-lower-env-agencies-state = {
@@ -180,12 +160,10 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "DISABLED"
     "infra-training" = "DISABLED"
-    grantee1         = "DISABLED"
-    "infra-grantee1" = "DISABLED"
-    grantee2         = "DISABLED"
-    "infra-grantee2" = "DISABLED"
+    "infra-sgg2"     = "DISABLED"
+    "infra-sgg3"     = "DISABLED"
     grantor1         = "DISABLED"
-    "infra-grantor1" = "DISABLED"
+    "infra-sgg1"     = "DISABLED"
     prod             = "DISABLED"
   }
   build-automatic-opportunities-state = {
@@ -195,12 +173,10 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "DISABLED"
-    "infra-grantee1" = "DISABLED"
-    grantee2         = "DISABLED"
-    "infra-grantee2" = "DISABLED"
+    "infra-sgg2"     = "DISABLED"
+    "infra-sgg3"     = "DISABLED"
     grantor1         = "DISABLED"
-    "infra-grantor1" = "DISABLED"
+    "infra-sgg1"     = "DISABLED"
     prod             = "DISABLED"
   }
   load-transform-state = {
@@ -210,12 +186,10 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "ENABLED"
-    "infra-grantee1" = "ENABLED"
-    grantee2         = "ENABLED"
-    "infra-grantee2" = "ENABLED"
+    "infra-sgg2"     = "ENABLED"
+    "infra-sgg3"     = "ENABLED"
     grantor1         = "ENABLED"
-    "infra-grantor1" = "ENABLED"
+    "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
   }
   sam-extracts-state = {
@@ -225,12 +199,10 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "ENABLED"
-    "infra-grantee1" = "ENABLED"
-    grantee2         = "ENABLED"
-    "infra-grantee2" = "ENABLED"
+    "infra-sgg2"     = "ENABLED"
+    "infra-sgg3"     = "ENABLED"
     grantor1         = "ENABLED"
-    "infra-grantor1" = "ENABLED"
+    "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
   }
   create-analytics-db-csvs-state = {
@@ -240,12 +212,10 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "ENABLED"
-    "infra-grantee1" = "ENABLED"
-    grantee2         = "ENABLED"
-    "infra-grantee2" = "ENABLED"
+    "infra-sgg2"     = "ENABLED"
+    "infra-sgg3"     = "ENABLED"
     grantor1         = "ENABLED"
-    "infra-grantor1" = "ENABLED"
+    "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
   }
   email-notification-opportunity-state = {
@@ -255,28 +225,87 @@ locals {
     "infra-staging"  = "ENABLED"
     training         = "ENABLED"
     "infra-training" = "ENABLED"
-    grantee1         = "DISABLED"
-    "infra-grantee1" = "DISABLED"
-    grantee2         = "DISABLED"
-    "infra-grantee2" = "DISABLED"
+    "infra-sgg2"     = "DISABLED"
+    "infra-sgg3"     = "DISABLED"
     grantor1         = "DISABLED"
-    "infra-grantor1" = "DISABLED"
+    "infra-sgg1"     = "DISABLED"
     prod             = "ENABLED"
+  }
+  new-opportunity-notification-state = {
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "DISABLED"
+    "infra-training" = "DISABLED"
+    "infra-sgg2"     = "DISABLED"
+    "infra-sgg3"     = "DISABLED"
+    grantee2         = "DISABLED"
+    grantor1         = "DISABLED"
+    "infra-sgg1"     = "DISABLED"
+    prod             = "DISABLED"
   }
   scheduled_jobs = {
     load-transform = {
       task_command = local.load-transform-args[var.environment]
-      # Every hour at the top of the hour
-      schedule_expression = "cron(0 * * * ? *)"
+      # Every 15 minutes starting at 1:00 AM through 11:45 PM
+      schedule_expression = "cron(0/15 1-23 * * ? *)"
       state               = local.load-transform-state[var.environment]
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+      # load-transform now syncs to OpenSearch (incremental) after SetCurrentOpportunitiesTask,
+      # which requires write access beyond the default app_service role's read-only query policy.
+      role_override = "opensearch-write"
+    }
+    load-user-tables = {
+      # The user tables only need daily freshness, so they load here instead of in the
+      # hourly load-transform cycle.
+      #
+      # Load only. Transform, set-current, store-version, and sync-to-index are all opportunity
+      # steps that have no bearing on the user tables, and store-version in particular must stay
+      # off: it writes opportunity_version off the opportunity_change_audit queue, and this job
+      # can overlap the hourly cycle (which runs every hour, with the job lock disabled here),
+      # so it would risk versioning opportunities midway through the hourly transform.
+      task_command = [
+        "flask",
+        "data-migration",
+        "load-transform",
+        "--load",
+        "--no-transform",
+        "--no-set-current",
+        "--no-store-version",
+        "--no-sync-to-index",
+        "-t",
+        "vuser_account",
+        "-t",
+        "tuser_profile"
+      ]
+      # Every day at 3:45am Eastern Time during DST. 2:45am during non-DST.
+      # Minute 45 is the only minute free of the hourly jobs (0, 15, and 30 are all taken),
+      # and hour 7 is free of the daily jobs. Nothing consumes these staging tables yet, so
+      # the slot is chosen purely to stay clear of the rest of the schedule.
+      schedule_expression = "cron(45 7 * * ? *)"
+      state               = local.load-transform-state[var.environment]
+      cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
+      mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      # This job shares the load-transform job type with the hourly job, so the lock is
+      # disabled to keep the two from blocking each other.
+      environment_vars = concat(
+        try(local.scheduled_jobs_config[var.environment].environment_vars, []),
+        [
+          {
+            Name  = "ENABLE_JOB_LOCK"
+            Value = "false"
+          }
+        ]
+      )
     }
     load-search-opportunity-data = {
-      task_command = ["flask", "load-search-data", "load-opportunity-data"]
-      # Every hour at the half hour
-      schedule_expression = "cron(30 * * * ? *)"
+      task_command = ["flask", "load-search-data", "load-opportunity-data", "--full-refresh"]
+      # Once a day at 00:30, after the agency data hourly job at 00:00.
+      # Incremental sync now runs every load-transform cycle
+      schedule_expression = "cron(30 0 * * ? *)"
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
@@ -356,6 +385,25 @@ locals {
       schedule_expression = "cron(45 12 * * ? *)"
       # Only enable in dev/staging, do not run in training/prod
       state            = local.setup-lower-env-agencies-state[var.environment]
+      cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
+      mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+    }
+    check-xsd-drift = {
+      task_command = ["flask", "task", "check-xsd-drift"]
+      # Every day at 1am Eastern Time during DST. 2am during non-DST.
+      schedule_expression = "cron(0 6 * * ? *)"
+      state               = "ENABLED"
+      cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
+      mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+    }
+    new-opportunity-notification = {
+      task_command = ["flask", "task", "new-opportunity-notification"]
+      # Every day at 4am Eastern Time during DST. 5am during non-DST.
+      schedule_expression = "cron(0 9 * * ? *)"
+      # Only enable in dev/staging, do not run in training/prod yet
+      state            = local.new-opportunity-notification-state[var.environment]
       cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)

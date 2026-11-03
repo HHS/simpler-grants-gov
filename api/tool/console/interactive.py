@@ -13,14 +13,14 @@ import rich  # ruff: ignore[unused-import] isort:skip
 import rich.panel  # ruff: ignore[unused-import] isort:skip
 import rich.pretty
 
-import grants_shared.adapters.db as db
+import src.adapters.db as db
 import src.db  # ruff: ignore[unused-import] isort:skip
 import src.db.models
-import grants_shared.logs
+import src.logs
 import src.util
 import tests.src.db.models.factories
-from grants_shared.adapters.db.clients.postgres_client import PostgresDBClient
-from grants_shared.adapters.db.clients.postgres_config import get_db_config
+from src.adapters.db.clients.postgres_client import PostgresDBClient
+from src.adapters.db.clients.postgres_config import get_db_config
 
 INTRO = """
 Simpler Grants Gov Python console
@@ -115,7 +115,7 @@ def reload_repl() -> None:
 
         # reloading the logging initialization and stuff can cause some issues,
         # avoid it all for now
-        if "<module 'grants_shared.logs" in str(module):
+        if "<module 'src.logs" in str(module):
             continue
 
         try:
@@ -132,7 +132,7 @@ def reload_module(m: ModuleType) -> None:
 
 
 if __name__ == "__main__":
-    with grants_shared.logs.init(__package__):
+    with src.logs.init(__package__):
         interactive_variables = interactive_console()
         globals().update(interactive_variables)
         rich.pretty.install(indent_guides=True, max_length=20, max_string=400)

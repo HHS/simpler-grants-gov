@@ -10,14 +10,33 @@ import click
 from src.form_schema.forms import init_form_registry
 from src.services.xml_generation.config import _build_xml_form_map, _build_xml_form_xsd_url_map
 from src.services.xml_generation.models import XMLGenerationRequest
+from src.services.xml_generation.models.attachment import HASH_ALGORITHM
 from src.services.xml_generation.service import XMLGenerationService
-from src.services.xml_generation.validation.test_cases import (
-    get_all_test_cases,
-    get_test_cases_by_form,
-)
-from src.services.xml_generation.validation.test_runner import ValidationTestRunner
+from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
+
+
+def _validate_raw_attachments(raw: dict, param_name: str) -> None:
+    """Raise click.BadParameter if any attachment entry is missing required keys.
+
+    Args:
+        raw: Parsed attachment mapping dict (uuid -> info dict).
+        param_name: The CLI option name, used in the error message.
+    """
+    required_keys = {"filename", "mime_type", "file_location", "hash_value"}
+    for uuid, info in raw.items():
+        if not isinstance(info, dict):
+            raise click.BadParameter(
+                f"Attachment '{uuid}' must be an object, got {type(info).__name__}",
+                param_hint=f"'--{param_name}'",
+            )
+        missing = required_keys - info.keys()
+        if missing:
+            raise click.BadParameter(
+                f"Attachment '{uuid}' is missing required fields: {sorted(missing)}",
+                param_hint=f"'--{param_name}'",
+            )
 
 
 @task_blueprint.cli.command("generate-xml")
@@ -47,12 +66,29 @@ from src.task.task_blueprint import task_blueprint
     type=click.Path(),
     help="Output file path (default: stdout)",
 )
+@click.option(
+    "--attachments",
+    "attachments_string",
+    help=(
+        "JSON string mapping attachment UUIDs to file info, for attachment forms. "
+        'Format: \'{"<uuid>": {"filename": "...", "mime_type": "...", '
+        '"file_location": "...", "hash_value": "...", "hash_algorithm": "SHA-1"}}\''
+    ),
+)
+@click.option(
+    "--attachments-file",
+    "attachments_file_path",
+    type=click.Path(exists=True),
+    help="Path to JSON file containing the attachment mapping (same format as --attachments).",
+)
 def generate_xml_command(
     json_string: str | None,
     file_path: str | None,
     form: str,
     compact: bool,
     output_path: str | None,
+    attachments_string: str | None,
+    attachments_file_path: str | None,
 ) -> None:
     """Generate XML from JSON application data.
 
@@ -71,8 +107,14 @@ def generate_xml_command(
 
         # Generate Budget Narrative Attachments XML
         flask task generate-xml --file input.json --form BudgetNarrativeAttachments_1_2
+
         # Generate SF-LLL from file
         flask task generate-xml --file sflll.json --form SFLLL_2_0
+
+        # Generate Project Abstract XML (attachment form)
+        flask task generate-xml --form Project_Abstract \\
+            --json '{"attachment": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"}' \\
+            --attachments '{"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": {"filename": "abstract.pdf", "mime_type": "application/pdf", "file_location": "abstract.pdf", "hash_value": "abc123="}}'
 
         # Generate compact XML and save to file
         flask task generate-xml --json '{"field": "value"}' --compact --output out.xml
@@ -108,6 +150,29 @@ def generate_xml_command(
             click.echo("Error: Must provide either --json or --file", err=True)
             sys.exit(1)
 
+        # Build attachment mapping if provided
+        attachment_mapping: dict[str, AttachmentInfo] | None = None
+        raw_attachments: dict | None = None
+        if attachments_string:
+            raw_attachments = json.loads(attachments_string)
+        elif attachments_file_path:
+            with open(attachments_file_path) as f:
+                raw_attachments = json.load(f)
+
+        if raw_attachments is not None:
+            param_name = "attachments-file" if attachments_file_path else "attachments"
+            _validate_raw_attachments(raw_attachments, param_name)
+            attachment_mapping = {
+                uuid: AttachmentInfo(
+                    filename=info["filename"],
+                    mime_type=info["mime_type"],
+                    file_location=info["file_location"],
+                    hash_value=info["hash_value"],
+                    hash_algorithm=info.get("hash_algorithm", HASH_ALGORITHM),
+                )
+                for uuid, info in raw_attachments.items()
+            }
+
         # Get transform config for the specified form (validated by click.Choice)
         transform_config = form_transform_rules_map.get(form.upper())
 
@@ -117,6 +182,7 @@ def generate_xml_command(
             application_data=application_data,
             transform_config=transform_config,
             pretty_print=not compact,
+            attachment_mapping=attachment_mapping,
         )
 
         response = service.generate_xml(request)
@@ -140,127 +206,6 @@ def generate_xml_command(
         sys.exit(1)
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
-        sys.exit(1)
-
-
-@task_blueprint.cli.command("validate-xml-generation")
-@click.option(
-    "--form",
-    help="Form name to test (e.g., SF424_4_0). If not specified, runs all forms.",
-)
-@click.option(
-    "--xsd-dir",
-    type=click.Path(),
-    help="Directory containing XSD files (default: ../services/xml_generation/xsds). Run 'flask task fetch-xsds' first.",
-)
-@click.option(
-    "--output",
-    "output_file",
-    type=click.Path(),
-    help="Output file to save results (JSON format). Defaults to {xsd_dir}/validation_results.json",
-)
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    help="Enable verbose logging",
-)
-def validate_xml_generation_command(
-    form: str | None,
-    xsd_dir: str | None,
-    output_file: str | None,
-    verbose: bool,
-) -> None:
-    """Run XML validation tests against XSD schemas.
-
-    **Prerequisites**: Run 'flask task fetch-xsds' first to download XSD files.
-
-    This validates that generated XML conforms to Grants.gov XSD schemas.
-    Flask handles DB/logging setup automatically.
-
-    By default, results are saved to validation_results.json in the XSD directory.
-
-    Examples:
-
-        # Run all validation tests (results saved to ../services/xml_generation/xsds/validation_results.json)
-        flask task validate-xml-generation
-
-        # Run only SF-424 tests
-        flask task validate-xml-generation --form SF424_4_0
-
-        # Save results to custom file
-        flask task validate-xml-generation --output validation_results.json
-
-        # Use XSD directory
-        flask task validate-xml-generation --xsd-dir ../services/xml_generation/xsds
-    """
-    init_form_registry()
-
-    # Set up logging level
-    logger = logging.getLogger(__name__)
-
-    if verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-    try:
-        # Use default XSD directory if not specified
-        if not xsd_dir:
-            xsd_dir = str(Path(__file__).resolve().parents[2] / "src/services/xml_generation/xsds")
-
-        # Verify XSD directory exists
-        xsd_path = Path(xsd_dir)
-        if not xsd_path.exists():
-            click.echo(
-                f"Error: XSD directory not found: {xsd_dir}\n"
-                "Run 'flask task fetch-xsds' first to download XSD files.",
-                err=True,
-            )
-            sys.exit(1)
-
-        # Default output file to xsd directory if not specified
-        if not output_file:
-            output_file = str(xsd_path / "validation_results.json")
-
-        # Get test cases
-        if form:
-            test_cases = get_test_cases_by_form(form)
-            if not test_cases:
-                click.echo(f"Error: No test cases found for form: {form}", err=True)
-                sys.exit(1)
-        else:
-            test_cases = get_all_test_cases()
-            if not test_cases:
-                click.echo("Error: No test cases found", err=True)
-                sys.exit(1)
-
-        click.echo(f"Found {len(test_cases)} test cases")
-        click.echo(f"XSD directory: {xsd_dir}")
-        click.echo(f"Results will be saved to: {output_file}")
-        click.echo("")
-
-        # Initialize test runner with xsd directory
-        xml_form_map = _build_xml_form_map()
-
-        runner = ValidationTestRunner(xsd_dir=xsd_dir, xml_form_map=xml_form_map)
-
-        # Run tests
-        summary = runner.run_test_suite(test_cases)
-
-        # Print summary
-        runner.print_summary(summary)
-
-        # Save results (now always saves, since we have a default)
-        runner.save_results(output_file)
-        click.echo(f"\nResults saved to: {output_file}")
-
-        # Exit with appropriate code
-        sys.exit(0 if summary["failed_tests"] == 0 else 1)
-
-    except KeyboardInterrupt:
-        click.echo("\nValidation interrupted by user", err=True)
-        sys.exit(130)
-    except Exception as e:
-        logger.error(f"Validation failed: {e}", exc_info=verbose)
-        click.echo(f"Error: Validation failed: {e}", err=True)
         sys.exit(1)
 
 
@@ -288,7 +233,7 @@ def fetch_xsds_command(
     """Pre-fetch and store XSD files for offline validation.
 
     This command downloads XSD schema files and stores them in a local
-    XSD directory. Run this before using the validate-xml-generation command.
+    XSD directory for local XML validation tests.
 
     Examples:
         # Fetch all XSD files (uses ../services/xml_generation/xsds by default)

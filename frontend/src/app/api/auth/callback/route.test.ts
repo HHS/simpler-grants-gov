@@ -8,9 +8,16 @@ import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 import { NextRequest } from "next/server";
 
 const createSessionMock = jest.fn();
+const mockLoggerError = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   createSession: (token: string): unknown => createSessionMock(token),
+}));
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    error: (...args: unknown[]): unknown => mockLoggerError(...args),
+  },
 }));
 
 // note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
@@ -27,11 +34,56 @@ describe("/api/auth/callback GET handler", () => {
     expect(redirectError.digest).toContain(";/login;");
   });
 
-  it("if no token exists on query param, does not call createSession and redirects to unauthenticated page", async () => {
+  it("if no token exists on query param, does not call createSession and returns through /login", async () => {
     const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
       GET(new NextRequest("https://simpler.grants.gov")),
     );
     expect(createSessionMock).toHaveBeenCalledTimes(0);
-    expect(redirectError.digest).toContain(";/unauthenticated;");
+    expect(redirectError.digest).toContain(";/login;");
+    expect(redirectError.digest).not.toContain("/unauthenticated");
+  });
+
+  it("returns through /login with the PIV error flag when PIV is required", async () => {
+    const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
+      GET(
+        new NextRequest(
+          "https://simpler.grants.gov/?login_piv_required_error=true",
+        ),
+      ),
+    );
+    expect(createSessionMock).toHaveBeenCalledTimes(0);
+    expect(redirectError.digest).toContain(";/login?pivError=true;");
+  });
+
+  it("logs session creation failures without the token and returns through /login", async () => {
+    const sessionError = new Error("session failure");
+    createSessionMock.mockRejectedValueOnce(sessionError);
+
+    const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
+      GET(
+        new NextRequest("https://simpler.grants.gov/?token=fakeToken", {
+          headers: { "X-Amz-Cf-Id": "trace-id" },
+        }),
+      ),
+    );
+
+    expect(redirectError.digest).toContain(";/login;");
+    expect(redirectError.digest).not.toContain("/error");
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      { err: sessionError, awsTraceId: "trace-id" },
+      "Error creating session",
+    );
+    expect(JSON.stringify(mockLoggerError.mock.calls)).not.toContain(
+      "fakeToken",
+    );
+  });
+
+  it("does not log the token on successful session creation", async () => {
+    await wrapForExpectedError(() =>
+      GET(new NextRequest("https://simpler.grants.gov/?token=fakeToken")),
+    );
+    expect(JSON.stringify(mockLoggerError.mock.calls)).not.toContain(
+      "fakeToken",
+    );
   });
 });

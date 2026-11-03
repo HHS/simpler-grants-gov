@@ -3,6 +3,7 @@
 #
 
 from . import (
+    application,
     attachment,
     certificates,
     competition,
@@ -19,6 +20,7 @@ metadata = foreignbase.metadata
 
 __all__ = [
     "metadata",
+    "application",
     "forecast",
     "opportunity",
     "synopsis",

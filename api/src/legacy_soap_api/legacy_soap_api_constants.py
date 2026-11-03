@@ -45,6 +45,7 @@ class LegacySoapApiEvent(StrEnum):
 class SimplerRequests(StrEnum):
     GET_SUBMISSION_LIST_REQUEST = "GetSubmissionListRequest"
     GET_SUBMISSION_LIST_EXPANDED_REQUEST = "GetSubmissionListExpandedRequest"
+    GET_APPLICATION_LIST_EXPANDED_REQUEST = "GetApplicationListExpandedRequest"
     CONFIRM_APPLICATION_DELIVERY_REQUEST = "ConfirmApplicationDeliveryRequest"
     UPDATE_APPLICATION_INFO_REQUEST = "UpdateApplicationInfoRequest"
     GET_APPLICATION_ZIP_REQUEST = "GetApplicationZipRequest"

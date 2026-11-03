@@ -1,0 +1,19 @@
+{
+  "name": "Data Availability - Oldest",
+  "display": "object",
+  "visualization_settings": {
+    "table.columns": [
+      {
+        "name": "minimum_date",
+        "enabled": true
+      }
+    ],
+    "column_settings": {
+      "[\"name\",\"minimum_date\"]": {
+        "date_abbreviate": true,
+        "date_style": "MMMM D, YYYY",
+        "column_title": "Oldest  Dataset:"
+      }
+    }
+  }
+}

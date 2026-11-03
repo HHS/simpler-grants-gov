@@ -6,8 +6,13 @@ import { USWDSIcon } from "./USWDSIcon";
 
 interface SimplerAlertProps {
   alertClick: () => void;
-  // This is the id which will be tied to the aria-describedby of the alert
-  buttonId: string;
+  // This is the id which will be tied to the aria-describedby of the alert. Omit it when the
+  // alert shouldn't be described by that element, as the attribute exposes the alert's container
+  // to screen readers with the element's name as its description
+  buttonId?: string;
+  className?: string;
+  // accessible name for the dismiss button, which otherwise only contains an icon
+  closeButtonLabel?: string;
   messageText: string | ReactNode;
   type: "error" | "success";
 }
@@ -15,6 +20,8 @@ interface SimplerAlertProps {
 const SimplerAlert = ({
   alertClick,
   buttonId,
+  className,
+  closeButtonLabel,
   messageText,
   type,
 }: SimplerAlertProps) => {
@@ -36,6 +43,7 @@ const SimplerAlert = ({
           "position-relative padding-0 border-top-0 border-right-0 border-bottom-0":
             type === "error",
         },
+        className,
       )}
     >
       <div
@@ -58,6 +66,7 @@ const SimplerAlert = ({
           {messageText}
         </div>
         <button
+          aria-label={closeButtonLabel}
           data-testid="simpler-alert-close-button"
           type="button"
           className="usa-button usa-button--unstyled font-sans-lg text-black margin-left-2"

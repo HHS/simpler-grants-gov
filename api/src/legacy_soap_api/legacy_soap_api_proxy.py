@@ -4,7 +4,6 @@ from datetime import timedelta
 from os.path import join
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 
-from grants_shared.util.datetime_util import utcnow
 from requests import Request, Session
 
 from src.legacy_soap_api.legacy_soap_api_auth import (
@@ -30,6 +29,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_streamed_soap_response,
     log_local,
 )
+from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 

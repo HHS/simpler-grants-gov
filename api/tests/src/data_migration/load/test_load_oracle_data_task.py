@@ -524,21 +524,19 @@ class TestLoadOracleData(BaseTestClass):
         )
         assert task.metrics["count.insert.total"] == 1
 
-    def test_load_data_excludes_tcertificates_column_is_selfsigned_by_default(
+    def test_load_data_copies_tcertificates_column_is_selfsigned(
         self, db_session, foreign_tables, staging_tables, enable_factory_create
     ):
-        """Test that excluded columns are not copied from foreign to staging tables."""
+        """Test that tcertificates.is_selfsigned is copied like any other column now that it
+        relies on the strip_zeros opt-in instead of column exclusion."""
         source_table = foreign_tables["tcertificates"]
         destination_table = staging_tables["tcertificates"]
 
         db_session.execute(sqlalchemy.delete(source_table))
         db_session.execute(sqlalchemy.delete(destination_table))
 
-        # Create a record in the foreign table with specific values
-        # 'is_selfsigned' should be excluded
         source_record = ForeignTcertificatesFactory.create(is_selfsigned="Y")
 
-        # Run the task with column exclusions
         task = load_oracle_data_task.LoadOracleDataTask(
             db_session,
             foreign_tables,
@@ -564,5 +562,5 @@ class TestLoadOracleData(BaseTestClass):
         assert inserted_record.certemail == source_record.certemail
         assert inserted_record.serial_num == source_record.serial_num
 
-        # Verify excluded column was not copied (should be None)
-        assert inserted_record.is_selfsigned is None
+        # Verify is_selfsigned is no longer excluded
+        assert inserted_record.is_selfsigned == source_record.is_selfsigned

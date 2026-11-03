@@ -1,14 +1,14 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
 from src.api.opportunities_grantor_v1.opportunity_grantor_schemas import (
     CompetitionRequestBaseSchema,
 )
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
 from src.db.models.competition_models import Competition
@@ -54,6 +54,10 @@ def update_competition(
 
     # Update fields
     competition.competition_title = competition_data["competition_title"]
+    if "public_competition_id" in competition_data:
+        competition.public_competition_id = competition_data["public_competition_id"]
+    if "grace_period" in competition_data:
+        competition.grace_period = competition_data["grace_period"]
     competition.opening_date = competition_data["opening_date"]
     competition.closing_date = competition_data["closing_date"]
     competition.contact_info = competition_data["contact_info"]

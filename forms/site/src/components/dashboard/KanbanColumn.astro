@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from "astro:content";
+import KanbanCard from "./KanbanCard.astro";
+
+interface Props {
+  label: string;
+  status: string;
+  forms: CollectionEntry<"forms">[];
+}
+
+const { label, status, forms } = Astro.props;
+const statusParam = status.replace("_", "-");
+---
+
+<div class="kanban-column">
+  <div class="kanban-column__header">
+    <div class={`kanban-column__indicator kanban-column__indicator--${statusParam}`}></div>
+    <span class="kanban-column__title">{label}</span>
+    <span class="kanban-column__count">{forms.length}</span>
+  </div>
+  <ul class="kanban-cards">
+    {forms.map((form) => (
+      <li><KanbanCard form={form} /></li>
+    ))}
+    {forms.length === 0 && (
+      <li class="kanban-empty">No forms migrated yet</li>
+    )}
+  </ul>
+  <a href={`/forms/?status=${status}`} class="kanban-view-all">View all &rsaquo;</a>
+</div>

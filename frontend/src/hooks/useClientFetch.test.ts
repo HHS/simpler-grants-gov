@@ -77,6 +77,42 @@ describe("useClientFetch", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(refreshUserMock).toHaveBeenCalledTimes(1);
   });
+  it("on 401 and not auth gated, refresh user without refreshing page", async () => {
+    fetchMock.mockResolvedValue({ status: 401 });
+    const { result } = renderHook(() => useClientFetch("an error!"));
+    await wrapForExpectedError(() =>
+      result.current.clientFetch("http://wherever"),
+    );
+
+    expect(refreshUserMock).toHaveBeenCalledTimes(1);
+    expect(refreshMock).toHaveBeenCalledTimes(0);
+  });
+  it("on 5xx, does not refresh user or page", async () => {
+    fetchMock.mockResolvedValue({ status: 503, ok: false });
+    const { result } = renderHook(() =>
+      useClientFetch("an error!", { authGatedRequest: true }),
+    );
+    const error = await wrapForExpectedError(() =>
+      result.current.clientFetch("http://wherever"),
+    );
+
+    expect(error.message).toEqual("an error!: 503");
+    expect(refreshUserMock).toHaveBeenCalledTimes(0);
+    expect(refreshMock).toHaveBeenCalledTimes(0);
+  });
+  it("on network failure, does not refresh user or page", async () => {
+    fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
+    const { result } = renderHook(() =>
+      useClientFetch("an error!", { authGatedRequest: true }),
+    );
+    const error = await wrapForExpectedError(() =>
+      result.current.clientFetch("http://wherever"),
+    );
+
+    expect(error.message).toEqual("Failed to fetch");
+    expect(refreshUserMock).toHaveBeenCalledTimes(0);
+    expect(refreshMock).toHaveBeenCalledTimes(0);
+  });
   it("calls json and returns json data on success by default", async () => {
     jsonMock.mockResolvedValue({ oh: "hi" });
     const { result } = renderHook(() => useClientFetch("an error!"));
@@ -98,7 +134,24 @@ describe("useClientFetch", () => {
     const error = await wrapForExpectedError(() =>
       result.current.clientFetch("http://wherever"),
     );
-    expect(jsonMock).toHaveBeenCalledTimes(0);
     expect(error.message).toEqual("an error!: 500");
+    expect(error.cause).toEqual({ status: 500, body: undefined });
+  });
+  it("includes the response body in the error cause", async () => {
+    jsonMock.mockResolvedValue({ errorType: "a_validation_error" });
+    fetchMock.mockResolvedValue({
+      status: 422,
+      ok: false,
+      json: () => jsonMock() as unknown,
+    });
+    const { result } = renderHook(() => useClientFetch("an error!"));
+    const error = await wrapForExpectedError(() =>
+      result.current.clientFetch("http://wherever"),
+    );
+    expect(error.message).toEqual("an error!: 422");
+    expect(error.cause).toEqual({
+      status: 422,
+      body: { errorType: "a_validation_error" },
+    });
   });
 });

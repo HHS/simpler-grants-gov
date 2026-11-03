@@ -5,6 +5,7 @@ import {
   updateAwardRecommendation,
   updateAwardRecommendationSubmissionDetails,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import {
   AwardRecommendationSubmissionDetailUpdate,
   AwardRecommendationType,
@@ -114,12 +115,13 @@ export async function saveAwardRecommendation(
       success: true,
     };
   } catch (e) {
-    const error = e as Error;
-    console.error(
-      `Error saving award recommendation - ${error.message} ${error.cause?.toString() || ""}`,
+    const typedError = e as Error;
+    logger.error(
+      { err: typedError, awardRecommendationId },
+      "Error saving award recommendation",
     );
     return {
-      errorMessage: error.message,
+      errorMessage: typedError.message,
     };
   }
 }
@@ -144,10 +146,11 @@ export async function saveAwardRecommendationSubmissionDetails(
       throw e;
     }
 
-    const error = e as Error;
-    console.error(
-      `Error saving award recommendation submission details - ${error.message} ${error.cause?.toString() || ""}`,
+    const typedError = e as Error;
+    logger.error(
+      { err: typedError, awardRecommendationId, submissionId },
+      "Error saving award recommendation submission details",
     );
-    throw error;
+    throw typedError;
   }
 }

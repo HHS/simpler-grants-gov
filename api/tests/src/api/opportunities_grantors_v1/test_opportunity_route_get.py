@@ -25,6 +25,8 @@ def opportunity(
     grantor_auth_data,
     opportunity_number="TEST-2026-123",
     opportunity_title="Test Opportunity for GET",
+    tagline="Test tagline for GET",
+    purpose_statement="Test purpose statement for GET",
 ):
     """Create a test opportunity"""
     user, agency, _, _ = grantor_auth_data
@@ -34,6 +36,8 @@ def opportunity(
         agency_code=agency.agency_code,
         opportunity_number=opportunity_number,
         opportunity_title=opportunity_title,
+        tagline=tagline,
+        purpose_statement=purpose_statement,
     )
 
     opportunity.agency_record = agency
@@ -72,6 +76,8 @@ def test_get_opportunity_success(client, db_session, grantor_auth_data, opportun
     assert response_data["opportunity_id"] == str(opportunity.opportunity_id)
     assert response_data["opportunity_number"] == opportunity.opportunity_number
     assert response_data["opportunity_title"] == opportunity.opportunity_title
+    assert response_data["tagline"] == opportunity.tagline
+    assert response_data["purpose_statement"] == opportunity.purpose_statement
     assert response_data["agency_code"] == opportunity.agency_code
     assert response_data["category"] == opportunity.category.value
 
@@ -86,7 +92,12 @@ def test_get_opportunity_with_competition_and_forms(
 
     from tests.src.db.models.factories import CompetitionFactory
 
-    CompetitionFactory.create(opportunity=opportunity)
+    competition = CompetitionFactory.create(
+        opportunity=opportunity,
+        public_competition_id="ABC-123-456",
+        grace_period=5,
+        with_instruction=True,
+    )
 
     response = client.get(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}",
@@ -96,6 +107,13 @@ def test_get_opportunity_with_competition_and_forms(
     assert response.status_code == 200
     response_data = response.get_json()["data"]
     assert len(response_data["competitions"]) == 1
+    competition_data = response_data["competitions"][0]
+    assert competition_data["public_competition_id"] == competition.public_competition_id
+    assert competition_data["grace_period"] == competition.grace_period
+    assert len(competition_data["competition_instructions"]) == 1
+    assert competition_data["competition_instructions"][0]["competition_instruction_id"] == str(
+        competition.competition_instructions[0].competition_instruction_id
+    )
 
 
 def test_get_opportunity_with_invalid_jwt_token(client, opportunity):

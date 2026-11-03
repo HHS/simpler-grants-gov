@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -777,7 +778,8 @@ SupplementaryNEHCoverSheet_v3_0 = Form(
     short_form_name="SupplementaryCoverSheetforNEHGrantPrograms",
     form_version="3.0",
     agency_code="SGG",
-    omb_number=None,
+    omb_number="3136-0134",
+    expiration_date=date(2027, 10, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

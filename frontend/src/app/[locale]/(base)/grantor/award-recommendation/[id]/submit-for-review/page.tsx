@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { ReviewSubmissionFormContainer } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/_components/ReviewSubmissionFormContainer";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -42,8 +43,11 @@ async function SubmitForReviewPageContent({
     awardRecommendationDetails = await getAwardRecommendationDetails(
       awardRecommendationId,
     );
-  } catch (error) {
-    console.error("Failed to fetch award recommendation details", error);
+  } catch (e) {
+    logger.error(
+      { err: e, awardRecommendationId },
+      "Failed to fetch award recommendation details",
+    );
     redirect(`/grantor/award-recommendation/${awardRecommendationId}/edit`);
   }
 

@@ -15,10 +15,10 @@ from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
-from grants_shared.auth.auth_handler import AbstractAuthHandler
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from src.auth.auth_handler_base import AbstractAuthHandler
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.user_models import (
     LinkExternalUser,
@@ -52,19 +52,22 @@ class AuthHandler(
 
     # --- API keys ---
 
-    def get_api_key_by_key_id(self, key_id: str) -> UserApiKey | None:
+    def get_api_key_by_hash(self, key_id_hash: str) -> UserApiKey | None:
         return self.db_session.execute(
             select(UserApiKey)
-            .where(UserApiKey.key_id == key_id)
+            .where(UserApiKey.key_id_hash == key_id_hash)
             .options(selectinload(UserApiKey.user))
         ).scalar_one_or_none()
 
-    def create_api_key(self, user_id: UUID, key_name: str, key_id: str) -> UserApiKey:
+    def create_api_key(
+        self, user_id: UUID, key_name: str, key_id: str, key_id_hash: str
+    ) -> UserApiKey:
         api_key = UserApiKey(
             api_key_id=uuid.uuid4(),
             user_id=user_id,
             key_name=key_name,
             key_id=key_id,
+            key_id_hash=key_id_hash,
             is_active=True,
         )
         self.db_session.add(api_key)

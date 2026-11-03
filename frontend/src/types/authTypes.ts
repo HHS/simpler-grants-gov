@@ -38,12 +38,11 @@ import { UserPrivilegeResult } from "./userTypes";
  * @category Client
  */
 
-// represents relevant client side data from API JWT
+// represents the session data exposed to the browser via /api/auth/session
+// intentionally excludes the API token and any PII
 export interface UserProfile {
-  email?: string;
-  token: string;
+  isLoggedIn: boolean;
   expiresAt?: number;
-  user_id: string;
 }
 
 // represents client JWT payload
@@ -51,14 +50,18 @@ export interface SimplerJwtPayload extends JWTPayload {
   token: string;
   session_duration_minutes: number;
 }
-// represents API JWT payload
-export type UserSession = UserProfile & SimplerJwtPayload;
+// represents API JWT payload plus the API token, for server side use only
+export type UserSession = SimplerJwtPayload & {
+  email?: string;
+  expiresAt?: number;
+  user_id: string;
+};
 
 /**
  * Fetches the user from the profile API route to fill the useUser hook with the
  * UserProfile object.
  */
-export type UserFetcher = (url: string) => Promise<UserSession | undefined>;
+export type UserFetcher = (url: string) => Promise<UserProfile | undefined>;
 
 /**
  * @ignore

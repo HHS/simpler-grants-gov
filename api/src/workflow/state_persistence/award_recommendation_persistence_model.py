@@ -1,7 +1,6 @@
 import logging
 
-from grants_shared.adapters import db
-
+from src.adapters import db
 from src.db.models.workflow_models import Workflow
 from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
 from src.workflow.workflow_errors import InvalidEntityForWorkflow

@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -41,7 +42,11 @@ FORM_JSON_SCHEMA = {
                     "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("state")}],
                 },
                 "zip_code": {
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("zip_code")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("zip_code")},
+                        # zip_code always required (enforced above) with minLength 1
+                        {"minLength": 1},
+                    ],
                 },
             },
         },
@@ -538,6 +543,7 @@ EPA_FORM_4700_4_v5_0 = Form(
     form_version="5.0",
     agency_code="SGG",
     omb_number="2030-0020",
+    expiration_date=date(2029, 2, 28),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

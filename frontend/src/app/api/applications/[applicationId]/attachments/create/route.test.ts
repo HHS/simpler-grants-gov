@@ -36,6 +36,7 @@ const fakeRequest = (body: unknown, { malformed = false } = {}) =>
         : Promise.resolve(body),
     ),
     method: "POST",
+    headers: new Headers(),
   }) as unknown as Request;
 
 const options = { params: Promise.resolve({ applicationId: "app-123" }) };

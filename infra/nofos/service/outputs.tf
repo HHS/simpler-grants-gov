@@ -22,3 +22,15 @@ output "service_endpoint" {
 output "service_name" {
   value = local.service_config.service_name
 }
+
+output "pdf_readability_dashboard_name" {
+  value = module.monitoring.pdf_readability_dashboard_name
+}
+
+output "monitoring_notification_topic_arn" {
+  value = module.monitoring.sns_notification_channel
+}
+
+output "pdf_readability_alarm_actions_enabled" {
+  value = local.service_config.pdf_readability_alarm_actions_enabled
+}

@@ -2,9 +2,9 @@ import logging
 import uuid
 from typing import Any
 
-from grants_shared.adapters import db
 from sqlalchemy import select
 
+from src.adapters import db
 from src.constants.lookup_constants import WorkflowEntityType
 from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.award_recommendation_models import AwardRecommendation

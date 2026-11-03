@@ -1,0 +1,115 @@
+{
+  "name": "Sprint End Date ",
+  "display": "scalar",
+  "visualization_settings": {
+    "graph.dimensions": [
+      "day"
+    ],
+    "table.cell_column": "total_closed",
+    "table.pivot_column": "total_opened",
+    "series_settings": {
+      "total_remaining": {
+        "color": "#509EE3"
+      }
+    },
+    "scalar.field": "days_remaining",
+    "column_settings": {
+      "[\"name\",\"end_date\"]": {
+        "date_abbreviate": true
+      }
+    },
+    "graph.metrics": [
+      "total_remaining"
+    ]
+  },
+  "template_tags": {
+    "sprint_name": {
+      "widget-type": "string/=",
+      "default": null,
+      "name": "sprint_name",
+      "type": "dimension",
+      "id": "3a63ce6a-96bf-417a-b165-f81ee11dd13e",
+      "dimension": [
+        "field",
+        318,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Sprint Name",
+      "options": null,
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_sprint",
+        "column": "name"
+      }
+    },
+    "ghid": {
+      "widget-type": "string/=",
+      "default": null,
+      "name": "ghid",
+      "type": "dimension",
+      "id": "a1ceb784-2804-456b-96cd-1d6b81f79b81",
+      "dimension": [
+        "field",
+        302,
+        {
+          "base-type": "type/Integer",
+          "effective-type": "type/Integer"
+        }
+      ],
+      "display-name": "GitHub Project #",
+      "options": null,
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_project",
+        "column": "ghid"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "slug": "sprint_name",
+      "name": "Sprint Name",
+      "type": "string/=",
+      "values_source_type": "card",
+      "id": "3a63ce6a-96bf-417a-b165-f81ee11dd13e",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "sprint_name"
+        ]
+      ],
+      "values_source_config": {
+        "card_id": 152,
+        "value_field": [
+          "field",
+          "sprint_name",
+          {
+            "base-type": "type/Text"
+          }
+        ]
+      },
+      "required": true
+    },
+    {
+      "slug": "ghid",
+      "values_query_type": "list",
+      "name": "GitHub Project #",
+      "type": "string/=",
+      "id": "a1ceb784-2804-456b-96cd-1d6b81f79b81",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "ghid"
+        ]
+      ],
+      "required": true
+    }
+  ]
+}

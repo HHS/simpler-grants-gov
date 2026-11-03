@@ -36,11 +36,90 @@ Admin users will have full access to the features available in New Relic's UI. N
 
 ### Custom Attributes / Events
 
-New Relic does not collect search params on URLs by default for security reasons. We have implemented custom attributes on search page events to capture approved query param values. These custom attributes will all be prefixed with `search_param_`.
+New Relic does not collect search params on URLs by default for security reasons. To capture query param values, the search page sends a `PageAction` event named `search_attempt` (via `newrelic.addPageAction`) each time the search state changes, including the initial search page load.
+
+- Only params in the `expectedQueryParamKeys` allow list (`src/types/search/searchQueryTypes.ts`) are sent, and only when they have a value. Each is prefixed with `search_param_`, for example `search_param_status`, `search_param_agency` or `search_param_page`.
+- `search_param_query_length` is always sent: the length of the `query` param, or `0` when there is no query.
+- `search_filter_count` is always sent: the number of user-facing filter categories in use (from `searchFilterNames` in `src/types/search/searchFilterTypes.ts`), or `0` when no filters are active. A filter with several selected values counts once. The Agency filter counts once even when both of its params, `agency` and `topLevelAgency`, have values. `query`, `page`, `sortby`, `andOr`, `utm_source` and `savedSearch` are not filters.
+- `search_param_page` is present for normal search states, since the page defaults to `"1"` when the URL has no `page` param. Page changes also send a `search_attempt`, so filter and tool adoption metrics should only count first-page search states (`AND search_param_page = '1'`).
+- All active params for a search are on the same event, so one search with several filters counts toward each of those filters. Filter usage should be calculated independently per filter (for example with `percentage(count(*), WHERE search_param_status IS NOT NULL)`), not with `FACET CASES`, which places each event in only its first matching bucket. Percentages across filters can add up to more than 100%.
+- Since each event is independent, a cleared filter is simply absent from the next event.
+
+```sql
+-- Status filter usage across search attempts
+FROM PageAction
+SELECT percentage(count(*), WHERE search_param_status IS NOT NULL)
+WHERE actionName = 'search_attempt' AND search_param_page = '1'
+SINCE 30 days ago
+
+-- Percentage of searches using 5 or more filters
+FROM PageAction
+SELECT percentage(count(*), WHERE search_filter_count >= 5)
+WHERE actionName = 'search_attempt' AND search_param_page = '1'
+SINCE 30 days ago
+
+-- Filter count distribution
+FROM PageAction
+SELECT count(*)
+WHERE actionName = 'search_attempt' AND search_param_page = '1'
+FACET search_filter_count
+SINCE 30 days ago
+```
+
+Session-level questions, such as the share of sessions that ever use 5 or more filters, can use `uniqueCount(session)` with `search_filter_count >= 5` (for example `filter(uniqueCount(session), WHERE search_filter_count >= 5) / uniqueCount(session) * 100`).
+
+Search params are no longer set as custom attributes on `BrowserInteraction` or `PageView` events. Those attributes were rarely attached to the matching interaction, so older data based on them undercounts filter usage. `BrowserInteraction` data from before this change is not directly comparable to `search_attempt` `PageAction` data, so dashboard windows should initially begin at its deployment, or visibly note the instrumentation change.
+
+This is separate from the Google Analytics `search_attempt` event, which sends a JSON string of the active filters (excluding `query` and `page`).
 
 ### Dashboards
 
 Since non-admin users will only be able to consume metrics via dashboards, it is important for any important information to be surfaced in dashboards.
+
+This repository does not define New Relic dashboard resources - there is no dashboard-as-code. Dashboards are created and maintained manually in the New Relic UI at [one.newrelic.com](https://one.newrelic.com/), so the queries behind them are documented here in order to be reproducible.
+
+#### Correlation ID and request URLs
+
+Frontend request logs and anonymous session logs both carry a `correlation_id` attribute, so a single anonymous visitor's path through the site can be reconstructed from New Relic Logs.
+
+Requests to `/api/health` do not participate in correlation ID handling: they neither generate nor refresh the correlation ID cookie, and they never emit `anonymous_session_started`. The existing sampling of health request logs is unchanged, so a portion of them still reaches New Relic - but with no `correlation_id`, which keeps them out of the correlation-ID-based queries below.
+
+Attributes available on the frontend request log: `correlation_id`, `url`, `method`, `statusCode`, `userAgent`, `acceptLanguage`, `awsTraceId`, `cacheControl`, `hasSessionCookie`.
+
+Attributes available on the `anonymous_session_started` event: `correlation_id`, `reason` (`missing` or `invalid`), `url` (the URL the session started on), `referer` (`null` when the request carried no `Referer` header).
+
+Suggested widgets for a "Correlation ID" dashboard. These queries have not yet been run against the live New Relic account - treat them as starting points to validate and adjust when the dashboard is actually built:
+
+```sql
+-- Pages visited by a single correlation id, in order
+SELECT url, method, statusCode, timestamp
+FROM Log
+WHERE correlation_id = '<correlation id>'
+SINCE 1 day ago
+ORDER BY timestamp ASC
+LIMIT MAX
+
+-- Most common landing pages for new anonymous sessions
+SELECT count(*)
+FROM Log
+WHERE event = 'anonymous_session_started'
+FACET url
+SINCE 1 day ago
+
+-- Where new anonymous sessions come from
+SELECT count(*)
+FROM Log
+WHERE event = 'anonymous_session_started'
+FACET referer
+SINCE 1 day ago
+
+-- How many distinct URLs each visitor sees
+SELECT uniqueCount(url)
+FROM Log
+WHERE correlation_id IS NOT NULL
+FACET correlation_id
+SINCE 1 day ago
+```
 
 ## Integration
 

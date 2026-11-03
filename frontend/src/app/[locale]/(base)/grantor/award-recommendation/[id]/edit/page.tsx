@@ -4,6 +4,7 @@ import AwardRecommendationSaveButton from "src/app/[locale]/(base)/grantor/award
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -153,9 +154,12 @@ async function AwardRecommendationEditPageContent({
     awardRecommendationDetails = await getAwardRecommendationDetails(
       awardRecommendationId,
     );
-  } catch (error) {
-    console.error("Failed to fetch award recommendation details", error);
-    const errorStatus = parseErrorStatus(error as ApiRequestError);
+  } catch (e) {
+    logger.error(
+      { err: e, awardRecommendationId },
+      "Failed to fetch award recommendation details",
+    );
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
 
     if (errorStatus === 404) {
       awardRecommendationDetails = null;

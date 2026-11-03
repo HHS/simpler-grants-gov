@@ -6,6 +6,7 @@ const {
   MAILCHIMP_LIST_ID,
   API_URL,
   API_GW_AUTH,
+  AUTH_LOGOUT_URL,
   NEXT_BUILD,
   SESSION_SECRET,
   NEXT_PUBLIC_BASE_URL,
@@ -38,9 +39,9 @@ const legacyHost = (): string => {
   switch (ENVIRONMENT) {
     case "prod":
       return "https://www.grants.gov";
-    case "training":
+    case "infra-training":
       return "https://training.grants.gov";
-    case "staging":
+    case "infra-staging":
       return "https://test.grants.gov";
     case "test":
       return "https://test.grants.gov";
@@ -59,6 +60,7 @@ export const environment: { [key: string]: string } = {
   MAILCHIMP_LIST_ID: MAILCHIMP_LIST_ID || "",
   API_URL: API_URL || "",
   AUTH_LOGIN_URL: AUTH_LOGIN_URL || "",
+  AUTH_LOGOUT_URL: AUTH_LOGOUT_URL || "",
   AUTH_EXPIRATION_TIME: AUTH_EXPIRATION_TIME || "0",
   API_GW_AUTH: API_GW_AUTH || "",
   MAINTENANCE_BANNER_MESSAGE: MAINTENANCE_BANNER_MESSAGE || "",

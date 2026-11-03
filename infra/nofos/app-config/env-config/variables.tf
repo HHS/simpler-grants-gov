@@ -134,3 +134,37 @@ variable "database_newrelic_entity_guid" {
   description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
   default     = null
 }
+
+variable "enable_pdf_readability_monitoring" {
+  type        = bool
+  default     = false
+  description = "Opt in to the NOFO pilot dashboard and alarms for this environment."
+}
+
+variable "monitoring_email_alert_recipients" {
+  type        = set(string)
+  default     = []
+  description = "Explicit operational alert recipients; SNS email subscriptions require recipient confirmation."
+}
+
+variable "monitoring_email_alert_recipient_parameter_name" {
+  type        = string
+  default     = null
+  description = "Optional SecureString SSM parameter for a private monitoring email recipient; no address is committed to the repository."
+}
+
+variable "pdf_readability_alarm_actions_enabled" {
+  type        = bool
+  default     = false
+  description = "Enable pilot notifications after agreement on recipients and delivery verification."
+}
+
+variable "pdf_readability_waf" {
+  description = "Opt-in NOFO PDF pilot controls. Null preserves existing WAF rules; Count observes without blocking."
+  type = object({
+    rate_limit      = optional(number, 10)
+    rate_action     = optional(string, "count")
+    emergency_block = optional(bool, false)
+  })
+  default = null
+}

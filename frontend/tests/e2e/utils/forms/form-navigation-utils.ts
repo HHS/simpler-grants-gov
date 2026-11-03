@@ -176,3 +176,16 @@ export async function openForm(
   await page.waitForTimeout(2000);
   return true;
 }
+
+// Opens an application form without handling authentication. Use this when the user is already authenticated.
+export async function openApplicationForm(
+  page: Page,
+  applicationUrl: string,
+  formMatcher: string | RegExp,
+): Promise<void> {
+  await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+  const opened = await openForm(page, formMatcher);
+  if (!opened) {
+    throw new Error(`Could not find or open form: ${formMatcher}`);
+  }
+}

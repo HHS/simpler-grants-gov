@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="simpler_grants_cms">
+  <description>Drupal coding standards for the Simpler.Grants.gov CMS.</description>
+
+  <file>web/modules/custom</file>
+  <file>web/sites/default/settings.php</file>
+
+  <arg name="extensions" value="php,module,inc,install,test,profile,theme,info,yml"/>
+  <arg name="cache" value=".phpcs-cache"/>
+  <arg name="colors"/>
+  <arg value="sp"/>
+
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
+</ruleset>

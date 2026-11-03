@@ -4,6 +4,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { getSession } from "src/services/auth/session";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 import {
@@ -92,9 +93,9 @@ const handleSave = async (
     }
     return false;
   } catch (e) {
-    console.error(
-      `Error saving the form (${formId}) for application (${applicationId}):`,
-      e,
+    logger.error(
+      { err: e, formId, applicationId },
+      "Error saving the form for application",
     );
     return false;
   }
@@ -106,20 +107,20 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   try {
     const response = await getFormDetails(formId);
     if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving form details for formID (${formId})`,
-        response,
+      logger.error(
+        { statusCode: response.status_code, formId },
+        "Error retrieving form details",
       );
     }
     formDetail = response.data;
   } catch (e) {
-    console.error(`Error retrieving form details for formID (${formId})`, e);
+    logger.error({ err: e, formId }, "Error retrieving form details");
   }
   try {
     const { formSchema } = processFormSchema(formDetail.form_json_schema);
     return formSchema;
   } catch (e) {
-    console.error(`Error parsing JSON schema for ${formId}`, e);
+    logger.error({ err: e, formId }, "Error parsing JSON schema");
     return undefined;
   }
 }

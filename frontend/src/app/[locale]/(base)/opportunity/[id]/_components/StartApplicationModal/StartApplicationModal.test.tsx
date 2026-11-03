@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { fakeUserOrganization } from "src/utils/testing/fixtures";
 
 import { createRef } from "react";
+import { ModalRef } from "@trussworks/react-uswds";
 
 import { StartApplicationModal } from "./StartApplicationModal";
 
@@ -29,15 +30,60 @@ describe("StartApplicationModal", () => {
     jest.resetAllMocks();
   });
 
+  it("sends a view_start_application_modal user event beacon when it becomes visible", async () => {
+    const sendBeaconMock = jest.fn();
+    Object.defineProperty(navigator, "sendBeacon", {
+      value: sendBeaconMock,
+      writable: true,
+    });
+    const modalRef = createRef<ModalRef>();
+
+    render(
+      <StartApplicationModal
+        competitionId="1"
+        opportunityId="opp-1"
+        opportunityTitle="blessed opportunity"
+        modalRef={modalRef}
+        applicantTypes={["individual"]}
+        organizations={[]}
+        isLoggedIn={true}
+        loading={false}
+      />,
+    );
+
+    expect(sendBeaconMock).not.toHaveBeenCalled();
+
+    act(() => {
+      modalRef.current?.toggleModal(undefined, true);
+    });
+
+    await waitFor(() => {
+      expect(sendBeaconMock).toHaveBeenCalledTimes(1);
+    });
+    const [url, blob] = sendBeaconMock.mock.calls[0] as [string, Blob];
+    expect(url).toBe("/api/events");
+    const blobText = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("failed to read blob"));
+      reader.readAsText(blob);
+    });
+    expect(JSON.parse(blobText)).toEqual({
+      name: "view_start_application_modal",
+      properties: { competitionId: "1", opportunityId: "opp-1" },
+    });
+  });
+
   it("displays validation error if submitted without a name", async () => {
     render(
       <StartApplicationModal
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["individual"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -60,11 +106,12 @@ describe("StartApplicationModal", () => {
     render(
       <StartApplicationModal
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["organization"]}
         organizations={[fakeUserOrganization]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -88,11 +135,12 @@ describe("StartApplicationModal", () => {
     render(
       <StartApplicationModal
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["individual"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -111,11 +159,12 @@ describe("StartApplicationModal", () => {
     render(
       <StartApplicationModal
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["individual"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -134,11 +183,12 @@ describe("StartApplicationModal", () => {
     render(
       <StartApplicationModal
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["organization"]}
         organizations={[fakeUserOrganization]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -170,11 +220,12 @@ describe("StartApplicationModal", () => {
     render(
       <StartApplicationModal
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["organization"]}
         organizations={[]}
-        token={"a token"}
+        isLoggedIn={true}
         loading={false}
       />,
     );
@@ -213,11 +264,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -246,11 +298,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -280,11 +333,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -296,11 +350,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -312,11 +367,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -328,11 +384,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -346,11 +403,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -362,11 +420,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -379,11 +438,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
           organizationsError={true}
         />,
@@ -397,11 +457,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
           organizationsError={false}
         />,
@@ -415,11 +476,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[fakeUserOrganization]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
         />,
       );
@@ -432,11 +494,12 @@ describe("StartApplicationModal", () => {
       render(
         <StartApplicationModal
           competitionId="1"
+          opportunityId="opp-1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
           organizations={[]}
-          token={"a token"}
+          isLoggedIn={true}
           loading={false}
           organizationsError={true}
         />,

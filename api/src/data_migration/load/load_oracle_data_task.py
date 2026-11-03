@@ -7,10 +7,10 @@ import time
 from dataclasses import dataclass
 
 import sqlalchemy
-from grants_shared.adapters import db
-from grants_shared.util import datetime_util
 
 import src.task.task
+from src.adapters import db
+from src.util import datetime_util
 
 from . import sql
 
@@ -48,8 +48,6 @@ TABLES_TO_LOAD = [
     "tcompetition",
     "tinstructions",
     "tcertificates",
-    "vuser_account",
-    "tuser_profile",
 ]
 
 
@@ -71,7 +69,7 @@ class LoadOracleDataTask(src.task.task.Task):
         # Initialize columns_to_exclude if None
         # Note: This does not work on UPDATES and can cause errors because the fields won't be excluded
         # if the column has invalid data
-        self.columns_to_exclude: dict[str, list[str]] = {"tcertificates": ["is_selfsigned"]}
+        self.columns_to_exclude: dict[str, list[str]] = {}
 
         foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}
         staging_tables = {k: v for (k, v) in staging_tables.items() if k in tables_to_load}

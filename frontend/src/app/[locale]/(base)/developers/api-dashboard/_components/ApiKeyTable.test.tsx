@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
@@ -35,37 +35,33 @@ jest.mock("next/navigation", () => ({
   })),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock("react", () => ({
-  ...jest.requireActual("react"),
-  useRef: () => ({
-    current: {
-      toggleModal: jest.fn(),
-    },
-  }),
-}));
-
 const mockUser = {
-  user_id: "test-user-id",
-  token: "test-token",
+  isLoggedIn: true,
 };
 
 const mockApiKeys: ApiKey[] = [
   createMockApiKey({
     api_key_id: "test-api-key-1",
     key_name: "Production API Key",
-    key_id: "abc123def456",
     created_at: "2023-01-01",
     last_used: "2023-01-02",
   }),
   createMockApiKey({
     api_key_id: "test-api-key-2",
     key_name: "Development API Key",
-    key_id: "xyz789uvw012",
     created_at: "2023-01-03",
     last_used: null,
   }),
 ];
+
+// every row renders its modals, and jsdom has no USWDS styles to hide the closed ones
+const getOpenModal = () => {
+  const openModal = screen
+    .getAllByRole("dialog")
+    .find((dialog) => dialog.classList.contains("is-visible"));
+  if (!openModal) throw new Error("No open modal found");
+  return openModal;
+};
 
 const renderTable = (apiKeys: ApiKey[] = mockApiKeys) => {
   return render(<ApiKeyTable apiKeys={apiKeys} />);
@@ -99,13 +95,11 @@ describe("ApiKeyTable", () => {
       renderTable();
 
       const headers = screen.getAllByRole("columnheader");
-      expect(headers).toHaveLength(6);
-      expect(headers[0]).toHaveTextContent("headers.apiKey");
-      expect(headers[1]).toHaveTextContent("headers.status");
-      expect(headers[2]).toHaveTextContent("headers.secret");
-      expect(headers[3]).toHaveTextContent("headers.created");
-      expect(headers[4]).toHaveTextContent("headers.lastUsed");
-      expect(headers[5]).toHaveTextContent("headers.modify");
+      expect(headers).toHaveLength(4);
+      expect(headers[0]).toHaveTextContent("headers.keyName");
+      expect(headers[1]).toHaveTextContent("headers.created");
+      expect(headers[2]).toHaveTextContent("headers.lastUsed");
+      expect(headers[3]).toHaveTextContent("headers.actions");
 
       expect(screen.getByText("Production API Key")).toBeInTheDocument();
       expect(screen.getByText("Development API Key")).toBeInTheDocument();
@@ -115,17 +109,21 @@ describe("ApiKeyTable", () => {
       renderTable();
 
       expect(screen.getByText("Production API Key")).toBeInTheDocument();
-      expect(screen.getByText("abc...456")).toBeInTheDocument();
+      expect(screen.getByText("January 1, 2023")).toBeInTheDocument();
+      expect(screen.getByText("January 2, 2023")).toBeInTheDocument();
 
       expect(screen.getByText("Development API Key")).toBeInTheDocument();
-      expect(screen.getByText("xyz...012")).toBeInTheDocument();
+      expect(screen.getByText("January 3, 2023")).toBeInTheDocument();
       expect(screen.getByText("never")).toBeInTheDocument();
     });
 
     it("renders empty state when no API keys", () => {
       renderTable([]);
 
-      expect(screen.getByText("emptyState")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 2, name: "emptyStateHeading" }),
+      ).toBeInTheDocument();
+      expect(screen.getByText("emptyStateDescription")).toBeInTheDocument();
       expect(screen.queryByRole("table")).not.toBeInTheDocument();
     });
   });
@@ -149,17 +147,14 @@ describe("ApiKeyTable", () => {
       );
       await user.click(deleteButton);
 
-      const deleteHeadings = screen.getAllByRole("heading", {
-        level: 2,
-        name: /deleteTitle/i,
-      });
-      expect(deleteHeadings.length).toBeGreaterThan(0);
-
-      expect(screen.getByText('"Production API Key"')).toBeInTheDocument();
-      expect(screen.getAllByText("deleteDescription")[0]).toBeInTheDocument();
+      const modal = getOpenModal();
+      expect(
+        within(modal).getByRole("heading", { level: 2, name: "deleteTitle" }),
+      ).toBeInTheDocument();
+      expect(within(modal).getByText("deleteDescription")).toBeInTheDocument();
     });
 
-    it("shows correct API key name in delete modal", async () => {
+    it("opens the delete modal for the selected key", async () => {
       const user = userEvent.setup();
       renderTable();
 
@@ -168,7 +163,10 @@ describe("ApiKeyTable", () => {
       );
       await user.click(deleteButton);
 
-      expect(screen.getByText('"Development API Key"')).toBeInTheDocument();
+      expect(getOpenModal()).toHaveAttribute(
+        "id",
+        "delete-api-key-test-api-key-2",
+      );
     });
 
     it("successfully deletes API key and refreshes page", async () => {
@@ -182,15 +180,14 @@ describe("ApiKeyTable", () => {
       );
       await user.click(deleteButton);
 
-      const confirmationInputs = screen.getAllByPlaceholderText(
-        "deleteConfirmationPlaceholder",
+      const modal = getOpenModal();
+      await user.type(
+        within(modal).getByLabelText("deleteConfirmationLabel"),
+        "delete",
       );
-      await user.type(confirmationInputs[0], "delete");
-
-      const submitButtons = screen.getAllByTestId(
-        "delete-api-key-submit-button",
+      await user.click(
+        within(modal).getByTestId("delete-api-key-submit-button"),
       );
-      await user.click(submitButtons[0]);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -233,10 +230,10 @@ describe("ApiKeyTable", () => {
       );
       await user.click(deleteButton);
 
-      const confirmationInputs = screen.getAllByPlaceholderText(
-        "deleteConfirmationPlaceholder",
+      await user.type(
+        within(getOpenModal()).getByLabelText("deleteConfirmationLabel"),
+        "wrong",
       );
-      await user.type(confirmationInputs[0], "wrong");
 
       const submitButtons = screen.getAllByTestId(
         "delete-api-key-submit-button",
@@ -257,18 +254,18 @@ describe("ApiKeyTable", () => {
       );
       await user.click(deleteButton);
 
-      const confirmationInputs = screen.getAllByPlaceholderText(
-        "deleteConfirmationPlaceholder",
+      const modal = getOpenModal();
+      await user.type(
+        within(modal).getByLabelText("deleteConfirmationLabel"),
+        "delete",
       );
-      await user.type(confirmationInputs[0], "delete");
-
-      const submitButtons = screen.getAllByTestId(
-        "delete-api-key-submit-button",
+      await user.click(
+        within(modal).getByTestId("delete-api-key-submit-button"),
       );
-      await user.click(submitButtons[0]);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
+      expect(screen.getByText("deleteErrorHeading")).toBeInTheDocument();
       expect(screen.getByText("deleteErrorMessage")).toBeInTheDocument();
     });
   });
@@ -354,13 +351,11 @@ describe("ApiKeyTable", () => {
       renderTable();
 
       const headers = screen.getAllByRole("columnheader");
-      expect(headers).toHaveLength(6);
-      expect(headers[0]).toHaveTextContent("headers.apiKey");
-      expect(headers[1]).toHaveTextContent("headers.status");
-      expect(headers[2]).toHaveTextContent("headers.secret");
-      expect(headers[3]).toHaveTextContent("headers.created");
-      expect(headers[4]).toHaveTextContent("headers.lastUsed");
-      expect(headers[5]).toHaveTextContent("headers.modify");
+      expect(headers).toHaveLength(4);
+      expect(headers[0]).toHaveTextContent("headers.keyName");
+      expect(headers[1]).toHaveTextContent("headers.created");
+      expect(headers[2]).toHaveTextContent("headers.lastUsed");
+      expect(headers[3]).toHaveTextContent("headers.actions");
     });
 
     it("displays API key data in correct order", () => {
@@ -378,24 +373,27 @@ describe("ApiKeyTable", () => {
     it("passes accessibility scan", async () => {
       const { container } = renderTable();
 
-      const results = await axe(container, {
-        rules: {
-          // CopyIcon and edit icon buttons are icon-only; a11y labels are a
-          // pre-existing concern tracked separately from this test file.
-          "button-name": { enabled: false },
-        },
-      });
+      const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
 
-    it("has proper ARIA labels for delete buttons", () => {
+    it("passes accessibility scan in the empty state", async () => {
+      const { container } = renderTable([]);
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
+    });
+
+    it("names the key in each delete button for screen readers", () => {
       renderTable();
 
       const deleteButtons = screen.getAllByTestId(
         /open-delete-api-key-modal-button-/,
       );
       deleteButtons.forEach((button) => {
-        expect(button).toHaveAttribute("title", "deleteTitle");
+        expect(within(button).getByText("deleteTriggerKeyName")).toHaveClass(
+          "usa-sr-only",
+        );
       });
     });
 

@@ -17,5 +17,7 @@ module "prod_config" {
   database_max_capacity         = 1
   database_instance_count       = 1
 
-  service_override_extra_environment_variables = {}
+  service_override_extra_environment_variables = {
+    AUTHENTICATED_PDF_READABILITY_ATTEMPT_RECORDING_ENABLED = "true"
+  }
 }

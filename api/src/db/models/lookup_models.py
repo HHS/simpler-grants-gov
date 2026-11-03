@@ -1,11 +1,3 @@
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.db.models.lookup import (
-    Lookup,
-    LookupConfig,
-    LookupRegistry,
-    LookupStr,
-    LookupTable,
-)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.constants.lookup_constants import (
@@ -33,6 +25,8 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    NotificationQueueStatus,
+    NotificationType,
     OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityStatus,
@@ -46,6 +40,8 @@ from src.constants.lookup_constants import (
     WorkflowType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
+from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
 
 OPPORTUNITY_STATUS_CONFIG: LookupConfig[OpportunityStatus] = LookupConfig(
     [
@@ -479,6 +475,24 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
         LookupStr(JobType.SAM_EXTRACTS, 15),
         LookupStr(JobType.LOAD_AGENCY_DATA_OPENSEARCH, 16),
         LookupStr(JobType.EXPORT_OPPORTUNITY_DATA, 17),
+        LookupStr(JobType.CHECK_XSD_DRIFT, 18),
+        LookupStr(JobType.NEW_OPPORTUNITY_NOTIFICATION, 19),
+    ]
+)
+
+NOTIFICATION_TYPE_CONFIG: LookupConfig[NotificationType] = LookupConfig(
+    [
+        LookupStr(NotificationType.ALL_NEW_OPPORTUNITIES, 1),
+    ]
+)
+
+NOTIFICATION_QUEUE_STATUS_CONFIG: LookupConfig[NotificationQueueStatus] = LookupConfig(
+    [
+        LookupStr(NotificationQueueStatus.PENDING, 1),
+        LookupStr(NotificationQueueStatus.IN_PROGRESS, 2),
+        LookupStr(NotificationQueueStatus.SENT, 3),
+        LookupStr(NotificationQueueStatus.FAILED, 4),
+        LookupStr(NotificationQueueStatus.SUPPRESSED, 5),
     ]
 )
 
@@ -972,4 +986,33 @@ class LkOpportunityAuditEvent(ApiLookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> LkOpportunityAuditEvent:
         return LkOpportunityAuditEvent(
             opportunity_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(NOTIFICATION_TYPE_CONFIG)
+class LkNotificationType(ApiLookupTable, TimestampMixin):
+    __tablename__ = "lk_notification_type"
+
+    notification_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkNotificationType:
+        return LkNotificationType(
+            notification_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(NOTIFICATION_QUEUE_STATUS_CONFIG)
+class LkNotificationQueueStatus(ApiLookupTable, TimestampMixin):
+    __tablename__ = "lk_notification_queue_status"
+
+    notification_queue_status_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkNotificationQueueStatus:
+        return LkNotificationQueueStatus(
+            notification_queue_status_id=lookup.lookup_val,
+            description=lookup.get_description(),
         )

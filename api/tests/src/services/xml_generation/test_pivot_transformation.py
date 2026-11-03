@@ -314,3 +314,48 @@ class TestPivotObjectTransformation:
         assert result is not None
         assert "TargetField" in result
         assert result["TargetField"]["SubField"] == "deep_value"
+
+    def test_pivot_applies_item_value_transform(self):
+        """item_value_transform is applied to every value that gets pivoted."""
+        transform_config = {
+            "type": "pivot_object",
+            "source_field": "cash",
+            "item_value_transform": {"type": "currency_format"},
+            "field_mapping": {
+                "FirstQuarter": {"Federal": "federal.q1", "NonFederal": "non_federal.q1"},
+            },
+        }
+        source_data = {"cash": {"federal": {"q1": "11"}, "non_federal": {"q1": "2.50"}}}
+
+        result = apply_conditional_transform(transform_config, source_data, ["cash"])
+
+        assert result == {"FirstQuarter": {"Federal": "11.00", "NonFederal": "2.50"}}
+
+    @pytest.mark.parametrize(
+        "cash,expected",
+        [
+            # Only the calculated total is there, so nothing is written
+            ({"federal": {"total": "0.00"}}, None),
+            ({"federal": {"q1": ""}}, None),
+            ({}, None),
+            # An entered value brings the whole pivot back, totals included
+            (
+                {"federal": {"q1": "5.00", "total": "5.00"}},
+                {"FirstQuarter": {"Federal": "5.00"}, "Year": {"Federal": "5.00"}},
+            ),
+        ],
+    )
+    def test_pivot_include_if_any_of(self, cash, expected):
+        transform_config = {
+            "type": "pivot_object",
+            "source_field": "cash",
+            "include_if_any_of": ["federal.q1"],
+            "field_mapping": {
+                "Year": {"Federal": "federal.total"},
+                "FirstQuarter": {"Federal": "federal.q1"},
+            },
+        }
+
+        result = apply_conditional_transform(transform_config, {"cash": cash}, ["cash"])
+
+        assert result == expected

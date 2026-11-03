@@ -7,12 +7,12 @@
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
+const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 test.describe("Search results export", () => {
   test(
     "should download a csv file when requested",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [DISCOVERY, FULL_REGRESSION] },
     async ({ page }, { project }) => {
       // Unsupported browsers or viewports are excluded for this scenario
       // downloads work manually in safari, but can't get the test to work

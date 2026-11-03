@@ -7,6 +7,7 @@ import {
   getAwardRecommendationDetails,
   getAwardRecommendationSubmission,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -62,12 +63,12 @@ async function AwardRecommendationSubmissionEditPageContent({
     awardRecommendationNumber =
       awardRecommendationDetails.award_recommendation_number;
     submission = submissionDetails;
-  } catch (error) {
-    console.error(
+  } catch (e) {
+    logger.error(
+      { err: e, awardRecommendationId, applicationSubmissionId },
       "Failed to fetch award recommendation submission details",
-      error,
     );
-    const errorStatus = parseErrorStatus(error as ApiRequestError);
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
 
     if (errorStatus === 401 || errorStatus === 403) {
       return (

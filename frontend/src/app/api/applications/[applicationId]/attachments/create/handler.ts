@@ -1,6 +1,7 @@
 import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { createApplicationAttachment } from "src/services/fetch/fetchers/applicationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { NextResponse } from "next/server";
 
@@ -59,13 +60,17 @@ export const createApplicationAttachmentHandler = async (
     const res = await createApplicationAttachment(applicationId, pendingFileId);
     return NextResponse.json({ data: res.data });
   } catch (e) {
-    const { status, message } = readError(e as Error, 500);
+    const { status } = readError(e as Error, 500);
     // logged server side only
-    console.error("Error creating application attachment", {
-      applicationId,
-      status,
-      message,
-    });
+    logger.error(
+      {
+        err: e,
+        applicationId,
+        status,
+        awsTraceId: req.headers.get("X-Amz-Cf-Id"),
+      },
+      "Error creating application attachment",
+    );
     return NextResponse.json({ message: GENERIC_FAILURE_MESSAGE }, { status });
   }
 };

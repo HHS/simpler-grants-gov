@@ -50,10 +50,7 @@ module "staging_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
-    ENABLE_WORKFLOW_ENDPOINTS             = 1
-    ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
-    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
@@ -64,10 +61,6 @@ module "staging_config" {
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
-    # Workflow
-    WORKFLOW_SERVICE_INTERNAL_USER_ID = "903bf2e6-b213-4744-9f95-66ccfd98a819"
-
-    # Job lock — only enabled in dev/staging while we validate it
     ENABLE_JOB_LOCK = "true"
 
     # File upload stream duration

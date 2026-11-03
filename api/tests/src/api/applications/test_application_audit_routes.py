@@ -1,3 +1,4 @@
+import logging
 import random
 import uuid
 from datetime import datetime, timezone
@@ -479,3 +480,37 @@ def test_list_application_audit_missing_required_422(client, db_session, enable_
             "value": None,
         }
     ]
+
+
+def test_list_application_audit_logs_application_id(
+    client, enable_factory_create, db_session, caplog
+):
+    """audit_history handler adds application_id to request logs at the top of the handler"""
+    user, application, token = create_user_in_app(
+        db_session=db_session, privileges=[Privilege.VIEW_APPLICATION]
+    )
+
+    caplog.set_level(logging.INFO)
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/audit_history",
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 10,
+                "order_by": "created_at",
+                "sort_direction": "descending",
+            }
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+
+    # application_id should appear on logs emitted during this request
+    records_with_app_id = [
+        record
+        for record in caplog.records
+        if getattr(record, "application_id", None) == application.application_id
+    ]
+    assert len(records_with_app_id) > 0

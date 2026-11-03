@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ApiRequestError } from "src/errors";
+import { logger } from "src/services/logger/simplerLogger";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
 
@@ -61,17 +62,15 @@ export const uploadFileToS3 = async (
         "Content-Type": "multipart/form-data",
       },
     });
-  } catch (error) {
+  } catch (e) {
     const defaultErrorMessage = "Error uploading file to S3";
-    if (axios.isAxiosError(error)) {
+    if (axios.isAxiosError(e)) {
       // Non 2XX response status
-      if (error.response) {
-        console.error(
-          `${defaultErrorMessage} with status: ${error.response.status}`,
-        );
+      if (e.response) {
+        logger.error({ status: e.response.status }, defaultErrorMessage);
       }
     } else {
-      console.error(defaultErrorMessage);
+      logger.error({ err: e }, defaultErrorMessage);
     }
     throw new ApiRequestError(defaultErrorMessage);
   }

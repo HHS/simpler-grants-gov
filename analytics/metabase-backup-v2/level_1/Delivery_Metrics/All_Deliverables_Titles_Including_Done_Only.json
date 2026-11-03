@@ -1,0 +1,58 @@
+{
+  "name": "All Deliverables - Titles Including Done Only",
+  "display": "table",
+  "visualization_settings": {
+    "table.pivot_column": "deliverable_id",
+    "table.cell_column": "d_effective",
+    "table.columns": [
+      {
+        "name": "deliverable_id",
+        "enabled": false
+      },
+      {
+        "name": "url",
+        "enabled": true
+      },
+      {
+        "name": "title",
+        "enabled": false
+      },
+      {
+        "name": "status",
+        "enabled": true
+      },
+      {
+        "name": "d_effective",
+        "enabled": false
+      },
+      {
+        "name": "quad_name",
+        "enabled": true
+      },
+      {
+        "name": "ghid",
+        "enabled": true
+      }
+    ],
+    "column_settings": {
+      "[\"name\",\"status\"]": {
+        "column_title": "Status"
+      },
+      "[\"name\",\"ghid\"]": {
+        "view_as": "link",
+        "link_text": "{{ghid}}",
+        "link_url": "{{url}}",
+        "column_title": "Link"
+      },
+      "[\"name\",\"quad_name\"]": {
+        "column_title": "Quad"
+      },
+      "[\"name\",\"url\"]": {
+        "view_as": "link",
+        "link_text": "{{title}}",
+        "link_url": "{{url}}",
+        "column_title": "Deliverable"
+      }
+    }
+  }
+}

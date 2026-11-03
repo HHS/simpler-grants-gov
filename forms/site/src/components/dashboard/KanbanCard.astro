@@ -1,0 +1,26 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { TOTAL_APPS } from "../../content.config";
+import { familySlug } from "../../lib/families";
+
+interface Props {
+  form: CollectionEntry<"forms">;
+}
+
+const { form } = Astro.props;
+const pct = ((form.data.apps_count / TOTAL_APPS) * 100).toFixed(2);
+---
+
+<a href={`/forms/${form.data.slug}/`} class="kanban-card">
+  <div class="kanban-card__title">{form.data.title}</div>
+  <div class="kanban-card__meta">
+    <span class="kanban-card__apps">
+      {form.data.apps_count.toLocaleString()} apps ({pct}%)
+    </span>
+    {form.data.family.map((family) => (
+      <span class={`kanban-card__family family--${familySlug(family)}`}>
+        {family}
+      </span>
+    ))}
+  </div>
+</a>

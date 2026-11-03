@@ -3,14 +3,16 @@ import uuid
 from collections.abc import Iterator
 from typing import Any, BinaryIO
 
-import grants_shared.adapters.db as db
 from pydantic import ValidationError
 
+import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
 from src.legacy_soap_api.grantors.services import (
     confirm_application_delivery,
+    get_application_list_expanded,
+    get_application_list_expanded_response,
     get_application_zip_response,
     get_confirm_application_delivery_response,
     get_submission_list,
@@ -274,6 +276,21 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         )
         return get_submission_list_response(
             simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
+        )
+
+    def get_application_list_expanded_request(
+        self, proxy_response: SOAPResponse
+    ) -> grantors_schemas.GetApplicationListExpandedResponse:
+        soap_request_dict = self.get_soap_request_dict() or {}
+        simpler_applications = get_application_list_expanded(
+            db_session=self.db_session,
+            soap_request=self.soap_request,
+            request=grantors_schemas.GetApplicationListExpandedRequest(**soap_request_dict),
+            soap_config=self.operation_config,
+        )
+        return get_application_list_expanded_response(
+            simpler_applications=simpler_applications,
             proxy_response=proxy_response,
         )
 

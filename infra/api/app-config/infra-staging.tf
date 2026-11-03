@@ -36,7 +36,8 @@ module "infra_staging_config" {
   service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMzgzNjIwODA5MTQ5MzcxNTc5OA"
   api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTc2Mzk2OTQ1"
 
-  # Sizing mirrors staging.
+  # 1 vCPU saturates during E2E runs
+  instance_cpu                    = 2048
   instance_memory                 = 4096
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
@@ -52,10 +53,7 @@ module "infra_staging_config" {
   search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_e85dcedcdbe7e774"
 
   service_override_extra_environment_variables = {
-    ENABLE_WORKFLOW_ENDPOINTS             = 1
-    ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
-    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
 
     # Override the env-config default, which would derive a nonexistent hhs-infra-staging client id.
     LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-staging-simpler-grants-gov"
@@ -69,19 +67,12 @@ module "infra_staging_config" {
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
-    # Workflow. This is staging's internal user id, reused because infra-staging's database
-    # is restored from a staging snapshot and therefore carries the same user row. The
-    # workflow service REQUIRES this row to exist: brought up against an empty database it
-    # will fail at runtime, not at apply time, so a non-snapshot bring-up must either seed
-    # this user or point this at one that exists. Same arrangement as infra-dev, which
-    # reuses dev's id for the same reason.
-    WORKFLOW_SERVICE_INTERNAL_USER_ID = "903bf2e6-b213-4744-9f95-66ccfd98a819"
-
-    # Job lock — enabled in dev/staging while we validate it
     ENABLE_JOB_LOCK = "true"
   }
 
   enable_workflow_service = true
+
+  enable_processor_service = true
 
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

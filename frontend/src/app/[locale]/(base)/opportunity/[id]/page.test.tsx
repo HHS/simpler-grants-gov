@@ -76,19 +76,10 @@ jest.mock("./_components/OpportunityHistory", () => ({
   default: () => <div />,
 }));
 
-jest.mock(
-  "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityCompetitionStart",
-  () => ({
-    OpportunityCompetitionStart: () => <div />,
-  }),
-);
-
-jest.mock(
-  "src/components/simpler-opportunity/OpportunitySaveUserControl",
-  () => ({
-    OpportunitySaveUserControl: () => <div />,
-  }),
-);
+jest.mock("./_components/OpportunityHeader", () => ({
+  __esModule: true,
+  default: () => <div />,
+}));
 
 const opportunityParams = Promise.resolve({
   locale: "en",

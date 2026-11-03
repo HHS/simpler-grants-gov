@@ -1,0 +1,80 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { TOTAL_APPS } from "../../content.config";
+import { NO_FAMILY } from "../../lib/families";
+import { countFields } from "../../lib/planTree";
+
+interface Props {
+  form: CollectionEntry<"forms">;
+}
+
+const { form } = Astro.props;
+const d = form.data;
+const pct = d.apps_count ? ((d.apps_count / TOTAL_APPS) * 100).toFixed(2) : "0.00";
+const fieldCount = countFields(d.children);
+const hasLinks = d.fid_url || d.pdf_url || d.xsd_url || d.dat_url;
+---
+
+<div class="metadata-grid">
+  <div class="metadata-card">
+    <dl>
+      {d.omb_number && (
+        <>
+          <dt>OMB Number</dt>
+          <dd>{d.omb_number}</dd>
+        </>
+      )}
+      {d.expiration_date && (
+        <>
+          <dt>Expiration</dt>
+          <dd>{d.expiration_date}</dd>
+        </>
+      )}
+      <dt>Family</dt>
+      <dd>{d.family.length ? d.family.join(", ") : NO_FAMILY}</dd>
+      {d.category && (
+        <>
+          <dt>Category</dt>
+          <dd>{d.category}</dd>
+        </>
+      )}
+      {d.sgg_form_id && (
+        <>
+          <dt>SGG form ID</dt>
+          <dd><code>{d.sgg_form_id}</code></dd>
+        </>
+      )}
+    </dl>
+  </div>
+  <div class="metadata-card">
+    <dl>
+      <dt>Apps count</dt>
+      <dd>{d.apps_count ? d.apps_count.toLocaleString() : "—"} ({pct}%)</dd>
+      {fieldCount > 0 && (
+        <>
+          <dt>Fields</dt>
+          <dd>{fieldCount}</dd>
+        </>
+      )}
+      {d.widgets && d.widgets.length > 0 && (
+        <>
+          <dt>Widgets</dt>
+          <dd>{d.widgets.join(", ")}</dd>
+        </>
+      )}
+      {hasLinks && (
+        <>
+          <dt>Links</dt>
+          <dd>
+            <div class="metadata-links">
+              {d.fid_url && <a href={d.fid_url} target="_blank" rel="noopener">FID page</a>}
+              {d.pdf_url && <a href={d.pdf_url} target="_blank" rel="noopener">PDF</a>}
+              {d.xsd_url && <a href={d.xsd_url} target="_blank" rel="noopener">XSD</a>}
+              {d.dat_url && <a href={d.dat_url} target="_blank" rel="noopener">DAT</a>}
+            </div>
+          </dd>
+        </>
+      )}
+    </dl>
+  </div>
+</div>

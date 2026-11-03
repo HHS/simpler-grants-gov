@@ -1,1 +1,2 @@
 *.sh text=auto eol=lf
+scripts/tests/fixtures/readability/*.pdf binary

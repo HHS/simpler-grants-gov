@@ -9,7 +9,7 @@
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { STATIC, EXTENDED, FULL_REGRESSION } = VALID_TAGS;
+const { FULL_REGRESSION } = VALID_TAGS;
 test.beforeEach(async ({ page }) => {
   // the waitUntil change here is to work around a temporary bug with some staging assets
   // Background: Given I open "/vision"
@@ -19,7 +19,7 @@ test.beforeEach(async ({ page }) => {
 /**
  * @scenario Show the page title
  */
-test("has title", { tag: [STATIC, FULL_REGRESSION] }, async ({ page }) => {
+test("has title", { tag: [FULL_REGRESSION] }, async ({ page }) => {
   // Then the page title should be "Vision | Simpler.Grants.gov"
   await expect(page).toHaveTitle("Vision | Simpler.Grants.gov");
 });
@@ -29,7 +29,7 @@ test("has title", { tag: [STATIC, FULL_REGRESSION] }, async ({ page }) => {
  */
 test(
   "can navigate to wiki in new tab",
-  { tag: [STATIC, FULL_REGRESSION] },
+  { tag: [FULL_REGRESSION] },
   async ({ page, context }) => {
     // Given I should see "Read more about the research on our public wiki"
     const wikiLink = page.getByRole("link", {
@@ -64,7 +64,7 @@ test(
  */
 test(
   "can navigate to ethnio in new tab",
-  { tag: [STATIC, EXTENDED] },
+  { tag: [FULL_REGRESSION] },
   async ({ page, context }) => {
     // Given I should see "Sign up to participate in future user studies"
     const ethnioLink = page.getByRole("link", {

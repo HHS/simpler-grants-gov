@@ -1,38 +1,20 @@
 /**
  * Generic form-filling helpers that open forms, fill fields, and save when needed.
- * Usage: import { fillField, fillFormPartial, fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+ * Usage: import { fillFormPartial, fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+ * (Single-field fills go through tests/e2e/utils/fields/fill-fields directly.)
  */
 
 import { Page, TestInfo } from "@playwright/test";
-import { runSharedFieldFill } from "tests/e2e/utils/common/index";
 import {
   shouldFillField,
-  type FillFieldDefinition,
   type FillFormConfig,
   type FormFillFieldDefinitions,
 } from "tests/e2e/utils/common/types";
+import { fillField } from "tests/e2e/utils/fields/fill-fields";
 
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";
 
-type FillFieldOptions = {
-  fieldContextLabel?: string;
-};
-
-/** Fills one field using the shared field-fill execution path. */
-export async function fillField(
-  page: Page,
-  field: FillFieldDefinition,
-  data: string | boolean | undefined,
-  options?: FillFieldOptions,
-): Promise<void> {
-  await runSharedFieldFill({
-    page,
-    field,
-    data,
-    fieldContextLabel: options?.fieldContextLabel,
-  });
-}
 /**
  * Fills a subset of fields on the current form page without navigating or saving.
  * Use when the form is already open and only some fields should be filled

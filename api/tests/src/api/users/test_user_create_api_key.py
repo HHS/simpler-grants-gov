@@ -2,7 +2,9 @@ import uuid
 
 from sqlalchemy import select
 
+from src.auth.api_key_config import ApiKeyConfig
 from src.db.models.user_models import UserApiKey
+from src.util.api_key_gen import hash_api_key_id
 
 
 def test_create_api_key_success(enable_factory_create, db_session, client, user, user_auth_token):
@@ -40,6 +42,30 @@ def test_create_api_key_success(enable_factory_create, db_session, client, user,
     assert api_key.user_id == user.user_id
     assert api_key.is_active is True
     assert api_key.last_used is None
+
+    assert api_key.key_id_hash == hash_api_key_id(response_data["key_id"], ApiKeyConfig().pepper)
+    assert "key_id_hash" not in response_data
+
+
+def test_create_api_key_returned_key_authenticates(
+    enable_factory_create, db_session, client, user, user_auth_token
+):
+    """The key returned on create can be used with X-API-Key auth"""
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"key_name": "Auth Test Key"},
+    )
+    assert response.status_code == 200
+    key_id = response.json["data"]["key_id"]
+
+    # The API key has to resolve to the user by its hash for this to succeed
+    response = client.post(
+        f"/v1/users/{user.user_id}/agencies",
+        headers={"X-API-Key": key_id},
+    )
+
+    assert response.status_code == 200
 
 
 def test_create_api_key_validation_error_missing_key_name(
@@ -88,6 +114,44 @@ def test_create_api_key_validation_error_long_key_name(
         .all()
     )
     assert len(api_keys) == 0
+
+
+def test_create_api_key_duplicate_name_validation_error(
+    enable_factory_create, db_session, client, user, user_auth_token
+):
+    """Test 422 with duplicate_api_key_name type when the user already has a key with that name"""
+    json_data = {"key_name": "My API Key"}
+
+    # Create the first key successfully
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys",
+        headers={"X-SGG-Token": user_auth_token},
+        json=json_data,
+    )
+    assert response.status_code == 200
+
+    # Attempt to create a second key with the same name
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys",
+        headers={"X-SGG-Token": user_auth_token},
+        json=json_data,
+    )
+
+    assert response.status_code == 422
+    assert response.json["message"] == "An API key with this name already exists"
+
+    errors = response.json["errors"]
+    assert len(errors) == 1
+    assert errors[0]["type"] == "duplicate_api_key_name"
+    assert errors[0]["field"] == "key_name"
+
+    # Verify only one key was created
+    api_keys = (
+        db_session.execute(select(UserApiKey).where(UserApiKey.user_id == user.user_id))
+        .scalars()
+        .all()
+    )
+    assert len(api_keys) == 1
 
 
 def test_create_api_key_unauthorized_different_user(

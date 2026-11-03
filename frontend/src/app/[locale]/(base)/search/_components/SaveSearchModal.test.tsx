@@ -6,7 +6,7 @@ const fakeSearchParams = new URLSearchParams();
 
 const mockUseUser = jest.fn(() => ({
   user: {
-    token: "faketoken",
+    isLoggedIn: true,
   },
 }));
 

@@ -9,11 +9,18 @@ module "infra_training_config" {
   environment    = "infra-training"
   network_name   = "infra-training"
 
+  app_environment_name = "training"
+
   domain_name            = "api.training.simpler.grants.gov"
   secondary_domain_names = ["alb.training.simpler.grants.gov"]
-  enable_https           = false
-  # s3_cdn_domain_name = "files.training.simpler.grants.gov" # Set once a hosted zone/ACM cert exists in 049145893907
-  # mtls_domain_name   = "soap.training.simpler.grants.gov"  # Set once a hosted zone/ACM cert exists in 049145893907
+  enable_https           = true
+
+  enable_api_gateway_domain_name = true
+  s3_cdn_domain_name             = "files.training.simpler.grants.gov"
+  enable_cdn_alias               = true
+
+  # SOAP (mTLS) endpoint. Requires enable_https, which gates the ALB's 443 listener.
+  mtls_domain_name = "soap.training.simpler.grants.gov"
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
@@ -41,28 +48,23 @@ module "infra_training_config" {
   has_search            = true
   search_engine_version = "OpenSearch_2.15"
 
-  # The reserved-SSO role suffix (AWSReservedSSO_<PermissionSet>_<suffix>) is generated
-  # per AWS account, so the env-config default (which matches the shared account) does not
-  # exist in 049145893907. null falls back to the account root principal; replace with this
-  # account's own AWSReservedSSO_* role name once IAM Identity Center is wired up.
-  search_sso_admin_role_name = null
+  # This account's own reserved-SSO suffix; must not be null -- the role-mappings lambda
+  # puts it in all_access backend_roles and OpenSearch rejects a null array element.
+  search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_43bdcb088d20dc60"
 
   service_override_extra_environment_variables = {
     SAM_GOV_BASE_URL = "https://api.sam.gov"
 
+    LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-training-simpler-grants-gov"
+
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS       = 1
 
-    # Workflow. This is training's internal user id, reused because infra-training's database
-    # is restored from a training snapshot and therefore carries the same user row. The
-    # workflow service REQUIRES this row to exist: brought up against an empty database it
-    # will fail at runtime, not at apply time, so a non-snapshot bring-up must either seed
-    # this user or point this at one that exists. Same arrangement as infra-dev/infra-staging,
-    # which reuse dev's and staging's ids for the same reason.
-    WORKFLOW_SERVICE_INTERNAL_USER_ID = "00bcaf8e-dd04-4fd1-9fb3-ea872a93178d"
-    ENABLE_WORKFLOW_ENDPOINTS         = 1
+    FRONTEND_URL = "https://training.simpler.grants.gov"
+
+    # Virus scanning endpoints
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

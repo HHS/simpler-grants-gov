@@ -6,6 +6,7 @@ import {
   removeRedundantSlashes,
   throwError,
 } from "src/services/fetch/fetcherHelpers";
+import { logger } from "src/services/logger/simplerLogger";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 const getSessionMock = jest.fn();
@@ -98,6 +99,43 @@ describe("throwError", () => {
       status: 401,
       type: "UnauthorizedError",
     });
+  });
+
+  it("logs the response status and AWS headers as structured fields", async () => {
+    const loggerErrorSpy = jest
+      .spyOn(logger, "error")
+      .mockImplementation(() => undefined);
+
+    await wrapForExpectedError<Error>(() => {
+      throwError(
+        { data: {}, message: "unavailable", status_code: 503 },
+        "http://any.url",
+        {
+          ok: false,
+          status: 503,
+          headers: new Headers({
+            "x-amzn-requestid": "fake-request-id",
+            "Content-Type": "application/json",
+          }),
+        } as unknown as Response,
+      );
+    });
+
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      {
+        url: "http://any.url",
+        status_code: 503,
+        apiMessage: "unavailable",
+        responseOk: false,
+        responseStatus: 503,
+        apiRequestId: "fake-request-id",
+        apiGatewayId: null,
+        apiErrorType: null,
+        contentType: "application/json",
+      },
+      "API request error",
+    );
+    loggerErrorSpy.mockRestore();
   });
 });
 

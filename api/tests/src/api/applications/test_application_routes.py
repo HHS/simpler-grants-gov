@@ -2,12 +2,10 @@
 import uuid
 from datetime import date, timedelta
 
-import grants_shared.util.file_util as file_util
 import pytest
-from grants_shared.util import datetime_util
-from grants_shared.util.datetime_util import get_now_us_eastern_date
 from sqlalchemy import select
 
+import src.util.file_util as file_util
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import (
@@ -18,6 +16,8 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
+from src.util import datetime_util
+from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
@@ -147,10 +147,46 @@ def test_application_start_logging_enhancement(
             or hasattr(record, "opportunity_id")
             or hasattr(record, "agency_code")
         ):
+            if hasattr(record, "competition_id"):
+                assert record.competition_id is not None
             found_metadata = True
             break
 
     assert found_metadata, "Application metadata should be added to logs for New Relic dashboards"
+
+
+def test_application_start_audit_log_includes_application_id(
+    client, enable_factory_create, db_session, user, user_auth_token, caplog
+):
+    """The application_created audit log from the start endpoint carries the new application_id
+
+    This is the join key for the Apply funnel dashboards - it previously logged as null
+    because the audit record's foreign keys are not populated until flush.
+    """
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    caplog.set_level(logging.INFO)
+
+    response = client.post(
+        "/alpha/applications/start",
+        json={"competition_id": str(competition.competition_id)},
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    application_id = response.json["data"]["application_id"]
+
+    created_records = [
+        record
+        for record in caplog.records
+        if record.message == "Added application audit event"
+        and record.application_audit_event == ApplicationAuditEvent.APPLICATION_CREATED
+    ]
+    assert len(created_records) == 1
+    assert str(created_records[0].application_id) == application_id
+    assert created_records[0].user_id == user.user_id
 
 
 def test_application_start_null_opening_date(
@@ -492,6 +528,7 @@ def test_application_form_update_success_update(
     enable_factory_create,
     db_session,
     create_test_form,
+    caplog,
 ):
     """Test successful update of an existing application form response"""
     # Create application
@@ -511,6 +548,8 @@ def test_application_form_update_success_update(
     )
 
     request_data = {"application_response": {"name": "Updated Name"}}
+
+    caplog.set_level(logging.INFO)
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
@@ -537,6 +576,16 @@ def test_application_form_update_success_update(
         application.application_audits[0].target_application_form_id
         == existing_form.application_form_id
     )
+
+    # Verify form_updated log includes warning_count, application_form_status, is_required
+    form_updated_records = [
+        record for record in caplog.records if "Updated application" in record.message
+    ]
+    assert len(form_updated_records) == 1
+    record = form_updated_records[0]
+    assert record.warning_count == 0
+    assert hasattr(record, "application_form_status")
+    assert record.is_required == competition_form.is_required
 
 
 @pytest.mark.parametrize(
@@ -4352,6 +4401,52 @@ def test_add_organization_no_start_application_privilege(
 
     assert response.status_code == 403
     assert "Forbidden" in response.json["message"]
+
+
+def test_add_organization_logging_enhancement(
+    client, enable_factory_create, db_session, user, user_auth_token, caplog
+):
+    """Test that the add-organization endpoint adds opportunity_id and agency_code to request logs"""
+    competition = CompetitionFactory.create(
+        open_to_applicants={
+            CompetitionOpenToApplicant.INDIVIDUAL,
+            CompetitionOpenToApplicant.ORGANIZATION,
+        },
+        opportunity=OpportunityFactory.create(agency_code="TEST"),
+    )
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
+    organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
+
+    caplog.set_level(logging.INFO)
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+
+    found_metadata = False
+    for record in caplog.records:
+        if hasattr(record, "opportunity_id") or hasattr(record, "agency_code"):
+            found_metadata = True
+            break
+
+    assert (
+        found_metadata
+    ), "opportunity_id and agency_code should be added to request logs once application is loaded"
 
 
 def test_application_get_shows_expired_org_warning(client, enable_factory_create, db_session):

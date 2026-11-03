@@ -1,0 +1,87 @@
+---
+import type { FieldNode } from "../../content.config";
+
+interface Props {
+  field: FieldNode;
+}
+
+const { field } = Astro.props;
+const isRequired =
+  field.required === true ||
+  (typeof field.required === "string" && field.required !== "false");
+const requiredLabel =
+  field.required === true
+    ? "* Required"
+    : typeof field.required === "string" && field.required !== "false"
+      ? field.required
+      : undefined;
+---
+
+<div class="field-row">
+  <div class="field-row__primary">
+    <span class="field-row__label">{field.label}</span>
+    {isRequired ? (
+      <span class="field-row__required">{requiredLabel}</span>
+    ) : (
+      <span class="field-row__optional">Optional</span>
+    )}
+  </div>
+
+  {field.help_text && (
+    <div class="field-row__help">{field.help_text}</div>
+  )}
+
+  <div class="field-row__tertiary">
+    <span class="field-row__type">{field.type}</span>
+    {field.widget && (
+      <>
+        <span class="field-row__sep">&middot;</span>
+        <span>{field.widget}</span>
+      </>
+    )}
+    {field.constraints && (
+      <>
+        <span class="field-row__sep">&middot;</span>
+        <span>{field.constraints}</span>
+      </>
+    )}
+  </div>
+
+  {(field.dat_field || field.json_path || field.xml_path || field.pre_populated || field.post_populated) && (
+    <details class="field-row__detail">
+      <summary>Details</summary>
+      <dl class="field-detail-grid">
+        {field.dat_field && (
+          <>
+            <dt>DAT #</dt>
+            <dd>{field.dat_field}</dd>
+          </>
+        )}
+        {field.json_path && (
+          <>
+            <dt>JSON path</dt>
+            <dd>{field.json_path}</dd>
+          </>
+        )}
+        {field.xml_path && (
+          <>
+            <dt>XML path</dt>
+            <dd>{field.xml_path}</dd>
+          </>
+        )}
+        {field.pre_populated && (
+          <>
+            <dt>Pre-populated</dt>
+            <dd>{field.pre_populated}</dd>
+          </>
+        )}
+        {field.post_populated && (
+          <>
+            <dt>Post-populated</dt>
+            <dd>{field.post_populated}</dd>
+          </>
+        )}
+      </dl>
+    </details>
+  )}
+</div>

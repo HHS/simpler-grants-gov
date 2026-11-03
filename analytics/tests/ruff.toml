@@ -4,6 +4,8 @@ extend = "../pyproject.toml"
 [lint]
 ignore = [
   "ANN201", # missing return type
+  "CPY001", # copyright at top of file
+  "PLR0917", # Too many positional arguments
   "PLR2004", # magic value used in comparison instead of constant
   "S101", # Use of `assert` detected
   "T201",    # use of `print` detected

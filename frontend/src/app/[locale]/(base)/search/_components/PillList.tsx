@@ -24,6 +24,7 @@ export function PillList({ pills }: { pills: FilterPillLabelData[] }) {
             >
               <Pill
                 label={label}
+                labelPrefix="filter"
                 onClose={() =>
                   removeQueryParamValue(queryParamKey, queryParamValue)
                 }

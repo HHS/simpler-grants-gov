@@ -168,8 +168,9 @@ data "aws_acm_certificate" "s3_cdn_cert" {
   key_types   = ["RSA_2048", "RSA_4096"]
 }
 
+# Gated on enable_https too, so the mTLS ALB can be provisioned before its cert is issued.
 data "aws_acm_certificate" "mtls_cert" {
-  count       = local.service_config.mtls_domain_name != null ? 1 : 0
+  count       = local.service_config.mtls_domain_name != null && local.service_config.enable_https == true ? 1 : 0
   domain      = local.service_config.mtls_domain_name
   most_recent = true
   key_types   = ["RSA_2048", "RSA_4096"]
@@ -232,7 +233,8 @@ module "service" {
   # This is used by the API when hosting a side-by-side ALB for mTLS traffic to the API
   enable_mtls_load_balancer = local.service_config.mtls_domain_name != null
   mtls_domain_name          = local.service_config.mtls_domain_name
-  mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
+  # Null until the cert exists; the ALB and target group are still created without it.
+  mtls_certificate_arn = local.service_config.mtls_domain_name != null && local.service_config.enable_https == true ? data.aws_acm_certificate.mtls_cert[0].arn : null
 
 
   fargate_cpu                   = local.service_config.cpu
@@ -278,6 +280,8 @@ module "service" {
   pinpoint_app_id       = local.pinpoint_app_id
   hosted_zone           = local.network_config.domain_config.hosted_zone
   ses_configuration_set = local.ses_configuration_set
+
+  enable_processor_service = local.enable_processor_service
 
   extra_environment_variables = merge(
     {

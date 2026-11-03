@@ -6,8 +6,9 @@ import mimetypes
 from pathlib import Path
 from typing import Any
 
-from grants_shared.util import file_util
 from pydantic import BaseModel, Field, field_validator
+
+from src.util import file_util
 
 HASH_ALGORITHM = "SHA-1"
 

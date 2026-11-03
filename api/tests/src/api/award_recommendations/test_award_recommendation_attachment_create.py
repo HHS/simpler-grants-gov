@@ -1,9 +1,9 @@
 import uuid
 
-import grants_shared.util.file_util as file_util
 import pytest
 from sqlalchemy import select
 
+import src.util.file_util as file_util
 from src.constants.lookup_constants import (
     AwardRecommendationAttachmentType,
     AwardRecommendationAuditEvent,

@@ -337,7 +337,7 @@ h6 {
 
 // Events
 
-#main-content:has(div:last-child.bg-base-lightest) + footer.usa-footer {
+#main-content:has(div:last-child.footer-blend-lightest) + footer.usa-footer {
   background-color: color($theme-color-base-lightest);
 }
 
@@ -546,6 +546,30 @@ h6 {
   }
 }
 
+// default outline mint-50 fails contrast on the bg-base-lightest search header
+.search-filter-drawer-toggle.usa-button--outline {
+  &,
+  &:visited {
+    box-shadow: inset 0 0 0 2px color("mint-60");
+    color: color("mint-60");
+    border-bottom-color: color("mint-60");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    box-shadow: inset 0 0 0 2px color("mint-70");
+    color: color("mint-70");
+    border-bottom-color: color("mint-70");
+  }
+
+  &:active,
+  &.usa-button--active {
+    box-shadow: inset 0 0 0 2px color("mint-80");
+    color: color("mint-80");
+    border-bottom-color: color("mint-80");
+  }
+}
+
 // make modal close "X" use normal style rather than simpler button styline
 .usa-modal__close {
   background-color: color("transparent");
@@ -714,6 +738,13 @@ dl {
   }
   aside {
     max-height: calc(100vh - 2rem);
+  }
+
+  // USWDS adds its own margin-top to checkbox labels on top of the .usa-form-group
+  // margin-top, making the gap before a checkbox larger than the gap before any other
+  // field. Zero it out so checkbox spacing matches the rest of the form.
+  .usa-checkbox__label {
+    margin-top: 0;
   }
 }
 
@@ -1703,4 +1734,26 @@ $simpler-switch-transition-easing: ease;
 
 .bg-mint-lighter-custom {
   background-color: color("mint-10");
+}
+
+// Opportunity page header call to action buttons:
+// stacked and full width on small screens, side by side on larger screens
+.opportunity-header__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: units(1.5);
+
+  .usa-button {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  @include at-media("tablet-lg") {
+    flex-direction: row;
+    justify-content: flex-end;
+
+    .usa-button {
+      width: auto;
+    }
+  }
 }

@@ -8,14 +8,14 @@
  * run individually or as part of the full suite without any changes.
  *
  * Test users are chosen via a TestUserKey (see test-users.ts). Spoofing is the
- * only supported path — seeded test users have no login credentials or MFA — so
+ * only supported path - seeded test users have no login credentials or MFA - so
  * any failure throws and fails the test rather than falling back to a real login.
  */
 
 import { type BrowserContext, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
-import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { createSpoofedSessionCookie } from "tests/e2e/utils/auth/login-utils";
+import { getShardedPrimaryOrgAdminId } from "tests/e2e/utils/auth/sharded-test-user-utils";
 import {
   getTestUserId,
   type TestUserKey,
@@ -52,19 +52,21 @@ export async function authenticateE2eUser(
   isMobile: boolean,
   testUserKey: TestUserKey = "primaryOrgAdmin",
 ): Promise<void> {
-  const userId = getTestUserId(testUserKey);
+  // primaryOrgAdmin is the identity every mutating test shares, so spread it
+  // across the seeded pool per worker/shard. Every other key maps to one user.
+  const userId =
+    testUserKey === "primaryOrgAdmin"
+      ? getShardedPrimaryOrgAdminId()
+      : getTestUserId(testUserKey);
   const token = await fetchE2eSessionToken(userId);
   await createSpoofedSessionCookie(context, token);
 
   // Give the spoofed session cookie a moment to settle before navigating, then
-  // let the page hydrate the authenticated state after load. These waits are
-  // carried over from the previous local flow to avoid a race where the nav
-  // renders before the client resolves the session.
-  await page.waitForTimeout(1000);
+  // let the page hydrate the authenticated state after load. Mobile needs longer
+  // waits due to slower rendering and session establishment on smaller viewports.
+  const preNavWait = isMobile ? 2000 : 1000;
+  const postNavWait = isMobile ? 4000 : 2000;
+  await page.waitForTimeout(preNavWait);
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-
-  if (isMobile) {
-    await openMobileNav(page);
-  }
+  await page.waitForTimeout(postNavWait);
 }

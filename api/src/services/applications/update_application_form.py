@@ -1,11 +1,11 @@
 import logging
 from uuid import UUID
 
-import grants_shared.adapters.db as db
-from grants_shared.api.response import ValidationErrorDetail
-from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 
+import src.adapters.db as db
+from src.api.response import ValidationErrorDetail
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, Privilege, SubmissionIssue
 from src.db.models.competition_models import ApplicationForm, CompetitionForm
@@ -147,6 +147,9 @@ def update_application_form(
         extra={
             "application_id": str(application_id),
             "form_id": str(form_id),
+            "warning_count": len(warnings),
+            "application_form_status": application_form.application_form_status,  # type: ignore[attr-defined]
+            "is_required": competition_form.is_required,
         },
     )
 

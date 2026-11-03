@@ -32,6 +32,7 @@ describe("getNextRoutes", () => {
       "/(base)/grantor/opportunity/1/edit",
       "/(base)/grantor/opportunity/1/overview",
       "/(base)/login",
+      "/(base)/logout",
       "/(base)/maintenance",
       "/(base)/newsletter/confirmation",
       "/(base)/newsletter",

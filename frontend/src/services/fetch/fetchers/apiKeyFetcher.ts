@@ -1,7 +1,22 @@
 import "server-only";
 
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
-import { ApiKeyResponse } from "src/types/apiKeyTypes";
+import {
+  ApiKey,
+  ApiKeyResponse,
+  CreateApiKeyResponse,
+  RenameApiKeyResponse,
+} from "src/types/apiKeyTypes";
+
+// The API only returns the key on create, but copy over only the metadata on
+// list and rename anyway so a key can never end up in anything sent to the browser.
+const toApiKeyMetadata = (apiKey: ApiKey): ApiKey => ({
+  api_key_id: apiKey.api_key_id,
+  key_name: apiKey.key_name,
+  created_at: apiKey.created_at,
+  last_used: apiKey.last_used,
+  is_active: apiKey.is_active,
+});
 
 export const handleListApiKeys = async (
   userId: string,
@@ -25,13 +40,16 @@ export const handleListApiKeys = async (
     body,
   });
 
-  return (await resp.json()) as ApiKeyResponse;
+  const response = (await resp.json()) as ApiKeyResponse;
+  return response.data
+    ? { ...response, data: response.data.map(toApiKeyMetadata) }
+    : response;
 };
 
 export const handleCreateApiKey = async (
   userId: string,
   keyName: string,
-): Promise<ApiKeyResponse> => {
+): Promise<CreateApiKeyResponse> => {
   const body = {
     key_name: keyName,
   };
@@ -42,14 +60,14 @@ export const handleCreateApiKey = async (
     body,
   });
 
-  return (await resp.json()) as ApiKeyResponse;
+  return (await resp.json()) as CreateApiKeyResponse;
 };
 
 export const handleRenameApiKey = async (
   userId: string,
   apiKeyId: string,
   keyName: string,
-): Promise<ApiKeyResponse> => {
+): Promise<RenameApiKeyResponse> => {
   const body = {
     key_name: keyName,
   };
@@ -60,7 +78,10 @@ export const handleRenameApiKey = async (
     body,
   });
 
-  return (await resp.json()) as ApiKeyResponse;
+  const response = (await resp.json()) as RenameApiKeyResponse;
+  return response.data
+    ? { ...response, data: toApiKeyMetadata(response.data) }
+    : response;
 };
 
 export const handleDeleteApiKey = async (

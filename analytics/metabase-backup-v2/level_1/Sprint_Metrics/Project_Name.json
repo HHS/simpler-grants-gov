@@ -1,0 +1,44 @@
+{
+  "name": "Project Name",
+  "display": "scalar",
+  "visualization_settings": {},
+  "template_tags": {
+    "ghid": {
+      "widget-type": "string/=",
+      "type": "dimension",
+      "name": "ghid",
+      "id": "a53f6553-171b-47c7-befb-7201bb2cb063",
+      "display-name": "Ghid",
+      "dimension": [
+        "field",
+        302,
+        {
+          "base-type": "type/Integer",
+          "effective-type": "type/Integer"
+        }
+      ],
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_project",
+        "column": "ghid"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "id": "a53f6553-171b-47c7-befb-7201bb2cb063",
+      "type": "string/=",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "ghid"
+        ]
+      ],
+      "name": "Ghid",
+      "slug": "ghid",
+      "required": true
+    }
+  ]
+}

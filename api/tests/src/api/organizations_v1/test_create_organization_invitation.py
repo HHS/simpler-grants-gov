@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
 from src.task.notifications.config import _reset_email_config
@@ -606,6 +607,7 @@ class TestCreateOrganizationInvitation:
         monkeypatch,
         ses_client,
         get_sent_emails,
+        sent_email_tags,
     ):
         """Should send invitation email with proper content"""
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://localhost:3000")
@@ -632,6 +634,7 @@ class TestCreateOrganizationInvitation:
 
         sent_email = emails[0]
         assert sent_email.destinations["ToAddresses"] == ["newuser@example.com"]
+        assert sent_email_tags[0].email_tags == {"email_type": EmailType.ORG_INVITATION}
 
         # Verify exact subject
         assert (

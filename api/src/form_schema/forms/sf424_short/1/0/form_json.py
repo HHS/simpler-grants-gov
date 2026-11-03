@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -83,9 +84,10 @@ FORM_JSON_SCHEMA = {
             "type": "object",
             "required": ["name", "title", "address", "phone_number", "email"],
             "properties": {
+                # No title on purpose: the frontend prefixes required messages with the
+                # parent's title, which would read "Name First Name is required".
                 "name": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
-                    "title": "Name",
                     "description": "Enter the name.",
                 },
                 "title": {
@@ -94,24 +96,34 @@ FORM_JSON_SCHEMA = {
                     "description": "Enter the position title.",
                 },
                 "address": {
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+                        # if country is US, zip_code must be at least 9 characters
+                        {
+                            "if": {
+                                "properties": {"country": {"const": "USA: UNITED STATES"}},
+                                "required": ["country"],
+                            },
+                            "then": {"properties": {"zip_code": {"minLength": 9}}},
+                        },
+                    ],
                     "title": "Address",
                     "description": "Enter the address.",
                 },
                 "phone_number": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
                     "title": "Telephone Number",
-                    "description": "Enter the daytime Telephone Number.",
+                    "description": "Enter the daytime telephone number.",
                 },
                 "fax": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
                     "title": "Fax Number",
-                    "description": "Enter the Fax Number.",
+                    "description": "Enter the fax number.",
                 },
                 "email": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
                     "title": "Email",
-                    "description": "Enter a valid email Address.",
+                    "description": "Enter a valid email address.",
                 },
             },
         },
@@ -165,7 +177,17 @@ FORM_JSON_SCHEMA = {
             "description": "Enter the legal name of applicant that will undertake the assistance activity. This is the name that the organization has registered with the System for Award Management (SAM.gov). Information on registering with SAM may be obtained by visiting the Grants.gov website.",
         },
         "applicant": {
-            "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+            "allOf": [
+                {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+                # if country is US, zip_code must be at least 9 characters
+                {
+                    "if": {
+                        "properties": {"country": {"const": "USA: UNITED STATES"}},
+                        "required": ["country"],
+                    },
+                    "then": {"properties": {"zip_code": {"minLength": 9}}},
+                },
+            ],
             "title": "Address",
             "description": "Enter the address of the applicant.",
         },
@@ -259,7 +281,8 @@ FORM_JSON_SCHEMA = {
         "application_certification": {
             "type": "boolean",
             "title": "** I Agree",
-            "description": "** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions. By signing this application, I certify (1) to the statements contained in the list of certifications and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
+            # The certification statement renders as its own paragraph below the checkbox
+            # via the "text" node in FORM_UI_SCHEMA, not as this field's own hint text.
         },
         "authorized_representative": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
@@ -276,17 +299,17 @@ FORM_JSON_SCHEMA = {
         "authorized_representative_email": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
             "title": "Email",
-            "description": "Enter a valid email Address.",
+            "description": "Enter a valid email address.",
         },
         "authorized_representative_phone_number": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
             "title": "Telephone Number",
-            "description": "Enter the daytime Telephone Number.",
+            "description": "Enter the daytime telephone number.",
         },
         "authorized_representative_fax": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
             "title": "Fax Number",
-            "description": "Enter the Fax Number.",
+            "description": "Enter the fax number.",
         },
         "aor_signature": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
@@ -420,9 +443,18 @@ FORM_UI_SCHEMA = [
         "label": "9. Authorized Representative",
         "children": [
             {
+                "type": "text",
+                "name": "application_certification_statement",
+                "content": "* By signing this application, I certify (1) to the statements contained in the list of certifications and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
+            },
+            {
                 "type": "field",
                 "definition": "/properties/application_certification",
-                "printDescription": True,
+            },
+            {
+                "type": "text",
+                "name": "application_certification_note",
+                "content": "** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions.",
             },
             {
                 "type": "field",
@@ -646,6 +678,7 @@ SF424Short_v3_0 = Form(
     form_version="3.0",
     agency_code="SGG",
     omb_number="4040-0003",
+    expiration_date=date(2028, 7, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

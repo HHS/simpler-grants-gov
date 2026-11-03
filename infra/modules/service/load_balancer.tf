@@ -70,6 +70,22 @@ resource "aws_lb_listener" "alb_listener_http" {
   }
 }
 
+# Temporary until the mTLS cert is issued: a listener is what associates mtls_tg with the ALB.
+resource "aws_lb_listener" "mtls_listener_http" {
+  # checkov:skip=CKV_AWS_2:Plain HTTP is deliberate until the mTLS certificate exists.
+  # checkov:skip=CKV_AWS_103:TLS policy is not applicable to an HTTP listener.
+  count = var.enable_mtls_load_balancer && var.mtls_certificate_arn == null ? 1 : 0
+
+  load_balancer_arn = aws_lb.alb[1].arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.mtls_tg[0].arn
+  }
+}
+
 resource "aws_lb_listener_rule" "http_to_https_redirect" {
   count = var.certificate_arn != null ? 1 : 0
 

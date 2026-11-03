@@ -1,16 +1,15 @@
 import logging
 
-from grants_shared.adapters import db
-from grants_shared.adapters.db import flask_db
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.auth.api_jwt_auth import ApiJwtConfig, JwtAuth
-from grants_shared.auth.auth_errors import JwtValidationError
-from grants_shared.db.models.auth_base_models import BaseUserTokenSession
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-
+from src.adapters import db
+from src.adapters.db import flask_db
+from src.api.route_utils import raise_flask_error
+from src.auth.auth_errors import JwtValidationError
 from src.auth.auth_handler import AuthHandler
+from src.auth.jwt import ApiJwtConfig, JwtAuth
 from src.auth.jwt_user_http_token_auth import JwtUserHttpTokenAuth
+from src.db.models.auth_base_models import BaseUserTokenSession
 from src.db.models.user_models import User
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 

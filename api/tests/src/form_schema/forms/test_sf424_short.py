@@ -141,7 +141,7 @@ def contact_person_group():
             "city": "Exampleburg",
             "state": "NY: New York",
             "country": "USA: UNITED STATES",
-            "zip_code": "12345",
+            "zip_code": "12345-6789",  # 9+ chars required for US addresses
         },
     }
 
@@ -160,7 +160,7 @@ def valid_json_v3_0(contact_person_group):
             "city": "Exampleburg",
             "state": "NY: New York",
             "country": "USA: UNITED STATES",
-            "zip_code": "12345",
+            "zip_code": "12345-6789",  # 9+ chars required for US addresses
         },
         "applicant_type_code": ["P: Individual"],
         "employer_taxpayer_identification_number": "123-456-7890",
@@ -241,7 +241,11 @@ def test_sf424_short_v3_0_form_title_and_ui_section_order(sf424_short_v3_0):
 
 def test_sf424_short_v3_0_ui_fields_are_in_expected_sections(sf424_short_v3_0):
     actual_section_fields = {
-        section["name"]: [child["definition"] for child in section["children"]]
+        # "text" nodes (e.g. the certification statement/note) have no "definition",
+        # so skip them here and only compare the schema-backed field pointers.
+        section["name"]: [
+            child["definition"] for child in section["children"] if "definition" in child
+        ]
         for section in sf424_short_v3_0.form_ui_schema
     }
 
@@ -304,36 +308,53 @@ def test_sf424_short_v3_0_authorized_representative_agreement_copy(
     sf424_short_v3_0,
 ):
     agreement_schema = sf424_short_v3_0.form_json_schema["properties"]["application_certification"]
-    expected_description = (
-        "** The list of certifications and assurances, or an internet site where you may "
-        "obtain this list, is contained in the announcement or agency specific instructions. "
-        "By signing this application, I certify (1) to the statements contained in the list "
+    expected_statement_content = (
+        "* By signing this application, I certify (1) to the statements contained in the list "
         "of certifications and (2) that the statements herein are true, complete and accurate "
         "to the best of my knowledge. I also provide the required assurances and agree to "
         "comply with any resulting terms if I accept an award. I am aware that any false, "
         "fictitious, or fraudulent statements or claims may subject me to criminal, civil, or "
         "administrative penalties. (U.S. Code, Title 18, Section 1001)"
     )
+    expected_note_content = (
+        "** The list of certifications and assurances, or an internet site where you may "
+        "obtain this list, is contained in the announcement or agency specific instructions."
+    )
 
     assert agreement_schema["title"] == "** I Agree"
-    assert agreement_schema["description"] == expected_description
-    assert agreement_schema["description"].startswith("** The list of certifications")
-    assert agreement_schema["description"].index(
-        "** The list of certifications"
-    ) < agreement_schema["description"].index("By signing this application")
-    assert agreement_schema["description"].count("The list of certifications") == 1
-    assert agreement_schema["description"].count("By signing this application") == 1
+    assert "description" not in agreement_schema
 
     authorized_representative_section = next(
         section
         for section in sf424_short_v3_0.form_ui_schema
         if section["name"] == "authorized_representative"
     )
-    agreement_field = authorized_representative_section["children"][0]
+    # No leading section description - the certification statement renders as its own
+    # paragraph before the checkbox instead (via the "text" node below).
+    assert "description" not in authorized_representative_section
+
+    # The certification statement is rendered as a standalone paragraph before the
+    # "** I Agree" checkbox, rather than as the checkbox's own hint text.
+    agreement_statement = authorized_representative_section["children"][0]
+    assert agreement_statement == {
+        "type": "text",
+        "name": "application_certification_statement",
+        "content": expected_statement_content,
+    }
+
+    agreement_field = authorized_representative_section["children"][1]
     assert agreement_field == {
         "type": "field",
         "definition": "/properties/application_certification",
-        "printDescription": True,
+    }
+
+    # The footnote referenced by "**" is rendered as a standalone paragraph after the
+    # checkbox, rather than as the checkbox's own hint text.
+    agreement_note = authorized_representative_section["children"][2]
+    assert agreement_note == {
+        "type": "text",
+        "name": "application_certification_note",
+        "content": expected_note_content,
     }
 
 
@@ -383,7 +404,10 @@ def test_sf424_short_v3_0_ui_schema_is_print_view_compatible(sf424_short_v3_0):
     for section in sf424_short_v3_0.form_ui_schema:
         assert section["type"] == "section"
         for field in section["children"]:
-            assert field["type"] in {"field", "null"}
+            assert field["type"] in {"field", "null", "text"}
+            if field["type"] == "text":
+                # `text` nodes are static copy, not a schema-backed field.
+                continue
             assert (
                 _resolve_ui_definition(sf424_short_v3_0.form_json_schema, field["definition"])
                 is not None
@@ -602,6 +626,33 @@ def test_sf424_short_v3_0_max_length(sf424_short_v3_0, valid_json_v3_0, data):
     assert validation_issues[0].type == "maxLength"
 
 
+def test_sf424_short_v3_0_us_zip_code_min_length(sf424_short_v3_0, valid_json_v3_0):
+    """US zip_code shorter than 9 characters fails minLength."""
+    data = valid_json_v3_0 | {
+        "applicant": {
+            **valid_json_v3_0["applicant"],
+            "zip_code": "12345",  # 5 chars — too short for US
+        }
+    }
+    issues = validate_json_schema_for_form(data, sf424_short_v3_0)
+    assert len(issues) == 1
+    assert issues[0].type == "minLength"
+    assert issues[0].field == "$.applicant.zip_code"
+
+
+def test_sf424_short_v3_0_non_us_zip_code_any_length(sf424_short_v3_0, valid_json_v3_0):
+    """Non-US zip_code has no minimum length requirement."""
+    data = valid_json_v3_0 | {
+        "applicant": {
+            "street1": "1 Rue de la Paix",
+            "city": "Paris",
+            "country": "FRA: FRANCE",
+            "zip_code": "",  # empty is fine for non-US
+        }
+    }
+    assert validate_json_schema_for_form(data, sf424_short_v3_0) == []
+
+
 def test_sf424_short_v3_0_pre_population_with_all_non_null_values(
     enable_factory_create, valid_json_v3_0, sf424_short_v3_0, verify_no_warning_error_logs
 ):
@@ -654,3 +705,13 @@ def test_sf424_short_v3_0_post_population(
     assert app_json["date_received"] == "2023-02-20"
     assert app_json["authorized_representative_date_signed"] == "2023-02-20"
     assert app_json["aor_signature"] == "mynewmail@example.com"
+
+
+@pytest.mark.parametrize("group", ["project_director", "contact_person"])
+def test_sf424_short_v3_0_contact_name_has_no_title(sf424_short_v3_0, group):
+    """Without a title, required errors read "First Name is required" rather than
+    "Name First Name is required"."""
+    group_schema = sf424_short_v3_0.form_json_schema["properties"][group]["allOf"][0]
+    name_schema = group_schema["properties"]["name"]
+
+    assert all("title" not in part for part in [name_schema, *name_schema.get("allOf", [])])

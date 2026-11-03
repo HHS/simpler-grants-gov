@@ -1,10 +1,10 @@
 import uuid
 
 import pytest
-from grants_shared.pagination.pagination_models import SortDirection
 
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.constants.lookup_constants import OpportunityStatus
+from src.pagination.pagination_models import SortDirection
 from src.search.backend.load_agencies_to_index import AGENCY_INDEX_ANALYSIS, AGENCY_INDEX_MAPPINGS
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import AgencyFactory

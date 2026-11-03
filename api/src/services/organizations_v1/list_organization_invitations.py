@@ -3,12 +3,11 @@ import uuid
 from collections.abc import Sequence
 from typing import Any
 
-import grants_shared.adapters.db as db
-from grants_shared.pagination.pagination_models import PaginationInfo, SortOrder, SortOrderParams
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
@@ -16,6 +15,7 @@ from src.db.models.entity_models import (
     OrganizationInvitation,
 )
 from src.db.models.user_models import User
+from src.pagination.pagination_models import PaginationInfo, SortOrder, SortOrderParams
 from src.search.search_models import StrSearchFilter
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 

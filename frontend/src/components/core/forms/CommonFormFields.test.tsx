@@ -175,6 +175,20 @@ describe("CommonCharacterCount", () => {
     const charCountText = screen.getByText("10 characters over limit");
     expect(charCountText).toBeInTheDocument();
   });
+  it("renders and handles input without an onTextChange callback", () => {
+    const { onTextChange: _, ...propsWithoutCallback } =
+      commonCharacterCountProps;
+
+    render(<CommonCharacterCount {...propsWithoutCallback} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+
+    expect(() =>
+      fireEvent.change(element, { target: { value: "Optional callback" } }),
+    ).not.toThrow();
+    expect(element).toHaveValue("Optional callback");
+  });
   it("renders the input as disabled when disabled=true", () => {
     render(
       <CommonCharacterCount
