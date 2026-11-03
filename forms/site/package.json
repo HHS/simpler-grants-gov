@@ -21,7 +21,7 @@
     "test": "vitest run",
     "audit": "npm audit --audit-level=critical",
     "postinstall": "node scripts/postinstall.mjs",
-    "specs": "npm --prefix .. install --no-audit --no-fund && npm --prefix .. run compile"
+    "specs": "npm --prefix .. install --no-audit --no-fund && npm --prefix .. run clean && npm --prefix .. run compile"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^16.0.3",
@@ -42,7 +42,8 @@
     "lodash": "^4.18.1",
     "nanostores": "^0.11.3",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "shiki": "^4.5.0"
   },
   "overrides": {
     "http-cache-semantics": "^4.2.0"

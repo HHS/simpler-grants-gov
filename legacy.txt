@@ -1,7 +1,0 @@
---uuid:66088e2c-fc57-4f31-a926-947d5007d0ad
-Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"
-Content-Transfer-Encoding: binary
-Content-ID: <root.message@cxf.apache.org>
-
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns2:ConfirmApplicationDeliveryResponse xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/"><GrantsGovTrackingNumber>GRANT00855137</GrantsGovTrackingNumber><ResponseMessage>Success</ResponseMessage></ns2:ConfirmApplicationDeliveryResponse></soap:Body></soap:Envelope>
---uuid:66088e2c-fc57-4f31-a926-947d5007d0ad--

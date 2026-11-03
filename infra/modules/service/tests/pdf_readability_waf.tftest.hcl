@@ -170,26 +170,26 @@ run "route_and_method_scope" {
     condition = alltrue([
       for r in aws_wafv2_web_acl.waf[0].rule : r.name == "NOFO-PDFReadability-EmergencyBlock" ? alltrue([
         for s in r.statement[0].and_statement[0].statement : length(s.regex_match_statement) == 0 ? true : length(s.regex_match_statement[0].field_to_match[0].uri_path) == 0 ? true : (
-          alltrue([for path in ["/readability", "/readability/"] : can(regex(s.regex_match_statement[0].regex_string, path))]) &&
-          alltrue([for path in ["/", "/health", "/nofos", "/readability/extra", "/readability-other", "/Readability", "/readability//"] : !can(regex(s.regex_match_statement[0].regex_string, path))]) &&
+          alltrue([for path in ["/readability-checker", "/readability-checker/", "/readability", "/readability/"] : can(regex(s.regex_match_statement[0].regex_string, path))]) &&
+          alltrue([for path in ["/", "/health", "/nofos", "/nofos/readability-checker/", "/readability/extra", "/readability-checker/extra", "/readability-other", "/readability-checker-other", "/Readability", "/Readability-checker", "/readability//", "/readability-checker//", "/prefix/readability-checker/"] : !can(regex(s.regex_match_statement[0].regex_string, path))]) &&
           one(s.regex_match_statement[0].text_transformation).type == "NONE"
         )
       ]) : true
     ])
-    error_message = "NOFO-PDFReadability-EmergencyBlock must match both exact route forms and exclude other Builder paths."
+    error_message = "NOFO-PDFReadability-EmergencyBlock must match the current checker and legacy route with optional trailing slash, excluding child, authenticated and unrelated paths."
   }
 
   assert {
     condition = alltrue([
       for r in aws_wafv2_web_acl.waf[0].rule : r.name == "NOFO-PDFReadability-UploadRate" ? alltrue([
         for s in r.statement[0].rate_based_statement[0].scope_down_statement[0].and_statement[0].statement : length(s.regex_match_statement) == 0 ? true : length(s.regex_match_statement[0].field_to_match[0].uri_path) == 0 ? true : (
-          alltrue([for path in ["/readability", "/readability/"] : can(regex(s.regex_match_statement[0].regex_string, path))]) &&
-          alltrue([for path in ["/", "/health", "/nofos", "/readability/extra", "/readability-other", "/Readability", "/readability//"] : !can(regex(s.regex_match_statement[0].regex_string, path))]) &&
+          alltrue([for path in ["/readability-checker", "/readability-checker/", "/readability", "/readability/"] : can(regex(s.regex_match_statement[0].regex_string, path))]) &&
+          alltrue([for path in ["/", "/health", "/nofos", "/nofos/readability-checker/", "/readability/extra", "/readability-checker/extra", "/readability-other", "/readability-checker-other", "/Readability", "/Readability-checker", "/readability//", "/readability-checker//", "/prefix/readability-checker/"] : !can(regex(s.regex_match_statement[0].regex_string, path))]) &&
           one(s.regex_match_statement[0].text_transformation).type == "NONE"
         )
       ]) : true
     ])
-    error_message = "NOFO-PDFReadability-UploadRate must match both exact route forms and exclude other Builder paths."
+    error_message = "NOFO-PDFReadability-UploadRate must match the current checker and legacy route with optional trailing slash, excluding child, authenticated and unrelated paths."
   }
 
   assert {
@@ -297,4 +297,15 @@ run "reject_allow_action" {
     pdf_readability_waf = { rate_action = "allow" }
   }
   expect_failures = [var.pdf_readability_waf]
+}
+
+run "acl_resource_name_is_distinct_from_visibility_metric_name" {
+  command = plan
+  variables {
+    waf_metric_name = "different-visibility-label"
+  }
+  assert {
+    condition     = output.waf_web_acl_name == "nofos-infra-dev-wafv2-web-acl" && output.waf_metric_name == "different-visibility-label"
+    error_message = "Monitoring must receive the ACL resource name independently of its visibility metric label."
+  }
 }

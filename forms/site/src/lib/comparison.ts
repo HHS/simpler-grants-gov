@@ -21,15 +21,20 @@ export type FormComparison = ParityForm<FieldNode>;
 
 /** A recorded difference's category. */
 export type DiffType = "gap" | "upstream" | "intentional";
-/** What a filter tile selects: fields with a category of difference, or fields with none. */
-export type FilterKey = DiffType | "matches";
+/** What the tree counts: each recorded category, and differences no record accepts. */
+export type TallyKey = "unrecorded" | DiffType;
+export type Tally = Record<TallyKey, number>;
+/** What a filter tile selects: fields with a kind of difference, or fields with none. */
+export type FilterKey = TallyKey | "matches";
 
 export const DIFF_TYPES: readonly DiffType[] = [
   "gap",
   "upstream",
   "intentional",
 ];
-export const FILTER_KEYS: readonly FilterKey[] = [...DIFF_TYPES, "matches"];
+/** Unrecorded first: each one fails the parity tests. */
+export const TALLY_KEYS: readonly TallyKey[] = ["unrecorded", ...DIFF_TYPES];
+export const FILTER_KEYS: readonly FilterKey[] = [...TALLY_KEYS, "matches"];
 export const SOURCES: readonly Source[] = ["dat", "xsd", "form"];
 
 export const SOURCE_LABELS: Record<Source, string> = {
@@ -53,7 +58,13 @@ export const ATTRIBUTE_LABELS: Record<Attribute, string> = {
 
 export const STATUS: Record<
   Status,
-  { label: string; symbol: string; description: string }
+  {
+    label: string;
+    /** How a count of them reads, e.g. "2 unrecorded"; the label when unset. */
+    short?: string;
+    symbol: string;
+    description: string;
+  }
 > = {
   match: {
     label: "Match",
@@ -82,6 +93,7 @@ export const STATUS: Record<
   },
   unrecorded: {
     label: "Unrecorded difference",
+    short: "Unrecorded",
     symbol: "!",
     description:
       "A difference no record accepts. The parity tests fail until it is recorded.",
@@ -133,19 +145,25 @@ export function differencesIn(
     : all;
 }
 
-/** How many of the field's differences in the selected attributes fall in each category. */
+const emptyTally = (): Tally => ({
+  unrecorded: 0,
+  gap: 0,
+  upstream: 0,
+  intentional: 0,
+});
+
+/**
+ * How many of the field's differences in the selected attributes fall in each category, and
+ * how many no record accepts.
+ */
 export function countsIn(
   field: FieldComparison,
   attributes: readonly Attribute[] = [],
-): Record<DiffType, number> {
-  if (!attributes.length) return field.counts;
-  const counts: Record<DiffType, number> = {
-    gap: 0,
-    upstream: 0,
-    intentional: 0,
-  };
+): Tally {
+  const counts = emptyTally();
   for (const { cell } of differencesIn(field, attributes))
-    if (isDiffType(cell.status)) counts[cell.status] += 1;
+    if (isDiffType(cell.status) || cell.status === "unrecorded")
+      counts[cell.status] += 1;
   return counts;
 }
 
@@ -211,13 +229,13 @@ export function rollupCounts(
   fields: ReadonlyMap<string, FieldComparison>,
   filter: readonly FilterKey[] = [],
   attributes: readonly Attribute[] = [],
-): Record<DiffType, number> {
+): Tally {
   const shown = filter.some((key) => key !== "matches")
-    ? DIFF_TYPES.filter((type) => filter.includes(type))
+    ? TALLY_KEYS.filter((key) => filter.includes(key))
     : filter.length
       ? []
-      : DIFF_TYPES;
-  const sum: Record<DiffType, number> = { gap: 0, upstream: 0, intentional: 0 };
+      : TALLY_KEYS;
+  const sum = emptyTally();
   const visit = (n: ComparisonNode) => {
     if (n.kind === "section") return n.children.forEach(visit);
     const field = fields.get(n.id);
@@ -258,9 +276,9 @@ export function categoryCounts(
     FilterKey,
     { count: number; fields: number }
   >;
-  for (const type of DIFF_TYPES) {
-    const each = fields.map((field) => countsIn(field, attributes)[type]);
-    counts[type] = {
+  for (const key of TALLY_KEYS) {
+    const each = fields.map((field) => countsIn(field, attributes)[key]);
+    counts[key] = {
       count: each.reduce((sum, n) => sum + n, 0),
       fields: each.filter((n) => n > 0).length,
     };
@@ -276,10 +294,9 @@ export function attributeCounts(
   fields: readonly FieldComparison[],
   filter: readonly FilterKey[] = [],
 ): { attribute: Attribute; count: number; fields: number }[] {
-  const types = DIFF_TYPES.filter((type) => filter.includes(type));
+  const keys = TALLY_KEYS.filter((key) => filter.includes(key));
   const counted = (d: Difference) =>
-    !types.length ||
-    (isDiffType(d.cell.status) && types.includes(d.cell.status));
+    !keys.length || (keys as readonly Status[]).includes(d.cell.status);
   return (Object.keys(ATTRIBUTE_LABELS) as Attribute[])
     .map((attribute) => {
       const each = fields.map(

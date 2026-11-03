@@ -157,7 +157,11 @@ FORM_JSON_SCHEMA = {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "address": {
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")},
+                        # zip_code max 10 characters
+                        {"properties": {"zip_code": {"maxLength": 10}}},
+                    ],
                 },
             },
         },
@@ -170,7 +174,11 @@ FORM_JSON_SCHEMA = {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "address": {
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")},
+                        # zip_code max 10 characters
+                        {"properties": {"zip_code": {"maxLength": 10}}},
+                    ],
                 },
             },
         },
@@ -216,7 +224,11 @@ FORM_JSON_SCHEMA = {
                     "title": "Organization Name",
                 },
                 "address": {
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")},
+                        # zip_code max 10 characters
+                        {"properties": {"zip_code": {"maxLength": 10}}},
+                    ],
                 },
                 "congressional_district": {
                     "type": "string",

@@ -62,15 +62,17 @@ export async function verifyVirusScanPassedAndUploaded(
     // Element exists now, continue with assertions
   }
 
-  // Now verify the file is in the container
+  // Now verify the file is in the container. The container renders as soon as
+  // the FIRST of several concurrent uploads completes, so give the rest time to
+  // finish scanning (multi-file fields upload in parallel).
   await expect(existingFilesLocator).toContainText(fileName, {
-    timeout: 5_000,
+    timeout: 60_000,
   });
 
   // Check that a delete button exists for this file by verifying the text appears somewhere in the section
   // (Don't require a single button since multiple files may have delete buttons)
   await expect(existingFilesLocator).toContainText("Delete", {
-    timeout: 5_000,
+    timeout: 60_000,
   });
 }
 

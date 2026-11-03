@@ -1,4 +1,4 @@
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 ZERO_DECIMAL = Decimal("0.00")  # For formatting and defining 0 for decimal/monetary
@@ -25,7 +25,8 @@ def quantize_decimal(value: Decimal) -> Decimal:
     """
     Quantize a decimal number to always contain 2 values after the decimal.
 
-    This uses the default behavior of quantizing and rounds UP
+    Halves round away from zero (0.125 -> 0.13), rather than Python's
+    default of rounding to the nearest even digit (0.125 -> 0.12).
     See: https://docs.python.org/3/library/decimal.html#decimal.ROUND_HALF_UP
     """
-    return value.quantize(ZERO_DECIMAL)
+    return value.quantize(ZERO_DECIMAL, rounding=ROUND_HALF_UP)

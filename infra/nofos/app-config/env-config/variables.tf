@@ -147,6 +147,12 @@ variable "monitoring_email_alert_recipients" {
   description = "Explicit operational alert recipients; SNS email subscriptions require recipient confirmation."
 }
 
+variable "monitoring_email_alert_recipient_parameter_name" {
+  type        = string
+  default     = null
+  description = "Optional SecureString SSM parameter for a private monitoring email recipient; no address is committed to the repository."
+}
+
 variable "pdf_readability_alarm_actions_enabled" {
   type        = bool
   default     = false

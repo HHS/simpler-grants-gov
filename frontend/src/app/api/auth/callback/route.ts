@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (pivRequired === "true") {
       return redirect("/login?pivError=true");
     }
-    return redirect("/unauthenticated");
+    return redirect("/login");
   }
   try {
     await createSession(token, newExpirationDate());
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       { err: e, awsTraceId: request.headers.get("X-Amz-Cf-Id") },
       "Error creating session",
     );
-    return redirect("/error");
+    return redirect("/login");
   }
   return redirect("/login");
 }

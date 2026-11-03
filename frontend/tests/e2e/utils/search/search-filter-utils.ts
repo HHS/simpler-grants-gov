@@ -48,6 +48,10 @@ export const FUNDING_INSTRUMENT_GRANT = {
   "funding-instrument-grant": "grant",
 };
 
+export const FUNDING_INSTRUMENT_OTHER = {
+  "funding-instrument-other": "other",
+};
+
 export const ELIGIBILITY_COUNTY = {
   "eligibility-county_governments": "county_governments",
 };
@@ -56,7 +60,7 @@ export const ELIGIBILITY_COUNTY = {
 // Scenario composition (login + navigate + drawer open/apply/assert)
 // ---------------------------------------------------------------------------
 
-export async function openSearchWithFilterDrawer(
+export async function gotoSearchPage(
   page: Page,
   context: BrowserContext,
   testInfo: TestInfo,
@@ -74,6 +78,15 @@ export async function openSearchWithFilterDrawer(
   });
 
   await waitForSearchResultsInitialLoad(page);
+}
+
+export async function openSearchWithFilterDrawer(
+  page: Page,
+  context: BrowserContext,
+  testInfo: TestInfo,
+  loginState: LoginState,
+): Promise<void> {
+  await gotoSearchPage(page, context, testInfo, loginState);
   await ensureFilterDrawerOpen(page);
 }
 
@@ -159,6 +172,109 @@ export async function ensureFilterDrawerOpen(page: Page) {
         .catch(() => undefined);
     }
   }
+}
+
+// Targets the modal overlay, not the #search-filter-drawer wrapper: the wrapper
+// has no in-flow content (its overlay is position: fixed), so its own box is
+// empty and Playwright's visibility check on it is unreliable. The overlay is
+// full-viewport and inherits the wrapper's is-visible / is-hidden visibility.
+export const getFilterDrawer = (page: Page): Locator =>
+  page.locator('.usa-modal-overlay[aria-controls="search-filter-drawer"]');
+
+export const getFilterDrawerToggle = (page: Page): Locator =>
+  page.locator("button[data-testid='toggle-drawer']");
+
+// The drawer is rendered to a portal only after hydration (Drawer.tsx,
+// renderToPortal={!isSSR}), so toBeHidden() alone passes vacuously on a page
+// that has not hydrated yet. Require the overlay to be mounted and hidden.
+export async function expectFilterDrawerClosed(page: Page): Promise<void> {
+  await expect(getFilterDrawerToggle(page)).toBeEnabled();
+  await expect(getFilterDrawer(page)).toHaveCount(1);
+  await expect(getFilterDrawer(page)).toBeHidden();
+}
+
+export async function openFilterDrawer(page: Page): Promise<void> {
+  await getFilterDrawerToggle(page).click();
+  await expect(getFilterDrawer(page)).toBeVisible();
+}
+
+// Keyboard open keeps focus on the Filters button (a mouse click does not on
+// every browser, e.g. WebKit), which the focus-return assertions rely on.
+export async function openFilterDrawerWithKeyboard(
+  page: Page,
+  key: "Enter" | "Space" = "Enter",
+): Promise<void> {
+  await getFilterDrawerToggle(page).focus();
+  await page.keyboard.press(key);
+  await expect(getFilterDrawer(page)).toBeVisible();
+}
+
+export async function closeFilterDrawerWithCloseButton(
+  page: Page,
+): Promise<void> {
+  await getFilterDrawer(page).locator("button.usa-modal__close").click();
+  await expectFilterDrawerClosed(page);
+}
+
+export async function closeFilterDrawerWithViewResults(
+  page: Page,
+): Promise<void> {
+  await getFilterDrawer(page)
+    .locator("button[data-testid='close-drawer']")
+    .click();
+  await expectFilterDrawerClosed(page);
+}
+
+// Clicks the page overlay beside the drawer panel (not on the panel itself)
+export async function clickOutsideFilterDrawer(page: Page): Promise<void> {
+  const panel = await getFilterDrawer(page).locator(".usa-modal").boundingBox();
+  const viewport = page.viewportSize();
+  if (!panel || !viewport) {
+    throw new Error("Unable to measure filter drawer panel or viewport");
+  }
+
+  const margin = 20;
+  const y = viewport.height / 2;
+  if (panel.x > margin) {
+    await page.mouse.click(panel.x / 2, y);
+  } else if (panel.x + panel.width < viewport.width - margin) {
+    await page.mouse.click((panel.x + panel.width + viewport.width) / 2, y);
+  } else {
+    throw new Error(
+      "Filter drawer fills the viewport; no area outside it to click",
+    );
+  }
+}
+
+// Focus is on the drawer panel itself or on an element inside it
+export async function expectFocusInsideFilterDrawer(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const active = document.activeElement;
+        return !!active?.closest("#search-filter-drawer .usa-modal");
+      }),
+    )
+    .toBe(true);
+}
+
+export async function expectFocusReturnedToFilterDrawerToggle(
+  page: Page,
+): Promise<void> {
+  await expect(getFilterDrawerToggle(page)).toBeFocused();
+}
+
+// Drawer panel and its critical controls are fully on screen
+export async function expectFilterDrawerFitsViewport(
+  page: Page,
+): Promise<void> {
+  const drawer = getFilterDrawer(page);
+  await expect(drawer.locator(".usa-modal")).toBeInViewport({ ratio: 0.99 });
+  await expect(drawer.locator(".usa-modal__heading")).toBeInViewport();
+  await expect(drawer.locator("button.usa-modal__close")).toBeInViewport();
+  await expect(
+    drawer.locator("button[data-testid='close-drawer']"),
+  ).toBeInViewport();
 }
 
 export async function expectCheckboxIDIsChecked(
@@ -366,6 +482,29 @@ export const validateTopLevelAndNestedSelectedFilterCounts = async (
     await expect(expanderButton).toContainText(`${expectedNestedCount}`);
   }
 };
+
+// The drawer does not render a numeric count in the accordion title. Selected
+// state is shown by the checked options plus the simpler-selected-filter
+// highlight on the accordion (SearchFilterAccordion.tsx), so assert both.
+export async function expectSelectedFilterCount(
+  page: Page,
+  queryParamKey: string,
+  expectedCount: number,
+): Promise<void> {
+  const accordion = page.locator(
+    `[data-testid="accordionItem_opportunity-filter-${queryParamKey}"]`,
+  );
+
+  await expect(accordion.locator("input[type='checkbox']:checked")).toHaveCount(
+    expectedCount,
+  );
+
+  if (expectedCount > 0) {
+    await expect(accordion).toHaveClass(/simpler-selected-filter/);
+  } else {
+    await expect(accordion).not.toHaveClass(/simpler-selected-filter/);
+  }
+}
 
 export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterButton = page.locator(

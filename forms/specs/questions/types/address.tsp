@@ -60,11 +60,11 @@ namespace AddressParts {
 @Validation.requiredPathWhen("zipCode", "country", Questions.Types.CountryCode.USA)
 model Address {
   /** Enter the first line of the street address. */
-  @UI.label("Street1")
+  @UI.label("Street 1")
   street1: Questions.Types.AddressParts.Street1;
 
   /** Enter the second line of the street address. */
-  @UI.label("Street2")
+  @UI.label("Street 2")
   street2?: Questions.Types.AddressParts.Street2;
 
   /** Enter the city. */

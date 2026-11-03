@@ -250,11 +250,12 @@ module "monitoring" {
   application_log_group                       = module.service.application_log_group
   incident_management_service_integration_url = module.app_config.has_incident_management_service && !local.is_temporary ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
 
-  email_alert_recipients = local.service_config.monitoring_email_alert_recipients
+  email_alert_recipients               = local.service_config.monitoring_email_alert_recipients
+  email_alert_recipient_parameter_name = local.service_config.monitoring_email_alert_recipient_parameter_name
   pdf_readability_monitoring = local.service_config.enable_pdf_readability_monitoring ? {
-    waf_metric_name = module.service.waf_metric_name
-    cluster_name    = module.service.cluster_name
-    region          = local.service_config.region
+    waf_web_acl_name = module.service.waf_web_acl_name
+    cluster_name     = module.service.cluster_name
+    region           = local.service_config.region
   } : null
   pdf_readability_alarm_actions_enabled = local.service_config.pdf_readability_alarm_actions_enabled
 }

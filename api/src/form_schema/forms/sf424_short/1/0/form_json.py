@@ -84,9 +84,10 @@ FORM_JSON_SCHEMA = {
             "type": "object",
             "required": ["name", "title", "address", "phone_number", "email"],
             "properties": {
+                # No title on purpose: the frontend prefixes required messages with the
+                # parent's title, which would read "Name First Name is required".
                 "name": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
-                    "title": "Name",
                     "description": "Enter the name.",
                 },
                 "title": {
@@ -95,7 +96,17 @@ FORM_JSON_SCHEMA = {
                     "description": "Enter the position title.",
                 },
                 "address": {
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+                        # if country is US, zip_code must be at least 9 characters
+                        {
+                            "if": {
+                                "properties": {"country": {"const": "USA: UNITED STATES"}},
+                                "required": ["country"],
+                            },
+                            "then": {"properties": {"zip_code": {"minLength": 9}}},
+                        },
+                    ],
                     "title": "Address",
                     "description": "Enter the address.",
                 },
@@ -166,7 +177,17 @@ FORM_JSON_SCHEMA = {
             "description": "Enter the legal name of applicant that will undertake the assistance activity. This is the name that the organization has registered with the System for Award Management (SAM.gov). Information on registering with SAM may be obtained by visiting the Grants.gov website.",
         },
         "applicant": {
-            "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+            "allOf": [
+                {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+                # if country is US, zip_code must be at least 9 characters
+                {
+                    "if": {
+                        "properties": {"country": {"const": "USA: UNITED STATES"}},
+                        "required": ["country"],
+                    },
+                    "then": {"properties": {"zip_code": {"minLength": 9}}},
+                },
+            ],
             "title": "Address",
             "description": "Enter the address of the applicant.",
         },

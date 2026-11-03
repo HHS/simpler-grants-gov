@@ -6,6 +6,34 @@ using SimplerForms;
 
 namespace Forms.EPAKeyContacts;
 
+// =============================================================================
+// FORM LAYOUT
+// =============================================================================
+
+// The paper form's layout: one section per role, in official order.
+@UI.layout(EPAKeyContacts)
+model EPAKeyContactsLayout {
+  @UI.label("Authorized Representative")
+  @UI.field(EPAKeyContacts.authorizedRepresentative)
+  authorizedRepresentative: EPAContact<"the Authorized Representative's ">;
+
+  @UI.label("Payee")
+  @UI.field(EPAKeyContacts.payee)
+  payee: EPAContact<"the Payee's ">;
+
+  @UI.label("Administrative Contact")
+  @UI.field(EPAKeyContacts.administrativeContact)
+  administrativeContact: EPAContact<"the Administrative Contact's ">;
+
+  @UI.label("Project Manager")
+  @UI.field(EPAKeyContacts.projectManager)
+  projectManager: EPAContact<"the Project Manager's ">;
+}
+
+// =============================================================================
+// CONTACT LAYOUT
+// =============================================================================
+
 /**
  * One EPA contact: their title under a Role heading after the name, and no County or
  * Province, which `globLib:ContactPersonDataTypeV3` permits but neither the official PDF
@@ -35,24 +63,4 @@ model EPAContact<Whose extends valueof string> {
 
   @UI.omit county: Questions.People.Person.address::type.county;
   @UI.omit province: Questions.People.Person.address::type.province;
-}
-
-// The paper form's layout: one section per role, in official order.
-@UI.layout(EPAKeyContacts)
-model EPAKeyContactsLayout {
-  @UI.label("Authorized Representative")
-  @UI.field(EPAKeyContacts.authorizedRepresentative)
-  authorizedRepresentative: EPAContact<"the Authorized Representative's ">;
-
-  @UI.label("Payee")
-  @UI.field(EPAKeyContacts.payee)
-  payee: EPAContact<"the Payee's ">;
-
-  @UI.label("Administrative Contact")
-  @UI.field(EPAKeyContacts.administrativeContact)
-  administrativeContact: EPAContact<"the Administrative Contact's ">;
-
-  @UI.label("Project Manager")
-  @UI.field(EPAKeyContacts.projectManager)
-  projectManager: EPAContact<"the Project Manager's ">;
 }

@@ -2,7 +2,9 @@ import uuid
 
 from sqlalchemy import select
 
+from src.auth.api_key_config import ApiKeyConfig
 from src.db.models.user_models import UserApiKey
+from src.util.api_key_gen import hash_api_key_id
 
 
 def test_create_api_key_success(enable_factory_create, db_session, client, user, user_auth_token):
@@ -40,6 +42,30 @@ def test_create_api_key_success(enable_factory_create, db_session, client, user,
     assert api_key.user_id == user.user_id
     assert api_key.is_active is True
     assert api_key.last_used is None
+
+    assert api_key.key_id_hash == hash_api_key_id(response_data["key_id"], ApiKeyConfig().pepper)
+    assert "key_id_hash" not in response_data
+
+
+def test_create_api_key_returned_key_authenticates(
+    enable_factory_create, db_session, client, user, user_auth_token
+):
+    """The key returned on create can be used with X-API-Key auth"""
+    response = client.post(
+        f"/v1/users/{user.user_id}/api-keys",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"key_name": "Auth Test Key"},
+    )
+    assert response.status_code == 200
+    key_id = response.json["data"]["key_id"]
+
+    # The API key has to resolve to the user by its hash for this to succeed
+    response = client.post(
+        f"/v1/users/{user.user_id}/agencies",
+        headers={"X-API-Key": key_id},
+    )
+
+    assert response.status_code == 200
 
 
 def test_create_api_key_validation_error_missing_key_name(

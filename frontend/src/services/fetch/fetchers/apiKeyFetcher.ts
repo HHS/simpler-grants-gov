@@ -8,9 +8,8 @@ import {
   RenameApiKeyResponse,
 } from "src/types/apiKeyTypes";
 
-// The API still returns the full key on list and rename until the hashing
-// cutover (#11633), so copy over only the metadata to keep it out of anything
-// sent to the browser.
+// The API only returns the key on create, but copy over only the metadata on
+// list and rename anyway so a key can never end up in anything sent to the browser.
 const toApiKeyMetadata = (apiKey: ApiKey): ApiKey => ({
   api_key_id: apiKey.api_key_id,
   key_name: apiKey.key_name,

@@ -9,11 +9,13 @@ interface Props {
 }
 
 export default function CategoryBadge({ status, count }: Props) {
-  const label = STATUS[status].label;
+  const { label, short } = STATUS[status];
   return (
     <span className={`category-badge category-badge--${status}`}>
       <StatusDot status={status} />
-      {count === undefined ? label : `${count} ${label.toLowerCase()}`}
+      {count === undefined
+        ? label
+        : `${count} ${(short ?? label).toLowerCase()}`}
     </span>
   );
 }

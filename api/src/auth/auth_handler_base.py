@@ -56,10 +56,7 @@ class AbstractAuthHandler[
     # --- API keys ---
 
     @abc.abstractmethod
-    def get_api_key_by_key_id(self, key_id: str) -> USER_API_KEY | None: ...
-
-    @abc.abstractmethod
-    def get_api_key_by_key_id_hash(self, key_id_hash: str) -> USER_API_KEY | None: ...
+    def get_api_key_by_hash(self, key_id_hash: str) -> USER_API_KEY | None: ...
 
     @abc.abstractmethod
     def create_api_key(

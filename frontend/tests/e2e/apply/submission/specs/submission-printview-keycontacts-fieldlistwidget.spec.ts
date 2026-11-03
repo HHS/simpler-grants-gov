@@ -18,10 +18,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import {
-  skipNonChromeOnStaging,
-  skipWebkit,
-} from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillFormPartial } from "tests/e2e/utils/forms/general-forms-filling";
 import { clickSaveButton } from "tests/e2e/utils/forms/save-form-utils";
@@ -59,7 +56,6 @@ const applicantScenarios = [
 test.describe("Key Contacts FieldList", () => {
   test.beforeEach(({ page: _ }, testInfo) => {
     skipNonChromeOnStaging(testInfo);
-    skipWebkit(testInfo);
   });
 
   for (const { testName, orgLabel } of applicantScenarios) {

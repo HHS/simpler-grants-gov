@@ -58,7 +58,9 @@ def _check_duplicate_key_name(
             )
 
 
-def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> UserApiKey:
+def create_api_key(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> tuple[UserApiKey, str]:
     params = CreateApiKeyParams(json_data)
     key_name = params.key_name.strip()
 

@@ -18,7 +18,7 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session):
     user = UserFactory.create()
     json_data = {"key_name": "Test API Key"}
 
-    api_key = create_api_key(
+    api_key, key_id = create_api_key(
         db_session=db_session,
         user_id=user.user_id,
         json_data=json_data,
@@ -30,14 +30,13 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session):
     assert api_key.api_key_id is not None
     assert api_key.user_id == user.user_id
     assert api_key.key_name == "Test API Key"
-    assert api_key.key_id is not None
-    assert len(api_key.key_id) == 25  # Auto-generated key_id should be 25 characters
+    assert len(key_id) == 25  # Auto-generated key_id should be 25 characters
     assert api_key.is_active is True
     assert api_key.last_used is None
 
     # Verify the key_id contains only alphanumeric characters
     allowed_chars = string.ascii_letters + string.digits
-    assert all(c in allowed_chars for c in api_key.key_id)
+    assert all(c in allowed_chars for c in key_id)
 
     # Verify it was persisted to the database
     db_session.commit()
@@ -47,10 +46,10 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session):
 
 
 def test_create_api_key_stores_key_id_hash(enable_factory_create, db_session: db.Session):
-    """The key is saved with both the raw key_id and its hash."""
+    """The key is saved with the hash of the raw key_id that is returned."""
     user = UserFactory.create()
 
-    api_key = create_api_key(
+    api_key, key_id = create_api_key(
         db_session=db_session,
         user_id=user.user_id,
         json_data={"key_name": "Hashed Key"},
@@ -58,25 +57,23 @@ def test_create_api_key_stores_key_id_hash(enable_factory_create, db_session: db
     db_session.commit()
     db_session.refresh(api_key)
 
-    assert api_key.key_id is not None
-    assert api_key.key_id_hash == hash_api_key_id(api_key.key_id, ApiKeyConfig().pepper)
+    assert api_key.key_id_hash == hash_api_key_id(key_id, ApiKeyConfig().pepper)
 
 
 def test_create_api_key_generates_unique_key_ids(enable_factory_create, db_session: db.Session):
     """Test that create_api_key generates unique key_ids for each API key."""
     user = UserFactory.create()
 
-    api_keys = []
+    key_ids = []
     for i in range(3):
         json_data = {"key_name": f"Key {i}"}
-        api_key = create_api_key(
+        _, key_id = create_api_key(
             db_session=db_session,
             user_id=user.user_id,
             json_data=json_data,
         )
-        api_keys.append(api_key)
+        key_ids.append(key_id)
 
-    key_ids = [key.key_id for key in api_keys]
     assert len(set(key_ids)) == len(key_ids), "All key_ids should be unique"
 
     assert all(len(key_id) == 25 for key_id in key_ids)
@@ -101,13 +98,13 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
         ]
 
         json_data = {"key_name": "New Key"}
-        api_key = create_api_key(
+        _, key_id = create_api_key(
             db_session=db_session,
             user_id=user.user_id,
             json_data=json_data,
         )
 
-        assert api_key.key_id == "UNIQUE_TEST_KEY_123456789"
+        assert key_id == "UNIQUE_TEST_KEY_123456789"
         assert mock_generate.call_count == 2
 
 
@@ -147,7 +144,7 @@ def test_create_api_key_logging_success(enable_factory_create, db_session: db.Se
     json_data = {"key_name": key_name}
 
     with caplog.at_level("INFO"):
-        api_key = create_api_key(
+        api_key, _ = create_api_key(
             db_session=db_session,
             user_id=user.user_id,
             json_data=json_data,
@@ -209,7 +206,7 @@ def test_create_api_key_uses_key_generator(
     user = UserFactory.create()
 
     json_data = {"key_name": "Test Key"}
-    api_key = create_api_key(
+    _, key_id = create_api_key(
         db_session=db_session,
         user_id=user.user_id,
         json_data=json_data,
@@ -217,7 +214,7 @@ def test_create_api_key_uses_key_generator(
 
     mock_generate.assert_called_once()
 
-    assert api_key.key_id == "TestGeneratedKey123456789"
+    assert key_id == "TestGeneratedKey123456789"
 
 
 def test_create_api_key_aws_gateway_error_handling(
@@ -232,7 +229,7 @@ def test_create_api_key_aws_gateway_error_handling(
 
     # This should succeed using the built-in mock system
     with caplog.at_level("INFO"):
-        api_key = create_api_key(
+        api_key, _ = create_api_key(
             db_session=db_session,
             user_id=user.user_id,
             json_data=json_data,
@@ -272,7 +269,7 @@ def test_create_api_key_database_rollback_on_gateway_failure(
     initial_count = len(initial_count)
 
     # This should succeed with the built-in mock system
-    api_key = create_api_key(
+    api_key, _ = create_api_key(
         db_session=db_session,
         user_id=user.user_id,
         json_data=json_data,
@@ -302,14 +299,14 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     user = UserFactory.create()
 
     json_data1 = {"key_name": "Production Key"}
-    api_key1 = create_api_key(
+    api_key1, key_id1 = create_api_key(
         db_session=db_session,
         user_id=user.user_id,
         json_data=json_data1,
     )
 
     json_data2 = {"key_name": "Development Key"}
-    api_key2 = create_api_key(
+    api_key2, key_id2 = create_api_key(
         db_session=db_session,
         user_id=user.user_id,
         json_data=json_data2,
@@ -318,7 +315,7 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     assert api_key1.user_id == api_key2.user_id
     assert api_key1.key_name != api_key2.key_name
     assert api_key1.api_key_id != api_key2.api_key_id
-    assert api_key1.key_id != api_key2.key_id
+    assert key_id1 != key_id2
 
 
 def test_create_api_key_blank_name_rejected(enable_factory_create, db_session: db.Session):
@@ -386,7 +383,7 @@ def test_create_api_key_different_users_same_name_allowed(
     UserApiKeyFactory.create(user=user1, key_name="Prod")
 
     # Should succeed — uniqueness is per-user, not global
-    api_key = create_api_key(
+    api_key, _ = create_api_key(
         db_session=db_session, user_id=user2.user_id, json_data={"key_name": "Prod"}
     )
 
@@ -408,7 +405,7 @@ def test_create_api_key_with_preexisting_duplicates_can_create_new(
     UserApiKeyFactory.create(user=user, key_name="Prod")
 
     # Creating a new key with a distinct name should succeed
-    api_key = create_api_key(
+    api_key, _ = create_api_key(
         db_session=db_session, user_id=user.user_id, json_data={"key_name": "Staging"}
     )
 

@@ -1,8 +1,8 @@
-import { FILTER_KEYS } from "@/lib/comparison";
 import {
   $attributeFilter,
   $categoryFilter,
   $comparison,
+  $filterKeys,
   $visibleFields,
   clearCategories,
 } from "@/stores/fieldComparison";
@@ -18,6 +18,7 @@ export default function DeviationTiles() {
   const filtering = categories.length > 0 || attributes.length > 0;
   const shown = useStore($visibleFields).length;
   const total = useStore($comparison).fields.length;
+  const keys = useStore($filterKeys);
   return (
     <div className="deviation-tiles">
       <div
@@ -25,7 +26,7 @@ export default function DeviationTiles() {
         role="group"
         aria-label="Filter fields by difference"
       >
-        {FILTER_KEYS.map((key) => (
+        {keys.map((key) => (
           <DeviationTile key={key} filterKey={key} />
         ))}
       </div>

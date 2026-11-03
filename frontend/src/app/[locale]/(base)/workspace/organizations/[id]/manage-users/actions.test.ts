@@ -32,7 +32,7 @@ describe("user profile form action", () => {
       "generic error message",
     );
     expect(result.validationErrors).toEqual({
-      email: ["Expected string, received null"],
+      email: ["Invalid input: expected string, received null"],
     });
   });
   it("returns validation warning if last name is missing", async () => {
@@ -46,7 +46,7 @@ describe("user profile form action", () => {
       "generic error message",
     );
     expect(result.validationErrors).toEqual({
-      role: ["Expected string, received null"],
+      role: ["Invalid input: expected string, received null"],
     });
   });
   it("returns error if not logged in", async () => {

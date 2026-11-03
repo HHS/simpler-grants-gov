@@ -80,7 +80,10 @@ export default async function RootLayoutWrapper({
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <CorrelationIdTracker correlationId={correlationId} />
+          <CorrelationIdTracker
+            correlationId={correlationId}
+            newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
+          />
           {children}
         </NextIntlClientProvider>
         {environment.IS_CI !== "true" && (

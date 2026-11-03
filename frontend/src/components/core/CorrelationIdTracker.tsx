@@ -10,11 +10,13 @@ import { useEffect } from "react";
 
 export const CorrelationIdTracker = ({
   correlationId,
+  newRelicEnabled,
 }: {
   correlationId?: string;
+  newRelicEnabled: boolean;
 }) => {
   useEffect(() => {
-    if (!correlationId) {
+    if (!correlationId || !newRelicEnabled) {
       return;
     }
 
@@ -34,7 +36,7 @@ export const CorrelationIdTracker = ({
     return () => {
       isCancelled = true;
     };
-  }, [correlationId]);
+  }, [correlationId, newRelicEnabled]);
 
   return null;
 };

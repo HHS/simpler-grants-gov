@@ -500,6 +500,7 @@ class JobType(StrEnum):
     LOAD_AGENCY_DATA_OPENSEARCH = "load-agency-data-opensearch"
     EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
     CHECK_XSD_DRIFT = "check-xsd-drift"
+    NEW_OPPORTUNITY_NOTIFICATION = "new-opportunity-notification"
 
 
 class NotificationType(StrEnum):

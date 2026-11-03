@@ -130,6 +130,17 @@ describe("decrypt", () => {
     expect(decrypted).toEqual(null);
   });
 
+  it("returns null for an expired token", async () => {
+    jwtVerifyMock.mockImplementation(() => {
+      throw Object.assign(new Error('"exp" claim timestamp check failed'), {
+        name: "JWTExpired",
+        code: "ERR_JWT_EXPIRED",
+      });
+    });
+    const decrypted = await decrypt(cookie, fakeKey, "HS256");
+    expect(decrypted).toEqual(null);
+  });
+
   it("logs verification failures without the decoded payload", async () => {
     jwtVerifyMock.mockImplementation(() => {
       throw Object.assign(new Error('"exp" claim timestamp check failed'), {

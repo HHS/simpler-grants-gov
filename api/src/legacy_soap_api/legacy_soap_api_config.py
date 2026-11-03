@@ -173,6 +173,12 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         ),
+        "GetApplicationListExpandedRequest": SOAPOperationConfig(
+            request_operation_name="GetApplicationListExpandedRequest",
+            response_operation_name="GetApplicationListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetApplicationListExpanded",
+            privileges={Privilege.LEGACY_AGENCY_VIEWER},
+        ),
         "ConfirmApplicationDeliveryRequest": SOAPOperationConfig(
             request_operation_name="ConfirmApplicationDeliveryRequest",
             response_operation_name="ConfirmApplicationDeliveryResponse",

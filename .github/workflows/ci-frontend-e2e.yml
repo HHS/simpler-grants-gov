@@ -407,6 +407,124 @@ jobs:
             api/src/form_schema/forms/**
             api/src/form_schema/shared/**
             api/src/form_schema/rule_processing/**
+            frontend/tests/e2e/apply/**
+            frontend/src/app/*/*/workspace/applications/**
+            frontend/src/app/api/applications/**
+            frontend/src/app/api/file/**
+            frontend/src/app/api/competitions/**
+            frontend/src/app/*/*/opportunity/*/_components/StartApplicationModal/**
+            frontend/src/app/*/*/opportunity/*/_components/OpportunityApplyAction.tsx
+            frontend/src/components/apply-form/**
+            frontend/src/hooks/useFileUpload.ts
+            frontend/src/hooks/ApplicationAttachments.tsx
+            frontend/src/hooks/useUserOrganizations.ts
+            frontend/src/services/fetch/fetchers/addOrganizationToApplication.ts
+            frontend/src/services/fetch/fetchers/allFormsFetcher.ts
+            frontend/src/services/fetch/fetchers/applicationFetcher.ts
+            frontend/src/services/fetch/fetchers/clientApplicationFetcher.ts
+            frontend/src/services/fetch/fetchers/competitionFormsFetcher.ts
+            frontend/src/services/fetch/fetchers/filesFetcher.ts
+            frontend/src/services/fetch/fetchers/formsFetcher.ts
+            frontend/src/services/fetch/fetchers/opportunityFetcher.ts
+            frontend/src/services/fetch/fetchers/userApplicationsFetcher.ts
+            frontend/src/utils/applyForm/**
+            frontend/src/utils/formData/**
+            frontend/src/utils/fileUtils/**
+            frontend/src/utils/getFormData.ts
+            frontend/src/utils/streamUtils.ts
+            frontend/src/constants/fileUploads.ts
+            frontend/src/types/application/**
+            frontend/src/types/applyForm/**
+            frontend/src/types/applicationResponseTypes.ts
+            frontend/src/types/formResponseTypes.ts
+            frontend/src/types/attachmentTypes.ts
+            frontend/src/types/fileUploadTypes.ts
+            api/src/form_schema/**
+            api/src/api/application_alpha/**
+            api/src/api/application_v1/**
+            api/src/api/form_alpha/**
+            api/src/api/form_v1/**
+            api/src/api/files_v1/**
+            api/src/api/competition_alpha/**
+            api/src/services/applications/**
+            api/src/services/form_alpha/**
+            api/src/services/form_v1/**
+            api/src/services/files/**
+            api/src/services/pdf_generation/**
+            api/src/services/xml_generation/**
+            api/src/services/competition_alpha/**
+            api/src/db/models/competition_models.py
+            api/src/db/models/file_upload_models.py
+            api/tests/lib/seed_form.py
+            api/tests/lib/seed_local_db.py
+            !**/*.test.ts
+            !**/*.test.tsx
+
+      # Code that determines what Discovery (search, opportunity pages, saved items) does.
+      # The Start Application modal and Apply button, competition code and opportunityFetcher.ts are shared with
+      # the apply flow, so they appear in the apply filter above as well.
+      - name: Get list of changed discovery files
+        id: changed-discovery-files
+        uses: tj-actions/changed-files@v47.0.6
+        with:
+          files: |
+            frontend/tests/e2e/search/**/*.spec.ts
+            frontend/tests/e2e/opportunity/**/*.spec.ts
+            frontend/tests/e2e/saved-opportunities/**/*.spec.ts
+            frontend/src/app/*/*/search/**
+            frontend/src/app/*/*/opportunity/**
+            frontend/src/app/*/*/workspace/saved-opportunities/**
+            frontend/src/app/*/*/workspace/saved-search-queries/**
+            frontend/src/app/api/search/**
+            frontend/src/app/api/opportunities/**
+            frontend/src/app/api/user/saved-opportunities/**
+            frontend/src/app/api/user/saved-searches/**
+            frontend/src/app/api/competitions/**
+            frontend/src/components/saved-opportunities/**
+            frontend/src/components/simpler-opportunity/**
+            frontend/src/components/core/ClientSideUrlUpdater.tsx
+            frontend/src/components/core/drawer/**
+            frontend/src/components/core/tooltip/InfoTooltip.tsx
+            frontend/src/components/core/LegacyLink.tsx
+            frontend/src/hooks/useSearchParamUpdater.ts
+            frontend/src/hooks/useOpportunitySave.ts
+            frontend/src/hooks/useCopyToClipboard.ts
+            frontend/src/services/search/**
+            frontend/src/services/fetch/fetchers/searchFetcher.ts
+            frontend/src/services/fetch/fetchers/savedSearchFetcher.ts
+            frontend/src/services/fetch/fetchers/savedOpportunityFetcher.ts
+            frontend/src/services/fetch/fetchers/organizationSavedOpportunitiesFetcher.ts
+            frontend/src/services/fetch/fetchers/clientAgenciesFetcher.ts
+            frontend/src/services/fetch/fetchers/opportunityFetcher.ts
+            frontend/src/utils/search/**
+            frontend/src/utils/opportunity/**
+            frontend/src/utils/buildSavedOpportunityTags.ts
+            frontend/src/types/search/**
+            frontend/src/types/opportunity/**
+            frontend/src/constants/search.ts
+            frontend/src/constants/searchFilterOptions.ts
+            frontend/src/constants/opportunity.ts
+            api/src/api/opportunities_v1/**
+            api/src/api/agencies_v1/**
+            api/src/api/competition_alpha/**
+            api/src/api/users/user_routes.py
+            api/src/api/users/user_schemas.py
+            api/src/services/opportunities_v1/**
+            api/src/services/current_opportunity/**
+            api/src/services/opportunity_attachments/**
+            api/src/services/agencies_v1/**
+            api/src/services/competition_alpha/**
+            api/src/services/users/*saved_*.py
+            api/src/services/organizations_v1/*saved_opportunity*.py
+            api/src/search/**
+            api/src/adapters/search/**
+            api/src/db/models/opportunity_models.py
+            api/src/db/models/user_models.py
+            api/src/db/models/agency_models.py
+            api/src/db/models/competition_models.py
+            api/tests/lib/seed_local_db.py
+            !**/*.test.ts
+            !**/*.test.tsx
 
       - name: Get list of changed core e2e files
         id: changed-e2e-utils
@@ -429,11 +547,13 @@ jobs:
         shell: bash
         env:
           APPLY_FORMS_CHANGED: ${{ steps.changed-apply-form-files.outputs.any_changed }}
+          DISCOVERY_CHANGED: ${{ steps.changed-discovery-files.outputs.any_changed }}
           E2E_SPECS_CHANGED: ${{ steps.changed-e2e-spec-files.outputs.any_changed }}
           E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
 
         run: |
           echo "Any apply form files changed? $APPLY_FORMS_CHANGED"
+          echo "Any discovery files changed? $DISCOVERY_CHANGED"
           echo "Any e2e spec files changed? $E2E_SPECS_CHANGED"
           echo "Any e2e util files changed? $E2E_UTILS_CHANGED"
 
@@ -441,6 +561,9 @@ jobs:
             test_group_tags="@smoke"
             if [[ $APPLY_FORMS_CHANGED = "true" ]]; then
               test_group_tags="$test_group_tags|@apply-forms"
+            fi
+            if [[ $DISCOVERY_CHANGED = "true" ]]; then
+              test_group_tags="$test_group_tags|@discovery"
             fi
             echo "test_group_tags=$test_group_tags" >> "$GITHUB_ENV"
           elif [[ $GITHUB_EVENT_NAME = "push" ]]; then
@@ -450,7 +573,7 @@ jobs:
           fi
 
       # PRs run Chrome only.
-      # Cross-browser coverage still runs on push to main and in the daily/weekly
+      # Cross-browser coverage still runs on push to main and in the daily
       # scheduled runs, which leave playwright_projects blank to get every project.
       - name: Determine browsers to run
         shell: bash

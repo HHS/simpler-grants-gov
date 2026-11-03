@@ -1,3 +1,6 @@
+# Cover the current public checker and legacy redirects; authenticated checker
+# paths remain outside these rules. Use anchored alternatives without captures
+# for AWS WAF regex compatibility.
 locals {
   pdf_readability_managed_priority_offset = var.pdf_readability_waf == null ? 0 : 2
 }
@@ -40,7 +43,7 @@ resource "aws_wafv2_web_acl" "waf" {
         and_statement {
           statement {
             regex_match_statement {
-              regex_string = "^/readability/?$"
+              regex_string = "^/readability-checker/?$|^/readability/?$"
               field_to_match {
                 uri_path {}
               }
@@ -104,7 +107,7 @@ resource "aws_wafv2_web_acl" "waf" {
             and_statement {
               statement {
                 regex_match_statement {
-                  regex_string = "^/readability/?$"
+                  regex_string = "^/readability-checker/?$|^/readability/?$"
                   field_to_match {
                     uri_path {}
                   }

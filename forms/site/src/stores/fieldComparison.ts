@@ -4,6 +4,7 @@ import {
   defaultCell,
   differences,
   diffTypeCounts,
+  FILTER_KEYS,
   summarize,
   visibleDifferences,
   visibleFields,
@@ -46,6 +47,12 @@ export const $categoryCounts = computed(
   [$comparison, $attributeFilter],
   (comparison, attributes) => categoryCounts(comparison.fields, attributes),
 );
+
+/** The filter tiles to show. Unrecorded differences get one only when the form has some. */
+export const $filterKeys = computed($comparison, (comparison) => {
+  const unrecorded = categoryCounts(comparison.fields).unrecorded.count;
+  return FILTER_KEYS.filter((key) => key !== "unrecorded" || unrecorded > 0);
+});
 
 export const $attributeCounts = computed(
   [$comparison, $categoryFilter],

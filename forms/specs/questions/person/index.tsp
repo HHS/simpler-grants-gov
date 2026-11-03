@@ -35,13 +35,11 @@ scalar PersonFaxNumber extends Questions.Types.PhoneNumber;
 @UI.label("Email")
 scalar PersonEmail extends Questions.Types.EmailAddress;
 
-/**
- * A person and how to reach them: `globLib:ContactPersonDataTypeV3`.
- *
- * Used as-is wherever a form asks for a contact person whose role is given by where the
- * person sits in the form (e.g. EPA's Payee). A role that adds fields of its own, like a
- * key contact's project role, is a separate question that spreads this one.
- */
+// `globLib:ContactPersonDataTypeV3`. Used as-is wherever a form asks for a contact person
+// whose role is given by where the person sits in the form (e.g. EPA's Payee). A role that
+// adds fields of its own, like a key contact's project role, is a separate question that
+// spreads this one.
+/** A person and how to reach them. */
 @Meta.question(#{ id: "person" })
 @Meta.tag(Catalogue.Tag.person, Catalogue.Tag.details)
 @UI.label("Contact Person")

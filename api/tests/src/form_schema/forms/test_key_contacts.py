@@ -131,7 +131,7 @@ def test_key_contacts_v2_0_min_length(key_contacts_v2_0):
                     "city": "",
                     "county": "",
                     "province": "",
-                    "zip_code": "",
+                    # zip_code excluded: non-US zip has minLength=0
                     "country": "CAN: CANADA",
                 },
                 "phone": "",
@@ -155,7 +155,7 @@ def test_key_contacts_v2_0_min_length(key_contacts_v2_0):
         "$.key_contacts[0].address.city",
         "$.key_contacts[0].address.county",
         "$.key_contacts[0].address.province",
-        "$.key_contacts[0].address.zip_code",
+        # zip_code excluded: non-US zip has minLength=0
         "$.key_contacts[0].phone",
         "$.key_contacts[0].fax",
     ]
@@ -242,6 +242,40 @@ def test_key_contacts_v2_0_us_address_requires_state_zip(contact_minimal, key_co
         "$.key_contacts[0].address.zip_code",
     ]
     validate_required(data, EXPECTED_REQUIRED_FIELDS, key_contacts_v2_0)
+
+
+def test_key_contacts_v2_0_us_zip_code_min_length(contact_minimal, key_contacts_v2_0):
+    """US zip_code shorter than 9 characters fails minLength."""
+    contact_minimal["address"] = {
+        "street1": "123 Main Street",
+        "city": "Placeville",
+        "state": "WY: Wyoming",
+        "country": "USA: UNITED STATES",
+        "zip_code": "12345",  # 5 chars — too short for US
+    }
+    data = {
+        "applicant_organization_name": "Acme Corporation",
+        "key_contacts": [contact_minimal],
+    }
+    issues = validate_json_schema_for_form(data, key_contacts_v2_0)
+    assert len(issues) == 1
+    assert issues[0].type == "minLength"
+    assert issues[0].field == "$.key_contacts[0].address.zip_code"
+
+
+def test_key_contacts_v2_0_non_us_zip_code_any_length(contact_minimal, key_contacts_v2_0):
+    """Non-US zip_code has no minimum length — empty string is valid."""
+    contact_minimal["address"] = {
+        "street1": "456 Rio",
+        "city": "Montevideo",
+        "country": "URY: URUGUAY",
+        "zip_code": "",  # empty is fine for non-US
+    }
+    data = {
+        "applicant_organization_name": "Acme Corporation",
+        "key_contacts": [contact_minimal],
+    }
+    assert validate_json_schema_for_form(data, key_contacts_v2_0) == []
 
 
 def test_key_contacts_v2_0_ui_schema_hides_field_list_heading(key_contacts_v2_0):

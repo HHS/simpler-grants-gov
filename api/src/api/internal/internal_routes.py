@@ -61,14 +61,15 @@ def setup_file_scan_scanner_user_route(
         api_key_user = api_user_key_auth.get_user()
         db_session.add(api_key_user)
 
-        scanner_api_key = setup_file_scan_scanner_user(db_session, api_key_user, scanner_user_id)
+        scanner_api_key, key_id = setup_file_scan_scanner_user(
+            db_session, api_key_user, scanner_user_id
+        )
 
-        # Capture the generated key value while the row is still attached; this
-        # is the one and only time the plaintext key leaves the system.
+        # This is the one and only time the plaintext key leaves the system.
         data = {
             "user_id": scanner_user_id,
             "api_key_id": scanner_api_key.api_key_id,
-            "api_key": scanner_api_key.key_id,
+            "api_key": key_id,
         }
 
     return response.ApiResponse(message="Success", data=data)

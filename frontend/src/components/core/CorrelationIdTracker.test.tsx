@@ -31,20 +31,31 @@ describe("CorrelationIdTracker", () => {
 
   it("renders without errors and returns null", () => {
     const { container } = render(
-      <CorrelationIdTracker correlationId="test-id-123" />,
+      <CorrelationIdTracker correlationId="test-id-123" newRelicEnabled />,
     );
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it("does not call waitForNewRelic when correlationId is not provided", () => {
-    render(<CorrelationIdTracker />);
+    render(<CorrelationIdTracker newRelicEnabled />);
+
+    expect(analyticsUtil.waitForNewRelic).not.toHaveBeenCalled();
+  });
+
+  it("does not call waitForNewRelic when New Relic is not enabled", () => {
+    render(
+      <CorrelationIdTracker
+        correlationId="test-correlation-id"
+        newRelicEnabled={false}
+      />,
+    );
 
     expect(analyticsUtil.waitForNewRelic).not.toHaveBeenCalled();
   });
 
   it("does not call waitForNewRelic when correlationId is empty string", () => {
-    render(<CorrelationIdTracker correlationId="" />);
+    render(<CorrelationIdTracker correlationId="" newRelicEnabled />);
 
     expect(analyticsUtil.waitForNewRelic).not.toHaveBeenCalled();
   });
@@ -52,7 +63,12 @@ describe("CorrelationIdTracker", () => {
   it("waits for newrelic and sets correlation ID when correlationId is provided", async () => {
     analyticsUtil.waitForNewRelic.mockResolvedValue(true);
 
-    render(<CorrelationIdTracker correlationId="test-correlation-id" />);
+    render(
+      <CorrelationIdTracker
+        correlationId="test-correlation-id"
+        newRelicEnabled
+      />,
+    );
 
     await waitFor(() => {
       expect(analyticsUtil.waitForNewRelic).toHaveBeenCalled();
@@ -66,7 +82,12 @@ describe("CorrelationIdTracker", () => {
   it("does not set correlation ID when newrelic is not ready", async () => {
     analyticsUtil.waitForNewRelic.mockResolvedValue(false);
 
-    render(<CorrelationIdTracker correlationId="test-correlation-id" />);
+    render(
+      <CorrelationIdTracker
+        correlationId="test-correlation-id"
+        newRelicEnabled
+      />,
+    );
 
     await waitFor(() => {
       expect(analyticsUtil.waitForNewRelic).toHaveBeenCalled();
@@ -88,7 +109,10 @@ describe("CorrelationIdTracker", () => {
     );
 
     const { unmount } = render(
-      <CorrelationIdTracker correlationId="test-correlation-id" />,
+      <CorrelationIdTracker
+        correlationId="test-correlation-id"
+        newRelicEnabled
+      />,
     );
 
     unmount();
@@ -105,7 +129,7 @@ describe("CorrelationIdTracker", () => {
     analyticsUtil.waitForNewRelic.mockResolvedValue(true);
 
     const { rerender } = render(
-      <CorrelationIdTracker correlationId="correlation-id-1" />,
+      <CorrelationIdTracker correlationId="correlation-id-1" newRelicEnabled />,
     );
 
     await waitFor(() => {
@@ -118,7 +142,9 @@ describe("CorrelationIdTracker", () => {
       analyticsUtil.setNewRelicCorrelationIdAttribute,
     ).toHaveBeenCalledTimes(1);
 
-    rerender(<CorrelationIdTracker correlationId="correlation-id-2" />);
+    rerender(
+      <CorrelationIdTracker correlationId="correlation-id-2" newRelicEnabled />,
+    );
 
     await waitFor(() => {
       expect(
@@ -135,7 +161,7 @@ describe("CorrelationIdTracker", () => {
     analyticsUtil.waitForNewRelic.mockResolvedValue(true);
 
     const { rerender } = render(
-      <CorrelationIdTracker correlationId="correlation-id-1" />,
+      <CorrelationIdTracker correlationId="correlation-id-1" newRelicEnabled />,
     );
 
     await waitFor(() => {
@@ -144,7 +170,7 @@ describe("CorrelationIdTracker", () => {
       ).toHaveBeenCalledTimes(1);
     });
 
-    rerender(<CorrelationIdTracker correlationId="" />);
+    rerender(<CorrelationIdTracker correlationId="" newRelicEnabled />);
 
     await waitFor(() => {
       expect(
@@ -160,7 +186,12 @@ describe("CorrelationIdTracker", () => {
 
     analyticsUtil.waitForNewRelic.mockRejectedValue(new Error("Test error"));
 
-    render(<CorrelationIdTracker correlationId="test-correlation-id" />);
+    render(
+      <CorrelationIdTracker
+        correlationId="test-correlation-id"
+        newRelicEnabled
+      />,
+    );
 
     await waitFor(() => {
       expect(analyticsUtil.waitForNewRelic).toHaveBeenCalled();

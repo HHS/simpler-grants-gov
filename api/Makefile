@@ -262,6 +262,9 @@ init-mailpit: start-mailpit
 start-mailpit:
 	docker compose up --detach mailpit
 
+preview-new-opportunity-email: start-mailpit ## Send the new opportunity email to Mailpit, read it at http://localhost:8025
+	$(PY_RUN_CMD) python3 -m tool.preview_emails.preview_new_opportunity_email
+
 ##################################################
 # Testing
 ##################################################
@@ -366,6 +369,9 @@ run-workflow-service-async: ## Run the workflow service without blocking
 
 run-email-notifications: ## Send email notifications
 	$(FLASK_CMD) task email-notifications $(args)
+
+run-new-opportunity-notification: ## Queue the daily new opportunity email for opted-in users
+	$(FLASK_CMD) task new-opportunity-notification $(args)
 
 
 setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup

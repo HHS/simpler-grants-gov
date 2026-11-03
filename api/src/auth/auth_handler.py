@@ -52,16 +52,11 @@ class AuthHandler(
 
     # --- API keys ---
 
-    def get_api_key_by_key_id(self, key_id: str) -> UserApiKey | None:
+    def get_api_key_by_hash(self, key_id_hash: str) -> UserApiKey | None:
         return self.db_session.execute(
             select(UserApiKey)
-            .where(UserApiKey.key_id == key_id)
+            .where(UserApiKey.key_id_hash == key_id_hash)
             .options(selectinload(UserApiKey.user))
-        ).scalar_one_or_none()
-
-    def get_api_key_by_key_id_hash(self, key_id_hash: str) -> UserApiKey | None:
-        return self.db_session.execute(
-            select(UserApiKey).where(UserApiKey.key_id_hash == key_id_hash)
         ).scalar_one_or_none()
 
     def create_api_key(

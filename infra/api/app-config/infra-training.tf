@@ -60,18 +60,11 @@ module "infra_training_config" {
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS       = 1
 
     FRONTEND_URL = "https://training.simpler.grants.gov"
 
-    # Workflow. This is training's internal user id, reused because infra-training's database
-    # is restored from a training snapshot and therefore carries the same user row. The
-    # workflow service REQUIRES this row to exist: brought up against an empty database it
-    # will fail at runtime, not at apply time, so a non-snapshot bring-up must either seed
-    # this user or point this at one that exists. Same arrangement as infra-dev/infra-staging,
-    # which reuse dev's and staging's ids for the same reason.
-    WORKFLOW_SERVICE_INTERNAL_USER_ID = "00bcaf8e-dd04-4fd1-9fb3-ea872a93178d"
-    ENABLE_WORKFLOW_ENDPOINTS         = 1
+    # Virus scanning endpoints
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

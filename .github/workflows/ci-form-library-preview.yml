@@ -61,6 +61,11 @@ jobs:
         id: compile
         run: npm --prefix .. run compile
 
+      # Every form marked @Sgg.sync must be installed in api/ exactly as its spec emits it.
+      - name: Check installed forms match their specs
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        run: npm --prefix .. run sync:check
+
       # The Grants.gov DATs and XSDs the parity suite compares the forms against. The key is
       # the lockfile's hash, so a new or revised source is fetched once and then reused.
       - name: Restore parity sources

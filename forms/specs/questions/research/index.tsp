@@ -12,7 +12,7 @@ namespace Questions.Research;
 
 /** If you have an established personal profile with the agency (e.g., NIH), enter its agency ID. */
 @Meta.question(#{ id: "research/credential" })
-@UI.label("Credential, e.g., agency login")
+@UI.label("Credential, e.g., Agency Login")
 @minLength(1)
 @maxLength(60)
 scalar Credential extends string;
