@@ -1,0 +1,11 @@
+simpler_health.check:
+  path: '/health'
+  defaults:
+    _controller: '\Drupal\simpler_health\Controller\HealthController::check'
+  methods: [GET]
+  requirements:
+    # Health checks run without a session and the response reveals nothing
+    _access: 'TRUE'
+  options:
+    # Never serve a cached health response
+    no_cache: TRUE
