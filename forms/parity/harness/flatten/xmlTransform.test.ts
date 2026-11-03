@@ -44,6 +44,23 @@ describe("xmlTransformFields", () => {
     ]);
   });
 
+  it("maps each root attachment field after the rules", () => {
+    const { byLink } = xmlTransformFields({
+      _xml_config: {
+        attachment_fields: {
+          upload: { xml_element: "AttachedFile", file_element: "" },
+          sketch: { xml_element: "Sketches", file_element: "Sketch" },
+        },
+      },
+      title: { xml_transform: { target: "Title" } },
+    });
+    expect([...byLink].map(([path, field]) => [path, field.order])).toEqual([
+      ["title -> Title", 0],
+      ["upload -> AttachedFile", 1],
+      ["sketch -> Sketches/Sketch", 2],
+    ]);
+  });
+
   it("refuses a rule type it cannot read", () => {
     expect(() =>
       xmlTransformFields({

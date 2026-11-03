@@ -128,13 +128,14 @@ revision-aware deployment path may be used when required by the environment,
 but neither is required for this dev-only procedure.
 
 For each activation or restoration stage, update `pdf_readability_waf` in
-`infra/nofos/app-config/infra-dev.tf` **and** the matching expected mode in
-`infra/nofos/app-config/tests/pdf_readability_waf.tftest.hcl`. The test must
-continue to assert the rate threshold, dev-only opt-in and every other
-environment's null configuration. Update only the temporary mode expectation:
-rate `block` for rate and emergency stages, and emergency `true` only for the
-emergency stage. The final restoration change must return both the configuration
-and test expectation to rate `count` and emergency `false`.
+`infra/nofos/app-config/infra-dev.tf` **and** every Terraform test that asserts
+the WAF mode: currently `tests/pdf_readability_waf.tftest.hcl` and
+`tests/pdf_readability_monitoring.tftest.hcl`. The tests must continue to assert
+the rate threshold, dev-only opt-in, private notification routing and every
+other environment's null configuration. Update only the temporary mode
+expectation: rate `block` for rate and emergency stages, and emergency `true`
+only for the emergency stage. The final restoration change must return both the
+configuration and test expectations to rate `count` and emergency `false`.
 
 Keep the threshold at 10 and the window at 300 seconds. Do not edit shared
 modules, other environments, recipients, IAM or managed rules. Inspect the

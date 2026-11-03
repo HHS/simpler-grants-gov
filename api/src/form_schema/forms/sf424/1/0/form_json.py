@@ -205,7 +205,17 @@ FORM_JSON_SCHEMA = {
             "description": "UEI of the applicant organization. This field is pre-populated from the Application cover sheet.",
         },
         "applicant": {
-            "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+            "allOf": [
+                {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+                # if country is US, zip_code must be at least 9 characters
+                {
+                    "if": {
+                        "properties": {"country": {"const": "USA: UNITED STATES"}},
+                        "required": ["country"],
+                    },
+                    "then": {"properties": {"zip_code": {"minLength": 9}}},
+                },
+            ],
             "title": "Applicant",
             "description": "Enter information about the applicant.",
         },

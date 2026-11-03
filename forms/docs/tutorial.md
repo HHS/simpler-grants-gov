@@ -1190,7 +1190,7 @@ model TutorialKeyContact {
 
 `...Questions.People.Person` spreads in the name, title, address, phone, fax and email.
 
-**`TutorialKeyContact` is now a question** (`@Meta.question`) so it can make `email` required. `Person` declares it optional, and Key Contacts requires it. This is the pattern for overriding whether a nested field is required: declare the containing model as a question and add `@Validation.requiredPaths` with the field's path. The real Key Contacts form does the same in `specs/forms/key-contacts/key-contact.tsp`.
+**`TutorialKeyContact` is now a question** (`@Meta.question`) so it can make `email` required. `Person` declares it optional, and Key Contacts requires it. This is the pattern for overriding whether a nested field is required: declare the containing model as a question and add `@Validation.requiredPaths` with the field's path. The real Key Contacts form does the same in `specs/forms/key-contacts/fragments.tsp`.
 
 ### 5.2 Put Organizational Affiliation back after Title
 
