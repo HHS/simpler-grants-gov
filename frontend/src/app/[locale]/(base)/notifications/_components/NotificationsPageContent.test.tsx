@@ -1,47 +1,34 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { UpdateNotificationPreferenceActionState } from "src/app/[locale]/(base)/notifications/actions";
 
-import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
+import {
+  NotificationsPageContent,
+  NotificationsPageContentProps,
+} from "./NotificationsPageContent";
 
-const mockCheckbox = jest.fn();
+const mockUpdateSavedOpportunityNotificationPreferenceAction = jest.fn<
+  Promise<UpdateNotificationPreferenceActionState>,
+  [{ organizationId: string | null; emailEnabled: boolean }]
+>();
+const mockUpdateAllOpportunitiesNotificationPreferenceAction = jest.fn<
+  Promise<UpdateNotificationPreferenceActionState>,
+  [{ isEnabled: boolean }]
+>();
 
-jest.mock("@trussworks/react-uswds", () => ({
-  Checkbox: (props: {
-    id: string;
-    name: string;
-    checked: boolean;
-    disabled?: boolean;
-    onChange?: (event: {
-      target: { checked: boolean };
-      currentTarget: { checked: boolean };
-    }) => void;
-    "aria-labelledby"?: string;
-    "aria-describedby"?: string;
-  }) => {
-    mockCheckbox(props);
-
-    return (
-      <input
-        type="checkbox"
-        data-testid="notification-checkbox"
-        id={props.id}
-        name={props.name}
-        checked={props.checked}
-        disabled={props.disabled}
-        aria-labelledby={props["aria-labelledby"]}
-        aria-describedby={props["aria-describedby"]}
-        onChange={(event) => {
-          props.onChange?.({
-            target: {
-              checked: event.currentTarget.checked,
-            },
-            currentTarget: {
-              checked: event.currentTarget.checked,
-            },
-          });
-        }}
-      />
-    );
-  },
+jest.mock("src/app/[locale]/(base)/notifications/actions", () => ({
+  updateSavedOpportunityNotificationPreferenceAction: (props: {
+    organizationId: string | null;
+    emailEnabled: boolean;
+  }) => mockUpdateSavedOpportunityNotificationPreferenceAction(props),
+  updateAllOpportunitiesNotificationPreferenceAction: (props: {
+    isEnabled: boolean;
+  }) => mockUpdateAllOpportunitiesNotificationPreferenceAction(props),
 }));
 
 jest.mock("src/components/core/Spinner", () => ({
@@ -49,135 +36,273 @@ jest.mock("src/components/core/Spinner", () => ({
   default: () => <span role="progressbar" aria-label="Loading!" />,
 }));
 
-describe("NotificationPreferenceCard", () => {
-  const baseProps = {
-    checkboxId: "test-checkbox",
-    label: "Test Label",
-    description: "Test Description",
-    isChecked: false,
-  };
+const SAVE_ERROR = "preferencesNotSavedError";
 
+const baseProps: NotificationsPageContentProps = {
+  pageHeading: "Notifications",
+  fetchErrorMessage: "fetchError",
+  managePreferencesTitle: "Manage your preferences",
+  managePreferencesDescription: "managePreferencesDescription",
+  organizationPreferencesTitle: "Organization preferences",
+  organizationPreferencesDescription: "organizationPreferencesDescription",
+  savedOpportunitiesLabel: "Subscribe to saved opportunities",
+  savedOpportunitiesDescription: "savedOpportunitiesDescription",
+  allNewOpportunitiesLabel: "Subscribe to all new opportunities",
+  allNewOpportunitiesDescription: "allNewOpportunitiesDescription",
+  organizationSavedOpportunitiesDescription:
+    "organizationSavedOpportunitiesDescription",
+  organizations: [],
+  hasOrganizationsFetchError: false,
+  initialPreferenceValues: {
+    "saved-opportunities": false,
+    "all-new-opportunities": false,
+  },
+};
+
+const getAllNewOpportunitiesCheckbox = () =>
+  screen.getByRole("checkbox", { name: "Subscribe to all new opportunities" });
+
+const getSavedOpportunitiesCheckbox = () =>
+  screen.getByRole("checkbox", { name: "Subscribe to saved opportunities" });
+
+describe("NotificationsPageContent", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders label and description", () => {
-    render(<NotificationPreferenceCard {...baseProps} />);
-
-    expect(screen.getByText("Test Label")).toBeInTheDocument();
-    expect(screen.getByText("Test Description")).toBeInTheDocument();
-  });
-
-  it("renders checkbox in checked state", () => {
-    render(<NotificationPreferenceCard {...baseProps} isChecked={true} />);
-
-    expect(screen.getByTestId("notification-checkbox")).toBeChecked();
-  });
-
-  it("renders checkbox in unchecked state", () => {
-    render(<NotificationPreferenceCard {...baseProps} isChecked={false} />);
-
-    expect(screen.getByTestId("notification-checkbox")).not.toBeChecked();
-  });
-
-  it("calls onCheckedChange when toggled", () => {
-    const handleChange = jest.fn();
-
+  it("shows the fetch error when preferences could not be loaded", () => {
     render(
-      <NotificationPreferenceCard
-        {...baseProps}
-        onCheckedChange={handleChange}
-      />,
+      <NotificationsPageContent {...baseProps} hasOrganizationsFetchError />,
     );
 
-    fireEvent.click(screen.getByTestId("notification-checkbox"));
-
-    expect(handleChange).toHaveBeenCalledWith(true);
+    expect(screen.getByRole("alert")).toHaveTextContent("fetchError");
   });
 
-  it("uses noop when onCheckedChange is not provided", () => {
-    render(<NotificationPreferenceCard {...baseProps} />);
+  describe("all new opportunities toggle", () => {
+    it("renders under manage your preferences", () => {
+      render(<NotificationsPageContent {...baseProps} />);
 
-    expect(() => {
-      fireEvent.click(screen.getByTestId("notification-checkbox"));
-    }).not.toThrow();
-  });
+      const section = screen.getByRole("region", {
+        name: "Manage your preferences",
+      });
 
-  it("disables checkbox when isDisabled is true", () => {
-    render(<NotificationPreferenceCard {...baseProps} isDisabled={true} />);
+      expect(section).toContainElement(getAllNewOpportunitiesCheckbox());
+      expect(
+        screen.getByText("allNewOpportunitiesDescription"),
+      ).toBeInTheDocument();
+    });
 
-    expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
-  });
+    it.each([true, false])(
+      "renders the initial preference value of %s",
+      (isEnabled) => {
+        render(
+          <NotificationsPageContent
+            {...baseProps}
+            initialPreferenceValues={{
+              ...baseProps.initialPreferenceValues,
+              "all-new-opportunities": isEnabled,
+            }}
+          />,
+        );
 
-  it("disables checkbox when loading", () => {
-    render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
-
-    expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
-  });
-
-  it("shows loading indicator when isLoading is true", () => {
-    render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
-
-    expect(screen.getByRole("progressbar")).toBeInTheDocument();
-    expect(screen.getByText("srPendingSave")).toBeInTheDocument();
-  });
-
-  it("does not show loading indicator when not loading", () => {
-    render(<NotificationPreferenceCard {...baseProps} />);
-
-    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
-  });
-
-  it("passes disabled=false to Checkbox when not disabled or loading", () => {
-    render(<NotificationPreferenceCard {...baseProps} />);
-
-    expect(mockCheckbox).toHaveBeenCalledWith(
-      expect.objectContaining({
-        checked: false,
-        disabled: false,
-      }),
-    );
-  });
-
-  it("passes disabled=true to Checkbox when loading", () => {
-    render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
-
-    expect(mockCheckbox).toHaveBeenCalledWith(
-      expect.objectContaining({
-        disabled: true,
-      }),
-    );
-  });
-
-  it("constructs aria-labelledby with organizationHeadingId", () => {
-    render(
-      <NotificationPreferenceCard
-        {...baseProps}
-        organizationHeadingId="org-heading"
-      />,
+        expect(getAllNewOpportunitiesCheckbox()).toHaveProperty(
+          "checked",
+          isEnabled,
+        );
+      },
     );
 
-    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
-      "aria-labelledby",
-      "org-heading test-checkbox-label",
-    );
+    it("calls the all opportunities action and stays on when save succeeds", async () => {
+      mockUpdateAllOpportunitiesNotificationPreferenceAction.mockResolvedValue({
+        success: true,
+        error: null,
+      });
+
+      render(<NotificationsPageContent {...baseProps} />);
+
+      fireEvent.click(getAllNewOpportunitiesCheckbox());
+
+      await waitFor(() => {
+        expect(getAllNewOpportunitiesCheckbox()).toBeChecked();
+      });
+
+      expect(
+        mockUpdateAllOpportunitiesNotificationPreferenceAction,
+      ).toHaveBeenCalledWith({ isEnabled: true });
+      expect(
+        mockUpdateSavedOpportunityNotificationPreferenceAction,
+      ).not.toHaveBeenCalled();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("stays off when turning off succeeds", async () => {
+      mockUpdateAllOpportunitiesNotificationPreferenceAction.mockResolvedValue({
+        success: true,
+        error: null,
+      });
+
+      render(
+        <NotificationsPageContent
+          {...baseProps}
+          initialPreferenceValues={{
+            ...baseProps.initialPreferenceValues,
+            "all-new-opportunities": true,
+          }}
+        />,
+      );
+
+      fireEvent.click(getAllNewOpportunitiesCheckbox());
+
+      await waitFor(() => {
+        expect(getAllNewOpportunitiesCheckbox()).not.toBeChecked();
+      });
+
+      expect(
+        mockUpdateAllOpportunitiesNotificationPreferenceAction,
+      ).toHaveBeenCalledWith({ isEnabled: false });
+    });
+
+    it("stays off and shows an error when turning on fails", async () => {
+      mockUpdateAllOpportunitiesNotificationPreferenceAction.mockResolvedValue({
+        success: false,
+        error: SAVE_ERROR,
+      });
+
+      render(<NotificationsPageContent {...baseProps} />);
+
+      fireEvent.click(getAllNewOpportunitiesCheckbox());
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(SAVE_ERROR);
+      });
+
+      expect(getAllNewOpportunitiesCheckbox()).not.toBeChecked();
+      expect(getAllNewOpportunitiesCheckbox()).toBeEnabled();
+    });
+
+    it("displays as off and shows an error when turning off fails", async () => {
+      mockUpdateAllOpportunitiesNotificationPreferenceAction.mockResolvedValue({
+        success: false,
+        error: SAVE_ERROR,
+      });
+
+      render(
+        <NotificationsPageContent
+          {...baseProps}
+          initialPreferenceValues={{
+            ...baseProps.initialPreferenceValues,
+            "all-new-opportunities": true,
+          }}
+        />,
+      );
+
+      expect(getAllNewOpportunitiesCheckbox()).toBeChecked();
+      fireEvent.click(getAllNewOpportunitiesCheckbox());
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(SAVE_ERROR);
+      });
+
+      expect(getAllNewOpportunitiesCheckbox()).not.toBeChecked();
+    });
+
+    it("falls back to the default error message when the action returns nothing", async () => {
+      mockUpdateAllOpportunitiesNotificationPreferenceAction.mockResolvedValue(
+        undefined,
+      );
+
+      render(<NotificationsPageContent {...baseProps} />);
+
+      fireEvent.click(getAllNewOpportunitiesCheckbox());
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          "Your notification preference was not saved. Refresh the page to try again.",
+        );
+      });
+
+      expect(getAllNewOpportunitiesCheckbox()).not.toBeChecked();
+    });
   });
 
-  it("constructs aria-labelledby from field label when organizationHeadingId is missing", () => {
-    render(<NotificationPreferenceCard {...baseProps} />);
+  describe("saved opportunities toggles", () => {
+    it("calls the saved opportunities action for the personal preference", async () => {
+      mockUpdateSavedOpportunityNotificationPreferenceAction.mockResolvedValue({
+        success: true,
+        error: null,
+      });
 
-    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
-      "aria-labelledby",
-      "test-checkbox-label",
-    );
-  });
+      render(<NotificationsPageContent {...baseProps} />);
 
-  it("constructs aria-describedby from description id", () => {
-    render(<NotificationPreferenceCard {...baseProps} />);
+      fireEvent.click(getSavedOpportunitiesCheckbox());
 
-    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
-      "aria-describedby",
-      "test-checkbox-description",
-    );
+      await waitFor(() => {
+        expect(getSavedOpportunitiesCheckbox()).toBeChecked();
+      });
+
+      expect(
+        mockUpdateSavedOpportunityNotificationPreferenceAction,
+      ).toHaveBeenCalledWith({ organizationId: null, emailEnabled: true });
+      expect(
+        mockUpdateAllOpportunitiesNotificationPreferenceAction,
+      ).not.toHaveBeenCalled();
+    });
+
+    it("keeps the previous value when saving the personal preference fails", async () => {
+      mockUpdateSavedOpportunityNotificationPreferenceAction.mockResolvedValue({
+        success: false,
+        error: SAVE_ERROR,
+      });
+
+      render(
+        <NotificationsPageContent
+          {...baseProps}
+          initialPreferenceValues={{
+            ...baseProps.initialPreferenceValues,
+            "saved-opportunities": true,
+          }}
+        />,
+      );
+
+      fireEvent.click(getSavedOpportunitiesCheckbox());
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(SAVE_ERROR);
+      });
+
+      expect(getSavedOpportunitiesCheckbox()).toBeChecked();
+    });
+
+    it("calls the saved opportunities action with the organization id", async () => {
+      mockUpdateSavedOpportunityNotificationPreferenceAction.mockResolvedValue({
+        success: true,
+        error: null,
+      });
+
+      render(
+        <NotificationsPageContent
+          {...baseProps}
+          organizations={[
+            { organizationId: "org-1", organizationName: "Org One" },
+          ]}
+        />,
+      );
+
+      const organizationSection = screen.getByRole("region", {
+        name: /Org One/,
+      });
+      const organizationCheckbox =
+        within(organizationSection).getByRole("checkbox");
+
+      fireEvent.click(organizationCheckbox);
+
+      await waitFor(() => {
+        expect(organizationCheckbox).toBeChecked();
+      });
+
+      expect(
+        mockUpdateSavedOpportunityNotificationPreferenceAction,
+      ).toHaveBeenCalledWith({ organizationId: "org-1", emailEnabled: true });
+    });
   });
 });
