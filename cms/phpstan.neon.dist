@@ -1,0 +1,6 @@
+# Static analysis for our custom code. mglaman/phpstan-drupal is loaded
+# automatically by phpstan/extension-installer and finds the Drupal root itself.
+parameters:
+  level: 6
+  paths:
+    - web/modules/custom
