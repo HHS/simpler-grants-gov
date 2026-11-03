@@ -19,7 +19,11 @@ export async function download(url: string): Promise<Buffer> {
 
     // Release the body before retrying, so a failing server does not keep connections open.
     await response.body?.cancel();
-    if (response.status < 500 || response.status > 599 || attempt === ATTEMPTS) {
+    if (
+      response.status < 500 ||
+      response.status > 599 ||
+      attempt === ATTEMPTS
+    ) {
       throw new Error(`${url}: HTTP ${response.status}`);
     }
     await setTimeout(BACKOFF_MS * 2 ** (attempt - 1));

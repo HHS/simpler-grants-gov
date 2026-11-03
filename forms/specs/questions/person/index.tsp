@@ -104,7 +104,12 @@ namespace Examples {
   };
 
   const internationalContact: Questions.People.Person = #{
-    name: #{ prefix: "Dr.", firstName: "Tom", lastName: "Okafor", suffix: "PhD" },
+    name: #{
+      prefix: "Dr.",
+      firstName: "Tom",
+      lastName: "Okafor",
+      suffix: "PhD",
+    },
     title: "Lead Scientist",
     address: #{
       street1: "456 Rio",

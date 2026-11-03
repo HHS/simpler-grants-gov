@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+
 import { TOTAL_APPS } from "../../content.config";
 
 const forms = await getCollection("forms");
@@ -18,7 +19,12 @@ const inProgressApps = inProgressForms.reduce(
 );
 const inProgressPct = ((inProgressApps / TOTAL_APPS) * 100).toFixed(2);
 
-const prioritizedStatuses = ["prioritized", "in_progress", "in_review", "migrated"];
+const prioritizedStatuses = [
+  "prioritized",
+  "in_progress",
+  "in_review",
+  "migrated",
+];
 const prioritizedForms = forms.filter((f) =>
   prioritizedStatuses.includes(f.data.status),
 );

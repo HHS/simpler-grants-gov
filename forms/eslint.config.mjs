@@ -5,7 +5,10 @@ export default [
   {
     files: ["scripts/**/*.mjs"],
     rules: {
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_", ignoreRestSiblings: true }],
+      "no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
       "no-unreachable": "error",
       "valid-typeof": "error",
       "no-constant-condition": "error",

@@ -7,11 +7,7 @@
     "checkJs": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "scripts/**/*.mjs"
-  ]
+  "include": ["scripts/**/*.mjs"]
 }

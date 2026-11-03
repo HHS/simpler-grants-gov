@@ -1,9 +1,12 @@
-import type { Model, ModelProperty, Program, Type } from "@typespec/compiler";
 import {
   getMaxItems,
   getMinItems,
   isArrayModelType,
   resolveEncodedName,
+  type Model,
+  type ModelProperty,
+  type Program,
+  type Type,
 } from "@typespec/compiler";
 import { getNs, isAttribute } from "@typespec/xml";
 

@@ -19,7 +19,12 @@
   ],
   "sgg_form_id": "sf424",
   "description": "The standard cover page form used for most federal grant applications. Collects applicant organization information, project details, estimated funding, and authorized representative certification.",
-  "new_concepts": ["TextWidget", "SelectWidget", "RadioWidget", "CheckboxWidget"],
+  "new_concepts": [
+    "TextWidget",
+    "SelectWidget",
+    "RadioWidget",
+    "CheckboxWidget"
+  ],
   "notes": [
     "Contact Person is OPTIONAL per XSD (minOccurs=0) but DAT marks First/Last Name as required",
     "Department/Division use V1 types (maxLength 30), unlike R&R forms which use V2 (maxLength 100)"

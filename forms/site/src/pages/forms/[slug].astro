@@ -1,14 +1,15 @@
 ---
-import { getCollection, type CollectionEntry } from "astro:content";
-import type { FieldNode } from "../../content.config";
-import Base from "../../layouts/Base.astro";
-import FormMetadata from "../../components/forms/FormMetadata.astro";
-import FormFieldTree from "../../components/forms/FormFieldTree.astro";
 import FieldComparison from "@/components/forms/comparison/FieldComparison";
+import { compareForm } from "@parity/comparison.ts";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+import FormFieldTree from "../../components/forms/FormFieldTree.astro";
+import FormMetadata from "../../components/forms/FormMetadata.astro";
 import FormDataPanel from "../../components/forms/preview/FormDataPanel";
 import FormPreview from "../../components/forms/preview/FormPreview";
+import type { FieldNode } from "../../content.config";
+import Base from "../../layouts/Base.astro";
 import { loadFormSpec } from "../../lib/formSpec";
-import { compareForm } from "@parity/comparison.ts";
 
 export async function getStaticPaths() {
   const forms = await getCollection("forms");
@@ -19,7 +20,9 @@ export async function getStaticPaths() {
 }
 
 const { form } = Astro.props;
-const spec = form.data.spec_id ? await loadFormSpec(form.data.spec_id) : undefined;
+const spec = form.data.spec_id
+  ? await loadFormSpec(form.data.spec_id)
+  : undefined;
 const comparison = await compareForm<FieldNode>(form.data);
 const notes = form.data.notes ?? [];
 
@@ -43,7 +46,9 @@ const STATUS_LABELS: Record<string, string> = {
     <div class="page-header">
       <div class="form-detail-header">
         <h1 class="page-title">{form.data.title}</h1>
-        <span class={`status-badge status-badge--${form.data.status.replace("_", "-")}`}>
+        <span
+          class={`status-badge status-badge--${form.data.status.replace("_", "-")}`}
+        >
           {STATUS_LABELS[form.data.status] ?? form.data.status}
         </span>
       </div>
@@ -55,33 +60,63 @@ const STATUS_LABELS: Record<string, string> = {
     {form.data.children.length > 0 ? (
       <>
         <div class="tab-bar" role="tablist">
-          <button class="tab-bar__tab tab-bar__tab--active" role="tab" aria-selected="true" data-tab="fields">
+          <button
+            class="tab-bar__tab tab-bar__tab--active"
+            role="tab"
+            aria-selected="true"
+            data-tab="fields"
+          >
             Field tree
           </button>
           {spec ? (
             <>
-              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="preview">
+              <button
+                class="tab-bar__tab"
+                role="tab"
+                aria-selected="false"
+                data-tab="preview"
+              >
                 Form preview
               </button>
-              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="data">
+              <button
+                class="tab-bar__tab"
+                role="tab"
+                aria-selected="false"
+                data-tab="data"
+              >
                 Data
               </button>
             </>
           ) : (
             <>
-              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Form preview</button>
-              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Data</button>
+              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>
+                Form preview
+              </button>
+              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>
+                Data
+              </button>
             </>
           )}
           {notes.length > 0 ? (
-            <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="notes">
+            <button
+              class="tab-bar__tab"
+              role="tab"
+              aria-selected="false"
+              data-tab="notes"
+            >
               Notes
             </button>
           ) : (
-            <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Notes</button>
+            <button class="tab-bar__tab tab-bar__tab--disabled" disabled>
+              Notes
+            </button>
           )}
-          <button class="tab-bar__tab tab-bar__tab--disabled" disabled>JSON Schema</button>
-          <button class="tab-bar__tab tab-bar__tab--disabled" disabled>XML Mapping</button>
+          <button class="tab-bar__tab tab-bar__tab--disabled" disabled>
+            JSON Schema
+          </button>
+          <button class="tab-bar__tab tab-bar__tab--disabled" disabled>
+            XML Mapping
+          </button>
         </div>
 
         <div data-panel="fields">
@@ -98,7 +133,10 @@ const STATUS_LABELS: Record<string, string> = {
         {notes.length > 0 && (
           <div data-panel="notes" hidden>
             <h2 class="section-title">Notes</h2>
-            <p class="text-base">Context from planning. Unlike the field comparison, notes are not checked.</p>
+            <p class="text-base">
+              Context from planning. Unlike the field comparison, notes are not
+              checked.
+            </p>
             <ul class="plan-notes">
               {notes.map((note) => (
                 <li>{note}</li>
@@ -123,8 +161,8 @@ const STATUS_LABELS: Record<string, string> = {
           <div data-panel="data" hidden>
             <h2 class="section-title">Form data</h2>
             <p class="text-base">
-              The JSON entered in the form preview, and the Grants.gov XML built from it, updated
-              as you type.
+              The JSON entered in the form preview, and the Grants.gov XML built
+              from it, updated as you type.
             </p>
             <FormDataPanel client:only="react" xmlMapping={spec.xmlMapping} />
           </div>
@@ -139,14 +177,20 @@ const STATUS_LABELS: Record<string, string> = {
 </Base>
 
 <script>
-  for (const tab of document.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
+  for (const tab of document.querySelectorAll<HTMLButtonElement>(
+    "[data-tab]",
+  )) {
     tab.addEventListener("click", () => {
-      for (const other of document.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
+      for (const other of document.querySelectorAll<HTMLButtonElement>(
+        "[data-tab]",
+      )) {
         const active = other === tab;
         other.classList.toggle("tab-bar__tab--active", active);
         other.setAttribute("aria-selected", String(active));
       }
-      for (const panel of document.querySelectorAll<HTMLElement>("[data-panel]")) {
+      for (const panel of document.querySelectorAll<HTMLElement>(
+        "[data-panel]",
+      )) {
         panel.hidden = panel.dataset.panel !== tab.dataset.tab;
       }
     });

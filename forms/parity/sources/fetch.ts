@@ -12,7 +12,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { DIFFS } from "../diffs/index.ts";
-import { cachePath, LOCK_FILE, loadPlans } from "../harness/load.ts";
+import { cachePath, loadPlans, LOCK_FILE } from "../harness/load.ts";
 import { download } from "./download.ts";
 
 /** URL -> SHA-256 of its body. */

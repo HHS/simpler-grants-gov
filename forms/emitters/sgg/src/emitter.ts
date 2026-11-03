@@ -1,7 +1,12 @@
-import type { EmitContext, Model } from "@typespec/compiler";
-import { emitFile, resolvePath } from "@typespec/compiler";
+import {
+  emitFile,
+  resolvePath,
+  type EmitContext,
+  type Model,
+} from "@typespec/compiler";
 import { formIdentities } from "form-library-xml";
 import { allBlocks } from "simpler-forms";
+
 import type { SggEmitterOptions } from "./lib.js";
 import { modelSync, ruleSchema } from "./model.js";
 
