@@ -200,7 +200,6 @@ export function NotificationsPageContent({
           label={savedOpportunitiesLabel}
           description={savedOpportunitiesDescription}
           isChecked={isSavedOpportunitiesChecked}
-          isDisabled={isSavingSavedOpportunities}
           isLoading={isSavingSavedOpportunities}
           hasError={hasSavedOpportunitiesError}
           errorMessage={
@@ -221,7 +220,6 @@ export function NotificationsPageContent({
           label={allNewOpportunitiesLabel}
           description={allNewOpportunitiesDescription}
           isChecked={isAllNewOpportunitiesChecked}
-          isDisabled={isSavingAllNewOpportunities}
           isLoading={isSavingAllNewOpportunities}
           hasError={hasAllNewOpportunitiesError}
           errorMessage={
@@ -268,7 +266,6 @@ export function NotificationsPageContent({
                   label={savedOpportunitiesLabel}
                   description={organizationSavedOpportunitiesDescription}
                   isChecked={isChecked}
-                  isDisabled={isSavingThisPreference}
                   isLoading={isSavingThisPreference}
                   hasError={hasErrorThisPreference}
                   errorMessage={

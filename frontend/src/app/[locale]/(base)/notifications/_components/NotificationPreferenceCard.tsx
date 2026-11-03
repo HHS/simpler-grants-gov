@@ -84,8 +84,12 @@ export function NotificationPreferenceCard({
               id={checkboxId}
               name={checkboxId}
               checked={isChecked}
-              disabled={isDisabled || isLoading}
+              disabled={isDisabled}
+              aria-disabled={isLoading}
               onChange={(event) => {
+                if (isLoading) {
+                  return;
+                }
                 onCheckedChange?.(event.currentTarget.checked);
               }}
               aria-labelledby={ariaLabelledBy}

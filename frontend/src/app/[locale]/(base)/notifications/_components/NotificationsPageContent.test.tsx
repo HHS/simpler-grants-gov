@@ -5,6 +5,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { UpdateNotificationPreferenceActionState } from "src/app/[locale]/(base)/notifications/actions";
 
 import {
@@ -303,6 +304,139 @@ describe("NotificationsPageContent", () => {
       expect(
         mockUpdateSavedOpportunityNotificationPreferenceAction,
       ).toHaveBeenCalledWith({ organizationId: "org-1", emailEnabled: true });
+    });
+  });
+
+  describe("keyboard interaction", () => {
+    const organizations = [
+      { organizationId: "org-1", organizationName: "Org One" },
+    ];
+
+    const getOrganizationCheckbox = () =>
+      within(screen.getByRole("region", { name: /Org One/ })).getByRole(
+        "checkbox",
+      );
+
+    it("moves focus through each checkbox in order with Tab", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <NotificationsPageContent
+          {...baseProps}
+          organizations={organizations}
+        />,
+      );
+
+      await user.tab();
+      expect(getSavedOpportunitiesCheckbox()).toHaveFocus();
+      await user.tab();
+      expect(getAllNewOpportunitiesCheckbox()).toHaveFocus();
+      await user.tab();
+      expect(getOrganizationCheckbox()).toHaveFocus();
+    });
+
+    it("turns the all new opportunities preference on with space", async () => {
+      const user = userEvent.setup();
+      mockUpdateAllOpportunitiesNotificationPreferenceAction.mockResolvedValue({
+        success: true,
+        error: null,
+      });
+
+      render(<NotificationsPageContent {...baseProps} />);
+
+      await user.tab();
+      await user.tab();
+      expect(getAllNewOpportunitiesCheckbox()).toHaveFocus();
+
+      await user.keyboard(" ");
+      await waitFor(() => {
+        expect(getAllNewOpportunitiesCheckbox()).toBeChecked();
+      });
+
+      expect(
+        mockUpdateAllOpportunitiesNotificationPreferenceAction,
+      ).toHaveBeenCalledWith({ isEnabled: true });
+    });
+
+    it("toggles personal saved opportunities preference off with space", async () => {
+      const user = userEvent.setup();
+      mockUpdateSavedOpportunityNotificationPreferenceAction.mockResolvedValue({
+        success: true,
+        error: null,
+      });
+
+      render(
+        <NotificationsPageContent
+          {...baseProps}
+          initialPreferenceValues={{
+            ...baseProps.initialPreferenceValues,
+            "saved-opportunities": true,
+          }}
+        />,
+      );
+
+      await user.tab();
+      expect(getSavedOpportunitiesCheckbox()).toHaveFocus();
+
+      await user.keyboard(" ");
+
+      await waitFor(() => {
+        expect(getSavedOpportunitiesCheckbox()).not.toBeChecked();
+      });
+
+      expect(
+        mockUpdateSavedOpportunityNotificationPreferenceAction,
+      ).toHaveBeenCalledWith({ organizationId: null, emailEnabled: false });
+    });
+
+    it("turns an organization preference off with space", async () => {
+      const user = userEvent.setup();
+      mockUpdateSavedOpportunityNotificationPreferenceAction.mockResolvedValue({
+        success: true,
+        error: null,
+      });
+
+      render(
+        <NotificationsPageContent
+          {...baseProps}
+          organizations={organizations}
+          initialPreferenceValues={{
+            ...baseProps.initialPreferenceValues,
+            "organization-org-1-saved-opportunities": true,
+          }}
+        />,
+      );
+
+      await user.tab();
+      await user.tab();
+      await user.tab();
+      expect(getOrganizationCheckbox()).toHaveFocus();
+
+      await user.keyboard(" ");
+
+      await waitFor(() => {
+        expect(getOrganizationCheckbox()).not.toBeChecked();
+      });
+
+      expect(
+        mockUpdateSavedOpportunityNotificationPreferenceAction,
+      ).toHaveBeenCalledWith({ organizationId: "org-1", emailEnabled: false });
+    });
+
+    it("does not toggle a checkbox when Enter is pressed", async () => {
+      const user = userEvent.setup();
+
+      render(<NotificationsPageContent {...baseProps} />);
+
+      await user.tab();
+      expect(getSavedOpportunitiesCheckbox()).toHaveFocus();
+
+      await user.keyboard("{Enter}");
+
+      expect(getSavedOpportunitiesCheckbox()).not.toBeChecked();
+      expect(
+        mockUpdateSavedOpportunityNotificationPreferenceAction,
+      ).not.toHaveBeenCalled();
     });
   });
 });
