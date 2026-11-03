@@ -39,6 +39,7 @@ or broader permission is necessary.
 | --- | --- | --- |
 | Account/service | Expected-account match, desired/running/pending task counts and ECS Exec setting | Access to run commands, health of every request or public enablement |
 | Running tasks | Image version tags and task-definition revisions actually referenced by running tasks; selected recording/retention environment settings; user/root-filesystem/capability/tmpfs declarations | Database-stored Constance flags, effective mounted storage, parser containment or successful cleanup |
+| Load balancer | Live idle timeout in seconds for the load balancer associated with the dev service | A total upload deadline or a buffering guarantee |
 | WAF | ACL association discovered through the service's target group; pilot rule modes, priorities, threshold/window and IP aggregation; metrics/sampling settings | Exact request matching, actual throttling, emergency block timing or live protection |
 | Dashboard/alarms | Dashboard widget count; four expected alarm states, thresholds, notification settings and destination counts | Correct rendering, valid threshold selection, recipient identity or delivery |
 | Subscriptions | Email/HTTPS/other subscription counts and pending-confirmation count for the fixed NOFO monitoring topic | That the intended inbox is subscribed, messages arrive or someone responds |
@@ -46,7 +47,10 @@ or broader permission is necessary.
 | Application log configuration | Retention and subscription-filter counts for the running containers' configured log groups | Content redaction, actual forwarding or infrastructure-wide logging coverage |
 
 The service's configured task-definition revision and the running revisions can
-differ during a deployment; both are reported. Unset environment values mean
+differ during a deployment; both are reported. Startup override indicators report the presence of an ECS command, entry point,
+Gunicorn argument override or environment file without disclosing values.
+Compare these indicators with the deployed image startup command and worker logs.
+Unset environment values mean
 **unset; application default not inspected**. No-expiration usage-record defaults
 are documented in Builder; this workflow does not query its database or search
 for scheduled cleanup jobs.

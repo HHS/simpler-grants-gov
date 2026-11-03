@@ -115,6 +115,11 @@ class FakeAws:
                 ]
             },
             ("ecs", "describe-task-definition"): {"taskDefinition": definition()},
+            ("elbv2", "describe-load-balancer-attributes"): {
+                "Attributes": [
+                    {"Key": "idle_timeout.timeout_seconds", "Value": "120"},
+                ],
+            },
             ("elbv2", "describe-target-groups"): {
                 "TargetGroups": [{"LoadBalancerArns": [MARKER]}]
             },
@@ -162,7 +167,8 @@ class InspectionTests(unittest.TestCase):
     def test_full_report_is_sanitized_and_uses_only_allowed_reads(self):
         aws = FakeAws()
         results = m.Inspector(aws).run()
-        self.assertEqual(len(results), 9)
+        self.assertEqual(len(results), 10)
+        self.assertIn('"idle_timeout_seconds": 120', json.dumps(results))
         self.assertTrue(all(r["status"] == "observed" for r in results))
         serialized = json.dumps(results)
         for value in (MARKER, "private.registry", "task-definition/test", "SECRET_KEY"):

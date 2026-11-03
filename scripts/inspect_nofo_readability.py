@@ -29,6 +29,9 @@ READ_OPERATIONS = {
     ("ecs", "list-tasks"): "ecs:ListTasks",
     ("ecs", "describe-tasks"): "ecs:DescribeTasks",
     ("ecs", "describe-task-definition"): "ecs:DescribeTaskDefinition",
+    ("elbv2", "describe-load-balancer-attributes"): (
+        "elasticloadbalancing:DescribeLoadBalancerAttributes"
+    ),
     ("elbv2", "describe-target-groups"): "elasticloadbalancing:DescribeTargetGroups",
     ("wafv2", "get-web-acl-for-resource"): "wafv2:GetWebACLForResource",
     ("cloudwatch", "get-dashboard"): "cloudwatch:GetDashboard",
@@ -157,6 +160,17 @@ def task_summary(definition):
             "unspecified"
             if not user
             else "root" if str(user).split(":")[0] in {"root", "0"} else "other_user"
+        ),
+        "startup_override_configured": bool(
+            container.get("command") or container.get("entryPoint")
+        ),
+        "gunicorn_args_environment_configured": (
+            "GUNICORN_CMD_ARGS" in environment
+            or bool(container.get("environmentFiles"))
+            or any(
+                item.get("name") == "GUNICORN_CMD_ARGS"
+                for item in container.get("secrets", [])
+            )
         ),
         "read_only_root_configured": container.get("readonlyRootFilesystem") is True,
         "drop_all_capabilities_configured": "ALL"
@@ -360,12 +374,26 @@ class Inspector:
                 "ecs", "describe-task-definition", "--task-definition", arn
             )["taskDefinition"]
             summary, log_group = task_summary(definition)
+            summary["running_task_startup_override_configured"] = any(
+                override.get("name") == SERVICE
+                and (
+                    override.get("command")
+                    or any(
+                        item.get("name") == "GUNICORN_CMD_ARGS"
+                        for item in override.get("environment", [])
+                    )
+                    or override.get("environmentFiles")
+                )
+                for task in response["tasks"]
+                if task["taskDefinitionArn"] == arn
+                for override in task.get("overrides", {}).get("containerOverrides", [])
+            )
             summaries.append(summary)
             if log_group:
                 self.log_groups.add(log_group)
         return {"running_definition_count": len(summaries), "definitions": summaries}
 
-    def waf(self):
+    def load_balancer_arn(self):
         bindings = getattr(self, "service_data", {}).get("loadBalancers", [])
         if not bindings:
             raise InspectionError("load_balancer_not_discovered")
@@ -378,8 +406,27 @@ class Inspector:
         lbs = {arn for g in groups for arn in g.get("LoadBalancerArns", [])}
         if len(lbs) != 1:
             raise InspectionError("load_balancer_ambiguous")
+        return next(iter(lbs))
+
+    def load_balancer(self):
+        attributes = self.aws.get(
+            "elbv2",
+            "describe-load-balancer-attributes",
+            "--load-balancer-arn",
+            self.load_balancer_arn(),
+        ).get("Attributes", [])
+        for attribute in attributes:
+            if attribute.get("Key") == "idle_timeout.timeout_seconds":
+                value = attribute.get("Value")
+                if isinstance(value, str) and value.isascii() and value.isdecimal():
+                    seconds = int(value)
+                    if 1 <= seconds <= 4000:
+                        return {"idle_timeout_seconds": seconds}
+        raise InspectionError("load_balancer_idle_timeout_missing_or_invalid")
+
+    def waf(self):
         acl = self.aws.get(
-            "wafv2", "get-web-acl-for-resource", "--resource-arn", next(iter(lbs))
+            "wafv2", "get-web-acl-for-resource", "--resource-arn", self.load_balancer_arn()
         ).get("WebACL")
         if not acl:
             raise InspectionError("no_web_acl_association")
@@ -585,6 +632,7 @@ class Inspector:
             "service",
             "tasks",
             "waf",
+            "load_balancer",
             "dashboard",
             "alarms",
             "subscriptions",
@@ -629,7 +677,7 @@ def main():
             stream.write(summary)
     return (
         0
-        if len(results) == 9
+        if len(results) == 10
         and all(r["status"] == "observed" for r in results)
         and results[0]["details"]["expected_account"]
         else 1
