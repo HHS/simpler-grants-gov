@@ -3,13 +3,13 @@ import FieldComparison from "@/components/forms/comparison/FieldComparison";
 import { compareForm } from "@parity/comparison.ts";
 import { getCollection, type CollectionEntry } from "astro:content";
 
+import FormArtifactsPanel from "../../components/forms/FormArtifactsPanel";
 import FormFieldTree from "../../components/forms/FormFieldTree.astro";
 import FormMetadata from "../../components/forms/FormMetadata.astro";
 import FormDataPanel from "../../components/forms/preview/FormDataPanel";
 import FormPreview from "../../components/forms/preview/FormPreview";
 import type { FieldNode } from "../../content.config";
 import Base from "../../layouts/Base.astro";
-import FormArtifactsPanel from "../../components/forms/FormArtifactsPanel";
 import { loadFormSpec } from "../../lib/formSpec";
 
 export async function getStaticPaths() {
@@ -114,16 +114,36 @@ const STATUS_LABELS: Record<string, string> = {
           )}
           {spec ? (
             <>
-              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="schemas">Schemas</button>
-              <button class="tab-bar__tab" role="tab" aria-selected="false" data-tab="source">Source</button>
+              <button
+                class="tab-bar__tab"
+                role="tab"
+                aria-selected="false"
+                data-tab="schemas"
+              >
+                Schemas
+              </button>
+              <button
+                class="tab-bar__tab"
+                role="tab"
+                aria-selected="false"
+                data-tab="source"
+              >
+                Source
+              </button>
             </>
           ) : (
             <>
-              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Schemas</button>
-              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>Source</button>
+              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>
+                Schemas
+              </button>
+              <button class="tab-bar__tab tab-bar__tab--disabled" disabled>
+                Source
+              </button>
             </>
           )}
-          <button class="tab-bar__tab tab-bar__tab--disabled" disabled>XML Mapping</button>
+          <button class="tab-bar__tab tab-bar__tab--disabled" disabled>
+            XML Mapping
+          </button>
         </div>
 
         <div data-panel="fields">
@@ -179,13 +199,29 @@ const STATUS_LABELS: Record<string, string> = {
           <>
             <div data-panel="schemas" hidden>
               <h2 class="section-title">Schemas</h2>
-              <p class="text-base">Generated artifacts for this form. JSON Schema expands question-bank references; API installation bundles those definitions under internal references.</p>
-              <FormArtifactsPanel client:load kind="schemas" files={spec.schemas} absent={spec.absentSchemas} />
+              <p class="text-base">
+                Generated artifacts for this form. JSON Schema expands
+                question-bank references; API installation bundles those
+                definitions under internal references.
+              </p>
+              <FormArtifactsPanel
+                client:load
+                kind="schemas"
+                files={spec.schemas}
+                absent={spec.absentSchemas}
+              />
             </div>
             <div data-panel="source" hidden>
               <h2 class="section-title">Source</h2>
-              <p class="text-base">TypeSpec files in this form’s folder. Shared imports are not included. GitHub links point to the commit used for this build.</p>
-              <FormArtifactsPanel client:load kind="source" files={spec.sources} />
+              <p class="text-base">
+                TypeSpec files in this form’s folder. Shared imports are not
+                included. GitHub links point to the commit used for this build.
+              </p>
+              <FormArtifactsPanel
+                client:load
+                kind="source"
+                files={spec.sources}
+              />
             </div>
           </>
         )}
