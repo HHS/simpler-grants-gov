@@ -42,7 +42,11 @@ const mockSummaryData: Summary = {
 describe("OpportunityDescription", () => {
   it("renders the opportunity description", () => {
     render(
-      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
+      <OpportunityDescription
+        summary={mockSummaryData}
+        attachments={[]}
+        opportunityId="opp-id"
+      />,
     );
 
     const descriptionHeading = screen.getByText("title");
@@ -62,6 +66,7 @@ describe("OpportunityDescription", () => {
       <OpportunityDescription
         summary={{ ...mockSummaryData, summary_description: longDescription }}
         attachments={[]}
+        opportunityId="opp-id"
       />,
     );
 
@@ -87,6 +92,7 @@ describe("OpportunityDescription", () => {
       <OpportunityDescription
         summary={{ ...mockSummaryData, summary_description: longDescription }}
         attachments={[]}
+        opportunityId="opp-id"
       />,
     );
 
@@ -99,7 +105,11 @@ describe("OpportunityDescription", () => {
 
   it("renders additional information on eligibility", () => {
     render(
-      <OpportunityDescription summary={mockSummaryData} attachments={[]} />,
+      <OpportunityDescription
+        summary={mockSummaryData}
+        attachments={[]}
+        opportunityId="opp-id"
+      />,
     );
 
     const additionalInfoHeading = screen.getByText("additionalInfo");
@@ -126,6 +136,7 @@ describe("OpportunityDescription", () => {
           summary_description: null,
         }}
         attachments={[]}
+        opportunityId="opp-id"
       />,
     );
 
