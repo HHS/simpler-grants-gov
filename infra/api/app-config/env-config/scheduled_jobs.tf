@@ -236,8 +236,8 @@ locals {
     "infra-dev"      = "ENABLED"
     staging          = "ENABLED"
     "infra-staging"  = "ENABLED"
-    training         = "DISABLED"
-    "infra-training" = "DISABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
     "infra-sgg2"     = "DISABLED"
     "infra-sgg3"     = "DISABLED"
     grantee2         = "DISABLED"
@@ -402,7 +402,7 @@ locals {
       task_command = ["flask", "task", "new-opportunity-notification"]
       # Every day at 4am Eastern Time during DST. 5am during non-DST.
       schedule_expression = "cron(0 9 * * ? *)"
-      # Enabled in dev/staging/prod, not yet in training
+      # Enabled in dev/staging/training/prod
       state            = local.new-opportunity-notification-state[var.environment]
       cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
