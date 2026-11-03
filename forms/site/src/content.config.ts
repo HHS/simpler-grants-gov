@@ -65,8 +65,8 @@ const formSchema = z.object({
     "backlog",
     "prioritized",
     "in_progress",
+    "in_review",
     "migrated",
-    "ready",
   ]),
   /** Grants.gov form families, e.g. ["R&R"]; empty for forms outside any family. */
   family: z.array(z.string()).default([]),
