@@ -100,10 +100,10 @@ output "sqs_config" {
 
 output "submission_consumer_config" {
   value = {
-    enable        = var.enable_submisssion_consumer
-    cpu           = var.submisssion_consumer_cpu
-    memory        = var.submisssion_consumer_memory
-    desired_count = var.submisssion_consumer_desired_count
+    enable        = var.enable_submission_consumer
+    cpu           = var.submission_consumer_cpu
+    memory        = var.submission_consumer_memory
+    desired_count = var.submission_consumer_desired_count
   }
 }
 
