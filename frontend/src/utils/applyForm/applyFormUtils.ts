@@ -122,7 +122,7 @@ export const formatValidationWarning = (
   fieldSchema?: SchemaField,
 ): string => {
   const title = typeof fieldSchema === "string" ? fieldSchema : fieldSchema?.title;
-  return validationWarningOverrides(message, fieldName, fieldSchema?.title);
+  return validationWarningOverrides(message, fieldName, title);
 };
 export const findValidationErrors = (
   errors: FormValidationWarning[],
