@@ -7,13 +7,14 @@ name: "CI - Form Library: Validate and Deploy Preview"
 #
 # Previews deploy from the repositories holding the Cloudflare secrets:
 #   - secrets.CLOUDFLARE_API_TOKEN, secrets.CLOUDFLARE_ACCOUNT_ID
-# The Worker must already exist (first deploy is manual: `npm run build && npm run deploy`).
+# The main/manual CD workflow creates or updates the Worker before previews are uploaded.
 
 on:
   pull_request:
     paths:
       - forms/**
       - .github/workflows/ci-form-library-preview.yml
+      - .github/workflows/cd-form-library.yml
 
 defaults:
   run:
@@ -60,6 +61,30 @@ jobs:
       - name: Compile form specs
         id: compile
         run: npm --prefix .. run compile
+
+      - name: Check formatting
+        if: ${{ !cancelled() }}
+        working-directory: ./forms
+        run: |
+          npm run format:check
+          npm run format:typespec:check
+
+      - name: Check emitter and script types
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        working-directory: ./forms
+        run: |
+          npm run check:emitters
+          npm run check:scripts
+
+      - name: Lint emitters, scripts and parity harness
+        if: ${{ !cancelled() }}
+        working-directory: ./forms
+        run: npm run lint
+
+      - name: Test emitters
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        working-directory: ./forms
+        run: npm run test:emitters
 
       # Every form marked @Sgg.sync must be installed in api/ exactly as its spec emits it.
       - name: Check installed forms match their specs
