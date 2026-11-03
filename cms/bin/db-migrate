@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Applies pending database updates, imports configuration from config/sync,
+# rebuilds caches and runs deploy hooks.
+#
+# bin/run-database-migrations runs this as a one-off ECS task during deploys.
+set -euo pipefail
+
+cd /app
+exec drush deploy --yes
