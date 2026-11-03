@@ -1,6 +1,7 @@
 import { useStore } from "@nanostores/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { signalFormStateReady } from "../../lib/formHydration";
 import type { FormFile } from "../../lib/formSpec";
 import { $schemaFile, $sourceFile } from "../../stores/formArtifacts";
 import HighlightedCode from "./preview/HighlightedCode";
@@ -15,6 +16,8 @@ export default function FormArtifactsPanel({
   files: FormFile[];
   absent?: string[];
 }) {
+  const boundary = useRef<HTMLDivElement>(null);
+  useEffect(() => signalFormStateReady(boundary.current), []);
   const selection = kind === "schemas" ? $schemaFile : $sourceFile;
   const name = useStore(selection);
   const file = files.find((entry) => entry.name === name) ?? files[0];
@@ -37,7 +40,12 @@ export default function FormArtifactsPanel({
   };
 
   return (
-    <div className="form-artifacts" data-artifact-kind={kind}>
+    <div
+      ref={boundary}
+      className="form-artifacts"
+      data-artifact-kind={kind}
+      data-form-state-boundary
+    >
       <ul
         className="usa-button-group usa-button-group--segmented margin-bottom-2"
         aria-label={kind === "schemas" ? "Schema files" : "Source files"}
