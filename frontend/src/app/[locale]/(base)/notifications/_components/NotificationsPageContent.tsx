@@ -96,7 +96,7 @@ export function NotificationsPageContent({
   >(null);
 
   /**
-   * When turnOffOnError is set, a failed save forces the preference to OFF
+   * When turnOffOnError is set, a failed save forces the preference to display as OFF
    * instead of leaving it at its previous value.
    */
   function handlePreferenceToggle(
