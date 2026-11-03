@@ -16,7 +16,7 @@ import {
 } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 import {
-  deleteAllSavedSearches,
+  deleteSavedSearchesByName,
   navigateToSavedSearches,
   runSavedSearch,
   saveCurrentSearch,
@@ -27,21 +27,22 @@ import {
   toggleFilterDrawer,
 } from "tests/e2e/utils/search/search-filter-utils";
 import {
-  applySortOption,
   applyStatusNarrowingFilter,
   clickSearchFromTopNav,
   DEFAULT_SORT,
   expectNoFullPageReload,
   expectNoSortInURL,
+  expectRenderedSortOptions,
   expectRowsSorted,
   expectSortInURL,
   expectSortSelected,
   gotoPartialResultsSearch,
   markPageSession,
-  NON_DEFAULT_SORT_VALUE,
+  MIN_VERIFIABLE_ROWS,
   openFirstResultAndGoBack,
   readResultRows,
   SEARCH_PAGE_SIZE,
+  selectSortCase,
   SORT_CASES,
   verifySortedAcrossPages,
 } from "tests/e2e/utils/search/search-sort-utils";
@@ -57,26 +58,21 @@ const { baseUrl } = playwrightEnv;
 
 const PARTIAL_RESULTS_SEARCH_TERM = "E2E-*";
 
-// Controls whether loss of focus after sort selection fails the test or is recorded as a non-blocking annotation.
-const ENFORCE_FOCUS_AFTER_SELECTION = false;
-
-async function expectFocusRemainsOnSortSelect(
+// KNOWN APP DEFECT: on desktop the Sort by select is inside the results <Suspense>, which is keyed
+// on every search param (SearchResults.tsx), so changing the sort remounts the select and focus
+// falls back to the page. The AC "focus remains on the dropdown after selection" can't pass yet,
+// so the result is recorded as a "known-issue" annotation instead of failing the test.
+// TODO: link the bug ticket here. Once the app is fixed, replace the body with
+//   await expect(sortSelect).toBeFocused();
+async function recordFocusAfterSelection(
   sortSelect: Locator,
   testInfo: TestInfo,
 ): Promise<void> {
-  if (ENFORCE_FOCUS_AFTER_SELECTION) {
-    await expect(
-      sortSelect,
-      "Focus should remain on the Sort by dropdown after selection",
-    ).toBeFocused();
-    return;
-  }
-  const hasFocus = await expect(sortSelect)
-    .toBeFocused({ timeout: 5000 })
-    .then(
-      () => true,
-      () => false,
-    );
+  // A single read with no wait: callers wait for the results to finish rendering first, so the
+  // select has already been remounted and a known failure costs no extra time.
+  const hasFocus = await sortSelect.evaluate(
+    (element) => element === document.activeElement,
+  );
   if (!hasFocus) {
     testInfo.annotations.push({
       type: "known-issue",
@@ -105,9 +101,6 @@ test.describe("Search results sorting", () => {
          * And my login state is "<loginState>"
          */
         await gotoSearchPage(page, context, testInfo, sortCase.loginState);
-        if (canSaveSearch) {
-          await deleteAllSavedSearches(page);
-        }
 
         // The default sort is "Most relevant", with no sortby in the URL.
         expectNoSortInURL(page);
@@ -120,23 +113,16 @@ test.describe("Search results sorting", () => {
          * @and I select "<sortOption>" from the dropdown
          */
         await markPageSession(page);
-        // Selecting the option that is already selected fires no change event.
-        if (sortCase.value === DEFAULT_SORT.value) {
-          await applySortOption(
-            page,
-            NON_DEFAULT_SORT_VALUE,
-            isMobile,
-            projectName,
-          );
-        }
-        await applySortOption(page, sortCase.value, isMobile, projectName);
+        await selectSortCase(page, sortCase, isMobile, projectName);
 
         /**
          * @then results should be reordered according to "<sortOption>"
          */
         const firstPageRows = await readResultRows(page);
         expect(firstPageRows.length).toBeGreaterThan(0);
-        expectRowsSorted(firstPageRows, sortCase, "page 1");
+        expectRowsSorted(firstPageRows, sortCase, "page 1", {
+          minVerifiable: MIN_VERIFIABLE_ROWS,
+        });
         // Sorting reorders results; it never changes how many there are.
         expect(await getNumberOfOpportunitySearchResults(page)).toBe(
           baselineCount,
@@ -155,13 +141,10 @@ test.describe("Search results sorting", () => {
 
         /**
          * @and the selected sort option reflects the intended sort direction
-         * The ordering assertion above checks the rows; this checks the option itself.
+         * The ordering assertions check the rows; this checks the dropdown as rendered on the
+         * page: its options, the selected option, and the direction in its value and label.
          */
-        if (sortCase.direction) {
-          expect(sortCase.value.endsWith("Asc")).toBe(
-            sortCase.direction === "asc",
-          );
-        }
+        await expectRenderedSortOptions(page, sortCase, isMobile);
 
         /**
          * @and sorting persists when pagination changes
@@ -208,6 +191,7 @@ test.describe("Search results sorting", () => {
           await readResultRows(page),
           sortCase,
           "filtered results",
+          { minVerifiable: MIN_VERIFIABLE_ROWS },
         );
 
         if (canSaveSearch) {
@@ -216,24 +200,40 @@ test.describe("Search results sorting", () => {
            * Saving needs a logged in user, so this only runs for logged in options.
            */
           const savedSearchName = `E2E Sort Persist ${sortCase.value} ${Date.now()}`;
-          const workspaceLink = await saveCurrentSearch(page, savedSearchName);
-          await navigateToSavedSearches(page, workspaceLink);
-          await runSavedSearch(page, savedSearchName);
+          try {
+            const workspaceLink = await saveCurrentSearch(
+              page,
+              savedSearchName,
+            );
+            await navigateToSavedSearches(page, workspaceLink);
+            await runSavedSearch(page, savedSearchName);
 
-          // A saved relevancy sort comes back as the default: the app leaves sortby
-          // out of the URL for relevancy (paginationToSortby), so only the dropdown
-          // shows it.
-          if (sortCase.value === DEFAULT_SORT.value) {
-            expectNoSortInURL(page);
-          } else {
-            expectSortInURL(page, sortCase.value);
+            // A saved relevancy sort comes back as the default: the app leaves sortby
+            // out of the URL for relevancy (paginationToSortby), so only the dropdown
+            // shows it.
+            if (sortCase.value === DEFAULT_SORT.value) {
+              expectNoSortInURL(page);
+            } else {
+              expectSortInURL(page, sortCase.value);
+            }
+            await expectSortSelected(page, sortCase, isMobile);
+            expectRowsSorted(
+              await readResultRows(page),
+              sortCase,
+              "reopened saved search",
+            );
+          } finally {
+            // Remove only the search this test created. deleteAllSavedSearches would also
+            // delete searches other specs create for the same seeded user.
+            await deleteSavedSearchesByName(page, savedSearchName).catch(
+              (error) => {
+                console.warn(
+                  `Could not delete saved search "${savedSearchName}":`,
+                  error,
+                );
+              },
+            );
           }
-          await expectSortSelected(page, sortCase, isMobile);
-          expectRowsSorted(
-            await readResultRows(page),
-            sortCase,
-            "reopened saved search",
-          );
         }
 
         if (isMobile) {
@@ -293,7 +293,9 @@ test.describe("Search results sorting", () => {
           await expect(sortSelect.locator("option:checked")).toHaveText(
             nextSort.label,
           );
-          await expectFocusRemainsOnSortSelect(sortSelect, testInfo);
+          // Wait for the results to re-render so the select has been remounted before reading focus.
+          await getNumberOfOpportunitySearchResults(page);
+          await recordFocusAfterSelection(sortSelect, testInfo);
         }
 
         if (isMobile) {
@@ -310,19 +312,6 @@ test.describe("Search results sorting", () => {
         const projectName = testInfo.project.name;
         const isMobile = !!projectName.match(/[Mm]obile/);
 
-        const selectSort = async () => {
-          // Selecting the option that is already selected fires no change event.
-          if (sortCase.value === DEFAULT_SORT.value) {
-            await applySortOption(
-              page,
-              NON_DEFAULT_SORT_VALUE,
-              isMobile,
-              projectName,
-            );
-          }
-          await applySortOption(page, sortCase.value, isMobile, projectName);
-        };
-
         /**
          * @background
          * Given I am on the Search Funding Opportunity page
@@ -338,22 +327,23 @@ test.describe("Search results sorting", () => {
          * @and sorting produces consistent ordering across pages
          * The default catalog spans multiple pages.
          */
-        const largeCount = await getNumberOfOpportunitySearchResults(page);
+        const largeOpportunityCount =
+          await getNumberOfOpportunitySearchResults(page);
         expect(
-          largeCount,
+          largeOpportunityCount,
           "Expected more than one page of results in the default catalog. " +
             "If this starts failing, the seed data no longer has enough opportunities",
         ).toBeGreaterThan(SEARCH_PAGE_SIZE);
 
-        await selectSort();
+        await selectSortCase(page, sortCase, isMobile, projectName);
         expect(await getNumberOfOpportunitySearchResults(page)).toBe(
-          largeCount,
+          largeOpportunityCount,
         );
         await verifySortedAcrossPages(
           page,
           sortCase,
           "large result set",
-          largeCount,
+          largeOpportunityCount,
         );
 
         /**
@@ -366,7 +356,7 @@ test.describe("Search results sorting", () => {
           filteredCount,
           "Expected results after unchecking Forecasted status",
         ).toBeGreaterThan(0);
-        expect(filteredCount).toBeLessThanOrEqual(largeCount);
+        expect(filteredCount).toBeLessThanOrEqual(largeOpportunityCount);
         expectSortInURL(page, sortCase.value);
         await verifySortedAcrossPages(
           page,
@@ -386,7 +376,7 @@ test.describe("Search results sorting", () => {
         );
         expect(partialCount).toBeLessThanOrEqual(SEARCH_PAGE_SIZE);
 
-        await selectSort();
+        await selectSortCase(page, sortCase, isMobile, projectName);
         expect(await getNumberOfOpportunitySearchResults(page)).toBe(
           partialCount,
         );

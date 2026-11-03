@@ -37,6 +37,10 @@ const NAVIGATION_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
 // Matches the page_size sent by buildPagination (src/utils/search/searchFormatUtils.ts).
 export const SEARCH_PAGE_SIZE = 25;
 
+// Ordering can only be confirmed from rows that have a sortable value. Require at least this
+// many, so a result set whose values are all missing or unverifiable can't pass vacuously.
+export const MIN_VERIFIABLE_ROWS = 2;
+
 // ---------------------------------------------------------------------------
 // Sort options (src/constants/searchFilterOptions.ts `sortOptions`)
 // ---------------------------------------------------------------------------
@@ -65,7 +69,7 @@ export const DEFAULT_SORT: SortCase = {
 
 // Used to leave the default option before selecting it. Re-selecting the option that
 // is already selected does not fire a change event.
-export const NON_DEFAULT_SORT_VALUE = "closeDateAsc";
+const NON_DEFAULT_SORT_VALUE = "closeDateAsc";
 
 export const SORT_CASES: SortCase[] = [
   DEFAULT_SORT,
@@ -168,6 +172,23 @@ export async function applySortOption(
 }
 
 /**
+ * Selects the sort option for a case, starting from the default sort. Selecting the option that
+ * is already selected fires no change event, so for the default option another option is
+ * selected first.
+ */
+export async function selectSortCase(
+  page: Page,
+  sortCase: Pick<SortCase, "value">,
+  isMobile: boolean,
+  projectName?: string,
+): Promise<void> {
+  if (sortCase.value === DEFAULT_SORT.value) {
+    await applySortOption(page, NON_DEFAULT_SORT_VALUE, isMobile, projectName);
+  }
+  await applySortOption(page, sortCase.value, isMobile, projectName);
+}
+
+/**
  * Asserts the dropdown shows the given option (value and visible label).
  */
 export async function expectSortSelected(
@@ -184,6 +205,83 @@ export async function expectSortSelected(
   if (isMobile) {
     await toggleFilterDrawer(page);
   }
+}
+
+// The sort direction is part of each rendered option, e.g. "Close date (Soonest)".
+const directionFromLabel = (label: string): SortDirection | null => {
+  if (/\((Soonest|Oldest|A to Z|Lowest)\)$/.test(label)) return "asc";
+  if (/\((Furthest|Newest|Z to A|Highest)\)$/.test(label)) return "desc";
+  return null;
+};
+
+const directionFromValue = (value: string): SortDirection | null => {
+  if (value.endsWith("Asc")) return "asc";
+  if (value.endsWith("Desc")) return "desc";
+  return null;
+};
+
+type RenderedSortOption = { value: string; label: string; selected: boolean };
+
+async function readRenderedSortOptions(
+  page: Page,
+  isMobile: boolean,
+): Promise<RenderedSortOption[]> {
+  if (isMobile) {
+    await ensureFilterDrawerOpen(page);
+  }
+  const sortSelect = await getSortSelect(page, isMobile);
+  const options = await sortSelect.locator("option").evaluateAll((elements) =>
+    elements.map((element) => ({
+      value: (element as HTMLOptionElement).value,
+      label: (element.textContent ?? "").trim(),
+      selected: (element as HTMLOptionElement).selected,
+    })),
+  );
+  if (isMobile) {
+    await toggleFilterDrawer(page);
+  }
+  return options;
+}
+
+/**
+ * Checks the Sort by dropdown as rendered on the page, not just the SORT_CASES constants:
+ * - the rendered options are exactly SORT_CASES (an added, removed or renamed option fails here)
+ * - exactly one option is selected, and it is the case's option
+ * - the selected option's rendered value and label both carry the case's sort direction
+ */
+export async function expectRenderedSortOptions(
+  page: Page,
+  sortCase: SortCase,
+  isMobile: boolean,
+): Promise<void> {
+  const options = await readRenderedSortOptions(page, isMobile);
+
+  const byValue = (a: { value: string }, b: { value: string }) =>
+    a.value.localeCompare(b.value);
+  const pick = ({ value, label }: { value: string; label: string }) => ({
+    value,
+    label,
+  });
+  expect(
+    options.map(pick).sort(byValue),
+    "Sort by dropdown options on the page should match the sort cases under test",
+  ).toEqual(SORT_CASES.map(pick).sort(byValue));
+
+  const selected = options.filter((option) => option.selected);
+  expect(selected, "Expected exactly one selected Sort by option").toHaveLength(
+    1,
+  );
+  const [rendered] = selected;
+  expect(rendered.value).toBe(sortCase.value);
+  expect(rendered.label).toBe(sortCase.label);
+  expect(
+    directionFromValue(rendered.value),
+    `Direction of rendered value "${rendered.value}"`,
+  ).toBe(sortCase.direction);
+  expect(
+    directionFromLabel(rendered.label),
+    `Direction of rendered label "${rendered.label}"`,
+  ).toBe(sortCase.direction);
 }
 
 export function expectNoSortInURL(page: Page): void {
@@ -240,8 +338,10 @@ export type ResultRow = {
  * not innerText: the posted date is display:none below the tablet-lg breakpoint.
  */
 export async function readResultRows(page: Page): Promise<ResultRow[]> {
+  // :visible, because the keyed Suspense in SearchResults.tsx can leave a hidden duplicate of
+  // the table in the DOM while results re-render, which would double the rows read.
   return page
-    .locator(".simpler-responsive-table tbody tr")
+    .locator(".simpler-responsive-table:visible tbody tr")
     .evaluateAll((rows) =>
       rows.map((row) => {
         const clean = (text: string | null | undefined) =>
@@ -402,14 +502,18 @@ const describeRow = (row: ResultRow) =>
  * start with whitespace or punctuation. Title ordering passes if it holds exactly,
  * ignoring case, or ignoring case/accents/punctuation, since the search index collation
  * is not defined in this repo.
+ *
+ * Returns how many rows were actually verified. Pass `minVerifiable` to fail when fewer rows
+ * than that could be verified, so a page of missing or unverifiable values can't pass vacuously.
  */
 export function expectRowsSorted(
   rows: ResultRow[],
   sortCase: SortCase,
   context: string,
-): void {
+  options: { minVerifiable?: number } = {},
+): number {
   const { key, direction } = sortCase;
-  if (!key || !direction) return;
+  if (!key || !direction) return 0;
 
   const entries = rows.map((row, index) => ({
     row,
@@ -435,6 +539,14 @@ export function expectRowsSorted(
         `have a ${key} value that can't be verified and were left out of the ordering check`,
     );
   }
+  if (options.minVerifiable !== undefined) {
+    expect(
+      verifiable.length,
+      `${context}: only ${verifiable.length} of ${rows.length} rows have a ${key} value that ` +
+        `can be verified (need at least ${options.minVerifiable}), so the ordering of ` +
+        `"${sortCase.label}" can't be confirmed. Check the data in this environment`,
+    ).toBeGreaterThanOrEqual(options.minVerifiable);
+  }
 
   const comparators: Comparator[] =
     key === "title"
@@ -456,6 +568,8 @@ export function expectRowsSorted(
           `${describeRow(verifiable[violationIndex - 1].row)} then ` +
           `${describeRow(verifiable[violationIndex].row)}`,
   ).toBe(-1);
+
+  return verifiable.length;
 }
 
 // ---------------------------------------------------------------------------
@@ -468,6 +582,7 @@ export function expectRowsSorted(
  * - sortby stays in the URL
  * - full pages hold 25 rows and the last page holds the remainder
  * - rows are ordered on each page and across each page boundary
+ * - at least MIN_VERIFIABLE_ROWS rows across the pages visited had a verifiable value
  * - no opportunity appears twice across the pages visited
  * Leaves the browser on the last page visited.
  */
@@ -513,6 +628,7 @@ export async function verifySortedAcrossPages(
 
   expectSortInURL(page, sortCase.value);
 
+  let verifiedRows = 0;
   for (const { pageNumber, rows } of visited) {
     const expectedRowCount =
       pageNumber < totalPages
@@ -522,7 +638,19 @@ export async function verifySortedAcrossPages(
       rows.length,
       `${label}: unexpected row count on page ${pageNumber}`,
     ).toBe(expectedRowCount);
-    expectRowsSorted(rows, sortCase, `${label} page ${pageNumber}`);
+    verifiedRows += expectRowsSorted(
+      rows,
+      sortCase,
+      `${label} page ${pageNumber}`,
+    );
+  }
+  if (sortCase.key) {
+    expect(
+      verifiedRows,
+      `${label}: only ${verifiedRows} rows across the pages visited have a ${sortCase.key} ` +
+        `value that can be verified (need at least ${MIN_VERIFIABLE_ROWS}), so the ordering of ` +
+        `"${sortCase.label}" can't be confirmed. Check the data in this environment`,
+    ).toBeGreaterThanOrEqual(MIN_VERIFIABLE_ROWS);
   }
 
   for (let i = 1; i < visited.length; i += 1) {
@@ -621,8 +749,8 @@ export async function applyStatusNarrowingFilter(page: Page): Promise<void> {
  * Seed data differs between environments (the "SGG" keyword returns a handful of results locally
  * but hundreds on staging), so the preferred keyword is tried first. The fallback uses titles of
  * opportunities on the default search page: keyword search defaults to AND, so a title (or its
- * first words) only matches a few opportunities. A set of 2 or more is preferred so ordering is
- * meaningful; a set of 1 is accepted if that is all there is.
+ * first words) only matches a few opportunities. The set must have at least 2 results: ordering
+ * can't be verified on a single row.
  */
 export async function gotoPartialResultsSearch(
   page: Page,
@@ -630,7 +758,6 @@ export async function gotoPartialResultsSearch(
   preferredTerm: string,
 ): Promise<{ term: string; count: number }> {
   const attempted: string[] = [];
-  let singleResultMatch: { term: string; count: number } | undefined;
 
   const tryTerm = async (term: string) => {
     await gotoWithRetry(
@@ -643,9 +770,6 @@ export async function gotoPartialResultsSearch(
     attempted.push(`"${term}" -> ${count}`);
     if (count >= 2 && count <= SEARCH_PAGE_SIZE) {
       return { term, count };
-    }
-    if (count === 1 && !singleResultMatch) {
-      singleResultMatch = { term, count };
     }
     return undefined;
   };
@@ -671,14 +795,8 @@ export async function gotoPartialResultsSearch(
     if (found) return found;
   }
 
-  if (singleResultMatch) {
-    // Go back to it so the browser is on the search that is returned.
-    await tryTerm(singleResultMatch.term);
-    return singleResultMatch;
-  }
-
   throw new Error(
-    "Could not find a keyword returning a partial result set (1-" +
+    "Could not find a keyword returning a partial result set (2-" +
       `${SEARCH_PAGE_SIZE} results). Tried: ${attempted.join("; ")}`,
   );
 }
