@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
@@ -12,7 +12,12 @@ const fields = (nodes: Node[]): Node[] =>
 describe("durable field link identities", () => {
   const plans = readdirSync(directory)
     .filter((name) => name.endsWith(".json"))
-    .map((file) => ({ file, fields: fields(JSON.parse(readFileSync(`${directory}/${file}`, "utf8")).children ?? []) }))
+    .map((file) => ({
+      file,
+      fields: fields(
+        JSON.parse(readFileSync(`${directory}/${file}`, "utf8")).children ?? [],
+      ),
+    }))
     .filter((plan) => plan.fields.length > 0);
   it("checks a nonempty set of authored plans", () => {
     expect(plans.length).toBeGreaterThan(0);

@@ -57,6 +57,7 @@ const STATUS_LABELS: Record<string, string> = {
     </div>
 
     <FormMetadata form={form} />
+    <p class="usa-alert usa-alert--info" data-link-notice role="status" hidden></p>
 
     {form.data.children.length > 0 || spec ? (
       <>
@@ -235,22 +236,8 @@ const STATUS_LABELS: Record<string, string> = {
 </Base>
 
 <script>
-  for (const tab of document.querySelectorAll<HTMLButtonElement>(
-    "[data-tab]",
-  )) {
-    tab.addEventListener("click", () => {
-      for (const other of document.querySelectorAll<HTMLButtonElement>(
-        "[data-tab]",
-      )) {
-        const active = other === tab;
-        other.classList.toggle("tab-bar__tab--active", active);
-        other.setAttribute("aria-selected", String(active));
-      }
-      for (const panel of document.querySelectorAll<HTMLElement>(
-        "[data-panel]",
-      )) {
-        panel.hidden = panel.dataset.panel !== tab.dataset.tab;
-      }
-    });
-  }
+  import { mountFormPage } from "@/lib/formPage";
+
+  const stop = mountFormPage(document, window);
+  document.addEventListener("astro:before-swap", stop, { once: true });
 </script>

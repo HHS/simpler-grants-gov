@@ -3,8 +3,12 @@ import {
   SOURCE_LABELS,
   type Difference,
 } from "@/lib/comparison";
+import { $selectedField } from "@/stores/fieldComparison";
+import { checkSlug } from "@/stores/formPage";
+import { useStore } from "@nanostores/react";
 
 import CategoryBadge from "./CategoryBadge";
+import CopyReviewLink from "./CopyReviewLink";
 import OptionsDiff from "./OptionsDiff";
 import ValuePair from "./ValuePair";
 
@@ -14,9 +18,14 @@ export default function DifferenceCard({
   difference: Difference;
 }) {
   const { attribute, source, row, cell } = difference;
+  const field = useStore($selectedField);
   const sourceLabel = SOURCE_LABELS[source];
   return (
-    <li className="difference-card">
+    <li
+      className="difference-card"
+      data-check={checkSlug(difference)}
+      tabIndex={-1}
+    >
       <p className="difference-card__title">
         <span>
           {ATTRIBUTE_LABELS[attribute]} vs {sourceLabel}
@@ -33,6 +42,9 @@ export default function DifferenceCard({
         />
       )}
       {cell.reason && <p className="difference-card__reason">{cell.reason}</p>}
+      {field?.field.id && (
+        <CopyReviewLink field={field.field.id} check={checkSlug(difference)} />
+      )}
     </li>
   );
 }

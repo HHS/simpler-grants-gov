@@ -17,7 +17,13 @@ const requiredLabel =
       : undefined;
 ---
 
-<div class="field-row">
+<div class="field-row" data-field-id={field.id} data-static-field-id={field.id} tabindex="-1">
+  {field.id && (
+    <div>
+      <button type="button" class="usa-button usa-button--unstyled" data-copy-field={field.id}>Copy link</button>
+      <a class="margin-left-1" href={`?${new URLSearchParams({ field: field.id })}`}>Link</a>
+    </div>
+  )}
   <div class="field-row__primary">
     <span class="field-row__label">{field.label}</span>
     {isRequired ? (

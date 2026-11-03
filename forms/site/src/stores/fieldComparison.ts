@@ -119,7 +119,11 @@ export function openField(id: string) {
   $selectedFieldId.set(id);
 }
 
-export const closeSheet = () => $selectedFieldId.set(null);
+export const closeSheet = () => {
+  $selectedFieldId.set(null);
+  $selectedCell.set(null);
+  $sheetTab.set("comparison");
+};
 
 export const selectCell = (ref: CellRef) => $selectedCell.set(ref);
 

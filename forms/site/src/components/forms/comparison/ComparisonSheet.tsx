@@ -1,9 +1,12 @@
+import { revealField } from "@/lib/formPage";
 import {
+  $selectedCell,
   $selectedField,
   $sheetTab,
   $summary,
   closeSheet,
 } from "@/stores/fieldComparison";
+import { $pageTab, checkSlug } from "@/stores/formPage";
 import { useStore } from "@nanostores/react";
 import { useEffect, useRef } from "react";
 
@@ -19,22 +22,34 @@ import StatusMatrix from "./StatusMatrix";
 export default function ComparisonSheet() {
   const field = useStore($selectedField);
   const tab = useStore($sheetTab);
+  const selected = useStore($selectedCell);
+  const pageTab = useStore($pageTab);
   const summary = useStore($summary);
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const element = dialog.current;
     if (!element) return;
-    if (field && !element.open) element.showModal();
-    if (!field && element.open) element.close();
-  }, [field]);
+    if (field && pageTab === "fields" && !element.open) {
+      if (field.field.id) revealField(document, field.field.id);
+      element.showModal();
+    }
+    if (field && pageTab === "fields" && selected && tab === "differences") {
+      const target = [
+        ...element.querySelectorAll<HTMLElement>("[data-check]"),
+      ].find((entry) => entry.dataset.check === checkSlug(selected));
+      target?.scrollIntoView({ block: "nearest" });
+      target?.focus();
+    }
+    if ((!field || pageTab !== "fields") && element.open) element.close();
+  }, [field, selected, tab, pageTab]);
 
   return (
     <dialog
       ref={dialog}
       className="comparison-sheet"
       aria-labelledby="comparison-sheet-title"
-      onClose={closeSheet}
+      onClose={() => $pageTab.get() === "fields" && closeSheet()}
       // A click on the dialog itself, not its contents, is a click on the scrim.
       onClick={(event) => event.target === event.currentTarget && closeSheet()}
     >

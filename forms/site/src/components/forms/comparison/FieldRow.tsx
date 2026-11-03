@@ -5,6 +5,7 @@ import {
 } from "@/lib/comparison";
 import { openField } from "@/stores/fieldComparison";
 
+import CopyReviewLink from "./CopyReviewLink";
 import DeviationBadges from "./DeviationBadges";
 import FieldDetails from "./FieldDetails";
 
@@ -20,7 +21,7 @@ export default function FieldRow({
     Boolean,
   );
   return (
-    <div className="field-row field-row--compare">
+    <div className="field-row field-row--compare" data-field-id={field.id}>
       <div className="field-row__plan">
         <div className="field-row__primary">
           <span className="field-row__label">{field.label}</span>
@@ -39,6 +40,7 @@ export default function FieldRow({
       <button
         type="button"
         className="field-row__compare"
+        data-compare-field
         aria-haspopup="dialog"
         aria-label={`Compare ${field.label} with its sources`}
         onClick={() => openField(comparison.id)}
@@ -48,6 +50,7 @@ export default function FieldRow({
           Compare ›
         </span>
       </button>
+      {field.id && <CopyReviewLink field={field.id} />}
     </div>
   );
 }
