@@ -53,6 +53,16 @@ jobs:
       - name: Compile form specs
         run: npm --prefix .. run compile
 
+      # Astro displays DAT/XSD comparisons, so these are build inputs even without tests.
+      - name: Restore parity sources
+        uses: actions/cache@v5
+        with:
+          path: forms/.cache/sources
+          key: parity-sources-${{ hashFiles('forms/parity/sources/sources.lock.json') }}
+
+      - name: Fetch locked source inputs
+        run: npm --prefix .. run parity:fetch
+
       - name: Build site
         run: npx astro build
 

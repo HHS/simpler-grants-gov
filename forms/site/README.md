@@ -35,7 +35,8 @@ CI builds the site for every pull request that touches `forms/` and deploys it t
 
 [`cd-form-library.yml`](../../.github/workflows/cd-form-library.yml) builds and deploys
 the site when `main` changes `forms/`, and supports manual dispatch from `main`.
-It compiles and builds the merged revision without rerunning the PR checks. Deployments
+It compiles and builds the merged revision without rerunning the PR checks. It restores or
+downloads the locked DAT/XSD inputs needed to build the comparison pages. Deployments
 share a queue, so neither an active deployment nor earlier pending deployments are replaced
 by a newer run (GitHub permits up to 100 pending runs).
 
