@@ -200,9 +200,9 @@ const STATUS_LABELS: Record<string, string> = {
             <div data-panel="schemas" hidden>
               <h2 class="section-title">Schemas</h2>
               <p class="text-base">
-                Generated artifacts for this form. JSON Schema expands
-                question-bank references; API installation bundles those
-                definitions under internal references.
+                Generated artifacts for this form. JSON Schema uses the same
+                self-contained bundle as API installation, with shared
+                definitions under <code>$defs</code> and internal references.
               </p>
               <FormArtifactsPanel
                 client:load

@@ -5,7 +5,6 @@ import { processFormSchema } from "@sgg/frontend/utils/applyForm/applyFormUtils"
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { unadaptableScopes } from "../vendor/sgg/jsonFormsUiSchema";
-import { dereferenceFormSchema } from "./dereferenceSchema";
 import { CANONICAL_DIR, loadFormSpec, type FormSpec } from "./formSpec";
 import { createAjv } from "./validation";
 
@@ -60,16 +59,6 @@ describe.each([
 
   it("inlines every $ref", () => {
     expect(JSON.stringify(spec.schema)).not.toContain('"$ref"');
-  });
-
-  it("exposes the expanded canonical schema before preview-only sanitation", async () => {
-    const file = spec.schemas.find((entry) => entry.name === "schema.json")!;
-    const expanded = await dereferenceFormSchema(
-      path.join(CANONICAL_DIR, "forms", specId, "schema.json"),
-    );
-    expect(JSON.parse(file.code)).toEqual(expanded);
-    expect(file.code).not.toContain('"$ref"');
-    expect(file.code.endsWith("\n")).toBe(true);
   });
 
   it("preserves each emitted artifact's full content", async () => {

@@ -12,6 +12,7 @@ import path from "node:path";
 import type { JsonSchema, UISchemaElement } from "@jsonforms/core";
 import type { XmlMapping } from "@xml/index.ts";
 
+import { bundleFormSchema } from "../../../scripts/bundle-schema.mjs";
 import { dereferenceFormSchema } from "./dereferenceSchema";
 
 /** `forms/` — the site runs from `forms/site`. */
@@ -96,8 +97,12 @@ export async function loadFormSpec(specId: string): Promise<FormSpec> {
   // Copying also unshares the objects dereferencing reuses between `$ref` targets, since the
   // result is handed to a client island as props.
   const resolved = await dereferenceFormSchema(schemaFile);
-  // Keep the expanded canonical artifact before the preview removes nested IDs.
-  const expandedSchema = `${JSON.stringify(resolved, null, 2)}\n`;
+  // The inspector uses the same self-contained schema the API sync installs.
+  const apiSchema = await bundleFormSchema(
+    await readJson(schemaFile),
+    formDir,
+    path.join(CANONICAL_DIR, "question-bank"),
+  );
   const schema = stripIds(resolved) as JsonSchema & {
     examples?: Record<string, unknown>[];
   };
@@ -112,7 +117,7 @@ export async function loadFormSpec(specId: string): Promise<FormSpec> {
     {
       name: "schema.json",
       label: "JSON Schema",
-      code: expandedSchema,
+      code: `${JSON.stringify(apiSchema, null, 2)}\n`,
       lang: "json",
     },
     {
