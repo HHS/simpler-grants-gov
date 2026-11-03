@@ -65,6 +65,22 @@ describe("source downloads", () => {
     expect(setTimeout).not.toHaveBeenCalled();
   });
 
+  it("still retries a server failure when cancelling its body fails", async () => {
+    const failed = new Response("unavailable", { status: 503 });
+    vi.spyOn(failed.body!, "cancel").mockRejectedValueOnce(
+      new TypeError("terminated"),
+    );
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(failed)
+      .mockResolvedValueOnce(new Response("ok"));
+    vi.stubGlobal("fetch", fetch);
+    expect(await download("https://example.test/form.xsd")).toEqual(
+      Buffer.from("ok"),
+    );
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
   it.each(["network", "server"])(
     "stops after four %s failures",
     async (kind) => {
