@@ -10,7 +10,7 @@ on:
       - "infra/frontend/**"
       - "infra/modules/**"
   # Release deployments are handled by cd-release.yml to enforce deployment order
-  # (API -> Frontend -> NOFOs -> Analytics)
+  # (API -> Frontend -> Analytics)
   workflow_dispatch:
     inputs:
       environment:

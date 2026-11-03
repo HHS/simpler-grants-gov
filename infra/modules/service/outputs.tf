@@ -116,13 +116,3 @@ output "processor_service_role_name" {
   description = "Name of the role to use for the processor service, for attaching environment-specific policies"
   value       = length(aws_iam_role.processor_service) > 0 ? aws_iam_role.processor_service[0].name : null
 }
-
-output "waf_metric_name" {
-  description = "WebACL visibility metric name; distinct from the ACL resource name used by NOFO rule metric queries."
-  value       = var.enable_load_balancer ? aws_wafv2_web_acl.waf[0].visibility_config[0].metric_name : null
-}
-
-output "waf_web_acl_name" {
-  description = "Web ACL resource name used by the published NOFO WAF rule metric WebACL dimension."
-  value       = var.enable_load_balancer ? aws_wafv2_web_acl.waf[0].name : null
-}

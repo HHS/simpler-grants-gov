@@ -216,8 +216,8 @@ openssl x509 -inform DER \
 Alternatively, if you get an error (or it's a p7b file), you might need to run:
 ```bash
 openssl pkcs7 -inform DER -print-certs \
-    -in nofos_simpler_grants_gov_chain.p7b \
-    -out nofos_simpler_grants_gov_chain.pem
+    -in api_simpler_grants_gov_chain.p7b \
+    -out api_simpler_grants_gov_chain.pem
 ```
 
 Once you have plain text certs, you need to split it into the chain and the main cert. The main cert is the first certificate in the file, and the chain is the remaining (likely 2 certificates). So split it into a certificate.pem and certificate_chain.pem.

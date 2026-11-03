@@ -31,7 +31,6 @@ flowchart LR
   style simplerreporting fill:#F7F7F4,stroke:#171716
   style simplerdelivery fill:#F7F7F4,stroke:#171716
   style commongrants fill:#F7F7F4,stroke:#171716
-  style simplernofos fill:#F7F7F4,stroke:#171716
 
   %% ─────────────────────────────
   %% Legend
@@ -130,12 +129,6 @@ flowchart LR
         HHS/simpler-grants-gov#5892["CommonGrants: Co-Planning * 🛠️"]:::InProgress
         HHS/simpler-grants-gov#6195["CommonGrants: Form library"]
         HHS/simpler-grants-gov#6201["CommonGrants: Schema versioning 🛠️"]:::InProgress
-    end
-
-
-    subgraph simplernofos["📣 SimplerNOFOs"]
-    direction LR
-        HHS/simpler-grants-gov#5688["SNOFO - User Research & Eval Quad 3 ✔️"]:::Done
     end
 
 

@@ -8,7 +8,7 @@ on:
   #      - "mdragon/8032-improve-action-slack-notifications"
 
   # Release deployments are handled by cd-release.yml to enforce deployment order
-  # (API -> Frontend -> NOFOs -> Analytics)
+  # (API -> Frontend -> Analytics)
   workflow_dispatch:
     inputs:
       version:

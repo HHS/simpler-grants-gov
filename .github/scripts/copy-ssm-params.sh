@@ -3,13 +3,13 @@
 # Usage: copy-ssm-params.sh <source_env> <target_env> [--dry-run] [--no-overwrite] [--app=<name>]
 #
 # Copies parameters matching /{app}/{source_env}/* to /{app}/{target_env}/*
-# for all apps (api, frontend, nofos, analytics) unless narrowed with --app.
+# for all apps (api, frontend, analytics) unless narrowed with --app.
 #
 # Flags:
 #   --dry-run       Preview what would happen without making changes.
 #   --no-overwrite  Create-if-missing: only create target params that do NOT already
 #                   exist; leave existing target values untouched. (Default overwrites.)
-#   --app=<name>    Restrict to a single app: api, frontend, nofos, or analytics.
+#   --app=<name>    Restrict to a single app: api, frontend, or analytics.
 #
 # Examples:
 #   copy-ssm-params.sh staging grantor1
@@ -52,7 +52,7 @@ if [[ "${SOURCE_ENV}" == "${TARGET_ENV}" ]]; then
   exit 1
 fi
 
-APP_PREFIXES=("api" "frontend" "nofos" "analytics")
+APP_PREFIXES=("api" "frontend" "analytics")
 
 # Narrow to a single app when --app is provided (e.g. --app=api).
 if [[ -n "${APP_FILTER}" ]]; then

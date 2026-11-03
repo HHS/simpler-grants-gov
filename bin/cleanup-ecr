@@ -12,7 +12,6 @@ REPOSITORIES=(
     "simpler-grants-gov-analytics"
     "simpler-grants-gov-api"
     "simpler-grants-gov-frontend"
-    "simpler-grants-gov-nofos"
 )
 
 while [[ $# -gt 0 ]]; do
