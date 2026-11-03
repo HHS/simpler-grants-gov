@@ -54,6 +54,10 @@ class InspectionError(Exception):
     """Only fixed categories may reach the report."""
 
 
+# Keep in sync with aws_lb.alb in infra/modules/service/load_balancer.tf.
+EXPECTED_ALB_IDLE_TIMEOUT_SECONDS = 120
+
+
 def number(value):
     return value if type(value) in (int, float) and 0 <= value < 10**12 else None
 
@@ -421,7 +425,11 @@ class Inspector:
                 if isinstance(value, str) and value.isascii() and value.isdecimal():
                     seconds = int(value)
                     if 1 <= seconds <= 4000:
-                        return {"idle_timeout_seconds": seconds}
+                        matches = seconds == EXPECTED_ALB_IDLE_TIMEOUT_SECONDS
+                        return {
+                            "idle_timeout": "matches" if matches else "differs",
+                            "complete": matches,
+                        }
         raise InspectionError("load_balancer_idle_timeout_missing_or_invalid")
 
     def waf(self):
