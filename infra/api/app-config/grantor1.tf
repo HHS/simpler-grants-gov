@@ -56,7 +56,6 @@ module "grantor1_config" {
     RESET_EMAILS_WITHOUT_SENDING = "true"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL             = "https://grantor1.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 

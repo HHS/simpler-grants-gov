@@ -61,8 +61,6 @@ module "infra_training_config" {
     RESET_EMAILS_WITHOUT_SENDING               = "false"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
-    FRONTEND_URL = "https://training.simpler.grants.gov"
-
     # Virus scanning endpoints
     ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
