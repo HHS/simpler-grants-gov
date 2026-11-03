@@ -23,6 +23,8 @@ interface PlanNodeBase {
 
 /** The parts of a plan field the suite reads. */
 export interface PlanField extends PlanNodeBase {
+  /** Stable plan identity for review links; independent of JSON/XML paths and position. */
+  id?: string;
   kind: "field";
   required: boolean | string;
   constraints?: string;

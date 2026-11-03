@@ -23,6 +23,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-i-am-submitting-an-application-as-an-individual-and-not-on-behalf-of-a-company-state-local-or-tribal-government-academia-or-other-type-of-organization",
           "label": "I am submitting an application as an individual, and not on behalf of a company, state, local or tribal government, academia, or other type of organization.",
           "help_text": "Select if submitting application as an individual and not on behalf of or representing any organization.",
           "required": false,
@@ -35,6 +36,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-organization-name",
           "label": "Organization Name",
           "help_text": "Indicate the organization name of the site where the work will be performed.",
           "required": "Conditional (unless applying as an individual, including when that choice is absent)",
@@ -47,6 +49,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-uei",
           "label": "UEI",
           "help_text": "Enter the UEI associated with the organization where the project will be performed. This field is optional.",
           "required": false,
@@ -59,6 +62,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-street-1",
           "label": "Street 1",
           "help_text": "Enter the first line of the street address.",
           "required": true,
@@ -71,6 +75,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-street-2",
           "label": "Street 2",
           "help_text": "Enter the second line of the street address.",
           "required": false,
@@ -83,6 +88,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-city",
           "label": "City",
           "help_text": "Enter the city.",
           "required": true,
@@ -95,6 +101,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-county-parish",
           "label": "County/Parish",
           "help_text": "Enter the county or parish.",
           "required": false,
@@ -107,6 +114,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-state",
           "label": "State",
           "help_text": "Select the state. This field is required if the country is the United States.",
           "required": "Conditional (when the site country is USA: UNITED STATES)",
@@ -119,6 +127,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-province",
           "label": "Province",
           "help_text": "Enter the province.",
           "required": false,
@@ -131,6 +140,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-country",
           "label": "Country",
           "help_text": "Select the country.",
           "required": true,
@@ -143,6 +153,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-zip-postal-code",
           "label": "Zip / Postal Code",
           "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
           "required": "Conditional (when the site country is USA: UNITED STATES)",
@@ -155,6 +166,7 @@
         },
         {
           "kind": "field",
+          "id": "project-performance-site-primary-location-project-performance-site-congressional-district",
           "label": "Project/Performance Site Congressional District",
           "help_text": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005, MD-all, US-all, 00-000. Required if the site is in the United States.",
           "required": "Conditional (when the site country is USA: UNITED STATES)",
@@ -175,6 +187,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "other-project-performance-sites-i-am-submitting-an-application-as-an-individual-and-not-on-behalf-of-a-company-state-local-or-tribal-government-academia-or-other-type-of-organization",
           "label": "I am submitting an application as an individual, and not on behalf of a company, state, local or tribal government, academia, or other type of organization.",
           "help_text": "Select if submitting application as an individual and not on behalf of or representing any organization.",
           "required": false,
@@ -187,6 +200,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-organization-name",
           "label": "Organization Name",
           "help_text": "Indicate the organization name of the site where the work will be performed.",
           "required": false,
@@ -199,6 +213,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-uei",
           "label": "UEI",
           "help_text": "Enter the UEI associated with the organization where the project will be performed. This field is optional.",
           "required": false,
@@ -211,6 +226,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-street-1",
           "label": "Street 1",
           "help_text": "Enter the first line of the street address.",
           "required": "Conditional (when this additional site entry is supplied)",
@@ -223,6 +239,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-street-2",
           "label": "Street 2",
           "help_text": "Enter the second line of the street address.",
           "required": false,
@@ -235,6 +252,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-city",
           "label": "City",
           "help_text": "Enter the city.",
           "required": "Conditional (when this additional site entry is supplied)",
@@ -247,6 +265,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-county-parish",
           "label": "County/Parish",
           "help_text": "Enter the county or parish.",
           "required": false,
@@ -259,6 +278,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-state",
           "label": "State",
           "help_text": "Select the state. This field is required if the country is the United States.",
           "required": "Conditional (when this additional site exists and its country is USA: UNITED STATES)",
@@ -271,6 +291,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-province",
           "label": "Province",
           "help_text": "Enter the province.",
           "required": false,
@@ -283,6 +304,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-country",
           "label": "Country",
           "help_text": "Select the country.",
           "required": "Conditional (when this additional site entry is supplied)",
@@ -295,6 +317,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-zip-postal-code",
           "label": "Zip / Postal Code",
           "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
           "required": "Conditional (when this additional site exists and its country is USA: UNITED STATES)",
@@ -307,6 +330,7 @@
         },
         {
           "kind": "field",
+          "id": "other-project-performance-sites-project-performance-site-congressional-district",
           "label": "Project/Performance Site Congressional District",
           "help_text": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005, MD-all, US-all, 00-000. Required if the site is in the United States.",
           "required": "Conditional (when this additional site exists and its country is USA: UNITED STATES)",
@@ -332,6 +356,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "additional-locations-additional-location-s",
           "label": "Additional Location(s)",
           "help_text": "Attach a file listing additional locations if more than 299 additional sites are needed.",
           "required": false,

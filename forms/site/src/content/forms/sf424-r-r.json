@@ -45,6 +45,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "type-of-submission-type-of-submission",
           "label": "Type of Submission",
           "dat_field": "01-0",
           "required": true,
@@ -63,6 +64,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "date-submitted-applicant-identifier-date-submitted",
           "label": "Date Submitted",
           "dat_field": "02-0",
           "required": false,
@@ -75,6 +77,7 @@
         },
         {
           "kind": "field",
+          "id": "date-submitted-applicant-identifier-applicant-identifier",
           "label": "Applicant Identifier",
           "dat_field": "02-1",
           "required": false,
@@ -93,6 +96,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "date-received-by-state-state-application-identifier-date-received-by-state",
           "label": "Date Received by State",
           "dat_field": "03-0",
           "required": false,
@@ -105,6 +109,7 @@
         },
         {
           "kind": "field",
+          "id": "date-received-by-state-state-application-identifier-state-application-identifier",
           "label": "State Application Identifier",
           "dat_field": "03-1",
           "required": false,
@@ -123,6 +128,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "federal-identifier-agency-routing-grants-gov-tracking-federal-identifier",
           "label": "Federal Identifier",
           "dat_field": "04-0",
           "required": "Conditional (required if ApplicationTypeCode = Renewal, Continuation, or Revision)",
@@ -135,6 +141,7 @@
         },
         {
           "kind": "field",
+          "id": "federal-identifier-agency-routing-grants-gov-tracking-agency-routing-identifier",
           "label": "Agency Routing Identifier",
           "dat_field": "04-1",
           "required": false,
@@ -147,6 +154,7 @@
         },
         {
           "kind": "field",
+          "id": "federal-identifier-agency-routing-grants-gov-tracking-previous-grants-gov-tracking-id",
           "label": "Previous Grants.gov Tracking ID",
           "dat_field": "04-2",
           "required": "Conditional (required if SubmissionTypeCode = Changed/Corrected Application)",
@@ -165,6 +173,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "applicant-information-sam-uei",
           "label": "SAM UEI",
           "dat_field": "05-1",
           "required": true,
@@ -178,6 +187,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-legal-name-organization",
           "label": "Legal Name (Organization)",
           "dat_field": "05-2",
           "required": true,
@@ -191,6 +201,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-department-organization",
           "label": "Department (Organization)",
           "dat_field": "05-3",
           "required": false,
@@ -203,6 +214,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-division-organization",
           "label": "Division (Organization)",
           "dat_field": "05-4",
           "required": false,
@@ -215,6 +227,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-street1-organization",
           "label": "Street1 (Organization)",
           "dat_field": "05-5a",
           "required": true,
@@ -227,6 +240,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-street2-organization",
           "label": "Street2 (Organization)",
           "dat_field": "05-5b",
           "required": false,
@@ -239,6 +253,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-city-organization",
           "label": "City (Organization)",
           "dat_field": "05-5c",
           "required": true,
@@ -251,6 +266,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-county-organization",
           "label": "County (Organization)",
           "dat_field": "05-5d",
           "required": false,
@@ -263,6 +279,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-state-organization",
           "label": "State (Organization)",
           "dat_field": "05-5e",
           "required": "Conditional (required when Country = \"USA: UNITED STATES\")",
@@ -275,6 +292,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-province-organization",
           "label": "Province (Organization)",
           "dat_field": "05-5e1",
           "required": "Conditional (active when Country != \"USA: UNITED STATES\")",
@@ -287,6 +305,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-country-organization",
           "label": "Country (Organization)",
           "dat_field": "05-5f",
           "required": true,
@@ -299,6 +318,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-zip-postal-code-organization",
           "label": "ZIP / Postal Code (Organization)",
           "dat_field": "05-5g",
           "required": "Conditional (required when Country = \"USA: UNITED STATES\"; if US, minLength 9)",
@@ -311,6 +331,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-prefix-contact-person",
           "label": "Prefix (Contact Person)",
           "dat_field": "05-6a",
           "required": false,
@@ -323,6 +344,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-first-name-contact-person",
           "label": "First Name (Contact Person)",
           "dat_field": "05-6b",
           "required": true,
@@ -335,6 +357,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-middle-name-contact-person",
           "label": "Middle Name (Contact Person)",
           "dat_field": "05-6c",
           "required": false,
@@ -347,6 +370,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-last-name-contact-person",
           "label": "Last Name (Contact Person)",
           "dat_field": "05-6d",
           "required": true,
@@ -359,6 +383,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-suffix-contact-person",
           "label": "Suffix (Contact Person)",
           "dat_field": "05-6e",
           "required": false,
@@ -371,6 +396,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-position-title-contact-person",
           "label": "Position/Title (Contact Person)",
           "dat_field": "05-6f",
           "required": false,
@@ -383,6 +409,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-street1-contact-person",
           "label": "Street1 (Contact Person)",
           "dat_field": "05-6g",
           "required": true,
@@ -395,6 +422,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-street2-contact-person",
           "label": "Street2 (Contact Person)",
           "dat_field": "05-6h",
           "required": false,
@@ -407,6 +435,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-city-contact-person",
           "label": "City (Contact Person)",
           "dat_field": "05-6i",
           "required": true,
@@ -419,6 +448,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-county-contact-person",
           "label": "County (Contact Person)",
           "dat_field": "05-6j",
           "required": false,
@@ -431,6 +461,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-state-contact-person",
           "label": "State (Contact Person)",
           "dat_field": "05-6k",
           "required": "Conditional (required when Country = \"USA: UNITED STATES\")",
@@ -443,6 +474,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-province-contact-person",
           "label": "Province (Contact Person)",
           "dat_field": "05-6l",
           "required": "Conditional (active when Country != \"USA: UNITED STATES\")",
@@ -455,6 +487,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-country-contact-person",
           "label": "Country (Contact Person)",
           "dat_field": "05-6m",
           "required": true,
@@ -467,6 +500,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-zip-postal-code-contact-person",
           "label": "ZIP / Postal Code (Contact Person)",
           "dat_field": "05-6n",
           "required": "Conditional (required when Country = \"USA: UNITED STATES\"; if US, minLength 9)",
@@ -479,6 +513,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-phone-number-contact-person",
           "label": "Phone Number (Contact Person)",
           "dat_field": "05-7",
           "required": true,
@@ -491,6 +526,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-fax-number-contact-person",
           "label": "Fax Number (Contact Person)",
           "dat_field": "05-8",
           "required": false,
@@ -503,6 +539,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-information-email-contact-person",
           "label": "Email (Contact Person)",
           "dat_field": "05-9",
           "required": false,
@@ -521,6 +558,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "employer-identification-ein-tin-employer-identification-number",
           "label": "Employer Identification Number",
           "dat_field": "06-0",
           "required": true,
@@ -539,6 +577,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "type-of-applicant-applicant-type-code",
           "label": "Applicant Type Code",
           "dat_field": "07-0",
           "required": true,
@@ -551,6 +590,7 @@
         },
         {
           "kind": "field",
+          "id": "type-of-applicant-other-specify",
           "label": "Other (Specify)",
           "dat_field": "07-1",
           "required": "Conditional (required if ApplicantTypeCode = \"Other\")",
@@ -563,6 +603,7 @@
         },
         {
           "kind": "field",
+          "id": "type-of-applicant-women-owned",
           "label": "Women Owned",
           "dat_field": "07-2",
           "required": false,
@@ -575,6 +616,7 @@
         },
         {
           "kind": "field",
+          "id": "type-of-applicant-socially-and-economically-disadvantaged",
           "label": "Socially and Economically Disadvantaged",
           "dat_field": "07-3",
           "required": false,
@@ -593,6 +635,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "type-of-application-application-type-code",
           "label": "Application Type Code",
           "dat_field": "08-0",
           "required": true,
@@ -605,6 +648,7 @@
         },
         {
           "kind": "field",
+          "id": "type-of-application-revision-code",
           "label": "Revision Code",
           "dat_field": "08-1-1 through 08-1-5",
           "required": "Conditional (enabled when ApplicationTypeCode = Revision)",
@@ -617,6 +661,7 @@
         },
         {
           "kind": "field",
+          "id": "type-of-application-revision-other-explanation",
           "label": "Revision Other Explanation",
           "dat_field": "08-1-6",
           "required": "Conditional (required if RevisionCode = E)",
@@ -629,6 +674,7 @@
         },
         {
           "kind": "field",
+          "id": "type-of-application-is-this-application-being-submitted-to-other-agencies",
           "label": "Is This Application Being Submitted to Other Agencies?",
           "dat_field": "08-2",
           "required": true,
@@ -641,6 +687,7 @@
         },
         {
           "kind": "field",
+          "id": "type-of-application-what-other-agencies",
           "label": "What Other Agencies?",
           "dat_field": "08-2-3",
           "required": "Conditional (required if isOtherAgencySubmission = Yes)",
@@ -659,6 +706,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "name-of-federal-agency-federal-agency-name",
           "label": "Federal Agency Name",
           "dat_field": "09-0",
           "required": true,
@@ -678,6 +726,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "assistance-listing-cfda-assistance-listing-number",
           "label": "Assistance Listing Number",
           "dat_field": "10-1",
           "required": false,
@@ -691,6 +740,7 @@
         },
         {
           "kind": "field",
+          "id": "assistance-listing-cfda-assistance-listing-title",
           "label": "Assistance Listing Title",
           "dat_field": "10-2",
           "required": false,
@@ -710,6 +760,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "descriptive-title-of-applicant-s-project-project-title",
           "label": "Project Title",
           "dat_field": "11-0",
           "required": true,
@@ -728,6 +779,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "proposed-project-period-start-date",
           "label": "Start Date",
           "dat_field": "12-1",
           "required": true,
@@ -740,6 +792,7 @@
         },
         {
           "kind": "field",
+          "id": "proposed-project-period-end-date",
           "label": "End Date",
           "dat_field": "12-2",
           "required": true,
@@ -758,6 +811,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "congressional-district-of-applicant-congressional-district",
           "label": "Congressional District",
           "dat_field": "13-1",
           "required": true,
@@ -776,6 +830,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-prefix-pd-pi",
           "label": "Prefix (PD/PI)",
           "dat_field": "14-01",
           "required": false,
@@ -788,6 +843,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-first-name-pd-pi",
           "label": "First Name (PD/PI)",
           "dat_field": "14-02",
           "required": true,
@@ -800,6 +856,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-middle-name-pd-pi",
           "label": "Middle Name (PD/PI)",
           "dat_field": "14-03",
           "required": false,
@@ -812,6 +869,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-last-name-pd-pi",
           "label": "Last Name (PD/PI)",
           "dat_field": "14-04",
           "required": true,
@@ -824,6 +882,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-suffix-pd-pi",
           "label": "Suffix (PD/PI)",
           "dat_field": "14-05",
           "required": false,
@@ -836,6 +895,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-position-title-pd-pi",
           "label": "Position/Title (PD/PI)",
           "dat_field": "14-06",
           "required": false,
@@ -848,6 +908,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-organization-name-pd-pi",
           "label": "Organization Name (PD/PI)",
           "dat_field": "14-07",
           "required": true,
@@ -861,6 +922,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-department-pd-pi",
           "label": "Department (PD/PI)",
           "dat_field": "14-08",
           "required": false,
@@ -874,6 +936,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-division-pd-pi",
           "label": "Division (PD/PI)",
           "dat_field": "14-09",
           "required": false,
@@ -887,6 +950,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-street1-pd-pi",
           "label": "Street1 (PD/PI)",
           "dat_field": "14-10a",
           "required": true,
@@ -900,6 +964,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-street2-pd-pi",
           "label": "Street2 (PD/PI)",
           "dat_field": "14-10b",
           "required": false,
@@ -913,6 +978,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-city-pd-pi",
           "label": "City (PD/PI)",
           "dat_field": "14-10c",
           "required": true,
@@ -926,6 +992,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-county-pd-pi",
           "label": "County (PD/PI)",
           "dat_field": "14-10d",
           "required": false,
@@ -939,6 +1006,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-state-pd-pi",
           "label": "State (PD/PI)",
           "dat_field": "14-10e",
           "required": "Conditional (required when Country = \"USA: UNITED STATES\")",
@@ -952,6 +1020,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-province-pd-pi",
           "label": "Province (PD/PI)",
           "dat_field": "14-10e1",
           "required": "Conditional (active when Country != \"USA: UNITED STATES\")",
@@ -965,6 +1034,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-country-pd-pi",
           "label": "Country (PD/PI)",
           "dat_field": "14-10f",
           "required": true,
@@ -978,6 +1048,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-zip-postal-code-pd-pi",
           "label": "ZIP / Postal Code (PD/PI)",
           "dat_field": "14-10g",
           "required": "Conditional (required when Country = \"USA: UNITED STATES\"; if US, minLength 9)",
@@ -991,6 +1062,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-phone-number-pd-pi",
           "label": "Phone Number (PD/PI)",
           "dat_field": "14-11",
           "required": true,
@@ -1003,6 +1075,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-fax-number-pd-pi",
           "label": "Fax Number (PD/PI)",
           "dat_field": "14-12",
           "required": false,
@@ -1015,6 +1088,7 @@
         },
         {
           "kind": "field",
+          "id": "project-director-principal-investigator-contact-information-email-address-pd-pi",
           "label": "Email Address (PD/PI)",
           "dat_field": "14-13",
           "required": true,
@@ -1033,6 +1107,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "estimated-project-funding-total-federal-funds-requested",
           "label": "Total Federal Funds Requested",
           "dat_field": "15-1",
           "required": true,
@@ -1045,6 +1120,7 @@
         },
         {
           "kind": "field",
+          "id": "estimated-project-funding-total-non-federal-funds",
           "label": "Total Non-Federal Funds",
           "dat_field": "15-2",
           "required": true,
@@ -1057,6 +1133,7 @@
         },
         {
           "kind": "field",
+          "id": "estimated-project-funding-total-federal-and-non-federal-funds",
           "label": "Total Federal & Non-Federal Funds",
           "dat_field": "15-3",
           "required": true,
@@ -1069,6 +1146,7 @@
         },
         {
           "kind": "field",
+          "id": "estimated-project-funding-estimated-program-income",
           "label": "Estimated Program Income",
           "dat_field": "15-4",
           "required": true,
@@ -1087,6 +1165,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "state-review-e-o-12372-state-review-code",
           "label": "State Review Code",
           "dat_field": "16-0",
           "required": true,
@@ -1099,6 +1178,7 @@
         },
         {
           "kind": "field",
+          "id": "state-review-e-o-12372-state-review-date",
           "label": "State Review Date",
           "dat_field": "16-3",
           "required": "Conditional (required when StateReviewCodeType = \"Y: Yes\")",
@@ -1117,6 +1197,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "certification-i-agree",
           "label": "I Agree",
           "dat_field": "17-1",
           "required": true,
@@ -1135,6 +1216,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "sflll-attachment-sflll-or-other-explanatory-documentation",
           "label": "SFLLL or Other Explanatory Documentation",
           "dat_field": "18-0",
           "required": false,
@@ -1153,6 +1235,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "authorized-representative-prefix-aor",
           "label": "Prefix (AOR)",
           "dat_field": "19-01",
           "required": false,
@@ -1165,6 +1248,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-first-name-aor",
           "label": "First Name (AOR)",
           "dat_field": "19-02",
           "required": true,
@@ -1177,6 +1261,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-middle-name-aor",
           "label": "Middle Name (AOR)",
           "dat_field": "19-03",
           "required": false,
@@ -1189,6 +1274,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-last-name-aor",
           "label": "Last Name (AOR)",
           "dat_field": "19-04",
           "required": true,
@@ -1201,6 +1287,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-suffix-aor",
           "label": "Suffix (AOR)",
           "dat_field": "19-05",
           "required": false,
@@ -1213,6 +1300,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-position-title-aor",
           "label": "Position/Title (AOR)",
           "dat_field": "19-06",
           "required": true,
@@ -1225,6 +1313,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-organization-aor",
           "label": "Organization (AOR)",
           "dat_field": "19-07",
           "required": true,
@@ -1238,6 +1327,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-department-aor",
           "label": "Department (AOR)",
           "dat_field": "19-08",
           "required": false,
@@ -1251,6 +1341,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-division-aor",
           "label": "Division (AOR)",
           "dat_field": "19-09",
           "required": false,
@@ -1264,6 +1355,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-street1-aor",
           "label": "Street1 (AOR)",
           "dat_field": "19-10a",
           "required": true,
@@ -1277,6 +1369,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-street2-aor",
           "label": "Street2 (AOR)",
           "dat_field": "19-10b",
           "required": false,
@@ -1290,6 +1383,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-city-aor",
           "label": "City (AOR)",
           "dat_field": "19-10c",
           "required": true,
@@ -1303,6 +1397,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-county-aor",
           "label": "County (AOR)",
           "dat_field": "19-10d",
           "required": false,
@@ -1316,6 +1411,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-state-aor",
           "label": "State (AOR)",
           "dat_field": "19-10e",
           "required": "Conditional (required when Country = \"USA: UNITED STATES\")",
@@ -1329,6 +1425,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-province-aor",
           "label": "Province (AOR)",
           "dat_field": "19-10e1",
           "required": "Conditional (active when Country != \"USA: UNITED STATES\")",
@@ -1342,6 +1439,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-country-aor",
           "label": "Country (AOR)",
           "dat_field": "19-10f",
           "required": true,
@@ -1355,6 +1453,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-zip-postal-code-aor",
           "label": "ZIP / Postal Code (AOR)",
           "dat_field": "19-10g",
           "required": "Conditional (required when Country = \"USA: UNITED STATES\"; if US, minLength 9)",
@@ -1368,6 +1467,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-phone-number-aor",
           "label": "Phone Number (AOR)",
           "dat_field": "19-11",
           "required": true,
@@ -1380,6 +1480,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-fax-number-aor",
           "label": "Fax Number (AOR)",
           "dat_field": "19-12",
           "required": false,
@@ -1392,6 +1493,7 @@
         },
         {
           "kind": "field",
+          "id": "authorized-representative-email-aor",
           "label": "Email (AOR)",
           "dat_field": "19-13",
           "required": true,
@@ -1410,6 +1512,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "signature-signature-of-authorized-representative",
           "label": "Signature of Authorized Representative",
           "dat_field": "19-14",
           "required": true,
@@ -1422,6 +1525,7 @@
         },
         {
           "kind": "field",
+          "id": "signature-date-signed",
           "label": "Date Signed",
           "dat_field": "19-15",
           "required": true,
@@ -1441,6 +1545,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "pre-application-attachment-pre-application",
           "label": "Pre-application",
           "dat_field": "20-0",
           "required": false,
@@ -1459,6 +1564,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "cover-letter-attachment-cover-letter",
           "label": "Cover Letter",
           "dat_field": "21-0",
           "required": false,
