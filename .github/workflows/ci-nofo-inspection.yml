@@ -12,6 +12,7 @@ on:
       - scripts/nofo_inspection_session_policy.json
       - scripts/tests/test_nofo_inspection.py
       - .github/workflows/inspect-nofo-readability.yml
+      - .github/workflows/inspect-nofo-readability-prod.yml
       - .github/workflows/ci-nofo-inspection.yml
   push:
     branches: [main]
@@ -25,6 +26,7 @@ on:
       - scripts/nofo_inspection_session_policy.json
       - scripts/tests/test_nofo_inspection.py
       - .github/workflows/inspect-nofo-readability.yml
+      - .github/workflows/inspect-nofo-readability-prod.yml
       - .github/workflows/ci-nofo-inspection.yml
 
 permissions:
