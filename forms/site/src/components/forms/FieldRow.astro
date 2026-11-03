@@ -17,11 +17,27 @@ const requiredLabel =
       : undefined;
 ---
 
-<div class="field-row" data-field-id={field.id} data-static-field-id={field.id} tabindex="-1">
+<div
+  class="field-row"
+  data-field-id={field.id}
+  data-static-field-id={field.id}
+  tabindex="-1"
+>
   {field.id && (
     <div>
-      <button type="button" class="usa-button usa-button--unstyled" data-copy-field={field.id}>Copy link</button>
-      <a class="margin-left-1" href={`?${new URLSearchParams({ field: field.id })}`}>Link</a>
+      <button
+        type="button"
+        class="usa-button usa-button--unstyled"
+        data-copy-field={field.id}
+      >
+        Copy link
+      </button>
+      <a
+        class="margin-left-1"
+        href={`?${new URLSearchParams({ field: field.id })}`}
+      >
+        Link
+      </a>
     </div>
   )}
   <div class="field-row__primary">

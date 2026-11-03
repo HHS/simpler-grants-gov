@@ -34,7 +34,10 @@ const nodeBase = z.object({
 
 const fieldNode = nodeBase.extend({
   /** Stable review-link identity. Keep it when the field moves or its answer path changes. */
-  id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
+  id: z
+    .string()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .optional(),
   kind: z.literal("field"),
   required: z.union([z.boolean(), z.string()]),
   type: z.string(),

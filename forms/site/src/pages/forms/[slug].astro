@@ -57,7 +57,12 @@ const STATUS_LABELS: Record<string, string> = {
     </div>
 
     <FormMetadata form={form} />
-    <p class="usa-alert usa-alert--info" data-link-notice role="status" hidden></p>
+    <p
+      class="usa-alert usa-alert--info"
+      data-link-notice
+      role="status"
+      hidden
+    ></p>
 
     {form.data.children.length > 0 || spec ? (
       <>
@@ -147,7 +152,10 @@ const STATUS_LABELS: Record<string, string> = {
           </button>
         </div>
 
-        <div data-panel="fields" data-has-comparison={comparison ? "true" : "false"}>
+        <div
+          data-panel="fields"
+          data-has-comparison={comparison ? "true" : "false"}
+        >
           <h2 class="section-title">Fields</h2>
           {comparison ? (
             <FieldComparison client:load comparison={comparison} />
