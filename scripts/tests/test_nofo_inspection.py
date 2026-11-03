@@ -297,6 +297,34 @@ class InspectionTests(unittest.TestCase):
                 )
                 self.assertNotIn(MARKER, json.dumps(summaries))
 
+    def test_production_guard_and_read_targets(self):
+        dev = FakeAws()
+        result = m.Inspector(dev, "prod").run()
+        self.assertFalse(result[0]["details"]["expected_account"])
+        self.assertEqual(len(dev.calls), 1)
+
+        container = definition()
+        container["containerDefinitions"][0]["name"] = m.PROD_SERVICE
+        aws = FakeAws({
+            ("sts", "get-caller-identity"): {"Account": m.PROD_ACCOUNT},
+            ("ecs", "describe-task-definition"): {"taskDefinition": container},
+        })
+        result = m.Inspector(aws, "prod").run()
+        self.assertTrue(result[0]["details"]["expected_account"])
+        self.assertEqual(next(r for r in result if r["check"] == "tasks")["status"], "observed")
+        self.assertIn(
+            ("ecs", "describe-services", ("--cluster", m.PROD_SERVICE, "--services", m.PROD_SERVICE)),
+            aws.calls,
+        )
+        self.assertIn(
+            ("sns", "list-subscriptions-by-topic", (
+                "--topic-arn", f"arn:aws:sns:{m.REGION}:{m.PROD_ACCOUNT}:{m.PROD_SERVICE}-monitoring",
+                "--no-paginate",
+            )),
+            aws.calls,
+        )
+        self.assertNotIn(MARKER, json.dumps(result))
+
     def test_wrong_account_stops_before_resource_queries(self):
         aws = FakeAws({("sts", "get-caller-identity"): {"Account": "wrong"}})
         results = m.Inspector(aws).run()
