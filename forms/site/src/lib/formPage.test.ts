@@ -25,8 +25,9 @@ import {
 import { $dataView } from "@/stores/formPreview";
 import { afterEach, describe, expect, it } from "vitest";
 
+import { signalFormStateReady } from "./formHydration";
 // DOM-shaped targets exercise the actual adapter, not a browser/dialog/clipboard walkthrough.
-import { mountFormPage, revealField } from "./formPage";
+import { mountFormPage, mountFormPageWhenReady, revealField } from "./formPage";
 
 class Page extends EventTarget {
   url: URL;
@@ -279,8 +280,9 @@ function documentFor(
   panels: Element[],
   notice: Element,
   rows: Element[] = [],
+  boundaries: Element[] = [],
 ) {
-  return {
+  return Object.assign(new EventTarget(), {
     querySelectorAll: (selector: string) =>
       selector === "[data-tab]"
         ? tabs
@@ -290,9 +292,11 @@ function documentFor(
             ? rows
             : selector === "[data-static-field-id]"
               ? rows.filter((row) => row.dataset.staticFieldId)
-              : [],
+              : selector === "[data-form-state-boundary]"
+                ? boundaries
+                : [],
     querySelector: () => notice,
-  } as unknown as Document;
+  }) as unknown as Document;
 }
 describe("the rendered panel adapter", () => {
   it("does not invent a comparison on a static plan-only field link", () => {
@@ -361,5 +365,63 @@ describe("the rendered panel adapter", () => {
     expect(group.open).toBe(true);
     expect(row.scrolled).toBe(true);
     expect(compare.focused).toBe(true);
+  });
+});
+
+describe("URL restoration after React commit", () => {
+  it("waits for all SSR state boundaries before applying linked stores", () => {
+    const page = new Page("?tab=data&source=form.tsp&category=gap");
+    const fields = new Element({ tab: "fields" });
+    const data = new Element({ tab: "data" });
+    const comparison = new Element();
+    const source = new Element();
+    const doc = documentFor(
+      [fields, data],
+      [],
+      new Element(),
+      [],
+      [comparison, source],
+    );
+    stop = mountFormPageWhenReady(doc, page.host());
+    expect($pageTab.get()).toBe("fields");
+    expect($sourceFile.get()).toBe("index.tsp");
+    expect($categoryFilter.get()).toEqual([]);
+    signalFormStateReady(comparison as unknown as HTMLElement);
+    // EventTarget test doubles do not have DOM ancestry/bubbling.
+    doc.dispatchEvent(new Event("form:state-ready"));
+    expect($sourceFile.get()).toBe("index.tsp");
+    signalFormStateReady(source as unknown as HTMLElement);
+    doc.dispatchEvent(new Event("form:state-ready"));
+    expect($pageTab.get()).toBe("data");
+    expect($sourceFile.get()).toBe("form.tsp");
+    expect($categoryFilter.get()).toEqual(["gap"]);
+    expect(page.writes).toEqual([]);
+  });
+
+  it("handles boundaries committed before page startup and cleans up pending startup", () => {
+    const ready = new Element();
+    let bubbles = false;
+    ready.addEventListener("form:state-ready", (event) => {
+      bubbles = event.bubbles;
+    });
+    signalFormStateReady(ready as unknown as HTMLElement);
+    expect(bubbles).toBe(true);
+    const page = new Page("?tab=data");
+    const tabs = [new Element({ tab: "fields" }), new Element({ tab: "data" })];
+    stop = mountFormPageWhenReady(
+      documentFor(tabs, [], new Element(), [], [ready]),
+      page.host(),
+    );
+    expect($pageTab.get()).toBe("data");
+    stop();
+    stop = undefined;
+    restorePageState(parsePageState(new URLSearchParams()));
+    const pending = new Element();
+    const doc = documentFor(tabs, [], new Element(), [], [pending]);
+    const dispose = mountFormPageWhenReady(doc, page.host());
+    dispose();
+    signalFormStateReady(pending as unknown as HTMLElement);
+    doc.dispatchEvent(new Event("form:state-ready"));
+    expect($pageTab.get()).toBe("fields");
   });
 });

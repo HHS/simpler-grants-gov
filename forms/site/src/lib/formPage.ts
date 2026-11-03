@@ -125,3 +125,31 @@ export function revealField(root: Document, id: string) {
   row.scrollIntoView({ block: "center" });
   (row.querySelector<HTMLElement>("[data-compare-field]") ?? row).focus();
 }
+
+/** Keep every SSR store reader on its server snapshot until its actual React commit. */
+export function mountFormPageWhenReady(
+  root: Document,
+  host: Window,
+): () => void {
+  const boundaries = [
+    ...root.querySelectorAll<HTMLElement>("[data-form-state-boundary]"),
+  ];
+  let stop: (() => void) | undefined;
+  let disposed = false;
+  const start = () => {
+    if (
+      disposed ||
+      stop ||
+      boundaries.some((boundary) => boundary.dataset.formStateReady !== "true")
+    )
+      return;
+    stop = mountFormPage(root, host);
+  };
+  root.addEventListener("form:state-ready", start);
+  start(); // Some islands can commit before the page module arrives.
+  return () => {
+    disposed = true;
+    root.removeEventListener("form:state-ready", start);
+    stop?.();
+  };
+}

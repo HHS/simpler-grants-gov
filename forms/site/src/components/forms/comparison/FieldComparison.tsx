@@ -1,4 +1,5 @@
 import { differences, type FormComparison } from "@/lib/comparison";
+import { signalFormStateReady } from "@/lib/formHydration";
 import {
   $comparison,
   $selectedCell,
@@ -7,7 +8,7 @@ import {
 } from "@/stores/fieldComparison";
 import { $linkNotice } from "@/stores/formPage";
 import { useStore } from "@nanostores/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ComparisonSheet from "./ComparisonSheet";
 import DeviationTiles from "./DeviationTiles";
@@ -27,6 +28,8 @@ export default function FieldComparison({
   const selected = useStore($selectedFieldId);
   const cell = useStore($selectedCell);
   const sheet = useStore($sheetTab);
+  const boundary = useRef<HTMLDivElement>(null);
+  useEffect(() => signalFormStateReady(boundary.current), []);
   useEffect(() => {
     if (!selected) return;
     const field = comparison.fields.find((item) => item.field.id === selected);
@@ -50,10 +53,10 @@ export default function FieldComparison({
       );
   }, [comparison, selected, cell, sheet]);
   return (
-    <>
+    <div ref={boundary} data-form-state-boundary>
       <DeviationTiles />
       <FieldTree />
       <ComparisonSheet />
-    </>
+    </div>
   );
 }

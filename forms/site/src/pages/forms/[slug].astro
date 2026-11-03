@@ -236,8 +236,8 @@ const STATUS_LABELS: Record<string, string> = {
 </Base>
 
 <script>
-  import { mountFormPage } from "@/lib/formPage";
+  import { mountFormPageWhenReady } from "@/lib/formPage";
 
-  const stop = mountFormPage(document, window);
+  const stop = mountFormPageWhenReady(document, window);
   document.addEventListener("astro:before-swap", stop, { once: true });
 </script>
