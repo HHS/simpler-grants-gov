@@ -88,7 +88,6 @@ export const SggFormRenderer = ({
   return (
     <form
       className="flex-1 margin-top-2 simpler-apply-form"
-      onInput={handleInput}
       onChange={handleInput}
       onSubmit={(event) => event.preventDefault()}
       noValidate
