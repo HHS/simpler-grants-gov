@@ -29,6 +29,9 @@ export default function HighlightedCode({
     };
   }, [code, lang, foldable, id]);
 
+  // Folds sit inside Shiki's <pre><code>, where <details>/<summary> are not
+  // phrasing content. Native buttons keep one selectable code block and supply
+  // Enter/Space activation without a separate keyboard handler.
   const toggleBlock = (event: MouseEvent<HTMLDivElement>) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
       "button[data-code-fold]",

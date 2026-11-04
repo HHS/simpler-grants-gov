@@ -1252,15 +1252,32 @@ details[open] > .group-header::before {
   }
 }
 
-// Keep every file choice reachable on a narrow form page.
-.form-artifacts > .usa-button-group {
-  flex-wrap: wrap;
-  row-gap: units(1);
+.form-artifacts {
+  margin-bottom: units(4);
+
+  // Keep every file choice reachable on a narrow form page.
+  > .usa-button-group {
+    flex-wrap: wrap;
+    row-gap: units(1);
+
+    .usa-button-group__item {
+      display: flex;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .usa-button {
+      height: auto;
+    }
+  }
 }
 
 .form-artifacts__copy-result {
-  min-height: units(3);
   margin: units(1) 0;
+
+  &:empty {
+    margin: units("05") 0;
+  }
 }
 
 .code-fold__toggle {
