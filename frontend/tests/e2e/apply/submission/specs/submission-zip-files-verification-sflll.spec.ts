@@ -33,6 +33,7 @@ import {
   assertPdfContainsText,
   assertXmlContainsFields,
   downloadAndUnzipSubmission,
+  PDF_SERIALIZATION_LEAKS,
 } from "tests/e2e/utils/submission/submission-zip-utils";
 import {
   submitApplicationAndVerify,
@@ -50,6 +51,14 @@ const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 const SFLLL_ZIP_PDF_NAME = "SFLLL_2_0.pdf";
 // System post-populated signature (SignatureBlock/Signature): the e2e user's email.
 const SIGNATURE_VALUE = "simpler-grants-e2e-tester@navapbc.com";
+
+// Text that must not appear in the PDF. The generic "is required" check catches leaked
+// validation messages ("<Field> is required"), but the SF-LLL certification text itself
+// reads "This disclosure is required pursuant to 31 U.S.C. 1352", so that phrase is excluded.
+const SFLLL_UNEXPECTED_PDF_TEXT = [
+  ...PDF_SERIALIZATION_LEAKS,
+  /\bis required\b(?! pursuant)/i,
+];
 
 // Runs only against staging, in Chrome. The submission zip is built by the
 // submission consumer/task, which does not run in the local e2e environment.
@@ -145,10 +154,15 @@ test(
     });
 
     await test.step("Verify SFLLL_2_0.pdf form title and field values", async () => {
-      await assertPdfContainsText(contents, SFLLL_ZIP_PDF_NAME, [
-        SFLLL_FORM_MATCHER,
-        ...buildExpectedPdfText(sflllForm, d, systemValues),
-      ]);
+      await assertPdfContainsText(
+        contents,
+        SFLLL_ZIP_PDF_NAME,
+        [
+          SFLLL_FORM_MATCHER,
+          ...buildExpectedPdfText(sflllForm, d, systemValues),
+        ],
+        SFLLL_UNEXPECTED_PDF_TEXT,
+      );
     });
   },
 );
