@@ -83,5 +83,7 @@ module "infra_training_config" {
 
   enable_workflow_service = true
 
+  enable_processor_service = true
+
   scanner_provisioned_concurrency = 1
 }
