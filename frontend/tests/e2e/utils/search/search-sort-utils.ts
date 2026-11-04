@@ -447,14 +447,17 @@ function isVerifiable(value: number | string, key: SortKey): boolean {
 type Comparator = (a: number | string, b: number | string) => number;
 
 const compareNumbers: Comparator = (a, b) => Number(a) - Number(b);
+
 const compareStrings: Comparator = (a, b) => {
   const left = String(a);
   const right = String(b);
   if (left < right) return -1;
   return left > right ? 1 : 0;
 };
+
 const compareStringsIgnoringCase: Comparator = (a, b) =>
   compareStrings(String(a).toLowerCase(), String(b).toLowerCase());
+
 // Case, accents and punctuation ignored.
 const toLooseTitle = (value: number | string) =>
   String(value)
@@ -462,6 +465,7 @@ const toLooseTitle = (value: number | string) =>
     .replace(/\p{M}/gu, "")
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]/gu, "");
+
 const compareStringsLoosely: Comparator = (a, b) =>
   compareStrings(toLooseTitle(a), toLooseTitle(b));
 
