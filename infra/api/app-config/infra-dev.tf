@@ -75,7 +75,7 @@ module "infra_dev_config" {
     ENABLE_JOB_LOCK = "true"
   }
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
 
   enable_processor_service = true
 
