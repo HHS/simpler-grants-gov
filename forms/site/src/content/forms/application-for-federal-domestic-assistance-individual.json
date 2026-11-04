@@ -10,7 +10,13 @@
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/SF424_Individual_2_0-V2.0_F668.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Individual_2_0-V2.0.xsd",
   "apps_count": 5223,
-  "widgets": ["TextWidget", "SelectWidget", "RadioWidget", "CheckboxWidget", "TextAreaWidget"],
+  "widgets": [
+    "TextWidget",
+    "SelectWidget",
+    "RadioWidget",
+    "CheckboxWidget",
+    "TextAreaWidget"
+  ],
   "sgg_form_id": null,
   "description": "Application for Federal Domestic Assistance - Individual (SF424_Individual_2_0) collects application information from individual applicants seeking federal domestic assistance. Unlike other SF-424 variants, this form has no organization, EIN, or estimated funding sections -- the applicant IS the individual. It captures the applicant's name, address, contact information, citizenship status, project details, and certification. This is the simplest form in the SF-424 family, designed exclusively for individual (non-organizational) applicants.",
   "notes": [

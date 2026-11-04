@@ -9,7 +9,13 @@
   "dat_url": "https://apply07.grants.gov/apply/forms/sample/Key_Contacts_2_0-V2.0_F683.xls",
   "apps_count": 14470,
   "status": "in_review",
-  "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Individual", "SF-424 Mandatory"],
+  "family": [
+    "SF-424",
+    "R&R",
+    "SF-424 Short",
+    "SF-424 Individual",
+    "SF-424 Mandatory"
+  ],
   "category": "Key Personnel & Contact Forms",
   "widgets": ["TextWidget", "SelectWidget", "FieldListWidget"],
   "sgg_form_id": "key_contacts",

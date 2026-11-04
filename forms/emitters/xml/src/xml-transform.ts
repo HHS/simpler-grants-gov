@@ -1,13 +1,15 @@
-import type {
-  Enum,
-  EnumMember,
-  Model,
-  ModelProperty,
-  Program,
-  Type,
+import {
+  resolveEncodedName,
+  type Enum,
+  type EnumMember,
+  type Model,
+  type ModelProperty,
+  type Program,
+  type Type,
 } from "@typespec/compiler";
-import { resolveEncodedName } from "@typespec/compiler";
-import { $lib as xmlLib, getNs, isAttribute } from "@typespec/xml";
+import { getNs, isAttribute, $lib as xmlLib } from "@typespec/xml";
+
+import { reportDiagnostic, stateKeys } from "./lib.js";
 import {
   jsonPropertyName,
   mappingTargets,
@@ -17,7 +19,6 @@ import {
   type MappingNode,
   type PropertyCasing,
 } from "./simpler-forms.js";
-import { reportDiagnostic, stateKeys } from "./lib.js";
 import { transformOf, transformParamsOf } from "./transforms.js";
 
 /** One form's rules, in the shape `FORM_XML_TRANSFORM_RULES` takes. */

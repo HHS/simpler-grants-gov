@@ -1,5 +1,6 @@
 import type { Model, Program, Type } from "@typespec/compiler";
 import { jsonPropertyName, modelProperties } from "simpler-forms";
+
 import type { SyncOptions } from "./decorators.js";
 import { stateKeys } from "./lib.js";
 
