@@ -54,6 +54,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "principal-investigator-name-prefix",
               "label": "Prefix",
               "dat_field": "1-01",
               "required": false,
@@ -67,6 +68,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-name-first-name",
               "label": "First Name",
               "dat_field": "1-02",
               "required": true,
@@ -80,6 +82,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-name-middle-name",
               "label": "Middle Name",
               "dat_field": "1-03",
               "required": false,
@@ -93,6 +96,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-name-last-name",
               "label": "Last Name",
               "dat_field": "1-04",
               "required": true,
@@ -106,6 +110,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-name-suffix",
               "label": "Suffix",
               "dat_field": "1-05",
               "required": false,
@@ -127,6 +132,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "principal-investigator-title",
               "label": "Title",
               "dat_field": "1-06",
               "required": false,
@@ -140,6 +146,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-organization-name",
               "label": "Organization Name",
               "dat_field": "1-08",
               "required": false,
@@ -153,6 +160,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-department",
               "label": "Department",
               "dat_field": "1-07",
               "required": false,
@@ -166,6 +174,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-division",
               "label": "Division",
               "dat_field": "1-09",
               "required": false,
@@ -179,6 +188,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-project-role",
               "label": "Project Role",
               "dat_field": "1-22",
               "required": true,
@@ -191,6 +201,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-other-project-role-category",
               "label": "Other Project Role Category",
               "dat_field": "1-23",
               "required": "Conditional (when Project Role is \"Other Professional\" or \"Other (Specify)\")",
@@ -213,6 +224,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "principal-investigator-address-street1",
               "label": "Street 1",
               "dat_field": "1-11",
               "required": true,
@@ -226,6 +238,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-address-street2",
               "label": "Street 2",
               "dat_field": "1-12",
               "required": false,
@@ -239,6 +252,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-address-city",
               "label": "City",
               "dat_field": "1-13",
               "required": true,
@@ -252,6 +266,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-address-county",
               "label": "County/Parish",
               "dat_field": "1-14",
               "required": false,
@@ -265,6 +280,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-address-state",
               "label": "State",
               "dat_field": "1-15",
               "required": "Conditional (when Country is the United States)",
@@ -278,6 +294,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-address-province",
               "label": "Province",
               "dat_field": "1-15a",
               "required": false,
@@ -291,6 +308,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-address-country",
               "label": "Country",
               "dat_field": "1-16",
               "required": true,
@@ -304,6 +322,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "1-17",
               "required": "Conditional (when Country is the United States)",
@@ -325,6 +344,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "principal-investigator-phone",
               "label": "Phone Number",
               "dat_field": "1-18",
               "required": true,
@@ -338,6 +358,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-fax",
               "label": "Fax Number",
               "dat_field": "1-19",
               "required": false,
@@ -351,6 +372,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-email",
               "label": "Email",
               "dat_field": "1-20",
               "required": true,
@@ -372,6 +394,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "principal-investigator-credential",
               "label": "Credential, e.g., Agency Login",
               "dat_field": "1-21",
               "required": false,
@@ -384,6 +407,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-degree-type",
               "label": "Degree Type",
               "dat_field": "1-24",
               "required": false,
@@ -396,6 +420,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-degree-year",
               "label": "Degree Year",
               "dat_field": "1-25",
               "required": false,
@@ -416,6 +441,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "principal-investigator-biographical-sketch",
               "label": "Biographical Sketch",
               "dat_field": "1-26",
               "required": true,
@@ -428,6 +454,7 @@
             },
             {
               "kind": "field",
+              "id": "principal-investigator-current-pending-support",
               "label": "Current & Pending Support",
               "dat_field": "1-27",
               "required": false,
@@ -460,6 +487,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "senior-key-persons-name-prefix",
               "label": "Prefix",
               "dat_field": "2-01",
               "required": false,
@@ -472,6 +500,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-name-first-name",
               "label": "First Name",
               "dat_field": "2-02",
               "required": "Conditional (required for each senior/key person)",
@@ -484,6 +513,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-name-middle-name",
               "label": "Middle Name",
               "dat_field": "2-03",
               "required": false,
@@ -496,6 +526,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-name-last-name",
               "label": "Last Name",
               "dat_field": "2-04",
               "required": "Conditional (required for each senior/key person)",
@@ -508,6 +539,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-name-suffix",
               "label": "Suffix",
               "dat_field": "2-05",
               "required": false,
@@ -528,6 +560,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "senior-key-persons-title",
               "label": "Title",
               "dat_field": "2-06",
               "required": false,
@@ -540,6 +573,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-organization-name",
               "label": "Organization Name",
               "dat_field": "2-08",
               "required": false,
@@ -552,6 +586,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-department",
               "label": "Department",
               "dat_field": "2-07",
               "required": false,
@@ -564,6 +599,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-division",
               "label": "Division",
               "dat_field": "2-09",
               "required": false,
@@ -576,6 +612,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-project-role",
               "label": "Project Role",
               "dat_field": "2-22",
               "required": "Conditional (required for each senior/key person)",
@@ -588,6 +625,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-other-project-role-category",
               "label": "Other Project Role Category",
               "dat_field": "2-23",
               "required": "Conditional (when Project Role is \"Other Professional\" or \"Other (Specify)\")",
@@ -610,6 +648,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "senior-key-persons-address-street1",
               "label": "Street 1",
               "dat_field": "2-11",
               "required": "Conditional (required for each senior/key person)",
@@ -622,6 +661,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-address-street2",
               "label": "Street 2",
               "dat_field": "2-12",
               "required": false,
@@ -634,6 +674,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-address-city",
               "label": "City",
               "dat_field": "2-13",
               "required": "Conditional (required for each senior/key person)",
@@ -646,6 +687,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-address-county",
               "label": "County/Parish",
               "dat_field": "2-14",
               "required": false,
@@ -658,6 +700,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-address-state",
               "label": "State",
               "dat_field": "2-15",
               "required": "Conditional (when Country is the United States)",
@@ -670,6 +713,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-address-province",
               "label": "Province",
               "dat_field": "2-15a",
               "required": false,
@@ -682,6 +726,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-address-country",
               "label": "Country",
               "dat_field": "2-16",
               "required": "Conditional (required for each senior/key person)",
@@ -694,6 +739,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "2-17",
               "required": "Conditional (when Country is the United States)",
@@ -714,6 +760,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "senior-key-persons-phone",
               "label": "Phone Number",
               "dat_field": "2-18",
               "required": "Conditional (required for each senior/key person)",
@@ -726,6 +773,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-fax",
               "label": "Fax Number",
               "dat_field": "2-19",
               "required": false,
@@ -738,6 +786,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-email",
               "label": "Email",
               "dat_field": "2-20",
               "required": "Conditional (required for each senior/key person)",
@@ -758,6 +807,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "senior-key-persons-credential",
               "label": "Credential, e.g., Agency Login",
               "dat_field": "2-21",
               "required": false,
@@ -770,6 +820,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-degree-type",
               "label": "Degree Type",
               "dat_field": "2-24",
               "required": false,
@@ -782,6 +833,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-degree-year",
               "label": "Degree Year",
               "dat_field": "2-25",
               "required": false,
@@ -802,6 +854,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "senior-key-persons-biographical-sketch",
               "label": "Biographical Sketch",
               "dat_field": "2-26",
               "required": false,
@@ -814,6 +867,7 @@
             },
             {
               "kind": "field",
+              "id": "senior-key-persons-current-pending-support",
               "label": "Current & Pending Support",
               "dat_field": "2-27",
               "required": false,
@@ -837,6 +891,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "additional-profiles",
           "label": "Additional Senior/Key Person Profile(s)",
           "dat_field": "5-0",
           "required": false,
@@ -849,6 +904,7 @@
         },
         {
           "kind": "field",
+          "id": "additional-biographical-sketches",
           "label": "Additional Biographical Sketch(es)",
           "dat_field": "5-1",
           "required": false,
@@ -861,6 +917,7 @@
         },
         {
           "kind": "field",
+          "id": "additional-current-pending-support",
           "label": "Additional Current & Pending Support",
           "dat_field": "5-2",
           "required": false,

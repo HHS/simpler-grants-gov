@@ -40,6 +40,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "submission-type",
           "label": "Submission Type",
           "dat_field": "01-0",
           "required": true,
@@ -58,6 +59,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "application-type",
           "label": "Application Type",
           "dat_field": "02-0",
           "required": true,
@@ -70,6 +72,7 @@
         },
         {
           "kind": "field",
+          "id": "revision-type",
           "label": "Revision Type",
           "dat_field": "02-04",
           "required": "Conditional (when Application Type = 'Revision')",
@@ -82,6 +85,7 @@
         },
         {
           "kind": "field",
+          "id": "revision-other-explanation",
           "label": "Other Revision Explanation",
           "dat_field": "02-05",
           "required": "Conditional (when Revision Type includes 'E: Other')",
@@ -100,6 +104,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "date-received",
           "label": "Date Received",
           "dat_field": "03-0",
           "required": true,
@@ -112,6 +117,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant-identifier",
           "label": "Applicant Identifier",
           "dat_field": "04-0",
           "required": false,
@@ -124,6 +130,7 @@
         },
         {
           "kind": "field",
+          "id": "federal-entity-identifier",
           "label": "Federal Entity Identifier",
           "dat_field": "05-A",
           "required": false,
@@ -136,6 +143,7 @@
         },
         {
           "kind": "field",
+          "id": "federal-award-identifier",
           "label": "Federal Award Identifier",
           "dat_field": "05-B",
           "required": false,
@@ -148,6 +156,7 @@
         },
         {
           "kind": "field",
+          "id": "date-received-by-state",
           "label": "Date Received by State",
           "dat_field": "06-1",
           "required": false,
@@ -160,6 +169,7 @@
         },
         {
           "kind": "field",
+          "id": "state-application-identifier",
           "label": "State Application Identifier",
           "dat_field": "07-0",
           "required": false,
@@ -178,6 +188,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "legal-name",
           "label": "Legal Name",
           "dat_field": "08-a",
           "required": true,
@@ -190,6 +201,7 @@
         },
         {
           "kind": "field",
+          "id": "ein",
           "label": "EIN/TIN",
           "dat_field": "08-b",
           "required": true,
@@ -202,6 +214,7 @@
         },
         {
           "kind": "field",
+          "id": "uei",
           "label": "UEI",
           "dat_field": "08-c",
           "required": true,
@@ -214,6 +227,7 @@
         },
         {
           "kind": "field",
+          "id": "street1",
           "label": "Street1",
           "dat_field": "08-d1",
           "required": true,
@@ -226,6 +240,7 @@
         },
         {
           "kind": "field",
+          "id": "street2",
           "label": "Street2",
           "dat_field": "08-d2",
           "required": false,
@@ -237,6 +252,7 @@
         },
         {
           "kind": "field",
+          "id": "city",
           "label": "City",
           "dat_field": "08-d3",
           "required": true,
@@ -248,6 +264,7 @@
         },
         {
           "kind": "field",
+          "id": "county",
           "label": "County/Parish",
           "dat_field": "08-d4",
           "required": false,
@@ -259,6 +276,7 @@
         },
         {
           "kind": "field",
+          "id": "address-state",
           "label": "State",
           "dat_field": "08-d5",
           "required": "Conditional (when Country = 'USA')",
@@ -271,6 +289,7 @@
         },
         {
           "kind": "field",
+          "id": "country",
           "label": "Country",
           "dat_field": "08-d7",
           "required": true,
@@ -282,6 +301,7 @@
         },
         {
           "kind": "field",
+          "id": "zip-code",
           "label": "Zip / Postal Code",
           "dat_field": "08-d8",
           "required": false,
@@ -293,6 +313,7 @@
         },
         {
           "kind": "field",
+          "id": "department",
           "label": "Department Name",
           "dat_field": "08-e1",
           "required": false,
@@ -304,6 +325,7 @@
         },
         {
           "kind": "field",
+          "id": "division",
           "label": "Division Name",
           "dat_field": "08-e2",
           "required": false,
@@ -321,6 +343,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "project-title",
           "label": "Descriptive Title of Project",
           "dat_field": "15-0",
           "required": true,
@@ -333,6 +356,7 @@
         },
         {
           "kind": "field",
+          "id": "proposed-start-date",
           "label": "Proposed Start Date",
           "dat_field": "17-1",
           "required": true,
@@ -344,6 +368,7 @@
         },
         {
           "kind": "field",
+          "id": "proposed-end-date",
           "label": "Proposed End Date",
           "dat_field": "17-2",
           "required": true,
@@ -361,6 +386,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "federal",
           "label": "Federal",
           "dat_field": "18-a",
           "required": true,
@@ -372,6 +398,7 @@
         },
         {
           "kind": "field",
+          "id": "applicant",
           "label": "Applicant",
           "dat_field": "18-b",
           "required": true,
@@ -383,6 +410,7 @@
         },
         {
           "kind": "field",
+          "id": "estimated-funding-state",
           "label": "State",
           "dat_field": "18-c",
           "required": true,
@@ -394,6 +422,7 @@
         },
         {
           "kind": "field",
+          "id": "local",
           "label": "Local",
           "dat_field": "18-d",
           "required": true,
@@ -405,6 +434,7 @@
         },
         {
           "kind": "field",
+          "id": "other",
           "label": "Other",
           "dat_field": "18-e",
           "required": true,
@@ -416,6 +446,7 @@
         },
         {
           "kind": "field",
+          "id": "program-income",
           "label": "Program Income",
           "dat_field": "18-f",
           "required": true,
@@ -427,6 +458,7 @@
         },
         {
           "kind": "field",
+          "id": "total",
           "label": "Total",
           "dat_field": "18-g",
           "required": true,
@@ -444,6 +476,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "prefix",
           "label": "Prefix",
           "dat_field": "21-f01",
           "required": false,
@@ -456,6 +489,7 @@
         },
         {
           "kind": "field",
+          "id": "first-name",
           "label": "First Name",
           "dat_field": "21-f02",
           "required": true,
@@ -468,6 +502,7 @@
         },
         {
           "kind": "field",
+          "id": "last-name",
           "label": "Last Name",
           "dat_field": "21-f04",
           "required": true,
@@ -480,6 +515,7 @@
         },
         {
           "kind": "field",
+          "id": "title",
           "label": "Title",
           "dat_field": "21-f06",
           "required": false,
@@ -491,6 +527,7 @@
         },
         {
           "kind": "field",
+          "id": "phone",
           "label": "Phone Number",
           "dat_field": "21-f08",
           "required": true,
@@ -503,6 +540,7 @@
         },
         {
           "kind": "field",
+          "id": "email",
           "label": "Email",
           "dat_field": "21-f10",
           "required": true,
@@ -515,6 +553,7 @@
         },
         {
           "kind": "field",
+          "id": "i-agree",
           "label": "I Agree",
           "dat_field": "21-3",
           "required": true,
@@ -526,6 +565,7 @@
         },
         {
           "kind": "field",
+          "id": "signature",
           "label": "Signature",
           "dat_field": "21-4",
           "required": true,
@@ -538,6 +578,7 @@
         },
         {
           "kind": "field",
+          "id": "date-signed",
           "label": "Date Signed",
           "dat_field": "21-5",
           "required": true,

@@ -17,9 +17,25 @@ const requiredLabel =
       : undefined;
 ---
 
-<div class="field-row">
+<div
+  class="field-row"
+  data-field-id={field.id}
+  data-static-field-id={field.id}
+  tabindex="-1"
+>
   <div class="field-row__primary">
     <span class="field-row__label">{field.label}</span>
+    {field.id && (
+      <a
+        class="review-link"
+        href={`?${new URLSearchParams({ field: field.id })}`}
+        aria-label={`Link to ${field.label}`}
+        title={`Link to ${field.label}`}
+      >
+        <span aria-hidden="true">#</span>
+      </a>
+    )}
+
     {isRequired ? (
       <span class="field-row__required">{requiredLabel}</span>
     ) : (

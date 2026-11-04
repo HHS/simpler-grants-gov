@@ -679,7 +679,8 @@ function buildField<F extends PlanField>(
     }
 
   return {
-    id: field.json_path ?? fallbackId,
+    // Older parity fixtures may lack a link ID; only explicit plan IDs are shareable.
+    id: field.id ?? field.json_path ?? fallbackId,
     field,
     rows,
     counts,
