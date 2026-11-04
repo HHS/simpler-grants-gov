@@ -17,40 +17,6 @@ branch_labels = None
 depends_on = None
 
 
-# Static role IDs from the removed award recommendation roles in static_role_values.py
-AWARD_RECOMMENDATION_ROLE_IDS = (
-    "a5a5881e-2b55-4044-bf4d-eec45503cc56",  # Award Recommendation User
-    "8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e",  # PQC Reviewer
-    "9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f",  # GMS Reviewer
-    "0d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a",  # FMO Reviewer
-    "1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b",  # GMO Reviewer
-    "2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c",  # Final Award Rec Approver
-)
-
-# lk_privilege IDs for the removed award recommendation privileges
-AWARD_RECOMMENDATION_PRIVILEGE_IDS = (28, 29, 30, 31, 34, 35, 36, 37, 38)
-
-# lk_approval_type IDs for the removed award recommendation approval types (PQC..EXECUTIVE)
-AWARD_RECOMMENDATION_APPROVAL_TYPE_IDS = (4, 5, 6, 7, 8, 9, 10, 11)
-
-# lk_workflow_type ID for AWARD_RECOMMENDATION_REVIEW
-AWARD_RECOMMENDATION_REVIEW_WORKFLOW_TYPE_ID = 7
-
-ROLE_REFERENCING_TABLES = (
-    "agency_user_role",
-    "internal_user_role",
-    "organization_user_role",
-    "application_user_role",
-    "link_organization_invitation_to_role",
-    "link_role_role_type",
-    "link_role_privilege",
-)
-
-
-def _in_list(values: tuple) -> str:
-    return ", ".join(f"'{v}'" if isinstance(v, str) else str(v) for v in values)
-
-
 def upgrade():
     # Drop the award recommendation tables, children before parents.
     # Dropping a table also drops its indexes and outgoing foreign keys
@@ -79,18 +45,33 @@ def upgrade():
 
     # Delete award recommendation workflows (and their child rows) so the
     # check constraint below can be narrowed without violating existing rows.
-    award_workflow_ids = (
-        "SELECT workflow_id FROM api.workflow"
-        " WHERE award_recommendation_id IS NOT NULL"
-        f" OR workflow_type_id = {AWARD_RECOMMENDATION_REVIEW_WORKFLOW_TYPE_ID}"
-    )
-    for table in ("workflow_audit", "workflow_approval", "workflow_event_history"):
-        op.execute(f"DELETE FROM api.{table} WHERE workflow_id IN ({award_workflow_ids})")
-    op.execute(f"DELETE FROM api.workflow WHERE workflow_id IN ({award_workflow_ids})")
+    # workflow_type_id 7 is AWARD_RECOMMENDATION_REVIEW.
     op.execute(
-        "DELETE FROM api.workflow_approval"
-        f" WHERE approval_type_id IN ({_in_list(AWARD_RECOMMENDATION_APPROVAL_TYPE_IDS)})"
+        sa.text(
+            "DELETE FROM api.workflow_audit WHERE workflow_id IN ("
+            "SELECT workflow_id FROM api.workflow WHERE award_recommendation_id IS NOT NULL OR workflow_type_id = 7)"
+        )
     )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.workflow_approval WHERE workflow_id IN ("
+            "SELECT workflow_id FROM api.workflow WHERE award_recommendation_id IS NOT NULL OR workflow_type_id = 7)"
+        )
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.workflow_event_history WHERE workflow_id IN ("
+            "SELECT workflow_id FROM api.workflow WHERE award_recommendation_id IS NOT NULL OR workflow_type_id = 7)"
+        )
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.workflow WHERE workflow_id IN ("
+            "SELECT workflow_id FROM api.workflow WHERE award_recommendation_id IS NOT NULL OR workflow_type_id = 7)"
+        )
+    )
+    # approval_type_id 4-11 are the award recommendation approval types (PQC..EXECUTIVE)
+    op.execute(sa.text("DELETE FROM api.workflow_approval WHERE approval_type_id BETWEEN 4 AND 11"))
 
     op.drop_constraint(
         "workflow_exactly_one_nonnull_entity_check",
@@ -106,30 +87,73 @@ def upgrade():
     )
 
     # Delete the award recommendation roles. The role/lookup sync is upsert-only,
-    # so removing them from code does not delete their rows.
-    for table in ROLE_REFERENCING_TABLES:
-        op.execute(
-            f"DELETE FROM api.{table} WHERE role_id IN ({_in_list(AWARD_RECOMMENDATION_ROLE_IDS)})"
+    # so removing them from code does not delete their rows. Role IDs, in order:
+    # Award Recommendation User, PQC Reviewer, GMS Reviewer, FMO Reviewer,
+    # GMO Reviewer, Final Award Rec Approver.
+    op.execute(
+        sa.text(
+            "DELETE FROM api.agency_user_role WHERE role_id IN ("
+            "'a5a5881e-2b55-4044-bf4d-eec45503cc56', '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e', '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '0d4e5f6a-7b8c-9d0e-1f2a3b4c5d6e7f8a', '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b', '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c')"
         )
-    op.execute(f"DELETE FROM api.role WHERE role_id IN ({_in_list(AWARD_RECOMMENDATION_ROLE_IDS)})")
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.internal_user_role WHERE role_id IN ("
+            "'a5a5881e-2b55-4044-bf4d-eec45503cc56', '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e', '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '0d4e5f6a-7b8c-9d0e-1f2a3b4c5d6e7f8a', '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b', '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c')"
+        )
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.organization_user_role WHERE role_id IN ("
+            "'a5a5881e-2b55-4044-bf4d-eec45503cc56', '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e', '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '0d4e5f6a-7b8c-9d0e-1f2a3b4c5d6e7f8a', '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b', '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c')"
+        )
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.application_user_role WHERE role_id IN ("
+            "'a5a5881e-2b55-4044-bf4d-eec45503cc56', '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e', '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '0d4e5f6a-7b8c-9d0e-1f2a3b4c5d6e7f8a', '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b', '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c')"
+        )
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.link_organization_invitation_to_role WHERE role_id IN ("
+            "'a5a5881e-2b55-4044-bf4d-eec45503cc56', '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e', '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '0d4e5f6a-7b8c-9d0e-1f2a3b4c5d6e7f8a', '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b', '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c')"
+        )
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.link_role_role_type WHERE role_id IN ("
+            "'a5a5881e-2b55-4044-bf4d-eec45503cc56', '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e', '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '0d4e5f6a-7b8c-9d0e-1f2a3b4c5d6e7f8a', '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b', '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c')"
+        )
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.link_role_privilege WHERE role_id IN ("
+            "'a5a5881e-2b55-4044-bf4d-eec45503cc56', '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e', '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '0d4e5f6a-7b8c-9d0e-1f2a3b4c5d6e7f8a', '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b', '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c')"
+        )
+    )
+    op.execute(
+        sa.text(
+            "DELETE FROM api.role WHERE role_id IN ("
+            "'a5a5881e-2b55-4044-bf4d-eec45503cc56', '8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e', '9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f', '0d4e5f6a-7b8c-9d0e-1f2a3b4c5d6e7f8a', '1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b', '2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c')"
+        )
+    )
 
-    # Delete the lookup rows, leaving ID gaps (IDs are never reused)
+    # Delete the lookup rows, leaving ID gaps (IDs are never reused).
+    # privilege_id 28-31 and 34-38 are the award recommendation privileges.
     op.execute(
-        "DELETE FROM api.link_role_privilege"
-        f" WHERE privilege_id IN ({_in_list(AWARD_RECOMMENDATION_PRIVILEGE_IDS)})"
+        sa.text(
+            "DELETE FROM api.link_role_privilege"
+            " WHERE privilege_id IN (28, 29, 30, 31, 34, 35, 36, 37, 38)"
+        )
     )
     op.execute(
-        "DELETE FROM api.lk_privilege"
-        f" WHERE privilege_id IN ({_in_list(AWARD_RECOMMENDATION_PRIVILEGE_IDS)})"
+        sa.text(
+            "DELETE FROM api.lk_privilege WHERE privilege_id IN (28, 29, 30, 31, 34, 35, 36, 37, 38)"
+        )
     )
-    op.execute(
-        "DELETE FROM api.lk_approval_type"
-        f" WHERE approval_type_id IN ({_in_list(AWARD_RECOMMENDATION_APPROVAL_TYPE_IDS)})"
-    )
-    op.execute(
-        "DELETE FROM api.lk_workflow_type"
-        f" WHERE workflow_type_id = {AWARD_RECOMMENDATION_REVIEW_WORKFLOW_TYPE_ID}"
-    )
+    op.execute(sa.text("DELETE FROM api.lk_approval_type WHERE approval_type_id BETWEEN 4 AND 11"))
+    op.execute(sa.text("DELETE FROM api.lk_workflow_type WHERE workflow_type_id = 7"))
 
 
 def downgrade():
