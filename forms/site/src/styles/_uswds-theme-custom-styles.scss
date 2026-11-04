@@ -1241,6 +1241,68 @@ details[open] > .group-header::before {
   @include u-font("mono", "3xs");
 }
 
+.form-artifacts__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: units(2);
+
+  .usa-button {
+    margin: 0;
+  }
+}
+
+.form-artifacts {
+  margin-bottom: units(4);
+
+  // Keep every file choice reachable on a narrow form page.
+  > .usa-button-group {
+    flex-wrap: wrap;
+    row-gap: units(1);
+
+    .usa-button-group__item {
+      display: flex;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .usa-button {
+      height: auto;
+    }
+  }
+}
+
+.form-artifacts__copy-result {
+  margin: units(1) 0;
+
+  &:empty {
+    margin: units("05") 0;
+  }
+}
+
+.code-fold__toggle {
+  display: inline-block;
+  width: 1.1em;
+  margin: 0 0.2em 0 0;
+  padding: 0;
+  border: 1px solid color("base-light");
+  border-radius: 2px;
+  background: color("white");
+  color: color("primary-dark");
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid color("primary");
+    outline-offset: 2px;
+  }
+}
+
+.code-fold__placeholder {
+  color: color("base-dark");
+}
+
 // Plan notes, in their own tab
 .plan-notes {
   @include u-font("sans", "xs");
