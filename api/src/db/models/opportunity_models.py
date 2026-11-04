@@ -30,7 +30,6 @@ from src.db.models.lookup_models import (
 from src.util.file_util import safe_presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
-    from src.db.models.award_recommendation_models import AwardRecommendation
     from src.db.models.competition_models import Competition
     from src.db.models.entity_models import OrganizationSavedOpportunity
     from src.db.models.user_models import User, UserOpportunityNotificationLog, UserSavedOpportunity
@@ -114,13 +113,6 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     competitions: Mapped[list[Competition]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
-    )
-
-    award_recommendations: Mapped[list[AwardRecommendation]] = relationship(
-        "AwardRecommendation",
-        back_populates="opportunity",
-        uselist=True,
-        cascade="all, delete-orphan",
     )
 
     versions: Mapped[list[OpportunityVersion]] = relationship(
