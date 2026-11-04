@@ -57,7 +57,6 @@ module "staging_config" {
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL             = "https://staging.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 

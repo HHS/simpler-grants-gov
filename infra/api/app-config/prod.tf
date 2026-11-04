@@ -99,7 +99,6 @@ module "prod_config" {
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Production overrides
-    FRONTEND_URL             = "https://simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
 
