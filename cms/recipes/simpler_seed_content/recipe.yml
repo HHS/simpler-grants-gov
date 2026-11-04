@@ -1,0 +1,3 @@
+name: 'Simpler seed content'
+description: 'Sample content for local development and CI. Never applied in deployed environments.'
+type: 'Content'

@@ -1,6 +1,10 @@
 "use client";
 
-import { updateSavedOpportunityNotificationPreferenceAction } from "src/app/[locale]/(base)/notifications/actions";
+import {
+  updateAllOpportunitiesNotificationPreferenceAction,
+  UpdateNotificationPreferenceActionState,
+  updateSavedOpportunityNotificationPreferenceAction,
+} from "src/app/[locale]/(base)/notifications/actions";
 import {
   NotificationOrganization,
   NotificationPreferenceKey,
@@ -22,6 +26,8 @@ export interface NotificationsPageContentProps {
   organizationPreferencesDescription: string;
   savedOpportunitiesLabel: string;
   savedOpportunitiesDescription: string;
+  allNewOpportunitiesLabel: string;
+  allNewOpportunitiesDescription: string;
   organizationSavedOpportunitiesDescription: string;
   organizations: NotificationOrganization[];
   hasOrganizationsFetchError: boolean;
@@ -34,6 +40,9 @@ const SAVE_ERROR_MESSAGE =
 function buildPersonalPreferenceKey(): NotificationPreferenceKey {
   return "saved-opportunities";
 }
+
+const ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY: NotificationPreferenceKey =
+  "all-new-opportunities";
 
 function buildOrganizationPreferenceKey(
   organizationId: string,
@@ -50,6 +59,8 @@ export function NotificationsPageContent({
   organizationPreferencesDescription,
   savedOpportunitiesLabel,
   savedOpportunitiesDescription,
+  allNewOpportunitiesLabel,
+  allNewOpportunitiesDescription,
   organizationSavedOpportunitiesDescription,
   organizations,
   hasOrganizationsFetchError,
@@ -84,9 +95,15 @@ export function NotificationsPageContent({
     string | null
   >(null);
 
+  /**
+   * When turnOffOnError is set, a failed save forces the preference to display as OFF
+   * instead of leaving it at its previous value.
+   */
   function handlePreferenceToggle(
     preferenceKey: NotificationPreferenceKey,
-    organizationId: string | null,
+    savePreference: (
+      nextValue: boolean,
+    ) => Promise<UpdateNotificationPreferenceActionState>,
   ): void {
     const currentValue = preferenceValues[preferenceKey] ?? false;
     const nextValue = !currentValue;
@@ -96,11 +113,7 @@ export function NotificationsPageContent({
     setSavingPreferenceKey(preferenceKey);
 
     startTransition(async () => {
-      const actionResult =
-        await updateSavedOpportunityNotificationPreferenceAction({
-          organizationId,
-          emailEnabled: nextValue,
-        });
+      const actionResult = await savePreference(nextValue);
 
       setSavingPreferenceKey(null);
 
@@ -132,6 +145,13 @@ export function NotificationsPageContent({
     errorPreferenceKey === personalPreferenceKey;
   const isSavedOpportunitiesChecked =
     preferenceValues[personalPreferenceKey] ?? false;
+
+  const isSavingAllNewOpportunities =
+    savingPreferenceKey === ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY;
+  const hasAllNewOpportunitiesError =
+    errorPreferenceKey === ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY;
+  const isAllNewOpportunitiesChecked =
+    preferenceValues[ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY] ?? false;
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
@@ -167,18 +187,44 @@ export function NotificationsPageContent({
         </p>
 
         <NotificationPreferenceCard
+          className="margin-bottom-1"
           checkboxId={personalPreferenceKey}
           label={savedOpportunitiesLabel}
           description={savedOpportunitiesDescription}
           isChecked={isSavedOpportunitiesChecked}
-          isDisabled={isSavingSavedOpportunities}
           isLoading={isSavingSavedOpportunities}
           hasError={hasSavedOpportunitiesError}
           errorMessage={
             hasSavedOpportunitiesError ? SAVE_ERROR_MESSAGE : undefined
           }
           onCheckedChange={() => {
-            handlePreferenceToggle(personalPreferenceKey, null);
+            handlePreferenceToggle(personalPreferenceKey, (emailEnabled) =>
+              updateSavedOpportunityNotificationPreferenceAction({
+                organizationId: null,
+                emailEnabled,
+              }),
+            );
+          }}
+        />
+
+        <NotificationPreferenceCard
+          checkboxId={ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY}
+          label={allNewOpportunitiesLabel}
+          description={allNewOpportunitiesDescription}
+          isChecked={isAllNewOpportunitiesChecked}
+          isLoading={isSavingAllNewOpportunities}
+          hasError={hasAllNewOpportunitiesError}
+          errorMessage={
+            hasAllNewOpportunitiesError ? SAVE_ERROR_MESSAGE : undefined
+          }
+          onCheckedChange={() => {
+            handlePreferenceToggle(
+              ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY,
+              (isEnabled) =>
+                updateAllOpportunitiesNotificationPreferenceAction({
+                  isEnabled,
+                }),
+            );
           }}
         />
       </section>
@@ -211,16 +257,17 @@ export function NotificationsPageContent({
                   label={savedOpportunitiesLabel}
                   description={organizationSavedOpportunitiesDescription}
                   isChecked={isChecked}
-                  isDisabled={isSavingThisPreference}
                   isLoading={isSavingThisPreference}
                   hasError={hasErrorThisPreference}
                   errorMessage={
                     hasErrorThisPreference ? SAVE_ERROR_MESSAGE : undefined
                   }
                   onCheckedChange={() => {
-                    handlePreferenceToggle(
-                      preferenceKey,
-                      organization.organizationId,
+                    handlePreferenceToggle(preferenceKey, (emailEnabled) =>
+                      updateSavedOpportunityNotificationPreferenceAction({
+                        organizationId: organization.organizationId,
+                        emailEnabled,
+                      }),
                     );
                   }}
                 />

@@ -166,7 +166,10 @@ class LoadOpportunitiesToIndex(Task):
 
     def _emit_doc_count(self) -> None:
         """Emit the total number of documents in the search index after this run."""
-        resp = self.search_client.search(self.config.alias_name, {"size": 0})
+        # Without track_total_hits, OpenSearch caps the reported total at 10,000
+        resp = self.search_client.search(
+            self.config.alias_name, {"size": 0, "track_total_hits": True}
+        )
         self.set_metrics({self.Metrics.OPENSEARCH_DOC_COUNT: resp.total_records})
 
     @retry(

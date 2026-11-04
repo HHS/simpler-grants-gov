@@ -61,14 +61,10 @@ module "infra_sgg2_config" {
   search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
 
   service_override_extra_environment_variables = {
-
-    ENABLE_WORKFLOW_ENDPOINTS = 1
-
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "true"
 
     # PDF Generation
-    FRONTEND_URL             = "https://sgg2.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
@@ -83,5 +79,5 @@ module "infra_sgg2_config" {
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
 }

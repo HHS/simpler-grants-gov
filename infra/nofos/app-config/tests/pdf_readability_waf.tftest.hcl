@@ -6,17 +6,17 @@ mock_provider "external" {
   }
 }
 
-run "only_infra_dev_emergency_block_test" {
+run "only_dev_and_prod_observe_calculator_requests" {
   command = plan
 
   assert {
     condition = alltrue([
-      for name, config in output.environment_configs : name == "infra-dev" ? (
+      for name, config in output.environment_configs : contains(["infra-dev", "prod"], name) ? (
         config.service_config.pdf_readability_waf.rate_limit == 10 &&
         config.service_config.pdf_readability_waf.rate_action == "count" &&
-        config.service_config.pdf_readability_waf.emergency_block
+        !config.service_config.pdf_readability_waf.emergency_block
       ) : config.service_config.pdf_readability_waf == null
     ])
-    error_message = "Only infra-dev may use the temporary emergency-block test mode; rate limiting, production and all other environments must remain non-blocking."
+    error_message = "Only infra-dev and prod may opt in, with both rules in Count. All other environments must remain opted out."
   }
 }
