@@ -113,6 +113,8 @@ module "prod_config" {
 
   scanner_provisioned_concurrency = 1
 
+  enable_processor_service = true
+
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.
   # ⚠️ Warning! It is not recommended to enable this in a production environment.
