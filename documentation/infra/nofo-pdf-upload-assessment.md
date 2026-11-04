@@ -1,7 +1,8 @@
-# NOFO PDF pilot: upload availability assessment
+# NOFO Readability Calculator: upload availability assessment
 
 Work for [#12568](https://github.com/HHS/simpler-grants-gov/issues/12568), items 4–5.
-Source review dated October 2, 2026. Status: **preparation only; no dev tests run**.
+Initial source review dated October 2, 2026; bounded test plan updated November 2.
+Status: **slow-upload test not run; plan for review**.
 This document changes no infrastructure, application settings, or feature flags.
 It does not establish deployed protection or complete release acceptance criteria.
 
@@ -68,11 +69,17 @@ log artifacts. Keep the pilot flag off during initial path/control checks.
 An enabled-path upload test needs a separately agreed, time-limited dev flag
 change and restoration. It is deferred, not authorized or executed here. A 503
 while the flag is off is not evidence of file-size or analysis protections.
+The current public disabled behavior is GET 200 / POST 403; the historical 503
+references above describe the initial source baseline only.
 PRs [#12661](https://github.com/HHS/simpler-grants-gov/pull/12661) and
 [#12673](https://github.com/HHS/simpler-grants-gov/pull/12673) should be deployed
 and their signals verified before relying on them during these tests.
 
 ## Proposed bounded procedure for that later window
+
+For the slow-upload part of this procedure, use the narrower observation gate
+and request limits below. The size-boundary tests in step 3 are a separate
+follow-up; do not bundle them into the first slow-upload session.
 
 1. Record the baseline: effective routing, image, worker settings, healthy task
    count, WAF actions, ordinary authenticated Builder latency/errors, and observer
@@ -107,6 +114,152 @@ and their signals verified before relying on them during these tests.
    Builder impact, recovery, and unresolved limitations. Publish only a non-sensitive
    conclusion and evidence-owner/location reference. Update #12568 items 4–5 only
    when the evidence supports a reviewed decision; no boxes are completed here.
+
+## Slow-upload observation gate and first test card
+
+The immediate question is whether a slowly arriving body occupies a Builder web
+worker, how it is released, and whether ordinary requests are affected. This is
+not a capacity benchmark. Keep public uploads disabled during preparation; no
+upload traffic, feature changes or worker termination are authorized by this plan.
+
+### What existing access establishes
+
+Read-only New Relic queries on November 2 confirmed that dev application and ALB
+logs are searchable. For `entity.name = 'nofos-infra-dev'`,
+`logtype = 'ecs-application'`, 00:00–21:30 UTC, the worker-lifecycle query returned
+24 `Booting worker` records, zero `Worker exiting` records and zero
+`WORKER TIMEOUT` records. These are text-match counts, not distinct workers, a
+current worker count or proof that exit/timeout messages can never occur.
+Known record delivery is established for startup messages only. No raw process
+identifiers, log samples, IPs or document content are reproduced here.
+
+The source still starts eight Gunicorn workers with an 89-second timeout and no
+worker-class override. Builder's middleware timestamps request entry but logs
+only after response/exception. The approved inspection reports service-level
+CPU/memory and WAF counters; it does not expose an in-flight worker gauge,
+stacks, ALB idle-timeout attributes or effective Gunicorn arguments.
+
+| Observation | Available now | What it cannot establish alone |
+| --- | --- | --- |
+| New Relic application logs | Search/count request completion, worker startup and candidate timeout/exit messages | Which live worker is waiting for body bytes, or absence of unlogged restarts |
+| New Relic ALB logs | Request/status/byte metadata and restricted raw-log access through the existing UI | Live worker occupation; parsed timing fields were not established in the earlier keyset query |
+| Approved inspection | Deployed image/task configuration categories, service health and CPU/memory/WAF signals | An upload receive deadline, per-worker activity or actual body buffering |
+| Separate-task runtime workflow (#13111) | Analysis limits, controlled timeout, synthetic cleanup and PostgreSQL admission | HTTP ingress, the normal Gunicorn workers or slow-body protection |
+
+**Do not start the slow upload until worker observation is usable.** First
+choose and review an existing live-worker inspection path, if available, or a
+minimal dev-scoped observation change that records request entry *before body
+parsing*, completion/abort and worker identity in restricted evidence. It must
+not log uploaded bytes, filenames, cookies, headers, user identity or query
+strings. Confirm delivery/latency of that signal with an ordinary request before
+the slow test. This plan does not implement instrumentation, authorize ECS Exec
+or assume the inspection role has container-execution access.
+
+Without this signal, we can describe end-to-end behavior but must mark worker
+occupation **inconclusive**. No 5xx, low CPU, a responsive health endpoint, a
+missing log record or the client's timeout is sufficient evidence of protection.
+
+### Entry and restoration decisions
+
+Record these in #12568 before execution, without adding a new coordination
+meeting solely because the environment is dev. Ben has confirmed dev is not in
+active shared use. The executing operator and reviewer can use the existing
+normal review/deployment path; role names are not a new staffing requirement.
+
+- Record actual deployed Builder/infrastructure revisions, task health, effective
+  worker count/class/timeout, ALB idle timeout and relevant WAF modes. The source
+  values above are not substitutes for effective settings. Do not change WAF,
+  worker counts, ALB attributes or infrastructure as part of the test itself.
+- Choose the entry route and obtain explicit authorization for any temporary
+  flag change. Prefer the restricted authenticated PDF route if its permissions,
+  CSRF handling and multipart path are verified equivalent for this question.
+  That does not establish signed-out routing or public WAF behavior. Otherwise
+  obtain Ben's separate approval to enable the public route briefly; that flag
+  makes the public endpoint available to others too, not just the test client.
+- Record the exact flag's initial/effective state, who can restore it, a maximum
+  **15-minute enabled window**, and the existing escalation path if restoration
+  fails. Keep a usable admin session open. There is no automatic timed flag
+  rollback. Verify the public flag stays false if using the authenticated path.
+  The first test assumes the selected flag starts off; if it is already on,
+  pause and agree its intended restoration state before proceeding.
+- Select an approved restricted evidence location and observer with usable
+  worker signals. Record cookies/authentication only in memory; never in command
+  output, screenshots, source, issues or workflow artifacts. Security/privacy
+  handling review remains deferred to its later release gate; use fictional PDFs.
+
+### Proposed requests and stop conditions
+
+Review these limits before execution. No script is dispatched by this document.
+Do not improvise multipart framing or use a pathological PDF to create delay.
+
+1. **Baseline:** over 60 seconds, send five GETs to `/health` and five to a fixed
+   ordinary Builder page. Record their statuses and elapsed times. Stop before
+   uploads if any fails, or if baseline latency is unstable. Retrieve a valid
+   CSRF token/session, then send one ordinary small supported synthetic PDF with
+   a 30-second client deadline. A login redirect, disabled response or CSRF error
+   does not establish that the enabled upload path was reached.
+2. **Continuous slow body:** only after the observation gate passes, send one
+   valid multipart request containing the same small fictional PDF. Cap the
+   whole multipart body at 64 KiB, send at most 32 body bytes per second, use one
+   connection with no retry/redirect following, and a **110-second total client
+   deadline**. Record the actual bytes handed to the socket and any server-side
+   close/rejection; transmission speed is not proof of downstream consumption.
+3. **Idle comparison:** only if the prior request has fully ended, worker
+   recovery is confirmed and no stop condition occurred, send at most one more
+   request: send headers and one small body chunk, pause for up to 100 seconds,
+   and enforce the same 110-second total deadline. Do not extend the test to
+   cross an unobserved timeout boundary. A still-open request at the client
+   deadline is inconclusive about a later server cutoff.
+4. During steps 2–3, use at most one ordinary-page or health GET every five
+   seconds, alternating endpoints, with a five-second timeout. Stop the upload
+   and the entire test on any monitoring failure, unexpected 5xx, any observed
+   worker timeout/restart, or two consecutive probes slower than the greater of
+   two seconds or three times the baseline median. A worker timeout may be an
+   outcome of this test; it ends the session rather than authorizing escalation.
+   Inspect that result before considering the idle comparison or another test.
+5. Always stop the client and restore the selected flag immediately after the
+   session, on a stop condition or before the 15-minute window ends. Cancellation
+   alone does not prove a worker released the request. Confirm worker recovery,
+   stored/effective disabled state, and five ordinary health/page checks. If the
+   service is unresponsive, use the recorded escalation path. The WAF off switch
+   can prevent new requests; it is not assumed to cancel an existing transfer.
+
+**Whole-session bounds:** at most three upload requests, one at a time; 64 KiB
+per complete multipart body; 80 total HTTP requests including auth/CSRF and
+health checks; no automatic retries, redirects, parallel slow uploads, deliberate
+worker/task kills or production traffic. Budget the baseline, at most 44
+during-test probes and restoration before starting. Stop at any ceiling even
+if the result is inconclusive. Account for request count/clock in the eventual
+reviewed client implementation; this document does not supply a runnable client.
+
+Allow a bounded five-minute read-only log-publication interval after restoring
+the flag. Existing dev error alarms could send notifications; leave them enabled
+and label the window as a controlled test. Log delay is not permission to resend
+uploads or extend the enabled window.
+
+### Outcome and decision
+
+Record worker entry/exit evidence, transfer timing/bytes, HTTP response and
+rejection layer, ordinary-route impact and recovery. ALB timing needs careful
+interpretation: with WAF attached, AWS documents that POST receive time can be
+included in request processing time; a high duration does not by itself identify
+worker residence. Client cancellation, server enforcement and Gunicorn killing
+a worker are distinct outcomes.
+
+- If a worker waits on the slow body or is killed for timing out, document that
+  availability cost. Do not present worker replacement as edge-side protection.
+  Propose a NOFO-scoped buffering/receive-deadline boundary or another reviewed
+  mitigation, considering ordinary document imports before changing defaults.
+- If a verified upstream control rejects the request before it reaches a
+  worker, record the exact control and configured bound. A single-client check
+  still does not establish saturation resistance or shared-office-IP fairness.
+- If attribution is missing, retain an **inconclusive** result and fix the
+  observation gap instead of increasing load.
+
+The infrastructure reviewer evaluates the evidence and recommendation; Ben
+does not need to choose a timeout or worker configuration. Keep #12568 items
+4–5 and production enablement open until the protection/remaining-risk decision
+is recorded. Finishing this plan or merging its PR does not approve the test.
 
 ## Decision record to fill after verification
 

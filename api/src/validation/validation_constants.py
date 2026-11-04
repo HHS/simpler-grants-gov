@@ -63,7 +63,3 @@ class ValidationErrorType(StrEnum):
 
     # API key validation error types
     DUPLICATE_API_KEY_NAME = "duplicate_api_key_name"
-
-    # Award recommendation validation error types
-    AWARD_RECOMMENDATION_NOT_DRAFT = "award_recommendation_not_draft"
-    AWARD_RECOMMENDATION_REVIEW_ALREADY_STARTED = "award_recommendation_review_already_started"

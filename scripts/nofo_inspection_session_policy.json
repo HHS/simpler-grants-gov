@@ -11,6 +11,7 @@
         "ecs:DescribeTaskDefinition",
         "ecs:DescribeTasks",
         "ecs:ListTasks",
+        "elasticloadbalancing:DescribeLoadBalancerAttributes",
         "elasticloadbalancing:DescribeTargetGroups",
         "elasticloadbalancing:GetLoadBalancerWebACL",
         "logs:DescribeLogGroups",
