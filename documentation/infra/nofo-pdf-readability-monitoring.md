@@ -262,3 +262,10 @@ parameter. If one exists, confirm its configuration privately before proceeding.
 
 Creating the parameter is separate from deploying the subscription. Keep public
 uploads disabled and verify delivery before enabling calculator alarm actions.
+
+After the production parameter exists, deploy the reviewed NOFO production
+configuration. Check the Terraform plan for the NOFO subscription, dashboard,
+alarms and Count-mode WAF rules before applying. Confirm the subscription from
+the intended inbox. The subscription uses the shared NOFO production monitoring
+topic, so existing service alarms that publish to it can send email after
+confirmation even while calculator-specific alarm actions are disabled.
