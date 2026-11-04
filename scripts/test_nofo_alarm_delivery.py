@@ -1,4 +1,4 @@
-"""Exercise a temporary dev alarm; never log raw AWS responses or recipients."""
+"""Exercise a temporary NOFO alarm; never log raw AWS responses or recipients."""
 
 import os
 import re
@@ -19,7 +19,7 @@ class TestFailure(Exception):
     """Only fixed diagnostics may reach public logs."""
 
 
-def context():
+def context(prefix=PREFIX):
     if (
         os.environ.get("GITHUB_REPOSITORY") != "HHS/simpler-grants-gov"
         or os.environ.get("GITHUB_REF") != "refs/heads/main"
@@ -28,7 +28,7 @@ def context():
     parts = [os.environ.get(key, "") for key in ("GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT")]
     if not all(re.fullmatch(r"[0-9]{1,20}", part) for part in parts):
         raise TestFailure("Valid GitHub run identity is required.")
-    name = PREFIX + "-".join(parts)
+    name = prefix + "-".join(parts)
     return name, Path(os.environ["RUNNER_TEMP"]) / (name + ".owned")
 
 
@@ -44,19 +44,19 @@ def client(service):
     )
 
 
-def confirmed_route(sns):
-    response = sns.list_subscriptions_by_topic(TopicArn=TOPIC)
+def confirmed_route(sns, topic=TOPIC):
+    response = sns.list_subscriptions_by_topic(TopicArn=topic)
     rows = response.get("Subscriptions", [])
     if (
         response.get("NextToken")
         or len(rows) != 1
         or rows[0].get("Protocol") != "email"
-        or not rows[0].get("SubscriptionArn", "").startswith(TOPIC + ":")
+        or not rows[0].get("SubscriptionArn", "").startswith(topic + ":")
     ):
         raise TestFailure("Expected one confirmed email subscription; test stopped.")
 
 
-def wait_for_actions(cw, name, since, expected):
+def wait_for_actions(cw, name, since, expected, topic=TOPIC):
     # Never print HistoryData: AWS can embed notification messages there.
     # Fail closed if AWS changes its successful-action summary format.
     for attempt in range(12):
@@ -68,7 +68,7 @@ def wait_for_actions(cw, name, since, expected):
         )
         rows = response.get("AlarmHistoryItems", [])
         successes = sum(
-            row.get("HistorySummary") == "Successfully executed action " + TOPIC
+            row.get("HistorySummary") == "Successfully executed action " + topic
             for row in rows
         )
         if response.get("NextToken"):
@@ -80,8 +80,8 @@ def wait_for_actions(cw, name, since, expected):
     raise TestFailure("Timed out waiting for CloudWatch notification action evidence.")
 
 
-def exercise(cw, sns, name, marker):
-    confirmed_route(sns)
+def exercise(cw, sns, name, marker, topic=TOPIC, environment="dev"):
+    confirmed_route(sns, topic)
     response = cw.describe_alarms(AlarmNames=[name])
     if response.get("MetricAlarms") or response.get("CompositeAlarms"):
         raise TestFailure("Test alarm already exists; it was not changed or deleted.")
@@ -92,12 +92,12 @@ def exercise(cw, sns, name, marker):
     cw.put_metric_alarm(
         AlarmName=name,
         AlarmDescription=(
-            "TEST ONLY: NOFO Builder dev alarm/recovery email delivery, not an incident. "
+            f"TEST ONLY: NOFO Builder {environment} alarm/recovery email delivery, not an incident. "
             "No calculator thresholds or public upload settings are changed."
         ),
         ActionsEnabled=True,
-        AlarmActions=[TOPIC],
-        OKActions=[TOPIC],
+        AlarmActions=[topic],
+        OKActions=[topic],
         InsufficientDataActions=[],
         Namespace="NOFO/NotificationDeliveryTest",
         MetricName=name,
@@ -115,9 +115,9 @@ def exercise(cw, sns, name, marker):
         cw.set_alarm_state(
             AlarmName=name,
             StateValue=state,
-            StateReason=f"TEST ONLY: controlled NOFO dev email delivery, state {state}.",
+            StateReason=f"TEST ONLY: controlled NOFO {environment} email delivery, state {state}.",
         )
-        wait_for_actions(cw, name, since, 1)
+        wait_for_actions(cw, name, since, 1, topic)
         print(f"CloudWatch recorded the test {state} notification action.")
 
 
@@ -137,13 +137,22 @@ def cleanup(cw, name, marker):
 
 def main():
     try:
-        name, marker = context()
+        environment = os.environ.get("NOFO_ALARM_TEST_ENVIRONMENT", "infra-dev")
+        topic, prefix, label = {
+            "infra-dev": (TOPIC, PREFIX, "dev"),
+            "prod": (
+                "arn:aws:sns:us-east-1:315341936575:nofos-prod-monitoring",
+                "NOFO-PROD-TEST-alert-delivery-",
+                "production",
+            ),
+        }[environment]
+        name, marker = context(prefix)
         cw = client("cloudwatch")
         if sys.argv[1:] == ["--cleanup"]:
             cleanup(cw, name, marker)
         elif not sys.argv[1:]:
             try:
-                exercise(cw, client("sns"), name, marker)
+                exercise(cw, client("sns"), name, marker, topic, label)
             finally:
                 cleanup(cw, name, marker)
             print(
