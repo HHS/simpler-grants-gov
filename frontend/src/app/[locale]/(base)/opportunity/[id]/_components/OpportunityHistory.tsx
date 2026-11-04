@@ -31,14 +31,6 @@ const OpportunityHistory = ({
       <h2>{t("history")}</h2>
       <div className="border radius-md border-base-lighter padding-x-2">
         <ul className="usa-list usa-list--unstyled">
-          <OpportunityHistoryItem
-            title={t("version")}
-            content={
-              summary.version_number
-                ? summary.version_number.toString()
-                : t("notSpecified")
-            }
-          />
           {!(isForecasted && !summary.post_date) && (
             <OpportunityHistoryItem
               title={isForecasted ? t("forecastPostedDate") : t("postedDate")}
@@ -48,6 +40,14 @@ const OpportunityHistory = ({
           <OpportunityHistoryItem
             title={t("archiveDate")}
             content={formatHistoryDate(summary.archive_date)}
+          />
+          <OpportunityHistoryItem
+            title={t("version")}
+            content={
+              summary.version_number
+                ? summary.version_number.toString()
+                : t("notSpecified")
+            }
           />
         </ul>
         <OpportunityIntro legacyOpportunityId={legacyOpportunityId} />

@@ -43,7 +43,7 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
           : [];
         if (items.length) {
           return (
-            <ul className="usa-list margin-y-0">
+            <ul className="usa-list simpler-list-style-disc margin-y-0">
               {items.map((item, index) => (
                 <li key={`contentList-${index}`}>
                   {formatStringReturnValue(item)}
