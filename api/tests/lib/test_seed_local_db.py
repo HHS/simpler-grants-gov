@@ -15,8 +15,6 @@ def test_run_seed_logic_can_run_multiple_times(db_session, enable_factory_create
         seed_forms=True,
         seed_users=True,
         seed_e2e=True,
-        seed_award_recommendations=True,
-        seed_award_recommendation_workflows=False,
     )
     run_seed_logic(db_session, config)
 
