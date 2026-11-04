@@ -7,6 +7,7 @@ import {
   $previewData,
   type DataView,
 } from "../../../stores/formPreview";
+import FileSelector from "../FileSelector";
 import HighlightedCode from "./HighlightedCode";
 
 /**
@@ -20,9 +21,9 @@ const placeholderAttachment = (id: string) => ({
   hashValue: "placeholder",
 });
 
-const VIEWS: { view: DataView; label: string }[] = [
-  { view: "json", label: "JSON" },
-  { view: "xml", label: "XML" },
+const VIEWS: { value: DataView; label: string }[] = [
+  { value: "json", label: "JSON" },
+  { value: "xml", label: "XML" },
 ];
 
 /**
@@ -51,20 +52,12 @@ export default function FormDataPanel({
   return (
     <>
       {xml !== undefined && (
-        <ul className="usa-button-group usa-button-group--segmented margin-bottom-2">
-          {VIEWS.map(({ view: option, label }) => (
-            <li key={option} className="usa-button-group__item">
-              <button
-                type="button"
-                className={`usa-button${option === view ? "" : " usa-button--outline"}`}
-                aria-pressed={option === view}
-                onClick={() => $dataView.set(option)}
-              >
-                {label}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <FileSelector
+          label="Data format"
+          options={VIEWS}
+          value={view}
+          onChange={(value) => $dataView.set(value)}
+        />
       )}
       {view === "xml" && xml !== undefined ? (
         <HighlightedCode code={xml} lang="xml" />

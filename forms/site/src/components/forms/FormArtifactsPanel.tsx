@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { signalFormStateReady } from "../../lib/formHydration";
 import type { FormFile } from "../../lib/formSpec";
 import { $schemaFile, $sourceFile } from "../../stores/formArtifacts";
+import FileSelector from "./FileSelector";
 import HighlightedCode from "./preview/HighlightedCode";
 
 /** Generated files and local source share the Data tab's one-file-at-a-time controls. */
@@ -46,26 +47,18 @@ export default function FormArtifactsPanel({
       data-artifact-kind={kind}
       data-form-state-boundary
     >
-      <ul
-        className="usa-button-group usa-button-group--segmented margin-bottom-2"
-        aria-label={kind === "schemas" ? "Schema files" : "Source files"}
-      >
-        {files.map((option) => (
-          <li key={option.name} className="usa-button-group__item">
-            <button
-              type="button"
-              className={`usa-button${option === file ? "" : " usa-button--outline"}`}
-              aria-pressed={option === file}
-              onClick={() => {
-                selection.set(option.name);
-                setCopyResult(undefined);
-              }}
-            >
-              {option.label}
-            </button>
-          </li>
-        ))}
-      </ul>
+      <FileSelector
+        label={kind === "schemas" ? "Schema files" : "Source files"}
+        options={files.map((option) => ({
+          value: option.name,
+          label: option.label,
+        }))}
+        value={file.name}
+        onChange={(name) => {
+          selection.set(name);
+          setCopyResult(undefined);
+        }}
+      />
       {file.name !== name && (
         <p role="status">
           The requested file is unavailable. Showing {file.name}.
