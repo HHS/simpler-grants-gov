@@ -8,8 +8,8 @@ import { checkSlug } from "@/stores/formPage";
 import { useStore } from "@nanostores/react";
 
 import CategoryBadge from "./CategoryBadge";
-import CopyReviewLink from "./CopyReviewLink";
 import OptionsDiff from "./OptionsDiff";
+import ReviewLink from "./ReviewLink";
 import ValuePair from "./ValuePair";
 
 export default function DifferenceCard({
@@ -43,7 +43,11 @@ export default function DifferenceCard({
       )}
       {cell.reason && <p className="difference-card__reason">{cell.reason}</p>}
       {field?.field.id && (
-        <CopyReviewLink field={field.field.id} check={checkSlug(difference)} />
+        <ReviewLink
+          field={field.field.id}
+          sheet="differences"
+          check={checkSlug(difference)}
+        />
       )}
     </li>
   );

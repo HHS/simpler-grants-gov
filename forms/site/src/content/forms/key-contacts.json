@@ -63,7 +63,7 @@
               "children": [
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-role-project-role",
+                  "id": "key-contacts-project-role",
                   "label": "Project Role",
                   "dat_field": "7-01",
                   "required": true,
@@ -76,7 +76,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-role-title",
+                  "id": "key-contacts-title",
                   "label": "Title",
                   "dat_field": "7-08",
                   "required": false,
@@ -89,7 +89,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-role-organizational-affiliation",
+                  "id": "key-contacts-organizational-affiliation",
                   "label": "Organizational Affiliation",
                   "dat_field": "7-09",
                   "required": false,
@@ -112,7 +112,7 @@
               "children": [
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-name-prefix",
+                  "id": "key-contacts-prefix",
                   "label": "Prefix",
                   "dat_field": "7-03",
                   "required": false,
@@ -125,7 +125,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-name-first-name",
+                  "id": "key-contacts-first-name",
                   "label": "First Name",
                   "dat_field": "7-04",
                   "required": true,
@@ -138,7 +138,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-name-middle-name",
+                  "id": "key-contacts-middle-name",
                   "label": "Middle Name",
                   "dat_field": "7-05",
                   "required": false,
@@ -151,7 +151,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-name-last-name",
+                  "id": "key-contacts-last-name",
                   "label": "Last Name",
                   "dat_field": "7-06",
                   "required": true,
@@ -164,7 +164,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-name-suffix",
+                  "id": "key-contacts-suffix",
                   "label": "Suffix",
                   "dat_field": "7-07",
                   "required": false,
@@ -187,7 +187,7 @@
               "children": [
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-address-street-1",
+                  "id": "key-contacts-street1",
                   "label": "Street 1",
                   "dat_field": "7-10",
                   "required": true,
@@ -200,7 +200,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-address-street-2",
+                  "id": "key-contacts-street2",
                   "label": "Street 2",
                   "dat_field": "7-11",
                   "required": false,
@@ -213,7 +213,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-address-city",
+                  "id": "key-contacts-city",
                   "label": "City",
                   "dat_field": "7-12",
                   "required": true,
@@ -226,7 +226,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-address-county-parish",
+                  "id": "key-contacts-county",
                   "label": "County/Parish",
                   "dat_field": "7-13",
                   "required": false,
@@ -239,7 +239,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-address-state",
+                  "id": "key-contacts-state",
                   "label": "State",
                   "dat_field": "7-14",
                   "required": "Conditional (when Country = 'USA')",
@@ -252,7 +252,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-address-province",
+                  "id": "key-contacts-province",
                   "label": "Province",
                   "dat_field": "7-15",
                   "required": false,
@@ -265,7 +265,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-address-country",
+                  "id": "key-contacts-country",
                   "label": "Country",
                   "dat_field": "7-16",
                   "required": true,
@@ -278,7 +278,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-address-zip-postal-code",
+                  "id": "key-contacts-zip-code",
                   "label": "Zip / Postal Code",
                   "dat_field": "7-17",
                   "required": false,
@@ -299,7 +299,7 @@
               "children": [
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-contact-information-phone-number",
+                  "id": "key-contacts-phone",
                   "label": "Phone Number",
                   "dat_field": "7-18",
                   "required": true,
@@ -312,7 +312,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-contact-information-fax-number",
+                  "id": "key-contacts-fax",
                   "label": "Fax Number",
                   "dat_field": "7-19",
                   "required": false,
@@ -325,7 +325,7 @@
                 },
                 {
                   "kind": "field",
-                  "id": "key-contacts-key-contact-contact-information-email",
+                  "id": "key-contacts-email",
                   "label": "Email",
                   "dat_field": "7-20",
                   "required": true,

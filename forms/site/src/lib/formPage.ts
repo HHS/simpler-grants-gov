@@ -2,8 +2,6 @@ import { $selectedFieldId } from "@/stores/fieldComparison";
 import {
   $linkNotice,
   $pageTab,
-  currentPageState,
-  pageUrl,
   startFormPage,
   type PageTab,
 } from "@/stores/formPage";
@@ -76,40 +74,12 @@ export function mountFormPage(root: Document, host: Window): () => void {
         details.open = true;
     }
   });
-  const copyButtons = [
-    ...root.querySelectorAll<HTMLButtonElement>("[data-copy-field]"),
-  ];
-  const copyListeners = copyButtons.map((button) => {
-    const copy = async () => {
-      const state = {
-        ...currentPageState(),
-        tab: "fields" as const,
-        field: button.dataset.copyField!,
-        check: null,
-        sheet: "comparison" as const,
-      };
-      try {
-        await host.navigator.clipboard.writeText(
-          new URL(
-            pageUrl(new URL(host.location.href), state),
-            host.location.href,
-          ).href,
-        );
-        button.textContent = "Copied";
-      } catch {
-        button.textContent = "Copy unavailable; use Link";
-      }
-    };
-    button.addEventListener("click", copy);
-    return () => button.removeEventListener("click", copy);
-  });
   return () => {
     stop();
     stopTabs();
     stopNotice();
     stopStaticField();
     listeners.forEach((remove) => remove());
-    copyListeners.forEach((remove) => remove());
   };
 }
 

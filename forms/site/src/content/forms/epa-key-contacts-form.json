@@ -113,7 +113,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "authorized-representative-role-title",
+              "id": "authorized-representative-title",
               "label": "Title",
               "dat_field": "B1-08",
               "required": false,
@@ -136,7 +136,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "authorized-representative-address-street-1",
+              "id": "authorized-representative-address-street1",
               "label": "Street 1",
               "dat_field": "B1-10",
               "required": "No (per XSD; required when section is started per SGG implementation)",
@@ -149,7 +149,7 @@
             },
             {
               "kind": "field",
-              "id": "authorized-representative-address-street-2",
+              "id": "authorized-representative-address-street2",
               "label": "Street 2",
               "dat_field": "B1-11",
               "required": false,
@@ -188,7 +188,7 @@
             },
             {
               "kind": "field",
-              "id": "authorized-representative-address-zip-postal-code",
+              "id": "authorized-representative-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "B1-14",
               "required": false,
@@ -222,7 +222,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "authorized-representative-contact-information-phone-number",
+              "id": "authorized-representative-phone",
               "label": "Phone Number",
               "dat_field": "B1-16",
               "required": "No (per XSD; required when section is started per SGG implementation)",
@@ -235,7 +235,7 @@
             },
             {
               "kind": "field",
-              "id": "authorized-representative-contact-information-fax-number",
+              "id": "authorized-representative-fax",
               "label": "Fax Number",
               "dat_field": "B1-17",
               "required": false,
@@ -248,7 +248,7 @@
             },
             {
               "kind": "field",
-              "id": "authorized-representative-contact-information-email",
+              "id": "authorized-representative-email",
               "label": "Email",
               "dat_field": "B1-18",
               "required": false,
@@ -354,7 +354,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "payee-role-title",
+              "id": "payee-title",
               "label": "Title",
               "dat_field": "B2-08",
               "required": false,
@@ -377,7 +377,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "payee-address-street-1",
+              "id": "payee-address-street1",
               "label": "Street 1",
               "dat_field": "B2-10",
               "required": "No (per XSD; required when section is started per SGG implementation)",
@@ -390,7 +390,7 @@
             },
             {
               "kind": "field",
-              "id": "payee-address-street-2",
+              "id": "payee-address-street2",
               "label": "Street 2",
               "dat_field": "B2-11",
               "required": false,
@@ -429,7 +429,7 @@
             },
             {
               "kind": "field",
-              "id": "payee-address-zip-postal-code",
+              "id": "payee-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "B2-14",
               "required": false,
@@ -463,7 +463,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "payee-contact-information-phone-number",
+              "id": "payee-phone",
               "label": "Phone Number",
               "dat_field": "B2-16",
               "required": "No (per XSD; required when section is started per SGG implementation)",
@@ -476,7 +476,7 @@
             },
             {
               "kind": "field",
-              "id": "payee-contact-information-fax-number",
+              "id": "payee-fax",
               "label": "Fax Number",
               "dat_field": "B2-17",
               "required": false,
@@ -489,7 +489,7 @@
             },
             {
               "kind": "field",
-              "id": "payee-contact-information-email",
+              "id": "payee-email",
               "label": "Email",
               "dat_field": "B2-18",
               "required": false,
@@ -595,7 +595,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "administrative-contact-role-title",
+              "id": "administrative-contact-title",
               "label": "Title",
               "dat_field": "B3-08",
               "required": false,
@@ -618,7 +618,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "administrative-contact-address-street-1",
+              "id": "administrative-contact-address-street1",
               "label": "Street 1",
               "dat_field": "B3-10",
               "required": "No (per XSD; required when section is started per SGG implementation)",
@@ -631,7 +631,7 @@
             },
             {
               "kind": "field",
-              "id": "administrative-contact-address-street-2",
+              "id": "administrative-contact-address-street2",
               "label": "Street 2",
               "dat_field": "B3-11",
               "required": false,
@@ -670,7 +670,7 @@
             },
             {
               "kind": "field",
-              "id": "administrative-contact-address-zip-postal-code",
+              "id": "administrative-contact-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "B3-14",
               "required": false,
@@ -704,7 +704,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "administrative-contact-contact-information-phone-number",
+              "id": "administrative-contact-phone",
               "label": "Phone Number",
               "dat_field": "B3-16",
               "required": "No (per XSD; required when section is started per SGG implementation)",
@@ -717,7 +717,7 @@
             },
             {
               "kind": "field",
-              "id": "administrative-contact-contact-information-fax-number",
+              "id": "administrative-contact-fax",
               "label": "Fax Number",
               "dat_field": "B3-17",
               "required": false,
@@ -730,7 +730,7 @@
             },
             {
               "kind": "field",
-              "id": "administrative-contact-contact-information-email",
+              "id": "administrative-contact-email",
               "label": "Email",
               "dat_field": "B3-18",
               "required": false,
@@ -836,7 +836,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "project-manager-role-title",
+              "id": "project-manager-title",
               "label": "Title",
               "dat_field": "B4-08",
               "required": false,
@@ -859,7 +859,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "project-manager-address-street-1",
+              "id": "project-manager-address-street1",
               "label": "Street 1",
               "dat_field": "B4-10",
               "required": "No (per XSD; required when section is started per SGG implementation)",
@@ -872,7 +872,7 @@
             },
             {
               "kind": "field",
-              "id": "project-manager-address-street-2",
+              "id": "project-manager-address-street2",
               "label": "Street 2",
               "dat_field": "B4-11",
               "required": false,
@@ -911,7 +911,7 @@
             },
             {
               "kind": "field",
-              "id": "project-manager-address-zip-postal-code",
+              "id": "project-manager-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "B4-14",
               "required": false,
@@ -945,7 +945,7 @@
           "children": [
             {
               "kind": "field",
-              "id": "project-manager-contact-information-phone-number",
+              "id": "project-manager-phone",
               "label": "Phone Number",
               "dat_field": "B4-16",
               "required": "No (per XSD; required when section is started per SGG implementation)",
@@ -958,7 +958,7 @@
             },
             {
               "kind": "field",
-              "id": "project-manager-contact-information-fax-number",
+              "id": "project-manager-fax",
               "label": "Fax Number",
               "dat_field": "B4-17",
               "required": false,
@@ -971,7 +971,7 @@
             },
             {
               "kind": "field",
-              "id": "project-manager-contact-information-email",
+              "id": "project-manager-email",
               "label": "Email",
               "dat_field": "B4-18",
               "required": false,

@@ -65,7 +65,7 @@ export interface PageState {
   tab: PageTab;
   field: string | null;
   check: string | null;
-  sheet: "comparison" | "differences";
+  sheet: "comparison" | "differences" | null;
   categories: FilterKey[];
   attributes: Attribute[];
   differences: DiffType[];
@@ -94,7 +94,12 @@ export function parsePageState(params: URLSearchParams): PageState {
       : "fields",
     field: params.get("field") || null,
     check: params.get("check") || null,
-    sheet: requested === "findings" ? "differences" : "comparison",
+    sheet:
+      requested === "findings"
+        ? "differences"
+        : requested === "comparison" || params.has("check")
+          ? "comparison"
+          : null,
     categories: allowed(params, "category", FILTER_KEYS),
     attributes: allowed(
       params,
@@ -140,15 +145,18 @@ export function pageUrl(url: URL, state: PageState): string {
   ])
     next.searchParams.delete(key);
   const params = next.searchParams;
-  if (state.tab !== "fields" || state.sheet === "differences")
+  if (state.tab !== "fields" || state.sheet)
     params.set(
       "tab",
-      state.tab === "fields" && state.sheet === "differences"
-        ? "findings"
+      state.tab === "fields"
+        ? state.sheet === "differences"
+          ? "findings"
+          : "comparison"
         : state.tab,
     );
   if (state.field) params.set("field", state.field);
-  if (state.field && state.check) params.set("check", state.check);
+  if (state.field && state.sheet && state.check)
+    params.set("check", state.check);
   for (const value of state.categories) params.append("category", value);
   for (const value of state.attributes) params.append("attribute", value);
   for (const value of state.differences) params.append("difference", value);
@@ -195,7 +203,8 @@ export function startFormPage(
     } else if (
       params.has("tab") &&
       !PAGE_TABS.includes(params.get("tab") as PageTab) &&
-      params.get("tab") !== "findings"
+      params.get("tab") !== "findings" &&
+      params.get("tab") !== "comparison"
     ) {
       notices.push("That view no longer exists. Showing the field tree.");
     }
@@ -227,10 +236,12 @@ export function startFormPage(
     });
   };
   const unlisten = [
-    ...[$pageTab, $selectedFieldId, $selectedCell, $sheetTab].map((store) =>
+    ...[$pageTab, $selectedFieldId].map((store) =>
       store.listen(() => schedule(true)),
     ),
     ...[
+      $selectedCell,
+      $sheetTab,
       $categoryFilter,
       $attributeFilter,
       $diffTypeFilter,

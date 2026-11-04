@@ -1662,3 +1662,10 @@ details[open] > .group-header::before {
     }
   }
 }
+
+// One heading-style permalink per field or comparison, with a usable focus target.
+.review-link {
+  display: inline-block;
+  padding: units("05") units(1);
+  text-decoration: none;
+}

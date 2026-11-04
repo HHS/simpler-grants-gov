@@ -12,6 +12,7 @@ import { useEffect, useRef } from "react";
 
 import CellDetail from "./CellDetail";
 import DifferenceList from "./DifferenceList";
+import ReviewLink from "./ReviewLink";
 import SheetTabs from "./SheetTabs";
 import StatusMatrix from "./StatusMatrix";
 
@@ -30,7 +31,7 @@ export default function ComparisonSheet() {
   useEffect(() => {
     const element = dialog.current;
     if (!element) return;
-    if (field && pageTab === "fields" && !element.open) {
+    if (field && tab && pageTab === "fields" && !element.open) {
       if (field.field.id) revealField(document, field.field.id);
       element.showModal();
     }
@@ -41,7 +42,8 @@ export default function ComparisonSheet() {
       target?.scrollIntoView({ block: "nearest" });
       target?.focus();
     }
-    if ((!field || pageTab !== "fields") && element.open) element.close();
+    if ((!field || !tab || pageTab !== "fields") && element.open)
+      element.close();
   }, [field, selected, tab, pageTab]);
 
   return (
@@ -62,6 +64,13 @@ export default function ComparisonSheet() {
                 className="comparison-sheet__title"
               >
                 {field.field.label}
+                {field.field.id && tab && (
+                  <ReviewLink
+                    field={field.field.id}
+                    sheet={tab}
+                    check={selected ? checkSlug(selected) : undefined}
+                  />
+                )}
               </h2>
               <p className="comparison-sheet__summary">{summary}</p>
             </div>

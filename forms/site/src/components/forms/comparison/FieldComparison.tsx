@@ -1,12 +1,13 @@
 import { differences, type FormComparison } from "@/lib/comparison";
 import { signalFormStateReady } from "@/lib/formHydration";
+import { revealField } from "@/lib/formPage";
 import {
   $comparison,
   $selectedCell,
   $selectedFieldId,
   $sheetTab,
 } from "@/stores/fieldComparison";
-import { $linkNotice } from "@/stores/formPage";
+import { $linkNotice, $pageTab } from "@/stores/formPage";
 import { useStore } from "@nanostores/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -28,11 +29,14 @@ export default function FieldComparison({
   const selected = useStore($selectedFieldId);
   const cell = useStore($selectedCell);
   const sheet = useStore($sheetTab);
+  const pageTab = useStore($pageTab);
   const boundary = useRef<HTMLDivElement>(null);
   useEffect(() => signalFormStateReady(boundary.current), []);
   useEffect(() => {
     if (!selected) return;
     const field = comparison.fields.find((item) => item.field.id === selected);
+    if (field && !sheet && pageTab === "fields")
+      revealField(document, selected);
     if (!field)
       $linkNotice.set("That field no longer exists. Showing the field tree.");
     else if (
@@ -51,7 +55,7 @@ export default function FieldComparison({
       $linkNotice.set(
         "That finding no longer exists. Showing the field’s differences.",
       );
-  }, [comparison, selected, cell, sheet]);
+  }, [comparison, selected, cell, sheet, pageTab]);
   return (
     <div ref={boundary} data-form-state-boundary>
       <DeviationTiles />

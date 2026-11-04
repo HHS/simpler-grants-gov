@@ -25,7 +25,7 @@ export const $categoryFilter = atom<FilterKey[]>([]);
 /** Attributes the tree is narrowed to: only differences in them count. */
 export const $attributeFilter = atom<Attribute[]>([]);
 export const $selectedFieldId = atom<string | null>(null);
-export const $sheetTab = atom<SheetTab>("comparison");
+export const $sheetTab = atom<SheetTab | null>(null);
 /** The cell chosen in the matrix; null shows the field's first difference. */
 export const $selectedCell = atom<CellRef | null>(null);
 export const $diffTypeFilter = atom<DiffType[]>([]);
@@ -161,9 +161,8 @@ export function openField(id: string) {
 }
 
 export const closeSheet = () => {
-  $selectedFieldId.set(null);
   $selectedCell.set(null);
-  $sheetTab.set("comparison");
+  $sheetTab.set(null);
 };
 
 export const selectCell = (ref: CellRef) => $selectedCell.set(ref);

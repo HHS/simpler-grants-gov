@@ -5,9 +5,9 @@ import {
 } from "@/lib/comparison";
 import { openField } from "@/stores/fieldComparison";
 
-import CopyReviewLink from "./CopyReviewLink";
 import DeviationBadges from "./DeviationBadges";
 import FieldDetails from "./FieldDetails";
+import ReviewLink from "./ReviewLink";
 
 /** A plan field as the field tree shows it, with a button that opens its comparison. */
 export default function FieldRow({
@@ -21,10 +21,15 @@ export default function FieldRow({
     Boolean,
   );
   return (
-    <div className="field-row field-row--compare" data-field-id={field.id}>
+    <div
+      className="field-row field-row--compare"
+      data-field-id={field.id}
+      tabIndex={-1}
+    >
       <div className="field-row__plan">
         <div className="field-row__primary">
           <span className="field-row__label">{field.label}</span>
+          {field.id && <ReviewLink field={field.id} />}
           {required ? (
             <span className="field-row__required">{required}</span>
           ) : (
@@ -50,7 +55,6 @@ export default function FieldRow({
           Compare ›
         </span>
       </button>
-      {field.id && <CopyReviewLink field={field.id} />}
     </div>
   );
 }

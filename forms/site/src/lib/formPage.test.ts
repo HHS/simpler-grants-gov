@@ -105,6 +105,50 @@ describe("form page links", () => {
     for (const [slug, cell] of CHECKS) expect(checkSlug(cell)).toBe(slug);
   });
 
+  it("keeps a field-tree permalink distinct from a comparison permalink", () => {
+    const field = parsePageState(
+      new URLSearchParams("field=key-contacts-country"),
+    );
+    expect(field.sheet).toBeNull();
+    expect(
+      pageUrl(new URL("https://example.test/forms/key-contacts/"), field),
+    ).toBe("/forms/key-contacts/?field=key-contacts-country");
+    const comparison = parsePageState(
+      new URLSearchParams("tab=comparison&field=key-contacts-country"),
+    );
+    expect(comparison.sheet).toBe("comparison");
+    expect(
+      pageUrl(new URL("https://example.test/forms/key-contacts/"), comparison),
+    ).toContain("tab=comparison");
+  });
+
+  it("Back skips comparisons within one field but returns to the previous field", async () => {
+    const page = new Page();
+    stop = startFormPage(page.host(), ["fields", "data"]);
+    openField("one");
+    await flush();
+    selectCell({ attribute: "help", source: "dat" });
+    await flush();
+    selectCell({ attribute: "label", source: "xsd" });
+    await flush();
+    openField("two");
+    await flush();
+    selectCell({ attribute: "format", source: "form" });
+    await flush();
+    expect(page.writes).toEqual([
+      "push",
+      "replace",
+      "replace",
+      "push",
+      "replace",
+    ]);
+    page.go(-1);
+    await flush();
+    expect($selectedFieldId.get()).toBe("one");
+    expect($selectedCell.get()).toEqual({ attribute: "label", source: "xsd" });
+    expect(page.entries).toHaveLength(3);
+  });
+
   it("opens a link into the actual existing comparison, filter, Data and artifact stores", () => {
     const page = new Page(
       "?tab=findings&field=applicant-name&check=plan-vs-dat-help-text&category=intentional&attribute=help&data=xml&schema=ui.json&source=form.tsp",
@@ -136,7 +180,7 @@ describe("form page links", () => {
     expect(page.location.searchParams.get("review")).toBe("keep");
     selectCell({ attribute: "help", source: "dat" });
     await flush();
-    expect(page.writes).toEqual(["push", "replace", "push"]);
+    expect(page.writes).toEqual(["push", "replace", "replace"]);
     expect(page.location.searchParams.get("check")).toBe(
       "plan-vs-dat-help-text",
     );
