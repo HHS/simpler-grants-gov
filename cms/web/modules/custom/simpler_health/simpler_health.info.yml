@@ -1,0 +1,5 @@
+name: 'Simpler health check'
+type: module
+description: 'Exposes /health for container and load balancer health checks.'
+package: 'Simpler Grants'
+core_version_requirement: ^11
