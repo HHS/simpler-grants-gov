@@ -294,7 +294,7 @@ main#main-content {
 
 .kanban-board {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: units(2);
   align-items: stretch;
 }
@@ -334,9 +334,8 @@ main#main-content {
   max-height: 560px;
 
   @media (max-width: 880px) {
-    min-width: 260px;
+    flex: 0 0 260px;
     scroll-snap-align: start;
-    flex-shrink: 0;
   }
 }
 
@@ -366,6 +365,10 @@ main#main-content {
 
 .kanban-column__indicator--in-progress {
   background: color("secondary");
+}
+
+.kanban-column__indicator--in-review {
+  background: color("accent-warm");
 }
 
 .kanban-column__indicator--migrated {
@@ -522,6 +525,11 @@ main#main-content {
 .status-badge--backlog {
   background: color("base-lighter");
   color: color("base-darker");
+}
+
+.status-badge--in-review {
+  background: color("accent-warm-lighter");
+  color: color("accent-warm-darker");
 }
 
 .status-badge--migrated {

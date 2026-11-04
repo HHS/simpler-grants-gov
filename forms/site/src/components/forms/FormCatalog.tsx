@@ -22,8 +22,8 @@ const STATUS_LABELS: Record<string, string> = {
   backlog: "Backlog",
   prioritized: "Prioritized",
   in_progress: "In Progress",
+  in_review: "In review",
   migrated: "Migrated",
-  ready: "Ready",
 };
 
 /** Sort statuses in workflow order, matching the dashboard's Kanban columns. */
