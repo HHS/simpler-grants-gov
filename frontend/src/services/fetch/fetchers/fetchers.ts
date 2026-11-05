@@ -4,11 +4,8 @@ import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
   fetchCompetitionEndpoint,
-  fetchCompetitionFormsEndpoint,
   fetchFormEndpoint,
-  fetchFormsEndpoint,
   fetchOpportunityEndpoint,
-  fetchWorkflowEndpoint,
   getApplicationForPrintEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
@@ -16,8 +13,6 @@ import {
   toDynamicApplicationsEndpoint,
   toDynamicApplicationsEndpointV1,
   toDynamicFilesEndpoint,
-  toDynamicGrantorAgenciesEndpoint,
-  toDynamicGrantorOpportunityEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
@@ -130,14 +125,8 @@ export const fetchOpportunity = cache(
 
 export const fetchForm = cache(requesterForEndpoint(fetchFormEndpoint));
 
-export const fetchForms = cache(requesterForEndpoint(fetchFormsEndpoint));
-
 export const fetchCompetition = cache(
   requesterForEndpoint(fetchCompetitionEndpoint),
-);
-
-export const fetchCompetitionForms = cache(
-  requesterForEndpoint(fetchCompetitionFormsEndpoint),
 );
 
 export const fetchApplicationWithMethod = (
@@ -166,19 +155,9 @@ export const fetchOrganizationWithMethod = (
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
 
-export const fetchGrantorOpportunityWithMethod = (
-  type: "POST" | "DELETE" | "GET" | "PUT",
-) => requesterForEndpoint(toDynamicGrantorOpportunityEndpoint(type));
-
-export const fetchGrantorAgenciesWithMethod = (
-  type: "POST" | "GET" | "PUT" | "DELETE",
-) => requesterForEndpoint(toDynamicGrantorAgenciesEndpoint(type));
-
 export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
   requesterForEndpoint(toDynamicFilesEndpoint(type));
 
 export const getApplicationForPrint = requesterForEndpoint(
   getApplicationForPrintEndpoint,
 );
-
-export const fetchWorkflow = cache(requesterForEndpoint(fetchWorkflowEndpoint));

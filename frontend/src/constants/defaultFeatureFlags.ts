@@ -5,5 +5,4 @@ export const defaultFeatureFlags: FeatureFlags = {
   featureFlagAdminOff: false,
   maintenanceBannerEnabled: false,
   maintenanceMode: false,
-  opportunitiesListOff: false,
 };
