@@ -24,6 +24,9 @@ enum Transformation {
   /** The string's first `max_length` characters: `#{ max_length: 60 }`. */
   truncateString: "truncate_string",
 
+  /** Replace specified wire values, optionally passing through other values. */
+  mapValues: "map_values",
+
   /**
    * A list of strings joined into one, sorted with `#{ sort: true }` so a code combined from
    * checkbox selections doesn't depend on their order.

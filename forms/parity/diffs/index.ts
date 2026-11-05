@@ -8,6 +8,7 @@ import { DIFF as performanceSites } from "./project-performance-site-location-s.
 import { DIFF as rrKeyPersonExpanded } from "./research-and-related-senior-key-person-profile-expanded.ts";
 import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profile.ts";
 import { DIFF as mandatory } from "./sf424-mandatory-form.ts";
+import { DIFF as researchCover } from "./sf424-r-r.ts";
 import { DIFF as regular } from "./sf424.ts";
 
 /** Every form the suite checks. A plan with a `spec_id` must be listed here. */
@@ -22,4 +23,5 @@ export const DIFFS: FormDiff[] = [
   mandatory,
   regular,
   short,
+  researchCover,
 ];
