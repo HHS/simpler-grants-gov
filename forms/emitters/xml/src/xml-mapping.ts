@@ -1,12 +1,20 @@
-import type {
-  EnumMember,
-  Model,
-  ModelProperty,
-  Program,
-  Type,
+import {
+  resolveEncodedName,
+  type EnumMember,
+  type Model,
+  type ModelProperty,
+  type Program,
+  type Type,
 } from "@typespec/compiler";
-import { resolveEncodedName } from "@typespec/compiler";
 import { getNs, isAttribute } from "@typespec/xml";
+
+import { reportDiagnostic, stateKeys } from "./lib.js";
+import {
+  XML_MAPPING_FORMAT,
+  type Elements,
+  type Value,
+  type XmlMapping,
+} from "./runtime/format.js";
 import {
   jsonPropertyName,
   mappedFromRoot,
@@ -14,15 +22,8 @@ import {
   propMappedFrom,
   type PropertyCasing,
 } from "./simpler-forms.js";
-import { reportDiagnostic, stateKeys } from "./lib.js";
 import { transformOf, transformParamsOf } from "./transforms.js";
 import { declaredNamespaces } from "./xml-transform.js";
-import {
-  XML_MAPPING_FORMAT,
-  type Elements,
-  type Value,
-  type XmlMapping,
-} from "./runtime/format.js";
 
 /**
  * `form`'s XML mapping in `mapping`, or undefined if no XSD TypeSpec model names `form` with

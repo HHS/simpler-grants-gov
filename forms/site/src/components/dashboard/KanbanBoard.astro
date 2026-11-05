@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+
 import KanbanColumn from "./KanbanColumn.astro";
 
 const forms = await getCollection("forms");
@@ -8,6 +9,7 @@ const columns = [
   { status: "backlog", label: "Backlog" },
   { status: "prioritized", label: "Prioritized" },
   { status: "in_progress", label: "In Progress" },
+  { status: "in_review", label: "In review" },
   { status: "migrated", label: "Migrated" },
 ] as const;
 

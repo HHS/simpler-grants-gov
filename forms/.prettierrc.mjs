@@ -7,6 +7,7 @@ export default {
     "^(src/)?components/(.*)$",
     "^[./]",
   ],
-  plugins: ["@ianvs/prettier-plugin-sort-imports"],
+  plugins: ["prettier-plugin-astro", "@ianvs/prettier-plugin-sort-imports"],
+  overrides: [{ files: "*.astro", options: { parser: "astro" } }],
   importOrderTypeScriptVersion: "5.0.0",
 };

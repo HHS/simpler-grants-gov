@@ -1,4 +1,5 @@
 import type { DecoratorContext, Model, Scalar } from "@typespec/compiler";
+
 import { stateKeys } from "./lib.js";
 
 /** How sync installs a form, from `@Sgg.sync`'s options. */

@@ -61,8 +61,6 @@ module "infra_training_config" {
     RESET_EMAILS_WITHOUT_SENDING               = "false"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
-    FRONTEND_URL = "https://training.simpler.grants.gov"
-
     # Virus scanning endpoints
     ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
@@ -71,7 +69,9 @@ module "infra_training_config" {
   # Defaults to `false`, matching training. Uncomment the next line to enable.
   # enable_command_execution = true
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
+
+  enable_processor_service = true
 
   scanner_provisioned_concurrency = 1
 }

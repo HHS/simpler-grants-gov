@@ -124,7 +124,7 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
     actions = [
       "iam:PassRole",
     ]
-    # Allow passing app_service, migrator_task, opensearch_write, and workflow_service roles
+    # Allow passing app_service, migrator_task, opensearch_write, and submission_consumer roles
     resources = concat(
       [
         aws_iam_role.task_executor.arn,
@@ -132,7 +132,7 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
       ],
       length(aws_iam_role.migrator_task) > 0 ? [aws_iam_role.migrator_task[0].arn] : [],
       length(aws_iam_role.opensearch_write) > 0 ? [aws_iam_role.opensearch_write[0].arn] : [],
-      length(aws_iam_role.workflow_service) > 0 ? [aws_iam_role.workflow_service[0].arn] : []
+      length(aws_iam_role.submission_consumer) > 0 ? [aws_iam_role.submission_consumer[0].arn] : []
     )
   }
 }
