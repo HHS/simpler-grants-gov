@@ -52,3 +52,27 @@ extern dec sync(target: Model, options?: valueof SyncOptions);
  * form's rule schema.
  */
 extern dec attachment(target: Scalar);
+
+/** Existing API providers available before submission. No provider runs in the compiler. */
+enum PrePopulationRule {
+  agencyName: "agency_name",
+  assistanceListingNumber: "assistance_listing_number",
+  assistanceListingTitle: "assistance_listing_program_title",
+  opportunityNumber: "opportunity_number",
+  opportunityTitle: "opportunity_title",
+  uei: "uei",
+  competitionId: "public_competition_id",
+  competitionTitle: "competition_title",
+}
+
+/** Existing API providers available when the applicant signs and submits. */
+enum PostPopulationRule {
+  currentDate: "current_date",
+  signature: "signature",
+}
+
+/** Populate this answer using an existing API provider before submission. */
+extern dec prePopulate(target: ModelProperty, rule: PrePopulationRule);
+
+/** Populate this answer using an existing API provider upon submission. */
+extern dec postPopulate(target: ModelProperty, rule: PostPopulationRule);
