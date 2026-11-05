@@ -57,3 +57,11 @@ The sync emitter reads these files and compiles the artifacts that the
 npm run build -w emitters/sgg          # also run by npm run compile
 npm run check:types -w emitters/sgg
 ```
+
+## Population
+
+`@Sgg.prePopulate(Sgg.PrePopulationRule.agencyName)` and
+`@Sgg.postPopulate(Sgg.PostPopulationRule.currentDate)` bind an answer to an existing
+API provider. They emit `gg_pre_population` and `gg_post_population` in the rule
+schema; no provider executes in the compiler or library preview. Read-only UI and
+draft requiredness remain explicit in the definition. A field cannot have both phases.

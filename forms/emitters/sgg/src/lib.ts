@@ -23,6 +23,18 @@ export const $lib = createTypeSpecLibrary({
   // into an npm scope later leaves every `#suppress "sgg/<rule>"` working.
   alias: "sgg",
   diagnostics: {
+    "invalid-population-target": {
+      severity: "error",
+      messages: {
+        default: paramMessage`The ${"rule"} provider cannot populate ${"name"}'s type. Use a text answer, or a date answer for current_date.`,
+      },
+    },
+    "conflicting-population": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"name"} has both pre- and post-population. Choose the answer's actual lifecycle.`,
+      },
+    },
     "sgg-not-a-form": {
       severity: "error",
       messages: {
@@ -51,6 +63,8 @@ export const $lib = createTypeSpecLibrary({
   state: {
     sync: {},
     attachment: {},
+    prePopulation: {},
+    postPopulation: {},
   },
   emitter: {
     options: {

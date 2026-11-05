@@ -1,4 +1,10 @@
-import type { DecoratorContext, Model, Scalar } from "@typespec/compiler";
+import type {
+  DecoratorContext,
+  EnumMember,
+  Model,
+  ModelProperty,
+  Scalar,
+} from "@typespec/compiler";
 
 import { stateKeys } from "./lib.js";
 
@@ -32,3 +38,16 @@ export const $sync = (
 /** `@Sgg.attachment`: this question's answer is the id of one of the application's uploads. */
 export const $attachment = (ctx: DecoratorContext, target: Scalar) =>
   ctx.program.stateSet(stateKeys.attachment).add(target);
+
+/** Author provider bindings; execution and application context remain in the API. */
+export const $prePopulate = (
+  ctx: DecoratorContext,
+  target: ModelProperty,
+  rule: EnumMember,
+) => ctx.program.stateMap(stateKeys.prePopulation).set(target, rule.value);
+
+export const $postPopulate = (
+  ctx: DecoratorContext,
+  target: ModelProperty,
+  rule: EnumMember,
+) => ctx.program.stateMap(stateKeys.postPopulation).set(target, rule.value);
