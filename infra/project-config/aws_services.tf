@@ -59,7 +59,9 @@ locals {
     // Amazon CloudWatch Logs – Collects, monitors, and analyzes log data from AWS services.
     "logs",
 
-    // Amazon Pinpoint – Provides customer engagement and messaging capabilities. Used for notifications.
+    // Amazon Pinpoint – No longer used; notifications send through SES directly.
+    // Kept so the GitHub Actions role can destroy the old Pinpoint apps. Remove
+    // once every environment's service layer has been applied without them.
     "mobiletargeting",
 
     // Amazon EventBridge Pipes – Connects event producers to consumers with filtering and enrichment.
@@ -89,7 +91,7 @@ locals {
     // AWS Cloud Map – Provides service discovery for microservices and applications.
     "servicediscovery",
 
-    // Amazon Simple Email Service (SES) – An email sending and receiving service. Used in conjunction with Amazon Pinpoint for notifications.
+    // Amazon Simple Email Service (SES) – An email sending and receiving service. Used for notifications.
     "ses",
 
     // Amazon Simple Notification Service (SNS) – A pub/sub messaging service.

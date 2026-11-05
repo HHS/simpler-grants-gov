@@ -131,13 +131,8 @@ data "aws_iam_policy_document" "runtime_logs" {
 }
 
 data "aws_iam_policy_document" "email_access" {
-  count = length(var.pinpoint_app_id) > 0 ? 1 : 0
+  count = var.enable_email_access ? 1 : 0
 
-  statement {
-    sid       = "SendViaPinpoint"
-    actions   = ["mobiletargeting:SendMessages"]
-    resources = ["arn:aws:mobiletargeting:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:apps/${var.pinpoint_app_id}/messages"]
-  }
   statement {
     sid       = "SendSESEmail"
     actions   = ["ses:SendEmail"]
@@ -199,7 +194,7 @@ resource "aws_iam_policy" "api_gateway_access" {
 }
 
 resource "aws_iam_policy" "email_access" {
-  count  = length(var.pinpoint_app_id) > 0 ? 1 : 0
+  count  = var.enable_email_access ? 1 : 0
   name   = "${var.service_name}-email-access-role-policy"
   policy = data.aws_iam_policy_document.email_access[0].json
 }
@@ -217,14 +212,14 @@ resource "aws_iam_role_policy_attachment" "runtime_logs" {
 }
 
 resource "aws_iam_role_policy_attachment" "email_access" {
-  count = length(var.pinpoint_app_id) > 0 ? 1 : 0
+  count = var.enable_email_access ? 1 : 0
 
   role       = aws_iam_role.app_service.name
   policy_arn = aws_iam_policy.email_access[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "migrator_email_access" {
-  count = length(var.pinpoint_app_id) > 0 && var.db_vars != null ? 1 : 0
+  count = var.enable_email_access && var.db_vars != null ? 1 : 0
 
   role       = aws_iam_role.migrator_task[0].name
   policy_arn = aws_iam_policy.email_access[0].arn

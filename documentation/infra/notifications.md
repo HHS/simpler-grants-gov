@@ -2,9 +2,9 @@
 
 The application may need to send email notifications to users. This document describes how to configure notifications. The notification setup process will:
 
-1. Create an AWS Pinpoint application for managing notifications
-2. Configure Amazon SES (Simple Email Service) for sending emails
-3. Set up the necessary environment variables for the application service
+1. Configure an Amazon SES (Simple Email Service) email identity for the domain
+2. Grant the application service permission to send email through SES
+3. Set the `AWS_SES_FROM_EMAIL` environment variable on the application service
 
 ## Requirements
 
@@ -32,28 +32,19 @@ make infra-update-app-service APP_NAME=<APP_NAME> ENVIRONMENT=<ENVIRONMENT>
 
 ## 4. Send a test email
 
-To send a test notification using the AWS CLI, first get the application id for the Pinpoint application/project for the environment you want to test.
+To send a test email using the AWS CLI, run the following command, replacing `<SENDER_EMAIL>` with the environment's sender address (the service's `AWS_SES_FROM_EMAIL`, e.g. `notifications@<domain_name>`) and `<RECIPIENT_EMAIL>` with the address you want to send to:
 
 ```bash
-bin/terraform-init "infra/<APP_NAME>/service" "<ENVIRONMENT>"
-APPLICATION_ID="$(terraform -chdir=infra/<APP_NAME>/service output -raw pinpoint_app_id)"
-```
-
-Then run the following command, replacing `<RECIPIENT_EMAIL>` with the email address you want to send to:
-
-```bash
-aws pinpoint send-messages --application-id "$APPLICATION_ID" --message-request '{
-  "Addresses": {
-    "<RECIPIENT_EMAIL>": { "ChannelType": "EMAIL" }
-  },
-  "MessageConfiguration": {
-    "EmailMessage": {
-      "SimpleEmail": {
-        "Subject": { "Data": "Test notification", "Charset": "UTF-8" },
-        "TextPart": { "Data": "This is a message from the future", "Charset": "UTF-8" },
-        "HtmlPart": { "Data": "This is a message from the future", "Charset": "UTF-8" }
+aws sesv2 send-email \
+  --from-email-address "<SENDER_EMAIL>" \
+  --destination '{"ToAddresses": ["<RECIPIENT_EMAIL>"]}' \
+  --content '{
+    "Simple": {
+      "Subject": { "Data": "Test notification", "Charset": "UTF-8" },
+      "Body": {
+        "Text": { "Data": "This is a message from the future", "Charset": "UTF-8" },
+        "Html": { "Data": "This is a message from the future", "Charset": "UTF-8" }
       }
-    } 
-  }
-}'
+    }
+  }'
 ```
