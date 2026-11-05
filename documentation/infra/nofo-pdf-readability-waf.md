@@ -233,7 +233,10 @@ Schedule the dev window and identify the restoration operator before merging
 the temporary Block configuration, since merge can trigger a dev deployment.
 Use two independent clients behind one confirmed public egress IP. Keep the IP
 in restricted evidence. The test uses empty POSTs with uploads disabled. Before
-sending requests, confirm the dev rate rule is Block at 10 requests per 300
+sending test traffic, verify in infra-dev Admin → Constance that the effective
+`HHS_NOFO_PDF_METRICS_PILOT_ENABLED` setting is false. Stop if it is enabled or
+the value cannot be verified. Use the page and response baselines as separate
+checks. Confirm the dev rate rule is Block at 10 requests per 300
 seconds, the emergency rule is Count, and GET on the checker, home page and
 `/health` has its expected baseline. Confirm access to rule-specific metrics
 and a reviewer and operator for restoring Count.
@@ -250,6 +253,8 @@ the home page and health endpoint still behave normally. A corroborated 429
 while each client stays at or below 10 requests demonstrates the shared budget.
 No block within the ceiling leaves the result inconclusive.
 
+Once Block mode is deployed, start restoration on every exit path, including a
+failed preflight, successful test, inconclusive result, abort or interruption.
 Restore the infra-dev rate rule to Count through a reviewed change and dev
 deployment. Verify both rules are back in Count and the checker and ordinary
 routes return their baseline responses. Record request counts, timing and
