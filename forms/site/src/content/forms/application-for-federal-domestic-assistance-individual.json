@@ -55,7 +55,8 @@
           "constraints": "minLength 1, maxLength 60",
           "json_path": "opportunity.agency_name",
           "xml_path": "SF424_Individual_2_0:FederalAgency",
-          "pre_populated": "From the opportunity or competition; read-only."
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "federal-agency"
         },
         {
           "kind": "field",
@@ -68,7 +69,8 @@
           "constraints": "minLength 1, maxLength 15",
           "json_path": "opportunity.assistance_listing.number",
           "xml_path": "SF424_Individual_2_0:CFDANumber",
-          "pre_populated": "From the opportunity or competition; read-only."
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "assistance-listing-number"
         },
         {
           "kind": "field",
@@ -81,7 +83,8 @@
           "constraints": "minLength 1, maxLength 120",
           "json_path": "opportunity.assistance_listing.title",
           "xml_path": "SF424_Individual_2_0:CFDATitle",
-          "pre_populated": "From the opportunity or competition; read-only."
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "assistance-listing-title"
         },
         {
           "kind": "field",
@@ -94,7 +97,8 @@
           "constraints": "minLength 1, maxLength 40",
           "json_path": "opportunity.number",
           "xml_path": "SF424_Individual_2_0:OpportunityID",
-          "pre_populated": "From the opportunity or competition; read-only."
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "funding-opportunity-number"
         },
         {
           "kind": "field",
@@ -107,7 +111,8 @@
           "constraints": "minLength 1, maxLength 255",
           "json_path": "opportunity.title",
           "xml_path": "SF424_Individual_2_0:OpportunityTitle",
-          "pre_populated": "From the opportunity or competition; read-only."
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "funding-opportunity-title"
         }
       ]
     },
@@ -126,7 +131,8 @@
           "constraints": "format date",
           "json_path": "date_received",
           "xml_path": "SF424_Individual_2_0:Date_Received",
-          "post_populated": "Completed by Grants.gov upon submission."
+          "post_populated": "Completed by Grants.gov upon submission.",
+          "id": "date-received"
         }
       ]
     },
@@ -148,7 +154,8 @@
               "help_text": "Enter the prefix.",
               "constraints": "minLength 1, maxLength 10",
               "json_path": "applicant.name.prefix",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:PrefixName"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:PrefixName",
+              "id": "prefix"
             },
             {
               "kind": "field",
@@ -160,7 +167,8 @@
               "help_text": "Enter the first name.",
               "constraints": "minLength 1, maxLength 35",
               "json_path": "applicant.name.first_name",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:FirstName"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:FirstName",
+              "id": "first-name"
             },
             {
               "kind": "field",
@@ -172,7 +180,8 @@
               "help_text": "Enter the middle name.",
               "constraints": "minLength 1, maxLength 25",
               "json_path": "applicant.name.middle_name",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:MiddleName"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:MiddleName",
+              "id": "middle-name"
             },
             {
               "kind": "field",
@@ -184,7 +193,8 @@
               "help_text": "Enter the last name.",
               "constraints": "minLength 1, maxLength 60",
               "json_path": "applicant.name.last_name",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:LastName"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:LastName",
+              "id": "last-name"
             },
             {
               "kind": "field",
@@ -196,7 +206,8 @@
               "help_text": "Enter the suffix.",
               "constraints": "minLength 1, maxLength 10",
               "json_path": "applicant.name.suffix",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:SuffixName"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:SuffixName",
+              "id": "suffix"
             }
           ]
         },
@@ -214,7 +225,8 @@
               "help_text": "Enter the daytime telephone number.",
               "constraints": "minLength 1, maxLength 25",
               "json_path": "applicant.phone",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativePhoneNumber"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativePhoneNumber",
+              "id": "phone"
             },
             {
               "kind": "field",
@@ -226,7 +238,8 @@
               "help_text": "Enter the evening telephone number.",
               "constraints": "minLength 1, maxLength 25",
               "json_path": "applicant.evening_phone",
-              "xml_path": "SF424_Individual_2_0:EveningPhone"
+              "xml_path": "SF424_Individual_2_0:EveningPhone",
+              "id": "evening-phone"
             },
             {
               "kind": "field",
@@ -238,7 +251,8 @@
               "help_text": "Enter the fax number.",
               "constraints": "minLength 1, maxLength 25",
               "json_path": "applicant.fax",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeFax"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeFax",
+              "id": "fax"
             },
             {
               "kind": "field",
@@ -250,7 +264,8 @@
               "help_text": "Enter a valid email address.",
               "constraints": "maxLength 60, format email",
               "json_path": "applicant.email",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeEmail"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeEmail",
+              "id": "email"
             }
           ]
         },
@@ -268,7 +283,8 @@
               "help_text": "Enter the first line of the street address.",
               "constraints": "minLength 1, maxLength 55",
               "json_path": "applicant.address.street1",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Street1"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Street1",
+              "id": "street1"
             },
             {
               "kind": "field",
@@ -280,7 +296,8 @@
               "help_text": "Enter the second line of the street address.",
               "constraints": "minLength 1, maxLength 55",
               "json_path": "applicant.address.street2",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Street2"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Street2",
+              "id": "street2"
             },
             {
               "kind": "field",
@@ -292,7 +309,8 @@
               "help_text": "Enter the city.",
               "constraints": "minLength 1, maxLength 35",
               "json_path": "applicant.address.city",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:City"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:City",
+              "id": "city"
             },
             {
               "kind": "field",
@@ -304,7 +322,8 @@
               "help_text": "Enter the county or parish.",
               "constraints": "minLength 1, maxLength 30",
               "json_path": "applicant.address.county",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:County"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:County",
+              "id": "county"
             },
             {
               "kind": "field",
@@ -316,7 +335,8 @@
               "help_text": "Select the state. This field is required if the country is the United States.",
               "constraints": "StateCodeDataTypeV3 enumeration",
               "json_path": "applicant.address.state",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:State"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:State",
+              "id": "state"
             },
             {
               "kind": "field",
@@ -328,7 +348,8 @@
               "help_text": "Enter the province.",
               "constraints": "minLength 1, maxLength 30",
               "json_path": "applicant.address.province",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Province"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Province",
+              "id": "province"
             },
             {
               "kind": "field",
@@ -340,7 +361,8 @@
               "help_text": "Select the country.",
               "constraints": "CountryCodeDataTypeV3 enumeration",
               "json_path": "applicant.address.country",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Country"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Country",
+              "id": "country"
             },
             {
               "kind": "field",
@@ -352,7 +374,8 @@
               "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
               "constraints": "minLength 1, maxLength 30",
               "json_path": "applicant.address.zip_code",
-              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:ZipPostalCode"
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:ZipPostalCode",
+              "id": "zip-code"
             }
           ]
         },
@@ -370,7 +393,8 @@
               "help_text": "",
               "constraints": "YesNoDataType enumeration",
               "json_path": "applicant.citizenship.is_us_citizen",
-              "xml_path": "SF424_Individual_2_0:citizenship"
+              "xml_path": "SF424_Individual_2_0:citizenship",
+              "id": "is-us-citizen"
             },
             {
               "kind": "field",
@@ -382,7 +406,8 @@
               "help_text": "Enter the Alien Registration Number.",
               "constraints": "minLength 1, maxLength 14",
               "json_path": "applicant.citizenship.alien_registration_number",
-              "xml_path": "SF424_Individual_2_0:AlienRegistrationNumber"
+              "xml_path": "SF424_Individual_2_0:AlienRegistrationNumber",
+              "id": "alien-registration-number"
             },
             {
               "kind": "field",
@@ -394,7 +419,8 @@
               "help_text": "Select the country. This field is required if the applicant is not a U.S. citizen.",
               "constraints": "CountryCodeDataTypeV3 enumeration",
               "json_path": "applicant.citizenship.country_of_citizenship",
-              "xml_path": "SF424_Individual_2_0:CountryofOrigin"
+              "xml_path": "SF424_Individual_2_0:CountryofOrigin",
+              "id": "country-of-citizenship"
             },
             {
               "kind": "field",
@@ -406,7 +432,8 @@
               "help_text": "Enter the start date of the most recent residency in the U.S. This field is required if the applicant is not a U.S. citizen.",
               "constraints": "format date",
               "json_path": "applicant.citizenship.residency_start_date",
-              "xml_path": "SF424_Individual_2_0:VisitDate"
+              "xml_path": "SF424_Individual_2_0:VisitDate",
+              "id": "residency-start-date"
             }
           ]
         },
@@ -420,7 +447,8 @@
           "help_text": "Enter the Congressional District as a two-character state abbreviation, a hyphen and a three-digit district number (for example, CA-005). If outside the US, enter 00-000.",
           "constraints": "minLength 1, maxLength 6",
           "json_path": "applicant.congressional_district",
-          "xml_path": "SF424_Individual_2_0:CongressionalDistrictApplicant"
+          "xml_path": "SF424_Individual_2_0:CongressionalDistrictApplicant",
+          "id": "congressional-district"
         }
       ]
     },
@@ -438,7 +466,8 @@
           "help_text": "Enter a brief, descriptive title of the project.",
           "constraints": "minLength 1, maxLength 200",
           "json_path": "project.title",
-          "xml_path": "SF424_Individual_2_0:ProjectTitle"
+          "xml_path": "SF424_Individual_2_0:ProjectTitle",
+          "id": "title"
         },
         {
           "kind": "field",
@@ -450,7 +479,8 @@
           "help_text": "Enter a brief description of the project.",
           "constraints": "minLength 1, maxLength 1000",
           "json_path": "project.description",
-          "xml_path": "SF424_Individual_2_0:ProjectDescription"
+          "xml_path": "SF424_Individual_2_0:ProjectDescription",
+          "id": "description"
         },
         {
           "kind": "field",
@@ -462,7 +492,8 @@
           "help_text": "Enter the start date for the proposed project.",
           "constraints": "format date",
           "json_path": "project.start_date",
-          "xml_path": "SF424_Individual_2_0:FundingPeriodStartDate"
+          "xml_path": "SF424_Individual_2_0:FundingPeriodStartDate",
+          "id": "start-date"
         },
         {
           "kind": "field",
@@ -474,7 +505,8 @@
           "help_text": "Enter the end date for the proposed project. The end date cannot be earlier than the start date.",
           "constraints": "format date",
           "json_path": "project.end_date",
-          "xml_path": "SF424_Individual_2_0:FundingPeriodEndDate"
+          "xml_path": "SF424_Individual_2_0:FundingPeriodEndDate",
+          "id": "end-date"
         }
       ]
     },
@@ -492,7 +524,8 @@
           "help_text": "The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions.",
           "constraints": "YesNoDataType enumeration",
           "json_path": "certification.agree",
-          "xml_path": "SF424_Individual_2_0:ApplicationCertification"
+          "xml_path": "SF424_Individual_2_0:ApplicationCertification",
+          "id": "agree"
         },
         {
           "kind": "field",
@@ -505,7 +538,8 @@
           "constraints": "minLength 1, maxLength 144",
           "json_path": "certification.signature",
           "xml_path": "SF424_Individual_2_0:AORSignature",
-          "post_populated": "Completed by Grants.gov upon submission."
+          "post_populated": "Completed by Grants.gov upon submission.",
+          "id": "signature"
         },
         {
           "kind": "field",
@@ -518,7 +552,8 @@
           "constraints": "format date",
           "json_path": "certification.date_signed",
           "xml_path": "SF424_Individual_2_0:AORDate",
-          "post_populated": "Completed by Grants.gov upon submission."
+          "post_populated": "Completed by Grants.gov upon submission.",
+          "id": "date-signed"
         }
       ]
     }
