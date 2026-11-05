@@ -8,7 +8,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
 from types import FrameType
 from typing import Any
@@ -97,6 +97,23 @@ class SubmissionConsumerConfig(PydanticBaseEnvConfig):
         120  # SUBMISSION_CONSUMER_PROCESSING_TIMEOUT_SEC
     )
 
+    # How often the reconciler sweep runs, in seconds. On each pass the
+    # consumer queries for applications that have been stuck in SUBMITTED
+    # longer than the age threshold and processes them directly, bypassing
+    # the queue. This is the safety net for messages that were never sent,
+    # were dropped, or exhausted their SQS retries and went to the DLQ.
+    submission_consumer_reconcile_interval_sec: int = (
+        3600  # SUBMISSION_CONSUMER_RECONCILE_INTERVAL_SEC
+    )
+
+    # Minimum time since submitted_at before the reconciler will pick up a
+    # SUBMITTED application, in seconds. This prevents the reconciler from
+    # racing with the queue path on freshly submitted applications whose SQS
+    # message is already in flight and about to be processed normally.
+    submission_consumer_reconcile_age_threshold_sec: int = (
+        300  # SUBMISSION_CONSUMER_RECONCILE_AGE_THRESHOLD_SEC
+    )
+
 
 @dataclass
 class MessageContainer:
@@ -126,6 +143,8 @@ class SubmissionConsumer:
         self._register_signal_handlers()
         self.config = config if config else SubmissionConsumerConfig()
 
+        self._last_reconcile_time: float | None = None
+
     def process_messages(self) -> None:
         """Process submission messages constantly.
 
@@ -150,6 +169,16 @@ class SubmissionConsumer:
                 "Finished running submission consumer batch",
                 extra={"batch_duration_sec": batch_duration},
             )
+
+            # Run the reconciler sweep if the interval has elapsed or first time running
+            now = time.monotonic()
+            if (
+                self._last_reconcile_time is None
+                or now - self._last_reconcile_time
+                >= self.config.submission_consumer_reconcile_interval_sec
+            ):
+                self._run_reconcile_pass()
+                self._last_reconcile_time = now
 
             # If a sigterm signal is received we don't handle it
             # until after processing a batch has finished.
@@ -205,6 +234,19 @@ class SubmissionConsumer:
         )
         self._shutdown_event.wait()
         logger.info("Exiting after receiving SIGTERM.")
+
+    def _run_reconcile_pass(self) -> None:
+        """Trigger a reconcile pass inside the Flask app context.
+
+        Called from the main loop after each interval elapses. Delegates to
+        the module-level reconcile_stale_submissions function so that
+        @flask_db.with_db_session() injects the DB session correctly.
+        (@with_db_session injects db_session as the first positional arg,
+        which only works for module-level functions, not instance methods.)
+        """
+        app = current_app._get_current_object()  # type: ignore[attr-defined]
+        with app.app_context():
+            reconcile_stale_submissions(self.config.submission_consumer_reconcile_age_threshold_sec)
 
     def process_batch(self) -> tuple[list[str], list[str]]:
         containers = self.fetch_messages()
@@ -437,3 +479,83 @@ def get_locked_application(db_session: db.Session, application_id: uuid.UUID) ->
         .where(Application.application_id == application_id)
         .with_for_update(nowait=True)
     ).scalar_one_or_none()
+
+
+@flask_db.with_db_session()
+def reconcile_stale_submissions(db_session: db.Session, reconcile_age_threshold_sec: int) -> None:
+    """Query for applications stuck in SUBMITTED and process them directly.
+
+    This is the safety net for submissions whose SQS message was never
+    sent, was dropped, or exhausted its retries and moved to the DLQ.
+    It runs on a fixed interval inside the main consumer loop and uses
+    the same builder and FOR UPDATE SKIP LOCKED locking as the queue
+    path, so it coexists safely with concurrent queue-driven processing.
+
+    Each application found is logged with source=reconciler.
+    """
+    # Open the outer transaction before any SELECT so that SQLAlchemy's
+    # auto-begin doesn't start one implicitly. begin_nested() inside the
+    # loop then creates per-application savepoints within this transaction.
+    # All successful applications commit together when the outer begin() exits.
+    with db_session.begin():
+        age_threshold = datetime_util.utcnow() - timedelta(seconds=reconcile_age_threshold_sec)
+        stale_applications = (
+            db_session.execute(
+                select(Application)
+                .where(
+                    Application.application_status == ApplicationStatus.SUBMITTED,
+                    Application.submitted_at < age_threshold,
+                )
+                .with_for_update(skip_locked=True)
+                .limit(50)
+            )
+            .scalars()
+            .all()
+        )
+
+        logger.info(
+            "Running reconciler sweep",
+            extra={"stale_submitted_count": len(stale_applications)},
+        )
+
+        for application in stale_applications:
+            log_extra = get_reconciler_log_extra(application.application_id)
+            try:
+                with db_session.begin_nested():
+                    if application.application_status == ApplicationStatus.ACCEPTED:
+                        logger.info(
+                            "Application submission was already processed - nothing to do",
+                            extra=log_extra,
+                        )
+                        continue
+                    pdf_generation_config = PdfGenerationConfig()
+                    s3_config = S3Config()
+                    internal_token = create_internal_token_for_pdf_generation(
+                        db_session, pdf_generation_config
+                    )
+                    builder = ApplicationSubmissionBuilder(
+                        db_session,
+                        s3_config,
+                        pdf_generation_config,
+                        lambda name: None,  # metrics no-op for reconciler path
+                        internal_token,
+                    )
+                    builder.build_application_submission(application)
+                    logger.info(
+                        "Finished handling submission message",
+                        extra=log_extra | {"message_result": SubmissionProcessingResult.SUCCESS},
+                    )
+            except OperationalError:
+                logger.info(
+                    "Application row is locked by another process - will retry next reconcile pass",
+                    extra=log_extra,
+                )
+            except Exception:
+                logger.exception("Failed to process submission message", extra=log_extra)
+
+
+def get_reconciler_log_extra(application_id: uuid.UUID) -> dict[str, Any]:
+    return {
+        "application_id": application_id,
+        "source": "reconciler",
+    }

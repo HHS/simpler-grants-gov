@@ -1472,6 +1472,16 @@ class ApplicationFactory(BaseFactory):
     application_status = ApplicationStatus.IN_PROGRESS
     application_name = factory.Faker("sentence", nb_words=3)
 
+    # Set submitted_at automatically when application_status is SUBMITTED,
+    # mirroring what submit_application.py does in production. Tests that
+    # create a SUBMITTED application this way will have a consistent
+    # timestamp without needing to set it manually.
+    submitted_at = factory.LazyAttribute(
+        lambda o: (
+            datetime_util.utcnow() if o.application_status == ApplicationStatus.SUBMITTED else None
+        )
+    )
+
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
