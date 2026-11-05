@@ -1,4 +1,5 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { postUserEvent } from "src/services/event/postUserEvent";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
 import { UserOrganization } from "src/types/userTypes";
 
@@ -26,20 +27,22 @@ import {
 } from "./StartApplicationInputs";
 
 export const StartApplicationModal = ({
+  opportunityId,
   opportunityTitle,
   modalRef,
   applicantTypes,
   organizations,
-  token,
+  isLoggedIn,
   loading,
   organizationsError,
   competitionId,
 }: {
+  opportunityId: string;
   opportunityTitle: string;
   modalRef: RefObject<ModalRef | null>;
   applicantTypes: ApplicantTypes[];
   organizations: UserOrganization[];
-  token: string | null;
+  isLoggedIn: boolean;
   loading: boolean;
   organizationsError?: boolean;
   competitionId: string;
@@ -58,23 +61,29 @@ export const StartApplicationModal = ({
   const [updating, setUpdating] = useState<boolean>(false);
 
   const validateSubmission = useCallback((): boolean => {
-    let isValidToken = Boolean(token);
+    let isValidSubmission = isLoggedIn;
 
     setNameValidationError("");
     setOrgValidationError("");
 
     if (!savedApplicationName) {
       setNameValidationError(t("fields.name.validationError"));
-      isValidToken = false;
+      isValidSubmission = false;
     }
 
     if (applicantTypes.includes("organization") && !selectedOrganization) {
       setOrgValidationError(t("fields.organizationSelect.validationError"));
-      isValidToken = false;
+      isValidSubmission = false;
     }
 
-    return isValidToken;
-  }, [applicantTypes, savedApplicationName, selectedOrganization, t, token]);
+    return isValidSubmission;
+  }, [
+    applicantTypes,
+    isLoggedIn,
+    savedApplicationName,
+    selectedOrganization,
+    t,
+  ]);
 
   const handleSubmit = useCallback(() => {
     const isValidSubmission = validateSubmission();
@@ -94,7 +103,7 @@ export const StartApplicationModal = ({
       organizationToSend = selectedOrganization; // Organization applications
     }
 
-    clientFetch("/api/applications/start", {
+    void clientFetch("/api/applications/start", {
       method: "POST",
       body: JSON.stringify({
         applicationName: savedApplicationName,
@@ -104,7 +113,7 @@ export const StartApplicationModal = ({
     })
       .then((data) => {
         const { applicationId } = data;
-        router.push(`/workspace/applications/${applicationId}`);
+        return router.push(`/workspace/applications/${applicationId}`);
       })
       .catch((error) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -137,6 +146,13 @@ export const StartApplicationModal = ({
     setSelectedOrganization("");
   }, []);
 
+  const onOpen = useCallback(() => {
+    postUserEvent({
+      name: "view_start_application_modal",
+      properties: { competitionId, opportunityId },
+    });
+  }, [competitionId, opportunityId]);
+
   const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSavedApplicationName(e.target.value);
   }, []);
@@ -157,6 +173,7 @@ export const StartApplicationModal = ({
         if (e.key === "Enter") handleSubmit();
       }}
       onClose={onClose}
+      onOpen={onOpen}
     >
       {organizationsError ? (
         <Alert

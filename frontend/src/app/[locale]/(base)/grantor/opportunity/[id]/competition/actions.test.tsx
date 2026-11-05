@@ -1,7 +1,9 @@
 import { identity } from "lodash";
 import { ApiRequestError } from "src/errors";
+import { updateCompetitionForms } from "src/services/fetch/fetchers/competitionFormsFetcher";
 import {
   createCompetitionForGrantor,
+  saveCompetitionInstructions,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
@@ -14,7 +16,12 @@ jest.mock("next-intl/server", () => ({
 
 jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
   createCompetitionForGrantor: jest.fn(),
+  saveCompetitionInstructions: jest.fn(),
   updateCompetitionForGrantor: jest.fn(),
+}));
+
+jest.mock("src/services/fetch/fetchers/competitionFormsFetcher", () => ({
+  updateCompetitionForms: jest.fn(),
 }));
 
 const mockRedirect = jest.fn();
@@ -30,6 +37,10 @@ const mockCreateCompetitionForGrantor = jest.mocked(
 const mockUpdateCompetitionForGrantor = jest.mocked(
   updateCompetitionForGrantor,
 );
+const mockSaveCompetitionInstructions = jest.mocked(
+  saveCompetitionInstructions,
+);
+const mockUpdateCompetitionForms = jest.mocked(updateCompetitionForms);
 
 const mockRequiredForms: CompetitionFormsSubmitApi = [
   {
@@ -61,6 +72,7 @@ function buildValidFormData(overrides?: Record<string, string>) {
   formData.set("competition_title", "Test Competition");
   formData.set("opening_date", "2026-06-01");
   formData.set("closing_date", "2026-07-01");
+  formData.set("public_competition_id", "PUBLIC-COMP-789");
   formData.set("open_to_applicants", "both");
   formData.set("contact_name", "John Doe");
   formData.set("contact_title", "Manager");
@@ -85,20 +97,20 @@ describe("updateCompetition", () => {
     const formData = new FormData();
     formData.set("competitionId", "compete-456");
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "genericError",
     });
   });
 
-  it("calls createCompetitionForGrantor when no competitionId and returns new ID", async () => {
+  it("calls createCompetitionForGrantor when no competitionId", async () => {
     const formData = buildValidFormData();
     formData.delete("competitionId");
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(mockCreateCompetitionForGrantor).toHaveBeenCalledWith(
       "opp-123",
@@ -106,11 +118,25 @@ describe("updateCompetition", () => {
         competition_title: "Test Competition",
         opening_date: "2026-06-01",
         closing_date: "2026-07-01",
+        public_competition_id: "PUBLIC-COMP-789",
       }),
     );
     expect(result).toEqual({
       successMessage: "success",
-      newCompetitionId: "new-competition-id",
+    });
+  });
+
+  it("updates competition forms with the new competition ID after creating", async () => {
+    const formData = buildValidFormData();
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    await updateCompetition(formData, mockRequiredForms);
+
+    expect(mockUpdateCompetitionForms).toHaveBeenCalledWith({
+      competitionId: "new-competition-id",
+      body: { forms: mockRequiredForms },
     });
   });
 
@@ -119,7 +145,7 @@ describe("updateCompetition", () => {
 
     mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(mockUpdateCompetitionForGrantor).toHaveBeenCalledWith(
       "opp-123",
@@ -128,10 +154,83 @@ describe("updateCompetition", () => {
         competition_title: "Test Competition",
         opening_date: "2026-06-01",
         closing_date: "2026-07-01",
+        public_competition_id: "PUBLIC-COMP-789",
       }),
     );
     expect(result).toEqual({
       successMessage: "success",
+    });
+  });
+
+  it("updates competition forms with the existing competition ID", async () => {
+    const formData = buildValidFormData();
+
+    mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
+
+    await updateCompetition(formData, mockRequiredForms);
+
+    expect(mockUpdateCompetitionForms).toHaveBeenCalledWith({
+      competitionId: "compete-456",
+      body: { forms: mockRequiredForms },
+    });
+  });
+
+  it("saves application instructions when creating a competition with a pending file ID", async () => {
+    const formData = buildValidFormData({
+      "pending-file-id": "pending-file-789",
+    });
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    const result = await updateCompetition(formData, mockRequiredForms);
+
+    expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
+      "opp-123",
+      "new-competition-id",
+      "pending-file-789",
+    );
+    expect(result).toEqual({
+      successMessage: "success",
+    });
+  });
+
+  it("saves application instructions when a pending file ID exists", async () => {
+    const formData = buildValidFormData({
+      "pending-file-id": "pending-file-789",
+    });
+
+    mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
+
+    const result = await updateCompetition(formData, mockRequiredForms);
+
+    expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
+      "opp-123",
+      "compete-456",
+      "pending-file-789",
+    );
+    expect(result).toEqual({
+      successMessage: "success",
+    });
+  });
+
+  it("returns a generic error when saving application instructions fails", async () => {
+    const formData = buildValidFormData({
+      "pending-file-id": "pending-file-789",
+    });
+
+    mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
+    mockSaveCompetitionInstructions.mockRejectedValue(new Error("unexpected"));
+
+    const result = await updateCompetition(formData, mockRequiredForms);
+
+    expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
+      "opp-123",
+      "compete-456",
+      "pending-file-789",
+    );
+    expect(result).toEqual({
+      errorMessage: "genericError",
     });
   });
 
@@ -142,7 +241,7 @@ describe("updateCompetition", () => {
       new ApiRequestError("unauthenticated", "APIRequestError", 401),
     );
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "unauthenticated",
@@ -156,7 +255,7 @@ describe("updateCompetition", () => {
       new ApiRequestError("forbidden", "APIRequestError", 403),
     );
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "forbidden",
@@ -170,7 +269,7 @@ describe("updateCompetition", () => {
       new ApiRequestError("notFound", "APIRequestError", 404),
     );
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "notFound",
@@ -192,7 +291,7 @@ describe("updateCompetition", () => {
 
     mockUpdateCompetitionForGrantor.mockRejectedValue(apiError);
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "validationErrors",
@@ -205,7 +304,7 @@ describe("updateCompetition", () => {
 
     mockUpdateCompetitionForGrantor.mockRejectedValue(new Error("unexpected"));
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "genericError",
@@ -301,13 +400,25 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.open_to_applicants).toEqual([
       "organization",
       "individual",
     ]);
+  });
+
+  it("includes the public competition ID in the request body", async () => {
+    const formData = buildValidFormData();
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    await updateCompetition(formData, mockRequiredForms);
+
+    const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
+    expect(requestBody.public_competition_id).toBe("PUBLIC-COMP-789");
   });
 
   it("builds correct request body for 'organizations_only' applicant type", async () => {
@@ -317,7 +428,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.open_to_applicants).toEqual(["organization"]);
@@ -330,7 +441,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.open_to_applicants).toEqual(["individual"]);
@@ -342,12 +453,24 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.contact_info).toBe(
-      "John Doe, Manager, john@example.com, 555-0100",
+      "John Doe | Manager | john@example.com | 555-0100",
     );
+  });
+
+  it("converts grace_period to a number when provided", async () => {
+    const formData = buildValidFormData({ grace_period: "30" });
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    await updateCompetition(formData, mockRequiredForms);
+
+    const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
+    expect(requestBody.grace_period).toBe(30);
   });
 
   it("handles empty field values by returning null", async () => {
@@ -356,14 +479,16 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
     formData.set("competition_title", "");
     formData.set("opening_date", "");
     formData.set("closing_date", "");
+    formData.set("public_competition_id", "");
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.competition_title).toBeNull();
     expect(requestBody.opening_date).toBeNull();
     expect(requestBody.closing_date).toBeNull();
+    expect(requestBody.public_competition_id).toBeNull();
   });
 });

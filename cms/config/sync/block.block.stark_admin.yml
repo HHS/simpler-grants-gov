@@ -1,0 +1,27 @@
+uuid: a442e474-65ae-4230-bfca-0efaf0b87900
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.admin
+  module:
+    - system
+  theme:
+    - stark
+_core:
+  default_config_hash: O-D8Nl1TR7UCNonzFkR4yexcwpIbqT5arx6HdRFMzYU
+id: stark_admin
+theme: stark
+region: sidebar_first
+weight: 1
+provider: null
+plugin: 'system_menu_block:admin'
+settings:
+  id: 'system_menu_block:admin'
+  label: Administration
+  label_display: visible
+  provider: system
+  level: 1
+  depth: null
+  expand_all_items: false
+visibility: {  }

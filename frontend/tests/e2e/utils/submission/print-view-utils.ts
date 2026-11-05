@@ -28,21 +28,67 @@ export function buildPrintUrl(formUrl: string): string {
  * Call `buildPrintUrl(formUrl)` first to derive the print URL from a workspace
  * form URL captured before submission.
  *
+ * The print view is fully client-rendered after navigation, and WebKit is
+ * slower at both network event processing and DOM rendering (same
+ * observation already documented in submit-application-utils.ts) - a fixed
+ * 3s wait that's enough on Chrome may not be on WebKit. This was the prime
+ * suspect for the "widespread webkit flakiness" that led to skipWebkit()
+ * being added to these specs; this makes the wait match the browser instead
+ * of guessing one number for all of them.
+ *
  * @param page     - The Playwright page object.
  * @param printUrl - The print view URL (already transformed via buildPrintUrl).
- * @param waitMs   - Extra ms to wait after load for client-side rendering. Defaults to 3000.
+ * @param waitMs   - Extra ms to wait after load for client-side rendering.
+ *                   Defaults to a browser-aware value (3000 on Chrome/Mobile
+ *                   Chrome, 9000 on WebKit/Firefox) - pass an explicit value
+ *                   to override.
  */
 export async function navigateToPrintView(
   page: Page,
   printUrl: string,
-  waitMs = 3000,
+  waitMs?: number,
 ): Promise<void> {
   await page.goto(printUrl);
   await page.waitForLoadState("domcontentloaded");
-  if (waitMs > 0) {
-    await page.waitForTimeout(waitMs);
+
+  const browserType = page.context().browser()?.browserType().name();
+  const isSlowBrowser = browserType === "webkit" || browserType === "firefox";
+  const resolvedWaitMs = waitMs ?? (isSlowBrowser ? 9000 : 3000);
+
+  if (resolvedWaitMs > 0) {
+    await page.waitForTimeout(resolvedWaitMs);
   }
   await expect(page).toHaveURL(printUrl);
+}
+
+/**
+ * Verifies that a print view page is read-only by checking for no visible enabled editable controls.
+ * This ensures the page is truly in print view mode, not edit mode.
+ *
+ * @param page - The Playwright page object
+ * @param skipCheck - Optional flag to skip the editable control check (for forms with custom table rendering)
+ *
+ * @throws if any visible input or textarea elements are enabled (not disabled/readonly)
+ */
+export async function assertPrintViewIsReadOnly(
+  page: Page,
+  skipCheck: boolean = false,
+): Promise<void> {
+  const printViewWrapper = page.locator(".apply-form-print-preview");
+  await expect(printViewWrapper).toBeVisible();
+
+  if (!skipCheck) {
+    // Check for inputs/textareas that are not disabled and not readonly
+    // This is more robust than checking for count=0 as there may be hidden UI elements on some mobile browsers
+    const visibleEditableInputs = printViewWrapper.locator(
+      "input:visible:not([disabled]):not([readonly])",
+    );
+    const visibleEditableTextareas = printViewWrapper.locator(
+      "textarea:visible:not([disabled]):not([readonly])",
+    );
+    await expect(visibleEditableInputs).toHaveCount(0);
+    await expect(visibleEditableTextareas).toHaveCount(0);
+  }
 }
 
 /**
@@ -196,29 +242,11 @@ export async function validateAllPrintViews(
   } of filledForms) {
     await navigateToPrintView(page, printUrl);
 
-    // Verify print-view wrapper exists (indicates read-only print layout)
-    // The wrapper has class "apply-form-print-preview" which contains the form content
-    const printViewWrapper = page.locator(".apply-form-print-preview");
-    await expect(printViewWrapper).toBeVisible();
-
-    // Verify there are no visible ENABLED editable controls (read-only state verification)
-    // Check for inputs/textareas that are not disabled and not readonly
-    // This is more robust than checking for count=0 as there may be hidden UI elements on some mobile browsers
-    // Skip this check for forms like SF-424A that use custom table rendering with actual input fields
+    // Verify print view is read-only before validating content
     const shouldSkipEditableCheck =
       skipEditableCheckForFormKeys &&
       skipEditableCheckForFormKeys.includes(formKey);
-
-    if (!shouldSkipEditableCheck) {
-      const visibleEditableInputs = printViewWrapper.locator(
-        "input:visible:not([disabled]):not([readonly])",
-      );
-      const visibleEditableTextareas = printViewWrapper.locator(
-        "textarea:visible:not([disabled]):not([readonly])",
-      );
-      await expect(visibleEditableInputs).toHaveCount(0);
-      await expect(visibleEditableTextareas).toHaveCount(0);
-    }
+    await assertPrintViewIsReadOnly(page, shouldSkipEditableCheck);
 
     // Form title heading is visible
     await expect(page.locator("h1")).toContainText(formName);
@@ -247,8 +275,18 @@ export async function validateAllPrintViews(
     for (const [testId, expectedValue] of Object.entries(
       expectedPrepopulatedFields,
     )) {
-      await expect(page.getByTestId(testId)).toBeVisible();
-      await expect(page.getByTestId(testId)).toContainText(expectedValue);
+      const locator = page.getByTestId(testId);
+      await expect(locator).toBeVisible();
+
+      // For input elements, check the value attribute; for other elements, check visible text
+      const elementType = await locator.evaluate((el) =>
+        el.tagName.toLowerCase(),
+      );
+      if (elementType === "input") {
+        await expect(locator).toHaveValue(expectedValue);
+      } else {
+        await expect(locator).toContainText(expectedValue);
+      }
     }
 
     // User-entered fields - uses formConfig.fields (printTestId ?? testId)

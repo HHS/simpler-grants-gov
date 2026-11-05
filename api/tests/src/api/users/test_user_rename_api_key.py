@@ -20,10 +20,13 @@ def test_rename_api_key_success(enable_factory_create, db_session, client, user,
     response_data = response.json["data"]
     assert str(response_data["api_key_id"]) == str(api_key.api_key_id)
     assert response_data["key_name"] == "Updated API Key Name"
-    assert response_data["key_id"] == api_key.key_id
     assert response_data["is_active"] == api_key.is_active
     assert response_data["last_used"] is None
     assert "created_at" in response_data
+
+    # Neither the raw key nor its hash is ever returned when renaming
+    assert "key_id" not in response_data
+    assert "key_id_hash" not in response_data
 
     db_session.expunge(api_key)
 
@@ -34,7 +37,7 @@ def test_rename_api_key_success(enable_factory_create, db_session, client, user,
     assert updated_api_key is not None
     assert updated_api_key.key_name == "Updated API Key Name"
     assert updated_api_key.user_id == user.user_id
-    assert updated_api_key.key_id == api_key.key_id
+    assert updated_api_key.key_id_hash == api_key.key_id_hash
 
 
 def test_rename_api_key_validation_error_missing_key_name(
@@ -195,7 +198,7 @@ def test_rename_api_key_preserves_other_fields(
         last_used=None,
     )
 
-    original_key_id = api_key.key_id
+    original_key_id_hash = api_key.key_id_hash
     original_is_active = api_key.is_active
     original_last_used = api_key.last_used
     original_created_at = api_key.created_at
@@ -211,13 +214,12 @@ def test_rename_api_key_preserves_other_fields(
 
     response_data = response.json["data"]
     assert response_data["key_name"] == "Updated Key Name"
-    assert response_data["key_id"] == original_key_id
     assert response_data["is_active"] == original_is_active
     assert response_data["last_used"] == original_last_used
 
     db_session.refresh(api_key)
     assert api_key.key_name == "Updated Key Name"
-    assert api_key.key_id == original_key_id
+    assert api_key.key_id_hash == original_key_id_hash
     assert api_key.is_active == original_is_active
     assert api_key.last_used == original_last_used
     assert api_key.created_at == original_created_at

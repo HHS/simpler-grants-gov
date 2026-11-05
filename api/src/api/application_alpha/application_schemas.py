@@ -1,22 +1,21 @@
-from grants_shared.api.schemas.extension import Schema, fields
-from grants_shared.api.schemas.response_schema import (
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
+from src.api.form_alpha.form_schema import FormAlphaSchema
+from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
+from src.api.schemas.extension import Schema, fields
+from src.api.schemas.response_schema import (
     AbstractResponseSchema,
     FileResponseSchema,
     PaginationMixinSchema,
     WarningMixinSchema,
 )
-from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder
-from grants_shared.pagination.pagination_schema import generate_pagination_schema
-
-from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
-from src.api.form_alpha.form_schema import FormAlphaSchema
-from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
+from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
     ApplicationFormStatus,
     ApplicationStatus,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class ApplicationStartRequestSchema(Schema):
@@ -322,24 +321,6 @@ class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationGetResponseDataSchema())
 
 
-class ApplicationAttachmentCreateSchema(Schema):
-    application_attachment_id = fields.UUID(
-        metadata={"description": "The ID of the uploaded application attachment"}
-    )
-
-
-class ApplicationAttachmentCreateResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(ApplicationAttachmentCreateSchema())
-
-
-class ApplicationAttachmentCreateRequestSchema(Schema):
-    file_attachment = fields.File(
-        required=True,
-        allow_none=False,
-        metadata={"description": "The file to attach to an application"},
-    )
-
-
 class ApplicationAttachmentGetSchema(FileResponseSchema):
     application_attachment_id = fields.UUID(
         metadata={"description": "The ID of the uploaded application attachment"}
@@ -362,22 +343,6 @@ class ApplicationAttachmentGetSchema(FileResponseSchema):
 
 class ApplicationAttachmentGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationAttachmentGetSchema())
-
-
-class ApplicationAttachmentDeleteResponseSchema(AbstractResponseSchema):
-    data = fields.MixinField(metadata={"example": None})
-
-
-class ApplicationAttachmentUpdateRequestSchema(Schema):
-    file_attachment = fields.File(
-        required=True,
-        allow_none=False,
-        metadata={"description": "The file to attach to an application"},
-    )
-
-
-class ApplicationAttachmentUpdateResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(ApplicationAttachmentCreateSchema())
 
 
 class ApplicationFormInclusionUpdateRequestSchema(Schema):

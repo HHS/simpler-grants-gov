@@ -34,7 +34,6 @@ locals {
     SAM_GOV_BASE_URL = "https://api-alpha.sam.gov"
 
     # PDF Generation Configuration
-    FRONTEND_URL                         = "https://${var.environment}.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE                  = "true" # Default to test mode for safety
     DOCRAPTOR_API_URL                    = "https://docraptor.com/docs"
     SHORT_LIVED_TOKEN_EXPIRATION_MINUTES = "60"
@@ -77,6 +76,13 @@ locals {
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"
     }
 
+    # HMAC key used to hash user API keys before storage. Set by hand, once per
+    # environment - rotating it invalidates every hash already stored.
+    API_KEY_PEPPER = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/api-key-pepper"
+    }
+
     LOGIN_FINAL_DESTINATION = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/frontend-login-redirect-url"
@@ -88,6 +94,11 @@ locals {
     }
 
     FRONTEND_BASE_URL = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/frontend-base-url"
+    }
+
+    FRONTEND_URL = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/frontend-base-url"
     }

@@ -40,4 +40,29 @@ describe("ZipDownloadButton", () => {
       `/api/opportunities/${ZipDownloadButtonProps.opportunityId}/attachments-download`,
     );
   });
+
+  it("sends a user event beacon on click", async () => {
+    const sendBeaconMock = jest.fn();
+    Object.defineProperty(navigator, "sendBeacon", {
+      value: sendBeaconMock,
+      writable: true,
+    });
+
+    render(<ZipDownloadButton {...ZipDownloadButtonProps} />);
+    await userEvent.click(screen.getByRole("button"));
+
+    expect(sendBeaconMock).toHaveBeenCalledTimes(1);
+    const [url, blob] = sendBeaconMock.mock.calls[0] as [string, Blob];
+    expect(url).toBe("/api/events");
+    const blobText = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("failed to read blob"));
+      reader.readAsText(blob);
+    });
+    expect(JSON.parse(blobText)).toEqual({
+      name: "click_download_opportunity_documents_zip",
+      properties: { opportunityId: ZipDownloadButtonProps.opportunityId },
+    });
+  });
 });

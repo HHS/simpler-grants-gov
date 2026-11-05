@@ -1,6 +1,10 @@
 import { getSession } from "src/services/auth/session";
-import { getSavedOpportunityNotificationPreferences } from "src/services/fetch/fetchers/notificationsFetcher";
+import {
+  getAllOpportunitiesNotificationPreference,
+  getSavedOpportunityNotificationPreferences,
+} from "src/services/fetch/fetchers/notificationsFetcher";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { Organization } from "src/types/applicationResponseTypes";
 import {
   NotificationOrganization,
@@ -13,6 +17,7 @@ import { ReactElement } from "react";
 import { NotificationsPageContent } from "./_components/NotificationsPageContent";
 
 const SELF_SAVED_OPPORTUNITIES_PREFERENCE_KEY = "saved-opportunities";
+const ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY = "all-new-opportunities";
 
 function buildOrganizationPreferenceKey(organizationId: string): string {
   return `organization-${organizationId}-saved-opportunities`;
@@ -23,7 +28,7 @@ async function Notifications(): Promise<ReactElement | undefined> {
 
   const session = await getSession();
   if (!session?.email) {
-    console.error("No user session, or user has no email address");
+    logger.warn("No user session, or user has no email address");
     return;
   }
 
@@ -31,6 +36,7 @@ async function Notifications(): Promise<ReactElement | undefined> {
   let hasOrganizationsFetchError = false;
   const initialPreferenceValues: NotificationPreferenceValues = {
     [SELF_SAVED_OPPORTUNITIES_PREFERENCE_KEY]: false,
+    [ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY]: false,
   };
 
   try {
@@ -44,8 +50,8 @@ async function Notifications(): Promise<ReactElement | undefined> {
         organizationName: organization.sam_gov_entity.legal_business_name,
       }),
     );
-  } catch (error: unknown) {
-    console.error("Unable to fetch user organizations", error);
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Unable to fetch user organizations");
     hasOrganizationsFetchError = true;
   }
 
@@ -61,8 +67,22 @@ async function Notifications(): Promise<ReactElement | undefined> {
         buildOrganizationPreferenceKey(organizationPreference.organization_id)
       ] = organizationPreference.email_enabled;
     });
-  } catch (error: unknown) {
-    console.error("Unable to fetch notification preferences", error);
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Unable to fetch notification preferences");
+    hasOrganizationsFetchError = true;
+  }
+
+  try {
+    const allOpportunitiesPreference =
+      await getAllOpportunitiesNotificationPreference(session.user_id);
+
+    initialPreferenceValues[ALL_NEW_OPPORTUNITIES_PREFERENCE_KEY] =
+      allOpportunitiesPreference.is_enabled;
+  } catch (e: unknown) {
+    logger.error(
+      { err: e },
+      "Unable to fetch all opportunities notification preference",
+    );
     hasOrganizationsFetchError = true;
   }
 
@@ -78,6 +98,8 @@ async function Notifications(): Promise<ReactElement | undefined> {
       )}
       savedOpportunitiesLabel={t("savedOpportunitiesLabel")}
       savedOpportunitiesDescription={t("savedOpportunitiesDescription")}
+      allNewOpportunitiesLabel={t("allNewOpportunitiesLabel")}
+      allNewOpportunitiesDescription={t("allNewOpportunitiesDescription")}
       organizationSavedOpportunitiesDescription={t(
         "organizationSavedOpportunitiesDescription",
       )}

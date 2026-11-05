@@ -1,8 +1,8 @@
 import logging
 
-from grants_shared.adapters import db
 from sqlalchemy import select
 
+from src.adapters import db
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType
 from src.db.models.agency_models import Agency
@@ -114,8 +114,6 @@ def get_agency_for_workflow(workflow: Workflow) -> Agency:
         opportunity = workflow.application.competition.opportunity
     elif workflow.application_submission is not None:
         opportunity = workflow.application_submission.application.competition.opportunity
-    elif workflow.award_recommendation is not None:
-        opportunity = workflow.award_recommendation.opportunity
 
     if opportunity is None:
         raise ImplementationMissingError("No approach implemented to find agency for workflow")

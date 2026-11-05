@@ -10,6 +10,7 @@ from .models import XMLGenerationRequest, XMLGenerationResponse
 from .transformers.attachment_transformer import AttachmentTransformer
 from .transformers.base_transformer import RecursiveXMLTransformer
 from .utils.attachment_mapping import AttachmentInfo
+from .utils.closing_tags import write_closing_tags_for_empty_elements
 
 logger = logging.getLogger(__name__)
 
@@ -215,6 +216,10 @@ class XMLGenerationService:
         # Flush attachments not placed in sequence order (forms with no ordering entry).
         if attachment_transformer is not None and original_data is not None:
             attachment_transformer.add_attachment_elements(root, original_data, nsmap)
+
+        write_closing_tags_for_empty_elements(
+            root, xml_config.get("empty_elements_with_closing_tag", [])
+        )
 
         # Generate XML string
         if pretty_print:

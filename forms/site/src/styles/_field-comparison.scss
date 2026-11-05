@@ -1,0 +1,538 @@
+// Field comparison: each plan field against the DAT, XSD and compiled form (forms/parity)
+@use "uswds-core" as *;
+
+// Each status has its own hue and lightness, and a symbol, so none relies on color alone.
+:root {
+  --status-match-fill: #{color("green-cool-50v")};
+  --status-match-ink: #{color("white")};
+  --status-match-tint: #{color("green-cool-5")};
+  --status-intentional-fill: #{color("blue-60v")};
+  --status-intentional-ink: #{color("white")};
+  --status-intentional-tint: #{color("blue-5")};
+  --status-upstream-fill: #{color("violet-warm-60")};
+  --status-upstream-ink: #{color("white")};
+  --status-upstream-tint: #{color("violet-warm-5")};
+  --status-gap-fill: #{color("gold-20v")};
+  --status-gap-ink: #{color("ink")};
+  --status-gap-tint: #{color("gold-5v")};
+  --status-unrecorded-fill: #{color("red-60v")};
+  --status-unrecorded-ink: #{color("white")};
+  --status-unrecorded-tint: #{color("red-5")};
+  --status-notCompared-fill: repeating-linear-gradient(
+    45deg,
+    #{color("gray-10")} 0 3px,
+    #{color("gray-20")} 3px 6px
+  );
+  --status-notCompared-ink: #{color("gray-60")};
+  --status-notCompared-tint: #{color("gray-5")};
+}
+
+$statuses: match, intentional, upstream, gap, unrecorded, notCompared;
+
+// Shared
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: units("05");
+  padding: 2px units(1) 2px 2px;
+  border-radius: 999px;
+  white-space: nowrap;
+  @include u-font("sans", "3xs");
+  font-weight: 600;
+}
+
+@each $status in $statuses {
+  .status-dot--#{$status} {
+    background: var(--status-#{$status}-fill);
+    color: var(--status-#{$status}-ink);
+  }
+
+  .category-badge--#{$status},
+  .deviation-tile--#{$status} {
+    background: var(--status-#{$status}-tint);
+  }
+}
+
+// Filter tiles
+.deviation-tiles {
+  margin-bottom: units(3);
+}
+
+.deviation-tiles__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: units(1);
+
+  @media (max-width: 800px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.deviation-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: units("105") units(2);
+  border: 2px solid transparent;
+  border-radius: radius("md");
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: color("ink");
+
+  &[aria-pressed="true"] {
+    border-color: color("ink");
+  }
+
+  &:focus-visible {
+    outline: 3px solid color("blue-40v");
+    outline-offset: 2px;
+  }
+}
+
+.deviation-tile__heading {
+  display: inline-flex;
+  align-items: center;
+  gap: units(1);
+  @include u-font("sans", "2xs");
+  font-weight: 700;
+}
+
+.deviation-tile__count {
+  @include u-font("sans", "xl");
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.deviation-tile__fields {
+  @include u-font("sans", "3xs");
+  color: color("base-dark");
+}
+
+// Attribute chips: a quiet row under the tiles that narrows them to what differs
+.attribute-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: units("05");
+  margin-top: units(1);
+}
+
+.attribute-filter__label {
+  margin-right: units("05");
+  @include u-font("sans", "3xs");
+  color: color("base-dark");
+}
+
+.attribute-filter__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: units("05");
+  padding: 1px units(1);
+  border: 1px solid color("base-lighter");
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  @include u-font("sans", "3xs");
+  color: color("base-darker");
+
+  &:hover {
+    border-color: color("base-light");
+  }
+
+  &[aria-pressed="true"] {
+    border-color: color("ink");
+    background: color("base-lightest");
+    color: color("ink");
+  }
+
+  &:focus-visible {
+    outline: 2px solid color("blue-40v");
+    outline-offset: 1px;
+  }
+}
+
+.attribute-filter__count {
+  font-variant-numeric: tabular-nums;
+  color: color("base-dark");
+}
+
+.deviation-tiles__clear {
+  margin: units(1) 0 0;
+  @include u-font("sans", "3xs");
+  color: color("base-dark");
+}
+
+// Field rows: the plan's details beside a button that opens the sheet
+.field-row--compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: units(1) units(2);
+  align-items: start;
+
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: units(2);
+  }
+}
+
+.field-row__plan {
+  min-width: 0;
+}
+
+.field-row__compare {
+  display: flex;
+  align-items: center;
+  gap: units(1);
+  padding: units("05") units(1);
+  border: 1px solid transparent;
+  border-radius: radius("md");
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover {
+    border-color: color("base-lighter");
+    background: color("base-lightest");
+  }
+
+  &:focus-visible {
+    outline: 3px solid color("blue-40v");
+    outline-offset: 2px;
+  }
+
+  // On phones the button spans the row: badges on the left, "Compare" on the right.
+  @media (max-width: 640px) {
+    justify-content: space-between;
+    padding: units(1);
+    border-color: color("base-lighter");
+  }
+}
+
+.field-details__group + .field-details__group {
+  margin-top: units(1);
+}
+
+.field-details__title {
+  margin: units(1) 0 0;
+  @include u-font("sans", "3xs");
+  font-weight: 700;
+  color: color("base-dark");
+}
+
+.field-row__detail .field-detail-grid__item {
+  display: contents;
+}
+
+.rollup-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: units(1);
+}
+
+.rollup-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  @include u-font("sans", "3xs");
+  font-weight: 700;
+}
+
+.deviation-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: units("05");
+}
+
+.field-row__open {
+  @include u-font("sans", "3xs");
+  color: color("primary");
+  white-space: nowrap;
+}
+
+// Sheet
+.comparison-sheet {
+  margin: 0 0 0 auto;
+  width: min(36rem, 100vw);
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  padding: 0;
+  border: 0;
+  box-shadow: -4px 0 24px rgb(0 0 0 / 20%);
+
+  &::backdrop {
+    background: rgb(0 0 0 / 40%);
+  }
+
+  &[open] {
+    animation: sheet-in-right 0.2s ease-out;
+  }
+
+  @media (max-width: 640px) {
+    margin: auto 0 0;
+    width: 100vw;
+    height: 86vh;
+    border-radius: radius("lg") radius("lg") 0 0;
+
+    &[open] {
+      animation-name: sheet-in-bottom;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &[open] {
+      animation: none;
+    }
+  }
+}
+
+@keyframes sheet-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes sheet-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+.comparison-sheet__body {
+  padding: units(3);
+
+  @media (max-width: 640px) {
+    padding: units(2);
+  }
+}
+
+.comparison-sheet__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: units(2);
+}
+
+.comparison-sheet__title {
+  margin: 0;
+  @include u-font("sans", "lg");
+}
+
+.comparison-sheet__summary {
+  margin: units("05") 0 0;
+  @include u-font("sans", "2xs");
+  color: color("base-dark");
+}
+
+.comparison-sheet__close {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: color("base-lightest");
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sheet-tabs {
+  margin-top: units(2);
+}
+
+.comparison-sheet__panel {
+  padding-top: units(2);
+}
+
+// Comparison tab
+.status-matrix {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    @include u-font("sans", "3xs");
+    font-weight: 600;
+    color: color("base-dark");
+    text-align: left;
+    padding: units("05") units(1);
+  }
+
+  thead th {
+    text-align: center;
+  }
+
+  tbody tr + tr {
+    border-top: 1px solid color("base-lightest");
+  }
+}
+
+.status-matrix__cell {
+  text-align: center;
+  padding: 2px;
+}
+
+.status-matrix__button {
+  display: inline-flex;
+  padding: units("05");
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+
+  .status-dot {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  &[aria-pressed="true"] {
+    border-color: color("ink");
+  }
+
+  &:focus-visible {
+    outline: 3px solid color("blue-40v");
+  }
+}
+
+.cell-detail {
+  margin-top: units(2);
+  padding: units(2);
+  border-radius: radius("md");
+  background: color("base-lightest");
+
+  &--empty {
+    @include u-font("sans", "2xs");
+    color: color("base-dark");
+  }
+}
+
+.cell-detail__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: units(1);
+  margin: 0 0 units(1);
+  @include u-font("sans", "xs");
+}
+
+.cell-detail__reason,
+.difference-card__reason {
+  margin: units(1) 0 0;
+  @include u-font("sans", "2xs");
+}
+
+.value-pair {
+  display: grid;
+  gap: units(1);
+  margin: 0;
+
+  > div {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: units(1);
+  }
+
+  dt {
+    @include u-font("sans", "3xs");
+    font-weight: 600;
+    color: color("base-dark");
+  }
+
+  dd {
+    margin: 0;
+    @include u-font("sans", "2xs");
+    word-break: break-word;
+  }
+}
+
+.value-pair__none {
+  color: color("base");
+  font-style: italic;
+}
+
+.options-diff__title {
+  margin: 0 0 units("05");
+  @include u-font("sans", "3xs");
+  font-weight: 600;
+}
+
+.options-diff__group + .options-diff__group {
+  margin-top: units(1);
+}
+
+.options-diff__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: units("05");
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 2px units(1);
+    border: 1px solid color("base-lighter");
+    border-radius: 999px;
+    background: color("white");
+    @include u-font("mono", "3xs");
+  }
+}
+
+// Differences tab
+.diff-type-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: units(1);
+  margin-bottom: units(2);
+}
+
+.diff-type-filter__chip {
+  border: 2px solid transparent;
+  cursor: pointer;
+
+  &[aria-pressed="true"] {
+    border-color: color("ink");
+  }
+}
+
+.difference-list__cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.difference-card {
+  padding: units(2);
+  border: 1px solid color("base-lighter");
+  border-radius: radius("md");
+
+  & + & {
+    margin-top: units(1);
+  }
+}
+
+.difference-card__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: units(1);
+  margin: 0 0 units(1);
+  @include u-font("sans", "xs");
+  font-weight: 700;
+}

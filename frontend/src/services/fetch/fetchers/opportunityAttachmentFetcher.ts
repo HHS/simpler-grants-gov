@@ -1,8 +1,8 @@
 import "server-only";
 
 import {
+  OpportunityAttachmentCreateResponse,
   OpportunityAttachmentListResponse,
-  OpportunityAttachmentUploadResponse,
 } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { fetchGrantorOpportunityWithMethod } from "./fetchers";
@@ -16,25 +16,35 @@ export const listOpportunityAttachments = async (
   return (await response.json()) as OpportunityAttachmentListResponse;
 };
 
-export const uploadOpportunityAttachment = async (
+export const createOpportunityAttachment = async (
   opportunityId: string,
-  file: FormData,
-): Promise<OpportunityAttachmentUploadResponse> => {
+  pendingFileId: string,
+): Promise<OpportunityAttachmentCreateResponse> => {
   const response = await fetchGrantorOpportunityWithMethod("POST")({
     subPath: `${opportunityId}/attachments`,
-    additionalHeaders: { Accept: "application/json" },
-    body: file,
-    addContentType: false,
+    body: { pending_file_id: pendingFileId },
+    // want to allow responses with failed validations through so we can properly handle displaying validation errors
+    allowedErrorStatuses: [422],
   });
-  return (await response.json()) as OpportunityAttachmentUploadResponse;
+  return (await response.json()) as OpportunityAttachmentCreateResponse;
 };
 
 export const deleteOpportunityAttachment = async (
   opportunityId: string,
   attachmentId: string,
-): Promise<{ status_code: number; message: string }> => {
+): Promise<{
+  status_code: number;
+  message: string;
+  errors?: unknown[] | null;
+}> => {
   const response = await fetchGrantorOpportunityWithMethod("DELETE")({
     subPath: `${opportunityId}/attachments/${attachmentId}`,
+    // want to allow responses with failed validations through so we can properly handle displaying validation errors
+    allowedErrorStatuses: [422],
   });
-  return (await response.json()) as { status_code: number; message: string };
+  return (await response.json()) as {
+    status_code: number;
+    message: string;
+    errors?: unknown[] | null;
+  };
 };

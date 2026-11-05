@@ -142,4 +142,16 @@ describe("FileInputExistingFiles", () => {
     await userEvent.click(secondButton);
     expect(onDeleteMock).not.toHaveBeenCalled();
   });
+  it("still lists the files when deletion is disabled", () => {
+    const fileOne = generateFile(testDateOne, 1);
+    render(
+      <FileInputExistingFiles
+        existingFiles={[fileOne]}
+        onDelete={jest.fn()}
+        disabled={true}
+      />,
+    );
+    expect(screen.getByText("file name 1")).toBeInTheDocument();
+    expect(screen.getByText("1 | savedOn 1995")).toBeInTheDocument();
+  });
 });

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+public/uswds/
+.wrangler/
+upload.log
+# The repo root ignores every `lib/` directory; this one is site source.
+!src/lib/

@@ -1,0 +1,41 @@
+{
+  "scope": "Offline fictional public-route PDF fixtures; not deployed evidence",
+  "body_marker": "SYNTHETIC-NOFO-BODY-CHECK-2026",
+  "fixtures": [
+    {
+      "file": "synthetic-nofo-supported.pdf",
+      "bytes": 2954,
+      "sha256": "23347518a1a72c0be5cab20a743ab37ce3b7b6ea6169815758249e5a6b69f3e1",
+      "expected_behavior": "Report returned with generic/untagged PDF caveats",
+      "expected_recorded_outcome": "success"
+    },
+    {
+      "file": "synthetic-unrelated.pdf",
+      "bytes": 1953,
+      "sha256": "fb17ede3a82c7df7b00a5ce598b12e9dce64af8c7033cb5ba4e31cceecae8866",
+      "expected_behavior": "Document not recognized as an HHS NOFO",
+      "expected_recorded_outcome": "format_unsupported"
+    },
+    {
+      "file": "synthetic-no-text.pdf",
+      "bytes": 1463,
+      "sha256": "791e26fc9009c0140501b32e478f3a278e8466d5d3fef8196a4b9fce84a0f492",
+      "expected_behavior": "Format cannot be determined without extractable text",
+      "expected_recorded_outcome": "format_indeterminate"
+    },
+    {
+      "file": "synthetic-encrypted.pdf",
+      "bytes": 3316,
+      "sha256": "8c7d5b1bf078ab4574ca68cb25e823c7ad78698fd2b3f7a6076513dc0da5e00b",
+      "expected_behavior": "Password-protected PDF rejected",
+      "expected_recorded_outcome": "encrypted"
+    },
+    {
+      "file": "synthetic-invalid.pdf",
+      "bytes": 55,
+      "sha256": "c66795ab6456a97bfd42cc7caef9f4f77e5efe645bc9d3caddaf025070f1542e",
+      "expected_behavior": "Invalid PDF rejected",
+      "expected_recorded_outcome": "invalid_pdf"
+    }
+  ]
+}

@@ -33,7 +33,7 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
@@ -60,9 +60,9 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 for (const { testName, orgLabel } of applicantScenarios) {
-  test.skip(
+  test(
     testName,
-    { tag: [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,

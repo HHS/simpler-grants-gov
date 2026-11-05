@@ -271,3 +271,105 @@ def test_sflll_2_0_invalid_enums(minimal_valid_sflll_v2_0, field, value, sflll_v
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "enum"
     assert validation_issues[0].message.startswith(f"'{value}' is not one of")
+
+
+@pytest.mark.parametrize(
+    "field_path,zip_value",
+    [
+        # reporting_entity uses $defs/reporting_entity_awardee
+        (["reporting_entity", "applicant_reporting_entity", "address"], "12345678901"),
+        (["reporting_entity", "prime_reporting_entity", "address"], "12345678901"),
+        # lobbying_registrant address
+        (["lobbying_registrant", "address"], "12345678901"),
+    ],
+)
+def test_sflll_v2_0_zip_code_max_length(
+    minimal_valid_sflll_v2_0, sflll_v2_0, field_path, zip_value
+):
+    """zip_code exceeding 10 characters triggers maxLength error."""
+    data = minimal_valid_sflll_v2_0
+    target = data
+    for key in field_path[:-1]:
+        target = target.setdefault(key, {})
+    target[field_path[-1]] = {
+        "street1": "123 Main St",
+        "city": "Somecity",
+        "zip_code": zip_value,  # 11 chars — too long
+    }
+    issues = validate_json_schema_for_form(data, sflll_v2_0)
+    zip_path = "." + ".".join(field_path) + ".zip_code"
+    assert any(
+        i.type == "maxLength" and i.field == f"${zip_path}" for i in issues
+    ), f"Expected maxLength error for ${zip_path}, got: {issues}"
+
+
+def test_sflll_v2_0_zip_code_max_length_boundary(minimal_valid_sflll_v2_0, sflll_v2_0):
+    """zip_code of exactly 10 characters is valid."""
+    data = minimal_valid_sflll_v2_0
+    data.setdefault("lobbying_registrant", {})["address"] = {
+        "street1": "123 Main St",
+        "city": "Somecity",
+        "zip_code": "1234567890",  # exactly 10 chars
+    }
+    assert validate_json_schema_for_form(data, sflll_v2_0) == []
+
+
+def test_sflll_v2_0_zip_code_empty_valid(minimal_valid_sflll_v2_0, sflll_v2_0):
+    """Empty zip_code is valid — no minimum length for SF-LLL."""
+    data = minimal_valid_sflll_v2_0
+    data.setdefault("lobbying_registrant", {})["address"] = {
+        "street1": "123 Main St",
+        "city": "Somecity",
+        "zip_code": "",
+    }
+    assert validate_json_schema_for_form(data, sflll_v2_0) == []
+
+
+def _ui_field_types(ui_schema: list) -> dict:
+    """Map each UI definition path to its type ("field" or "null"), walking nested sections."""
+    field_types = {}
+    for item in ui_schema:
+        if isinstance(item.get("definition"), str):
+            field_types[item["definition"]] = item["type"]
+        field_types |= _ui_field_types(item.get("children", []))
+    return field_types
+
+
+@pytest.mark.parametrize("field_name", ["federal_program_name", "assistance_listing_number"])
+def test_sflll_v2_0_pre_populated_fields_are_read_only(sflll_v2_0, field_name):
+    """Pre-populated fields are overwritten on save, so the UI must not let users edit them."""
+    assert "gg_pre_population" in sflll_v2_0.form_rule_schema[field_name]
+    assert _ui_field_types(sflll_v2_0.form_ui_schema)[f"/properties/{field_name}"] == "null"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ["lobbying_registrant", "individual"],
+        ["individual_performing_service", "individual"],
+        ["signature_block", "name"],
+    ],
+)
+def test_sflll_v2_0_name_objects_have_no_title(sflll_v2_0, path):
+    """Without a title, required errors read "First Name is required" with no generic prefix."""
+    schema = sflll_v2_0.form_json_schema
+    for key in path:
+        schema = schema["properties"][key]
+
+    assert all("title" not in part for part in [schema, *schema.get("allOf", [])])
+
+
+@pytest.mark.parametrize(
+    "path,title",
+    [
+        (["contact_person"], "Contact Person"),
+        (["authorized_representative"], "Authorized Representative"),
+    ],
+)
+def test_sf424_v4_0_name_objects_keep_their_own_title(sf424_v4_0, path, title):
+    """Forms that set their own title on the shared name keep it."""
+    schema = sf424_v4_0.form_json_schema
+    for key in path:
+        schema = schema["properties"][key]
+
+    assert schema["title"] == title

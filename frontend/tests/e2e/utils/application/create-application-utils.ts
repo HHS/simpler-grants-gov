@@ -3,6 +3,7 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
+import { buildUniqueTestId } from "tests/e2e/utils/common/unique-test-id-utils";
 
 const { baseUrl } = playwrightEnv;
 
@@ -90,12 +91,20 @@ async function selectOptionByLabelSubstring(
  * @param opportunityUrl Opportunity URL (e.g. "/opportunity/abc123")
  * @param orgLabel Optional organization label. If omitted, the application is created as an individual.
  */
+export type CreatedApplication = {
+  /** The application's id, extracted from the post-creation URL. */
+  applicationId: string | undefined;
+  /** The unique name filled into the application-name field, if present. */
+  applicationName: string | undefined;
+};
+
 export async function createApplication(
   page: Page,
   opportunityUrl: string,
   orgLabel?: string,
-) {
+): Promise<CreatedApplication> {
   const isIndividualApplicant = !orgLabel;
+  let applicationName: string | undefined;
   const requestedLabel = isIndividualApplicant
     ? INDIVIDUAL_APPLICANT_LABEL
     : orgLabel;
@@ -108,16 +117,24 @@ export async function createApplication(
   await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
   });
-  await page.waitForTimeout(3000);
   const startAppButton = page.getByRole("button", {
     name: /start.*application/i,
   });
   await startAppButton.waitFor({ state: "visible", timeout: 15000 });
-  await startAppButton.click();
   const modal = page.locator(
     '[role="dialog"].is-visible, #start-application.is-visible',
   );
-  await expect(modal.locator("select")).toBeVisible({ timeout: 60000 });
+  // The button is visible as soon as the server-rendered HTML arrives, but its
+  // click handler is only attached after React hydrates. A click before then is
+  // silently ignored (seen on WebKit), so the modal never opens. This replaces
+  // the old fixed 3s sleep: re-click until the modal actually appears, but never
+  // click again once it is open.
+  await expect(async () => {
+    if (!(await modal.first().isVisible())) {
+      await startAppButton.click();
+    }
+    await expect(modal.locator("select")).toBeVisible({ timeout: 5000 });
+  }).toPass({ timeout: 60000, intervals: [500, 1000, 2000, 3000] });
   const orgSelect = modal.locator(
     '#create-application-organization-select, select[name*="orgnization"], select[name*="organization"]',
   );
@@ -134,9 +151,9 @@ export async function createApplication(
   );
   if ((await nameInput.count()) > 0) {
     await nameInput.first().waitFor({ state: "visible", timeout: 5000 });
-    const uniqueAppName = `TEST-APPLY-ORG-IND-APP${Date.now()}`;
-    await nameInput.first().fill(uniqueAppName);
-    await expect(nameInput.first()).toHaveValue(uniqueAppName, {
+    applicationName = buildUniqueTestId("TEST-APPLY-ORG-IND-APP");
+    await nameInput.first().fill(applicationName);
+    await expect(nameInput.first()).toHaveValue(applicationName, {
       timeout: 5000,
     });
   }
@@ -150,12 +167,10 @@ export async function createApplication(
   await expect(createButton).toBeEnabled({ timeout: 10000 });
   await createButton.click({ force: true });
   await createRequest;
-  await page.waitForTimeout(3000);
   await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 60000 });
   await page.waitForLoadState("domcontentloaded");
   // Avoid strict networkidle waits on pages with background polling.
   await page.waitForLoadState("load").catch(() => undefined);
-  await page.waitForTimeout(2000);
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
   await expect(
@@ -169,4 +184,15 @@ export async function createApplication(
   }
   // Making this utility generic so it can be shared across all application creation
   // irrespective of forms. Form-specific assertions are handled by individual form utilities.
+
+  // Extracted so callers that need to re-identify this exact application
+  // later (e.g. after navigating to a list of applications) can match by
+  // id instead of assuming "the most recent one" - safe even if another
+  // concurrently-running test creates an application for the same user.
+  const applicationIdMatch = /\/applications\/([a-f0-9-]+)/.exec(page.url());
+
+  return {
+    applicationId: applicationIdMatch?.[1],
+    applicationName,
+  };
 }

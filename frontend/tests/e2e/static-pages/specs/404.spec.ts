@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { STATIC, FULL_REGRESSION, CORE_REGRESSION } = VALID_TAGS;
+const { FULL_REGRESSION } = VALID_TAGS;
 
 const { targetEnv } = playwrightEnv;
 
@@ -34,7 +34,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 // Scenario: Show the 404 page title
-test("has title", { tag: [STATIC, CORE_REGRESSION] }, async ({ page }) => {
+test("has title", { tag: [FULL_REGRESSION] }, async ({ page }) => {
   const timeout = targetEnv !== "local" ? 30000 : 5000;
   // Then the page title should be "Oops, we can't find that page."
   await expect(page).toHaveTitle("Oops, we can't find that page.", {
@@ -45,7 +45,7 @@ test("has title", { tag: [STATIC, CORE_REGRESSION] }, async ({ page }) => {
 // Scenario: Show the link back home
 test(
   "can view the home button",
-  { tag: [STATIC, FULL_REGRESSION] },
+  { tag: [FULL_REGRESSION] },
   async ({ page }) => {
     const timeout = targetEnv !== "local" ? 30000 : 5000;
     await expect(

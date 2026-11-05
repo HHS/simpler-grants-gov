@@ -5,6 +5,6 @@ const tempChunkSeparator = "~~~~~~~";
 // separate that into an array of json strings
 export const unbatchStreamChunkJSON = (streamChunkJson: string): string[] => {
   return streamChunkJson
-    .replace(/}\s*{/, `}${tempChunkSeparator}{`)
+    .replace(/}\s*{/g, `}${tempChunkSeparator}{`)
     .split(tempChunkSeparator);
 };

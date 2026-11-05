@@ -33,12 +33,15 @@ const applyNestedCheckboxFallback = async (
     const nestedId = await nestedCheckbox.getAttribute("id");
     if (nestedId) {
       const label = page.locator(`label[for="${nestedId}"]`).first();
+      // Use longer timeout (10s) for field attachment to handle lazy-loaded labels.
+      await label.waitFor({ state: "attached", timeout: 10000 });
       await label.waitFor({ state: "visible", timeout: 5000 });
+      await label.scrollIntoViewIfNeeded();
       await label.click();
     } else if (shouldBeChecked) {
-      await nestedCheckbox.check({ timeout: 5000 });
+      await nestedCheckbox.check({ timeout: 10000 });
     } else {
-      await nestedCheckbox.uncheck({ timeout: 5000 });
+      await nestedCheckbox.uncheck({ timeout: 10000 });
     }
   }
 
@@ -75,14 +78,20 @@ export const checkboxHandler: FieldHandler = async (
   }
 
   if (locatorCount === 1) {
+    // Use longer timeout (10s) for field attachment to handle lazy-loaded
+    // fields on mobile where form rendering may be progressive/async.
+    await locator.waitFor({ state: "attached", timeout: 10000 });
     await locator.waitFor({ state: "visible", timeout: 5000 });
+    await locator.scrollIntoViewIfNeeded();
   } else {
     if (!field.selectFirstInGroup) {
       throw new Error(
         `Checkbox field ${field.field} matched ${locatorCount} elements. Set selectFirstInGroup=true for intentional checkbox groups.`,
       );
     }
+    await locator.first().waitFor({ state: "attached", timeout: 10000 });
     await locator.first().waitFor({ state: "visible", timeout: 5000 });
+    await locator.first().scrollIntoViewIfNeeded();
   }
 
   /** Sets a locator to the target checked state and verifies the result. */

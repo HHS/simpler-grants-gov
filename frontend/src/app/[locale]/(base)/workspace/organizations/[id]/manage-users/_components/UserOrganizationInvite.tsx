@@ -1,5 +1,6 @@
 import { MissingAuthError } from "src/errors";
 import { getOrganizationRoles } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { UserRole } from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -18,10 +19,16 @@ export async function UserOrganizationInvite({
     organizationRoles = await getOrganizationRoles(organizationId);
   } catch (e) {
     if (e instanceof MissingAuthError) {
-      console.error("unable to display user invites, not logged in");
+      logger.warn(
+        { organizationId },
+        "Unable to display user invites, not logged in",
+      );
       return;
     }
-    console.error("unable to fetch organization roles", e);
+    logger.error(
+      { err: e, organizationId },
+      "Unable to fetch organization roles",
+    );
   }
   return (
     <div className="border-2px border-primary radius-md padding-x-2 padding-y-4">

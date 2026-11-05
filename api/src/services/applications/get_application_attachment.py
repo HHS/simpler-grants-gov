@@ -1,14 +1,14 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 
+import src.adapters.db as db
+from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
-from src.services.applications.get_application import get_application, get_application_with_auth
+from src.services.applications.get_application import get_application_with_auth
 
 logger = logging.getLogger(__name__)
 
@@ -38,21 +38,6 @@ def _get_application_attachment_by_application(
         )
 
     return application_attachment
-
-
-def get_application_attachment(
-    db_session: db.Session,
-    application_id: uuid.UUID,
-    application_attachment_id: uuid.UUID,
-    user: User,
-) -> ApplicationAttachment:
-
-    # Fetch the application
-    application = get_application(db_session, application_id, user)
-
-    return _get_application_attachment_by_application(
-        db_session, application, application_attachment_id
-    )
 
 
 def get_application_attachment_with_auth(

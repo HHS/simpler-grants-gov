@@ -7,6 +7,7 @@ import {
   postedDateOptions,
   statusOptions,
 } from "src/constants/searchFilterOptions";
+import { logger } from "src/services/logger/simplerLogger";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import {
   QueryParamData,
@@ -55,7 +56,7 @@ export async function SearchDrawerFilters({
   try {
     searchResults = await searchResultsPromise;
   } catch (e) {
-    console.error("Search error, cannot set filter facets", e);
+    logger.error({ err: e }, "Search error, cannot set filter facets");
   }
 
   const facetCounts = searchResults?.facet_counts;

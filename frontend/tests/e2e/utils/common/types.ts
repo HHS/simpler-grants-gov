@@ -49,6 +49,7 @@ export interface FillFieldDefinition {
    * test data builders to ensure generated values stay within field limits.
    */
   maxLength?: number;
+  wordLimit?: number;
   dependsOn?: {
     field: string;
     value: string | boolean;
@@ -88,6 +89,7 @@ export type ValidationMetadata = {
   emailValidationMessage?: string;
   negativeNumberValidationMessage?: string;
   characterLimitValidationMessage?: string;
+  wordLimitValidationMessage?: string;
 };
 
 /** Optional duplicate-check pattern for metadata-driven uniqueness assertions. */

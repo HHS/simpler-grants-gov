@@ -6,12 +6,12 @@ const {
   MAILCHIMP_LIST_ID,
   API_URL,
   API_GW_AUTH,
+  AUTH_LOGOUT_URL,
   NEXT_BUILD,
   SESSION_SECRET,
   NEXT_PUBLIC_BASE_URL,
   ENVIRONMENT = "dev",
   FEATURE_APPLY_FORM_PROTOTYPE_OFF,
-  FEATURE_AWARD_RECOMMENDATION_OFF,
   FEATURE_FEATURE_FLAG_ADMIN_OFF,
   FEATURE_MAINTENANCE_BANNER_ENABLED,
   FEATURE_MAINTENANCE_MODE,
@@ -27,7 +27,6 @@ const {
 
 export const envFeatureFlags = {
   applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
-  awardRecommendationOff: FEATURE_AWARD_RECOMMENDATION_OFF,
   featureFlagAdminOff: FEATURE_FEATURE_FLAG_ADMIN_OFF,
   maintenanceBannerEnabled: FEATURE_MAINTENANCE_BANNER_ENABLED,
   maintenanceMode: FEATURE_MAINTENANCE_MODE,
@@ -38,9 +37,9 @@ const legacyHost = (): string => {
   switch (ENVIRONMENT) {
     case "prod":
       return "https://www.grants.gov";
-    case "training":
+    case "infra-training":
       return "https://training.grants.gov";
-    case "staging":
+    case "infra-staging":
       return "https://test.grants.gov";
     case "test":
       return "https://test.grants.gov";
@@ -59,6 +58,7 @@ export const environment: { [key: string]: string } = {
   MAILCHIMP_LIST_ID: MAILCHIMP_LIST_ID || "",
   API_URL: API_URL || "",
   AUTH_LOGIN_URL: AUTH_LOGIN_URL || "",
+  AUTH_LOGOUT_URL: AUTH_LOGOUT_URL || "",
   AUTH_EXPIRATION_TIME: AUTH_EXPIRATION_TIME || "0",
   API_GW_AUTH: API_GW_AUTH || "",
   MAINTENANCE_BANNER_MESSAGE: MAINTENANCE_BANNER_MESSAGE || "",

@@ -1,0 +1,31 @@
+name: Check NOFO production history readiness
+on:
+  workflow_dispatch:
+
+# Serialize with existing NOFO production deployments.
+concurrency:
+  group: cd-nofos-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+      - name: Configure production AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: nofos
+          environment: prod
+      - name: Check history readiness without changing production data
+        run: python3 .github/scripts/nofo_history/check_production.py

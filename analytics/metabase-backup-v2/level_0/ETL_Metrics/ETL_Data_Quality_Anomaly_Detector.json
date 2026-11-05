@@ -1,0 +1,80 @@
+{
+  "name": "ETL Data Quality - Anomaly Detector",
+  "display": "object",
+  "visualization_settings": {
+    "table.columns": [
+      {
+        "name": "etl_health_status",
+        "enabled": true
+      },
+      {
+        "name": "current_day_issue_count",
+        "enabled": true
+      },
+      {
+        "name": "previous_day_issue_count",
+        "enabled": true
+      },
+      {
+        "name": "current_day_deliverable_count",
+        "enabled": true
+      },
+      {
+        "name": "previous_day_deliverable_count",
+        "enabled": true
+      },
+      {
+        "name": "current_day_point_sum",
+        "enabled": true
+      },
+      {
+        "name": "previous_day_point_sum",
+        "enabled": true
+      },
+      {
+        "name": "current_day_sprint_count",
+        "enabled": true
+      },
+      {
+        "name": "current_day_pointed_issue_pct",
+        "enabled": true
+      },
+      {
+        "name": "failure_reason",
+        "enabled": true
+      }
+    ],
+    "column_settings": {
+      "[\"name\",\"previous_day_deliverable_count\"]": {
+        "column_title": "deliverables (previous)"
+      },
+      "[\"name\",\"current_day_point_sum\"]": {
+        "column_title": "total points"
+      },
+      "[\"name\",\"current_day_sprint_count\"]": {
+        "column_title": "sprint count"
+      },
+      "[\"name\",\"current_day_pointed_issue_pct\"]": {
+        "column_title": "pct of issues with points>0 "
+      },
+      "[\"name\",\"etl_health_status\"]": {
+        "column_title": "data validation result"
+      },
+      "[\"name\",\"current_day_task_issue_pct\"]": {
+        "column_title": "pct of issues with type=task"
+      },
+      "[\"name\",\"previous_day_issue_count\"]": {
+        "column_title": "issues (previous)"
+      },
+      "[\"name\",\"previous_day_point_sum\"]": {
+        "column_title": "total points (previous)"
+      },
+      "[\"name\",\"current_day_deliverable_count\"]": {
+        "column_title": "deliverables"
+      },
+      "[\"name\",\"current_day_issue_count\"]": {
+        "column_title": "issues"
+      }
+    }
+  }
+}

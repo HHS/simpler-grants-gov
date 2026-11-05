@@ -1,5 +1,6 @@
 import { PageHeader } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/PageHeader";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData, FetchedResource } from "src/types/authTypes";
 
@@ -39,8 +40,11 @@ export async function ManageUsersPageContent({
 
   try {
     userOrganizations = await getOrganizationDetails(organizationId);
-  } catch (error) {
-    console.error("Unable to fetch organization information", error);
+  } catch (e) {
+    logger.error(
+      { err: e, organizationId },
+      "Unable to fetch organization information",
+    );
   }
   const name = userOrganizations?.sam_gov_entity?.legal_business_name;
 

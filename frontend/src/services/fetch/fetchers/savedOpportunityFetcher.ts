@@ -2,6 +2,7 @@
 
 import { getSession } from "src/services/auth/session";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { logger } from "src/services/logger/simplerLogger";
 import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { SavedOpportunitiesScope } from "src/types/opportunity/savedOpportunitiesTypes";
 import {
@@ -120,8 +121,8 @@ export const fetchSavedOpportunities = async (
       organizationIdsFilter,
     );
     return savedOpportunities;
-  } catch (error: unknown) {
-    console.error("Error fetching saved opportunities:", error);
+  } catch (e: unknown) {
+    logger.error({ err: e }, "Error fetching saved opportunities");
     return [];
   }
 };

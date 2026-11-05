@@ -3,7 +3,6 @@ import re
 from datetime import datetime
 from unittest import mock
 
-from grants_shared.util import file_util
 from lxml import etree
 from sqlalchemy import func, select
 
@@ -22,6 +21,7 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPResponse,
 )
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
+from src.util import file_util
 from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -1445,6 +1445,69 @@ def test_get_opportunity_list_always_calls_legacy_and_not_simpler(
 
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+def test_get_application_list_expanded_returns_error_message_for_invalid_filter(
+    mock_get_soap_response, client, enable_factory_create
+) -> None:
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:GetApplicationListExpandedRequest>
+        "<gran:ExpandedApplicationFilter>"
+        "<gran:FilterType>XXXXXXXXXX</gran:FilterType>"
+        "<gran:FilterValue>CFDA-PER-123</gran:FilterValue>"
+        "</gran:ExpandedApplicationFilter>"
+        </agen:GetApplicationListExpandedRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_VIEWER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path,
+        data=etree.tostring(envelope),
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert, "Use-Simpler-Override": "1"},
+    )
+    assert response.status_code == 500
+    assert (
+        "<faultstring>Encountered invalid filter type XXXXXXXXXX</faultstring>"
+        in response.data.decode()
+    )
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_get_application_list_expanded_always_calls_legacy_and_simpler(
+    mock_get_simpler_soap_response, mock_get_soap_response, client, enable_factory_create
+) -> None:
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:GetApplicationListExpandedRequest>
+        </agen:GetApplicationListExpandedRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_VIEWER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path,
+        data=etree.tostring(envelope),
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert},
+    )
+    assert response.status_code == 200
+    mock_get_soap_response.assert_called_once()
+    mock_get_simpler_soap_response.assert_called_once()
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 @mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
 def test_get_submission_list_expanded_always_calls_legacy_and_simpler(
     mock_get_simpler_soap_response, mock_get_soap_response, client, enable_factory_create
@@ -1728,6 +1791,79 @@ def test_calls_simpler_if_using_simpler_tracking_number(
     assert response.status_code == 200
     mock_get_soap_response.assert_not_called()
     mock_get_simpler_soap_response.assert_called_once()
+
+
+@mock.patch("uuid.uuid4")
+def test_update_application_info_successfully_handles_alternate_request_body(
+    mock_uuid,
+    db_session,
+    client,
+    enable_factory_create,
+) -> None:
+    mock_uuid.return_value = TEST_UUID
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_ASSIGNER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    ApplicationSubmissionRetrievedFactory.create(
+        application_submission=submission,
+        created_by_user=user,
+        modified_by_user=user,
+    )
+    mock_data = f"""
+        <?xml version='1.0' encoding='UTF-8'?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+        <soapenv:Body>
+        <agen:UpdateApplicationInfoRequest xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0">
+        <gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>
+        <agen1:AssignAgencyTrackingNumber xmlns:agen1="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0">test agency number</agen1:AssignAgencyTrackingNumber>
+        <agen1:SaveAgencyNotes xmlns:agen1="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0">your note text</agen1:SaveAgencyNotes>
+        </agen:UpdateApplicationInfoRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """.encode("utf-8")
+    response = client.post(
+        full_path,
+        data=mock_data,
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert, "Use-Simpler-Override": "1"},
+    )
+    expected = (
+        f"--uuid:{TEST_UUID}\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        "Content-Transfer-Encoding: binary\r\n"
+        "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<ns2:UpdateApplicationInfoResponse "
+        'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+        'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+        'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+        'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+        'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
+        'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+        'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+        'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+        'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+        'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+        'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
+        "<ns2:Success>true</ns2:Success>"
+        "<ns9:AssignAgencyTrackingNumberResult><ns9:Success>true</ns9:Success></ns9:AssignAgencyTrackingNumberResult>"
+        "<ns9:SaveAgencyNotesResult><ns9:Success>true</ns9:Success></ns9:SaveAgencyNotesResult>"
+        "</ns2:UpdateApplicationInfoResponse>"
+        "</soap:Body></soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--"
+    ).encode("utf-8")
+    assert response.data == expected
 
 
 def post_get_submission_list_expanded(client, add_to_headers=None):

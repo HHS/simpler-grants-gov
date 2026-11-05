@@ -1,6 +1,5 @@
 import { expect, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
-import { waitForURLChange } from "tests/e2e/playwrightUtils";
 
 const { targetEnv } = playwrightEnv;
 
@@ -48,7 +47,7 @@ export async function saveOpportunityViaSearch(
   // Navigate directly to Search - avoids mobile hamburger nav state
 
   await page.goto("/search");
-  await waitForURLChange(page, (url) => !!url.match(/\/search/));
+  await page.waitForURL(/\/search/);
 
   // Search for the opportunity by title
   const searchBox = page.getByRole("searchbox", {
@@ -62,23 +61,31 @@ export async function saveOpportunityViaSearch(
   await page.getByRole("button", { name: "Search", exact: true }).click();
 
   // Open the opportunity detail page from search results
-  await page.getByRole("link", { name: title }).first().click();
-
-  await waitForURLChange(
-    page,
-
-    (url) => !!url.match(/opportunity|opportunities/),
-  );
+  // On Webkit the click can land before results are hydrated and is silently
+  // ignored, so retry the click until we actually land on the detail page.
+  const resultLink = page.getByRole("link", { name: title }).first();
+  await expect(async () => {
+    if (!/\/opportunity\//.test(page.url())) {
+      await resultLink.click({ timeout: 5000 });
+    }
+    await page.waitForURL(/\/opportunity\//, { timeout: 8000 });
+  }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000, 3000] });
 
   // Save the opportunity via the save button
-  await page.getByTestId("simpler-save-button").click();
-
-  // Wait for the UI to confirm the save completed before navigating away.
-  await expect(page.getByTestId("simpler-save-button")).toContainText(/saved/i);
+  // Webkit can ignore a click made before hydration, so re-click only while the
+  // button still shows the unsaved state (never toggles an already-saved item).
+  const saveButton = page.getByTestId("simpler-save-button");
+  await expect(async () => {
+    const text = (await saveButton.textContent()) ?? "";
+    if (!/saved/i.test(text)) {
+      await saveButton.click({ timeout: 5000 });
+    }
+    await expect(saveButton).toContainText(/saved/i, { timeout: 5000 });
+  }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000, 3000] });
 
   // Return to Saved Opportunities via direct navigation - avoids mobile nav state
   await page.goto("/saved-opportunities");
-  await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
+  await page.waitForURL(/saved-opportunities/);
 
   // Confirm the page has settled and the opportunity link is visible
   await assertSavedOpportunitiesPageReady(page, title);

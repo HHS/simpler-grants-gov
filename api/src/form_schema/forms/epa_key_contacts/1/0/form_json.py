@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -437,6 +438,7 @@ EPA_KEY_CONTACT_v2_0 = Form(
     form_version="2.0",
     agency_code="SGG",
     omb_number="2030-0020",
+    expiration_date=date(2029, 2, 28),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     # No rule schema needed

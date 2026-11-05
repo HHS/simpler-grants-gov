@@ -11,7 +11,7 @@ export interface OpportunityAssistanceListing {
 
 export interface OpportunityDocument {
   file_name: string;
-  download_path: string;
+  download_path: string | null;
   updated_at: string;
   file_description?: string;
 }

@@ -27,7 +27,7 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
@@ -39,7 +39,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "Budget Narrative Attachment Form - error validation on empty save",
-  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+  { tag: [APPLY_FORMS, FULL_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,
@@ -73,6 +73,13 @@ test(
         "Could not find or open Budget Narrative Attachment Form link on the application forms page",
       );
     }
+
+    // Wait for form content to be fully rendered and interactive
+    // Check for form heading to ensure the form is ready
+    await page
+      .getByText(BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER, { exact: false })
+      .first()
+      .waitFor({ state: "visible", timeout: 15000 });
 
     // When the user attempts to save with no file uploaded for required attachment fields
     await saveForm(page, true); // expect validation errors

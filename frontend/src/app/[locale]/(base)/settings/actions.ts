@@ -2,6 +2,7 @@
 
 import { getSession } from "src/services/auth/session";
 import { updateUserDetails } from "src/services/fetch/fetchers/userFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { UserProfileResponse } from "src/types/userTypes";
 import { z } from "zod";
 
@@ -60,12 +61,10 @@ export const userProfileAction = async (
     return { data: userDetailsUpdateResponse, success: true };
   } catch (e) {
     // General try failure catch error
-    const error = e as Error;
-    console.error(
-      `Error updating user details - ${error.message} ${error.cause?.toString() || ""}`,
-    );
+    const typedError = e as Error;
+    logger.error({ err: typedError }, "Error updating user details");
     return {
-      errorMessage: error.message,
+      errorMessage: typedError.message,
       data: rawFormData,
     };
   }

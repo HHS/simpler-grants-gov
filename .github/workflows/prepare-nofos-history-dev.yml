@@ -1,0 +1,34 @@
+name: Prepare NOFO document history - dev
+run-name: Prepare NOFO document history in dev
+
+on:
+  workflow_dispatch:
+
+# Same group as deploy-nofos.yml for dev, which maps to infra-dev.
+concurrency:
+  group: cd-nofos-infra-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Backfill and check dev history
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+      - name: Configure dev AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: nofos
+          environment: infra-dev
+      - name: Prepare document history
+        run: python3 .github/scripts/nofo_history/prepare_dev.py

@@ -1,5 +1,7 @@
 "use client";
 
+import { postUserEvent } from "src/services/event/postUserEvent";
+
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
@@ -31,6 +33,12 @@ export const EditAppFilingName = ({
         opener
         className="usa-nav__link font-sans-2xs text-normal border-0 margin-left-1"
         data-testid="sign-in-button"
+        onClick={() =>
+          postUserEvent({
+            name: "click_edit_application_name",
+            properties: { applicationId },
+          })
+        }
       >
         <USWDSIcon className="usa-icon margin-right-01" name="edit" />
         {t("buttonText")}

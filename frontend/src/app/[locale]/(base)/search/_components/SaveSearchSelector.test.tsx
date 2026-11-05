@@ -34,7 +34,7 @@ jest.mock("src/hooks/useClientFetch", () => ({
 
 describe("SaveSearchSelector", () => {
   beforeEach(() => {
-    mockUseUser.mockReturnValue({ user: { token: "a token" } });
+    mockUseUser.mockReturnValue({ user: { isLoggedIn: true } });
     fakeSearchParams = new ReadonlyURLSearchParams();
   });
   afterEach(() => {
@@ -141,7 +141,7 @@ describe("SaveSearchSelector", () => {
     expect(selectedOption).toHaveTextContent(fakeSavedSearchRecord.name);
   });
   it("fetches saved searches at initial render, login, and new saved search", () => {
-    mockUseUser.mockReturnValue({ user: { token: "first token" } });
+    mockUseUser.mockReturnValue({ user: { isLoggedIn: false } });
     clientFetchMock.mockResolvedValue([fakeSavedSearchRecord]);
     const { rerender } = render(
       <SaveSearchSelector
@@ -152,7 +152,7 @@ describe("SaveSearchSelector", () => {
     );
 
     expect(clientFetchMock).toHaveBeenCalledTimes(1);
-    mockUseUser.mockReturnValue({ user: { token: "second token" } });
+    mockUseUser.mockReturnValue({ user: { isLoggedIn: true } });
 
     rerender(
       <SaveSearchSelector
@@ -175,7 +175,7 @@ describe("SaveSearchSelector", () => {
     expect(clientFetchMock).toHaveBeenCalledTimes(3);
   });
   it("sets selected search based on savedSearch query parameter", async () => {
-    mockUseUser.mockReturnValue({ user: { token: "first token" } });
+    mockUseUser.mockReturnValue({ user: { isLoggedIn: true } });
     clientFetchMock.mockResolvedValue([]);
     fakeSearchParams = new ReadonlyURLSearchParams(
       `savedSearch=${fakeSavedSearchRecord.saved_search_id}`,

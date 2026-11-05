@@ -63,4 +63,33 @@ describe("SaveButton", () => {
     expect(screen.queryByText("Saved")).not.toBeInTheDocument();
     expect(screen.getByText("Loading")).toBeInTheDocument();
   });
+  it("stays focusable but ignores clicks while loading", () => {
+    const buttonClick = jest.fn();
+    render(
+      <SaveButton
+        {...SaveButtonProps}
+        loading={true}
+        buttonClick={buttonClick}
+      />,
+    );
+    const saveButton = screen.getByRole("button", { name: "Loading" });
+    expect(saveButton).toBeEnabled();
+    expect(saveButton).toHaveAttribute("aria-disabled", "true");
+    saveButton.click();
+    expect(buttonClick).not.toHaveBeenCalled();
+  });
+  it("adds visually hidden context to the button name", () => {
+    render(
+      <SaveButton
+        {...SaveButtonProps}
+        loading={false}
+        accessibleContext="opportunity: Test Opportunity"
+      />,
+    );
+    expect(
+      screen.getByRole("button", {
+        name: "Saved opportunity: Test Opportunity",
+      }),
+    ).toBeInTheDocument();
+  });
 });

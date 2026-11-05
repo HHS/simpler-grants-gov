@@ -11,7 +11,7 @@ const HomepageInvolved = () => {
 
   return (
     <HomePageSection
-      className="padding-y-6 bg-base-lightest"
+      className="padding-y-6 bg-base-lightest footer-blend-lightest"
       title={t("title")}
     >
       <Grid

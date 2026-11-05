@@ -8,7 +8,7 @@ import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-const { AUTH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } = VALID_TAGS;
+const { SMOKE, FULL_REGRESSION } = VALID_TAGS;
 const { baseUrl, targetEnv } = playwrightEnv;
 
 const TEST_REDIRECT_TIMEOUT = targetEnv === "local" ? 5000 : 30000;
@@ -54,7 +54,7 @@ test.describe("Login Page Redirect", () => {
   // Scenario: should redirect to home page when no redirect URL is stored
   test(
     "should redirect to home page when no redirect URL is stored",
-    { tag: [AUTH, CORE_REGRESSION] },
+    { tag: [FULL_REGRESSION] },
     async ({ page }) => {
       // Given I navigate to the Simpler Grants site (done in beforeEach)
       // When I open the login page
@@ -67,7 +67,7 @@ test.describe("Login Page Redirect", () => {
   // Scenario: should redirect to stored URL after login
   test(
     "should redirect to stored URL after login",
-    { tag: [SMOKE, AUTH] },
+    { tag: [SMOKE] },
     async ({ page }) => {
       // Given I have stored "/grantor/opportunities" as the login redirect
       await page.evaluate(() => {
@@ -82,7 +82,7 @@ test.describe("Login Page Redirect", () => {
   // Scenario: should redirect to home page when stored URL is empty
   test(
     "should redirect to home page when stored URL is empty",
-    { tag: [AUTH, CORE_REGRESSION] },
+    { tag: [FULL_REGRESSION] },
     async ({ page }) => {
       // Given I have stored "/" as the login redirect
       await page.evaluate(() => {
@@ -99,7 +99,7 @@ test.describe("Login Page Redirect", () => {
   // Scenario: should redirect to home page when stored URL is external
   test(
     "should redirect to home page when stored URL is external",
-    { tag: [AUTH, SMOKE] },
+    { tag: [SMOKE] },
     async ({ page }) => {
       // Given I have stored "https://external.com" as the login redirect
       await page.evaluate(() => {
@@ -116,7 +116,7 @@ test.describe("Login Page Redirect", () => {
   // Scenario: should display "Redirecting..." text while redirecting
   test(
     'should display "Redirecting..." text while redirecting',
-    { tag: [AUTH, FULL_REGRESSION] },
+    { tag: [FULL_REGRESSION] },
     async ({ page }) => {
       // Given I have stored "/grantor/opportunities" as the login redirect
       await page.evaluate(() => {

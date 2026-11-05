@@ -20,7 +20,7 @@ import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-sta
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
@@ -31,7 +31,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "Application form completion happy path - SF424D",
-  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+  { tag: [APPLY_FORMS, FULL_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

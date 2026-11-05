@@ -2,11 +2,11 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
-from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.constants.email_constants import EmailType
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedSearch
@@ -18,6 +18,7 @@ from src.task.notifications.search_notification import (
     SearchNotificationTask,
     _strip_pagination_params,
 )
+from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 
@@ -76,6 +77,7 @@ def test_search_notifications_cli(
     caplog,
     ses_client,
     get_sent_emails,
+    sent_email_tags,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
 
@@ -150,6 +152,7 @@ def test_search_notifications_cli(
     emails = get_sent_emails()
     assert len(emails) == 1
     assert emails[0].destinations["ToAddresses"] == ["test@example.com"]
+    assert sent_email_tags[0].email_tags == {"email_type": EmailType.SEARCH_UPDATES}
 
     # Verify notification log was created
     notification_logs = (

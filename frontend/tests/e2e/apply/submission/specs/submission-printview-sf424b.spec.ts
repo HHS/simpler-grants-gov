@@ -23,6 +23,7 @@ import {
 import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
+  assertPrintViewIsReadOnly,
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
@@ -33,7 +34,7 @@ import {
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
+const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
@@ -62,7 +63,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 for (const { testName, orgLabel } of applicantScenarios) {
   test(
     testName,
-    { tag: [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
@@ -136,6 +137,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
       for (const { printUrl } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
+        // Verify print view is read-only before checking field values
+        await assertPrintViewIsReadOnly(page);
+
+        // Now verify the post-populated field values exist and are populated
         await expect(page.getByTestId("signature")).toBeVisible();
         await expect(page.getByTestId("signature")).not.toBeEmpty();
 

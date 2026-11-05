@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -26,7 +27,17 @@ _SITE_LOCATION_PROPERTIES = {
         "description": "Enter the UEI associated with the organization where the project will be performed.",
     },
     "address": {
-        "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+        "allOf": [
+            {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+            # if country is US, zip_code must be at least 9 characters
+            {
+                "if": {
+                    "properties": {"country": {"const": "USA: UNITED STATES"}},
+                    "required": ["country"],
+                },
+                "then": {"properties": {"zip_code": {"minLength": 9}}},
+            },
+        ],
         "title": "Address",
         "description": "Enter the performance site address.",
     },
@@ -392,6 +403,7 @@ ProjectPerformanceSiteLocation_v4_0 = Form(
     form_version="4.0",
     agency_code="SGG",
     omb_number="4040-0010",
+    expiration_date=date(2029, 8, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,

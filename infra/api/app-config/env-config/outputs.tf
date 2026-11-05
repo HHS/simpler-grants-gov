@@ -33,10 +33,12 @@ output "service_config" {
     app_environment_name            = coalesce(var.app_environment_name, var.environment)
     domain_name                     = var.domain_name
     secondary_domain_names          = var.secondary_domain_names
+    scanner_callback_domain_name    = var.scanner_callback_domain_name
     s3_cdn_domain_name              = var.s3_cdn_domain_name
     enable_cdn_alias                = var.enable_cdn_alias
     mtls_domain_name                = var.mtls_domain_name
     enable_api_gateway_domain_name  = var.enable_api_gateway_domain_name
+    enable_secure_alb               = var.enable_secure_alb
     enable_https                    = var.enable_https
     region                          = var.default_region
     cpu                             = var.instance_cpu
@@ -96,15 +98,29 @@ output "sqs_config" {
   value = local.sqs_config
 }
 
-output "workflow_service_config" {
+output "submission_consumer_config" {
   value = {
-    enable        = var.enable_workflow_service
-    cpu           = var.workflow_service_cpu
-    memory        = var.workflow_service_memory
-    desired_count = var.workflow_service_desired_count
+    enable        = var.enable_submission_consumer
+    cpu           = var.submission_consumer_cpu
+    memory        = var.submission_consumer_memory
+    desired_count = var.submission_consumer_desired_count
+  }
+}
+
+output "processor_service_config" {
+  value = {
+    enable        = var.enable_processor_service
+    cpu           = var.processor_service_cpu
+    memory        = var.processor_service_memory
+    desired_count = var.processor_service_desired_count
+    command       = var.processor_service_command
   }
 }
 
 output "file_scan_cache_config" {
   value = local.file_scan_cache_config
+}
+
+output "monitoring_config" {
+  value = local.monitoring_config
 }

@@ -2,16 +2,15 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.base import TimestampMixin
 from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType, WorkflowType
 from src.db.models.api_schema_table import ApiSchemaTable
-from src.db.models.award_recommendation_models import AwardRecommendation
+from src.db.models.base import TimestampMixin
 from src.db.models.competition_models import Application, ApplicationSubmission
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import LkApprovalResponseType, LkApprovalType, LkWorkflowType
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
@@ -51,7 +50,7 @@ class Workflow(ApiSchemaTable, TimestampMixin):
         table_name="workflow",
         schema="api",
         # THIS NEEDS TO MATCH WHATEVER COLUMNS YOU ADDED BELOW
-        condition="num_nonnulls(opportunity_id, application_id, application_submission_id, award_recommendation_id) = 1",
+        condition="num_nonnulls(opportunity_id, application_id, application_submission_id) = 1",
     )
     """
     # In addition, you need to add the same thing to the downgrade() function
@@ -60,7 +59,7 @@ class Workflow(ApiSchemaTable, TimestampMixin):
     __table_args__ = (
         CheckConstraint(
             # This check constraint ensures that exactly 1 of the entity columns is not null, no more, no less.
-            "num_nonnulls(opportunity_id, application_id, application_submission_id, award_recommendation_id) = 1",
+            "num_nonnulls(opportunity_id, application_id, application_submission_id) = 1",
             name="exactly_one_nonnull_entity",
         ),
         # Need to define the table args like this to inherit whatever we set on the super table
@@ -105,17 +104,6 @@ class Workflow(ApiSchemaTable, TimestampMixin):
         ApplicationSubmission
     )
 
-    award_recommendation_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey(AwardRecommendation.award_recommendation_id),
-    )
-
-    award_recommendation: Mapped[AwardRecommendation | None] = relationship(
-        AwardRecommendation,
-        back_populates="workflows",
-        foreign_keys=[award_recommendation_id],
-        overlaps="review_workflow",
-    )
-
     def get_log_extra(self) -> dict[str, Any]:
         return {
             "workflow_id": self.workflow_id,
@@ -125,7 +113,6 @@ class Workflow(ApiSchemaTable, TimestampMixin):
             "opportunity_id": self.opportunity_id,
             "application_id": self.application_id,
             "application_submission_id": self.application_submission_id,
-            "award_recommendation_id": self.award_recommendation_id,
         }
 
 

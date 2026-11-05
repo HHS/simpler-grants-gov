@@ -143,6 +143,11 @@ resource "aws_lambda_function" "scanner" {
   memory_size = var.scanner_memory_size
   timeout     = var.scanner_timeout
 
+
+  ephemeral_storage {
+    size = var.scanner_ephemeral_storage_size
+  }
+
   publish = true
 
   # Bound parallel scans so a burst of uploads can't exhaust the account

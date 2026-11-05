@@ -1,14 +1,14 @@
 from collections.abc import Sequence
 from uuid import UUID
 
-from grants_shared.adapters import db
-from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
-from grants_shared.pagination.paginator import Paginator
-from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import select
 
+from src.adapters import db
 from src.db.models.user_models import UserSavedSearch
+from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.pagination.paginator import Paginator
+from src.pagination.sorting_util import apply_sorting
 
 
 class SavedSearchListParams(BaseModel):

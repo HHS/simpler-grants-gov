@@ -24,6 +24,12 @@ MTLS_ALB_NAME = os.environ.get("MTLS_ALB_NAME", "")
 NR_ENTITY_GUID = os.environ.get("NR_ENTITY_GUID", "")
 NR_MTLS_ENTITY_GUID = os.environ.get("NR_MTLS_ENTITY_GUID", "")
 
+# New Relic reporting names. Differ from the ALB names when an environment stands in for
+# another (e.g. infra-staging reports as frontend-staging so it lands on the same entity
+# as the environment it replaces). The aws.alb.name attribute stays truthful.
+NR_ENTITY_NAME = os.environ.get("NR_ENTITY_NAME", "")
+NR_MTLS_ENTITY_NAME = os.environ.get("NR_MTLS_ENTITY_NAME", "")
+
 # Max log entries per New Relic Logs API request
 BATCH_SIZE = 1000
 
@@ -106,6 +112,15 @@ def get_entity_guid(alb_name):
     if MTLS_ALB_NAME and alb_name == MTLS_ALB_NAME and NR_MTLS_ENTITY_GUID:
         return NR_MTLS_ENTITY_GUID
     return ""
+
+
+def get_entity_name(alb_name):
+    """Return the New Relic reporting name for the given ALB name."""
+    if alb_name == ALB_NAME and NR_ENTITY_NAME:
+        return NR_ENTITY_NAME
+    if MTLS_ALB_NAME and alb_name == MTLS_ALB_NAME and NR_MTLS_ENTITY_NAME:
+        return NR_MTLS_ENTITY_NAME
+    return alb_name
 
 
 def send_to_newrelic(nr_payload, nr_license_key):
@@ -198,6 +213,7 @@ def process_log_file(bucket, key):
     total = 0
     for alb_name, entries in entries_by_alb.items():
         entity_guid = get_entity_guid(alb_name)
+        entity_name = get_entity_name(alb_name)
         common_attributes = {
             "logtype": "alb-access-logs",
             "plugin": "s3-lambda-forwarder",
@@ -206,8 +222,8 @@ def process_log_file(bucket, key):
             "aws.accountId": AWS_ACCOUNT_ID,
             "aws.region": region,
             "aws.alb.name": alb_name,
-            "hostname": alb_name,
-            "entity.name": alb_name,
+            "hostname": entity_name,
+            "entity.name": entity_name,
             "entity.type": "AWSALB",
             "provider": "Alb",
         }

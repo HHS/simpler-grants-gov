@@ -1,8 +1,25 @@
 import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { createApplicationAttachment } from "src/services/fetch/fetchers/applicationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 
 import { NextResponse } from "next/server";
+
+// generic message returned for any upstream or internal failure
+const GENERIC_FAILURE_MESSAGE = "Error failed to upload attachment";
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// pending_file_id arrives from the browser, so anything that is not a UUID string is
+// rejected before it reaches the API
+const parsePendingFileId = (value: unknown): string | null => {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return UUID_PATTERN.test(trimmed) ? trimmed : null;
+};
 
 export const createApplicationAttachmentHandler = async (
   req: Request,
@@ -16,11 +33,9 @@ export const createApplicationAttachmentHandler = async (
 
   const { applicationId } = await options.params;
 
-  let pendingFileId: string | undefined;
+  let body: unknown;
   try {
-    ({ pending_file_id: pendingFileId } = (await req.json()) as {
-      pending_file_id?: string;
-    });
+    body = (await req.json()) as unknown;
   } catch {
     return NextResponse.json(
       { message: "Malformed request body" },
@@ -28,9 +43,15 @@ export const createApplicationAttachmentHandler = async (
     );
   }
 
+  const rawPendingFileId =
+    body && typeof body === "object" && !Array.isArray(body)
+      ? (body as Record<string, unknown>).pending_file_id
+      : undefined;
+  const pendingFileId = parsePendingFileId(rawPendingFileId);
+
   if (!pendingFileId) {
     return NextResponse.json(
-      { message: "Missing pending_file_id" },
+      { message: "Invalid pending_file_id" },
       { status: 400 },
     );
   }
@@ -39,12 +60,17 @@ export const createApplicationAttachmentHandler = async (
     const res = await createApplicationAttachment(applicationId, pendingFileId);
     return NextResponse.json({ data: res.data });
   } catch (e) {
-    const { status, message } = readError(e as Error, 500);
-    return NextResponse.json(
+    const { status } = readError(e as Error, 500);
+    // logged server side only
+    logger.error(
       {
-        message: `Error failed to upload attachment: ${message}`,
+        err: e,
+        applicationId,
+        status,
+        awsTraceId: req.headers.get("X-Amz-Cf-Id"),
       },
-      { status },
+      "Error creating application attachment",
     );
+    return NextResponse.json({ message: GENERIC_FAILURE_MESSAGE }, { status });
   }
 };

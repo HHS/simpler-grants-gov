@@ -6,6 +6,7 @@ import {
   deleteApiKeyHandler,
   renameApiKeyHandler,
 } from "src/app/api/user/api-keys/[apiKeyId]/handler";
+import { ValidationError } from "src/errors";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { UserSession } from "src/types/authTypes";
 import { createMockApiKey } from "src/utils/testing/fixtures";
@@ -49,6 +50,7 @@ jest.mock("src/services/fetch/fetchers/apiKeyFetcher", () => ({
 interface JsonData {
   message: string;
   data?: ApiKey;
+  errorType?: string;
 }
 
 const mockApiKeyResponse: ApiKey = createMockApiKey({
@@ -182,6 +184,30 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
     expect(response.status).toBe(400);
     expect(data.message).toContain("No key name supplied for API key");
     expect(mockHandleRenameApiKey).not.toHaveBeenCalled();
+  });
+
+  it("passes the API validation error type through on a duplicate name", async () => {
+    mockHandleRenameApiKey.mockRejectedValueOnce(
+      new ValidationError("An API key with this name already exists", {
+        field: "key_name",
+        type: "duplicate_api_key_name",
+      }),
+    );
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: JSON.stringify({ key_name: "Existing Name" }),
+      },
+    );
+
+    const params = Promise.resolve({ apiKeyId: "test-key-id" });
+    const response = await renameApiKeyHandler(request, { params });
+    const data = (await response.json()) as JsonData;
+
+    expect(response.status).toBe(422);
+    expect(data.errorType).toBe("duplicate_api_key_name");
   });
 
   it("handles API key rename failure", async () => {

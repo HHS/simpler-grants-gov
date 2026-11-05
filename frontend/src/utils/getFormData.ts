@@ -1,10 +1,12 @@
 import { RJSFSchema } from "@rjsf/utils";
+import { ErrorObject } from "ajv";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
   getApplicationFormDetails,
   getApplicationFormDetailsForPrint,
 } from "src/services/fetch/fetchers/applicationFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import {
   ApplicationFormDetail,
   ApplicationResponseDetail,
@@ -35,6 +37,30 @@ type FormDataResult =
       };
     };
 
+const MAX_LOGGED_SCHEMA_ERRORS = 5;
+
+/*
+  Condenses ajv output to a single line. Logging the whole ui schema plus every
+  error produced hundreds of lines per invalid form, which buried the rest of the
+  server and e2e output. `params` is kept because ajv puts the offending key in
+  there rather than in `message` for keywords like additionalProperties and enum.
+*/
+const summarizeUiSchemaErrors = (errors: ErrorObject[]) => {
+  const summary = errors
+    .slice(0, MAX_LOGGED_SCHEMA_ERRORS)
+    .map((error) => {
+      const params = Object.keys(error.params ?? {}).length
+        ? ` ${JSON.stringify(error.params)}`
+        : "";
+
+      return `${error.instancePath || "/"}: ${error.message ?? "invalid"}${params}`;
+    })
+    .join("; ");
+  const remaining = errors.length - MAX_LOGGED_SCHEMA_ERRORS;
+
+  return remaining > 0 ? `${summary} (+${remaining} more)` : summary;
+};
+
 /*
   fetches application form data
   validates ui schema
@@ -60,7 +86,10 @@ export default async function getFormData({
     const session = await getSession();
 
     if (!session || !session.token) {
-      console.error("No active session to access form");
+      logger.error(
+        { applicationId, appFormId },
+        "No active session to access form",
+      );
       return { error: "UnauthorizedError" };
     }
   }
@@ -73,9 +102,9 @@ export default async function getFormData({
     const response = await formDetailsPromise;
 
     if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving form details for applicationID (${applicationId}), appFormId (${appFormId})`,
-        response,
+      logger.error(
+        { applicationId, appFormId, status_code: response.status_code },
+        "Error retrieving form details",
       );
       return { error: "TopLevelError" };
     }
@@ -83,15 +112,18 @@ export default async function getFormData({
     applicationFormData = response.data;
     formData = applicationFormData.form;
     if (!formData) {
-      console.error(
-        `No form data found for applicationID (${applicationId}), appFormId (${appFormId}))`,
-      );
+      logger.error({ applicationId, appFormId }, "No form data found");
       return { error: "TopLevelError" };
     }
 
     if (applicationFormData.application_form_id !== appFormId) {
-      console.error(
-        `Application form ids do not match: ${applicationFormData.application_form_id} & ${appFormId}`,
+      logger.error(
+        {
+          applicationId,
+          appFormId,
+          responseAppFormId: applicationFormData.application_form_id,
+        },
+        "Application form ids do not match",
       );
       return { error: "TopLevelError" };
     }
@@ -105,9 +137,9 @@ export default async function getFormData({
     }
 
     if (errorStatus === 404) {
-      console.error(
-        `Error retrieving application details for applicationID (${applicationId}), appFormId ${appFormId}:`,
-        e,
+      logger.error(
+        { err: e, applicationId, appFormId },
+        "Error retrieving application details",
       );
       return { error: "NotFound" };
     }
@@ -124,10 +156,9 @@ export default async function getFormData({
   } = formData;
   const schemaErrors = validateUiSchema(formUiSchema);
   if (schemaErrors) {
-    console.error(
-      `Error validating form ui schema for form id: ${formId}`,
-      formUiSchema,
-      schemaErrors,
+    logger.error(
+      { formId, schemaErrors: summarizeUiSchemaErrors(schemaErrors) },
+      "Error validating form ui schema",
     );
     return { error: "TopLevelError" };
   }
@@ -149,7 +180,7 @@ export default async function getFormData({
       },
     };
   } catch (e) {
-    console.error(`Error parsing JSON schema for form id: ${formId}`, e);
+    logger.error({ err: e, formId }, "Error parsing JSON schema");
     return { error: "TopLevelError" };
   }
 }

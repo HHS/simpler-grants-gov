@@ -52,6 +52,16 @@ variable "enable_api_gateway_domain_name" {
   default     = true
 }
 
+variable "enable_secure_alb" {
+  type        = bool
+  description = <<EOT
+    API Gateway reaches the ALB over a private VPC Link,
+    and the ALB drops its 0.0.0.0/0 ingress in favour of the VPC Link.
+  EOT
+  default     = false
+}
+
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
@@ -249,7 +259,7 @@ variable "database_newrelic_entity_guid" {
 
 variable "database_deletion_protection" {
   type        = bool
-  description = "Whether to enable deletion protection on the RDS cluster. When null, derives from whether the environment is grantee1 or grantee2."
+  description = "Whether to enable deletion protection on the RDS cluster."
   default     = true
 }
 
@@ -257,6 +267,12 @@ variable "secondary_domain_names" {
   type        = list(string)
   description = "A list of domain names the ALB can also use"
   default     = []
+}
+
+variable "scanner_callback_domain_name" {
+  type        = string
+  description = "Host the ClamAV scanner posts scan results to."
+  default     = null
 }
 
 variable "sqs_visibility_timeout_seconds" {
@@ -277,28 +293,58 @@ variable "sqs_max_receive_count" {
   default     = 3
 }
 
-variable "enable_workflow_service" {
-  description = "Enable workflow manager"
+variable "enable_submission_consumer" {
+  description = "Enable submission_consumer"
   type        = bool
   default     = false
 }
 
-variable "workflow_service_cpu" {
-  description = "CPU units for the workflow ECS task"
+variable "submission_consumer_cpu" {
+  description = "CPU units for the submission consumer task"
   type        = number
   default     = 1024
 }
 
-variable "workflow_service_memory" {
-  description = "Memory in MiB for the workflow ECS task"
+variable "submission_consumer_memory" {
+  description = "Memory in MiB for the submission consumer task"
   type        = number
   default     = 2048
 }
 
-variable "workflow_service_desired_count" {
-  description = "Workflow services counter count"
+variable "submission_consumer_desired_count" {
+  description = "Submission consumer counter count"
   type        = number
   default     = 1
+}
+
+variable "enable_processor_service" {
+  description = "Enable the always-on notification queue processor service"
+  type        = bool
+  default     = false
+}
+
+variable "processor_service_cpu" {
+  description = "CPU units for the processor ECS task"
+  type        = number
+  default     = 1024
+}
+
+variable "processor_service_memory" {
+  description = "Memory in MiB for the processor ECS task"
+  type        = number
+  default     = 2048
+}
+
+variable "processor_service_desired_count" {
+  description = "Number of processor tasks to keep running"
+  type        = number
+  default     = 1
+}
+
+variable "processor_service_command" {
+  description = "Container command the processor service runs"
+  type        = list(string)
+  default     = ["flask", "task", "process-notification-queue"]
 }
 
 variable "scanner_provisioned_concurrency" {

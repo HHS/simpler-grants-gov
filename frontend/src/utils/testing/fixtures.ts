@@ -5,12 +5,6 @@ import { ApplicationSubmission } from "src/types/application/applicationSubmissi
 import { Organization } from "src/types/applicationResponseTypes";
 import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { UserProfile } from "src/types/authTypes";
-import {
-  AwardRecommendationDetails,
-  AwardRecommendationListItem,
-  AwardRecommendationStatus,
-  AwardRecommendationSubmission,
-} from "src/types/awardRecommendationTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -35,104 +29,6 @@ import {
   UserPrivilegesResponse,
   UserRole,
 } from "src/types/userTypes";
-
-export const mockAwardRecommendationStatus: AwardRecommendationStatus =
-  "in_review";
-
-export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
-  award_recommendation_id: "63588df8-f2d1-44ed-a201-5804abba696a",
-  award_recommendation_number: "AR-26-0001",
-  award_recommendation_status: mockAwardRecommendationStatus,
-  award_selection_method: "merit-review-other",
-  selection_method_detail:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
-  funding_strategy:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
-  other_key_information:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
-  additional_info:
-    "Additional contextual information about the award recommendation",
-  review_workflow_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  award_recommendation_summary: {
-    total_received_count: 200,
-    recommended_for_funding_count: 150,
-    recommended_without_funding_count: 25,
-    not_recommended_count: 25,
-    total_recommended_amount: 250000,
-  },
-  opportunity: {
-    opportunity_id: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
-    opportunity_number: "OPP-2024-001",
-    opportunity_title: "Test Funding Opportunity",
-    summary: {
-      opportunity_status: "posted",
-      summary_description:
-        "This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.",
-    },
-  },
-  created_at: "2026-01-01T00:00:00Z",
-};
-
-export const mockAwardRecommendationListItem: AwardRecommendationListItem = {
-  award_recommendation_id:
-    mockAwardRecommendationDetails.award_recommendation_id,
-  award_recommendation_number:
-    mockAwardRecommendationDetails.award_recommendation_number,
-  award_recommendation_status:
-    mockAwardRecommendationDetails.award_recommendation_status,
-  opportunity: mockAwardRecommendationDetails.opportunity,
-  award_recommendation_summary: {
-    total_received_count:
-      mockAwardRecommendationDetails.award_recommendation_summary
-        ?.total_received_count ?? 0,
-  },
-};
-
-export const mockAwardRecommendationListItemNoSubmissions: AwardRecommendationListItem =
-  {
-    ...mockAwardRecommendationListItem,
-    award_recommendation_id: "no-submissions-award-rec-id",
-    award_recommendation_number: "AR-26-0003",
-    award_recommendation_summary: { total_received_count: 0 },
-  };
-
-export const mockDraftAwardRecommendationListItem: AwardRecommendationListItem =
-  {
-    ...mockAwardRecommendationListItem,
-    award_recommendation_id: "draft-award-rec-id",
-    award_recommendation_number: "AR-26-0002",
-    award_recommendation_status: "draft",
-  };
-
-export const mockAwardRecommendationSubmissions: AwardRecommendationSubmission[] =
-  [
-    {
-      award_recommendation_application_submission_id:
-        "63588df8-f2d1-44ed-a201-5804abba696b",
-      application_submission: {
-        application_submission_id: "63588df8-f2d1-44ed-a201-5804abba696c",
-        application_submission_number: "SUB-26-0001",
-        project_title: "Test project",
-        total_requested_amount: "50000.00",
-        application: {
-          application_id: "63588df8-f2d1-44ed-a201-5804abba696d",
-          competition_id: "63588df8-f2d1-44ed-a201-5804abba696e",
-          organization: {
-            organization_id: "63588df8-f2d1-44ed-a201-5804abba696f",
-            organization_name: "Test Org",
-            uei: "UEI000001",
-          },
-        },
-      },
-      submission_detail: {
-        award_recommendation_type: "recommended_for_funding",
-        recommended_amount: "50000.00",
-        general_comment: "",
-        has_exception: false,
-        exception_detail: "",
-      },
-    },
-  ];
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
@@ -666,7 +562,6 @@ export const fakeCompetition = {
 export const baseApiKey: ApiKey = {
   api_key_id: "test-key-id",
   key_name: "Test API Key",
-  key_id: "abc123",
   created_at: "2023-01-01T00:00:00Z",
   last_used: null,
   is_active: true,
@@ -679,7 +574,6 @@ export const usedApiKey: ApiKey = {
   ...baseApiKey,
   api_key_id: "used-key-id",
   key_name: "Used API Key",
-  key_id: "def456",
   last_used: "2023-06-01T12:00:00Z",
 };
 
@@ -690,7 +584,6 @@ export const inactiveApiKey: ApiKey = {
   ...baseApiKey,
   api_key_id: "inactive-key-id",
   key_name: "Inactive API Key",
-  key_id: "ghi789",
   is_active: false,
   last_used: "2023-05-01T10:30:00Z",
 };
@@ -703,7 +596,6 @@ export const longNameApiKey: ApiKey = {
   api_key_id: "long-name-key-id",
   key_name:
     "This is a very long API key name that might cause display issues in the UI",
-  key_id: "jkl012",
 };
 
 /**
@@ -713,7 +605,6 @@ export const specialCharApiKey: ApiKey = {
   ...baseApiKey,
   api_key_id: "special-char-key-id",
   key_name: "API Key with Special-Characters & Symbols!",
-  key_id: "mno345",
 };
 
 /**
@@ -889,8 +780,7 @@ export const fakeTestUser: TestUser = {
 };
 
 export const fakeUserProfile: UserProfile = {
-  token: "a token",
-  user_id: "an id",
+  isLoggedIn: true,
 };
 
 export const mockApplicationSubmission: ApplicationSubmission = {

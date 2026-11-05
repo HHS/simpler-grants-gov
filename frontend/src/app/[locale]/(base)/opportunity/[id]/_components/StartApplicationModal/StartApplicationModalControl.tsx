@@ -2,6 +2,7 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
+import { postUserEvent } from "src/services/event/postUserEvent";
 import {
   ApplicantTypes,
   Competition,
@@ -19,11 +20,13 @@ import { StartApplicationModal } from "./StartApplicationModal";
 
 type StartApplicationModalControlProps = {
   competitionId: string;
+  opportunityId: string;
   opportunityTitle: string;
 };
 
 export const StartApplicationModalControl = ({
   competitionId,
+  opportunityId,
   opportunityTitle,
 }: StartApplicationModalControlProps) => {
   const modalRef = useRef<ModalRef>(null);
@@ -48,22 +51,24 @@ export const StartApplicationModalControl = ({
     UserOrganization[]
   >([]);
 
-  const token = user?.token || null;
+  const isLoggedIn = Boolean(user?.isLoggedIn);
 
   // TODO: these fetches should likely only happen if the user opens the modal, or if user is logged in so as not to overfetch
-  // We could either move them around or just gate off of the presence of the token
+  // We could either move them around or just gate off of whether the user is logged in
 
   // see what the accepted applicant types are for this particular competition
   useEffect(() => {
     // TODO #9633
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCompetitionLoading(true);
-    fetchCompetition(`/api/competitions/${competitionId}`)
+    void fetchCompetition(`/api/competitions/${competitionId}`)
       .then((competition) => {
         if (competition.open_to_applicants) {
-          return setCompetitionApplicantTypes(competition.open_to_applicants);
+          setCompetitionApplicantTypes(competition.open_to_applicants);
+        } else {
+          console.error("Unable to find competition applicant designation");
         }
-        console.error("Unable to find competition applicant designation");
+        return;
       })
       .catch((e) => {
         console.error("Error fetching competition", e);
@@ -76,19 +81,20 @@ export const StartApplicationModalControl = ({
   // see what organizations the user belongs to, in order to handle organzation or
   // organization / individual competition types
   useEffect(() => {
-    if (!token) {
+    if (!isLoggedIn) {
       return;
     }
     // TODO #9633
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrganizationsLoading(true);
     setOrganizationsError(false);
-    fetchUserOrganizations("/api/user/organizations", {
+    void fetchUserOrganizations("/api/user/organizations", {
       cache: "no-store",
     })
       .then((organizations) => {
         setUserOrganizations(organizations);
         setOrganizationsError(false);
+        return;
       })
       .catch((e) => {
         console.error("Error fetching user organizations", e);
@@ -97,7 +103,7 @@ export const StartApplicationModalControl = ({
       .finally(() => {
         setOrganizationsLoading(false);
       });
-  }, [fetchUserOrganizations, token]);
+  }, [fetchUserOrganizations, isLoggedIn]);
 
   return (
     <div className="display-flex flex-align-start">
@@ -107,6 +113,12 @@ export const StartApplicationModalControl = ({
         opener
         disabled={organizationsLoading || competitionsLoading}
         className="usa-button"
+        onClick={() =>
+          postUserEvent({
+            name: "click_start_application",
+            properties: { competitionId, opportunityId },
+          })
+        }
       >
         {organizationsLoading || competitionsLoading ? (
           <>
@@ -119,9 +131,10 @@ export const StartApplicationModalControl = ({
           </>
         )}
       </ModalToggleButton>
-      {token ? (
+      {isLoggedIn ? (
         <StartApplicationModal
-          token={token}
+          isLoggedIn={isLoggedIn}
+          opportunityId={opportunityId}
           opportunityTitle={opportunityTitle}
           modalRef={modalRef}
           applicantTypes={competitionApplicantTypes}

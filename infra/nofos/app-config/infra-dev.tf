@@ -22,5 +22,18 @@ module "infra_dev_config" {
   database_max_capacity         = 1
   database_instance_count       = 1
 
+  # Alarm and recovery receipt confirmed in run 40576048291. Enable dev-only
+  # calculator notifications through the existing private route; see the runbook.
+  enable_pdf_readability_monitoring               = true
+  monitoring_email_alert_recipient_parameter_name = "/nofos/infra-dev/monitoring/alert-email"
+  pdf_readability_alarm_actions_enabled           = true
+  # Restore observation mode after the coordinated dev emergency-block test.
+  # Public uploads remain off.
+  pdf_readability_waf = {
+    rate_limit      = 10
+    rate_action     = "count"
+    emergency_block = false
+  }
+
   service_override_extra_environment_variables = {}
 }

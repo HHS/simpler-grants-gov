@@ -1,10 +1,5 @@
 from datetime import timedelta
 
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
-from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import ValidationError, validates_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
@@ -13,6 +8,10 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySummaryV1Schema,
     OpportunityV1Schema,
 )
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -22,6 +21,7 @@ from src.constants.lookup_constants import (
     OpportunityAuditEvent,
     OpportunityCategory,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 from src.validation.validation_constants import ValidationErrorType
 
 
@@ -239,6 +239,8 @@ class OpportunityGetResponseSchema(AbstractResponseSchema):
       "data": {
         "opportunity_number": "ABC-2026-001",
         "opportunity_title": "Research Grant for Climate Innovation",
+        "tagline": "Accelerating climate innovation",
+        "purpose_statement": "Support research that advances innovative climate technologies.",
         "agency_id": "550e8400-e29b-41d4-a716-446655440000",
         "category": "discretionary",
         "category_explanation": "Competitive research grant",
@@ -250,17 +252,6 @@ class OpportunityGetResponseSchema(AbstractResponseSchema):
     """
 
     data = fields.Nested(OpportunityGrantorSchema())
-
-
-class OpportunityListFilterSchema(Schema):
-    """Schema for opportunity list filters"""
-
-    award_recommendation_ready = fields.Nested(
-        BoolSearchSchemaBuilder("AwardRecommendationReadySchema").with_one_of(example=True).build(),
-        metadata={
-            "description": "Filter for opportunities ready for award recommendations. Returns only non-draft Simpler Grants opportunities with application submissions and no existing award recommendations."
-        },
-    )
 
 
 class OpportunityListRequestSchema(Schema):
@@ -285,13 +276,6 @@ class OpportunityListRequestSchema(Schema):
         },
     )
 
-    filters = fields.Nested(
-        OpportunityListFilterSchema(),
-        metadata={
-            "description": "Optional filters for opportunity list",
-        },
-    )
-
 
 class OpportunityListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     """Schema for POST /v1/grantors/opportunities/:agency_id/opportunities response"""
@@ -308,7 +292,7 @@ class OpportunitySummaryBaseRequestSchema(Schema):
     summary_description = fields.String(
         required=True,
         allow_none=True,
-        validate=validators.Length(max=18000),
+        validate=validators.WordLimit(max=500),
         metadata={"description": "Opportunity summary", "example": "This opportunity..."},
     )
 
@@ -611,40 +595,29 @@ class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryDetailSchema())
 
 
-class OpportunityUploadAttachmentRequestV1Schema(Schema):
-    file_attachment = fields.File(
-        required=True,
-        allow_none=False,
-        metadata={"description": "The file attachment to upload"},
-    )
-    file_description = fields.String(
-        required=False,
-        allow_none=True,
-        metadata={"description": "Description of the file attachment"},
-    )
-
-
-class OpportunityAttachmentResponseV1Schema(Schema):
-    opportunity_attachment_id = fields.String(required=True)
-    file_description = fields.String(required=False, allow_none=True)
-
-
 class ResponseWithErrorsSchema(Schema):
     message = fields.String(required=True)
     status_code = fields.Integer(required=True, dump_default=200)
     errors = fields.List(fields.String(), required=False)
 
 
-class OpportunityUploadAttachmentResponseV1Schema(ResponseWithErrorsSchema):
-    """Response Schema for Upload Attachments Endpoint"""
-
-    data = fields.Nested(OpportunityAttachmentResponseV1Schema())
-
-
 class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
     """Response Schema for Delete Attachment Endpoint"""
 
     pass
+
+
+class OpportunityAttachmentCreateFromPendingFileRequestV1Schema(Schema):
+    pending_file_id = fields.UUID(
+        required=True,
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
+    )
+
+
+class OpportunityAttachmentCreateFromPendingFileResponseV1Schema(AbstractResponseSchema):
+    """Response Schema for the Create Opportunity Attachment Endpoint"""
+
+    data = fields.Nested(OpportunityAttachmentV1Schema())
 
 
 class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
@@ -659,6 +632,23 @@ class CompetitionRequestBaseSchema(Schema):
         metadata={
             "description": "The title of the competition",
             "example": "Proposal for Advanced Research",
+        },
+    )
+    public_competition_id = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "The public-facing identifier of the competition",
+            "example": "ABC-123-456",
+        },
+    )
+    grace_period = fields.Integer(
+        required=False,
+        allow_none=True,
+        validate=validators.Range(min=0),
+        metadata={
+            "description": "The number of days after the closing date that applications are still accepted",
+            "example": 5,
         },
     )
     opening_date = fields.Date(
@@ -734,19 +724,27 @@ class CompetitionUpdateResponseSchema(AbstractResponseSchema):
 class CompetitionInstructionUploadRequestV1Schema(Schema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions request"""
 
-    file_attachment = fields.File(
+    pending_file_id = fields.UUID(
         required=True,
-        allow_none=False,
-        metadata={"description": "The instruction file to upload"},
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
     )
 
 
 class CompetitionInstructionUploadResponseDataV1Schema(Schema):
     """Data schema for competition instruction upload response"""
 
-    competition_instruction_id = fields.String(
+    competition_instruction_id = fields.UUID(
         required=True,
         metadata={"description": "The created competition instruction ID"},
+    )
+    file_name = fields.String(
+        metadata={"description": "The name of the uploaded instruction file"},
+    )
+    created_at = fields.DateTime(
+        metadata={"description": "Timestamp when the instruction was created"},
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "Timestamp when the instruction was last updated"},
     )
 
 

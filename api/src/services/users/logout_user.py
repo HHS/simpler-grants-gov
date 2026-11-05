@@ -1,10 +1,9 @@
 import logging
 
-from grants_shared.adapters import db
-from grants_shared.auth.api_jwt_auth import JwtAuth
-from grants_shared.auth.auth_errors import JwtValidationError
-
+from src.adapters import db
+from src.auth.auth_errors import JwtValidationError
 from src.auth.auth_handler import AuthHandler
+from src.auth.jwt import JwtAuth
 
 logger = logging.getLogger(__name__)
 

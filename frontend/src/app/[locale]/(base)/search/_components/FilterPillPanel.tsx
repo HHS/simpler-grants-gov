@@ -1,3 +1,4 @@
+import { logger } from "src/services/logger/simplerLogger";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 import {
@@ -18,7 +19,7 @@ export async function FilterPillPanel({
   try {
     agencies = await agencyListPromise;
   } catch (e) {
-    console.error("Unable to fetch agency options for pills", e);
+    logger.error({ err: e }, "Unable to fetch agency options for pills");
   }
   const agencyOptions = agenciesToSortedFilterOptions(agencies || []);
   const pillLabelData = formatPillLabels(searchParams, agencyOptions || []);

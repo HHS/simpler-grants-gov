@@ -504,6 +504,27 @@ describe("validateFormData", () => {
       expect(hasFieldListChildrenError).toBe(true);
     });
 
+    it("should validate fieldList with hideFieldListHeading", () => {
+      const validUiSchema = [
+        {
+          type: "fieldList",
+          label: "Test",
+          name: "test",
+          hideFieldListHeading: true,
+          children: [
+            {
+              type: "field",
+              definition: "/properties/TestField",
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      const errors = validateUiSchema(validUiSchema);
+
+      expect(errors).toBeFalsy();
+    });
+
     it("should invalidate fieldList with a Table child", () => {
       const invalidUiSchema = [
         {
@@ -551,6 +572,61 @@ describe("validateFormData", () => {
         });
 
       expect(hasFieldListTableError).toBe(true);
+    });
+
+    it("should validate a section with a text node child", () => {
+      const validUiSchema: UiSchema = [
+        {
+          type: "section",
+          name: "test",
+          label: "test",
+          children: [
+            {
+              type: "text",
+              name: "test_note",
+              content: "Some static copy shown between fields.",
+            },
+            {
+              type: "field",
+              definition: "/properties/TestField",
+            },
+          ],
+        },
+      ];
+
+      const errors = validateUiSchema(validUiSchema);
+
+      expect(errors).toBeFalsy();
+    });
+
+    it("should invalidate a text node missing content", () => {
+      const invalidUiSchema = [
+        {
+          type: "section",
+          name: "test",
+          label: "test",
+          children: [
+            {
+              type: "text",
+              name: "test_note",
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      const errors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(errors)).toBe(true);
+
+      const hasMissingContentError =
+        Array.isArray(errors) &&
+        errors.some((error) => {
+          const message =
+            typeof error.message === "string" ? error.message : "";
+          return message.includes("content");
+        });
+
+      expect(hasMissingContentError).toBe(true);
     });
   });
 });

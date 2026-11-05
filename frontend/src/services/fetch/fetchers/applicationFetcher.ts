@@ -3,11 +3,11 @@ import {
   fetchApplicationWithMethodV1,
   getApplicationForPrint,
 } from "src/services/fetch/fetchers/fetchers";
+import { logger } from "src/services/logger/simplerLogger";
 import { ApplicationSubmissionsRequestBody } from "src/types/application/applicationSubmissionRequestTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationAttachmentCreateResponse,
-  ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
   ApplicationFormDetailApiResponse,
   ApplicationHistoryApiResponse,
@@ -86,15 +86,20 @@ export const getLatestApplicationSubmission = async (
   try {
     submissionsResponse = await getApplicationSubmissions(applicationId, body);
     if (submissionsResponse.data.length !== 1) {
-      console.error(
-        `Expected 1 application submission but received ${submissionsResponse.data.length}`,
+      logger.error(
+        {
+          applicationId,
+          submissionCount: submissionsResponse.data.length,
+        },
+        "Expected 1 application submission",
       );
       return null;
     }
     return submissionsResponse.data[0];
-  } catch (_e) {
-    console.error(
-      `Error retrieving latest application submission for (${applicationId})`,
+  } catch (e) {
+    logger.error(
+      { err: e, applicationId },
+      "Error retrieving latest application submission",
     );
   }
   return null;
@@ -231,35 +236,6 @@ export const handleUpdateApplicationFormIncludeInSubmission = async (
 /**
  * Attachments
  */
-
-export const deleteAttachment = async (
-  applicationId: string,
-  application_attachment_id: string,
-): Promise<ApplicationDetailApiResponse> => {
-  const response = await fetchApplicationWithMethod("DELETE")({
-    subPath: `${applicationId}/attachments/${application_attachment_id}`,
-  });
-
-  return (await response.json()) as ApplicationDetailApiResponse;
-};
-
-export const uploadAttachment = async (
-  applicationId: string,
-  file: FormData,
-): Promise<ApplicationAttachmentUploadResponse> => {
-  const additionalHeaders = {
-    Accept: "application/json",
-  };
-
-  const response = await fetchApplicationWithMethod("POST")({
-    subPath: `${applicationId}/attachments`,
-    additionalHeaders,
-    body: file,
-    addContentType: false,
-  });
-
-  return (await response.json()) as ApplicationAttachmentUploadResponse;
-};
 
 export const createApplicationAttachment = async (
   applicationId: string,

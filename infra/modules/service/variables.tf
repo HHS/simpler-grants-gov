@@ -172,6 +172,14 @@ variable "enable_load_balancer" {
   default     = true
 }
 
+variable "enable_secure_alb" {
+  description = <<EOT
+    Limit ALB traffic to internal vpc only
+  EOT
+  type        = bool
+  default     = false
+}
+
 variable "enable_alb_cdn" {
   description = "Whether to enable an ALB origin CDN for the service. Cannot be enabled at the same time as the S3 CDN."
   type        = bool
@@ -422,4 +430,53 @@ variable "newrelic_host_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the ECS service, used to correlate container logs with the infrastructure entity in New Relic."
   default     = null
+}
+
+variable "newrelic_service_name" {
+  type        = string
+  description = "Name reported to New Relic as entity.name/hostname in forwarded logs; defaults to service_name."
+  default     = null
+}
+
+variable "enable_processor_service" {
+  description = "Whether to create the task role for the always-on notification queue processor service"
+  type        = bool
+  default     = false
+}
+
+variable "waf_metric_name" {
+  type        = string
+  default     = null
+  description = "Optional unique WebACL CloudWatch metric name; null preserves the existing name."
+}
+
+variable "pdf_readability_waf" {
+  description = "Opt-in NOFO PDF pilot controls. Null preserves existing WAF rules; Count observes without blocking."
+  type = object({
+    rate_limit      = optional(number, 10)
+    rate_action     = optional(string, "count")
+    emergency_block = optional(bool, false)
+  })
+  default = null
+
+  validation {
+    condition = var.pdf_readability_waf == null ? true : (
+      can(regex("(^|-)nofos-", var.service_name)) && var.enable_load_balancer
+    )
+    error_message = "PDF readability WAF controls require a NOFO service (nofos- or a workspace-prefixed -nofos-) with a load balancer."
+  }
+
+  validation {
+    condition = var.pdf_readability_waf == null ? true : (
+      var.pdf_readability_waf.rate_limit >= 10 &&
+      var.pdf_readability_waf.rate_limit <= 2000000000 &&
+      floor(var.pdf_readability_waf.rate_limit) == var.pdf_readability_waf.rate_limit
+    )
+    error_message = "The WAF rate limit must be an integer between 10 and 2000000000 requests per five minutes."
+  }
+
+  validation {
+    condition     = var.pdf_readability_waf == null ? true : contains(["count", "block"], var.pdf_readability_waf.rate_action)
+    error_message = "The PDF readability rate action must be count or block."
+  }
 }

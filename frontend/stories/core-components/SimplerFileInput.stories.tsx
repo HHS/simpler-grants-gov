@@ -28,7 +28,7 @@ const defaultArgs = {
   required: false,
   disabled: false,
   readOnly: false,
-  labelId: "",
+  describedByIds: [],
   multiFile: false,
 };
 

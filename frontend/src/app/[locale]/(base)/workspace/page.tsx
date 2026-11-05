@@ -6,6 +6,7 @@ import {
   getUserInvitations,
   getUserPrivileges,
 } from "src/services/fetch/fetchers/userFetcher";
+import { logger } from "src/services/logger/simplerLogger";
 import { LocalizedPageProps } from "src/types/intl";
 import { OrganizationInvitation } from "src/types/userTypes";
 
@@ -33,7 +34,7 @@ async function WorkspaceDashboard() {
   const session = await getSession();
   if (!session?.email) {
     // this won't happen, as email is required on sessions, and we're wrapping this in an auth gate in the layout
-    console.error("no user session, or user has no email address");
+    logger.warn("No user session, or user has no email address");
     return;
   }
   let userRoles;
@@ -49,7 +50,7 @@ async function WorkspaceDashboard() {
       userInvitationsPromise,
     ]);
   } catch (e) {
-    console.error("Unable to fetch user details or organizations", e);
+    logger.error({ err: e }, "Unable to fetch user details or organizations");
   }
 
   return (

@@ -9,6 +9,7 @@ import {
   handleDeleteApiKey,
   handleRenameApiKey,
 } from "src/services/fetch/fetchers/apiKeyFetcher";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
 
 export const renameApiKeyHandler = async (
@@ -53,9 +54,13 @@ export const renameApiKeyHandler = async (
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
+    const errorType = (
+      (e as Error).cause as { details?: FrontendErrorDetails } | undefined
+    )?.details?.type;
     return Response.json(
       {
         message: `Error attempting to rename API key: ${message}`,
+        errorType,
       },
       { status },
     );

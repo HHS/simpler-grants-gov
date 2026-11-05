@@ -3,14 +3,11 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-import grants_shared.adapters.db as db
-from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
-from grants_shared.pagination.paginator import Paginator
-from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, func, select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
@@ -21,14 +18,10 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.user_models import AgencyUser, AgencyUserRole, LinkRolePrivilege, Role, User
-from src.search.search_models import BoolSearchFilter
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from src.pagination.paginator import Paginator
+from src.pagination.sorting_util import apply_sorting
 from src.services.opportunities_grantor_v1.get_agency import get_agency
-
-
-class OpportunityListFilterParams(BaseModel):
-    """Optional filters for opportunity list"""
-
-    award_recommendation_ready: BoolSearchFilter | None = None
 
 
 class ListOpportunitiesParams(BaseModel):
@@ -37,7 +30,6 @@ class ListOpportunitiesParams(BaseModel):
     pagination: PaginationParams = Field(
         default_factory=lambda: PaginationParams(page_offset=1, page_size=25)
     )
-    filters: OpportunityListFilterParams | None = Field(default=None)
 
 
 @dataclass(frozen=True)
@@ -89,37 +81,12 @@ def _base_opportunity_list_stmt() -> Select:
                     Application.application_submissions
                 ),
             ),
-            selectinload(Opportunity.award_recommendations),
         )
         .outerjoin(
             Agency,
             (Opportunity.agency_id == Agency.agency_id)
             | ((Opportunity.agency_id.is_(None)) & (Opportunity.agency_code == Agency.agency_code)),
         )
-    )
-
-
-def _should_filter_award_recommendation_ready(params: ListOpportunitiesParams) -> bool:
-    return bool(
-        params.filters
-        and params.filters.award_recommendation_ready
-        and params.filters.award_recommendation_ready.one_of
-        and True in params.filters.award_recommendation_ready.one_of
-    )
-
-
-def _apply_opportunity_filters(stmt: Select, params: ListOpportunitiesParams) -> Select:
-    """Apply optional opportunity list filters."""
-    if not _should_filter_award_recommendation_ready(params):
-        return stmt
-
-    return stmt.where(
-        Opportunity.is_draft.is_(False),
-        Opportunity.is_simpler_grants_opportunity.is_(True),
-        Opportunity.competitions.any(
-            Competition.applications.any(Application.application_submissions.any())
-        ),
-        ~Opportunity.award_recommendations.any(),
     )
 
 
@@ -160,8 +127,7 @@ def _paginate_opportunity_stmt(
     stmt: Select,
     params: ListOpportunitiesParams,
 ) -> tuple[Sequence[OpportunityListItem], PaginationInfo]:
-    """Apply filters, sorting, submitted application counts, and pagination."""
-    stmt = _apply_opportunity_filters(stmt, params)
+    """Apply sorting, submitted application counts, and pagination."""
     stmt = apply_sorting(stmt, params.pagination.sort_order, Opportunity)
 
     paginator: Paginator[Opportunity] = Paginator(

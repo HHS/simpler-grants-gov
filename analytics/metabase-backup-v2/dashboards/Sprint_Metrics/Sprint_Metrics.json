@@ -1,0 +1,601 @@
+{
+  "name": "Sprint Metrics",
+  "description": null,
+  "width": "full",
+  "auto_apply_filters": true,
+  "parameters": [
+    {
+      "id": "c208d96a",
+      "slug": "sprint",
+      "name": "Sprint",
+      "type": "string/=",
+      "sectionId": "string",
+      "isMultiSelect": false,
+      "required": true,
+      "default": [
+        "Sprint 6.7"
+      ],
+      "values_source_type": "card",
+      "values_source_config": {
+        "card": "Sprints_with_SCD_data",
+        "value_field": [
+          "field",
+          "sprint_name",
+          {
+            "base-type": "type/Text"
+          }
+        ]
+      }
+    },
+    {
+      "id": "59f4a426",
+      "slug": "project",
+      "name": "Project",
+      "type": "string/=",
+      "sectionId": "string",
+      "isMultiSelect": false,
+      "required": true,
+      "default": [
+        "13"
+      ]
+    }
+  ],
+  "tabs": [
+    "NEW"
+  ],
+  "dashcards": [
+    {
+      "tab": "NEW",
+      "col": 0,
+      "row": 0,
+      "size_x": 8,
+      "size_y": 3,
+      "card": "Sprint_Name",
+      "parameter_mappings": [
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 8,
+      "row": 0,
+      "size_x": 4,
+      "size_y": 3,
+      "card": "Sprint_Issues_Pointed",
+      "parameter_mappings": [
+        {
+          "parameter": "59f4a426",
+          "target_tag": "ghid"
+        },
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 12,
+      "row": 0,
+      "size_x": 4,
+      "size_y": 3,
+      "card": "Sprint_Days_Left_in_Sprint",
+      "parameter_mappings": [
+        {
+          "parameter": "59f4a426",
+          "target_tag": "ghid"
+        },
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 16,
+      "row": 0,
+      "size_x": 8,
+      "size_y": 3,
+      "card": "Sprint_End_Date",
+      "visualization_settings": {
+        "graph.dimensions": [
+          "day"
+        ],
+        "table.cell_column": "total_closed",
+        "table.pivot_column": "total_opened",
+        "series_settings": {
+          "total_remaining": {
+            "color": "#509EE3"
+          }
+        },
+        "scalar.field": "days_remaining",
+        "column_settings": {
+          "[\"name\",\"end_date\"]": {
+            "date_abbreviate": true,
+            "date_style": "MMMM D, YYYY"
+          }
+        },
+        "graph.metrics": [
+          "total_remaining"
+        ]
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "59f4a426",
+          "target_tag": "ghid"
+        },
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 0,
+      "row": 3,
+      "size_x": 12,
+      "size_y": 6,
+      "card": "Sprint_Burnup_by_issues",
+      "visualization_settings": {
+        "series_settings": {
+          "total_closed": {
+            "color": "#A989C5",
+            "line.marker_enabled": false,
+            "title": "total closed"
+          },
+          "total_remaining": {
+            "color": "#88BF4D",
+            "line.marker_enabled": false,
+            "title": "total remaining"
+          }
+        },
+        "graph.dimensions": [
+          "day"
+        ],
+        "card.title": "Burnup (issues)",
+        "graph.y_axis.title_text": "issues",
+        "graph.x_axis.axis_enabled": "compact",
+        "column_settings": {
+          "[\"name\",\"day\"]": {
+            "date_abbreviate": true
+          }
+        },
+        "graph.metrics": [
+          "total_closed",
+          "total_remaining"
+        ]
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        },
+        {
+          "parameter": "59f4a426",
+          "target_tag": "ghid"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 12,
+      "row": 3,
+      "size_x": 12,
+      "size_y": 6,
+      "card": "Sprint_Burnup_by_points",
+      "visualization_settings": {
+        "series_settings": {
+          "total_closed": {
+            "color": "#A989C5",
+            "line.marker_enabled": false,
+            "title": "total closed"
+          },
+          "total_remaining": {
+            "color": "#88BF4D",
+            "line.marker_enabled": false,
+            "title": "total remaining"
+          }
+        },
+        "graph.dimensions": [
+          "day"
+        ],
+        "card.title": "Burnup (points)",
+        "graph.x_axis.axis_enabled": "compact",
+        "graph.y_axis.title_text": "points",
+        "column_settings": {
+          "[\"name\",\"day\"]": {
+            "date_abbreviate": true
+          }
+        },
+        "graph.metrics": [
+          "total_closed",
+          "total_remaining"
+        ]
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        },
+        {
+          "parameter": "59f4a426",
+          "target_tag": "ghid"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 0,
+      "row": 9,
+      "size_x": 12,
+      "size_y": 6,
+      "card": "Sprint_Burndown_by_issues",
+      "visualization_settings": {
+        "graph.y_axis.title_text": "issues",
+        "table.cell_column": "total_closed",
+        "graph.x_axis.axis_enabled": "compact",
+        "card.title": "Burndown (issues)",
+        "graph.metrics": [
+          "total_remaining"
+        ],
+        "table.pivot_column": "total_opened",
+        "column_settings": {
+          "[\"name\",\"day\"]": {
+            "date_abbreviate": true
+          }
+        },
+        "series_settings": {
+          "total_remaining": {
+            "color": "#509EE3",
+            "line.marker_enabled": false
+          }
+        },
+        "graph.dimensions": [
+          "day"
+        ]
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        },
+        {
+          "parameter": "59f4a426",
+          "target_tag": "ghid"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 12,
+      "row": 9,
+      "size_x": 12,
+      "size_y": 6,
+      "card": "Sprint_Burndown_by_points",
+      "visualization_settings": {
+        "graph.y_axis.title_text": "points",
+        "table.cell_column": "total_closed",
+        "graph.x_axis.axis_enabled": "compact",
+        "card.title": "Burndown (points)",
+        "graph.metrics": [
+          "total_remaining"
+        ],
+        "table.pivot_column": "total_opened",
+        "column_settings": {
+          "[\"name\",\"day\"]": {
+            "date_abbreviate": true
+          }
+        },
+        "series_settings": {
+          "total_remaining": {
+            "color": "#509EE3",
+            "line.marker_enabled": false
+          }
+        },
+        "graph.dimensions": [
+          "day"
+        ]
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        },
+        {
+          "parameter": "59f4a426",
+          "target_tag": "ghid"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 0,
+      "row": 15,
+      "size_x": 24,
+      "size_y": 6,
+      "card": "Sprint_Velocity_Trend",
+      "visualization_settings": {
+        "graph.dimensions": [
+          "sprint_name"
+        ],
+        "graph.series_order_dimension": null,
+        "graph.series_order": null,
+        "graph.x_axis.title_text": "sprint",
+        "graph.x_axis.axis_enabled": "compact",
+        "graph.y_axis.title_text": "points closed",
+        "graph.show_values": true,
+        "graph.metrics": [
+          "points_closed"
+        ]
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "59f4a426",
+          "target_tag": "ghid"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 0,
+      "row": 21,
+      "size_x": 24,
+      "size_y": 9,
+      "card": "Sprint_Issues_Open",
+      "visualization_settings": {
+        "table.pivot_column": "type",
+        "table.cell_column": "ghid",
+        "table.columns": [
+          {
+            "name": "issue_url",
+            "enabled": true
+          },
+          {
+            "name": "pointed",
+            "enabled": true
+          },
+          {
+            "name": "status",
+            "enabled": true
+          },
+          {
+            "name": "points",
+            "enabled": false
+          },
+          {
+            "name": "d_effective",
+            "enabled": true
+          },
+          {
+            "name": "issue_id",
+            "enabled": false
+          },
+          {
+            "name": "issue_title",
+            "enabled": false
+          },
+          {
+            "name": "issue_ghid",
+            "enabled": false
+          },
+          {
+            "name": "sprint_end_date",
+            "enabled": false
+          }
+        ],
+        "card.title": "Open Issues",
+        "column_settings": {
+          "[\"name\",\"issue_title\"]": {},
+          "[\"name\",\"status\"]": {
+            "column_title": "Status"
+          },
+          "[\"name\",\"points\"]": {
+            "column_title": "Points"
+          },
+          "[\"name\",\"sprint_end_date\"]": {},
+          "[\"name\",\"issue_url\"]": {
+            "column_title": "Link ",
+            "view_as": "link",
+            "link_text": "{{issue_title}}",
+            "link_url": "{{issue_url}}"
+          },
+          "[\"name\",\"issue_ghid\"]": {},
+          "[\"name\",\"d_effective\"]": {
+            "column_title": "Effective Date",
+            "date_abbreviate": true
+          },
+          "[\"name\",\"pointed\"]": {
+            "column_title": "Pointed"
+          },
+          "[\"name\",\"issue_id\"]": {}
+        }
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        },
+        {
+          "parameter": "59f4a426",
+          "target_tag": "project_ghid"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 0,
+      "row": 30,
+      "size_x": 24,
+      "size_y": 9,
+      "card": "Sprint_Issues_Done",
+      "visualization_settings": {
+        "table.pivot_column": "type",
+        "table.cell_column": "ghid",
+        "table.columns": [
+          {
+            "name": "issue_url",
+            "enabled": true
+          },
+          {
+            "name": "pointed",
+            "enabled": true
+          },
+          {
+            "name": "lead_time_days",
+            "enabled": true
+          },
+          {
+            "name": "status",
+            "enabled": true
+          },
+          {
+            "name": "points",
+            "enabled": false
+          },
+          {
+            "name": "d_effective",
+            "enabled": true
+          },
+          {
+            "name": "issue_id",
+            "enabled": false
+          },
+          {
+            "name": "issue_title",
+            "enabled": false
+          },
+          {
+            "name": "issue_ghid",
+            "enabled": false
+          },
+          {
+            "name": "in_progress_date",
+            "enabled": false
+          },
+          {
+            "name": "done_date",
+            "enabled": false
+          }
+        ],
+        "card.title": "Done Issues",
+        "column_settings": {
+          "[\"name\",\"issue_title\"]": {
+            "column_title": "Link",
+            "view_as": "link",
+            "link_text": "{{issue_title}}",
+            "link_url": "{{issue_url}}"
+          },
+          "[\"name\",\"pointed\"]": {
+            "column_title": "Pointed",
+            "view_as": "auto"
+          },
+          "[\"name\",\"status\"]": {
+            "column_title": "Status"
+          },
+          "[\"name\",\"d_effective\"]": {
+            "column_title": "Effective Date",
+            "date_abbreviate": true
+          },
+          "[\"name\",\"lead_time_days\"]": {
+            "column_title": "Lead Time"
+          },
+          "[\"name\",\"issue_url\"]": {
+            "column_title": "Link ",
+            "view_as": "link",
+            "link_text": "{{issue_title}}",
+            "link_url": "{{issue_url}}"
+          },
+          "[\"name\",\"points\"]": {
+            "column_title": "Points"
+          }
+        }
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        },
+        {
+          "parameter": "59f4a426",
+          "target_tag": "project_ghid"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 0,
+      "row": 39,
+      "size_x": 8,
+      "size_y": 3,
+      "card": "Sprint_Issues_Lead_Time_Avg",
+      "visualization_settings": {
+        "card.title": "Avg Lead Time for Done Issues",
+        "column_settings": {
+          "[\"name\",\"average_lead_time_days\"]": {
+            "suffix": " days"
+          }
+        }
+      },
+      "parameter_mappings": [
+        {
+          "parameter": "c208d96a",
+          "target_tag": "sprint_name"
+        },
+        {
+          "parameter": "59f4a426",
+          "target_tag": "project_ghid"
+        }
+      ]
+    },
+    {
+      "tab": "NEW",
+      "col": 8,
+      "row": 39,
+      "size_x": 8,
+      "size_y": 3,
+      "card": "Data_Availability_Oldest",
+      "visualization_settings": {
+        "table.columns": [
+          {
+            "name": "minimum_date",
+            "enabled": true
+          }
+        ],
+        "column_settings": {
+          "[\"name\",\"minimum_date\"]": {
+            "date_abbreviate": true,
+            "date_style": "MMMM D, YYYY"
+          }
+        }
+      }
+    },
+    {
+      "tab": "NEW",
+      "col": 16,
+      "row": 39,
+      "size_x": 8,
+      "size_y": 3,
+      "card": "Data_Availability_Newest",
+      "visualization_settings": {
+        "table.columns": [
+          {
+            "name": "maximum_date",
+            "enabled": true
+          }
+        ],
+        "column_settings": {
+          "[\"name\",\"maximum_date\"]": {
+            "column_title": "Newest Dateset:",
+            "date_abbreviate": true,
+            "date_style": "MMMM D, YYYY"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -21,7 +21,9 @@ type SimplerFileInputMockProps = {
   existingFiles?: UploadFileMetadata[];
   disabled?: boolean;
   readOnly?: boolean;
-  labelId: string;
+  required?: boolean;
+  describedByIds: string[];
+  formInvalid: boolean;
 };
 
 const mockUseApplicationAttachments = jest.fn<
@@ -120,6 +122,65 @@ describe("ApplicationAttachmentWidget", () => {
     render(<ApplicationAttachmentWidget {...defaultProps} />);
 
     expect(screen.queryByText("*")).not.toBeInTheDocument();
+  });
+
+  /*
+    #11352 makes this widget universal, which brings required single-attachment fields
+    (Project_Abstract) onto it for the first time. SimplerFileInput derives native required
+    from `required` plus whether anything is attached, so these assert the widget hands it
+    the right pair - the derivation itself is covered in SimplerFileInput's own suite.
+  */
+  describe("required fields", () => {
+    it("reports required with no attachment when nothing is saved", () => {
+      render(
+        <ApplicationAttachmentWidget
+          {...defaultProps}
+          required={true}
+          value={undefined}
+        />,
+      );
+
+      expect(getSimplerFileInputProps().required).toBe(true);
+      expect(getSimplerFileInputProps().existingFiles).toEqual([]);
+    });
+
+    it("reports required alongside the saved attachment so the field reads as satisfied", () => {
+      render(
+        <ApplicationAttachmentWidget
+          {...defaultProps}
+          required={true}
+          value="uuid-1"
+        />,
+      );
+
+      expect(getSimplerFileInputProps().required).toBe(true);
+      expect(getSimplerFileInputProps().existingFiles).toHaveLength(1);
+      expect(getSimplerFileInputProps().existingFiles?.[0].fileName).toBe(
+        "document1.pdf",
+      );
+    });
+
+    it("does not report required when the field is optional", () => {
+      render(
+        <ApplicationAttachmentWidget {...defaultProps} value={undefined} />,
+      );
+
+      expect(getSimplerFileInputProps().required).toBe(false);
+    });
+
+    it("still submits the saved attachment id for a required field", () => {
+      const { container } = render(
+        <ApplicationAttachmentWidget
+          {...defaultProps}
+          required={true}
+          value="uuid-1"
+        />,
+      );
+
+      expect(getHiddenInput(container, "test-attachment-field")).toHaveValue(
+        "uuid-1",
+      );
+    });
   });
 
   it("renders field errors and marks the form group as errored when rawErrors are present", () => {
@@ -389,7 +450,9 @@ describe("ApplicationAttachmentWidget", () => {
       <ApplicationAttachmentWidget
         {...defaultProps}
         formContext={{
-          widgetSupport: { useVirusScanning: true, markFormDirty },
+          widgetSupport: {
+            markFormDirty,
+          },
         }}
       />,
     );
@@ -405,7 +468,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
             markFormDirty,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
@@ -431,7 +493,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
             markFormDirty: throwingMarkFormDirty,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
@@ -454,7 +515,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
               decrementAttachmentsProcessing,
@@ -474,7 +534,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
               decrementAttachmentsProcessing,
@@ -495,7 +554,7 @@ describe("ApplicationAttachmentWidget", () => {
       <ApplicationAttachmentWidget
         {...defaultProps}
         formContext={{
-          widgetSupport: { useVirusScanning: true },
+          widgetSupport: {},
         }}
       />,
     );
@@ -511,7 +570,9 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         value="uuid-1"
         formContext={{
-          widgetSupport: { useVirusScanning: true, markFormDirty },
+          widgetSupport: {
+            markFormDirty,
+          },
         }}
       />,
     );
@@ -536,7 +597,7 @@ describe("ApplicationAttachmentWidget", () => {
     );
   });
 
-  it("describes the file input by the error message when the field has errors", () => {
+  it("describes the file input by both the label and the error message when the field has errors", () => {
     render(
       <ApplicationAttachmentWidget
         {...defaultProps}
@@ -544,20 +605,33 @@ describe("ApplicationAttachmentWidget", () => {
       />,
     );
 
-    expect(getSimplerFileInputProps().labelId).toEqual(
+    expect(getSimplerFileInputProps().describedByIds).toEqual([
+      "label-for-test-attachment-field-visible",
       "error-for-test-attachment-field-visible",
+    ]);
+  });
+
+  it("marks the file input invalid when the form has validation errors", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        rawErrors={["This field is required"]}
+      />,
     );
+
+    expect(getSimplerFileInputProps().formInvalid).toBe(true);
   });
 
   it("describes the file input by the field label when there is a title and no error", () => {
     render(<ApplicationAttachmentWidget {...defaultProps} />);
 
-    expect(getSimplerFileInputProps().labelId).toEqual(
+    expect(getSimplerFileInputProps().describedByIds).toEqual([
       "label-for-test-attachment-field-visible",
-    );
+    ]);
+    expect(getSimplerFileInputProps().formInvalid).toBe(false);
   });
 
-  it("falls back to the generic upload label when the schema has no title", () => {
+  it("describes the file input by nothing when the schema has no title", () => {
     render(
       <ApplicationAttachmentWidget
         {...defaultProps}
@@ -565,9 +639,9 @@ describe("ApplicationAttachmentWidget", () => {
       />,
     );
 
-    expect(getSimplerFileInputProps().labelId).toEqual(
-      "app-form-attachment-upload-label",
-    );
+    // no title means DynamicFieldLabel renders no label element, so there is no id to
+    // reference - an id for a missing element would be a dangling aria-describedby
+    expect(getSimplerFileInputProps().describedByIds).toEqual([]);
   });
 
   it("passes disabled and readOnly through to the file input", () => {

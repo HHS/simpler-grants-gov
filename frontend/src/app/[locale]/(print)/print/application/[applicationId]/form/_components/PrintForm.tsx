@@ -31,6 +31,7 @@ export default function PrintForm({
           schema={formSchema}
           uiSchema={uiSchema}
           formContext={{ rootFormData: savedFormData, rootSchema: formSchema }}
+          isFormLocked
         />
       </div>
     </AttachmentsProvider>

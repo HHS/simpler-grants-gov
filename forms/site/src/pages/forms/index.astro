@@ -1,0 +1,31 @@
+---
+import { getCollection } from "astro:content";
+
+import FormCatalog from "../../components/forms/FormCatalog";
+import { TOTAL_APPS } from "../../content.config";
+import Base from "../../layouts/Base.astro";
+import { countFields } from "../../lib/planTree";
+import type { FormSummary } from "../../stores/formFilters";
+
+const forms = await getCollection("forms");
+const summaries: FormSummary[] = forms.map((f) => ({
+  slug: f.data.slug,
+  title: f.data.title,
+  status: f.data.status,
+  family: f.data.family,
+  apps_count: f.data.apps_count,
+  apps_pct: ((f.data.apps_count / TOTAL_APPS) * 100).toFixed(2),
+  fieldCount: countFields(f.data.children),
+  description: f.data.description,
+  widgets: f.data.widgets,
+}));
+---
+
+<Base title="Forms">
+  <FormCatalog
+    client:load
+    forms={summaries}
+    title="Forms"
+    subtitle="Browse and search Grants.gov forms tracked for migration"
+  />
+</Base>

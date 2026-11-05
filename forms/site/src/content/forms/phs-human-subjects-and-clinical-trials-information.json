@@ -1,0 +1,12 @@
+{
+  "title": "PHS Human Subjects and Clinical Trials Information",
+  "slug": "phs-human-subjects-and-clinical-trials-information",
+  "status": "backlog",
+  "family": ["R&R"],
+  "category": "Research & Science-Specific Forms",
+  "apps_count": 243892,
+  "fid_url": "https://www.grants.gov/forms/form-items-description/fid/705",
+  "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/PHSHumanSubjectsAndClinicalTrialsInfo_3_0-V3.0_F705.pdf",
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PHSHumanSubjectsAndClinicalTrialsInfo_3_0-V3.0.xsd",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/PHSHumanSubjectsAndClinicalTrialsInfo_3_0-V3.0_F705.xls"
+}

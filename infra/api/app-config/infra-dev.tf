@@ -17,9 +17,11 @@ module "infra_dev_config" {
 
   app_environment_name = "dev"
 
-  domain_name            = "api.dev.simpler.grants.gov"
-  secondary_domain_names = ["alb.dev.simpler.grants.gov"]
-  enable_https           = true
+  domain_name                  = "api.dev.simpler.grants.gov"
+  secondary_domain_names       = ["alb.dev.simpler.grants.gov"]
+  scanner_callback_domain_name = "alb.dev.simpler.grants.gov"
+  enable_https                 = true
+  enable_secure_alb            = true
 
   enable_api_gateway_domain_name = true
 
@@ -36,7 +38,7 @@ module "infra_dev_config" {
 
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = false # Enable once an SES domain identity exists for infra-dev
+  enable_notifications            = true
 
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyODk0OTk3NTE4Nzc4MzA4NzUz"
   service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtNTc4NjYzMjA1MjA4MDAyNTA2Mg"
@@ -58,10 +60,7 @@ module "infra_dev_config" {
   search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
 
   service_override_extra_environment_variables = {
-    ENABLE_WORKFLOW_ENDPOINTS             = 1
-    ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
-    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
 
     LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-dev-simpler-grants-gov"
 
@@ -70,18 +69,15 @@ module "infra_dev_config" {
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation
-    FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
-    # Workflow
-    WORKFLOW_SERVICE_INTERNAL_USER_ID = "5711f79c-2445-47c7-bbcb-c8caa293ffad"
-
-    # Job lock — enabled in dev/staging while we validate it
     ENABLE_JOB_LOCK = "true"
   }
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
+
+  enable_processor_service = true
 
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

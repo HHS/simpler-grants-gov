@@ -1,5 +1,6 @@
 import { AgencyFilterContent } from "src/app/[locale]/(base)/search/_components/Filters/AgencyFilterContent";
 import { BasicSearchFilterAccordion } from "src/app/[locale]/(base)/search/_components/SearchFilterAccordion/SearchFilterAccordion";
+import { logger } from "src/services/logger/simplerLogger";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 import { agenciesToSortedAndNestedFilterOptions } from "src/utils/search/filterUtils";
@@ -29,7 +30,7 @@ export async function AgencyFilterAccordion({
     facetCounts = searchResults.facet_counts.agency;
   } catch (e) {
     // Come back to this to show the user an error
-    console.error("Unable to fetch agencies for filter list", e);
+    logger.error({ err: e }, "Unable to fetch agencies for filter list");
   }
 
   const agencyOptions = agenciesToSortedAndNestedFilterOptions(allAgencies);

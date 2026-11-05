@@ -4,22 +4,21 @@ import uuid
 from datetime import timedelta
 
 import click
-import grants_shared.adapters.db as db
-import grants_shared.logs
-import grants_shared.util.datetime_util as datetime_util
-from grants_shared.adapters.db import PostgresDBClient
-from grants_shared.util.local import error_if_not_local
 from sqlalchemy import select
 
+import src.adapters.db as db
+import src.logs
+import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
+from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import get_active_forms, init_form_registry
+from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_agencies_and_users import _build_agencies_and_users
-from tests.lib.seed_award_recommendations import _build_award_recommendations
 from tests.lib.seed_data_utils import CompetitionContainer
 from tests.lib.seed_e2e import _build_users_and_tokens
 from tests.lib.seed_orgs_and_users import _build_organizations_and_users, create_internal_users
@@ -44,8 +43,6 @@ class SeedConfig:
     seed_forms: bool
     seed_users: bool
     seed_e2e: bool
-    seed_award_recommendations: bool
-    seed_award_recommendation_workflows: bool
 
 
 def _build_opportunities(
@@ -786,7 +783,7 @@ def _build_user_organizations(db_session: db.Session) -> None:
     "-s",
     default=["ALL"],
     type=click.Choice(
-        ["ALL", "agencies", "opps", "forms", "users", "api", "award_recommendations"],
+        ["ALL", "agencies", "opps", "forms", "users", "api"],
     ),
     multiple=True,
     help="Which steps of the process should be run",
@@ -800,12 +797,9 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
         seed_forms="ALL" in steps or "forms" in steps,
         seed_users="ALL" in steps or "users" in steps,
         seed_e2e="ALL" in steps or "e2e" in steps,
-        seed_award_recommendations="ALL" in steps or "award_recommendations" in steps,
-        seed_award_recommendation_workflows="ALL" in steps
-        or "award_recommendation_workflows" in steps,
     )
 
-    with grants_shared.logs.init("seed_local_db"):
+    with src.logs.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
 
@@ -837,6 +831,4 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
         _build_agencies_and_users(db_session)
     if seed_config.seed_e2e:
         _build_users_and_tokens(db_session)
-    if seed_config.seed_award_recommendations:
-        _build_award_recommendations(db_session, seed_config.seed_award_recommendation_workflows)
     db_session.commit()

@@ -13,9 +13,13 @@ export type TableCellData = {
 export const TableWithResponsiveHeader = ({
   headerContent,
   tableRowData,
+  rowKeys,
 }: {
   headerContent: TableCellData[];
   tableRowData: TableCellData[][];
+  // stable ids for each row, needed when rows can be added, removed, or reordered
+  // so stateful cell content stays with its row instead of its position
+  rowKeys?: string[];
 }) => {
   if (
     !tableRowData.every((tableRow) => tableRow.length === headerContent.length)
@@ -44,14 +48,15 @@ export const TableWithResponsiveHeader = ({
   const dataRows = tableRowData.map((tableRow, i) => {
     return (
       <tr
-        key={`responsiveTableRow-${i}`}
+        key={rowKeys?.[i] ?? `responsiveTableRow-${i}`}
         className="border-base border-x border-y tablet-lg:border-0"
       >
         {tableRow.map((tableCell, j) => {
           const stackOrder = tableCell.stackOrder || 0;
           return (
             <td
-              key={`responsiveTableCell-${i}-${j}`}
+              // keyed by column only, so cells stay with their row if it moves
+              key={`responsiveTableCell-${j}`}
               style={headerContent[j].style}
               className={clsx(
                 "tablet-lg:display-table-cell",

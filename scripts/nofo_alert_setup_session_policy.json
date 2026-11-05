@@ -1,0 +1,22 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ssm:PutParameter",
+      "Resource": "arn:aws:ssm:us-east-1:061664787759:parameter/nofos/infra-dev/monitoring/alert-email",
+      "Condition": {"Bool": {"ssm:Overwrite": "false"}}
+    },
+    {
+      "Effect": "Allow",
+      "Action": "kms:Encrypt",
+      "Resource": "arn:aws:kms:us-east-1:061664787759:key/*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "ssm.us-east-1.amazonaws.com",
+          "kms:EncryptionContext:PARAMETER_ARN": "arn:aws:ssm:us-east-1:061664787759:parameter/nofos/infra-dev/monitoring/alert-email"
+        }
+      }
+    }
+  ]
+}

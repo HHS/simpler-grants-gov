@@ -56,7 +56,10 @@ export function SaveSearchPanel() {
     return `${origin}${path}${query}`;
   }, [searchParams, path]);
 
-  const showSavedSearchUI = useMemo(() => Boolean(user?.token), [user?.token]);
+  const showSavedSearchUI = useMemo(
+    () => Boolean(user?.isLoggedIn),
+    [user?.isLoggedIn],
+  );
 
   const copyText = useMemo(
     () =>
@@ -105,7 +108,7 @@ export function SaveSearchPanel() {
           url={url}
           snackbarMessage={t("copySearch.snackbar")}
         >
-          {!user?.token && (
+          {!user?.isLoggedIn && (
             <SaveSearchTooltip
               text={t("help.unauthenticated")}
               title={t("help.general")}

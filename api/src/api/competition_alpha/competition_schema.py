@@ -1,12 +1,14 @@
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
-
 from src.api.form_alpha.form_schema import FormAlphaSchema
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import CompetitionOpenToApplicant
 
 
 class CompetitionInstructionAlphaSchema(Schema):
+    competition_instruction_id = fields.UUID(
+        metadata={"description": "The competition instruction ID"}
+    )
     file_name = fields.String(
         metadata={
             "description": "The name of the instruction file",
@@ -56,6 +58,13 @@ class CompetitionAlphaSchema(Schema):
         metadata={"description": "List of instruction files associated with this competition"},
     )
 
+    public_competition_id = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The public-facing identifier of the competition",
+            "example": "ABC-123-456",
+        },
+    )
     competition_title = fields.String(
         allow_none=True,
         metadata={
@@ -73,6 +82,13 @@ class CompetitionAlphaSchema(Schema):
         allow_none=True,
         metadata={
             "description": "The closing date of the competition, the last day applications are accepted"
+        },
+    )
+    grace_period = fields.Integer(
+        allow_none=True,
+        metadata={
+            "description": "The number of days after the closing date that applications are still accepted",
+            "example": 5,
         },
     )
     contact_info = fields.String(
@@ -101,7 +117,21 @@ class CompetitionAlphaSchema(Schema):
     )
 
     is_open = fields.Boolean(
-        metadata={"description": "Whether the competition is open and accepting applications"}
+        metadata={
+            "description": "Whether the competition is open and accepting applications on Simpler.Grants.gov"
+        }
+    )
+
+    has_open_date = fields.Boolean(
+        metadata={
+            "description": "Whether today in US Eastern time is within the competition's application window, from the opening date through the closing date plus any grace period, regardless of whether the competition is enabled on Simpler.Grants.gov"
+        }
+    )
+
+    is_legacy_package = fields.Boolean(
+        metadata={
+            "description": "Whether the competition is an application package from Grants.gov"
+        }
     )
 
     is_simpler_grants_enabled = fields.Boolean(

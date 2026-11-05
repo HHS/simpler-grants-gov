@@ -137,6 +137,7 @@ class AbstractTransformSubTask(SubTask):
         batch_size: int = 5000,
         limit: int | None = None,
         order_by: UnaryExpression | None = None,
+        load_options: Sequence[Any] | None = None,
     ) -> list[tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]]:
         # Similar to the above fetch function, but also grabs an opportunity record
         # Note that this requires your source_model to have an opportunity_id field defined.
@@ -158,6 +159,9 @@ class AbstractTransformSubTask(SubTask):
 
         if limit is not None:
             select_query = select_query.limit(limit)
+
+        if load_options is not None:
+            select_query = select_query.options(*load_options)
 
         return cast(
             list[tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]],

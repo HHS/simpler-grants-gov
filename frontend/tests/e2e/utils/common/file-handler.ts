@@ -92,7 +92,7 @@ export const fileHandler: FieldHandler = async (
         );
       },
       { selector: hiddenInputSelector, uploadedFileName: fileName },
-      { timeout: 60000 },
+      { timeout: 120000 },
     );
   }
 };

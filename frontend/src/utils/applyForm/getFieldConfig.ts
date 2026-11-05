@@ -621,6 +621,7 @@ const getFieldListConfig = ({
       description: uiFieldObject.description,
       name: uiFieldObject.name,
       minItems: fieldListSchema?.minItems,
+      hideFieldListHeading: uiFieldObject.hideFieldListHeading,
       maxItems: fieldListSchema?.maxItems,
       groupDefinition,
       rawErrors: errors ?? [],

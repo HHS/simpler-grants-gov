@@ -23,7 +23,7 @@ const cspHeader = `
     base-uri 'self';
     media-src 'self';
     style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com/;
-    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/;
+    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/ https://dap.digitalgov.gov/;
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;
@@ -174,6 +174,11 @@ const nextConfig = {
     nrExternals(config);
     return config;
   },
+  // The Docker builder stage copies only `src`, so type-check the app without
+  // test files that import fixtures from `stories/` and `tests/`
+  typescript: {
+    tsconfigPath: "tsconfig.build.json",
+  },
   eslint: {
     dirs: [
       "src",
@@ -187,7 +192,15 @@ const nextConfig = {
     ],
   },
   experimental: {
-    testProxy: true,
+    // Do not enable `experimental.testProxy` here. It makes Next install the
+    // @mswjs/interceptors ClientRequest interceptor, which wraps the socket for
+    // every outbound request. Because `output: "standalone"` bakes this config
+    // into `server.js` at build time, that wrapper ships to deployed
+    // environments, where on Next >=16.3.3 it can begin a second write on an
+    // in-flight TLS socket and trip the uncatchable Node assertion
+    // `!current_write_` in TLSWrap::DoWrite, aborting the server process.
+    // Nothing here uses `next/experimental/testmode` — Playwright drives a real
+    // server via `baseUrl` (see tests/playwright.config.ts).
     proxyClientMaxBodySize: "2000mb",
     serverActions: {
       bodySizeLimit: "2000mb",

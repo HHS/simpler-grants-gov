@@ -203,3 +203,56 @@ def test_user_get_saved_searches_logging(
 
     assert response.status_code == 200
     assert any("Successfully fetched saved searches" in r.message for r in caplog.records)
+
+
+@pytest.mark.parametrize(
+    "record_count, page_offset, expected_total_pages",
+    [(0, 1, 0), (25, 1, 1), (26, 1, 2), (26, 2, 2), (26, 3, 2)],
+)
+def test_user_get_saved_searches_pagination_metadata(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+    record_count,
+    page_offset,
+    expected_total_pages,
+):
+    """Return pagination metadata through the actual API response schema."""
+    for index in range(record_count):
+        UserSavedSearchFactory.create(
+            user=user,
+            name=f"Saved search {index:02d}",
+            search_query={
+                "query": "python",
+                "filters": {"funding_instrument": {"one_of": [FundingInstrument.GRANT]}},
+            },
+        )
+
+    sort_order = [{"order_by": "name", "sort_direction": "ascending"}]
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": page_offset,
+                "page_size": 25,
+                "sort_order": sort_order,
+            }
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json["pagination_info"] == {
+        "page_offset": page_offset,
+        "page_size": 25,
+        "total_records": record_count,
+        "total_pages": expected_total_pages,
+        "sort_order": sort_order,
+    }
+    expected_names = [
+        f"Saved search {index:02d}"
+        for index in range((page_offset - 1) * 25, min(page_offset * 25, record_count))
+    ]
+    assert [search["name"] for search in response.json["data"]] == expected_names

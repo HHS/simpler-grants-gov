@@ -3,6 +3,12 @@ import { useUser } from "src/services/auth/useUser";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
+// attached as the `cause` of errors thrown by clientFetch on unsuccessful requests
+export interface ClientFetchErrorCause {
+  status: number;
+  body?: unknown;
+}
+
 /*
   returns a function that you should use for 99% of client side requests to the Next API
   will automatically handle:
@@ -53,7 +59,15 @@ export const useClientFetch = <T>(
         }
         return response as T;
       } else {
-        throw new Error(`${errorMessage}: ${response.status}`);
+        // include the response body so callers can react to specific errors
+        let body: unknown;
+        try {
+          body = await response.json();
+        } catch {
+          body = undefined;
+        }
+        const cause: ClientFetchErrorCause = { status: response.status, body };
+        throw new Error(`${errorMessage}: ${response.status}`, { cause });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

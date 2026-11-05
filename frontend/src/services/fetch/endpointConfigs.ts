@@ -23,26 +23,6 @@ export const fetchCompetitionEndpoint = {
   method: "GET" as ApiMethod,
 };
 
-export const fetchAwardRecommendationEndpoint = {
-  basePath: environment.API_URL,
-  version: "alpha",
-  namespace: "award-recommendations",
-  method: "GET" as ApiMethod,
-  requiresAuth: true,
-};
-
-export const toDynamicAwardRecommendationEndpoint = (
-  type: "POST" | "PUT" | "DELETE",
-) => {
-  return {
-    basePath: environment.API_URL,
-    version: "alpha",
-    namespace: "award-recommendations",
-    method: type as ApiMethod,
-    requiresAuth: true,
-  };
-};
-
 export const toDynamicApplicationsEndpointV1 = (type: "POST") => {
   return {
     basePath: environment.API_URL,

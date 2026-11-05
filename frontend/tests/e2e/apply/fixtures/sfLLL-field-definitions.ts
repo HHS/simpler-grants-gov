@@ -99,7 +99,7 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   reportingEntity_zip: {
     testId: "reporting_entity--applicant_reporting_entity--address--zip_code",
     type: "text",
-    maxLength: 30, // address_shared.py.zip_code
+    maxLength: 10,
     section: "Section 4",
     field: "Zip Code",
   },
@@ -148,7 +148,7 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   primeEntity_zip: {
     testId: "reporting_entity--prime_reporting_entity--address--zip_code",
     type: "text",
-    maxLength: 30, // address_shared.py.zip_code
+    maxLength: 10,
     section: "Section 5",
     field: "Prime Zip Code",
   },
@@ -167,14 +167,18 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
     field: "Federal Agency/Department",
   },
   federalInfo_name: {
-    testId: "federal_program_name",
+    // Display-only field: read-only and pre-populated by system
+    // No testId/selector - this field cannot be filled by users
+    printTestId: "federal_program_name",
     type: "text",
     maxLength: 120, // FORM_JSON_SCHEMA.properties.federal_program_name
     section: "Section 7",
     field: "Federal Program Name",
   },
   federalInfo_assistanceListingNumber: {
-    testId: "assistance_listing_number",
+    // Display-only field: read-only and pre-populated by system
+    // No testId/selector - this field cannot be filled by users
+    printTestId: "assistance_listing_number",
     type: "text",
     maxLength: 120, // FORM_JSON_SCHEMA.properties.assistance_listing_number
     section: "Section 7",
@@ -259,7 +263,7 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   lobbyingRegistrant_zip: {
     testId: "lobbying_registrant--address--zip_code",
     type: "text",
-    maxLength: 30, // address_shared.py.zip_code
+    maxLength: 10,
     section: "Section 10a",
     field: "Zip Code",
   },
@@ -328,7 +332,7 @@ export const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   performingService_zip: {
     testId: "individual_performing_service--address--zip_code",
     type: "text",
-    maxLength: 30, // address_shared.py.zip_code
+    maxLength: 10,
     section: "Section 10b",
     field: "Zip Code",
   },
@@ -423,26 +427,26 @@ export const SFLLL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "lobbying_registrant--individual--first_name",
-    message: "Name and Contact Information First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "lobbying_registrant--individual--last_name",
-    message: "Name and Contact Information Last Name is required",
+    message: "Last Name is required",
   },
   {
     fieldId: "individual_performing_service--individual--first_name",
-    message: "Name and Contact Information First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "individual_performing_service--individual--last_name",
-    message: "Name and Contact Information Last Name is required",
+    message: "Last Name is required",
   },
   {
     fieldId: "signature_block--name--first_name",
-    message: "Name and Contact Information First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "signature_block--name--last_name",
-    message: "Name and Contact Information Last Name is required",
+    message: "Last Name is required",
   },
 ];

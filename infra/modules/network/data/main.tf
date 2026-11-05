@@ -1,46 +1,31 @@
-module "interface" {
-  source = "../interface"
-  name   = var.name
-}
-
 data "aws_vpc" "network" {
-  tags = {
-    project      = var.project_name
-    network_name = var.name
+  filter {
+    name = "tag:Name"
+    # Resolve the VPC by its network_name tag so the environment name and its
+    # VPC/network name may differ (e.g. infra-dev -> infra-dev-simpler-grants),
+    # matching the pattern used by infra/api/database/main.tf.
+    values = [var.name]
   }
 }
 
 data "aws_subnets" "public" {
-  tags = merge(module.interface.public_subnet_tags, {
-    project      = var.project_name
-    network_name = var.name
-  })
-}
-
-data "aws_subnets" "private" {
-  tags = merge(module.interface.private_subnet_tags, {
-    project      = var.project_name
-    network_name = var.name
-  })
-}
-
-data "aws_subnets" "database" {
-  tags = merge(module.interface.database_subnet_tags, {
-    project      = var.project_name
-    network_name = var.name
-  })
-}
-
-data "aws_security_groups" "aws_services" {
-  filter {
-    name   = "group-name"
-    values = ["${module.interface.aws_services_security_group_name_prefix}*"]
-  }
-
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.network.id]
   }
+  filter {
+    name   = "tag:subnet_type"
+    values = ["public"]
+  }
 }
 
-
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
+  filter {
+    name   = "tag:subnet_type"
+    values = ["private"]
+  }
+}

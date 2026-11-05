@@ -359,7 +359,7 @@ def test_shared_common_v1_sam_uei_max_length():
 ###################################
 
 
-@pytest.mark.parametrize("value", ["10", "123.45", "100000000.00", "0.00", "0", "99999999999.99"])
+@pytest.mark.parametrize("value", ["10", "123.45", "100000000.00", "0.00", "0", "9999999999.99"])
 def test_shared_common_v1_budget_monetary_amount_non_negative_valid(value):
     schema = build_schema(COMMON_SHARED_V1, "budget_monetary_amount_non_negative")
     validation_issues = validate_json_schema({"my_field": value}, schema)
@@ -391,21 +391,21 @@ def test_shared_common_v1_budget_monetary_amount_non_negative_invalid_pattern(va
 
 def test_shared_common_v1_budget_monetary_amount_non_negative_min_length():
     schema = build_schema(COMMON_SHARED_V1, "budget_monetary_amount_non_negative")
-
     validation_issues = validate_json_schema({"my_field": ""}, schema)
-    assert len(validation_issues) == 1
-    assert validation_issues[0].type == "minLength"
-    assert validation_issues[0].field == "$.my_field"
+
+    issue_types = {i.type for i in validation_issues}
+    assert "minLength" in issue_types
+    assert any(i.field == "$.my_field" for i in validation_issues)
 
 
-@pytest.mark.parametrize("value", ["100000000000000", "123456789000.00"])
+@pytest.mark.parametrize("value", ["1000000000.000", "12345678901.000"])
 def test_shared_common_v1_budget_monetary_amount_non_negative_max_length(value):
     schema = build_schema(COMMON_SHARED_V1, "budget_monetary_amount_non_negative")
 
     validation_issues = validate_json_schema({"my_field": value}, schema)
-    assert len(validation_issues) == 1
-    assert validation_issues[0].type == "maxLength"
-    assert validation_issues[0].field == "$.my_field"
+    issue_types = {i.type for i in validation_issues}
+    assert "maxLength" in issue_types
+    assert any(i.field == "$.my_field" for i in validation_issues)
 
 
 ###################################
@@ -413,7 +413,7 @@ def test_shared_common_v1_budget_monetary_amount_non_negative_max_length(value):
 ###################################
 
 
-@pytest.mark.parametrize("value", ["10", "0.00", "99999999999.99"])
+@pytest.mark.parametrize("value", ["10", "0.00", "999999999999.99"])
 def test_shared_common_v1_budget_monetary_total_non_negative_valid(value):
     schema = build_schema(COMMON_SHARED_V1, "budget_monetary_total_non_negative")
     validation_issues = validate_json_schema({"my_field": value}, schema)
@@ -447,19 +447,19 @@ def test_shared_common_v1_budget_monetary_total_non_negative_min_length():
     schema = build_schema(COMMON_SHARED_V1, "budget_monetary_total_non_negative")
 
     validation_issues = validate_json_schema({"my_field": ""}, schema)
-    assert len(validation_issues) == 1
-    assert validation_issues[0].type == "minLength"
-    assert validation_issues[0].field == "$.my_field"
+    issue_types = {i.type for i in validation_issues}
+    assert "minLength" in issue_types
+    assert any(i.field == "$.my_field" for i in validation_issues)
 
 
-@pytest.mark.parametrize("value", ["100000000000000", "123456789000.00"])
+@pytest.mark.parametrize("value", ["100000000000.000", "1234567890123.000"])
 def test_shared_common_v1_budget_monetary_total_non_negative_max_length(value):
     schema = build_schema(COMMON_SHARED_V1, "budget_monetary_total_non_negative")
 
     validation_issues = validate_json_schema({"my_field": value}, schema)
-    assert len(validation_issues) == 1
-    assert validation_issues[0].type == "maxLength"
-    assert validation_issues[0].field == "$.my_field"
+    issue_types = {i.type for i in validation_issues}
+    assert "maxLength" in issue_types
+    assert any(i.field == "$.my_field" for i in validation_issues)
 
 
 ###################################

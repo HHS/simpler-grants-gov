@@ -7,6 +7,8 @@ module "prod_config" {
   network_name                      = "prod"
   domain_name                       = "api.simpler.grants.gov"
   secondary_domain_names            = ["alb.simpler.grants.gov"]
+  scanner_callback_domain_name      = "alb.simpler.grants.gov"
+  enable_secure_alb                 = false
   enable_https                      = true
   s3_cdn_domain_name                = "files.simpler.grants.gov"
   mtls_domain_name                  = "soap.simpler.grants.gov"
@@ -97,17 +99,23 @@ module "prod_config" {
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Production overrides
-    FRONTEND_URL             = "https://simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
 
     # Virus scanning endpoints
     ENABLE_FILE_UPLOAD_ENDPOINTS = 1
+
+    # Job lock — enabled in prod alongside incremental search sync wired into load-transform
+    ENABLE_JOB_LOCK = "true"
   }
   instance_cpu    = 2048
   instance_memory = 4096
 
+  enable_submission_consumer = true
+
   scanner_provisioned_concurrency = 1
+
+  enable_processor_service = true
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.

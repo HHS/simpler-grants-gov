@@ -1,18 +1,18 @@
 import uuid
 from collections.abc import Sequence
 
-import grants_shared.adapters.db as db
-from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
-from grants_shared.pagination.paginator import Paginator
-from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 
+import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationSubmission
 from src.db.models.user_models import User
+from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.pagination.paginator import Paginator
+from src.pagination.sorting_util import apply_sorting
 from src.services.applications.get_application import get_application
 
 

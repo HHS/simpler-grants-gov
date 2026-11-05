@@ -1,14 +1,13 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-import grants_shared.api.response as response
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 import src.api.internal.internal_schema as internal_schema
+import src.api.response as response
 from src.api.internal.internal_blueprint import internal_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.internal.create_e2e_token import create_e2e_token
 from src.services.internal.setup_file_scan_scanner_user import setup_file_scan_scanner_user
 from src.services.internal.update_internal_user_role import update_internal_user_role
@@ -62,14 +61,15 @@ def setup_file_scan_scanner_user_route(
         api_key_user = api_user_key_auth.get_user()
         db_session.add(api_key_user)
 
-        scanner_api_key = setup_file_scan_scanner_user(db_session, api_key_user, scanner_user_id)
+        scanner_api_key, key_id = setup_file_scan_scanner_user(
+            db_session, api_key_user, scanner_user_id
+        )
 
-        # Capture the generated key value while the row is still attached; this
-        # is the one and only time the plaintext key leaves the system.
+        # This is the one and only time the plaintext key leaves the system.
         data = {
             "user_id": scanner_user_id,
             "api_key_id": scanner_api_key.api_key_id,
-            "api_key": scanner_api_key.key_id,
+            "api_key": key_id,
         }
 
     return response.ApiResponse(message="Success", data=data)

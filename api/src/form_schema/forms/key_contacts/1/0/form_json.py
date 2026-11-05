@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
@@ -51,9 +52,19 @@ FORM_JSON_SCHEMA = {
                     "description": "Enter the contact's organizational affiliation.",
                 },
                 "address": {
-                    # Use the full address (with county/province) per the epic:
+                    # Use the full address (with county/province)
                     # the Province field is shown at all times on this form.
-                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+                    "allOf": [
+                        {"$ref": ADDRESS_SHARED_V1.field_ref("address")},
+                        # if country is US, zip_code must be at least 9 characters
+                        {
+                            "if": {
+                                "properties": {"country": {"const": "USA: UNITED STATES"}},
+                                "required": ["country"],
+                            },
+                            "then": {"properties": {"zip_code": {"minLength": 9}}},
+                        },
+                    ],
                 },
                 "phone": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
@@ -77,7 +88,6 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "label": "Key Contacts",
         "name": "key_contacts",
-        "description": "Enter between 1 and 4 key contacts and their role on the project.",
         "children": [
             # Applicant Organization Name is the first field and is not part of the FieldList.
             {
@@ -88,6 +98,7 @@ FORM_UI_SCHEMA = [
                 "type": "fieldList",
                 "name": "key_contacts",
                 "label": "Key Contact",
+                "hideFieldListHeading": True,
                 "description": "You may enter up to four (4) Key Contacts. At least 1 (one) contact person is required. Additional contacts are optional.",
                 "children": [
                     {
@@ -354,6 +365,7 @@ KeyContacts_v2_0 = Form(
     form_version="2.0",
     agency_code="SGG",
     omb_number="4040-0010",
+    expiration_date=date(2029, 8, 31),
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     # No rule schema needed — no conditional fields, attachments, or pre/post-population

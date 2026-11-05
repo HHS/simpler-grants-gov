@@ -106,6 +106,28 @@ resource "aws_sns_topic_subscription" "email_integration" {
   endpoint  = each.value
 }
 
+# Private email route. Resource identity is a stable index, never an email address.
+# The value remains sensitive in plans; restricted Terraform state still contains it.
+data "aws_ssm_parameter" "private_alert_email" {
+  count           = var.email_alert_recipient_parameter_name == null ? 0 : 1
+  name            = var.email_alert_recipient_parameter_name
+  with_decryption = true
+}
+
+resource "aws_sns_topic_subscription" "private_email_integration" {
+  count     = var.email_alert_recipient_parameter_name == null ? 0 : 1
+  topic_arn = aws_sns_topic.this.arn
+  protocol  = "email"
+  endpoint  = trimspace(data.aws_ssm_parameter.private_alert_email[0].value)
+
+  lifecycle {
+    precondition {
+      condition     = data.aws_ssm_parameter.private_alert_email[0].type == "SecureString" && can(regex("^[^@[:space:]]+@[^@[:space:]]+[.][^@[:space:]]+$", trimspace(data.aws_ssm_parameter.private_alert_email[0].value)))
+      error_message = "The alert parameter must be a SecureString containing one valid email address."
+    }
+  }
+}
+
 #External incident management service integration
 
 resource "aws_sns_topic_subscription" "incident_management_service_integration" {

@@ -1,0 +1,34 @@
+# frontend service for the infra-sgg2 environment (AWS account 061664787759, network_name "infra-sgg2").
+#
+# Replaced the former infra-grantee1 frontend. ACM cert is imported
+# into the "dev" account; DNS is managed externally.
+module "infra_sgg2_config" {
+  source                          = "./env-config"
+  project_name                    = local.project_name
+  app_name                        = local.app_name
+  default_region                  = module.project_config.default_region
+  environment                     = "infra-sgg2"
+  network_name                    = "infra-sgg2"
+  domain_name                     = "sgg2.teams.simpler.grants.gov"
+  enable_https                    = true
+  has_database                    = local.has_database
+  has_incident_management_service = local.has_incident_management_service
+  enable_identity_provider        = local.enable_identity_provider
+  enable_notifications            = local.enable_notifications
+
+  # Sizing carried over from infra-grantee1.
+  instance_desired_instance_count = 4
+  instance_scaling_min_capacity   = 4
+  instance_scaling_max_capacity   = 20
+
+  instance_cpu    = 1024
+  instance_memory = 2048
+
+  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-sgg2 frontend ALB exists
+  service_host_newrelic_entity_guid = "" # Populate once the New Relic browser entity for the infra-sgg2 frontend exists
+
+  # Enables ECS Exec access for debugging or jump access.
+  # Defaults to `false`. Uncomment the next line to enable.
+  # ⚠️ Warning! It is not recommended to enable this in a production environment.
+  # enable_command_execution = true
+}

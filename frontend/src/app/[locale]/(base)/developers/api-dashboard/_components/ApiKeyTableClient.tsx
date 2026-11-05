@@ -1,16 +1,16 @@
 "use client";
 
 import { ApiKey } from "src/types/apiKeyTypes";
-import { toShortMonthDate } from "src/utils/dateUtil";
+import { toLongMonthDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
-import CopyIcon from "src/components/core/CopyIcon";
 import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
+import { useApiKeyAlert } from "./ApiKeyAlertProvider";
 import ApiKeyModal from "./ApiKeyModal";
 
 interface ApiKeyTableClientProps {
@@ -25,37 +25,8 @@ const ApiKeyNameDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   );
 };
 
-const ApiKeySecretDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
-  const t = useTranslations("ApiDashboard.modal");
-  return (
-    <div>
-      <div className="font-sans-s text-base-dark grid-row">
-        <span className="margin-right-2 grid-col-6">
-          {apiKey.key_id.slice(0, 3) + "..." + apiKey.key_id.slice(-3)}
-        </span>
-        <CopyIcon
-          content={apiKey.key_id}
-          className="usa-icon--size-2 grid-col-6"
-          aria-label={t("copyApiKey")}
-        />
-      </div>
-    </div>
-  );
-};
-
-const ApiKeyStatusDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
-  const t = useTranslations("ApiDashboard.table.statuses");
-  return (
-    <div>
-      <div className="font-sans-md margin-bottom-05">
-        {apiKey.is_active ? t("active") : t("inactive")}
-      </div>
-    </div>
-  );
-};
-
 const CreatedDateDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
-  return <div>{toShortMonthDate(apiKey.created_at)}</div>;
+  return <div>{toLongMonthDate(apiKey.created_at)}</div>;
 };
 
 const LastUsedDateDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
@@ -63,37 +34,44 @@ const LastUsedDateDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
 
   return (
     <div>
-      {apiKey.last_used ? toShortMonthDate(apiKey.last_used) : t("never")}
+      {apiKey.last_used ? toLongMonthDate(apiKey.last_used) : t("never")}
     </div>
   );
 };
 
-const ModifyActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
+const ActionsDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   const router = useRouter();
+  const t = useTranslations("ApiDashboard");
+  const { showAlert } = useApiKeyAlert();
 
-  const handleApiKeyRenamed = () => {
+  const handleApiKeyRenamed = (renamedKey?: ApiKey) => {
+    showAlert(
+      t("renameSuccessMessage", {
+        originalName: apiKey.key_name,
+        keyName: renamedKey?.key_name ?? "",
+      }),
+    );
     router.refresh();
   };
   const handleApiKeyDeleted = () => {
+    showAlert(t("deleteSuccessMessage", { keyName: apiKey.key_name }));
     router.refresh();
   };
 
   return (
-    <div className="grid-row">
-      <div className="flex-align-center">
+    <div className="display-flex flex-align-center flex-wrap">
+      <div className="margin-right-2">
         <ApiKeyModal
           mode="edit"
           apiKey={apiKey}
           onApiKeyUpdated={handleApiKeyRenamed}
         />
       </div>
-      <div className="flex-align-center">
-        <ApiKeyModal
-          mode="delete"
-          apiKey={apiKey}
-          onApiKeyUpdated={handleApiKeyDeleted}
-        />
-      </div>
+      <ApiKeyModal
+        mode="delete"
+        apiKey={apiKey}
+        onApiKeyUpdated={handleApiKeyDeleted}
+      />
     </div>
   );
 };
@@ -105,25 +83,16 @@ const toApiKeyTableRow = (apiKey: ApiKey): TableCellData[] => {
       stackOrder: 0,
     },
     {
-      cellData: <ApiKeyStatusDisplay apiKey={apiKey} />,
+      cellData: <CreatedDateDisplay apiKey={apiKey} />,
       stackOrder: 1,
     },
     {
-      cellData: <ApiKeySecretDisplay apiKey={apiKey} />,
+      cellData: <LastUsedDateDisplay apiKey={apiKey} />,
       stackOrder: 2,
     },
-
     {
-      cellData: <CreatedDateDisplay apiKey={apiKey} />,
+      cellData: <ActionsDisplay apiKey={apiKey} />,
       stackOrder: 3,
-    },
-    {
-      cellData: <LastUsedDateDisplay apiKey={apiKey} />,
-      stackOrder: 4,
-    },
-    {
-      cellData: <ModifyActionDisplay apiKey={apiKey} />,
-      stackOrder: 5,
     },
   ];
 };
@@ -132,12 +101,10 @@ export default function ApiKeyTableClient({ apiKeys }: ApiKeyTableClientProps) {
   const t = useTranslations("ApiDashboard.table");
 
   const headerContent: TableCellData[] = [
-    { cellData: t("headers.apiKey") },
-    { cellData: t("headers.status") },
-    { cellData: t("headers.secret") },
+    { cellData: t("headers.keyName") },
     { cellData: t("headers.created") },
     { cellData: t("headers.lastUsed") },
-    { cellData: t("headers.modify") },
+    { cellData: t("headers.actions") },
   ];
 
   const tableRowData = apiKeys.map((apiKey) => toApiKeyTableRow(apiKey));
@@ -146,6 +113,7 @@ export default function ApiKeyTableClient({ apiKeys }: ApiKeyTableClientProps) {
     <TableWithResponsiveHeader
       headerContent={headerContent}
       tableRowData={tableRowData}
+      rowKeys={apiKeys.map((apiKey) => apiKey.api_key_id)}
     />
   );
 }

@@ -8,6 +8,9 @@ module "training_config" {
   domain_name                       = "api.training.simpler.grants.gov"
   s3_cdn_domain_name                = "files.training.simpler.grants.gov"
   secondary_domain_names            = ["alb.training.simpler.grants.gov"]
+  enable_api_gateway_domain_name    = false
+  scanner_callback_domain_name      = "alb.training.simpler.grants.gov"
+  enable_secure_alb                 = true
   mtls_domain_name                  = "soap.training.simpler.grants.gov"
   enable_https                      = true
   database_engine_version           = "17.7"
@@ -53,11 +56,6 @@ module "training_config" {
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS       = 1
-
-    # Workflow
-    WORKFLOW_SERVICE_INTERNAL_USER_ID = "00bcaf8e-dd04-4fd1-9fb3-ea872a93178d"
-    ENABLE_WORKFLOW_ENDPOINTS         = 1
 
     # Virus scanning endpoints
     ENABLE_FILE_UPLOAD_ENDPOINTS = 1
@@ -67,7 +65,7 @@ module "training_config" {
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
 
   scanner_provisioned_concurrency = 1
 }

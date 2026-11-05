@@ -223,21 +223,25 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Applicant Type Other Specify",
   },
   agency_name: {
-    testId: "agency_name",
+    // Display-only field: read-only and pre-populated by system
+    // No testId/selector - this field cannot be filled by users
+    printTestId: "agency_name",
     type: "text",
     maxLength: 60, // FORM_JSON_SCHEMA.properties.agency_name
     section: "Section 11",
     field: "Agency Name",
   },
   assistance_listing_program_title: {
-    testId: "assistance_listing_program_title",
+    // Display-only field: read-only and pre-populated by system
+    // No testId/selector - this field cannot be filled by users
+    printTestId: "assistance_listing_program_title",
     type: "text",
     maxLength: 120, // FORM_JSON_SCHEMA.properties.assistance_listing_program_title
     section: "Section 12",
     field: "Assistance Listing Program Title",
   },
   areas_affected_attachment: {
-    selector: 'input[name="areas_affected"][type="file"]',
+    selector: 'input[name="areas_affected-visible"][type="file"]',
     type: "file",
     section: "Section 14",
     field: "Areas Affected Attachment",
@@ -250,7 +254,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Project Title",
   },
   additional_project_title_attachment: {
-    selector: 'input[name="additional_project_title"][type="file"]',
+    selector: 'input[name="additional_project_title-visible"][type="file"]',
     type: "file",
     section: "Section 15",
     field: "Additional Project Title Attachment",
@@ -270,7 +274,8 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Congressional District Program Project",
   },
   additional_congressional_attachment: {
-    selector: 'input[name="additional_congressional_districts"][type="file"]',
+    selector:
+      'input[name="additional_congressional_districts-visible"][type="file"]',
     type: "file",
     section: "Section 16",
     field: "Additional Congressional Attachment",
@@ -358,7 +363,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
       field: "delinquent_federal_debt",
       value: "Yes",
     },
-    selector: 'input[name="debt_explanation"][type="file"]',
+    selector: 'input[name="debt_explanation-visible"][type="file"]',
     type: "file",
     section: "Section 20",
     field: "Debt Explanation Attachment",

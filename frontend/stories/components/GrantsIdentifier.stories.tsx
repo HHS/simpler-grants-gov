@@ -1,7 +1,7 @@
 import GrantsIdentifier from "src/components/core/GrantsIdentifier";
 
 const meta = {
-  title: "Components/Layout/Identifier",
+  title: "Components/Layout/GrantsIdentifier",
   component: GrantsIdentifier,
 };
 export default meta;
