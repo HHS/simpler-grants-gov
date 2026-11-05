@@ -3,7 +3,6 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
-  fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
   fetchCompetitionFormsEndpoint,
   fetchFormEndpoint,
@@ -16,7 +15,6 @@ import {
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicApplicationsEndpointV1,
-  toDynamicAwardRecommendationEndpoint,
   toDynamicFilesEndpoint,
   toDynamicGrantorAgenciesEndpoint,
   toDynamicGrantorOpportunityEndpoint,
@@ -152,14 +150,6 @@ export const fetchApplicationWithMethodV1 = (type: "POST") =>
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
 );
-
-export const fetchAwardRecommendation = cache(
-  requesterForEndpoint(fetchAwardRecommendationEndpoint),
-);
-
-export const fetchAwardRecommendationWithMethod = (
-  type: "POST" | "PUT" | "DELETE",
-) => requesterForEndpoint(toDynamicAwardRecommendationEndpoint(type));
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
