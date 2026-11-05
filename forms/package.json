@@ -43,6 +43,8 @@
     "@typespec/compiler": "^1.16.0",
     "@typespec/json-schema": "^1.16.0",
     "@typespec/xml": "^0.86.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "fast-xml-parser": "^5.11.2",
     "simpler-forms": "^0.1.0",
     "typescript": "^5.9.3",
