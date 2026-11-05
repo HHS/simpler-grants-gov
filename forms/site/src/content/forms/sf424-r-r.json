@@ -26,7 +26,10 @@
     "Country default value: the DAT business rules for Country fields (05-5f, 05-6m) state \"Default to 'USA: UNITED STATES'.\" The XSD does not define a default value. Resolution: implement the DAT default in the UI.",
     "RevisionCode as checkbox group: the XSD defines RevisionTypeCodeDataType as an enum with values A, B, C, D, E, AC, AD, BC, BD. The DAT (08-1-1 through 08-1-5) presents these as individual checkboxes with the note \"Each is own checkbox.\" The UI should render individual checkboxes but map selected combinations to the enum value (e.g., selecting A and C maps to \"AC\").",
     "SmallBusinessOrganizationType: the XSD marks this element as nillable=\"true\" and minOccurs=\"0\". When ApplicantTypeCode is not Small Business, this element should be omitted from the XML output rather than sent as nil.",
-    "EmployerID inline type: the XSD defines EmployerID with an inline restriction (minLength 9, maxLength 30) rather than using EmployerIDDataType from GlobalLibrary. We will use the inline constraint values."
+    "EmployerID inline type: the XSD defines EmployerID with an inline restriction (minLength 9, maxLength 30) rather than using EmployerIDDataType from GlobalLibrary. We will use the inline constraint values.",
+    "The definition preview presents the nine legal revision codes in a dropdown. The DAT specifies five checkboxes. The dropdown is a review candidate; its scalar answer already matches the XSD.",
+    "PD/PI and Authorized Organization Representative organization details and addresses are independent answers. The DAT calls for editable first-fill copies from Applicant Organization. Preview entry is manual for these 22 destinations.",
+    "Funding line 15c is applicant-entered in the definition preview, following the DAT instruction to enter the total."
   ],
   "risks": [
     "This form does not yet exist in SGG, so it will be built from scratch",
@@ -52,8 +55,8 @@
           "type": "Radio group (Preapplication, Application, Changed/Corrected Application)",
           "widget": "RadioWidget",
           "help_text": "If this submission is to change or correct a previously submitted application, click the Changed/Corrected Application box and enter the Grants.gov tracking number in field 4c.",
-          "constraints": "SubmissionTypeDataType enum",
-          "json_path": "submission_type_code",
+          "constraints": "SubmissionTypeDataType enumeration",
+          "json_path": "application.submission_type",
           "xml_path": "RR_SF424_5_0:SubmissionTypeCode"
         }
       ]
@@ -71,8 +74,8 @@
           "type": "Date input",
           "widget": "TextWidget",
           "help_text": "Enter the date the application is submitted to Federal agency (or State if applicable).",
-          "constraints": "xs:date format (YYYY-MM-DD)",
-          "json_path": "submitted_date",
+          "constraints": "format date",
+          "json_path": "application.submitted_date",
           "xml_path": "RR_SF424_5_0:SubmittedDate"
         },
         {
@@ -85,7 +88,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the applicant's control number (if applicable).",
           "constraints": "minLength 1, maxLength 30",
-          "json_path": "applicant_id",
+          "json_path": "application.applicant_id",
           "xml_path": "RR_SF424_5_0:ApplicantID"
         }
       ]
@@ -103,8 +106,8 @@
           "type": "Date input",
           "widget": "TextWidget",
           "help_text": "Enter the date received by state (if applicable).",
-          "constraints": "xs:date format (YYYY-MM-DD)",
-          "json_path": "state_received_date",
+          "constraints": "format date",
+          "json_path": "application.state_received_date",
           "xml_path": "RR_SF424_5_0:StateReceivedDate"
         },
         {
@@ -117,7 +120,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the state application identifier (if applicable).",
           "constraints": "minLength 1, maxLength 30",
-          "json_path": "state_id",
+          "json_path": "application.state_id",
           "xml_path": "RR_SF424_5_0:StateID"
         }
       ]
@@ -136,7 +139,7 @@
           "widget": "TextWidget",
           "help_text": "If this is a continuation, revision, or renewal application, enter the assigned Federal Identifier number (for example, award number) -- even if submitting a changed/corrected application.",
           "constraints": "minLength 1, maxLength 30",
-          "json_path": "federal_id",
+          "json_path": "application.federal_id",
           "xml_path": "RR_SF424_5_0:FederalID"
         },
         {
@@ -149,7 +152,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the agency-assigned routing identifier per the agency-specific instructions. This is an optional field.",
           "constraints": "minLength 1, maxLength 75",
-          "json_path": "agency_routing_number",
+          "json_path": "application.agency_routing_number",
           "xml_path": "RR_SF424_5_0:AgencyRoutingNumber"
         },
         {
@@ -162,7 +165,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the previous Grants.gov tracking number, if applicable.",
           "constraints": "minLength 13, maxLength 15",
-          "json_path": "gg_tracking_id",
+          "json_path": "application.tracking_id",
           "xml_path": "RR_SF424_5_0:GGTrackingID"
         }
       ]
@@ -180,9 +183,9 @@
           "type": "Text input",
           "widget": "TextWidget",
           "help_text": "UEI of the applicant organization. This field is pre-populated from the Application cover sheet.",
-          "constraints": "exact length 12",
+          "constraints": "minLength 12, maxLength 12",
           "pre_populated": "from Application cover sheet (deferred)",
-          "json_path": "applicant_info.organization_info.sam_uei",
+          "json_path": "applicant_organization.uei",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:SAMUEI"
         },
         {
@@ -196,7 +199,7 @@
           "help_text": "Enter legal name of applicant, which will undertake the assistance activity.",
           "constraints": "minLength 1, maxLength 60",
           "pre_populated": "from Application cover sheet (deferred)",
-          "json_path": "applicant_info.organization_info.organization_name",
+          "json_path": "applicant_organization.name",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:OrganizationName"
         },
         {
@@ -209,8 +212,8 @@
           "widget": "TextWidget",
           "help_text": "Enter the name of primary organizational department, service, laboratory, or equivalent level within the organization which will undertake the assistance activity.",
           "constraints": "minLength 1, maxLength 100",
-          "json_path": "applicant_info.organization_info.department",
-          "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:DepartmentName"
+          "json_path": "applicant_organization.department",
+          "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Department"
         },
         {
           "kind": "field",
@@ -222,8 +225,8 @@
           "widget": "TextWidget",
           "help_text": "Enter the name of primary organizational division, office, or major subdivision which will undertake the assistance activity.",
           "constraints": "minLength 1, maxLength 100",
-          "json_path": "applicant_info.organization_info.division",
-          "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:DivisionName"
+          "json_path": "applicant_organization.division",
+          "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Division"
         },
         {
           "kind": "field",
@@ -235,7 +238,7 @@
           "widget": "TextWidget",
           "help_text": "Enter first line of the street address for the applicant in 'Street1' field. This field is required.",
           "constraints": "minLength 1, maxLength 55",
-          "json_path": "applicant_info.organization_info.address.street1",
+          "json_path": "applicant_organization.address.street1",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:Street1"
         },
         {
@@ -248,7 +251,7 @@
           "widget": "TextWidget",
           "help_text": "Enter second line of the street address for the applicant in 'Street2' field. This field is optional.",
           "constraints": "minLength 1, maxLength 55",
-          "json_path": "applicant_info.organization_info.address.street2",
+          "json_path": "applicant_organization.address.street2",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:Street2"
         },
         {
@@ -261,7 +264,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the city for address of applicant. This field is required.",
           "constraints": "minLength 1, maxLength 35",
-          "json_path": "applicant_info.organization_info.address.city",
+          "json_path": "applicant_organization.address.city",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:City"
         },
         {
@@ -274,7 +277,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the county/parish for address of applicant.",
           "constraints": "minLength 1, maxLength 30",
-          "json_path": "applicant_info.organization_info.address.county",
+          "json_path": "applicant_organization.address.county",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:County"
         },
         {
@@ -287,7 +290,7 @@
           "widget": "SelectWidget",
           "help_text": "Enter the State where the applicant is located. This field is required if the applicant is located in the United States.",
           "constraints": "StateCodeDataType",
-          "json_path": "applicant_info.organization_info.address.state",
+          "json_path": "applicant_organization.address.state",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:State"
         },
         {
@@ -300,7 +303,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the Province where the applicant is located.",
           "constraints": "minLength 1, maxLength 30",
-          "json_path": "applicant_info.organization_info.address.province",
+          "json_path": "applicant_organization.address.province",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:Province"
         },
         {
@@ -313,7 +316,7 @@
           "widget": "SelectWidget",
           "help_text": "Select the country for the applicant address. This field is required.",
           "constraints": "CountryCodeDataType",
-          "json_path": "applicant_info.organization_info.address.country",
+          "json_path": "applicant_organization.address.country",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:Country"
         },
         {
@@ -325,8 +328,8 @@
           "type": "Text input",
           "widget": "TextWidget",
           "help_text": "Enter the nine-digit Postal Code (e.g., ZIP code) of the applicant. This field is required if the applicant is located in the United States.",
-          "constraints": "minLength 1, maxLength 30 (if US: minLength 9)",
-          "json_path": "applicant_info.organization_info.address.zip_code",
+          "constraints": "minLength 1, maxLength 30",
+          "json_path": "applicant_organization.address.zip_code",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:OrganizationInfo/globLib:Address/globLib:ZipPostalCode"
         },
         {
@@ -339,7 +342,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the prefix (e.g., Mr., Mrs., Rev.) for the person to contact on matters related to this application.",
           "constraints": "minLength 1, maxLength 10",
-          "json_path": "applicant_info.contact_person.name.prefix",
+          "json_path": "applicant_contact.name.prefix",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Name/globLib:PrefixName"
         },
         {
@@ -352,7 +355,7 @@
           "widget": "TextWidget",
           "help_text": "Enter first (given) name of the person to contact on matters related to this application. This field is required.",
           "constraints": "minLength 1, maxLength 35",
-          "json_path": "applicant_info.contact_person.name.first_name",
+          "json_path": "applicant_contact.name.first_name",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Name/globLib:FirstName"
         },
         {
@@ -365,7 +368,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the middle name of the person to contact on matters related to this application.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "applicant_info.contact_person.name.middle_name",
+          "json_path": "applicant_contact.name.middle_name",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Name/globLib:MiddleName"
         },
         {
@@ -378,7 +381,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the last (family) name of the person to contact on matters related to this application. This field is required.",
           "constraints": "minLength 1, maxLength 60",
-          "json_path": "applicant_info.contact_person.name.last_name",
+          "json_path": "applicant_contact.name.last_name",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Name/globLib:LastName"
         },
         {
@@ -391,7 +394,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the suffix (e.g., Jr., Sr., Ph.D) for the name of the person to contact on matters related to this application.",
           "constraints": "minLength 1, maxLength 10",
-          "json_path": "applicant_info.contact_person.name.suffix",
+          "json_path": "applicant_contact.name.suffix",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Name/globLib:SuffixName"
         },
         {
@@ -404,7 +407,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the position/title of the person to contact on matters related to this application.",
           "constraints": "minLength 1, maxLength 45",
-          "json_path": "applicant_info.contact_person.title",
+          "json_path": "applicant_contact.title",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Title"
         },
         {
@@ -417,7 +420,7 @@
           "widget": "TextWidget",
           "help_text": "Enter first line of the street address of the person to contact on matters related to this application. This field is required.",
           "constraints": "minLength 1, maxLength 55",
-          "json_path": "applicant_info.contact_person.address.street1",
+          "json_path": "applicant_contact.address.street1",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Address/globLib:Street1"
         },
         {
@@ -430,7 +433,7 @@
           "widget": "TextWidget",
           "help_text": "Enter second line of the street address of the person to contact on matters related to this application. This field is optional.",
           "constraints": "minLength 1, maxLength 55",
-          "json_path": "applicant_info.contact_person.address.street2",
+          "json_path": "applicant_contact.address.street2",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Address/globLib:Street2"
         },
         {
@@ -443,7 +446,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the city of the person to contact on matters related to this application. This field is required.",
           "constraints": "minLength 1, maxLength 35",
-          "json_path": "applicant_info.contact_person.address.city",
+          "json_path": "applicant_contact.address.city",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Address/globLib:City"
         },
         {
@@ -456,7 +459,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the county/parish of the person to contact on matters related to this application.",
           "constraints": "minLength 1, maxLength 30",
-          "json_path": "applicant_info.contact_person.address.county",
+          "json_path": "applicant_contact.address.county",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Address/globLib:County"
         },
         {
@@ -469,7 +472,7 @@
           "widget": "SelectWidget",
           "help_text": "Enter the State of the person to contact on matters related to this application. This field is required if the applicant is located in the United States.",
           "constraints": "StateCodeDataType",
-          "json_path": "applicant_info.contact_person.address.state",
+          "json_path": "applicant_contact.address.state",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Address/globLib:State"
         },
         {
@@ -482,7 +485,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the Province of the person to contact on matters related to this application.",
           "constraints": "minLength 1, maxLength 30",
-          "json_path": "applicant_info.contact_person.address.province",
+          "json_path": "applicant_contact.address.province",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Address/globLib:Province"
         },
         {
@@ -495,7 +498,7 @@
           "widget": "SelectWidget",
           "help_text": "Select the country of the person to contact on matters related to this application. This field is required.",
           "constraints": "CountryCodeDataType",
-          "json_path": "applicant_info.contact_person.address.country",
+          "json_path": "applicant_contact.address.country",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Address/globLib:Country"
         },
         {
@@ -507,8 +510,8 @@
           "type": "Text input",
           "widget": "TextWidget",
           "help_text": "Enter the nine-digit Postal Code (e.g., ZIP code) of the person to contact on matters related to this application. This field is required if the country is specified as United States.",
-          "constraints": "minLength 1, maxLength 30 (if US: minLength 9)",
-          "json_path": "applicant_info.contact_person.address.zip_code",
+          "constraints": "minLength 1, maxLength 30",
+          "json_path": "applicant_contact.address.zip_code",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Address/globLib:ZipPostalCode"
         },
         {
@@ -521,7 +524,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the daytime phone number for the person to contact on matters related to this application. This field is required.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "applicant_info.contact_person.phone",
+          "json_path": "applicant_contact.phone",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Phone"
         },
         {
@@ -534,7 +537,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the fax number for the person to contact on matters related to this application.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "applicant_info.contact_person.fax",
+          "json_path": "applicant_contact.fax",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Fax"
         },
         {
@@ -547,7 +550,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the e-mail address for the person to contact on matters related to this application.",
           "constraints": "minLength 1, maxLength 60",
-          "json_path": "applicant_info.contact_person.email",
+          "json_path": "applicant_contact.email",
           "xml_path": "RR_SF424_5_0:ApplicantInfo/RR_SF424_5_0:ContactPersonInfo/RR_SF424_5_0:Email"
         }
       ]
@@ -566,7 +569,7 @@
           "widget": "TextWidget",
           "help_text": "Enter either TIN or EIN as assigned by the Internal Revenue Service. If your organization is not in the U.S., enter 44-4444444. This field is required.",
           "constraints": "minLength 9, maxLength 30",
-          "json_path": "employer_id",
+          "json_path": "applicant_organization.employer_id",
           "xml_path": "RR_SF424_5_0:EmployerID"
         }
       ]
@@ -584,8 +587,8 @@
           "type": "Dropdown",
           "widget": "SelectWidget",
           "help_text": "Select the appropriate applicant type code. If Small Business is selected as Type of Applicant, then note if the organization is Woman-owned and/or Socially and Economically Disadvantaged. This field is required.",
-          "constraints": "ApplicantTypeCodeDataType enum",
-          "json_path": "applicant_type.applicant_type_code",
+          "constraints": "ApplicantTypeCodeDataType enumeration",
+          "json_path": "applicant_type.code",
           "xml_path": "RR_SF424_5_0:ApplicantType/RR_SF424_5_0:ApplicantTypeCode"
         },
         {
@@ -598,7 +601,7 @@
           "widget": "TextWidget",
           "help_text": "Complete only if 'Other' is selected as the Type of Applicant.",
           "constraints": "minLength 1, maxLength 50",
-          "json_path": "applicant_type.applicant_type_code_other_explanation",
+          "json_path": "applicant_type.other_explanation",
           "xml_path": "RR_SF424_5_0:ApplicantType/RR_SF424_5_0:ApplicantTypeCodeOtherExplanation"
         },
         {
@@ -611,7 +614,7 @@
           "widget": "CheckboxWidget",
           "help_text": "Check if you are a women-owned small business -- a small business that is at least 51% owned by a woman or women, who also control and operate it.",
           "constraints": "YesNoDataType",
-          "json_path": "applicant_type.small_business_organization_type.is_women_owned",
+          "json_path": "applicant_type.small_business.women_owned",
           "xml_path": "RR_SF424_5_0:ApplicantType/RR_SF424_5_0:SmallBusinessOrganizationType/RR_SF424_5_0:isWomenOwned"
         },
         {
@@ -624,7 +627,7 @@
           "widget": "CheckboxWidget",
           "help_text": "Check if you are a socially and economically disadvantaged small business, as determined by the U.S. Small Business Administration pursuant to section 8(a) of the Small Business Act U.S.C. 637(a).",
           "constraints": "YesNoDataType",
-          "json_path": "applicant_type.small_business_organization_type.is_socially_economically_disadvantaged",
+          "json_path": "applicant_type.small_business.socially_and_economically_disadvantaged",
           "xml_path": "RR_SF424_5_0:ApplicantType/RR_SF424_5_0:SmallBusinessOrganizationType/RR_SF424_5_0:isSociallyEconomicallyDisadvantaged"
         }
       ]
@@ -642,8 +645,8 @@
           "type": "Radio group (New, Resubmission, Renewal, Continuation, Revision)",
           "widget": "RadioWidget",
           "help_text": "Select the type from the following list. Check only one: New, Resubmission, Renewal, Continuation, Revision.",
-          "constraints": "ApplicationTypeCodeDataType enum",
-          "json_path": "application_type.application_type_code",
+          "constraints": "ApplicationTypeCodeDataType enumeration",
+          "json_path": "application.application_type",
           "xml_path": "RR_SF424_5_0:ApplicationType/RR_SF424_5_0:ApplicationTypeCode"
         },
         {
@@ -655,8 +658,8 @@
           "type": "Checkbox group (A. Increase Award, B. Decrease Award, C. Increase Duration, D. Decrease Duration, E. Other)",
           "widget": "CheckboxWidget",
           "help_text": "May select more than one. Valid combinations: AC, AD, BC, BD, or E.",
-          "constraints": "RevisionTypeCodeDataType enum (A, B, C, D, E, AC, AD, BC, BD)",
-          "json_path": "application_type.revision_code",
+          "constraints": "RevisionTypeCodeDataType enumeration",
+          "json_path": "application.revision_code",
           "xml_path": "RR_SF424_5_0:ApplicationType/RR_SF424_5_0:RevisionCode"
         },
         {
@@ -669,7 +672,7 @@
           "widget": "TextWidget",
           "help_text": "If 'other' is selected for Revision, add text to explain.",
           "constraints": "minLength 1, maxLength 45",
-          "json_path": "application_type.revision_code_other_explanation",
+          "json_path": "application.revision_explanation",
           "xml_path": "RR_SF424_5_0:ApplicationType/RR_SF424_5_0:RevisionCodeOtherExplanation"
         },
         {
@@ -682,7 +685,7 @@
           "widget": "RadioWidget",
           "help_text": "Check box if applicable. One selection is required.",
           "constraints": "YesNoDataType",
-          "json_path": "application_type.is_other_agency_submission",
+          "json_path": "application.submitted_to_other_agencies",
           "xml_path": "RR_SF424_5_0:ApplicationType/RR_SF424_5_0:isOtherAgencySubmission"
         },
         {
@@ -695,7 +698,7 @@
           "widget": "TextWidget",
           "help_text": "Enter agency name.",
           "constraints": "minLength 1, maxLength 20",
-          "json_path": "application_type.other_agency_submission_explanation",
+          "json_path": "application.other_agency_explanation",
           "xml_path": "RR_SF424_5_0:ApplicationType/RR_SF424_5_0:OtherAgencySubmissionExplanation"
         }
       ]
@@ -715,7 +718,7 @@
           "help_text": "Name the Federal agency from which assistance is being requested with this application. This field is pre-populated from the opportunity package.",
           "constraints": "minLength 1, maxLength 60",
           "pre_populated": "from the opportunity package",
-          "json_path": "federal_agency_name",
+          "json_path": "opportunity.agency_name",
           "xml_path": "RR_SF424_5_0:FederalAgencyName"
         }
       ]
@@ -733,9 +736,9 @@
           "type": "Text input",
           "widget": "TextWidget",
           "help_text": "This is the Assistance Listing number of the program under which assistance is requested. This field is pre-populated from the opportunity package.",
-          "constraints": "pattern \\d{2}\\.\\d{3}",
+          "constraints": "minLength 1, maxLength 15",
           "pre_populated": "from the opportunity package",
-          "json_path": "cfda_number",
+          "json_path": "opportunity.assistance_listing_number",
           "xml_path": "RR_SF424_5_0:CFDANumber"
         },
         {
@@ -749,7 +752,7 @@
           "help_text": "This is the Assistance Listing title of the program under which assistance is requested. This field is pre-populated from the opportunity package.",
           "constraints": "minLength 1, maxLength 120",
           "pre_populated": "from the opportunity package",
-          "json_path": "activity_title",
+          "json_path": "opportunity.assistance_listing_title",
           "xml_path": "RR_SF424_5_0:ActivityTitle"
         }
       ]
@@ -768,7 +771,7 @@
           "widget": "TextWidget",
           "help_text": "Enter a brief descriptive title of the project. This field is required.",
           "constraints": "minLength 1, maxLength 200",
-          "json_path": "project_title",
+          "json_path": "project.title",
           "xml_path": "RR_SF424_5_0:ProjectTitle"
         }
       ]
@@ -786,8 +789,8 @@
           "type": "Date input",
           "widget": "TextWidget",
           "help_text": "Enter the proposed start date of the project. This field is required.",
-          "constraints": "xs:date format (YYYY-MM-DD); Start Date cannot be after End Date",
-          "json_path": "proposed_project_period.start_date",
+          "constraints": "format date",
+          "json_path": "project.start_date",
           "xml_path": "RR_SF424_5_0:ProposedProjectPeriod/RR_SF424_5_0:ProposedStartDate"
         },
         {
@@ -799,8 +802,8 @@
           "type": "Date input",
           "widget": "TextWidget",
           "help_text": "Enter the proposed end date of the project. This field is required.",
-          "constraints": "xs:date format (YYYY-MM-DD); End Date cannot be before Start Date",
-          "json_path": "proposed_project_period.end_date",
+          "constraints": "format date",
+          "json_path": "project.end_date",
           "xml_path": "RR_SF424_5_0:ProposedProjectPeriod/RR_SF424_5_0:ProposedEndDate"
         }
       ]
@@ -819,7 +822,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district. If all districts in a state are affected, enter 'all'. If nationwide, enter US-all. If the applicant is outside the US, enter 00-000.",
           "constraints": "minLength 1, maxLength 6",
-          "json_path": "congressional_district.applicant",
+          "json_path": "project.congressional_district",
           "xml_path": "RR_SF424_5_0:CongressionalDistrict/RR_SF424_5_0:ApplicantCongressionalDistrict"
         }
       ]
@@ -838,7 +841,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the prefix (e.g., Mr., Mrs., Rev.) for the name of the PD/PI.",
           "constraints": "minLength 1, maxLength 10",
-          "json_path": "pdpi_contact_info.name.prefix",
+          "json_path": "principal_investigator.name.prefix",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Name/globLib:PrefixName"
         },
         {
@@ -851,7 +854,7 @@
           "widget": "TextWidget",
           "help_text": "Enter first name of the PD/PI. This field is required.",
           "constraints": "minLength 1, maxLength 35",
-          "json_path": "pdpi_contact_info.name.first_name",
+          "json_path": "principal_investigator.name.first_name",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Name/globLib:FirstName"
         },
         {
@@ -864,7 +867,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the middle name of the PD/PI.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "pdpi_contact_info.name.middle_name",
+          "json_path": "principal_investigator.name.middle_name",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Name/globLib:MiddleName"
         },
         {
@@ -877,7 +880,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the last (family) name of the PD/PI. This field is required.",
           "constraints": "minLength 1, maxLength 60",
-          "json_path": "pdpi_contact_info.name.last_name",
+          "json_path": "principal_investigator.name.last_name",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Name/globLib:LastName"
         },
         {
@@ -890,7 +893,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the suffix (e.g., Jr., Sr., Ph.D) for the name of the PD/PI.",
           "constraints": "minLength 1, maxLength 10",
-          "json_path": "pdpi_contact_info.name.suffix",
+          "json_path": "principal_investigator.name.suffix",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Name/globLib:SuffixName"
         },
         {
@@ -903,7 +906,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the title of the PD/PI.",
           "constraints": "minLength 1, maxLength 45",
-          "json_path": "pdpi_contact_info.title",
+          "json_path": "principal_investigator.title",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Title"
         },
         {
@@ -917,7 +920,7 @@
           "help_text": "Enter the name of organization for the PD/PI. This field is required.",
           "constraints": "minLength 1, maxLength 60",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.organization_name",
+          "json_path": "principal_investigator.organization_name",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:OrganizationName"
         },
         {
@@ -931,7 +934,7 @@
           "help_text": "Enter the name of primary organizational department, service, laboratory, or equivalent level within the organization of the PD/PI.",
           "constraints": "minLength 1, maxLength 100",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.department",
+          "json_path": "principal_investigator.department",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Department"
         },
         {
@@ -945,7 +948,7 @@
           "help_text": "Enter the name of primary organizational division, office, or major subdivision of the PD/PI.",
           "constraints": "minLength 1, maxLength 100",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.division",
+          "json_path": "principal_investigator.division",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Division"
         },
         {
@@ -959,7 +962,7 @@
           "help_text": "Enter first line of the street address for the PD/PI in the 'Street1' field. This field is required.",
           "constraints": "minLength 1, maxLength 55",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.address.street1",
+          "json_path": "principal_investigator.address.street1",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:Street1"
         },
         {
@@ -973,7 +976,7 @@
           "help_text": "Enter second line of the street address for the PD/PI in 'Street2' field. This field is optional.",
           "constraints": "minLength 1, maxLength 55",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.address.street2",
+          "json_path": "principal_investigator.address.street2",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:Street2"
         },
         {
@@ -987,7 +990,7 @@
           "help_text": "Enter the city for address of the PD/PI. This field is required.",
           "constraints": "minLength 1, maxLength 35",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.address.city",
+          "json_path": "principal_investigator.address.city",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:City"
         },
         {
@@ -1001,7 +1004,7 @@
           "help_text": "Enter the county/parish for address of the PD/PI.",
           "constraints": "minLength 1, maxLength 30",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.address.county",
+          "json_path": "principal_investigator.address.county",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:County"
         },
         {
@@ -1015,7 +1018,7 @@
           "help_text": "Enter the State where the PD/PI is located. This field is required if the PD/PI is located in the United States.",
           "constraints": "StateCodeDataType",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.address.state",
+          "json_path": "principal_investigator.address.state",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:State"
         },
         {
@@ -1029,7 +1032,7 @@
           "help_text": "Enter the Province for PD/PI.",
           "constraints": "minLength 1, maxLength 30",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.address.province",
+          "json_path": "principal_investigator.address.province",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:Province"
         },
         {
@@ -1043,7 +1046,7 @@
           "help_text": "Select the country for the PD/PI address.",
           "constraints": "CountryCodeDataType",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.address.country",
+          "json_path": "principal_investigator.address.country",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:Country"
         },
         {
@@ -1055,9 +1058,9 @@
           "type": "Text input",
           "widget": "TextWidget",
           "help_text": "Enter the nine-digit Postal Code (e.g., ZIP code) of the PD/PI. This field is required if the PD/PI is located in the United States.",
-          "constraints": "minLength 1, maxLength 30 (if US: minLength 9)",
+          "constraints": "minLength 1, maxLength 30",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "pdpi_contact_info.address.zip_code",
+          "json_path": "principal_investigator.address.zip_code",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Address/globLib:ZipPostalCode"
         },
         {
@@ -1070,7 +1073,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the daytime phone number for the PD/PI. This field is required.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "pdpi_contact_info.phone",
+          "json_path": "principal_investigator.phone",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Phone"
         },
         {
@@ -1083,7 +1086,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the fax number for the PD/PI.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "pdpi_contact_info.fax",
+          "json_path": "principal_investigator.fax",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Fax"
         },
         {
@@ -1096,7 +1099,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the e-mail address for the PD/PI. This field is required.",
           "constraints": "minLength 1, maxLength 60",
-          "json_path": "pdpi_contact_info.email",
+          "json_path": "principal_investigator.email",
           "xml_path": "RR_SF424_5_0:PDPIContactInfo/RR_SF424_5_0:Email"
         }
       ]
@@ -1114,8 +1117,8 @@
           "type": "Currency input",
           "widget": "TextWidget",
           "help_text": "Enter total Federal funds requested for the entire project period. This field is required.",
-          "constraints": "BudgetTotalAmountDataType (decimal, totalDigits 15, fractionDigits 2)",
-          "json_path": "estimated_project_funding.total_estimated_amount",
+          "constraints": "minimum 0, maximum 9999999999999.99",
+          "json_path": "funding.federal",
           "xml_path": "RR_SF424_5_0:EstimatedProjectFunding/RR_SF424_5_0:TotalEstimatedAmount"
         },
         {
@@ -1127,8 +1130,8 @@
           "type": "Currency input",
           "widget": "TextWidget",
           "help_text": "Enter total non-Federal funds requested for the entire project period. This field is required.",
-          "constraints": "BudgetTotalAmountDataType (decimal, totalDigits 15, fractionDigits 2)",
-          "json_path": "estimated_project_funding.total_nonfed_requested",
+          "constraints": "minimum 0, maximum 9999999999999.99",
+          "json_path": "funding.non_federal",
           "xml_path": "RR_SF424_5_0:EstimatedProjectFunding/RR_SF424_5_0:TotalNonfedrequested"
         },
         {
@@ -1140,8 +1143,8 @@
           "type": "Currency input",
           "widget": "TextWidget",
           "help_text": "Enter total estimated funds for the entire project period, including both Federal and non-Federal funds. This field is required.",
-          "constraints": "BudgetTotalAmountDataType (decimal, totalDigits 15, fractionDigits 2)",
-          "json_path": "estimated_project_funding.total_fed_nonfed_requested",
+          "constraints": "minimum 0, maximum 9999999999999.99",
+          "json_path": "funding.total",
           "xml_path": "RR_SF424_5_0:EstimatedProjectFunding/RR_SF424_5_0:TotalfedNonfedrequested"
         },
         {
@@ -1153,8 +1156,8 @@
           "type": "Currency input",
           "widget": "TextWidget",
           "help_text": "Identify any Program Income estimated for this project period if applicable. This field is required.",
-          "constraints": "BudgetTotalAmountDataType (decimal, totalDigits 15, fractionDigits 2)",
-          "json_path": "estimated_project_funding.estimated_program_income",
+          "constraints": "minimum 0, maximum 9999999999999.99",
+          "json_path": "funding.program_income",
           "xml_path": "RR_SF424_5_0:EstimatedProjectFunding/RR_SF424_5_0:EstimatedProgramIncome"
         }
       ]
@@ -1172,8 +1175,8 @@
           "type": "Radio group",
           "widget": "RadioWidget",
           "help_text": "If yes, check box. If the announcement indicates that the program is covered under Executive Order 12372, applicants should contact the State Single Point of Contact (SPOC) for Federal Executive Order 12372 Process.",
-          "constraints": "StateReviewCodeTypeDataType enum (\"Y: Yes\", \"Program is not covered by E.O. 12372\", \"Program has not been selected by state for review\")",
-          "json_path": "state_review.state_review_code_type",
+          "constraints": "StateReviewCodeTypeDataType enumeration",
+          "json_path": "state_review.status",
           "xml_path": "RR_SF424_5_0:StateReview/RR_SF424_5_0:StateReviewCodeType"
         },
         {
@@ -1185,8 +1188,8 @@
           "type": "Date input",
           "widget": "TextWidget",
           "help_text": "If block 16a is checked, insert date application was submitted to State.",
-          "constraints": "xs:date format (YYYY-MM-DD)",
-          "json_path": "state_review.state_review_date",
+          "constraints": "format date",
+          "json_path": "state_review.date",
           "xml_path": "RR_SF424_5_0:StateReview/RR_SF424_5_0:StateReviewDate"
         }
       ]
@@ -1205,7 +1208,7 @@
           "widget": "CheckboxWidget",
           "help_text": "Check 'I agree' to provide the required certifications and assurances. This field is required.",
           "constraints": "YesNoDataType",
-          "json_path": "trust_agree",
+          "json_path": "certification.agree",
           "xml_path": "RR_SF424_5_0:TrustAgree"
         }
       ]
@@ -1223,8 +1226,7 @@
           "type": "File attachment",
           "widget": "ApplicationAttachmentWidget",
           "help_text": "If applicable, attach the SFLLL (Disclosure of Lobbying Activities) or other explanatory documentation per agency instructions.",
-          "constraints": "AttachedFileDataType",
-          "json_path": "sflll_attachment",
+          "json_path": "attachments.lobbying_disclosure",
           "xml_path": "RR_SF424_5_0:SFLLLAttachment"
         }
       ]
@@ -1243,7 +1245,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the prefix (e.g., Mr., Mrs., Rev.) for the name of the Authorized Representative.",
           "constraints": "minLength 1, maxLength 10",
-          "json_path": "aor_info.name.prefix",
+          "json_path": "authorized_representative.name.prefix",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Name/globLib:PrefixName"
         },
         {
@@ -1256,7 +1258,7 @@
           "widget": "TextWidget",
           "help_text": "Enter first (given) name of the Authorized Representative. This field is required.",
           "constraints": "minLength 1, maxLength 35",
-          "json_path": "aor_info.name.first_name",
+          "json_path": "authorized_representative.name.first_name",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Name/globLib:FirstName"
         },
         {
@@ -1269,7 +1271,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the middle name of the Authorized Representative.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "aor_info.name.middle_name",
+          "json_path": "authorized_representative.name.middle_name",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Name/globLib:MiddleName"
         },
         {
@@ -1282,7 +1284,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the last (family) name of the Authorized Representative. This field is required.",
           "constraints": "minLength 1, maxLength 60",
-          "json_path": "aor_info.name.last_name",
+          "json_path": "authorized_representative.name.last_name",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Name/globLib:LastName"
         },
         {
@@ -1295,7 +1297,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the suffix (e.g., Jr., Sr., Ph.D) for the name of the Authorized Representative.",
           "constraints": "minLength 1, maxLength 10",
-          "json_path": "aor_info.name.suffix",
+          "json_path": "authorized_representative.name.suffix",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Name/globLib:SuffixName"
         },
         {
@@ -1308,7 +1310,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the title of the Authorized Representative. This field is required.",
           "constraints": "minLength 1, maxLength 45",
-          "json_path": "aor_info.title",
+          "json_path": "authorized_representative.title",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Title"
         },
         {
@@ -1322,7 +1324,7 @@
           "help_text": "Enter the name of organization for the Authorized Representative. This field is required.",
           "constraints": "minLength 1, maxLength 60",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.organization_name",
+          "json_path": "authorized_representative.organization_name",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:OrganizationName"
         },
         {
@@ -1336,7 +1338,7 @@
           "help_text": "Enter the name of primary organizational department, service, laboratory, or equivalent level within the organization of the Authorized Representative.",
           "constraints": "minLength 1, maxLength 100",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.department",
+          "json_path": "authorized_representative.department",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Department"
         },
         {
@@ -1350,7 +1352,7 @@
           "help_text": "Enter the name of primary organizational division, office, or major subdivision of the Authorized Representative.",
           "constraints": "minLength 1, maxLength 100",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.division",
+          "json_path": "authorized_representative.division",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Division"
         },
         {
@@ -1364,7 +1366,7 @@
           "help_text": "Enter first line of the street address for the Authorized Representative in the 'Street1' field. This field is required.",
           "constraints": "minLength 1, maxLength 55",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.address.street1",
+          "json_path": "authorized_representative.address.street1",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:Street1"
         },
         {
@@ -1378,7 +1380,7 @@
           "help_text": "Enter second line of the street address for the Authorized Representative in the 'Street2' field. This field is optional.",
           "constraints": "minLength 1, maxLength 55",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.address.street2",
+          "json_path": "authorized_representative.address.street2",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:Street2"
         },
         {
@@ -1392,7 +1394,7 @@
           "help_text": "City for address of the Authorized Representative. This field is required.",
           "constraints": "minLength 1, maxLength 35",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.address.city",
+          "json_path": "authorized_representative.address.city",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:City"
         },
         {
@@ -1406,7 +1408,7 @@
           "help_text": "Enter the county/parish for address of Authorized Representative.",
           "constraints": "minLength 1, maxLength 30",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.address.county",
+          "json_path": "authorized_representative.address.county",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:County"
         },
         {
@@ -1420,7 +1422,7 @@
           "help_text": "Enter the State where the Authorized Representative is located. This field is required if the Authorized Representative is located in the United States.",
           "constraints": "StateCodeDataType",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.address.state",
+          "json_path": "authorized_representative.address.state",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:State"
         },
         {
@@ -1434,7 +1436,7 @@
           "help_text": "Enter the Province for Authorized Representative.",
           "constraints": "minLength 1, maxLength 30",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.address.province",
+          "json_path": "authorized_representative.address.province",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:Province"
         },
         {
@@ -1448,7 +1450,7 @@
           "help_text": "Select the country for the Authorized Representative address.",
           "constraints": "CountryCodeDataType",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.address.country",
+          "json_path": "authorized_representative.address.country",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:Country"
         },
         {
@@ -1460,9 +1462,9 @@
           "type": "Text input",
           "widget": "TextWidget",
           "help_text": "Enter the nine-digit Postal Code (e.g., ZIP code) of the Authorized Representative. This field is required if the Authorized Representative is located in the United States.",
-          "constraints": "minLength 1, maxLength 30 (if US: minLength 9)",
+          "constraints": "minLength 1, maxLength 30",
           "pre_populated": "from applicant information (overwritable)",
-          "json_path": "aor_info.address.zip_code",
+          "json_path": "authorized_representative.address.zip_code",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Address/globLib:ZipPostalCode"
         },
         {
@@ -1475,7 +1477,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the daytime phone number for the Authorized Representative. This field is required.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "aor_info.phone",
+          "json_path": "authorized_representative.phone",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Phone"
         },
         {
@@ -1488,7 +1490,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the fax number for the Authorized Representative.",
           "constraints": "minLength 1, maxLength 25",
-          "json_path": "aor_info.fax",
+          "json_path": "authorized_representative.fax",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Fax"
         },
         {
@@ -1501,7 +1503,7 @@
           "widget": "TextWidget",
           "help_text": "Enter the e-mail address for the Authorized Representative. This field is required.",
           "constraints": "minLength 1, maxLength 60",
-          "json_path": "aor_info.email",
+          "json_path": "authorized_representative.email",
           "xml_path": "RR_SF424_5_0:AORInfo/RR_SF424_5_0:Email"
         }
       ]
@@ -1516,12 +1518,13 @@
           "label": "Signature of Authorized Representative",
           "dat_field": "19-14",
           "required": true,
-          "type": "Text input (signature capture)",
+          "type": "System-populated text on submission",
           "widget": "TextWidget",
           "help_text": "It is the organization's responsibility to assure that only properly authorized individuals sign in this capacity and/or submit the application to Grants.gov.",
-          "constraints": "minLength 1, maxLength 45",
-          "json_path": "aor_signature",
-          "xml_path": "RR_SF424_5_0:AOR_Signature"
+          "constraints": "minLength 1, maxLength 144",
+          "json_path": "certification.signature",
+          "xml_path": "RR_SF424_5_0:AOR_Signature",
+          "pre_populated": "populated by the submission service"
         },
         {
           "kind": "field",
@@ -1529,13 +1532,14 @@
           "label": "Date Signed",
           "dat_field": "19-15",
           "required": true,
-          "type": "Date input",
+          "type": "System-populated date on submission",
           "widget": "TextWidget",
           "help_text": "If this application is submitted through Grants.gov, the system will generate this date.",
-          "constraints": "xs:date format (YYYY-MM-DD)",
+          "constraints": "format date",
           "post_populated": "system-generated on submission",
-          "json_path": "aor_signed_date",
-          "xml_path": "RR_SF424_5_0:AOR_SignedDate"
+          "json_path": "certification.date_signed",
+          "xml_path": "RR_SF424_5_0:AOR_SignedDate",
+          "pre_populated": "populated by the submission service"
         }
       ]
     },
@@ -1552,8 +1556,7 @@
           "type": "File attachment",
           "widget": "ApplicationAttachmentWidget",
           "help_text": "If submitting a pre-application, provide a summary description of the project in accordance with the announcement and/or agency specific instructions and attach here.",
-          "constraints": "AttachedFileDataType",
-          "json_path": "pre_application_attachment",
+          "json_path": "attachments.pre_application",
           "xml_path": "RR_SF424_5_0:PreApplicationAttachment"
         }
       ]
@@ -1571,11 +1574,12 @@
           "type": "File attachment",
           "widget": "ApplicationAttachmentWidget",
           "help_text": "Attach the cover letter in accordance with the announcement and/or agency specific instructions.",
-          "constraints": "AttachedFileDataType",
-          "json_path": "cover_letter_attachment",
+          "json_path": "attachments.cover_letter",
           "xml_path": "RR_SF424_5_0:CoverLetterAttachment"
         }
       ]
     }
-  ]
+  ],
+  "spec_id": "sf424-r-r",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/RR_SF424_5_0-V5.0_F768.xls"
 }
