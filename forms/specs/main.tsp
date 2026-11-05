@@ -5,3 +5,6 @@ import "./forms/nsf-key-person-expanded/index.tsp";
 import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
 import "./forms/performance-sites/index.tsp";
+import "./forms/nsf-deviation-authorization/index.tsp";
+import "./forms/nsf-suggested-reviewers/index.tsp";
+import "./forms/phs-398-research-plan/index.tsp";
