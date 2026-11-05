@@ -1,11 +1,10 @@
 import path from "node:path";
-
 import { compile, NodeHost } from "@typespec/compiler";
 import { xsdRoots } from "form-library-xml";
 import { describe, expect, it } from "vitest";
 
-import { xsdModelFields } from "./harness/flatten/xsdModels.ts";
 import { xsdFields } from "./harness/flatten/xsd.ts";
+import { xsdModelFields } from "./harness/flatten/xsdModels.ts";
 import { comparePair, report, type Discrepancy } from "./harness/index.ts";
 import { FORMS_ROOT, readSource } from "./harness/load.ts";
 

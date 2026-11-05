@@ -1,6 +1,7 @@
 import type { Model, Program } from "@typespec/compiler";
 import { formIdentities, xmlTransformGaps } from "form-library-xml";
 import { readBlock } from "simpler-forms";
+
 import { reportDiagnostic, stateKeys } from "./lib.js";
 import { modelSync } from "./model.js";
 

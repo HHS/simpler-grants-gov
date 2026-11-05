@@ -56,8 +56,16 @@ namespace AddressParts {
 @Meta.question(#{ id: "types/address" })
 @Meta.tag(Catalogue.Tag.address)
 @UI.label("Address")
-@Validation.requiredPathWhen("state", "country", Questions.Types.CountryCode.USA)
-@Validation.requiredPathWhen("zipCode", "country", Questions.Types.CountryCode.USA)
+@Validation.requiredPathWhen(
+  "state",
+  "country",
+  Questions.Types.CountryCode.USA
+)
+@Validation.requiredPathWhen(
+  "zipCode",
+  "country",
+  Questions.Types.CountryCode.USA
+)
 model Address {
   /** Enter the first line of the street address. */
   @UI.label("Street 1")

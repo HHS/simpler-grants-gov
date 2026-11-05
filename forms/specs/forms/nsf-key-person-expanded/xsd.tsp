@@ -215,7 +215,10 @@ model BioSketchsAttached {
 /** The profile's current and pending (other) support. */
 @ns(Namespaces.NSF_KeyPersonExpanded_3_3)
 model SupportsAttached {
-  @Mapping.from(grantsGovXml, PrincipalInvestigatorProfile.currentPendingSupport)
+  @Mapping.from(
+    grantsGovXml,
+    PrincipalInvestigatorProfile.currentPendingSupport
+  )
   @Mapping.from(grantsGovXml, SeniorKeyPersonProfile.currentPendingSupport)
   @name("SupportAttached")
   supportAttached: Att.AttachedFileDataType;
@@ -233,7 +236,10 @@ model CollaboratorsAttached {
 /** The profile's synergistic activities. */
 @ns(Namespaces.NSF_KeyPersonExpanded_3_3)
 model SynergisticActivitiesAttached {
-  @Mapping.from(grantsGovXml, PrincipalInvestigatorProfile.synergisticActivities)
+  @Mapping.from(
+    grantsGovXml,
+    PrincipalInvestigatorProfile.synergisticActivities
+  )
   @Mapping.from(grantsGovXml, SeniorKeyPersonProfile.synergisticActivities)
   @name("SynergisticAttached")
   synergisticAttached: Att.AttachedFileDataType;

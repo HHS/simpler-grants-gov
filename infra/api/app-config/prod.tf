@@ -111,7 +111,11 @@ module "prod_config" {
   instance_cpu    = 2048
   instance_memory = 4096
 
+  enable_submission_consumer = true
+
   scanner_provisioned_concurrency = 1
+
+  enable_processor_service = true
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.

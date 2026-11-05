@@ -6,6 +6,7 @@ import type {
   Namespace,
   Program,
 } from "@typespec/compiler";
+
 import { reportDiagnostic, stateKeys } from "./lib.js";
 
 // TODO(agilesix/simpler-forms#21): move `@Mapping.transforms` and `@Mapping.transform` to simpler-forms.

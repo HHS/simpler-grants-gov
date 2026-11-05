@@ -18,7 +18,7 @@ const statusOf = (
   attribute: Attribute,
   source: Source,
 ) => {
-  const field = form.fields.find((f) => f.id === id);
+  const field = form.fields.find((f) => f.field.json_path === id);
   return field?.rows.find((row) => row.attribute === attribute)?.cells[source]
     .status;
 };
@@ -95,6 +95,14 @@ describe("Key Contacts", () => {
       ]);
     });
 
+    it("uses the persisted plan ID rather than an answer path as link identity", () => {
+      for (const field of form.fields) {
+        expect(field.field.id).toBeTruthy();
+        expect(field.id).toBe(field.field.id);
+        expect(field.id).not.toBe(field.field.json_path);
+      }
+    });
+
     it("names every field in the tree by a comparison", () => {
       const ids = (nodes: ComparisonNode[]): string[] =>
         nodes.flatMap((node) =>
@@ -107,7 +115,7 @@ describe("Key Contacts", () => {
   describe("Applicant Organization Name", () => {
     it("matches every source it is compared with", () => {
       const field = form.fields.find(
-        (f) => f.id === "applicant_organization_name",
+        (f) => f.field.json_path === "applicant_organization_name",
       )!;
       const statuses = new Set(
         field.rows.flatMap((row) =>

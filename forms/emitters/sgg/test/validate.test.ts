@@ -1,8 +1,8 @@
-import { compile, NodeHost } from "@typespec/compiler";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { compile, NodeHost } from "@typespec/compiler";
 import { describe, expect, it } from "vitest";
 
 const MAIN = fileURLToPath(new URL("../../../specs/main.tsp", import.meta.url));
