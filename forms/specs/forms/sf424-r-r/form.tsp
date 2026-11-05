@@ -81,9 +81,11 @@ enum RevisionCode {
 model Application {
   @UI.label("Type of Submission")
   @UI.widget(Rendering.Widget.Radio)
+  @doc("For a changed or corrected application, enter the previous Grants.gov tracking ID below.")
   submissionType: SubmissionType;
 
   @UI.label("Date Submitted")
+  @doc("Enter the date the application was submitted to the federal agency or state, if applicable.")
   submittedDate?: plainDate;
 
   @UI.label("Applicant Identifier")
@@ -92,6 +94,7 @@ model Application {
   applicantId?: string;
 
   @UI.label("Date Received by State")
+  @doc("Enter the date the state received the application, if applicable.")
   stateReceivedDate?: plainDate;
 
   @UI.label("State Application Identifier")
@@ -117,6 +120,7 @@ model Application {
   @UI.label("Agency Routing Identifier")
   @minLength(1)
   @maxLength(75)
+  @doc("Enter the agency routing number if the funding agency’s instructions provide one.")
   agencyRoutingNumber?: string;
 
   @UI.label("Previous Grants.gov Tracking ID")
@@ -141,6 +145,7 @@ model Application {
   @Validation.requiredWhen(Application.revisionCode, RevisionCode.E)
   @minLength(1)
   @maxLength(45)
+  @doc("Explain the revision if you selected E, Other.")
   revisionExplanation?: string;
 
   @UI.label("Is this application being submitted to other agencies?")
@@ -152,6 +157,7 @@ model Application {
   @Validation.requiredWhen(Application.submittedToOtherAgencies, true)
   @minLength(1)
   @maxLength(20)
+  @doc("Enter the name of the other agency.")
   otherAgencyExplanation?: string;
 }
 
@@ -172,6 +178,7 @@ model ApplicantOrganization {
   @UI.label("Employer Identification Number (EIN/TIN)")
   @minLength(9)
   @maxLength(30)
+  @doc("Enter your IRS-assigned EIN or TIN. For a non-US organization, enter 44-4444444.")
   employerId: string;
 }
 
@@ -196,10 +203,12 @@ model CoverApplicantType {
 model SmallBusiness {
   @UI.label("Women Owned")
   @UI.widget(Rendering.Widget.Radio)
+  @doc("Select Yes if women own at least 51% of the business and control and operate it.")
   womenOwned?: boolean;
 
   @UI.label("Socially and Economically Disadvantaged")
   @UI.widget(Rendering.Widget.Radio)
+  @doc("Select Yes if the U.S. Small Business Administration has determined that the business qualifies under section 8(a) of the Small Business Act.")
   sociallyAndEconomicallyDisadvantaged?: boolean;
 }
 
@@ -257,6 +266,7 @@ model Funding {
   total: FundingAmount;
 
   @UI.label("Estimated Program Income")
+  @doc("Enter estimated program income for the entire project period.")
   programIncome: FundingAmount;
 }
 
@@ -269,10 +279,12 @@ enum StateReviewStatus {
 model StateReview {
   @UI.label("Is this application subject to state review under Executive Order 12372?")
   @UI.widget(Rendering.Widget.Radio)
+  @doc("If the announcement says the program is covered by Executive Order 12372, contact your State Single Point of Contact.")
   status: StateReviewStatus;
 
   @UI.label("Date Submitted for State Review")
   @UI.enabledWhen(StateReview.status, StateReviewStatus.Yes)
+  @doc("Enter the date you submitted the application to the state for review.")
   date?: plainDate;
 }
 
