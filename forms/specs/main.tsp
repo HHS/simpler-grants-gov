@@ -7,3 +7,5 @@ import "./forms/rr-key-person/index.tsp";
 import "./forms/performance-sites/index.tsp";
 import "./forms/sf424-individual/index.tsp";
 import "./forms/sf424-mandatory/index.tsp";
+import "./forms/sf424-short/index.tsp";
+import "./forms/sf424/index.tsp";
