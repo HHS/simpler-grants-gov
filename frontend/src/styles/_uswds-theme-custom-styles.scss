@@ -1639,28 +1639,6 @@ $simpler-switch-transition-easing: ease;
 .seg-scroll-margin-top--header {
   scroll-margin-top: 6rem;
 }
-// Award Recommendation Step Connector
-.award-recommendation-step-connector {
-  background-color: #c3e8d8;
-  height: calc(100% + 1rem);
-}
-
-// Teal green checkboxes for RisksTable and EditRecommendationsTable
-.risks-table-checkbox,
-.edit-recommendations-table-checkbox {
-  accent-color: color("mint-50");
-
-  &:checked {
-    background-color: color("mint-50");
-    border-color: color("mint-50");
-  }
-
-  &:focus {
-    outline-color: color("mint-50");
-    box-shadow: 0 0 0 0.25rem rgba(color("mint-50"), 0.25);
-  }
-}
-
 // Form Select Modal Styles
 .centered-content {
   display: flex;

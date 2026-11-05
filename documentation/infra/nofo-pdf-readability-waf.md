@@ -235,24 +235,33 @@ NOFO environment's `pdf_readability_waf` object, review/merge the change, and us
 it has an emergency rule. Review the plan; never apply a dev object to production
 or assume changing the application `version` selects infrastructure from a PR.
 
-Only someone authorized for the repository review/deployment path and its AWS
-role may activate it. Repository write access alone does not prove operational
-permissions. Record a named primary operator and fallback contact before launch.
-Activation through this full deployment path has no established emergency SLA;
-measure it in dev. If it is too slow, agree a separate expedited mechanism before
-launch. An approved console/API activation would require separately authorized
-AWS access and a procedure to reconcile Terraform so a later deployment does not
-silently undo an incident block.
+The SimplerNOFOs team owns alert triage and coordinates activation and
+restoration. The team agrees on primary and backup coverage internally. An
+operator authorized for the repository deployment path and its AWS role applies
+the change. Confirm that the primary operator and fallback have the required
+production access before launch.
+
+For planning, allow about 25 minutes for the deployment workflow and about an
+hour from merge to verified blocking. In the November 2 dev exercise, the
+workflow finished about 22 minutes after dispatch, and the scoped requests were
+verified blocked about 54 minutes after merge. Time for alert triage, preparing
+the change and review comes before merge and was outside the measurement. These
+estimates are based on one dev exercise. [Merged change](https://github.com/HHS/simpler-grants-gov/pull/13097) ·
+[Deployment](https://github.com/HHS/simpler-grants-gov/actions/runs/41469724583) ·
+[Verification](https://github.com/HHS/simpler-grants-gov/issues/13085#issuecomment-6581516804)
+
+If launch requires a faster block, agree on an expedited path before launch.
+A console or API change requires authorized AWS access and a way to reconcile
+the change in Terraform so a subsequent deployment preserves the block.
 
 For restoration, return `emergency_block` to false through the agreed path and
 verify all four current/legacy route forms and unrelated routes. Restore the
 pre-incident rate mode and keep the application pilot flag in its agreed state. Do not delete the rules
 or alter managed protections as a shortcut.
 
-Before this is a tested incident procedure, record the actual operator, fallback,
-activation mechanism, measured timing, notification channel, restricted evidence
-location, and links back to #12568 and the Builder safeguards/operations tickets.
-These are outstanding verification items, not completed by this document.
+Record confirmed production operator access, the fallback and escalation path,
+and the restricted evidence location in the operating handoff. Track those
+checks under [#12568](https://github.com/HHS/simpler-grants-gov/issues/12568).
 
 ## Remaining boundaries
 
