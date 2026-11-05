@@ -58,6 +58,7 @@ export function datFields(workbook: Uint8Array): Fields {
   const start = rows.findIndex((row) => header(row[0]) === COLUMNS.field);
   if (start === -1) throw new Error('no "Field #" header row in the DAT');
   const names = rows[start].map(header);
+  const fieldType = names.indexOf("field type");
   const column = (name: keyof typeof COLUMNS) => {
     const index = names.indexOf(COLUMNS[name]);
     if (index === -1)
@@ -75,10 +76,22 @@ export function datFields(workbook: Uint8Array): Fields {
   for (const row of rows.slice(start + 1)) {
     const id = String(row[at.field]).trim();
     const implementation = header(row[at.implementation]);
-    if (!id || NOT_INPUTS.has(implementation)) continue;
+    // Some DATs render submission-owned values as labels. They still have a real
+    // answer/XML element; ordinary headings and instructions do not.
+    const populatedOutput =
+      implementation === "label" &&
+      fieldType !== -1 &&
+      header(row[fieldType]) === "post-populated";
+    if (!id || (NOT_INPUTS.has(implementation) && !populatedOutput)) continue;
     const rules: Rules = {};
     const max = Number(row[at.max]);
-    if (String(row[at.max]).trim() && !FIXED_LISTS.has(implementation))
+    // The shared column is a monetary value for "$", not a character count.
+    // Numeric bounds are compared with the XSD; do not invent a string length here.
+    if (
+      header(row[at.dataType]) !== "$" &&
+      String(row[at.max]).trim() &&
+      !FIXED_LISTS.has(implementation)
+    )
       rules.maxLength = max;
     const maxOccurs = occurrences(row[at.maxOccurs]);
     if (maxOccurs !== undefined) rules.maxOccurs = maxOccurs;

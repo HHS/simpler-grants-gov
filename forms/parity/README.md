@@ -81,7 +81,8 @@ optional section is optional. A plan's `Conditional (...)` counts as optional.
 The DAT is compared on `maxLength` only. Its minimum is 0 for every optional field and 1
 for every required one, so it restates requiredness; the XSD is the authority on
 `minLength`. A DAT list shown as a popup is a fixed code list, so its "max chars" is not a
-length rule. An exact length is stated in a plan as `minLength 12, maxLength 12`.
+length rule. Likewise, a row whose Data Type is `$` states a monetary maximum,
+not a character count; monetary bounds are compared with the XSD. An exact length is stated in a plan as `minLength 12, maxLength 12`.
 
 The DAT prints `*` before a required field's label. Labels compared with the DAT keep it,
 and the plan's label gets one wherever the plan says the field is required, so a label only
@@ -96,6 +97,10 @@ requiredness, like its minimum characters.
 
 Everything else is compared for equality, except JSON schema vs XSD: there the compiled
 schema must accept nothing the XSD rejects, but may be stricter.
+
+For enumerations whose values contain commas, use a JSON string array in the plan
+constraint, for example `enum ["Application", "Other, specify"]`. Values remain whole;
+malformed, empty or non-string arrays are not accepted as readable constraints.
 
 ## Adding a form
 
