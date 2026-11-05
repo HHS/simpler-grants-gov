@@ -28,11 +28,11 @@ API users can enable this through the [User set all new opportunities](https://a
 2. In a separate tab, navigate to the `api/` directory and run the notification processor: `make start-notification-processor`
 3. Setup necessary data for populating email content. [WIP](https://github.com/HHS/simpler-grants-gov/issues/13193)
 4. Invoke the new opportunity task: `make run-new-opportunity-notification`
-5. Open <http://localhost:8085> and ensure there are emails containing the `all_new_opportunities` email tag.
+5. Open <http://localhost:8025> and ensure there are emails containing the `all_new_opportunities` email tag.
 
 ### Email preview
 
 If you only need to preview or make changes to the email template without going through the entire workflow:
 
 1. Run `make preview-new-opportunity-email`
-2. Open <http://localhost:8085> and you will find a new email with different opportunity scenarios
+2. Open <http://localhost:8025> and you will find a new email with different opportunity scenarios
