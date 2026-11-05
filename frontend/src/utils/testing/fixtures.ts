@@ -878,7 +878,6 @@ export const fakeTestUser: TestUser = {
   first_name: "hi",
   last_name: "there",
   oauth_id: "id",
-  user_api_key: "key",
   user_id: "user",
   user_jwt: "jwt",
 };

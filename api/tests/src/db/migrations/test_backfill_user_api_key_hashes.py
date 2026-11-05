@@ -26,7 +26,7 @@ def nullable_key_id_hash(db_session, test_api_schema):
     db_session.execute(text(f"ALTER TABLE {table} ALTER COLUMN key_id_hash DROP NOT NULL"))
     db_session.commit()
 
-    yield
+    yield table
 
     # Only leftover if a test failed before the backfill ran
     db_session.execute(delete(UserApiKey).where(UserApiKey.key_id_hash.is_(None)))
@@ -34,11 +34,22 @@ def nullable_key_id_hash(db_session, test_api_schema):
     db_session.commit()
 
 
+def _set_plaintext_key_id(db_session, table: str, key: UserApiKey) -> None:
+    """Store the raw key in key_id, as rows were before the backfill"""
+    db_session.execute(
+        text(f"UPDATE {table} SET key_id = :key_id WHERE api_key_id = :api_key_id"),
+        {"key_id": key.raw_key, "api_key_id": key.api_key_id},
+    )
+
+
 def test_backfill_user_api_key_hashes(db_session, enable_factory_create, nullable_key_id_hash):
     pepper = ApiKeyConfig().pepper
     unhashed_keys = UserApiKeyFactory.create_batch(3, key_id_hash=None)
     # A row written by the dual-write on create, which the backfill should not touch
     already_hashed_key = UserApiKeyFactory.create(key_id_hash="already-hashed")
+    for key in [*unhashed_keys, already_hashed_key]:
+        _set_plaintext_key_id(db_session, nullable_key_id_hash, key)
+    db_session.commit()
 
     backfill_user_api_key_hashes(db_session.connection(), pepper)
     db_session.commit()
@@ -46,9 +57,9 @@ def test_backfill_user_api_key_hashes(db_session, enable_factory_create, nullabl
 
     auth_handler = AuthHandler(db_session)
     for key in unhashed_keys:
-        assert key.key_id_hash == hash_api_key_id(key.key_id, pepper)
-        # The lookup auth will use once it reads by hash resolves the backfilled row
-        found_key = auth_handler.get_api_key_by_hash(hash_api_key_id(key.key_id, pepper))
+        assert key.key_id_hash == hash_api_key_id(key.raw_key, pepper)
+        # The lookup auth uses resolves the backfilled row
+        found_key = auth_handler.get_api_key_by_hash(hash_api_key_id(key.raw_key, pepper))
         assert found_key is not None
         assert found_key.api_key_id == key.api_key_id
 
