@@ -92,7 +92,7 @@ def _create_api_key(db_session: db.Session, user: User) -> tuple[UserApiKey, str
     # X-API-Key auth, same as the locally-seeded scanner key.
     auth_handler = AuthHandler(db_session)
     key_id, key_id_hash = _generate_unique_key_id(auth_handler)
-    api_key = auth_handler.create_api_key(user.user_id, SCANNER_API_KEY_NAME, key_id, key_id_hash)
+    api_key = auth_handler.create_api_key(user.user_id, SCANNER_API_KEY_NAME, key_id_hash)
     logger.info(
         "Registered file-scan scanner API key",
         extra={"user_id": user.user_id} | api_key.get_log_extra(),

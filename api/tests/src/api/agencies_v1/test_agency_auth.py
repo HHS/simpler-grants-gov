@@ -99,7 +99,7 @@ def test_agency_search_with_inactive_api_user_key(client, enable_factory_create,
     response = client.post(
         "/v1/agencies/search",
         json=get_agency_search_request(),
-        headers={"X-API-Key": inactive_api_key.key_id},
+        headers={"X-API-Key": inactive_api_key.raw_key},
     )
 
     assert response.status_code == 401
