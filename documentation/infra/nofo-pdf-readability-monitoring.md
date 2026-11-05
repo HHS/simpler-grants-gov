@@ -250,3 +250,37 @@ Authenticated Builder saved readability history remains outside this pilot.
 References: [AWS WAF dimensions](https://docs.aws.amazon.com/waf/latest/developerguide/waf-metrics.html),
 [ECS service metrics](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/available-metrics.html),
 and [Builder release gate](https://github.com/HHS/simpler-grants-pdf-builder/issues/968).
+
+
+## Prepare the production email parameter
+
+Add the intended recipient as the private Actions secret `NOFO_PROD_ALERT_EMAIL`.
+After review and merge, manually run **Set up private NOFO production alert email**
+from **main**. It creates the encrypted `/nofos/prod/monitoring/alert-email`
+parameter in the production account. It refuses to overwrite an existing
+parameter. If one exists, confirm its configuration privately before proceeding.
+
+Creating the parameter is separate from deploying the subscription. Keep public
+uploads disabled and verify delivery before enabling calculator alarm actions.
+
+After the production parameter exists, deploy the reviewed NOFO production
+configuration. Check the Terraform plan for the NOFO subscription, dashboard,
+alarms and Count-mode WAF rules before applying. Confirm the subscription from
+the intended inbox. The subscription uses the shared NOFO production monitoring
+topic, so existing service alarms that publish to it can send email after
+confirmation even while calculator-specific alarm actions are disabled.
+
+
+## Verify production alarm and recovery delivery
+
+After the production subscription is confirmed, manually run **Test NOFO
+production alarm and recovery email** from **main**. It targets the fixed
+production monitoring topic and requires exactly one confirmed email route.
+The temporary alarm name includes the run and attempt. The workflow session
+can change only that temporary alarm and read the topic subscription status.
+
+Expect one labelled ALARM email and one labelled OK email. Confirm both in the
+inbox. The workflow verifies CloudWatch notification actions and deletes its
+owned temporary alarm, including a cleanup retry on failure or cancellation.
+Check deletion evidence before retrying a failed run. Public uploads remain
+disabled during this verification.

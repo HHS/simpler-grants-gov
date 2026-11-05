@@ -99,7 +99,6 @@ module "prod_config" {
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Production overrides
-    FRONTEND_URL             = "https://simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
 
@@ -113,6 +112,8 @@ module "prod_config" {
   instance_memory = 4096
 
   scanner_provisioned_concurrency = 1
+
+  enable_processor_service = true
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.

@@ -20,7 +20,6 @@ from src.adapters.oauth.login_gov.login_gov_jwt import initialize_login_gov_conf
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
 from src.api.application_v1 import application_v1_blueprint
-from src.api.award_recommendations_alpha import award_recommendation_blueprint
 from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
@@ -77,9 +76,6 @@ class EndpointConfig(PydanticBaseEnvConfig):
     domain_verification_map: dict = Field(default_factory=dict)
 
     enable_workflow_endpoints: bool = Field(False, alias="ENABLE_WORKFLOW_ENDPOINTS")
-    enable_award_recommendation_endpoints: bool = Field(
-        False, alias="ENABLE_AWARD_RECOMMENDATION_ENDPOINTS"
-    )
 
     enable_file_upload_endpoints: bool = Field(False, alias="ENABLE_FILE_UPLOAD_ENDPOINTS")
 
@@ -221,9 +217,6 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(form_v1_blueprint)
     app.register_blueprint(competition_blueprint)
     app.register_blueprint(submission_consumer_blueprint)
-
-    if endpoint_config.enable_award_recommendation_endpoints:
-        app.register_blueprint(award_recommendation_blueprint)
 
     # CommonGrants Protocol endpoints
     app.register_blueprint(common_grants_blueprint)

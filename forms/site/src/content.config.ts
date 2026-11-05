@@ -33,6 +33,11 @@ const nodeBase = z.object({
 });
 
 const fieldNode = nodeBase.extend({
+  /** Stable review-link identity. Keep it when the field moves or its answer path changes. */
+  id: z
+    .string()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .optional(),
   kind: z.literal("field"),
   required: z.union([z.boolean(), z.string()]),
   type: z.string(),
@@ -65,8 +70,8 @@ const formSchema = z.object({
     "backlog",
     "prioritized",
     "in_progress",
+    "in_review",
     "migrated",
-    "ready",
   ]),
   /** Grants.gov form families, e.g. ["R&R"]; empty for forms outside any family. */
   family: z.array(z.string()).default([]),

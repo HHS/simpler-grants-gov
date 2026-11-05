@@ -1,0 +1,11 @@
+uuid: 0092faf3-8c7c-44e4-a4d8-6c9536a425d4
+langcode: en
+status: true
+dependencies: {  }
+name: 'Basic page'
+type: page
+description: 'A title and body. Placeholder until the pilot content model is designed.'
+help: null
+new_revision: true
+preview_mode: 0
+display_submitted: false

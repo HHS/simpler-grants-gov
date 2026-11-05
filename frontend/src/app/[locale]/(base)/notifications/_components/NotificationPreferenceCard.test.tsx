@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
 
@@ -16,6 +17,7 @@ jest.mock("@trussworks/react-uswds", () => ({
     }) => void;
     "aria-labelledby"?: string;
     "aria-describedby"?: string;
+    "aria-disabled"?: boolean;
   }) => {
     mockCheckbox(props);
 
@@ -29,6 +31,7 @@ jest.mock("@trussworks/react-uswds", () => ({
         disabled={props.disabled}
         aria-labelledby={props["aria-labelledby"]}
         aria-describedby={props["aria-describedby"]}
+        aria-disabled={props["aria-disabled"]}
         onChange={(event) => {
           props.onChange?.({
             target: {
@@ -109,10 +112,27 @@ describe("NotificationPreferenceCard", () => {
     expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
   });
 
-  it("disables checkbox when loading", () => {
+  it("keeps checkbox enabled but aria-disabled when loading", () => {
     render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
+    const checkbox = screen.getByTestId("notification-checkbox");
+    expect(checkbox).toBeEnabled();
+    expect(checkbox).toHaveAttribute("aria-disabled", "true");
+  });
 
-    expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
+  it("does not call onCheckedChange when toggled while loading", () => {
+    const handleChange = jest.fn();
+
+    render(
+      <NotificationPreferenceCard
+        {...baseProps}
+        isLoading={true}
+        onCheckedChange={handleChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("notification-checkbox"));
+
+    expect(handleChange).not.toHaveBeenCalled();
   });
 
   it("shows loading indicator when isLoading is true", () => {
@@ -128,25 +148,89 @@ describe("NotificationPreferenceCard", () => {
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
-  it("passes disabled=false to Checkbox when not disabled or loading", () => {
+  it("disabled=falsewhen disabled/loading", () => {
     render(<NotificationPreferenceCard {...baseProps} />);
-
     expect(mockCheckbox).toHaveBeenCalledWith(
       expect.objectContaining({
         checked: false,
         disabled: false,
+        "aria-disabled": false,
       }),
     );
   });
 
-  it("passes disabled=true to Checkbox when loading", () => {
+  it("passes aria-disabled=true without disabled to Checkbox when loading", () => {
     render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
-
     expect(mockCheckbox).toHaveBeenCalledWith(
       expect.objectContaining({
-        disabled: true,
+        disabled: false,
+        "aria-disabled": true,
       }),
     );
+  });
+
+  describe("keyboard interaction", () => {
+    const getCheckbox = () => screen.getByTestId("notification-checkbox");
+
+    it("focuses the checkbox with Tab", async () => {
+      const user = userEvent.setup();
+      render(<NotificationPreferenceCard {...baseProps} />);
+      await user.tab();
+      expect(getCheckbox()).toHaveFocus();
+    });
+
+    it("calls onCheckedChange with false when space is pressed on a checked checkbox", async () => {
+      const user = userEvent.setup();
+      const handleChange = jest.fn();
+
+      render(
+        <NotificationPreferenceCard
+          {...baseProps}
+          isChecked={true}
+          onCheckedChange={handleChange}
+        />,
+      );
+
+      await user.tab();
+      await user.keyboard(" ");
+      expect(handleChange).toHaveBeenCalledTimes(1);
+      expect(handleChange).toHaveBeenCalledWith(false);
+    });
+
+    it("calls onCheckedChange when space is pressed", async () => {
+      const user = userEvent.setup();
+      const handleChange = jest.fn();
+
+      render(
+        <NotificationPreferenceCard
+          {...baseProps}
+          onCheckedChange={handleChange}
+        />,
+      );
+
+      await user.tab();
+      await user.keyboard(" ");
+      expect(handleChange).toHaveBeenCalledTimes(1);
+      expect(handleChange).toHaveBeenCalledWith(true);
+    });
+
+    it("keeps focus on the checkbox and ignores toggle while loading", async () => {
+      const user = userEvent.setup();
+      const handleChange = jest.fn();
+
+      render(
+        <NotificationPreferenceCard
+          {...baseProps}
+          isLoading={true}
+          onCheckedChange={handleChange}
+        />,
+      );
+      await user.tab();
+      expect(getCheckbox()).toHaveFocus();
+      await user.keyboard(" ");
+      expect(handleChange).not.toHaveBeenCalled();
+      expect(getCheckbox()).toHaveFocus();
+    });
   });
 
   it("constructs aria-labelledby with organizationHeadingId", () => {
@@ -169,6 +253,18 @@ describe("NotificationPreferenceCard", () => {
     expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
       "aria-labelledby",
       "test-checkbox-label",
+    );
+  });
+
+  it("applies additional className to the card", () => {
+    const { container } = render(
+      <NotificationPreferenceCard {...baseProps} className="a" />,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(container.firstChild).toHaveClass(
+      "notification-preference-card",
+      "a",
     );
   });
 

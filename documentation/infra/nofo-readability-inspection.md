@@ -1,4 +1,4 @@
-# Inspect the Readability Calculator in infra-dev
+# Inspect the Readability Calculator in dev and production
 
 Work for [#12568](https://github.com/HHS/simpler-grants-gov/issues/12568).
 This manual workflow collects a configuration snapshot and recent metric-presence
@@ -32,6 +32,19 @@ This workflow has not been live-verified by its offline tests. Organizational
 policies, permission boundaries or deployed role differences may deny a read;
 the result should identify that specific gap rather than assume a new operator
 or broader permission is necessary.
+
+## Production readiness snapshot
+
+Select **Inspect Readability Calculator production** and run it from **main**.
+This workflow uses the production account and the fixed NOFO production service
+in the same region. It uses the same read-only operation allowlist and sanitized
+report as the dev inspection. Keep public uploads disabled. Check the public
+route or admin setting separately because the workflow does not read Constance.
+
+Missing calculator rules, alarms, dashboard or subscriptions may reflect an
+incomplete rollout. Review each check independently. Subscription counts and
+pending status establish routing observations only. Verify delivery separately
+through an approved production notification test.
 
 ## What the summary contains
 
@@ -95,7 +108,7 @@ Initial email setup and actual subscription/delivery testing remain separate;
 this workflow does not subscribe an address or notify anyone. Slack/New Relic
 integration is deferred under
 [#12950](https://github.com/HHS/simpler-grants-gov/issues/12950).
-Production inspection and public upload enablement are outside this workflow.
+Public upload enablement is outside the scope of both inspection workflows.
 Builder [#968](https://github.com/HHS/simpler-grants-pdf-builder/issues/968) remains
 the public-release decision tracker.
 

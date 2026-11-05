@@ -1,11 +1,17 @@
-import type { EnumMember, Model, Program } from "@typespec/compiler";
-import { compile, NodeHost } from "@typespec/compiler";
-import { createTester, expectDiagnostics } from "@typespec/compiler/testing";
 import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  compile,
+  NodeHost,
+  type EnumMember,
+  type Model,
+  type Program,
+} from "@typespec/compiler";
+import { createTester, expectDiagnostics } from "@typespec/compiler/testing";
 import { describe, expect, it } from "vitest";
+
 import { xmlTransform } from "../src/xml-transform.js";
 
 const FORMS_ROOT = fileURLToPath(new URL("../../..", import.meta.url));

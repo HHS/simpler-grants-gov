@@ -7,11 +7,14 @@
  * compares values itself. It reads every artifact from disk, so it runs only at build time.
  */
 import { DIFFS } from "./diffs/index.ts";
+import { readRequired } from "./harness/flatten/plan.ts";
+import { link } from "./harness/flatten/xmlTransform.ts";
 import {
   comparePair,
   formPairs,
   matchFields,
   SPECS,
+  walkFields,
   type Accepted,
   type Discrepancy,
   type FlatField,
@@ -21,10 +24,7 @@ import {
   type PlanField,
   type PlanNode,
   type PlanSection,
-  walkFields,
 } from "./harness/index.ts";
-import { readRequired } from "./harness/flatten/plan.ts";
-import { link } from "./harness/flatten/xmlTransform.ts";
 import { fromXmlPath, type Category } from "./harness/model.ts";
 
 export type Source = "dat" | "xsd" | "form";
@@ -679,7 +679,8 @@ function buildField<F extends PlanField>(
     }
 
   return {
-    id: field.json_path ?? fallbackId,
+    // Older parity fixtures may lack a link ID; only explicit plan IDs are shareable.
+    id: field.id ?? field.json_path ?? fallbackId,
     field,
     rows,
     counts,
