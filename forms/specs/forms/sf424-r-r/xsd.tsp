@@ -177,6 +177,11 @@ model Organization {
   @ns(Namespaces.globLib)
   @name("Address")
   address: XSD.GlobLib.AddressDataTypeV3;
+
+  // This imported optional element has no DAT answer. The form collects EmployerID once.
+  @ns(Namespaces.globLib)
+  @name("EIN")
+  ein?: string;
 }
 
 @ns(Namespaces.RR_SF424_5_0)
