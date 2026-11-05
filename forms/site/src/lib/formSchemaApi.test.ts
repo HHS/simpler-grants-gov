@@ -80,10 +80,12 @@ describe.each(ids)("%s API schema artifact", (id) => {
       expect(schema.$defs["person.name"]).toBeDefined();
       expect(schema.$defs.StateCode).toBeDefined();
     }
-    // The expanded preview schema is deliberately a different consumer artifact.
+    // The preview inlines references that the installed schema preserves.
     const expanded = await dereferenceFormSchema(
       path.join(CANONICAL_DIR, "forms", id, "schema.json"),
     );
-    expect(`${JSON.stringify(expanded, null, 2)}\n`).not.toBe(installed);
+    expect(refs(expanded)).toEqual([]);
+    if (references.length > 0)
+      expect(`${JSON.stringify(expanded, null, 2)}\n`).not.toBe(installed);
   });
 });
