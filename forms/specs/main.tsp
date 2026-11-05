@@ -5,3 +5,5 @@ import "./forms/nsf-key-person-expanded/index.tsp";
 import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
 import "./forms/performance-sites/index.tsp";
+import "./forms/sf424-individual/index.tsp";
+import "./forms/sf424-mandatory/index.tsp";

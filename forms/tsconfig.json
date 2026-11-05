@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["parity", "vitest.config.ts"]
+  "include": ["parity", "validation", "vitest.config.ts"]
 }
