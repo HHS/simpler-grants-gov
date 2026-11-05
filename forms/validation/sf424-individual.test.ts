@@ -125,7 +125,7 @@ describe("Individual source boundaries", () => {
     expect(validate(value)).toBe(true);
   });
 
-  it("rejects invalid calendar dates; API tests separately enforce date ordering", () => {
+  it("rejects invalid calendar dates in the emitted schema", () => {
     const value = draft();
     value.project.end_date = "2027-02-30";
     expect(validate(value)).toBe(false);
