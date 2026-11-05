@@ -64,6 +64,59 @@ describe("datFields", () => {
     expect(dat.get("7-14")?.rules).toEqual({ maxOccurs: 4 });
   });
 
+  it("does not read a currency maximum as a text length", () => {
+    const dat = datFields(
+      workbook([
+        HEADER,
+        [
+          "15a-1",
+          "Federal ($):",
+          "Yes",
+          "$",
+          "999999999999.99",
+          1,
+          "Field",
+          "Enter the dollar amount.",
+        ],
+      ]),
+    );
+    expect(dat.get("15a-1")?.rules).toEqual({ maxOccurs: 1 });
+  });
+
+  it("keeps post-populated label values without treating headings as answers", () => {
+    const dat = datFields(
+      workbook([
+        [...HEADER, "Field Type"],
+        ["7-1", "Certification", "", "", "", "", "Label", "", ""],
+        [
+          "7-4",
+          "Signature:",
+          "Yes",
+          "AN",
+          144,
+          1,
+          "Label",
+          "Upon submission.",
+          "Post-Populated",
+        ],
+        [
+          "7-5",
+          "Date Signed:",
+          "Yes",
+          "DATE",
+          "",
+          1,
+          "Label",
+          "Upon submission.",
+          "Post-Populated",
+        ],
+      ]),
+    );
+    expect([...dat.keys()]).toEqual(["7-4", "7-5"]);
+    expect(dat.get("7-4")?.rules.maxLength).toBe(144);
+    expect(dat.get("7-5")?.required).toBe("yes");
+  });
+
   it("keeps asterisk on required labels", () => {
     const dat = datFields(
       workbook([
