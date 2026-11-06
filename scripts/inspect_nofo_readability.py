@@ -1,5 +1,6 @@
-"""Read-only infra-dev inspection. Never print AWS responses or exception text."""
+"""Read-only NOFO environment inspection. Never print AWS responses or exception text."""
 
+import argparse
 import json
 import os
 import re
@@ -10,6 +11,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ACCOUNT = "061664787759"
+PROD_ACCOUNT = "315341936575"
+PROD_SERVICE = "nofos-prod"
 REGION = "us-east-1"
 SERVICE = "nofos-infra-dev"
 RULES = {
@@ -29,6 +32,9 @@ READ_OPERATIONS = {
     ("ecs", "list-tasks"): "ecs:ListTasks",
     ("ecs", "describe-tasks"): "ecs:DescribeTasks",
     ("ecs", "describe-task-definition"): "ecs:DescribeTaskDefinition",
+    ("elbv2", "describe-load-balancer-attributes"): (
+        "elasticloadbalancing:DescribeLoadBalancerAttributes"
+    ),
     ("elbv2", "describe-target-groups"): "elasticloadbalancing:DescribeTargetGroups",
     ("wafv2", "get-web-acl-for-resource"): "wafv2:GetWebACLForResource",
     ("cloudwatch", "get-dashboard"): "cloudwatch:GetDashboard",
@@ -49,6 +55,10 @@ DEPENDENT_READ_ACTIONS = {
 
 class InspectionError(Exception):
     """Only fixed categories may reach the report."""
+
+
+# Keep in sync with aws_lb.alb in infra/modules/service/load_balancer.tf.
+EXPECTED_ALB_IDLE_TIMEOUT_SECONDS = 120
 
 
 def number(value):
@@ -139,9 +149,9 @@ class Aws:
             raise InspectionError("invalid_response") from None
 
 
-def task_summary(definition):
+def task_summary(definition, service=SERVICE):
     containers = definition.get("containerDefinitions", [])
-    container = next((c for c in containers if c.get("name") == SERVICE), None)
+    container = next((c for c in containers if c.get("name") == service), None)
     if container is None:
         raise InspectionError("expected_container_missing")
     environment = {
@@ -157,6 +167,17 @@ def task_summary(definition):
             "unspecified"
             if not user
             else "root" if str(user).split(":")[0] in {"root", "0"} else "other_user"
+        ),
+        "startup_override_configured": bool(
+            container.get("command") or container.get("entryPoint")
+        ),
+        "gunicorn_args_environment_configured": (
+            "GUNICORN_CMD_ARGS" in environment
+            or bool(container.get("environmentFiles"))
+            or any(
+                item.get("name") == "GUNICORN_CMD_ARGS"
+                for item in container.get("secrets", [])
+            )
         ),
         "read_only_root_configured": container.get("readonlyRootFilesystem") is True,
         "drop_all_capabilities_configured": "ALL"
@@ -284,7 +305,15 @@ def waf_summary(acl):
 
 
 class Inspector:
-    def __init__(self, aws):
+    def __init__(self, aws, environment="infra-dev"):
+        self.account, self.service_name = {
+            "infra-dev": (ACCOUNT, SERVICE),
+            "prod": (PROD_ACCOUNT, PROD_SERVICE),
+        }[environment]
+        self.alarm_names = {
+            key: self.service_name + name.removeprefix(SERVICE)
+            for key, name in ALARM_NAMES.items()
+        }
         self.aws = aws
         self.results = []
 
@@ -310,7 +339,7 @@ class Inspector:
 
     def service(self):
         response = self.aws.get(
-            "ecs", "describe-services", "--cluster", SERVICE, "--services", SERVICE
+            "ecs", "describe-services", "--cluster", self.service_name, "--services", self.service_name
         )
         if response.get("failures") or len(response.get("services", [])) != 1:
             raise InspectionError("service_not_found")
@@ -331,9 +360,9 @@ class Inspector:
             "ecs",
             "list-tasks",
             "--cluster",
-            SERVICE,
+            self.service_name,
             "--service-name",
-            SERVICE,
+            self.service_name,
             "--desired-status",
             "RUNNING",
             "--cli-input-json",
@@ -346,7 +375,7 @@ class Inspector:
         if not arns:
             raise InspectionError("no_running_tasks")
         response = self.aws.get(
-            "ecs", "describe-tasks", "--cluster", SERVICE, "--tasks", *arns
+            "ecs", "describe-tasks", "--cluster", self.service_name, "--tasks", *arns
         )
         if response.get("failures") or len(response.get("tasks", [])) != len(arns):
             raise InspectionError("running_tasks_incomplete")
@@ -359,13 +388,27 @@ class Inspector:
             definition = self.aws.get(
                 "ecs", "describe-task-definition", "--task-definition", arn
             )["taskDefinition"]
-            summary, log_group = task_summary(definition)
+            summary, log_group = task_summary(definition, self.service_name)
+            summary["running_task_startup_override_configured"] = any(
+                override.get("name") == self.service_name
+                and (
+                    override.get("command")
+                    or any(
+                        item.get("name") == "GUNICORN_CMD_ARGS"
+                        for item in override.get("environment", [])
+                    )
+                    or override.get("environmentFiles")
+                )
+                for task in response["tasks"]
+                if task["taskDefinitionArn"] == arn
+                for override in task.get("overrides", {}).get("containerOverrides", [])
+            )
             summaries.append(summary)
             if log_group:
                 self.log_groups.add(log_group)
         return {"running_definition_count": len(summaries), "definitions": summaries}
 
-    def waf(self):
+    def load_balancer_arn(self):
         bindings = getattr(self, "service_data", {}).get("loadBalancers", [])
         if not bindings:
             raise InspectionError("load_balancer_not_discovered")
@@ -378,8 +421,31 @@ class Inspector:
         lbs = {arn for g in groups for arn in g.get("LoadBalancerArns", [])}
         if len(lbs) != 1:
             raise InspectionError("load_balancer_ambiguous")
+        return next(iter(lbs))
+
+    def load_balancer(self):
+        attributes = self.aws.get(
+            "elbv2",
+            "describe-load-balancer-attributes",
+            "--load-balancer-arn",
+            self.load_balancer_arn(),
+        ).get("Attributes", [])
+        for attribute in attributes:
+            if attribute.get("Key") == "idle_timeout.timeout_seconds":
+                value = attribute.get("Value")
+                if isinstance(value, str) and value.isascii() and value.isdecimal():
+                    seconds = int(value)
+                    if 1 <= seconds <= 4000:
+                        matches = seconds == EXPECTED_ALB_IDLE_TIMEOUT_SECONDS
+                        return {
+                            "idle_timeout": "matches" if matches else "differs",
+                            "complete": matches,
+                        }
+        raise InspectionError("load_balancer_idle_timeout_missing_or_invalid")
+
+    def waf(self):
         acl = self.aws.get(
-            "wafv2", "get-web-acl-for-resource", "--resource-arn", next(iter(lbs))
+            "wafv2", "get-web-acl-for-resource", "--resource-arn", self.load_balancer_arn()
         ).get("WebACL")
         if not acl:
             raise InspectionError("no_web_acl_association")
@@ -405,18 +471,18 @@ class Inspector:
             "cloudwatch",
             "get-dashboard",
             "--dashboard-name",
-            f"{SERVICE}-pdf-readability",
+            f"{self.service_name}-pdf-readability",
         )
         widgets = json.loads(data["DashboardBody"]).get("widgets", [])
         return {"widget_count": len(widgets), "complete": bool(widgets)}
 
     def alarms(self):
         data = self.aws.get(
-            "cloudwatch", "describe-alarms", "--alarm-names", *ALARM_NAMES.values()
+            "cloudwatch", "describe-alarms", "--alarm-names", *self.alarm_names.values()
         )
         found = {a["AlarmName"]: a for a in data.get("MetricAlarms", [])}
         result = {}
-        for key, name in ALARM_NAMES.items():
+        for key, name in self.alarm_names.items():
             alarm = found.get(name)
             if alarm is None:
                 result[key] = {"present": False}
@@ -431,7 +497,7 @@ class Inspector:
                 "alarm_destination_count": len(alarm.get("AlarmActions", [])),
                 "recovery_destination_count": len(alarm.get("OKActions", [])),
                 "uses_expected_alarm_topic": alarm.get("AlarmActions", [])
-                == [f"arn:aws:sns:{REGION}:{ACCOUNT}:{SERVICE}-monitoring"],
+                == [f"arn:aws:sns:{REGION}:{self.account}:{self.service_name}-monitoring"],
                 "threshold": number(alarm.get("Threshold")),
             }
         return {
@@ -445,7 +511,7 @@ class Inspector:
             "sns",
             "list-subscriptions-by-topic",
             "--topic-arn",
-            f"arn:aws:sns:{REGION}:{ACCOUNT}:{SERVICE}-monitoring",
+            f"arn:aws:sns:{REGION}:{self.account}:{self.service_name}-monitoring",
             "--no-paginate",
         )
         if data.get("NextToken"):
@@ -472,8 +538,8 @@ class Inspector:
                 "AWS/ECS",
                 metric,
                 [
-                    {"Name": "ClusterName", "Value": SERVICE},
-                    {"Name": "ServiceName", "Value": SERVICE},
+                    {"Name": "ClusterName", "Value": self.service_name},
+                    {"Name": "ServiceName", "Value": self.service_name},
                 ],
                 "Average",
             )
@@ -576,7 +642,7 @@ class Inspector:
                 "expected_account": self.aws.get("sts", "get-caller-identity").get(
                     "Account"
                 )
-                == ACCOUNT
+                == self.account
             },
         )
         if not identity or not identity["expected_account"]:
@@ -585,6 +651,7 @@ class Inspector:
             "service",
             "tasks",
             "waf",
+            "load_balancer",
             "dashboard",
             "alarms",
             "subscriptions",
@@ -595,12 +662,12 @@ class Inspector:
         return self.results
 
 
-def main():
-    inspector = Inspector(Aws())
+def main(environment="infra-dev"):
+    inspector = Inspector(Aws(), environment)
     results = inspector.run()
     # Only fixed labels, numbers, booleans and allowlisted strings enter the report.
     report = {
-        "environment": "infra-dev",
+        "environment": environment,
         "observations": results,
         "limitations": [
             "Configuration snapshot only; not a public-release approval.",
@@ -615,7 +682,7 @@ def main():
     for result in results:
         rows.append(f"| {result['check'].replace('_', ' ')} | {result['status']} |")
     summary = (
-        "# Readability Calculator — infra-dev inspection\n\n"
+        f"# Readability Calculator — {environment} inspection\n\n"
         "Observed means the read completed, not that the control is effective. "
         "Review settings below; missing data is not proof of zero traffic.\n\n"
         + "\n".join(rows)
@@ -629,7 +696,7 @@ def main():
             stream.write(summary)
     return (
         0
-        if len(results) == 9
+        if len(results) == 10
         and all(r["status"] == "observed" for r in results)
         and results[0]["details"]["expected_account"]
         else 1
@@ -637,4 +704,6 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--environment", choices=("infra-dev", "prod"), default="infra-dev")
+    raise SystemExit(main(parser.parse_args().environment))

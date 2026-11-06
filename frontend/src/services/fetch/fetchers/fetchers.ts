@@ -3,23 +3,16 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
-  fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
-  fetchCompetitionFormsEndpoint,
   fetchFormEndpoint,
-  fetchFormsEndpoint,
   fetchOpportunityEndpoint,
-  fetchWorkflowEndpoint,
   getApplicationForPrintEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicApplicationsEndpointV1,
-  toDynamicAwardRecommendationEndpoint,
   toDynamicFilesEndpoint,
-  toDynamicGrantorAgenciesEndpoint,
-  toDynamicGrantorOpportunityEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
@@ -132,14 +125,8 @@ export const fetchOpportunity = cache(
 
 export const fetchForm = cache(requesterForEndpoint(fetchFormEndpoint));
 
-export const fetchForms = cache(requesterForEndpoint(fetchFormsEndpoint));
-
 export const fetchCompetition = cache(
   requesterForEndpoint(fetchCompetitionEndpoint),
-);
-
-export const fetchCompetitionForms = cache(
-  requesterForEndpoint(fetchCompetitionFormsEndpoint),
 );
 
 export const fetchApplicationWithMethod = (
@@ -152,14 +139,6 @@ export const fetchApplicationWithMethodV1 = (type: "POST") =>
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
 );
-
-export const fetchAwardRecommendation = cache(
-  requesterForEndpoint(fetchAwardRecommendationEndpoint),
-);
-
-export const fetchAwardRecommendationWithMethod = (
-  type: "POST" | "PUT" | "DELETE",
-) => requesterForEndpoint(toDynamicAwardRecommendationEndpoint(type));
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
@@ -176,19 +155,9 @@ export const fetchOrganizationWithMethod = (
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
 
-export const fetchGrantorOpportunityWithMethod = (
-  type: "POST" | "DELETE" | "GET" | "PUT",
-) => requesterForEndpoint(toDynamicGrantorOpportunityEndpoint(type));
-
-export const fetchGrantorAgenciesWithMethod = (
-  type: "POST" | "GET" | "PUT" | "DELETE",
-) => requesterForEndpoint(toDynamicGrantorAgenciesEndpoint(type));
-
 export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
   requesterForEndpoint(toDynamicFilesEndpoint(type));
 
 export const getApplicationForPrint = requesterForEndpoint(
   getApplicationForPrintEndpoint,
 );
-
-export const fetchWorkflow = cache(requesterForEndpoint(fetchWorkflowEndpoint));

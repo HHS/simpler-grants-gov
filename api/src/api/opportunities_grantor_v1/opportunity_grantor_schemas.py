@@ -11,7 +11,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
+from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -254,17 +254,6 @@ class OpportunityGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(OpportunityGrantorSchema())
 
 
-class OpportunityListFilterSchema(Schema):
-    """Schema for opportunity list filters"""
-
-    award_recommendation_ready = fields.Nested(
-        BoolSearchSchemaBuilder("AwardRecommendationReadySchema").with_one_of(example=True).build(),
-        metadata={
-            "description": "Filter for opportunities ready for award recommendations. Returns only non-draft Simpler Grants opportunities with application submissions and no existing award recommendations."
-        },
-    )
-
-
 class OpportunityListRequestSchema(Schema):
     """Schema for POST /v1/grantors/opportunities/:agency_id/opportunities request"""
 
@@ -284,13 +273,6 @@ class OpportunityListRequestSchema(Schema):
         required=True,
         metadata={
             "description": "Pagination parameters for opportunity list (default sort: created_at descending)"
-        },
-    )
-
-    filters = fields.Nested(
-        OpportunityListFilterSchema(),
-        metadata={
-            "description": "Optional filters for opportunity list",
         },
     )
 

@@ -16,10 +16,13 @@ namespace XSD.RRKeyPersonExpanded40;
 
 alias grantsGovXml = Mappings.Target.grantsGovXml;
 alias KeyPersonForm = Forms.RRKeyPersonExpanded.RRKeyPersonExpanded;
-alias KeyPersonEntry = Forms.RRKeyPersonExpanded.RRExpandedKeyPersonEntry;
 alias KeyPersonProfile = Forms.RRKeyPersonExpanded.RRExpandedKeyPersonProfile;
 alias GlobLib = XSD.GlobLib;
 alias Att = XSD.Att;
+
+// =============================================================================
+// ROOT ELEMENT
+// =============================================================================
 
 @nsDeclarations
 enum Namespaces {
@@ -56,10 +59,13 @@ model Root {
   @attribute @name("FormVersion") formVersion: "4.0";
 }
 
-/** A person on the form: their `Profile`. */
+// =============================================================================
+// PEOPLE
+// =============================================================================
+
+/** A person on the form: their `Profile`, filled from the same answers. */
 @ns(Namespaces.RR_KeyPersonExpanded_4_0)
 model PersonProfileDataType {
-  @Mapping.from(grantsGovXml, KeyPersonEntry.profile)
   @name("Profile")
   profile: Profile;
 }
@@ -129,6 +135,10 @@ model Profile {
   @name("SupportsAttached")
   supportsAttached?: SupportsAttached;
 }
+
+// =============================================================================
+// ATTACHMENTS
+// =============================================================================
 
 /** The profile's biographical sketch. */
 @ns(Namespaces.RR_KeyPersonExpanded_4_0)

@@ -6,17 +6,17 @@ mock_provider "external" {
   }
 }
 
-run "only_infra_dev_observes_pilot_requests" {
+run "only_dev_enforces_calculator_rate_during_shared_ip_test" {
   command = plan
 
   assert {
     condition = alltrue([
-      for name, config in output.environment_configs : name == "infra-dev" ? (
+      for name, config in output.environment_configs : contains(["infra-dev", "prod"], name) ? (
         config.service_config.pdf_readability_waf.rate_limit == 10 &&
-        config.service_config.pdf_readability_waf.rate_action == "count" &&
+        config.service_config.pdf_readability_waf.rate_action == (name == "infra-dev" ? "block" : "count") &&
         !config.service_config.pdf_readability_waf.emergency_block
       ) : config.service_config.pdf_readability_waf == null
     ])
-    error_message = "Only infra-dev may opt in, with both rules in Count. Production and all other environments must remain opted out."
+    error_message = "During the shared-IP test, only infra-dev enforces rate limits. Both emergency rules and the production rate rule stay in Count."
   }
 }

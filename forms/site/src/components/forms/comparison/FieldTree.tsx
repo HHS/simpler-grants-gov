@@ -2,6 +2,7 @@ import {
   $attributeFilter,
   $categoryFilter,
   $comparison,
+  $selectedFieldOutsideFilters,
   $visibleTree,
 } from "@/stores/fieldComparison";
 import { useStore } from "@nanostores/react";
@@ -14,17 +15,23 @@ export default function FieldTree() {
   const { fields } = useStore($comparison);
   const filter = useStore($categoryFilter);
   const attributes = useStore($attributeFilter);
+  const outside = useStore($selectedFieldOutsideFilters);
   if (!nodes.length)
     return <p className="text-base">No fields match this filter.</p>;
   const byId = new Map(fields.map((field) => [field.id, field]));
   return (
-    <div className="field-tree">
-      <TreeNodes
-        nodes={nodes}
-        fields={byId}
-        filter={filter}
-        attributes={attributes}
-      />
-    </div>
+    <>
+      {outside && (
+        <p role="status">Linked field shown outside current filters.</p>
+      )}
+      <div className="field-tree">
+        <TreeNodes
+          nodes={nodes}
+          fields={byId}
+          filter={filter}
+          attributes={attributes}
+        />
+      </div>
+    </>
   );
 }

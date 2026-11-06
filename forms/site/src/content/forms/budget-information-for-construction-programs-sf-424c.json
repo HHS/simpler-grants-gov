@@ -2,7 +2,13 @@
   "title": "Budget Information for Construction Programs (SF-424C)",
   "slug": "budget-information-for-construction-programs-sf-424c",
   "status": "backlog",
-  "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Individual", "SF-424 Mandatory"],
+  "family": [
+    "SF-424",
+    "R&R",
+    "SF-424 Short",
+    "SF-424 Individual",
+    "SF-424 Mandatory"
+  ],
   "category": "Budget & Financial Forms",
   "apps_count": 8079,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/408",

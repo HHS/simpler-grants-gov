@@ -21,7 +21,6 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
-import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
@@ -46,13 +45,6 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     ApprovalResponseType,
     ApprovalType,
-    AwardRecommendationAttachmentType,
-    AwardRecommendationAuditEvent,
-    AwardRecommendationReviewType,
-    AwardRecommendationRiskType,
-    AwardRecommendationStatus,
-    AwardRecommendationType,
-    AwardSelectionMethod,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -409,6 +401,26 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
         abstract = True
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
+
+
+class RawApiKeyFactoryMixin:
+    """For API key factories. The raw key isn't stored, only its hash, so it's
+    attached to the built object as `raw_key` for tests to send as X-API-Key.
+    """
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        raw_key = kwargs.pop("raw_key")
+        obj = super()._build(model_class, *args, **kwargs)  # type: ignore[misc]
+        obj.raw_key = raw_key
+        return obj
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        raw_key = kwargs.pop("raw_key")
+        obj = super()._create(model_class, *args, **kwargs)  # type: ignore[misc]
+        obj.raw_key = raw_key
+        return obj
 
 
 ###################
@@ -996,256 +1008,6 @@ class OpportunityIndexDeleteQueueFactory(BaseFactory):
     opportunity_id = Generators.UuidObj
 
 
-class AwardRecommendationFactory(BaseFactory):
-    class Meta:
-        model = award_recommendation_models.AwardRecommendation
-
-    award_recommendation_id = Generators.UuidObj
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-    award_recommendation_number = factory.LazyAttribute(
-        lambda s: f"{s.opportunity.agency_code or 'AGC'}_{fake.bothify('??????').upper()}"
-    )
-
-    award_recommendation_status = AwardRecommendationStatus.DRAFT
-    additional_info = sometimes_none(factory.Faker("paragraph"))
-    award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
-    selection_method_detail = sometimes_none(factory.Faker("paragraph"))
-    funding_strategy = sometimes_none(factory.Faker("paragraph"))
-    other_key_information = sometimes_none(factory.Faker("paragraph"))
-
-    is_deleted = False
-
-
-class AwardRecommendationAttachmentFactory(BaseFactory):
-    class Meta:
-        model = award_recommendation_models.AwardRecommendationAttachment
-
-    award_recommendation_attachment_id = Generators.UuidObj
-
-    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
-    award_recommendation_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation.award_recommendation_id
-    )
-    file_contents = factory.Faker("sentence")
-    file_name = factory.Faker("file_name", extension="pdf")
-    file_location = factory.LazyAttribute(
-        lambda o: f"s3://local-mock-public-bucket/award-recommendations/{o.award_recommendation_id}/attachments/{o.award_recommendation_attachment_id}/{o.file_name}"
-    )
-    award_recommendation_attachment_type = factory.fuzzy.FuzzyChoice(
-        AwardRecommendationAttachmentType
-    )
-    uploading_user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
-    uploading_user_id = factory.LazyAttribute(lambda s: s.uploading_user.user_id)
-    is_deleted = False
-
-    @classmethod
-    def _build(cls, model_class, *args, **kwargs):
-        kwargs.pop("file_contents")  # Not a model field
-        return super()._build(model_class, *args, **kwargs)
-
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        file_contents = kwargs.pop("file_contents")
-        attachment = super()._create(model_class, *args, **kwargs)
-
-        try:
-            with file_util.open_stream(attachment.file_location, "w") as my_file:
-                my_file.write(file_contents)
-        except Exception as e:
-            raise Exception(
-                f"""There was an error writing your attachment to {attachment.file_location}.
-
-                Does this location exist? If you are running in unit tests, make sure
-                `enable_factory_create` is pulled in as a fixture to your test.
-
-                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
-                """
-            ) from e
-
-        return attachment
-
-
-class AwardRecommendationRiskFactory(BaseFactory):
-    class Meta:
-        model = award_recommendation_models.AwardRecommendationRisk
-
-    award_recommendation_risk_id = Generators.UuidObj
-
-    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
-    award_recommendation_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation.award_recommendation_id
-    )
-    award_recommendation_risk_number = factory.LazyAttribute(
-        lambda _: f"RISK-{random.randint(1, 99999999):08d}"
-    )
-    award_recommendation_risk_type = AwardRecommendationRiskType.ADDITIONAL_MONITORING
-    comment = factory.Faker("paragraph")
-    is_deleted = False
-
-
-class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
-    class Meta:
-        model = award_recommendation_models.AwardRecommendationApplicationSubmission
-
-    award_recommendation_application_submission_id = Generators.UuidObj
-
-    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
-    award_recommendation_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation.award_recommendation_id
-    )
-
-    application_submission = factory.SubFactory(
-        "tests.src.db.models.factories.ApplicationSubmissionFactory"
-    )
-    application_submission_id = factory.LazyAttribute(
-        lambda s: s.application_submission.application_submission_id
-    )
-
-    award_recommendation_submission_detail = factory.SubFactory(
-        "tests.src.db.models.factories.AwardRecommendationSubmissionDetailFactory"
-    )
-    award_recommendation_submission_detail_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation_submission_detail.award_recommendation_submission_detail_id
-    )
-
-    class Params:
-        recommended_for_funding = factory.Trait(
-            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.RECOMMENDED_FOR_FUNDING,
-            award_recommendation_submission_detail__recommended_amount=50000,
-        )
-        recommended_without_funding = factory.Trait(
-            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.RECOMMENDED_WITHOUT_FUNDING,
-            award_recommendation_submission_detail__recommended_amount=0,
-        )
-        not_recommended = factory.Trait(
-            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.NOT_RECOMMENDED,
-            award_recommendation_submission_detail__recommended_amount=0,
-        )
-
-
-class AwardRecommendationRiskSubmissionFactory(BaseFactory):
-    class Meta:
-        model = award_recommendation_models.AwardRecommendationRiskSubmission
-
-    award_recommendation_risk = factory.SubFactory(AwardRecommendationRiskFactory)
-    award_recommendation_risk_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation_risk.award_recommendation_risk_id
-    )
-    award_recommendation_application_submission = factory.SubFactory(
-        AwardRecommendationApplicationSubmissionFactory
-    )
-    award_recommendation_application_submission_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation_application_submission.award_recommendation_application_submission_id
-    )
-
-
-class AwardRecommendationSubmissionDetailFactory(BaseFactory):
-    class Meta:
-        model = award_recommendation_models.AwardRecommendationSubmissionDetail
-
-    award_recommendation_submission_detail_id = Generators.UuidObj
-
-    recommended_amount = sometimes_none(
-        factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
-    )
-    scoring_comment = sometimes_none(factory.LazyFunction(lambda: str(random.randint(1, 100))))
-    general_comment = sometimes_none(factory.Faker("paragraph"))
-    award_recommendation_type = sometimes_none(factory.fuzzy.FuzzyChoice(AwardRecommendationType))
-    has_exception = False
-    exception_detail = sometimes_none(factory.Faker("paragraph"))
-
-
-class AwardRecommendationReviewFactory(BaseFactory):
-    class Meta:
-        model = award_recommendation_models.AwardRecommendationReview
-
-    award_recommendation_review_id = Generators.UuidObj
-
-    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
-    award_recommendation_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation.award_recommendation_id
-    )
-    award_recommendation_review_type = factory.fuzzy.FuzzyChoice(AwardRecommendationReviewType)
-    is_reviewed = False
-
-
-class AwardRecommendationAuditFactory(BaseFactory):
-    class Meta:
-        model = award_recommendation_models.AwardRecommendationAudit
-
-    award_recommendation_audit_id = Generators.UuidObj
-
-    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
-    award_recommendation_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation.award_recommendation_id
-    )
-    user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
-    award_recommendation_audit_event = AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED
-
-    class Params:
-        is_created = factory.Trait(
-            award_recommendation_audit_event=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED,
-        )
-        is_updated = factory.Trait(
-            award_recommendation_audit_event=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED,
-        )
-        is_attachment_created = factory.Trait(
-            award_recommendation_audit_event=AwardRecommendationAuditEvent.ATTACHMENT_CREATED,
-            award_recommendation_attachment=factory.SubFactory(
-                AwardRecommendationAttachmentFactory,
-                award_recommendation=factory.SelfAttribute("..award_recommendation"),
-            ),
-            award_recommendation_attachment_id=factory.LazyAttribute(
-                lambda s: s.award_recommendation_attachment.award_recommendation_attachment_id
-            ),
-        )
-        is_attachment_deleted = factory.Trait(
-            award_recommendation_audit_event=AwardRecommendationAuditEvent.ATTACHMENT_DELETED,
-            award_recommendation_attachment=factory.SubFactory(
-                AwardRecommendationAttachmentFactory,
-                award_recommendation=factory.SelfAttribute("..award_recommendation"),
-            ),
-            award_recommendation_attachment_id=factory.LazyAttribute(
-                lambda s: s.award_recommendation_attachment.award_recommendation_attachment_id
-            ),
-        )
-        is_risk_created = factory.Trait(
-            award_recommendation_audit_event=AwardRecommendationAuditEvent.RISK_CREATED,
-            award_recommendation_risk=factory.SubFactory(
-                AwardRecommendationRiskFactory,
-                award_recommendation=factory.SelfAttribute("..award_recommendation"),
-            ),
-            award_recommendation_risk_id=factory.LazyAttribute(
-                lambda s: s.award_recommendation_risk.award_recommendation_risk_id
-            ),
-        )
-        is_review_created = factory.Trait(
-            award_recommendation_audit_event=AwardRecommendationAuditEvent.REVIEW_CREATED,
-            award_recommendation_review=factory.SubFactory(
-                AwardRecommendationReviewFactory,
-                award_recommendation=factory.SelfAttribute("..award_recommendation"),
-            ),
-            award_recommendation_review_id=factory.LazyAttribute(
-                lambda s: s.award_recommendation_review.award_recommendation_review_id
-            ),
-        )
-        is_application_submission_updated = factory.Trait(
-            award_recommendation_audit_event=AwardRecommendationAuditEvent.APPLICATION_SUBMISSION_UPDATED,
-            award_recommendation_application_submission=factory.SubFactory(
-                AwardRecommendationApplicationSubmissionFactory,
-                award_recommendation=factory.SelfAttribute("..award_recommendation"),
-            ),
-            award_recommendation_application_submission_id=factory.LazyAttribute(
-                lambda s: s.award_recommendation_application_submission.award_recommendation_application_submission_id
-            ),
-        )
-
-
 ###################
 # User & Auth Factories
 ###################
@@ -1378,7 +1140,7 @@ class UserSavedSearchFactory(BaseFactory):
     )
 
 
-class UserApiKeyFactory(BaseFactory):
+class UserApiKeyFactory(RawApiKeyFactoryMixin, BaseFactory):
     class Meta:
         model = user_models.UserApiKey
 
@@ -1389,7 +1151,9 @@ class UserApiKeyFactory(BaseFactory):
 
     key_name = factory.Faker("sentence", nb_words=3)
 
-    key_id = factory.LazyAttribute(lambda obj: obj.raw_key)
+    # Not a column. Read it back as api_key.raw_key to send as X-API-Key,
+    # or set it: UserApiKeyFactory(raw_key="my-test-key").
+    raw_key = factory.LazyFunction(generate_api_key_id)
     key_id_hash = factory.LazyAttribute(
         lambda obj: hash_api_key_id(obj.raw_key, ApiKeyConfig().pepper)
     )
@@ -1410,10 +1174,6 @@ class UserApiKeyFactory(BaseFactory):
 
         # Trait for unused keys
         never_used = factory.Trait(last_used=None)
-
-        # Not a column. Tests and fixtures send this as X-API-Key.
-        # Override this, not key_id: UserApiKeyFactory(raw_key="my-test-key").
-        raw_key = factory.LazyFunction(generate_api_key_id)
 
 
 class RoleFactory(BaseFactory):
@@ -3424,7 +3184,6 @@ class WorkflowFactory(BaseFactory):
     opportunity = None
     application = None
     application_submission = None
-    award_recommendation = None
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
@@ -3437,7 +3196,6 @@ class WorkflowFactory(BaseFactory):
             WorkflowEntityType.OPPORTUNITY: "opportunity",
             WorkflowEntityType.APPLICATION: "application",
             WorkflowEntityType.APPLICATION_SUBMISSION: "application_submission",
-            WorkflowEntityType.AWARD_RECOMMENDATION: "award_recommendation",
         }
 
         supplied_entities = [
@@ -3459,7 +3217,6 @@ class WorkflowFactory(BaseFactory):
                 WorkflowEntityType.OPPORTUNITY: OpportunityFactory,
                 WorkflowEntityType.APPLICATION: ApplicationFactory,
                 WorkflowEntityType.APPLICATION_SUBMISSION: (ApplicationSubmissionFactory),
-                WorkflowEntityType.AWARD_RECOMMENDATION: (AwardRecommendationFactory),
             }
 
             entity_factory = factory_by_entity_type.get(config.entity_type)
@@ -3616,7 +3373,7 @@ class SharedLoginGovStateFactory(BaseFactory):
     nonce = Generators.UuidObj
 
 
-class SharedUserApiKeyFactory(BaseFactory):
+class SharedUserApiKeyFactory(RawApiKeyFactoryMixin, BaseFactory):
     class Meta:
         model = db_test_models.SharedUserApiKey
 
@@ -3626,9 +3383,10 @@ class SharedUserApiKeyFactory(BaseFactory):
     shared_user_id = factory.LazyAttribute(lambda k: k.shared_user.shared_user_id)
 
     key_name = factory.Faker("sentence", nb_words=3)
-    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+    # Not a column, see RawApiKeyFactoryMixin
+    raw_key = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
     key_id_hash = factory.LazyAttribute(
-        lambda obj: hash_api_key_id(obj.key_id, ApiKeyConfig().pepper)
+        lambda obj: hash_api_key_id(obj.raw_key, ApiKeyConfig().pepper)
     )
 
     last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")

@@ -11,8 +11,11 @@ export default defineConfig({
       dedupe: ["react", "react-dom", "@trussworks/react-uswds"],
     },
     server: {
-      // `../parity` compares each form page's fields with their Grants.gov sources.
-      fs: { allow: [".", "../parity", FRONTEND_ROOT] },
+      // `../parity` compares each form page's fields with their Grants.gov sources, and
+      // `form-library-xml`'s runtime builds the Data tab's XML.
+      fs: {
+        allow: [".", "../parity", "../emitters/xml/src/runtime", FRONTEND_ROOT],
+      },
     },
     css: {
       preprocessorOptions: {

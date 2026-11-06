@@ -224,3 +224,43 @@ export async function deleteAllSavedSearches(page: Page): Promise<void> {
       "being created faster than this cleans them up",
   );
 }
+
+/**
+ * Deletes only the authenticated user's saved searches with the given name.
+ * Use this to clean up a search a test created. deleteAllSavedSearches also removes
+ * searches other specs create for the same seeded user, which can break them when
+ * specs run in parallel.
+ */
+export async function deleteSavedSearchesByName(
+  page: Page,
+  searchName: string,
+): Promise<void> {
+  const listResponse = await page.request.post(
+    "/api/user/saved-searches/list",
+    { data: {} },
+  );
+  if (!listResponse.ok()) {
+    throw new Error(
+      `Failed to list saved searches for cleanup: ${listResponse.status()}`,
+    );
+  }
+  const savedSearches = (await listResponse.json()) as {
+    saved_search_id: string;
+    name: string;
+  }[];
+
+  for (const { saved_search_id: savedSearchId } of savedSearches.filter(
+    ({ name }) => name === searchName,
+  )) {
+    const deleteResponse = await page.request.delete(
+      "/api/user/saved-searches",
+      { data: { searchId: savedSearchId } },
+    );
+    if (!deleteResponse.ok()) {
+      throw new Error(
+        `Failed to delete saved search ${savedSearchId} during cleanup: ` +
+          `${deleteResponse.status()}`,
+      );
+    }
+  }
+}

@@ -75,6 +75,12 @@ never infer a pass from merged code or an empty dashboard.
 
 ### 4. Only if existing evidence does not cover it
 
+The [separate dev task verification](nofo-readability-runtime-verification.md)
+can check selected analyzer cleanup, Linux setup and PostgreSQL-session
+admission without enabling public uploads. Review its coverage limits before
+using the output as deployed evidence; HTTP handling, ordinary-worker
+interruption, logging and production remain separate checks.
+
 - [ ] Coordinate rate enforcement and emergency block/restoration using the
   [existing bounded WAF procedure](nofo-pdf-readability-waf.md). Keep unrelated
   Builder pages available and restore the agreed modes. Empty requests can test
@@ -85,6 +91,10 @@ never infer a pass from merged code or an empty dashboard.
   not prove cleanup.
 - [ ] Coordinate any interrupted-worker/task cleanup check before performing it.
   Record whether files survive and the actual cleanup/task-replacement behavior.
+- [ ] For slow uploads, use the [observation gate and bounded test card](nofo-pdf-upload-assessment.md#slow-upload-observation-gate-and-first-test-card).
+  Current log access shows lifecycle/completion signals, not reliable active-worker
+  occupation. Resolve that gap before uploads; temporary flag changes need separate
+  explicit authorization. Plan review does not authorize execution.
 - [ ] Inspect relevant deployed logging destinations for the synthetic markers,
   identify any unexpected document/identity data, and record remaining scope
   limitations. Keep detailed runtime configuration and raw logs restricted.
