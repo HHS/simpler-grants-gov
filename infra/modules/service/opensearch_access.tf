@@ -53,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "submission_consumer_db_access" {
 }
 
 resource "aws_iam_role_policy_attachment" "submission_consumer_email_access" {
-  count = var.opensearch_ingest_policy_arn != null && length(var.pinpoint_app_id) > 0 ? 1 : 0
+  count = var.opensearch_ingest_policy_arn != null && var.enable_email_access ? 1 : 0
 
   role       = aws_iam_role.submission_consumer[0].name
   policy_arn = aws_iam_policy.email_access[0].arn

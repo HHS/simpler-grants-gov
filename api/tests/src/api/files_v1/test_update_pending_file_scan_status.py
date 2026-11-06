@@ -30,7 +30,7 @@ def s3_scan_user_key(db_session, enable_factory_create):
     factories.LinkRoleRoleTypeFactory.create(role=role, role_type=RoleType.INTERNAL)
     factories.InternalUserRoleFactory.create(user=api_key.user, role=role)
 
-    return api_key.key_id
+    return api_key.raw_key
 
 
 class TestUpdateFileScanStatusSuccess:

@@ -1,6 +1,6 @@
 variable "name" {
   type        = string
-  description = "Name of the notifications project/application"
+  description = "Name of the notifications application, used to name its resources"
 }
 
 variable "sender_email" {

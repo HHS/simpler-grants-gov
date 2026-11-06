@@ -268,7 +268,7 @@ def test_setup_scanner_user_collision_checked_on_hash(
     setup_admin_privileges(db_session, internal_admin_user_api_key)
     pepper = ApiKeyConfig().pepper
     taken_key_id = "TAKEN_SCANNER_KEY_1234567"
-    # Stored under a different raw key_id, so only the hash matches
+    # Stored under a different raw key, so only the hash matches
     factories.UserApiKeyFactory.create(key_id_hash=hash_api_key_id(taken_key_id, pepper))
 
     with patch(

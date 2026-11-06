@@ -86,8 +86,7 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
     SharedUserApiKeyFactory.create(
         shared_user=user,
         key_name="Existing Key",
-        key_id=existing_key_id,
-        key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
+        raw_key=existing_key_id,
     )
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
@@ -142,11 +141,9 @@ def test_create_api_key_collision_checked_on_hash(enable_factory_create, db_sess
     user = SharedUserFactory.create()
 
     taken_key_id = "TAKEN_HASH_TEST_KEY_12345"
-    # Stored under a different raw key_id, so only the hash matches
     SharedUserApiKeyFactory.create(
         shared_user=user,
         key_name="Existing Key",
-        key_id="SOME_OTHER_RAW_KEY_ID_123",
         key_id_hash=hash_api_key_id(taken_key_id, ApiKeyConfig().pepper),
     )
 
@@ -170,8 +167,7 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
     SharedUserApiKeyFactory.create(
         shared_user=user,
         key_name="Existing Key",
-        key_id=existing_key_id,
-        key_id_hash=hash_api_key_id(existing_key_id, ApiKeyConfig().pepper),
+        raw_key=existing_key_id,
     )
 
     with patch("src.auth.api_key_handler_base.generate_api_key_id") as mock_generate:
@@ -510,7 +506,7 @@ def test_rename_api_key_success(enable_factory_create, db_session: db.Session, c
     assert renamed_api_key.shared_api_key_id == api_key.shared_api_key_id
     assert renamed_api_key.shared_user_id == user.shared_user_id
     assert renamed_api_key.key_name == "New Key Name"
-    assert renamed_api_key.key_id == api_key.key_id  # key_id should remain unchanged
+    assert renamed_api_key.key_id_hash == api_key.key_id_hash  # the key itself is unchanged
     assert renamed_api_key.is_active == api_key.is_active
     assert renamed_api_key.last_used == api_key.last_used
 
@@ -569,7 +565,7 @@ def test_rename_api_key_preserves_other_fields(enable_factory_create, db_session
     )
 
     original_api_key_id = api_key.shared_api_key_id
-    original_key_id = api_key.key_id
+    original_key_id_hash = api_key.key_id_hash
     original_user_id = api_key.shared_user_id
     original_is_active = api_key.is_active
     original_last_used = api_key.last_used
@@ -583,7 +579,7 @@ def test_rename_api_key_preserves_other_fields(enable_factory_create, db_session
 
     assert renamed_api_key.key_name == "Updated Key Name"
     assert renamed_api_key.shared_api_key_id == original_api_key_id
-    assert renamed_api_key.key_id == original_key_id
+    assert renamed_api_key.key_id_hash == original_key_id_hash
     assert renamed_api_key.shared_user_id == original_user_id
     assert renamed_api_key.is_active == original_is_active
     assert renamed_api_key.last_used == original_last_used

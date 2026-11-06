@@ -3,10 +3,12 @@ backfill_key_id_hash_and_finalize migration.
 """
 
 import pytest
+import sqlalchemy as sa
 from sqlalchemy import delete, text
 
 from src.auth.api_key_config import ApiKeyConfig
 from src.auth.auth_handler import AuthHandler
+from src.constants.schema import Schemas
 from src.db.migrations.utils import backfill_user_api_key_hashes
 from src.db.models.user_models import UserApiKey
 from src.util.api_key_gen import hash_api_key_id
@@ -34,11 +36,33 @@ def nullable_key_id_hash(db_session, test_api_schema):
     db_session.commit()
 
 
+# key_id isn't on the UserApiKey mapper, so write it through a plain Table
+_user_api_key_table = sa.Table(
+    "user_api_key",
+    sa.MetaData(),
+    sa.Column("api_key_id", sa.UUID(), primary_key=True),
+    sa.Column("key_id", sa.Text()),
+    schema=Schemas.API,
+)
+
+
+def _set_plaintext_key_id(db_session, key: UserApiKey) -> None:
+    """Store the raw key in key_id, as rows were before the backfill"""
+    db_session.execute(
+        sa.update(_user_api_key_table)
+        .where(_user_api_key_table.c.api_key_id == key.api_key_id)
+        .values(key_id=key.raw_key)
+    )
+
+
 def test_backfill_user_api_key_hashes(db_session, enable_factory_create, nullable_key_id_hash):
     pepper = ApiKeyConfig().pepper
     unhashed_keys = UserApiKeyFactory.create_batch(3, key_id_hash=None)
     # A row written by the dual-write on create, which the backfill should not touch
     already_hashed_key = UserApiKeyFactory.create(key_id_hash="already-hashed")
+    for key in [*unhashed_keys, already_hashed_key]:
+        _set_plaintext_key_id(db_session, key)
+    db_session.commit()
 
     backfill_user_api_key_hashes(db_session.connection(), pepper)
     db_session.commit()
@@ -46,9 +70,9 @@ def test_backfill_user_api_key_hashes(db_session, enable_factory_create, nullabl
 
     auth_handler = AuthHandler(db_session)
     for key in unhashed_keys:
-        assert key.key_id_hash == hash_api_key_id(key.key_id, pepper)
-        # The lookup auth will use once it reads by hash resolves the backfilled row
-        found_key = auth_handler.get_api_key_by_hash(hash_api_key_id(key.key_id, pepper))
+        assert key.key_id_hash == hash_api_key_id(key.raw_key, pepper)
+        # The lookup auth uses resolves the backfilled row
+        found_key = auth_handler.get_api_key_by_hash(hash_api_key_id(key.raw_key, pepper))
         assert found_key is not None
         assert found_key.api_key_id == key.api_key_id
 

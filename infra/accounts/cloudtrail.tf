@@ -31,7 +31,7 @@ resource "aws_cloudwatch_log_group" "cloudtrail_management" {
   retention_in_days = 365
 }
 
-# CloudWatch Log Group for pinpoint events trail
+# CloudWatch Log Group for the email (pinpoint-events) trail
 resource "aws_cloudwatch_log_group" "cloudtrail_pinpoint" {
   #checkov:skip=CKV_AWS_158:Existing log group - KMS encryption to be added in future update
   name              = "/aws/cloudtrail/pinpoint-events"
@@ -119,7 +119,8 @@ resource "aws_cloudtrail" "management_events" {
   }
 }
 
-# Pinpoint events trail
+# Email events trail. It is still named "pinpoint-events" because renaming a
+# trail replaces it; it now only records SES data events.
 moved {
   from = aws_cloudtrail.pinpoint_events
   to   = aws_cloudtrail.pinpoint_events[0]
@@ -138,17 +139,6 @@ resource "aws_cloudtrail" "pinpoint_events" {
 
   cloud_watch_logs_group_arn = "${aws_cloudwatch_log_group.cloudtrail_pinpoint.arn}:*"
   cloud_watch_logs_role_arn  = aws_iam_role.cloudtrail_cloudwatch.arn
-
-  advanced_event_selector {
-    field_selector {
-      field  = "resources.type"
-      equals = ["AWS::Pinpoint::App"]
-    }
-    field_selector {
-      field  = "eventCategory"
-      equals = ["Data"]
-    }
-  }
 
   advanced_event_selector {
     field_selector {
