@@ -53,6 +53,7 @@ describe("handleFormAction", () => {
     expect(result).toEqual({
       ...genericPayload,
       error: true,
+      errorCode: "AUTH_REQUIRED",
     });
   });
   it("returns error state if error occurs when processing schema", async () => {

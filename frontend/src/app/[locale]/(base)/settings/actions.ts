@@ -35,6 +35,7 @@ export const userProfileAction = async (
   if (!session || !session.token || !session.user_id) {
     return {
       errorMessage: "Not logged in",
+      errorCode: "AUTH_REQUIRED",
     };
   }
 

@@ -10,6 +10,7 @@ export type UpdateAppFilingNameActionState =
   | {
       success: boolean;
       error: string | null;
+      errorCode?: "AUTH_REQUIRED";
     }
   | undefined;
 
@@ -23,6 +24,7 @@ export const updateAppFilingNameAction = async (
     return {
       success: false,
       error: "Session has expired",
+      errorCode: "AUTH_REQUIRED",
     };
   }
 

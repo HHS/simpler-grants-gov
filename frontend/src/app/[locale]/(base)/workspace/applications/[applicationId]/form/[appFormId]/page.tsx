@@ -16,6 +16,7 @@ import { notFound, redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
+import { UnauthenticatedMessage } from "src/components/core/UnauthenticatedMessage";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +73,7 @@ async function FormPage({ params }: formPageProps) {
   const { application_status } = response.data;
 
   if (error || !data) {
-    if (error === "UnauthorizedError") return redirect("/unauthenticated");
+    if (error === "UnauthorizedError") return <UnauthenticatedMessage />;
     if (error === "NotFound") notFound();
     return <TopLevelError />;
   }
