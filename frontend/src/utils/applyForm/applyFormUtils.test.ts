@@ -1223,6 +1223,22 @@ describe("addPrintWidgetToFields", () => {
         ),
       ).toBe("Field is required");
     });
+
+    it("formats date validation errors to MM-DD-YYYY format when given an ISO date string", () => {
+      const rawError = "'275760-01-01' is not a 'date'";
+      const result = formatValidationWarning("project_end_date", rawError, {
+        title: "Project End Date",
+      });
+      expect(result).toBe("01-01-275760 is not a valid date. Please use MM-DD-YYYY format.");
+    });
+
+    it("formats generic date validation errors to specify MM-DD-YYYY format", () => {
+      const rawError = "must match format \"date\"";
+      const result = formatValidationWarning("project_end_date", rawError, {
+        title: "Project End Date",
+      });
+      expect(result).toBe("Project End Date must be a valid date in MM-DD-YYYY format.");
+    });
   });
 
   describe("getHtmlFieldForWarning", () => {
