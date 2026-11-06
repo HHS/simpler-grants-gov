@@ -6,10 +6,15 @@ import { PropsWithChildren } from "react";
 
 const debouncedUserFetcherMock = jest.fn();
 const routerRefreshMock = jest.fn();
+const mockPostUserEvent = jest.fn();
 const mockRouter = { refresh: () => routerRefreshMock() as unknown };
 
 jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
   debouncedUserFetcher: () => debouncedUserFetcherMock() as unknown,
+}));
+
+jest.mock("src/services/event/postUserEvent", () => ({
+  postUserEvent: (event: unknown) => mockPostUserEvent(event) as unknown,
 }));
 
 jest.mock("next/navigation", () => ({
@@ -285,6 +290,87 @@ describe("useUser", () => {
       await result.current.refreshIfExpiring();
 
       expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("session_expired", () => {
+    const renderSignedIn = async (expiresAt: number) => {
+      debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true, expiresAt });
+      const { result } = renderHook(() => useUser(), { wrapper });
+      await waitFor(() => {
+        expect(result.current.user?.isLoggedIn).toEqual(true);
+      });
+      return { result };
+    };
+
+    it("reports an expired session once when concurrent checks see it signed out", async () => {
+      const { result } = await renderSignedIn(Date.now() - 1000);
+      debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
+
+      const { refreshIfExpired } = result.current;
+      await Promise.all([refreshIfExpired(), refreshIfExpired()]);
+
+      await waitFor(() => {
+        expect(result.current.user?.isLoggedIn).toEqual(false);
+      });
+      await result.current.refreshUser();
+
+      expect(mockPostUserEvent).toHaveBeenCalledTimes(1);
+      expect(mockPostUserEvent).toHaveBeenCalledWith({
+        name: "session_expired",
+      });
+    });
+
+    it("does not report an anonymous visitor", async () => {
+      debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
+      const { result } = renderHook(() => useUser(), { wrapper });
+      await waitFor(() => {
+        expect(result.current.user?.isLoggedIn).toEqual(false);
+      });
+
+      await result.current.refreshUser();
+      await result.current.refreshIfExpired();
+
+      expect(mockPostUserEvent).not.toHaveBeenCalled();
+    });
+
+    it("does not report a signed out response before the session expiry time", async () => {
+      const { result } = await renderSignedIn(Date.now() + 60 * 60 * 1000);
+      debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
+
+      await result.current.refreshUser();
+
+      await waitFor(() => {
+        expect(result.current.hasBeenLoggedOut).toEqual(true);
+      });
+      expect(mockPostUserEvent).not.toHaveBeenCalled();
+    });
+
+    it("does not report a failed session request", async () => {
+      const { result } = await renderSignedIn(Date.now() - 1000);
+      debouncedUserFetcherMock.mockRejectedValue(
+        new Error("Unable to fetch user: 500"),
+      );
+
+      await result.current.refreshIfExpired();
+
+      await waitFor(() => {
+        expect(result.current.error).toBeDefined();
+      });
+      expect(mockPostUserEvent).not.toHaveBeenCalled();
+    });
+
+    it("does not report a local logout", async () => {
+      const { result } = await renderSignedIn(Date.now() - 1000);
+
+      result.current.logoutLocalUser();
+      await waitFor(() => {
+        expect(result.current.user?.isLoggedIn).toEqual(false);
+      });
+      debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
+      await result.current.refreshUser();
+
+      expect(mockPostUserEvent).not.toHaveBeenCalled();
     });
   });
 });

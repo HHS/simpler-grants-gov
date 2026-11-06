@@ -10,6 +10,7 @@ import { NextRequest } from "next/server";
 const FAKE_LOGOUT_TOKEN = "fake-logout-token";
 const mockSetLogoutTokenCookie = jest.fn();
 const mockGetSession = jest.fn();
+const mockLoggerError = jest.fn();
 
 jest.mock("src/constants/environments", () => ({
   environment: { AUTH_LOGOUT_URL: "http://simpler.grants.gov/logout" },
@@ -22,6 +23,16 @@ jest.mock("src/services/auth/sessionUtils", () => ({
 
 jest.mock("src/services/auth/session", () => ({
   getSession: () => mockGetSession() as unknown,
+}));
+
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: {
+    error: (...args: unknown[]): unknown => mockLoggerError(...args),
+  },
+}));
+
+jest.mock("src/services/correlationId/correlationId", () => ({
+  getCorrelationId: () => Promise.resolve("a-correlation-id"),
 }));
 
 describe("/api/auth/logout GET handler", () => {
@@ -52,6 +63,16 @@ describe("/api/auth/logout GET handler", () => {
 
     expect(response.headers.get("location")).toBe(null);
     expect(response.status).toBe(500);
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      {
+        event: "authentication_request_failed",
+        correlation_id: "a-correlation-id",
+        awsTraceId: null,
+        authRequest: "logout",
+        reason: "logout_url_not_configured",
+      },
+      "AUTH_LOGOUT_URL not defined",
+    );
   });
   it("sets token in logout cookie", async () => {
     await wrapForExpectedError<{
@@ -65,6 +86,7 @@ describe("/api/auth/logout GET handler", () => {
     const response = await GET(new NextRequest("https://simpler.grants.gov/"));
 
     expect(response.headers.get("location")).toBe(null);
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(500); // a missing session is an expected auth state, not a request failure
+    expect(mockLoggerError).not.toHaveBeenCalled();
   });
 });
