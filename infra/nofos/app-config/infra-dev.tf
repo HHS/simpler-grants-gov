@@ -29,10 +29,9 @@ module "infra_dev_config" {
   pdf_readability_alarm_actions_enabled           = true
   # Restore observation mode after the coordinated dev emergency-block test.
   # Public uploads remain off.
-  # Temporary shared-IP test. Restore rate_action to count after verification.
   pdf_readability_waf = {
     rate_limit      = 10
-    rate_action     = "block"
+    rate_action     = "count"
     emergency_block = false
   }
 
