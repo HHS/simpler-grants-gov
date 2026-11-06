@@ -19,22 +19,21 @@ module "infra_training_config" {
   s3_cdn_domain_name             = "files.training.simpler.grants.gov"
   enable_cdn_alias               = true
 
-  # SOAP (mTLS) endpoint. Requires enable_https, which gates the ALB's 443 listener.
   mtls_domain_name = "soap.training.simpler.grants.gov"
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
   database_engine_version       = "17.7"
-  database_deletion_protection  = false # non-prod experimental environment
-  database_newrelic_entity_guid = ""    # Populate once the New Relic entity for the infra-training RDS cluster exists
+  database_deletion_protection  = false                                                # non-prod experimental environment
+  database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMjEwNzYwNjQ1MjUwNjc2ODE4OQ" # Same entity as training
 
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
   enable_notifications            = true
 
-  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-training primary ALB exists
-  service_newrelic_mtls_entity_guid = "" # Populate once the New Relic entity for the infra-training mTLS ALB exists
-  api_host_newrelic_entity_guid     = "" # Populate once the New Relic entity for the infra-training ECS service host exists
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwtNTMyNjczNTExNjkwODE1NjMyMA"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwxMTEyMzE1NDM1OTM1OTM5OTYy"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTgyMjgwNTEz"
 
   # Sizing mirrors training.
   instance_desired_instance_count = 2
@@ -48,8 +47,6 @@ module "infra_training_config" {
   has_search            = true
   search_engine_version = "OpenSearch_2.15"
 
-  # This account's own reserved-SSO suffix; must not be null -- the role-mappings lambda
-  # puts it in all_access backend_roles and OpenSearch rejects a null array element.
   search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_43bdcb088d20dc60"
 
   service_override_extra_environment_variables = {
