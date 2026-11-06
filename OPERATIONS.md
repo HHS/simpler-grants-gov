@@ -68,6 +68,60 @@ When that happens, you need to unlock it via DynamoDB in the AWS console.
 
 ## Running Application Commands Manually
 
+### Bounded NOFO migration waiting
+
+NOFO deployment sets `MIGRATION_WAIT_TIMEOUT_SECONDS` to 1800 seconds (30 minutes).
+The repository variable `NOFO_MIGRATION_WAIT_TIMEOUT_SECONDS` can lower this
+budget; supported migration values are 1–1800. The workflow's 35-minute step
+ceiling also includes task-definition preparation and up to 60 seconds of
+best-effort diagnostics. It must remain longer than the task wait plus setup.
+This initial dev budget is not proof that a long backfill is healthy; measure
+actual runtime before deciding on a different budget.
+
+`bin/run-database-migrations` opts into `bin/run-command`'s
+`--wait-timeout-seconds` option only when that environment variable is set.
+Other deployments and direct helper callers retain the existing AWS waiter
+unless they explicitly opt in. Opt-in waiting needs Python 3 (standard library
+only) as well as the existing AWS CLI, Terraform and jq dependencies.
+
+The new observer prints task ID, elapsed time and status every 15 seconds. It
+requires the exact task to stop with the named container's integer exit code 0
+before permitting rollout. Timeout exits 124; unknown/failed status exits
+nonzero. It never calls stop-task, retries the migration or fake-applies it.
+
+On failure/timeout it uses the workflow's existing credentials to collect status,
+container exits, sanitized stop reasons and available CloudWatch migration
+progress. CloudWatch discovery uses the stopped/running task's exact task
+definition, not the family's newest revision. This needs `ecs:DescribeTasks`,
+`ecs:DescribeTaskDefinition` and, for logs, `logs:GetLogEvents` on the selected
+log stream. This PR does not broaden IAM access. Denied/missing logs are reported
+without masking the original failure. Live permission coverage remains to verify.
+
+Output deliberately omits commands, override values and full task-definition
+responses. Only fixed ECS reason categories and allowlisted Django migration
+progress lines from the latest 100 log events are published. Other messages,
+SQL/tracebacks and reason details stay private; the log group/stream identifies
+where an authorized operator can inspect them. JSON quoting prevents retrieved
+strings from introducing GitHub Actions commands. Logs may arrive late or be
+unavailable, so absence of a progress line is not evidence that nothing ran.
+
+**Safe retry:** a workflow timeout does not terminate an ECS migration task.
+Before launching another deployment, use its reported task ARN to establish
+whether it is stopped, inspect its exit code and migration/database state, and
+account for any partially applied work. Do not start overlapping migrations.
+For #12845, first establish the original dev task's state; then validate the
+affected history-index version on dev and record runtime/outcome and any need
+for application-side optimization. A successful deployment of the temporary
+history rollback does not establish that the original backfill was defective
+or that its task never completed.
+
+Offline verification (no AWS credentials or network calls):
+
+```bash
+python3 -m unittest discover -s scripts/tests -v
+bash -n bin/run-command bin/run-database-migrations
+```
+
 `bin/run-command` runs a one-off application command as an ECS task, reusing the service's cluster,
 task definition, and network configuration.
 

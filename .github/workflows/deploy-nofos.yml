@@ -55,6 +55,9 @@ jobs:
         run: make release-publish APP_NAME=nofos IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
 
       - name: Run migrations
+        timeout-minutes: 35
+        env:
+          MIGRATION_WAIT_TIMEOUT_SECONDS: ${{ vars.NOFO_MIGRATION_WAIT_TIMEOUT_SECONDS || '1800' }}
         run: |
           make release-run-database-migrations APP_NAME=nofos ENVIRONMENT=${{ inputs.environment || 'dev'  }} IMAGE_TAG="$(cat /tmp/commit-hash.txt)"
 
