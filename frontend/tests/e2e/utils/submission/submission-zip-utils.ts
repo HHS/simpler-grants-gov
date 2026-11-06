@@ -198,10 +198,14 @@ function textMatches(text: string, item: string | RegExp): boolean {
  * Text that should never appear in any generated form PDF: template or
  * serialization leaks and validation messages.
  */
-export const COMMON_PDF_UNEXPECTED_TEXT: (string | RegExp)[] = [
+export const PDF_SERIALIZATION_LEAKS: (string | RegExp)[] = [
   "undefined",
   "[object Object]",
   "NaN",
+];
+
+export const COMMON_PDF_UNEXPECTED_TEXT: (string | RegExp)[] = [
+  ...PDF_SERIALIZATION_LEAKS,
   /\bis required\b/i,
 ];
 
