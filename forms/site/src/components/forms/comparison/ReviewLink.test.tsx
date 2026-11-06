@@ -51,7 +51,7 @@ it("offers one native anchor with separate field, comparison and finding destina
   }
 });
 
-it("ordinary activation focuses the tree without a sheet and retains active filters", async () => {
+it("ordinary activation selects the tree without a sheet and retains active filters", async () => {
   dom = new JSDOM('<div id="root"></div>', { url: "https://example.test/" });
   vi.stubGlobal("window", dom.window);
   vi.stubGlobal("document", dom.window.document);
