@@ -57,11 +57,26 @@ export async function waitForSubmissionZipReady(
     const stillPreparing = await preparingMessage
       .isVisible()
       .catch(() => false);
+    const applicationId = page.url().split("/").pop();
+    const pageText = await page
+      .getByTestId("information-card")
+      .innerText({ timeout: 2_000 })
+      .catch(() => "(information card not found)");
+
+    // The page shows the "being prepared" message while SUBMITTED, and the button once
+    // ACCEPTED *and* the latest submission loads. With neither present, the status is
+    // ACCEPTED but the server-side submissions fetch returned null.
+    const reason = stillPreparing
+      ? "the application is still SUBMITTED (the submission consumer / " +
+        "create-application-submission task has not processed it)"
+      : 'neither the download button nor the "being prepared" message is shown: the ' +
+        "application is not SUBMITTED, so it is most likely ACCEPTED but its latest " +
+        "submission could not be loaded (the API errored or did not return exactly one " +
+        `submission; look for "Expected 1 application submission" in the frontend logs)`;
+
     throw new Error(
-      stillPreparing
-        ? `Submission zip was not ready after ${timeoutMs}ms: the application is still SUBMITTED ` +
-            "(the submission consumer / create-application-submission task has not processed it)."
-        : `Submission download button not found after ${timeoutMs}ms.`,
+      `Submission zip was not ready after ${timeoutMs}ms for application ${applicationId}: ${reason}.\n` +
+        `Information card text: ${pageText.replace(/\s+/g, " ").slice(0, 300)}`,
       { cause: error },
     );
   }
