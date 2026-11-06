@@ -28,10 +28,13 @@ from src.submission_consumer.submission_consumer import (
     SubmissionConsumerConfig,
     SubmissionProcessingResult,
     get_locked_application,
+    get_reconciler_log_extra,
     handle_message,
     process_application_submission_message,
+    reconcile_stale_submissions,
 )
 from src.util import file_util
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import ApplicationFactory, ApplicationFormFactory, UserFactory
 
 TEST_DATETIME_STR = "2025-06-15 14:30:00"
@@ -91,6 +94,20 @@ def build_consumer():
     config = SubmissionConsumerConfig(
         submission_consumer_cycle_duration=0,
         submission_consumer_maximum_batch_count=1,
+    )
+    return SubmissionConsumer(config=config)
+
+
+def build_reconciler_consumer():
+    """Consumer configured for reconciler tests.
+
+    Sets age threshold to 0 so any SUBMITTED application is eligible
+    immediately — no need to backdate updated_at or submitted_at.
+    """
+    config = SubmissionConsumerConfig(
+        submission_consumer_cycle_duration=0,
+        submission_consumer_maximum_batch_count=1,
+        submission_consumer_reconcile_age_threshold_sec=0,
     )
     return SubmissionConsumer(config=config)
 
@@ -895,3 +912,167 @@ def test_submission_consumer_run_command(
         if r.message == "Finished processing submission messages - exiting process"
     )
     assert finished_log is not None
+
+
+class TestReconciler:
+    """Tests for the reconciler sweep (reconcile_stale_submissions)."""
+
+    @pytest.fixture(autouse=True)
+    def clean_applications(self, db_session):
+        """Delete all applications before each reconciler test.
+
+        The reconciler queries the whole DB for SUBMITTED applications, so
+        committed rows from other tests would pollute its results. Wipe the
+        table before each test so only this test's data is present.
+        """
+        cascade_delete_from_db_table(db_session, ApplicationSubmission)
+        cascade_delete_from_db_table(db_session, Application)
+        db_session.commit()
+
+    def test_reconciler_picks_up_stale_submitted_application(
+        self,
+        app,
+        db_session,
+        enable_factory_create,
+        consumer_queue,
+        registered_form,
+        caplog,
+    ):
+        """Stale SUBMITTED application is built and transitioned to ACCEPTED."""
+        caplog.set_level(logging.INFO)
+        application = build_submitted_application(registered_form)
+        db_session.commit()
+
+        with app.app_context():
+            reconcile_stale_submissions(0)
+
+        db_session.expire_all()
+        db_session.refresh(application)
+        assert application.application_status == ApplicationStatus.ACCEPTED
+
+        submissions = get_submissions(db_session, application.application_id)
+        assert len(submissions) == 1
+        assert submissions[0].file_size_bytes > 0
+
+        sweep_log = next(r for r in caplog.records if r.message == "Running reconciler sweep")
+        assert sweep_log.stale_submitted_count == 1
+
+        finished_log = next(
+            r for r in caplog.records if r.message == "Finished handling submission message"
+        )
+        assert finished_log.application_id == application.application_id
+        assert finished_log.source == "reconciler"
+        assert finished_log.message_result == SubmissionProcessingResult.SUCCESS
+
+    def test_reconciler_skips_application_below_age_threshold(
+        self,
+        app,
+        db_session,
+        enable_factory_create,
+        consumer_queue,
+        caplog,
+    ):
+        """Application submitted just now is not picked up — it's too fresh."""
+        caplog.set_level(logging.INFO)
+        # 300s threshold — a freshly created application won't qualify.
+        application = ApplicationFactory.create(application_status=ApplicationStatus.SUBMITTED)
+        db_session.commit()
+
+        with app.app_context():
+            reconcile_stale_submissions(300)
+
+        db_session.expire_all()
+        db_session.refresh(application)
+        # Still SUBMITTED — reconciler correctly skipped it.
+        assert application.application_status == ApplicationStatus.SUBMITTED
+
+        sweep_log = next(r for r in caplog.records if r.message == "Running reconciler sweep")
+        assert sweep_log.stale_submitted_count == 0
+
+    def test_reconciler_skips_already_accepted_application(
+        self,
+        app,
+        db_session,
+        enable_factory_create,
+        consumer_queue,
+        caplog,
+    ):
+        """An application that reached ACCEPTED (by another path) is a no-op."""
+        caplog.set_level(logging.INFO)
+        application = ApplicationFactory.create(application_status=ApplicationStatus.ACCEPTED)
+        db_session.commit()
+
+        with app.app_context():
+            reconcile_stale_submissions(0)
+
+        db_session.expire_all()
+        db_session.refresh(application)
+        assert application.application_status == ApplicationStatus.ACCEPTED
+        # No submission record should have been created.
+        assert len(get_submissions(db_session, application.application_id)) == 0
+
+    def test_reconciler_logs_failure_with_reconciler_source(
+        self,
+        app,
+        db_session,
+        enable_factory_create,
+        consumer_queue,
+        registered_form,
+        monkeypatch,
+        caplog,
+    ):
+        """When the builder throws, the error log carries source=reconciler."""
+        caplog.set_level(logging.INFO)
+        application = build_submitted_application(registered_form)
+        db_session.commit()
+
+        def _raise(*args, **kwargs):
+            raise Exception("simulated reconciler build failure")
+
+        monkeypatch.setattr(
+            "src.services.applications.create_application_submission.ApplicationSubmissionBuilder.build_application_submission",
+            _raise,
+        )
+
+        with app.app_context():
+            reconcile_stale_submissions(0)
+
+        db_session.expire_all()
+        db_session.refresh(application)
+        # Build failed — application stays SUBMITTED.
+        assert application.application_status == ApplicationStatus.SUBMITTED
+        assert len(get_submissions(db_session, application.application_id)) == 0
+
+        # Multiple SUBMITTED apps may be in the DB from earlier tests; filter
+        # to the one this test created so we don't match a different app's log.
+        error_log = next(
+            r
+            for r in caplog.records
+            if r.message == "Failed to process submission message"
+            and r.application_id == application.application_id
+        )
+        assert error_log.source == "reconciler"
+
+    def test_reconciler_get_reconciler_log_extra_shape(self):
+        """get_reconciler_log_extra returns the expected keys and values."""
+        app_id = uuid.uuid4()
+        extra = get_reconciler_log_extra(app_id)
+        assert extra["application_id"] == app_id
+        assert extra["source"] == "reconciler"
+        # No message_id or submitted_by_user_id on the reconciler path.
+        assert "submission_message_id" not in extra
+        assert "submitted_by_user_id" not in extra
+
+    def test_reconciler_config_defaults(self):
+        """Config defaults are sane for production."""
+        config = SubmissionConsumerConfig(
+            submission_consumer_cycle_duration=0,
+            submission_consumer_maximum_batch_count=1,
+        )
+        assert config.submission_consumer_reconcile_interval_sec == 3600
+        assert config.submission_consumer_reconcile_age_threshold_sec == 300
+
+    def test_reconciler_last_reconcile_time_starts_as_none(self):
+        """_last_reconcile_time is None on startup so the first batch triggers a sweep."""
+        consumer = build_consumer()
+        assert consumer._last_reconcile_time is None
