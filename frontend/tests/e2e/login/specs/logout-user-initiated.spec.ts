@@ -102,7 +102,13 @@ test.describe("User-initiated logout", () => {
     "logs out via Sign out, blocks protected and private content, and allows re-login",
     { tag: [SMOKE] },
     async ({ page, context }, testInfo) => {
+      test.skip(
+        !testInfo.project.name.toLowerCase().includes("chrome"),
+        "Logout E2E runs only on Chrome",
+      );
+
       const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
+
       // Given the user is logged in to Simpler Grants.gov (seeded session, login.gov bypassed)
       await authenticateE2eUser(page, context, isMobile, LOGOUT_TEST_USER);
 
