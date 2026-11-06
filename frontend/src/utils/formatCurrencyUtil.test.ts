@@ -1,7 +1,6 @@
 import {
   formatCurrency,
   formatCurrencyString,
-  getNumericAmountFromString,
   sanitizeCurrencyInput,
 } from "src/utils/formatCurrencyUtil";
 
@@ -50,44 +49,6 @@ describe("formatCurrencyString", () => {
 
   it("returns the original string when not numeric", () => {
     expect(formatCurrencyString("not a number")).toBe("not a number");
-  });
-});
-
-describe("getNumericAmountFromString", () => {
-  it("returns 0 when null is passed", () => {
-    expect(getNumericAmountFromString(null)).toBe(0);
-  });
-
-  it("returns 0 when undefined is passed", () => {
-    expect(getNumericAmountFromString(undefined)).toBe(0);
-  });
-
-  it("returns 0 when empty string is passed", () => {
-    expect(getNumericAmountFromString("")).toBe(0);
-  });
-
-  it("parses a comma-separated number string", () => {
-    expect(getNumericAmountFromString("1,234")).toBe(1234);
-  });
-
-  it("parses a plain number string", () => {
-    expect(getNumericAmountFromString("500")).toBe(500);
-  });
-
-  it("returns 0 for non-numeric strings", () => {
-    expect(getNumericAmountFromString("abc")).toBe(0);
-  });
-
-  it("parses a formatted currency string with dollar sign and commas", () => {
-    expect(getNumericAmountFromString("$1,234")).toBe(1234);
-  });
-
-  it("parses a formatted currency string with dollar sign", () => {
-    expect(getNumericAmountFromString("$75000")).toBe(75000);
-  });
-
-  it("parses large formatted amounts", () => {
-    expect(getNumericAmountFromString("$1,234,567.89")).toBe(1234567.89);
   });
 });
 

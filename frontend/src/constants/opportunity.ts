@@ -254,5 +254,3 @@ export const categoryOptions: FilterOption[] = [
   },
   { id: "category-other", label: "Other", value: "other" },
 ];
-
-export const ELIGIBILITY_OPTIONS: LabelValueOption[] = eligibilityTypes;
