@@ -253,14 +253,17 @@ export const SF424_OPPORTUNITY_DATA: PrintViewFormData = {
       xmlElement: "SF424_4_0:CertificationAgree",
       xmlTransform: xmlYesNo,
     },
+    authorized_representative_prefix: { xmlElement: "globLib:PrefixName" },
     authorized_representative_first_name: {
       xmlElement: "globLib:FirstName",
       verifyInPdf: true,
     },
+    authorized_representative_middle_name: { xmlElement: "globLib:MiddleName" },
     authorized_representative_last_name: {
       xmlElement: "globLib:LastName",
       verifyInPdf: true,
     },
+    authorized_representative_suffix: { xmlElement: "globLib:SuffixName" },
     authorized_representative_title: {
       xmlElement: "SF424_4_0:AuthorizedRepresentativeTitle",
       verifyInPdf: true,
