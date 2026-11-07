@@ -21,7 +21,7 @@ STAGING_TEST_USER_PASSWORD=<Login.gov test account password>
 STAGING_TEST_USER_MFA_KEY=<Login.gov test account MFA key>
 ```
 
-Obtain deployed secrets from 1Password, AWS SSM, or a team member. Keep them in local configuration, never in committed files. `SESSION_SECRET_OVERRIDE`, when set, takes precedence over `SESSION_SECRET` for Playwright; CI uses the override when testing deployed environments.
+Obtain deployed secrets from 1Password, GitHub Actions secrets, or a team member. Keep them in local configuration, never in committed files. `SESSION_SECRET_OVERRIDE`, when set, takes precedence over `SESSION_SECRET` for Playwright; CI uses the override when testing deployed environments.
 
 The `STAGING_TEST_USER_*` variables are used by the real Login.gov test, not session spoofing. The Login.gov helper checks these credentials when imported, so collecting the full suite against a deployed target requires them even before tests run. A focused spec that only uses spoofed authentication instead needs the session secret and manager API key. The Login.gov spec is skipped for the local target.
 
