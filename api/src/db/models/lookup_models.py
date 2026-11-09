@@ -8,13 +8,6 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     ApprovalResponseType,
     ApprovalType,
-    AwardRecommendationAttachmentType,
-    AwardRecommendationAuditEvent,
-    AwardRecommendationReviewType,
-    AwardRecommendationRiskType,
-    AwardRecommendationStatus,
-    AwardRecommendationType,
-    AwardSelectionMethod,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -127,17 +120,6 @@ FUNDING_INSTRUMENT_CONFIG: LookupConfig[FundingInstrument] = LookupConfig(
     ]
 )
 
-AWARD_SELECTION_METHOD_CONFIG: LookupConfig[AwardSelectionMethod] = LookupConfig(
-    [
-        LookupStr(AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY, 1),
-        LookupStr(AwardSelectionMethod.MERIT_REVIEW_RANKING_WITH_OTHER_FACTORS, 2),
-        LookupStr(AwardSelectionMethod.FORMULA, 3),
-        LookupStr(AwardSelectionMethod.SINGLE_SOURCE, 4),
-        LookupStr(AwardSelectionMethod.SOLE_SOURCE, 5),
-        LookupStr(AwardSelectionMethod.OTHER, 6),
-    ]
-)
-
 AGENCY_DOWNLOAD_FILE_TYPE_CONFIG: LookupConfig[AgencyDownloadFileType] = LookupConfig(
     [LookupStr(AgencyDownloadFileType.XML, 1), LookupStr(AgencyDownloadFileType.PDF, 2)]
 )
@@ -246,74 +228,6 @@ APPLICATION_STATUS_CONFIG: LookupConfig[ApplicationStatus] = LookupConfig(
     ]
 )
 
-AWARD_RECOMMENDATION_ATTACHMENT_TYPE_CONFIG: LookupConfig[AwardRecommendationAttachmentType] = (
-    LookupConfig(
-        [
-            LookupStr(AwardRecommendationAttachmentType.STANDARD_TERMS, 1),
-            LookupStr(AwardRecommendationAttachmentType.STANDARD_CONDITIONS, 2),
-            LookupStr(AwardRecommendationAttachmentType.PROGRAM_TERMS, 3),
-            LookupStr(AwardRecommendationAttachmentType.PROGRAM_CONDITIONS, 4),
-            LookupStr(AwardRecommendationAttachmentType.OTHER, 5),
-        ]
-    )
-)
-
-AWARD_RECOMMENDATION_STATUS_CONFIG: LookupConfig[AwardRecommendationStatus] = LookupConfig(
-    [
-        LookupStr(AwardRecommendationStatus.DRAFT, 1),
-        LookupStr(AwardRecommendationStatus.IN_REVIEW, 2),
-        LookupStr(AwardRecommendationStatus.APPROVED, 3),
-        LookupStr(AwardRecommendationStatus.SUBMITTED, 4),
-        LookupStr(AwardRecommendationStatus.REVISION_REQUESTED, 5),
-        LookupStr(AwardRecommendationStatus.IN_REVISION, 6),
-    ]
-)
-
-AWARD_RECOMMENDATION_TYPE_CONFIG: LookupConfig[AwardRecommendationType] = LookupConfig(
-    [
-        LookupStr(AwardRecommendationType.RECOMMENDED_FOR_FUNDING, 1),
-        LookupStr(AwardRecommendationType.RECOMMENDED_WITHOUT_FUNDING, 2),
-        LookupStr(AwardRecommendationType.NOT_RECOMMENDED, 3),
-    ]
-)
-
-AWARD_RECOMMENDATION_REVIEW_TYPE_CONFIG: LookupConfig[AwardRecommendationReviewType] = LookupConfig(
-    [
-        LookupStr(AwardRecommendationReviewType.MERIT_REVIEW, 1),
-        LookupStr(AwardRecommendationReviewType.APPLICATION_BUDGET_REVIEW, 2),
-        LookupStr(AwardRecommendationReviewType.PROGRAMMATIC_REVIEW, 3),
-        LookupStr(AwardRecommendationReviewType.BUSINESS_AND_RISK_REVIEW, 4),
-    ]
-)
-
-AWARD_RECOMMENDATION_RISK_TYPE_CONFIG: LookupConfig[AwardRecommendationRiskType] = LookupConfig(
-    [
-        LookupStr(AwardRecommendationRiskType.ADDITIONAL_MONITORING, 1),
-    ]
-)
-
-AWARD_RECOMMENDATION_AUDIT_EVENT_CONFIG: LookupConfig[AwardRecommendationAuditEvent] = LookupConfig(
-    [
-        LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED, 1),
-        LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED, 2),
-        LookupStr(AwardRecommendationAuditEvent.ATTACHMENT_CREATED, 3),
-        LookupStr(AwardRecommendationAuditEvent.ATTACHMENT_UPDATED, 4),
-        LookupStr(AwardRecommendationAuditEvent.ATTACHMENT_DELETED, 5),
-        LookupStr(AwardRecommendationAuditEvent.EXCEPTION_CREATED, 6),
-        LookupStr(AwardRecommendationAuditEvent.EXCEPTION_UPDATED, 7),
-        LookupStr(AwardRecommendationAuditEvent.EXCEPTION_DELETED, 8),
-        LookupStr(AwardRecommendationAuditEvent.RISK_CREATED, 9),
-        LookupStr(AwardRecommendationAuditEvent.RISK_UPDATED, 10),
-        LookupStr(AwardRecommendationAuditEvent.RISK_DELETED, 11),
-        LookupStr(AwardRecommendationAuditEvent.APPLICATION_SUBMISSION_UPDATED, 12),
-        LookupStr(AwardRecommendationAuditEvent.REVIEW_CREATED, 13),
-        LookupStr(AwardRecommendationAuditEvent.REVIEW_UPDATED, 14),
-        LookupStr(AwardRecommendationAuditEvent.REVIEW_DELETED, 15),
-        LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_SUBMISSION_UPDATED, 16),
-        LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_DELETED, 17),
-    ]
-)
-
 PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
     [
         LookupStr(Privilege.MANAGE_ORG_MEMBERS, 1),
@@ -343,17 +257,8 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.VIEW_ORG_SAVED_OPPORTUNITIES, 25),
         LookupStr(Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES, 26),
         LookupStr(Privilege.INTERNAL_WORKFLOW_EVENT_SEND, 27),
-        LookupStr(Privilege.VIEW_AWARD_RECOMMENDATION, 28),
-        LookupStr(Privilege.CREATE_AWARD_RECOMMENDATION, 29),
-        LookupStr(Privilege.UPDATE_AWARD_RECOMMENDATION, 30),
-        LookupStr(Privilege.SUBMIT_AWARD_RECOMMENDATION, 31),
         LookupStr(Privilege.INTERNAL_S3_SCAN, 32),
         LookupStr(Privilege.MANAGE_TEST_USER_TOKEN, 33),
-        LookupStr(Privilege.PQC_REVIEWER, 34),
-        LookupStr(Privilege.GMS_REVIEWER, 35),
-        LookupStr(Privilege.FMO_REVIEWER, 36),
-        LookupStr(Privilege.GMO_REVIEWER, 37),
-        LookupStr(Privilege.FINAL_AWARD_REC_APPROVER, 38),
     ]
 )
 
@@ -400,7 +305,6 @@ WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
         LookupStr(WorkflowType.BASIC_TEST_WORKFLOW, 4),
         LookupStr(WorkflowType.NO_CONCURRENT_TEST_WORKFLOW, 5),
         LookupStr(WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW, 6),
-        LookupStr(WorkflowType.AWARD_RECOMMENDATION_REVIEW, 7),
     ]
 )
 
@@ -409,14 +313,6 @@ APPROVAL_TYPE_CONFIG: LookupConfig[ApprovalType] = LookupConfig(
         LookupStr(ApprovalType.INITIAL_PROTOTYPE_APPROVAL, 1),
         LookupStr(ApprovalType.PROGRAM_OFFICER_APPROVAL, 2),
         LookupStr(ApprovalType.BUDGET_OFFICER_APPROVAL, 3),
-        LookupStr(ApprovalType.PQC_APPROVAL, 4),
-        LookupStr(ApprovalType.GMS_APPROVAL, 5),
-        LookupStr(ApprovalType.FMO_APPROVAL, 6),
-        LookupStr(ApprovalType.GMO_APPROVAL, 7),
-        LookupStr(ApprovalType.AGENCY_APPROVAL, 8),
-        LookupStr(ApprovalType.DEPARTMENTAL_APPROVAL, 9),
-        LookupStr(ApprovalType.INTERAGENCY_APPROVAL, 10),
-        LookupStr(ApprovalType.EXECUTIVE_APPROVAL, 11),
     ]
 )
 
@@ -559,20 +455,6 @@ class LkFundingInstrument(ApiLookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> LkFundingInstrument:
         return LkFundingInstrument(
             funding_instrument_id=lookup.lookup_val, description=lookup.get_description()
-        )
-
-
-@LookupRegistry.register_lookup(AWARD_SELECTION_METHOD_CONFIG)
-class LkAwardSelectionMethod(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_award_selection_method"
-
-    award_selection_method_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkAwardSelectionMethod:
-        return LkAwardSelectionMethod(
-            award_selection_method_id=lookup.lookup_val, description=lookup.get_description()
         )
 
 
@@ -750,96 +632,6 @@ class LkApplicationStatus(ApiLookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> LkApplicationStatus:
         return LkApplicationStatus(
             application_status_id=lookup.lookup_val, description=lookup.get_description()
-        )
-
-
-@LookupRegistry.register_lookup(AWARD_RECOMMENDATION_ATTACHMENT_TYPE_CONFIG)
-class LkAwardRecommendationAttachmentType(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_award_recommendation_attachment_type"
-
-    award_recommendation_attachment_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationAttachmentType:
-        return LkAwardRecommendationAttachmentType(
-            award_recommendation_attachment_type_id=lookup.lookup_val,
-            description=lookup.get_description(),
-        )
-
-
-@LookupRegistry.register_lookup(AWARD_RECOMMENDATION_STATUS_CONFIG)
-class LkAwardRecommendationStatus(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_award_recommendation_status"
-
-    award_recommendation_status_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationStatus:
-        return LkAwardRecommendationStatus(
-            award_recommendation_status_id=lookup.lookup_val,
-            description=lookup.get_description(),
-        )
-
-
-@LookupRegistry.register_lookup(AWARD_RECOMMENDATION_TYPE_CONFIG)
-class LkAwardRecommendationType(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_award_recommendation_type"
-
-    award_recommendation_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationType:
-        return LkAwardRecommendationType(
-            award_recommendation_type_id=lookup.lookup_val,
-            description=lookup.get_description(),
-        )
-
-
-@LookupRegistry.register_lookup(AWARD_RECOMMENDATION_REVIEW_TYPE_CONFIG)
-class LkAwardRecommendationReviewType(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_award_recommendation_review_type"
-
-    award_recommendation_review_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationReviewType:
-        return LkAwardRecommendationReviewType(
-            award_recommendation_review_type_id=lookup.lookup_val,
-            description=lookup.get_description(),
-        )
-
-
-@LookupRegistry.register_lookup(AWARD_RECOMMENDATION_RISK_TYPE_CONFIG)
-class LkAwardRecommendationRiskType(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_award_recommendation_risk_type"
-
-    award_recommendation_risk_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationRiskType:
-        return LkAwardRecommendationRiskType(
-            award_recommendation_risk_type_id=lookup.lookup_val,
-            description=lookup.get_description(),
-        )
-
-
-@LookupRegistry.register_lookup(AWARD_RECOMMENDATION_AUDIT_EVENT_CONFIG)
-class LkAwardRecommendationAuditEvent(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_award_recommendation_audit_event"
-
-    award_recommendation_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationAuditEvent:
-        return LkAwardRecommendationAuditEvent(
-            award_recommendation_audit_event_id=lookup.lookup_val,
-            description=lookup.get_description(),
         )
 
 

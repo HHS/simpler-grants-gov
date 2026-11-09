@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc -p .",
-    "check:types": "tsc -p . --noEmit"
+    "check:types": "tsc -p . --noEmit",
+    "test": "vitest run"
   },
   "peerDependencies": {
     "@typespec/compiler": "^1.16.0",

@@ -52,21 +52,40 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`Form ${"form"} is linked in both ${"first"} and ${"second"}, but writes one xml-transform.json. Configure mapping-targets with only one of them.`,
       },
     },
-    "xml-wrappers-left-out": {
-      severity: "warning",
-      messages: {
-        default: paramMessage`${"form"}'s rules leave out ${"count"} element(s) that wrap fields without a field of their own, which rules keyed by the response's properties cannot write: ${"elements"}.`,
-      },
-    },
     "xml-root-namespace-missing": {
       severity: "error",
       messages: {
         default: paramMessage`${"name"} is the root element of mapping ${"mapping"}, so it needs an @Xml.ns naming a member of an @Xml.nsDeclarations enum: that enum lists the namespaces the document declares.`,
       },
     },
+    "xml-mapping-unsupported": {
+      severity: "error",
+      messages: {
+        default: paramMessage`The XML mapping can't write ${"element"} yet: it holds ${"reason"}.`,
+      },
+    },
+    "xml-transform-unsupported": {
+      severity: "warning",
+      messages: {
+        default: paramMessage`The XML transform rules leave out ${"element"}: it holds ${"reason"}, and the API writes an attachment only as a single file at the root.`,
+      },
+    },
+    "mapping-transform-unknown": {
+      severity: "error",
+      messages: {
+        default: paramMessage`@Mapping.transform names ${"name"}, which is not a member of an enum declared with @Mapping.transforms.`,
+      },
+    },
   },
   emitter: { options: EmitterOptionsSchema },
-  state: { xsd: {}, form: {} },
+  state: {
+    xsd: {},
+    form: {},
+    attachment: {},
+    transforms: {},
+    transform: {},
+    transformParams: {},
+  },
 } as const);
 
 export const { reportDiagnostic, stateKeys } = $lib;

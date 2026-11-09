@@ -111,15 +111,6 @@ class FundingInstrument(StrEnum):
     OTHER = "other"  # O
 
 
-class AwardSelectionMethod(StrEnum):
-    MERIT_REVIEW_RANKING_ONLY = "merit_review_ranking_only"
-    MERIT_REVIEW_RANKING_WITH_OTHER_FACTORS = "merit_review_ranking_with_other_factors"
-    FORMULA = "formula"
-    SINGLE_SOURCE = "single_source"
-    SOLE_SOURCE = "sole_source"
-    OTHER = "other"
-
-
 class AgencyDownloadFileType(StrEnum):
     XML = "xml"
     PDF = "pdf"
@@ -240,60 +231,6 @@ class ApplicationFormStatus(StrEnum):
     COMPLETE = "complete"
 
 
-class AwardRecommendationAttachmentType(StrEnum):
-    STANDARD_TERMS = "standard_terms"
-    STANDARD_CONDITIONS = "standard_conditions"
-    PROGRAM_TERMS = "program_terms"
-    PROGRAM_CONDITIONS = "program_conditions"
-    OTHER = "other"
-
-
-class AwardRecommendationStatus(StrEnum):
-    DRAFT = "draft"
-    IN_REVIEW = "in_review"
-    APPROVED = "approved"
-    SUBMITTED = "submitted"
-    REVISION_REQUESTED = "revision_requested"
-    IN_REVISION = "in_revision"
-
-
-class AwardRecommendationType(StrEnum):
-    RECOMMENDED_FOR_FUNDING = "recommended_for_funding"
-    RECOMMENDED_WITHOUT_FUNDING = "recommended_without_funding"
-    NOT_RECOMMENDED = "not_recommended"
-
-
-class AwardRecommendationReviewType(StrEnum):
-    MERIT_REVIEW = "merit_review"
-    APPLICATION_BUDGET_REVIEW = "application_budget_review"
-    PROGRAMMATIC_REVIEW = "programmatic_review"
-    BUSINESS_AND_RISK_REVIEW = "business_and_risk_review"
-
-
-class AwardRecommendationRiskType(StrEnum):
-    ADDITIONAL_MONITORING = "additional_monitoring"
-
-
-class AwardRecommendationAuditEvent(StrEnum):
-    AWARD_RECOMMENDATION_CREATED = "award_recommendation_created"
-    AWARD_RECOMMENDATION_UPDATED = "award_recommendation_updated"
-    AWARD_RECOMMENDATION_DELETED = "award_recommendation_deleted"
-    ATTACHMENT_CREATED = "attachment_created"
-    ATTACHMENT_UPDATED = "attachment_updated"
-    ATTACHMENT_DELETED = "attachment_deleted"
-    EXCEPTION_CREATED = "exception_created"
-    EXCEPTION_UPDATED = "exception_updated"
-    EXCEPTION_DELETED = "exception_deleted"
-    RISK_CREATED = "risk_created"
-    RISK_UPDATED = "risk_updated"
-    RISK_DELETED = "risk_deleted"
-    APPLICATION_SUBMISSION_UPDATED = "application_submission_updated"
-    AWARD_RECOMMENDATION_SUBMISSION_UPDATED = "award_recommendation_submission_updated"
-    REVIEW_CREATED = "review_created"
-    REVIEW_UPDATED = "review_updated"
-    REVIEW_DELETED = "review_deleted"
-
-
 class Privilege(StrEnum):
     MANAGE_ORG_MEMBERS = "manage_org_members"
     MANAGE_ORG_ADMIN_MEMBERS = "manage_org_admin_members"
@@ -320,21 +257,10 @@ class Privilege(StrEnum):
     VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
     INTERNAL_WORKFLOW_EVENT_SEND = "internal_workflow_event_send"
-    VIEW_AWARD_RECOMMENDATION = "view_award_recommendation"
-    CREATE_AWARD_RECOMMENDATION = "create_award_recommendation"
-    UPDATE_AWARD_RECOMMENDATION = "update_award_recommendation"
-    SUBMIT_AWARD_RECOMMENDATION = "submit_award_recommendation"
 
     # These privileges are associated with workflow approvals
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
-
-    # Award recommendation workflow privileges
-    PQC_REVIEWER = "pqc_reviewer"
-    GMS_REVIEWER = "gms_reviewer"
-    FMO_REVIEWER = "fmo_reviewer"
-    GMO_REVIEWER = "gmo_reviewer"
-    FINAL_AWARD_REC_APPROVER = "final_award_rec_approver"
 
     INTERNAL_S3_SCAN = "internal_s3_scan"
 
@@ -415,7 +341,6 @@ class WorkflowType(StrEnum):
     OPPORTUNITY_PUBLISH = "opportunity_publish"
     APPLICATION_SUBMISSION = "application_submission"
     INITIAL_PROTOTYPE = "initial_prototype"
-    AWARD_RECOMMENDATION_REVIEW = "award_recommendation_review"
 
     # Because of how we use the workflow type to find
     # the state machine and its configuration, we need
@@ -436,16 +361,6 @@ class ApprovalType(StrEnum):
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
-    # Award recommendation workflow approvals
-    PQC_APPROVAL = "pqc_approval"
-    GMS_APPROVAL = "gms_approval"
-    FMO_APPROVAL = "fmo_approval"
-    GMO_APPROVAL = "gmo_approval"
-    AGENCY_APPROVAL = "agency_approval"
-    DEPARTMENTAL_APPROVAL = "departmental_approval"
-    INTERAGENCY_APPROVAL = "interagency_approval"
-    EXECUTIVE_APPROVAL = "executive_approval"
-
 
 class ApprovalResponseType(StrEnum):
     APPROVED = "approved"
@@ -457,7 +372,6 @@ class WorkflowEntityType(StrEnum):
     OPPORTUNITY = "opportunity"
     APPLICATION = "application"
     APPLICATION_SUBMISSION = "application_submission"
-    AWARD_RECOMMENDATION = "award_recommendation"
 
 
 class WorkflowEventType(StrEnum):

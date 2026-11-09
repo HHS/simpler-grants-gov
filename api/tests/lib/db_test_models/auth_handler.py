@@ -48,13 +48,12 @@ class AuthHandler(
         ).scalar_one_or_none()
 
     def create_api_key(
-        self, user_id: uuid.UUID, key_name: str, key_id: uuid.UUID, key_id_hash: str
+        self, user_id: uuid.UUID, key_name: str, key_id_hash: str
     ) -> SharedUserApiKey:
         api_key = SharedUserApiKey(
             shared_api_key_id=uuid.uuid4(),
             shared_user_id=user_id,
             key_name=key_name,
-            key_id=key_id,
             key_id_hash=key_id_hash,
             is_active=True,
         )

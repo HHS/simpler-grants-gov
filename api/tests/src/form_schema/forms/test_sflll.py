@@ -273,6 +273,58 @@ def test_sflll_2_0_invalid_enums(minimal_valid_sflll_v2_0, field, value, sflll_v
     assert validation_issues[0].message.startswith(f"'{value}' is not one of")
 
 
+@pytest.mark.parametrize(
+    "field_path,zip_value",
+    [
+        # reporting_entity uses $defs/reporting_entity_awardee
+        (["reporting_entity", "applicant_reporting_entity", "address"], "12345678901"),
+        (["reporting_entity", "prime_reporting_entity", "address"], "12345678901"),
+        # lobbying_registrant address
+        (["lobbying_registrant", "address"], "12345678901"),
+    ],
+)
+def test_sflll_v2_0_zip_code_max_length(
+    minimal_valid_sflll_v2_0, sflll_v2_0, field_path, zip_value
+):
+    """zip_code exceeding 10 characters triggers maxLength error."""
+    data = minimal_valid_sflll_v2_0
+    target = data
+    for key in field_path[:-1]:
+        target = target.setdefault(key, {})
+    target[field_path[-1]] = {
+        "street1": "123 Main St",
+        "city": "Somecity",
+        "zip_code": zip_value,  # 11 chars — too long
+    }
+    issues = validate_json_schema_for_form(data, sflll_v2_0)
+    zip_path = "." + ".".join(field_path) + ".zip_code"
+    assert any(
+        i.type == "maxLength" and i.field == f"${zip_path}" for i in issues
+    ), f"Expected maxLength error for ${zip_path}, got: {issues}"
+
+
+def test_sflll_v2_0_zip_code_max_length_boundary(minimal_valid_sflll_v2_0, sflll_v2_0):
+    """zip_code of exactly 10 characters is valid."""
+    data = minimal_valid_sflll_v2_0
+    data.setdefault("lobbying_registrant", {})["address"] = {
+        "street1": "123 Main St",
+        "city": "Somecity",
+        "zip_code": "1234567890",  # exactly 10 chars
+    }
+    assert validate_json_schema_for_form(data, sflll_v2_0) == []
+
+
+def test_sflll_v2_0_zip_code_empty_valid(minimal_valid_sflll_v2_0, sflll_v2_0):
+    """Empty zip_code is valid — no minimum length for SF-LLL."""
+    data = minimal_valid_sflll_v2_0
+    data.setdefault("lobbying_registrant", {})["address"] = {
+        "street1": "123 Main St",
+        "city": "Somecity",
+        "zip_code": "",
+    }
+    assert validate_json_schema_for_form(data, sflll_v2_0) == []
+
+
 def _ui_field_types(ui_schema: list) -> dict:
     """Map each UI definition path to its type ("field" or "null"), walking nested sections."""
     field_types = {}

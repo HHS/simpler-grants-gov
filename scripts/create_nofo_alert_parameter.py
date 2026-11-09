@@ -1,4 +1,4 @@
-"""Create the fixed infra-dev email parameter without logging its private value."""
+"""Create the fixed NOFO email parameter without logging its private value."""
 
 import argparse
 import os
@@ -9,7 +9,6 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-PARAMETER = "/nofos/infra-dev/monitoring/alert-email"
 REGION = "us-east-1"
 SECRET = "NOFO_INFRA_DEV_ALERT_EMAIL"
 SAFE_ERROR_CODES = {
@@ -29,8 +28,9 @@ class SetupFailure(Exception):
     """Only fixed safe messages may leave the setup process."""
 
 
-def recipient():
-    value = os.environ.get(SECRET, "").strip()
+def recipient(environment="infra-dev"):
+    secret = SECRET if environment == "infra-dev" else "NOFO_PROD_ALERT_EMAIL"
+    value = os.environ.get(secret, "").strip()
     if not re.fullmatch(
         r"[^@\s\x00-\x1f\x7f]+@[^@\s\x00-\x1f\x7f]+\.[^@\s\x00-\x1f\x7f]+", value
     ):
@@ -40,19 +40,19 @@ def recipient():
     return value
 
 
-def parameter_payload(value):
+def parameter_payload(value, environment="infra-dev"):
     return {
-        "Name": PARAMETER,
+        "Name": f"/nofos/{environment}/monitoring/alert-email",
         "Value": value,
         "Type": "SecureString",
         "KeyId": "alias/aws/ssm",
         "Tier": "Standard",
         "Overwrite": False,
-        "Description": "Private NOFO infra-dev operational alert recipient",
+        "Description": f"Private NOFO {environment} operational alert recipient",
     }
 
 
-def create(value):
+def create(value, environment="infra-dev"):
     # Direct SDK call: no CLI/stdin parsing, subprocess arguments or private files.
     try:
         client = boto3.client(
@@ -64,7 +64,7 @@ def create(value):
                 retries={"total_max_attempts": 1, "mode": "standard"},
             ),
         )
-        client.put_parameter(**parameter_payload(value))
+        client.put_parameter(**parameter_payload(value, environment))
     except ClientError as error:
         code = error.response.get("Error", {}).get("Code", "")
         if code == "ParameterAlreadyExists":
@@ -73,7 +73,7 @@ def create(value):
             ) from None
         if code in ("AccessDenied", "AccessDeniedException", "UnauthorizedOperation"):
             raise SetupFailure(
-                "AWS denied parameter creation or encryption. Ask infrastructure support to check ssm:PutParameter and kms:Encrypt for the fixed dev parameter; no permissions were changed."
+                "AWS denied parameter creation or encryption. Ask infrastructure support to check ssm:PutParameter and kms:Encrypt for the fixed NOFO parameter; no permissions were changed."
             ) from None
         category = code if code in SAFE_ERROR_CODES else "unclassified"
         raise SetupFailure(
@@ -92,15 +92,16 @@ def create(value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--validate-only", action="store_true")
+    parser.add_argument("--environment", choices=("infra-dev", "prod"), default="infra-dev")
     args = parser.parse_args()
     try:
-        value = recipient()
+        value = recipient(args.environment)
         if args.validate_only:
             print("Private email input validated; no AWS call made.")
         else:
-            create(value)
+            create(value, args.environment)
             print(
-                "Created the encrypted infra-dev alert parameter. No subscription, notification or deployment was performed."
+                f"Created the encrypted {args.environment} alert parameter. No subscription, notification or deployment was performed."
             )
         return 0
     except SetupFailure as error:

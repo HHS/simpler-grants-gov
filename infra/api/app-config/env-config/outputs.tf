@@ -98,12 +98,12 @@ output "sqs_config" {
   value = local.sqs_config
 }
 
-output "workflow_service_config" {
+output "submission_consumer_config" {
   value = {
-    enable        = var.enable_workflow_service
-    cpu           = var.workflow_service_cpu
-    memory        = var.workflow_service_memory
-    desired_count = var.workflow_service_desired_count
+    enable        = var.enable_submission_consumer
+    cpu           = var.submission_consumer_cpu
+    memory        = var.submission_consumer_memory
+    desired_count = var.submission_consumer_desired_count
   }
 }
 

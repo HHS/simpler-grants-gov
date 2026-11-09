@@ -65,7 +65,7 @@ evaluation before rate limiting. Each rule has a CloudWatch counter and disables
 its own sampled requests. Existing ACL/managed-group sampling and WAF/ALB logs
 are unchanged: this is not a logging-redaction or privacy-control change.
 
-The infra-dev environment remains in Count mode with emergency blocking off.
+The normal infra-dev setting is Count mode with emergency blocking off.
 Correcting the path scope does not enable enforcement or public uploads. Merging
 service-module changes can automatically deploy dev; confirm the actual path
 matchers and unchanged Count actions afterward. Live blocking/restoration still
@@ -128,13 +128,14 @@ revision-aware deployment path may be used when required by the environment,
 but neither is required for this dev-only procedure.
 
 For each activation or restoration stage, update `pdf_readability_waf` in
-`infra/nofos/app-config/infra-dev.tf` **and** the matching expected mode in
-`infra/nofos/app-config/tests/pdf_readability_waf.tftest.hcl`. The test must
-continue to assert the rate threshold, dev-only opt-in and every other
-environment's null configuration. Update only the temporary mode expectation:
-rate `block` for rate and emergency stages, and emergency `true` only for the
-emergency stage. The final restoration change must return both the configuration
-and test expectation to rate `count` and emergency `false`.
+`infra/nofos/app-config/infra-dev.tf` **and** every Terraform test that asserts
+the WAF mode: currently `tests/pdf_readability_waf.tftest.hcl` and
+`tests/pdf_readability_monitoring.tftest.hcl`. The tests must continue to assert
+the rate threshold, dev-only opt-in, private notification routing and every
+other environment's null configuration. Update only the temporary mode
+expectation: rate `block` for rate and emergency stages, and emergency `true`
+only for the emergency stage. The final restoration change must return both the
+configuration and test expectations to rate `count` and emergency `false`.
 
 Keep the threshold at 10 and the window at 300 seconds. Do not edit shared
 modules, other environments, recipients, IAM or managed rules. Inspect the
@@ -226,6 +227,40 @@ emergency blocking, unrelated-route availability and restoration have evidence.
 This does not complete runtime cleanup, privacy review, production monitoring
 or public-release approval.
 
+## Bounded shared-IP check in infra-dev
+
+Schedule the dev window and identify the restoration operator before merging
+the temporary Block configuration, since merge can trigger a dev deployment.
+Use two independent clients behind one confirmed public egress IP. Keep the IP
+in restricted evidence. The test uses empty POSTs with uploads disabled. Before
+sending test traffic, verify in infra-dev Admin → Constance that the effective
+`HHS_NOFO_PDF_METRICS_PILOT_ENABLED` setting is false. Stop if it is enabled or
+the value cannot be verified. Use the page and response baselines as separate
+checks. Confirm the dev rate rule is Block at 10 requests per 300
+seconds, the emergency rule is Count, and GET on the checker, home page and
+`/health` has its expected baseline. Confirm access to rule-specific metrics
+and a reviewer and operator for restoring Count.
+
+After five quiet minutes on the test IP, alternate empty POST requests from
+the two clients to `/readability-checker/`. Use at most 10 per client, at least
+two seconds between requests, and pause 30 seconds after the first 12 combined
+requests to allow WAF time to evaluate the rate. Stop after observing a 429
+from each client, reaching the request ceiling, or five minutes from the first
+POST. Stop immediately on an unexpected response, ordinary-route regression,
+or loss of monitoring. Expect the disabled route's baseline rejection or a WAF
+429. Check the rate-rule BlockedRequests counter and confirm
+the home page and health endpoint still behave normally. A corroborated 429
+while each client stays at or below 10 requests demonstrates the shared budget.
+No block within the ceiling leaves the result inconclusive.
+
+Once Block mode is deployed, start restoration on every exit path, including a
+failed preflight, successful test, inconclusive result, abort or interruption.
+Restore the infra-dev rate rule to Count through a reviewed change and dev
+deployment. Verify both rules are back in Count and the checker and ordinary
+routes return their baseline responses. Record request counts, timing and
+results in #12568. Use the result alongside expected office traffic to choose
+a launch threshold.
+
 ## Emergency activation and restoration
 
 The implemented configuration path is to change `emergency_block` in the target
@@ -234,24 +269,33 @@ NOFO environment's `pdf_readability_waf` object, review/merge the change, and us
 it has an emergency rule. Review the plan; never apply a dev object to production
 or assume changing the application `version` selects infrastructure from a PR.
 
-Only someone authorized for the repository review/deployment path and its AWS
-role may activate it. Repository write access alone does not prove operational
-permissions. Record a named primary operator and fallback contact before launch.
-Activation through this full deployment path has no established emergency SLA;
-measure it in dev. If it is too slow, agree a separate expedited mechanism before
-launch. An approved console/API activation would require separately authorized
-AWS access and a procedure to reconcile Terraform so a later deployment does not
-silently undo an incident block.
+The SimplerNOFOs team owns alert triage and coordinates activation and
+restoration. The team agrees on primary and backup coverage internally. An
+operator authorized for the repository deployment path and its AWS role applies
+the change. Confirm that the primary operator and fallback have the required
+production access before launch.
+
+For planning, allow about 25 minutes for the deployment workflow and about an
+hour from merge to verified blocking. In the November 2 dev exercise, the
+workflow finished about 22 minutes after dispatch, and the scoped requests were
+verified blocked about 54 minutes after merge. Time for alert triage, preparing
+the change and review comes before merge and was outside the measurement. These
+estimates are based on one dev exercise. [Merged change](https://github.com/HHS/simpler-grants-gov/pull/13097) ·
+[Deployment](https://github.com/HHS/simpler-grants-gov/actions/runs/41469724583) ·
+[Verification](https://github.com/HHS/simpler-grants-gov/issues/13085#issuecomment-6581516804)
+
+If launch requires a faster block, agree on an expedited path before launch.
+A console or API change requires authorized AWS access and a way to reconcile
+the change in Terraform so a subsequent deployment preserves the block.
 
 For restoration, return `emergency_block` to false through the agreed path and
 verify all four current/legacy route forms and unrelated routes. Restore the
 pre-incident rate mode and keep the application pilot flag in its agreed state. Do not delete the rules
 or alter managed protections as a shortcut.
 
-Before this is a tested incident procedure, record the actual operator, fallback,
-activation mechanism, measured timing, notification channel, restricted evidence
-location, and links back to #12568 and the Builder safeguards/operations tickets.
-These are outstanding verification items, not completed by this document.
+Record confirmed production operator access, the fallback and escalation path,
+and the restricted evidence location in the operating handoff. Track those
+checks under [#12568](https://github.com/HHS/simpler-grants-gov/issues/12568).
 
 ## Remaining boundaries
 

@@ -49,6 +49,25 @@ class SetupTests(unittest.TestCase):
             self.assertEqual(status, 1)
             factory.assert_not_called()
 
+    def test_prod_uses_only_its_secret_and_fixed_create_only_target(self):
+        with patch.dict(os.environ, {setup.SECRET: EMAIL}, clear=True):
+            with self.assertRaises(setup.SetupFailure):
+                setup.recipient("prod")
+        with patch.dict(os.environ, {"NOFO_PROD_ALERT_EMAIL": EMAIL}, clear=True):
+            self.assertEqual(setup.recipient("prod"), EMAIL)
+        with patch.object(setup.boto3, "client") as factory:
+            setup.create(EMAIL, "prod")
+        payload = factory.return_value.put_parameter.call_args.kwargs
+        self.assertEqual(payload["Name"], "/nofos/prod/monitoring/alert-email")
+        self.assertEqual(payload["Type"], "SecureString")
+        self.assertIs(payload["Overwrite"], False)
+        dev_policy = (ROOT / "scripts/nofo_alert_setup_session_policy.json").read_text()
+        prod_policy = (ROOT / "scripts/nofo_prod_alert_setup_session_policy.json").read_text()
+        self.assertEqual(
+            json.loads(prod_policy),
+            json.loads(dev_policy.replace("061664787759", "315341936575").replace("infra-dev", "prod")),
+        )
+
     def test_creation_uses_fixed_sdk_request_and_disables_retries(self):
         status, _, factory = self.run_main(value=" " + EMAIL + " ")
         self.assertEqual(status, 0)

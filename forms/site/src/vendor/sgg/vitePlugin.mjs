@@ -45,6 +45,12 @@ const PREBUNDLE = [
   "lodash",
   "lodash/noop",
   "nanostores",
+  "shiki/core",
+  "shiki/engine/javascript",
+  "shiki/langs/json.mjs",
+  "shiki/langs/xml.mjs",
+  "shiki/langs/typespec.mjs",
+  "shiki/themes/github-light.mjs",
 ];
 
 const isBare = (source) =>

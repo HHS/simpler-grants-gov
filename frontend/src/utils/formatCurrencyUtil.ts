@@ -19,13 +19,6 @@ export const formatCurrencyString = (value?: string) => {
   return formatCurrency(parsedValue);
 };
 
-export const getNumericAmountFromString = (
-  value: string | null | undefined,
-): number => {
-  const raw = (value ?? "").replace(/[$,\s]/g, "");
-  return Number(raw) || 0;
-};
-
 /**
  * Strips non-numeric characters from a currency input while typing.
  * Matches the budget amount input behavior: digits, optional leading minus,

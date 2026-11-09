@@ -4,6 +4,8 @@ import "simpler-forms";
 import "#forms/index.tsp";
 import "#questions/person/index.tsp";
 
+import "./examples.tsp";
+
 using SimplerForms;
 
 namespace Forms.EPAKeyContacts;
@@ -22,12 +24,7 @@ namespace Forms.EPAKeyContacts;
   ombNumber: "2030-0020",
   expirationDate: "2029-02-28",
 })
-@example(#{
-  authorizedRepresentative: Questions.People.Examples.usContact,
-  payee: Questions.People.Examples.usContactNoEmail,
-  administrativeContact: Questions.People.Examples.usContact,
-  projectManager: Questions.People.Examples.internationalContact,
-})
+@example(Examples.form)
 model EPAKeyContacts {
   /** Original awards and amendments will be sent to this individual for review and acceptance, unless otherwise indicated. */
   authorizedRepresentative?: Questions.People.Person;

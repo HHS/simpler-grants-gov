@@ -343,8 +343,7 @@ export const InformationCard = ({
               <dd className="margin-right-1">
                 <span className="text-bold text-orange">
                   {applicationDetails.competition.closing_date}
-                </span>{" "}
-                (11:59pm ET)
+                </span>
               </dd>
             </div>
             {!is_open ? <SpecialInstructions /> : null}

@@ -95,7 +95,7 @@ def test_application_submissions_list_success_api_key_auth(
     response = client.post(
         f"/alpha/applications/{application.application_id}/submissions",
         json=request_data,
-        headers={"X-API-Key": api_key.key_id},
+        headers={"X-API-Key": api_key.raw_key},
     )
 
     assert response.status_code == 200

@@ -360,10 +360,10 @@ variable "ephemeral_write_volumes" {
   default     = []
 }
 
-variable "pinpoint_app_id" {
-  type        = string
-  description = "Pinpoint App ID"
-  default     = ""
+variable "enable_email_access" {
+  type        = bool
+  description = "Whether to grant the service's roles permission to send email through SES from hosted_zone"
+  default     = false
 }
 
 variable "hosted_zone" {

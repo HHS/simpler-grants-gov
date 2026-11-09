@@ -37,7 +37,6 @@ def test_get_local_users_200(client, db_session, enable_factory_create):
     assert user_with_nothing_resp["last_name"] is None
     assert user_with_nothing_resp["oauth_id"] is None
     assert user_with_nothing_resp["user_jwt"] is None
-    assert user_with_nothing_resp["user_api_key"] is None
 
     user_with_only_email_resp = user_map.get(str(user_with_only_email.user_id))
     assert user_with_only_email_resp is not None
@@ -48,7 +47,6 @@ def test_get_local_users_200(client, db_session, enable_factory_create):
         == user_with_only_email.linked_login_gov_external_user.external_user_id
     )
     assert user_with_only_email_resp["user_jwt"] is None
-    assert user_with_only_email_resp["user_api_key"] is None
 
     user_with_profile_resp = user_map.get(str(user_with_profile.user_id))
     assert user_with_profile_resp is not None
@@ -56,7 +54,6 @@ def test_get_local_users_200(client, db_session, enable_factory_create):
     assert user_with_profile_resp["last_name"] == user_with_profile.last_name
     assert user_with_profile_resp["oauth_id"] is None
     assert user_with_profile_resp["user_jwt"] is None
-    assert user_with_profile_resp["user_api_key"] is None
 
     user_with_api_key_resp = user_map.get(str(user_with_api_key.user_id))
     assert user_with_api_key_resp is not None
@@ -64,7 +61,6 @@ def test_get_local_users_200(client, db_session, enable_factory_create):
     assert user_with_api_key_resp["last_name"] is None
     assert user_with_api_key_resp["oauth_id"] is None
     assert user_with_api_key_resp["user_jwt"] is None
-    assert user_with_api_key_resp["user_api_key"] == user_with_api_key.api_keys[0].key_id
 
     user_with_jwt_key_resp = user_map.get(str(user_with_jwt_key.user_id))
     assert user_with_jwt_key_resp is not None
@@ -72,7 +68,6 @@ def test_get_local_users_200(client, db_session, enable_factory_create):
     assert user_with_jwt_key_resp["last_name"] is None
     assert user_with_jwt_key_resp["oauth_id"] is None
     assert user_with_jwt_key_resp["user_jwt"] is not None
-    assert user_with_jwt_key_resp["user_api_key"] is None
 
     user_with_everything_resp = user_map.get(str(user_with_everything.user_id))
     assert user_with_everything_resp is not None
@@ -83,7 +78,9 @@ def test_get_local_users_200(client, db_session, enable_factory_create):
         == user_with_everything.linked_login_gov_external_user.external_user_id
     )
     assert user_with_everything_resp["user_jwt"] is not None
-    assert user_with_everything_resp["user_api_key"] == user_with_everything.api_keys[0].key_id
+
+    # API keys are only stored as hashes, so the raw key can't be returned
+    assert all("user_api_key" not in user for user in users)
 
 
 def test_get_local_users_non_local_500(client, monkeypatch, caplog):
