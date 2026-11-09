@@ -47,9 +47,9 @@ class AbstractApiKeyHandler[USER_API_KEY: BaseUserApiKey](abc.ABC, metaclass=abc
         # Generate a unique key_id with collision detection
         key_id, key_id_hash = self._generate_unique_key_id(pepper)
 
-        # Create the new API key in our database first. Both the raw key and its
-        # hash are stored until the raw key column is dropped.
-        api_key = self.get_auth_handler().create_api_key(user_id, key_name, key_id, key_id_hash)
+        # Create the new API key in our database first. Only the hash is stored;
+        # the raw key goes to API Gateway and is returned to the caller once.
+        api_key = self.get_auth_handler().create_api_key(user_id, key_name, key_id_hash)
 
         # Import the API key to AWS API Gateway (it needs the raw key)
         self._import_api_key_to_aws_gateway(api_key, key_id)

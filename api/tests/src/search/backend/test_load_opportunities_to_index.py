@@ -328,6 +328,29 @@ class TestLoadOpportunitiesToIndexIncrementalRefresh(BaseTestClass):
         ).one_or_none()
         assert remaining is not None
 
+    def test_doc_count_tracks_total_hits_past_default_cap(
+        self,
+        enable_factory_create,
+        monkeypatch,
+        search_client,
+        load_opportunities_incremental,
+        seeded_index,
+        truncate_opportunities,
+    ):
+        """The doc count query must not be capped at OpenSearch's default 10,000 total hits."""
+        search_queries = []
+        original_search = search_client.search
+
+        def _capture_search(index_name, search_query, *args, **kwargs):
+            search_queries.append(search_query)
+            return original_search(index_name, search_query, *args, **kwargs)
+
+        monkeypatch.setattr(search_client, "search", _capture_search)
+
+        load_opportunities_incremental.run()
+
+        assert search_queries[-1] == {"size": 0, "track_total_hits": True}
+
 
 class TestLoadOpportunitiesToIndexIncrementalRefreshGuard(BaseTestClass):
     def test_incremental_raises_if_alias_missing(self, db_session, search_client):

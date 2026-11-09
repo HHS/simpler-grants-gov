@@ -3,6 +3,10 @@ import type { fieldDefinitionsSF424 } from "tests/e2e/apply/fixtures/sf424-field
 import playwrightEnv from "tests/e2e/playwright-env";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
+import {
+  xmlCurrency,
+  xmlYesNo,
+} from "tests/e2e/utils/submission/submission-field-utils";
 
 // Uploaded files validated by section locator in print view.
 const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
@@ -49,7 +53,7 @@ export const buildSF424HappyPathTestData = (
     applicant_city: `City ${shortSuffix}`,
     applicant_state: "AL: Alabama",
     applicant_country: "USA: UNITED STATES",
-    applicant_zip_code: "12345",
+    applicant_zip_code: "12345-6789",
     // Section 8e – Dept / Division
     department_name: `Dept ${shortSuffix}`,
     division_name: `Div ${shortSuffix}`,
@@ -130,4 +134,152 @@ export const SF424_OPPORTUNITY_DATA: PrintViewFormData = {
     certification_agree: "Yes",
   },
   buildTestData: buildSF424HappyPathTestData,
+  // What the submission zip spec verifies per field (XML element and/or PDF text).
+  // "SF424_4_0:" = root element prefix, "globLib:" = shared name/address elements.
+  // aor_signature, date_received and date_signed are system post-populated; the spec supplies their values.
+  submissionFields: {
+    submission_type: { xmlElement: "SF424_4_0:SubmissionType" },
+    application_type: { xmlElement: "SF424_4_0:ApplicationType" },
+    applicant_id: { xmlElement: "SF424_4_0:ApplicantID", verifyInPdf: true },
+    federal_entity_identifier: {
+      xmlElement: "SF424_4_0:FederalEntityIdentifier",
+      verifyInPdf: true,
+    },
+    federal_award_identifier: {
+      xmlElement: "SF424_4_0:FederalAwardIdentifier",
+      verifyInPdf: true,
+    },
+    organization_name: {
+      xmlElement: "SF424_4_0:OrganizationName",
+      verifyInPdf: true,
+    },
+    employer_taxpayer_identification_number: {
+      xmlElement: "SF424_4_0:EmployerTaxpayerIdentificationNumber",
+    },
+    applicant_street1: { xmlElement: "globLib:Street1", verifyInPdf: true },
+    applicant_street2: { xmlElement: "globLib:Street2" },
+    applicant_city: { xmlElement: "globLib:City", verifyInPdf: true },
+    applicant_state: { xmlElement: "globLib:State" },
+    applicant_zip_code: { xmlElement: "globLib:ZipPostalCode" },
+    applicant_country: { xmlElement: "globLib:Country" },
+    department_name: {
+      xmlElement: "SF424_4_0:DepartmentName",
+      verifyInPdf: true,
+    },
+    division_name: { xmlElement: "SF424_4_0:DivisionName", verifyInPdf: true },
+    contact_person_prefix: { xmlElement: "globLib:PrefixName" },
+    contact_person_first_name: {
+      xmlElement: "globLib:FirstName",
+      verifyInPdf: true,
+    },
+    contact_person_middle_name: { xmlElement: "globLib:MiddleName" },
+    contact_person_last_name: {
+      xmlElement: "globLib:LastName",
+      verifyInPdf: true,
+    },
+    contact_person_suffix: { xmlElement: "globLib:SuffixName" },
+    contact_person_title: { xmlElement: "SF424_4_0:Title", verifyInPdf: true },
+    organization_affiliation: {
+      xmlElement: "SF424_4_0:OrganizationAffiliation",
+      verifyInPdf: true,
+    },
+    phone_number: { xmlElement: "SF424_4_0:PhoneNumber" },
+    fax: { xmlElement: "SF424_4_0:Fax" },
+    email: { xmlElement: "SF424_4_0:Email", verifyInPdf: true },
+    applicant_type_code__combobox: {
+      xmlElement: "SF424_4_0:ApplicantTypeCode1",
+    },
+    applicant_type_other_specify: {
+      xmlElement: "SF424_4_0:ApplicantTypeOtherSpecify",
+      verifyInPdf: true,
+    },
+    agency_name: { xmlElement: "SF424_4_0:AgencyName", verifyInPdf: true },
+    assistance_listing_number: { xmlElement: "SF424_4_0:CFDANumber" },
+    assistance_listing_program_title: {
+      xmlElement: "SF424_4_0:CFDAProgramTitle",
+    },
+    funding_opportunity_number: {
+      xmlElement: "SF424_4_0:FundingOpportunityNumber",
+      verifyInPdf: true,
+    },
+    funding_opportunity_title: {
+      xmlElement: "SF424_4_0:FundingOpportunityTitle",
+    },
+    competition_identification_title: {
+      xmlElement: "SF424_4_0:CompetitionIdentificationTitle",
+    },
+    project_title: { xmlElement: "SF424_4_0:ProjectTitle", verifyInPdf: true },
+    congressional_district_applicant: {
+      xmlElement: "SF424_4_0:CongressionalDistrictApplicant",
+    },
+    congressional_district_program_project: {
+      xmlElement: "SF424_4_0:CongressionalDistrictProgramProject",
+    },
+    project_start_date: { xmlElement: "SF424_4_0:ProjectStartDate" },
+    project_end_date: { xmlElement: "SF424_4_0:ProjectEndDate" },
+    federal_estimated_funding: {
+      xmlElement: "SF424_4_0:FederalEstimatedFunding",
+      xmlTransform: xmlCurrency,
+    },
+    applicant_estimated_funding: {
+      xmlElement: "SF424_4_0:ApplicantEstimatedFunding",
+      xmlTransform: xmlCurrency,
+    },
+    state_estimated_funding: {
+      xmlElement: "SF424_4_0:StateEstimatedFunding",
+      xmlTransform: xmlCurrency,
+    },
+    local_estimated_funding: {
+      xmlElement: "SF424_4_0:LocalEstimatedFunding",
+      xmlTransform: xmlCurrency,
+    },
+    other_estimated_funding: {
+      xmlElement: "SF424_4_0:OtherEstimatedFunding",
+      xmlTransform: xmlCurrency,
+    },
+    program_income_estimated_funding: {
+      xmlElement: "SF424_4_0:ProgramIncomeEstimatedFunding",
+      xmlTransform: xmlCurrency,
+    },
+    application_subject_to: { xmlElement: "SF424_4_0:StateReview" },
+    state_review_available_date: {
+      xmlElement: "SF424_4_0:StateReviewAvailableDate",
+    },
+    delinquent_federal_debt: {
+      xmlElement: "SF424_4_0:DelinquentFederalDebt",
+      xmlTransform: xmlYesNo,
+    },
+    certification_agree: {
+      xmlElement: "SF424_4_0:CertificationAgree",
+      xmlTransform: xmlYesNo,
+    },
+    authorized_representative_prefix: { xmlElement: "globLib:PrefixName" },
+    authorized_representative_first_name: {
+      xmlElement: "globLib:FirstName",
+      verifyInPdf: true,
+    },
+    authorized_representative_middle_name: { xmlElement: "globLib:MiddleName" },
+    authorized_representative_last_name: {
+      xmlElement: "globLib:LastName",
+      verifyInPdf: true,
+    },
+    authorized_representative_suffix: { xmlElement: "globLib:SuffixName" },
+    authorized_representative_title: {
+      xmlElement: "SF424_4_0:AuthorizedRepresentativeTitle",
+      verifyInPdf: true,
+    },
+    authorized_representative_phone_number: {
+      xmlElement: "SF424_4_0:AuthorizedRepresentativePhoneNumber",
+    },
+    authorized_representative_fax: {
+      xmlElement: "SF424_4_0:AuthorizedRepresentativeFax",
+    },
+    authorized_representative_email: {
+      xmlElement: "SF424_4_0:AuthorizedRepresentativeEmail",
+      verifyInPdf: true,
+    },
+    aor_signature: { xmlElement: "SF424_4_0:AORSignature", verifyInPdf: true },
+    date_received: { xmlElement: "SF424_4_0:DateReceived" },
+    date_signed: { xmlElement: "SF424_4_0:DateSigned" },
+  },
 };

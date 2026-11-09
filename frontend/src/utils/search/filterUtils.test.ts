@@ -338,8 +338,8 @@ describe("agenciesToNestedFilterOptions", () => {
         agency_id: 1,
       },
       {
-        agency_code: "AR-TEST",
-        agency_name: "Award Recommendation Test Agency",
+        agency_code: "AT-TEST",
+        agency_name: "Alpha Test Agency",
         top_level_agency: null,
         agency_id: 2,
       },
@@ -352,9 +352,9 @@ describe("agenciesToNestedFilterOptions", () => {
         value: "DOCNIST",
       },
       {
-        id: "AR-TEST",
-        label: "Award Recommendation Test Agency",
-        value: "AR-TEST",
+        id: "AT-TEST",
+        label: "Alpha Test Agency",
+        value: "AT-TEST",
       },
     ]);
     expect(consoleError).not.toHaveBeenCalled();
@@ -423,8 +423,8 @@ describe("agenciesToSortedAndNestedFilterOptions", () => {
         agency_id: 1,
       },
       {
-        agency_code: "AR-TEST",
-        agency_name: "Award Recommendation Test Agency",
+        agency_code: "AT-TEST",
+        agency_name: "Alpha Test Agency",
         top_level_agency: null,
         agency_id: 3,
       },
@@ -438,9 +438,9 @@ describe("agenciesToSortedAndNestedFilterOptions", () => {
 
     expect(result).toEqual([
       {
-        id: "AR-TEST",
-        label: "Award Recommendation Test Agency",
-        value: "AR-TEST",
+        id: "AT-TEST",
+        label: "Alpha Test Agency",
+        value: "AT-TEST",
       },
       {
         id: "MOCKTRASH",

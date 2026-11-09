@@ -1,9 +1,11 @@
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
 import type { JsonSchema } from "@jsonforms/core";
 import { processFormSchema } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { unadaptableScopes } from "../vendor/sgg/jsonFormsUiSchema";
-import { loadFormSpec, type FormSpec } from "./formSpec";
+import { CANONICAL_DIR, loadFormSpec, type FormSpec } from "./formSpec";
 import { createAjv } from "./validation";
 
 type UiNode = {
@@ -57,6 +59,52 @@ describe.each([
 
   it("inlines every $ref", () => {
     expect(JSON.stringify(spec.schema)).not.toContain('"$ref"');
+  });
+
+  it("preserves each emitted artifact's full content", async () => {
+    for (const file of spec.schemas.filter(
+      (entry) => entry.name !== "schema.json",
+    )) {
+      const directory =
+        file.name === "rule-schema.json"
+          ? path.resolve("../dist/sgg/forms", specId)
+          : path.join(CANONICAL_DIR, "forms", specId);
+      expect(file.code).toBe(
+        await readFile(path.join(directory, file.name), "utf8"),
+      );
+    }
+    const available = new Set(spec.schemas.map((entry) => entry.name));
+    for (const [name, explanation] of [
+      ["rule-schema.json", "rules schema"],
+      ["xml-mapping.json", "XML mapping"],
+      ["xml-transform.json", "XML transform"],
+    ]) {
+      expect(
+        spec.absentSchemas.some((note) => note.includes(explanation)),
+      ).toBe(!available.has(name));
+    }
+  });
+
+  it("shows exactly the form-local TypeSpec files at the immutable build commit", async () => {
+    const folder = path.resolve("../specs/forms", specId);
+    const names = (await readdir(folder, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".tsp"))
+      .map((entry) => entry.name);
+    expect(spec.sources.map((entry) => entry.name).sort()).toEqual(
+      names.sort(),
+    );
+    expect(spec.sources[0].name).toBe("index.tsp");
+    for (const file of spec.sources) {
+      expect(file.code).toBe(
+        await readFile(path.join(folder, file.name), "utf8"),
+      );
+      expect(file.sourceUrl).toMatch(
+        new RegExp(
+          `/blob/[a-f0-9]{40}/forms/specs/forms/${specId}/${file.name.replace(".", "\\.")}$`,
+        ),
+      );
+      expect(file.sourceUrl).not.toContain("/questions/");
+    }
   });
 
   it("resolves every UI scope against the rendered schema", () => {
@@ -124,12 +172,12 @@ describe.each([
   "rr-key-person-expanded",
   "nsf-key-person-expanded",
 ])("%s PD/PI profile", (specId) => {
-  type Data = { principal_investigator: { profile: Record<string, unknown> } };
+  type Data = { principal_investigator: Record<string, unknown> };
 
   it("rejects a profile with only an email", async () => {
     const { schema } = await loadFormSpec(specId);
     const data = {
-      principal_investigator: { profile: { email: "pi@example.invalid" } },
+      principal_investigator: { email: "pi@example.invalid" },
     };
     expect(createAjv().compile(schema)(data)).toBe(false);
   });
@@ -139,12 +187,12 @@ describe.each([
     async (field) => {
       const { schema, example } = await loadFormSpec(specId);
       const data = clone(example) as Data;
-      delete data.principal_investigator.profile[field];
+      delete data.principal_investigator[field];
       const validate = createAjv().compile(schema);
       expect(validate(data)).toBe(false);
       expect(validate.errors).toContainEqual(
         expect.objectContaining({
-          instancePath: "/principal_investigator/profile",
+          instancePath: "/principal_investigator",
           params: { missingProperty: field },
         }),
       );
@@ -154,7 +202,7 @@ describe.each([
   it("requires an email", async () => {
     const { schema, example } = await loadFormSpec(specId);
     const data = clone(example) as Data;
-    delete data.principal_investigator.profile.email;
+    delete data.principal_investigator.email;
     expect(createAjv().compile(schema)(data)).toBe(false);
   });
 });

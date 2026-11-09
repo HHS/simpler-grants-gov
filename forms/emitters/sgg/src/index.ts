@@ -7,5 +7,6 @@ export { $onEmit } from "./emitter.js";
 export const $decorators = {
   "SimplerForms.Sgg": {
     sync: d.$sync,
+    attachment: d.$attachment,
   },
 };

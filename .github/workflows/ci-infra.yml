@@ -8,15 +8,24 @@ on:
       - bin/**
       - infra/**
       - .github/scripts/nofo_history/**
+      - .github/scripts/nofo_readability/**
       - .github/workflows/**
   pull_request:
     paths:
       - bin/**
       - infra/**
       - .github/scripts/nofo_history/**
+      - .github/scripts/nofo_readability/**
       - .github/workflows/**
 
 jobs:
+  test-nofo-readability-runtime:
+    name: Test NOFO runtime verification helper
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run offline verification helper tests
+        run: python3 -m unittest discover -s .github/scripts/nofo_readability/tests -p 'test_*.py' -v
   test-nofo-history-preparation:
     name: Test NOFO history preparation helper
     runs-on: ubuntu-22.04

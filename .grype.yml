@@ -2,7 +2,7 @@ fail-on-severity: "medium"
 
 # List of vulnerabilities to ignore for the anchore scan
 # https://github.com/anchore/grype#specifying-matches-to-ignore
-# More info can be found in the docs/infra/vulnerability-management.md file
+# More info can be found in the documentation/infra/vulnerability-management.md file
 
 # Please add safelists in the following format to make it easier when checking
 # Package/module name: URL to vulnerability for checking updates
@@ -18,6 +18,22 @@ ignore:
   - fix-state: not-fixed
   - fix-state: wont-fix
   - fix-state: unknown
+
+  # PROPOSED temporary risk acceptance; do not merge without infra/security review.
+  # CPython socket.getaddrinfo host/port truncation; 3.14 backport is open.
+  # Scope: every consumer of this shared config, only Python 3.14.10 binaries.
+  # Issue: https://github.com/HHS/simpler-grants-gov/issues/13178
+  # Backport: https://github.com/python/cpython/pull/160926
+  # Owner and risk approver: pending assignment in #13178; required before merge.
+  # Proposed review-by: 2026-11-12 (not automatic expiry; recheck before merge).
+  # Remove after supported patched images are adopted and pass unsuppressed scans.
+  # Last checked: 2026-11-05
+  - vulnerability: CVE-2026-116566
+    reason: "Temporary Python 3.14.10 exception proposed in #13178; risk approval pending"
+    package:
+      name: python
+      version: "3.14.10"
+      type: binary
 
   # zipfile: bzip2/LZMA/Zstandard members pre-allocate memory from an
   # attacker-controlled size
@@ -78,3 +94,24 @@ ignore:
   # https://github.com/python/cpython/issues/157265
   # Last checked: 10/02/2026
   - vulnerability: CVE-2026-87910
+
+  # rustls 0.23.45 statically linked in the uv binary (/usr/bin/uv) from the python base image
+  # Fixed in rustls 0.23.46; uv bumped it on main (astral-sh/uv#22959) but no uv release ships it yet (latest 0.13.6)
+  # Remove once a uv release includes rustls >= 0.23.46 and UV_VERSION in api/docker-python-base is bumped
+  # Last checked: 10/28/2026
+  - vulnerability: GHSA-c8m5-c952-6cm4
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-h2v8-394m-p7vv
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-vp88-798v-h67f
+    package:
+      name: rustls
+      type: rust-crate
+  - vulnerability: GHSA-w44r-93j7-qv28
+    package:
+      name: rustls
+      type: rust-crate

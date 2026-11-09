@@ -83,7 +83,7 @@ def create_internal_user_with_api_key(
     )
 
     api_key = UserApiKeyFactory.create(user=user)
-    return user, api_key.key_id
+    return user, api_key.raw_key
 
 
 def create_internal_user_with_jwt_and_api_key(
@@ -105,4 +105,4 @@ def create_internal_user_with_jwt_and_api_key(
     )
 
     api_key = UserApiKeyFactory.create(user=user)
-    return user, token, api_key.key_id
+    return user, token, api_key.raw_key

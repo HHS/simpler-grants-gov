@@ -12,11 +12,9 @@ on:
         # Enforced by bin/check-frontend-feature-flag-options in CI.
         options:
           - feature-apply-form-prototype-off
-          - feature-award-recommendation-off
           - feature-feature-flag-admin-off
           - feature-maintenance-banner-enabled
           - feature-maintenance-mode
-          - feature-opportunities-list-off
       environment:
         description: Target environment
         required: true
@@ -24,7 +22,6 @@ on:
         options:
           - dev
           - staging
-          - grantee1
           - infra-sgg2
           - infra-sgg3
           - infra-sgg1

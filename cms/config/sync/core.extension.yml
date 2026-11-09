@@ -1,0 +1,31 @@
+_core:
+  default_config_hash: 4GIX5Esnc_umpXUBj4IIocRX7Mt5fPhm4AgXfE3E56E
+module:
+  block: 0
+  breakpoint: 0
+  dblog: 0
+  dynamic_page_cache: 0
+  field: 0
+  field_ui: 0
+  file: 0
+  filter: 0
+  jsonapi: 0
+  link: 0
+  node: 0
+  options: 0
+  page_cache: 0
+  path: 0
+  path_alias: 0
+  pgsql: 0
+  serialization: 0
+  simpler_health: 0
+  system: 0
+  text: 0
+  toolbar: 0
+  user: 0
+  views: 10
+  minimal: 1000
+theme:
+  stark: 0
+  claro: 0
+profile: minimal

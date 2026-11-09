@@ -373,6 +373,10 @@ run-email-notifications: ## Send email notifications
 run-new-opportunity-notification: ## Queue the daily new opportunity email for opted-in users
 	$(FLASK_CMD) task new-opportunity-notification $(args)
 
+# The processor runs until stopped unless batches is set, then it exits after that many batches.
+# Send the emails queued in notification_queue, pass batches=N to stop after N batches.
+start-notification-processor:
+	$(PY_RUN_CMD) $(if $(batches),env NOTIFICATION_PROCESSOR_MAXIMUM_BATCH_COUNT=$(batches)) flask task process-notification-queue $(args)
 
 setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup
 

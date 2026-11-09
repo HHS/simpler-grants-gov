@@ -28,7 +28,14 @@
     "pretest:parity": "npm run parity:fetch",
     "test:parity": "vitest run",
     "check:parity": "tsc --noEmit",
-    "test:emitters": "npm test -w emitters/xml"
+    "test:emitters": "npm test -w emitters/xml -w emitters/sgg",
+    "format": "cd site && prettier --write --ignore-path ../.prettierignore ..",
+    "format:check": "cd site && prettier --check --ignore-path ../.prettierignore ..",
+    "format:typespec": "tsp format \"specs/**/*.tsp\" \"emitters/*/lib/*.tsp\"",
+    "format:typespec:check": "tsp format --check \"specs/**/*.tsp\" \"emitters/*/lib/*.tsp\"",
+    "lint": "node site/node_modules/eslint/bin/eslint.js emitters scripts parity",
+    "check:emitters": "npm run check:types --workspaces",
+    "check:scripts": "tsc -p tsconfig.scripts.json"
   },
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^16.0.3",

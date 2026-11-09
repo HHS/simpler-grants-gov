@@ -4,7 +4,8 @@ import "simpler-forms";
 import "#forms/index.tsp";
 import "#questions/research/index.tsp";
 
-import "./profile.tsp";
+import "./examples.tsp";
+import "./fragments.tsp";
 
 using SimplerForms;
 
@@ -24,19 +25,13 @@ namespace Forms.RRKeyPerson;
   ombNumber: "4040-0001",
   expirationDate: "2029-01-31",
 })
-@example(#{
-  principalInvestigator: #{
-    profile: Forms.RRKeyPerson.Examples.principalInvestigator,
-  },
-  seniorKeyPersons: #[#{ profile: Forms.RRKeyPerson.Examples.engineer }],
-  additionalProfiles: "c5e7a9b1-2d4f-4a6b-9c8d-4f6a8b0c2e44",
-})
+@example(Examples.form)
 model RRKeyPerson {
-  principalInvestigator: RRKeyPersonEntry;
+  principalInvestigator: RRKeyPersonProfile;
 
   @maxItems(7)
   @UI.widget(Rendering.Widget.CollapsibleFieldList)
-  seniorKeyPersons?: RRKeyPersonEntry[];
+  seniorKeyPersons?: RRKeyPersonProfile[];
 
   additionalProfiles?: Questions.Research.AdditionalProfiles;
   additionalBiographicalSketches?: Questions.Research.AdditionalBiographicalSketches;

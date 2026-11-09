@@ -7,7 +7,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { dereferenceFormSchema } from "../../site/src/lib/dereferenceSchema.ts";
-
 import type { Plan } from "./flatten/plan.ts";
 import type { Json } from "./model.ts";
 
@@ -88,6 +87,14 @@ export const hasXmlTransform = (specId: string): boolean =>
 /** The form's emitted XML transform rules, or undefined for a form that is not mapped. */
 export const loadXmlTransform = (specId: string): Json | undefined =>
   hasXmlTransform(specId) ? readJson(xmlTransformFile(specId)) : undefined;
+
+const xmlMappingFile = (specId: string) => formFile(specId, "xml-mapping.json");
+
+/** The form's emitted XML mapping, shaped like the XML, or undefined for one not mapped. */
+export const loadXmlMapping = (specId: string): Json | undefined =>
+  existsSync(xmlMappingFile(specId))
+    ? readJson(xmlMappingFile(specId))
+    : undefined;
 
 /** The form's `@GrantsGov.form` identity, as the SGG emitter wrote it, or null without one. */
 export const loadGrantsGovIdentity = (specId: string): Json =>

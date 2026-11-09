@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=24.19.0"
+    "node": ">=24.22.1"
   },
   "scripts": {
     "all-checks": "npm run lint && npm run ts:check && npm run format-check && npm run test && npm run build",
@@ -111,6 +111,7 @@
     "storybook": "^10.4.6",
     "style-loader": "^3.3.2",
     "typescript": "5.9.3",
+    "unpdf": "^1.8.1",
     "vite": "^7.0.0"
   },
   "overrides": {

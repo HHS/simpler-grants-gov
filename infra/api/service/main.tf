@@ -277,7 +277,7 @@ module "service" {
     }
   } : null
 
-  pinpoint_app_id       = local.pinpoint_app_id
+  enable_email_access   = local.notifications_config != null
   hosted_zone           = local.network_config.domain_config.hosted_zone
   ses_configuration_set = local.ses_configuration_set
 

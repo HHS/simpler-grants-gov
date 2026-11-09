@@ -25,12 +25,6 @@ class LocalUserTokenSchema(Schema):
             "example": "abc123",
         }
     )
-    user_api_key = fields.String(
-        metadata={
-            "description": "The API key of the user, can be used with our X-API-Key auth",
-            "example": "my_example_user_token",
-        }
-    )
 
 
 class LocalUserTokenResponseSchema(AbstractResponseSchema):
