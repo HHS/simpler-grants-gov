@@ -47,13 +47,16 @@ describe("logUserEvent", () => {
     });
   });
 
-  it("does not let properties override event or correlation_id", async () => {
+  it("does not let properties override system-owned log fields", async () => {
     const correlationId = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
     getCorrelationIdMock.mockResolvedValueOnce(correlationId);
 
     await logUserEvent({
       name: "example",
       properties: {
+        level: "error",
+        msg: "fake message",
+        time: 123,
         event: "fake",
         correlation_id: "fake-id",
         reason: "missing",

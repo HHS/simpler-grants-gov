@@ -84,7 +84,7 @@ The application refreshes tokens to extend the user's session without requiring 
 
 ## Observability
 
-Authentication lifecycle events go through the existing logging paths. Server-side events are logged with the Pino logger (`simplerLogger`). Client-side events are sent with `postUserEvent`, and `/api/events` logs them with the `correlation_id` from the cookie. Their `properties` are logged as top-level attributes, so fields such as `reason` are directly queryable.
+Authentication lifecycle events go through the existing logging paths. Server-side events are logged with the Pino logger (`simplerLogger`). Client-side events are sent with `postUserEvent`, and `/api/events` logs them with the `correlation_id` from the cookie. Their `properties` are logged as top-level attributes, so fields such as `reason` are directly queryable. Properties named `level`, `msg`, `time`, `event` or `correlation_id` are ignored.
 
 | Event                           | Source | Trigger                                                       | Additional fields                   |
 | ------------------------------- | ------ | ------------------------------------------------------------- | ----------------------------------- |
