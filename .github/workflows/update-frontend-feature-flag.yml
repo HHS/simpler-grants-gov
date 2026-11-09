@@ -15,7 +15,6 @@ on:
           - feature-feature-flag-admin-off
           - feature-maintenance-banner-enabled
           - feature-maintenance-mode
-          - feature-opportunities-list-off
       environment:
         description: Target environment
         required: true

@@ -65,7 +65,7 @@ evaluation before rate limiting. Each rule has a CloudWatch counter and disables
 its own sampled requests. Existing ACL/managed-group sampling and WAF/ALB logs
 are unchanged: this is not a logging-redaction or privacy-control change.
 
-The infra-dev environment remains in Count mode with emergency blocking off.
+The normal infra-dev setting is Count mode with emergency blocking off.
 Correcting the path scope does not enable enforcement or public uploads. Merging
 service-module changes can automatically deploy dev; confirm the actual path
 matchers and unchanged Count actions afterward. Live blocking/restoration still
@@ -226,6 +226,40 @@ Close the enforcement execution issue only after rate blocking, recovery,
 emergency blocking, unrelated-route availability and restoration have evidence.
 This does not complete runtime cleanup, privacy review, production monitoring
 or public-release approval.
+
+## Bounded shared-IP check in infra-dev
+
+Schedule the dev window and identify the restoration operator before merging
+the temporary Block configuration, since merge can trigger a dev deployment.
+Use two independent clients behind one confirmed public egress IP. Keep the IP
+in restricted evidence. The test uses empty POSTs with uploads disabled. Before
+sending test traffic, verify in infra-dev Admin → Constance that the effective
+`HHS_NOFO_PDF_METRICS_PILOT_ENABLED` setting is false. Stop if it is enabled or
+the value cannot be verified. Use the page and response baselines as separate
+checks. Confirm the dev rate rule is Block at 10 requests per 300
+seconds, the emergency rule is Count, and GET on the checker, home page and
+`/health` has its expected baseline. Confirm access to rule-specific metrics
+and a reviewer and operator for restoring Count.
+
+After five quiet minutes on the test IP, alternate empty POST requests from
+the two clients to `/readability-checker/`. Use at most 10 per client, at least
+two seconds between requests, and pause 30 seconds after the first 12 combined
+requests to allow WAF time to evaluate the rate. Stop after observing a 429
+from each client, reaching the request ceiling, or five minutes from the first
+POST. Stop immediately on an unexpected response, ordinary-route regression,
+or loss of monitoring. Expect the disabled route's baseline rejection or a WAF
+429. Check the rate-rule BlockedRequests counter and confirm
+the home page and health endpoint still behave normally. A corroborated 429
+while each client stays at or below 10 requests demonstrates the shared budget.
+No block within the ceiling leaves the result inconclusive.
+
+Once Block mode is deployed, start restoration on every exit path, including a
+failed preflight, successful test, inconclusive result, abort or interruption.
+Restore the infra-dev rate rule to Count through a reviewed change and dev
+deployment. Verify both rules are back in Count and the checker and ordinary
+routes return their baseline responses. Record request counts, timing and
+results in #12568. Use the result alongside expected office traffic to choose
+a launch threshold.
 
 ## Emergency activation and restoration
 
