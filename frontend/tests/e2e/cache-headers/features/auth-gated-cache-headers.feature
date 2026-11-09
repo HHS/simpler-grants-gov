@@ -18,3 +18,7 @@ Feature: Cache and index headers
   Scenario: Old saved and applications paths land on private workspace pages
     When I request "/applications" or "/saved-opportunities"
     Then I am redirected to a private, noindex workspace page
+
+  Scenario: Print pages are not stored
+    When I request a print page with an internal token and no session
+    Then the response is not stored

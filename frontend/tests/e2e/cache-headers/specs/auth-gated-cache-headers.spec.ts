@@ -5,6 +5,7 @@
  * @scenario Signed-out public pages keep their public cache policy
  * @scenario Signed-in public pages are not stored
  * @scenario Old saved and applications paths land on private workspace pages
+ * @scenario Print pages are not stored
  */
 
 import { APIResponse, expect, test } from "@playwright/test";
@@ -117,6 +118,22 @@ test.describe("public pages", () => {
         );
         expect(response.headers()["x-robots-tag"], path).toBeUndefined();
       }
+    },
+  );
+});
+
+test.describe("print pages", () => {
+  test(
+    "are not stored when requested with an internal token",
+    { tag: [FULL_REGRESSION] },
+    async ({ request }) => {
+      const response = await request.get(
+        "/print/application/00000000-0000-0000-0000-000000000000/form/00000000-0000-0000-0000-000000000000",
+        { headers: { "X-SGG-Internal-Token": "cache-header-test" } },
+      );
+      expect(response.headers()["cache-control"]).toBe(
+        "no-store, must-revalidate",
+      );
     },
   );
 });
