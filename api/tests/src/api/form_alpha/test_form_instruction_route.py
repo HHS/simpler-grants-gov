@@ -126,7 +126,7 @@ def test_form_instruction_upsert_wrong_privilege(
         f"/alpha/forms/{form_id}/form_instructions/{form_instruction_id}",
         data={"file": form_instruction_file},
         content_type="multipart/form-data",
-        headers={"X-API-Key": user_api_key.key_id},
+        headers={"X-API-Key": user_api_key.raw_key},
     )
 
     assert resp.status_code == 403

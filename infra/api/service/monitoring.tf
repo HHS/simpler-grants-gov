@@ -12,4 +12,12 @@ module "monitoring" {
   application_log_group                       = module.service.application_log_group
   email_alert_recipients                      = local.monitoring_config.email_alert_recipients
   incident_management_service_integration_url = local.incident_management_service_integration_url
+
+  # Skipped in temporary environments, which would otherwise alert on every preview deploy
+  notification_monitoring = local.is_temporary ? null : {
+    enqueue_enabled        = try(local.environment_config.scheduled_jobs["new-opportunity-notification"].state, "DISABLED") == "ENABLED"
+    cluster_name           = module.service.cluster_name
+    processor_service_name = local.processor_service_name
+    processor_log_group    = local.enable_processor_service ? aws_cloudwatch_log_group.processor[0].name : null
+  }
 }

@@ -1,4 +1,4 @@
-import OpportunitiesPagination from "src/app/[locale]/(base)/grantor/opportunities/_components/OpportunitiesPagination";
+import OpportunitiesPagination from "src/app/[locale]/(base)/workspace/saved-search-queries/_components/OpportunitiesPagination";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { fetchSavedSearchesPage } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { logger } from "src/services/logger/simplerLogger";

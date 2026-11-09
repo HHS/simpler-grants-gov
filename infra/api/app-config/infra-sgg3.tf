@@ -66,7 +66,6 @@ module "infra_sgg3_config" {
     RESET_EMAILS_WITHOUT_SENDING = "true"
 
     # PDF Generation
-    FRONTEND_URL             = "https://sgg3.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
@@ -81,5 +80,5 @@ module "infra_sgg3_config" {
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
 }

@@ -1,11 +1,11 @@
-import { compile, NodeHost } from "@typespec/compiler";
-import Ajv from "ajv/dist/2020.js";
-import { readdir } from "node:fs/promises";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { compile, NodeHost } from "@typespec/compiler";
+import Ajv from "ajv/dist/2020.js";
 import { beforeAll, describe, expect, it } from "vitest";
+
 import {
   generateXml,
   type AttachmentInfo,

@@ -17,7 +17,6 @@ def get_local_users(db_session: db.Session) -> list[dict]:
     users = (
         db_session.execute(
             select(User).options(
-                selectinload(User.api_keys),
                 selectinload(User.profile),
                 selectinload(User.linked_login_gov_external_user),
             )
@@ -41,7 +40,6 @@ def get_local_users(db_session: db.Session) -> list[dict]:
                     else None
                 ),
                 "user_jwt": _get_user_jwt(db_session, user),
-                "user_api_key": _get_user_api_key(user),
             }
         )
 
@@ -65,15 +63,3 @@ def _get_user_jwt(db_session: db.Session, user: User) -> str | None:
         return None
 
     return generate_jwt(user_token_session, user, datetime_util.utcnow(), user.email)
-
-
-def _get_user_api_key(user: User) -> str | None:
-    # This is really hacky and meant for local dev only
-    error_if_not_local()
-
-    # Arbitrarily pick any of the users API keys to return that are active
-    for api_key in user.api_keys:
-        if api_key.is_active:
-            return api_key.key_id
-
-    return None

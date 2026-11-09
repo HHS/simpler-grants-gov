@@ -136,7 +136,7 @@ def test_multi_auth_simpler_with_api_user_key(mini_app, enable_factory_create, d
     db_session.commit()
 
     resp = mini_app.test_client().get(
-        "/dummy_auth_endpoint_simpler", headers={"X-API-Key": api_key.key_id}
+        "/dummy_auth_endpoint_simpler", headers={"X-API-Key": api_key.raw_key}
     )
     assert resp.status_code == 200
     assert resp.json["message"] == "ok"
@@ -157,7 +157,7 @@ def test_multi_auth_simpler_precedence(mini_app, enable_factory_create, db_sessi
     # Send request with both authentication methods
     resp = mini_app.test_client().get(
         "/dummy_auth_endpoint_simpler",
-        headers={"X-SGG-Token": token, "X-API-Key": api_key.key_id},
+        headers={"X-SGG-Token": token, "X-API-Key": api_key.raw_key},
     )
 
     # Should use the JWT user since it's first in the MultiUserAuth definition

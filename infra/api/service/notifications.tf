@@ -21,7 +21,6 @@ locals {
     } : {},
   )
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
-  pinpoint_app_id        = local.notifications_config != null ? module.notifications[0].app_id : ""
   ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
 
 }
@@ -70,8 +69,8 @@ resource "aws_iam_policy" "external_ses_access" {
   })
 }
 
-# If the app has `enable_notifications` set to true, create a new email notification
-# AWS Pinpoint app for the service. A new app is created for all environments, including
+# If the app has `enable_notifications` set to true, create the email notification
+# sender and SES send policy for the service. One is created for all environments, including
 # temporary environments.
 module "notifications" {
   count  = local.notifications_config != null ? 1 : 0

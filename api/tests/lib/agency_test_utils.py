@@ -101,7 +101,7 @@ def create_user_in_agency_with_api_key(
     )
 
     api_key = UserApiKeyFactory.create(user=user)
-    return user, agency, api_key.key_id
+    return user, agency, api_key.raw_key
 
 
 def create_user_in_agency_with_jwt_and_api_key(
@@ -126,4 +126,4 @@ def create_user_in_agency_with_jwt_and_api_key(
     # Create API key for the user
     api_key = UserApiKeyFactory.create(user=user)
 
-    return user, agency, token, api_key.key_id
+    return user, agency, token, api_key.raw_key

@@ -1,0 +1,73 @@
+name: "CD - Form Library"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - forms/**
+      - .github/workflows/cd-form-library.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Queue all deployments, including multiple pending runs. Do not interrupt an upload.
+concurrency:
+  group: form-library-deploy
+  queue: max
+
+defaults:
+  run:
+    working-directory: ./forms/site
+
+jobs:
+  deploy:
+    name: Build and deploy the form library
+    if: |
+      github.ref == 'refs/heads/main'
+      && (github.repository == 'agilesix/simpler-grants-gov'
+        || github.repository == 'HHS/simpler-grants-gov')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: form-library
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            forms/package-lock.json
+            forms/site/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm --prefix .. ci --no-audit --no-fund
+          npm ci --no-audit --no-fund
+
+      # PR checks qualify the merge. CD only compiles, builds and deploys that revision.
+      - name: Compile form specs
+        run: npm --prefix .. run compile
+
+      # Astro displays DAT/XSD comparisons, so these are build inputs even without tests.
+      - name: Restore parity sources
+        uses: actions/cache@v5
+        with:
+          path: forms/.cache/sources
+          key: parity-sources-${{ hashFiles('forms/parity/sources/sources.lock.json') }}
+
+      - name: Fetch locked source inputs
+        run: npm --prefix .. run parity:fetch
+
+      - name: Build site
+        run: npx astro build
+
+      - name: Deploy Worker
+        run: npm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

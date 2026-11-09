@@ -236,6 +236,6 @@ def test_create_api_key_multiple_keys_same_user(
     assert "First API Key" in key_names
     assert "Second API Key" in key_names
 
-    # Verify they have different key_ids
-    key_ids = [key.key_id for key in api_keys]
-    assert len(set(key_ids)) == 2  # Ensure uniqueness
+    # Verify they are different keys
+    key_id_hashes = [key.key_id_hash for key in api_keys]
+    assert len(set(key_id_hashes)) == 2  # Ensure uniqueness

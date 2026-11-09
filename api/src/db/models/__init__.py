@@ -3,7 +3,6 @@ import logging
 from . import (
     agency_models,
     api_schema_table,
-    award_recommendation_models,
     competition_models,
     entity_models,
     extract_models,
@@ -25,7 +24,6 @@ metadata = api_schema_table.metadata
 __all__ = [
     "metadata",
     "opportunity_models",
-    "award_recommendation_models",
     "lookup_models",
     "agency_models",
     "user_models",

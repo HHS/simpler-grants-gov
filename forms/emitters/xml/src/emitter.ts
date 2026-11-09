@@ -1,7 +1,12 @@
-import type { EmitContext, Model } from "@typespec/compiler";
-import { emitFile, resolvePath } from "@typespec/compiler";
-import { mappingTargets, resolveForms } from "./simpler-forms.js";
+import {
+  emitFile,
+  resolvePath,
+  type EmitContext,
+  type Model,
+} from "@typespec/compiler";
+
 import { reportDiagnostic, type XmlEmitterOptions } from "./lib.js";
+import { mappingTargets, resolveForms } from "./simpler-forms.js";
 import { xmlMapping } from "./xml-mapping.js";
 import { xmlTransform } from "./xml-transform.js";
 

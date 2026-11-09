@@ -25,15 +25,34 @@ export const $categoryFilter = atom<FilterKey[]>([]);
 /** Attributes the tree is narrowed to: only differences in them count. */
 export const $attributeFilter = atom<Attribute[]>([]);
 export const $selectedFieldId = atom<string | null>(null);
-export const $sheetTab = atom<SheetTab>("comparison");
+export const $sheetTab = atom<SheetTab | null>(null);
 /** The cell chosen in the matrix; null shows the field's first difference. */
 export const $selectedCell = atom<CellRef | null>(null);
 export const $diffTypeFilter = atom<DiffType[]>([]);
 
-export const $visibleFields = computed(
+export const $selectedField = computed(
+  [$comparison, $selectedFieldId],
+  (comparison, id) =>
+    comparison.fields.find((field) => field.id === id) ?? null,
+);
+
+const $filteredFields = computed(
   [$comparison, $categoryFilter, $attributeFilter],
   (comparison, filter, attributes) =>
     visibleFields(comparison.fields, filter, attributes),
+);
+
+/** A linked field remains reachable when a saved filter no longer includes it. */
+export const $selectedFieldOutsideFilters = computed(
+  [$selectedField, $filteredFields],
+  (selected, filtered) => Boolean(selected && !filtered.includes(selected)),
+);
+export const $visibleFields = computed(
+  [$filteredFields, $selectedField],
+  (filtered, selected) =>
+    selected && !filtered.includes(selected)
+      ? [...filtered, selected]
+      : filtered,
 );
 
 /** The plan's tree, showing only the fields the filter shows. */
@@ -59,12 +78,6 @@ export const $attributeCounts = computed(
   (comparison, filter) => attributeCounts(comparison.fields, filter),
 );
 
-export const $selectedField = computed(
-  [$comparison, $selectedFieldId],
-  (comparison, id) =>
-    comparison.fields.find((field) => field.id === id) ?? null,
-);
-
 export const $summary = computed($selectedField, (field) =>
   field ? summarize(field) : "",
 );
@@ -80,9 +93,37 @@ export const $focusedCell = computed(
   },
 );
 
-export const $visibleDifferences = computed(
+const $filteredDifferences = computed(
   [$selectedField, $diffTypeFilter],
   (field, filter) => (field ? visibleDifferences(field, filter) : []),
+);
+const $selectedDifference = computed(
+  [$selectedField, $selectedCell],
+  (field, selected) =>
+    field && selected
+      ? (differences(field).find(
+          (entry) =>
+            entry.attribute === selected.attribute &&
+            entry.source === selected.source,
+        ) ?? null)
+      : null,
+);
+export const $selectedFindingOutsideFilters = computed(
+  [$filteredDifferences, $selectedDifference],
+  (filtered, selected) =>
+    Boolean(
+      selected &&
+      !filtered.some(
+        (entry) =>
+          entry.attribute === selected.attribute &&
+          entry.source === selected.source,
+      ),
+    ),
+);
+export const $visibleDifferences = computed(
+  [$filteredDifferences, $selectedDifference, $selectedFindingOutsideFilters],
+  (filtered, selected, outside) =>
+    selected && outside ? [...filtered, selected] : filtered,
 );
 
 /** Every difference the selected field has, whatever the type filter. */
@@ -119,7 +160,10 @@ export function openField(id: string) {
   $selectedFieldId.set(id);
 }
 
-export const closeSheet = () => $selectedFieldId.set(null);
+export const closeSheet = () => {
+  $selectedCell.set(null);
+  $sheetTab.set(null);
+};
 
 export const selectCell = (ref: CellRef) => $selectedCell.set(ref);
 

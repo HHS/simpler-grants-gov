@@ -4,6 +4,7 @@ import type {
   Program,
   Scalar,
 } from "@typespec/compiler";
+
 import { stateKeys } from "./lib.js";
 import { $transform, $transforms } from "./transforms.js";
 
@@ -34,11 +35,8 @@ export interface FormIdentity {
   expirationDate?: string;
 }
 
-const $form = (
-  ctx: DecoratorContext,
-  target: Model,
-  identity: FormIdentity,
-) => ctx.program.stateMap(stateKeys.form).set(target, identity);
+const $form = (ctx: DecoratorContext, target: Model, identity: FormIdentity) =>
+  ctx.program.stateMap(stateKeys.form).set(target, identity);
 
 /** Each form's Grants.gov identity, keyed by the model with `@Meta.form`. */
 export const formIdentities = (program: Program) =>

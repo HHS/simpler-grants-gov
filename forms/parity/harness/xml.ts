@@ -1,6 +1,8 @@
-import type { XmlTransformFields } from "./flatten/xmlTransform.ts";
 import { xmlMappingFields } from "./flatten/xmlMapping.ts";
-import { xmlTransformFields } from "./flatten/xmlTransform.ts";
+import {
+  xmlTransformFields,
+  type XmlTransformFields,
+} from "./flatten/xmlTransform.ts";
 import { loadXmlMapping, loadXmlTransform } from "./load.ts";
 
 /** The two formats `form-library-xml` writes a form's mapping to the XSD in. */

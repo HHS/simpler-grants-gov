@@ -8,8 +8,14 @@
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd",
   "dat_url": "https://apply07.grants.gov/apply/forms/sample/Key_Contacts_2_0-V2.0_F683.xls",
   "apps_count": 14470,
-  "status": "in_progress",
-  "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Individual", "SF-424 Mandatory"],
+  "status": "in_review",
+  "family": [
+    "SF-424",
+    "R&R",
+    "SF-424 Short",
+    "SF-424 Individual",
+    "SF-424 Mandatory"
+  ],
   "category": "Key Personnel & Contact Forms",
   "widgets": ["TextWidget", "SelectWidget", "FieldListWidget"],
   "sgg_form_id": "key_contacts",
@@ -27,6 +33,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "key-contacts-applicant-organization-name",
           "label": "Applicant Organization Name",
           "dat_field": "5",
           "required": true,
@@ -56,6 +63,7 @@
               "children": [
                 {
                   "kind": "field",
+                  "id": "key-contacts-project-role",
                   "label": "Project Role",
                   "dat_field": "7-01",
                   "required": true,
@@ -68,6 +76,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-title",
                   "label": "Title",
                   "dat_field": "7-08",
                   "required": false,
@@ -80,6 +89,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-organizational-affiliation",
                   "label": "Organizational Affiliation",
                   "dat_field": "7-09",
                   "required": false,
@@ -102,6 +112,7 @@
               "children": [
                 {
                   "kind": "field",
+                  "id": "key-contacts-prefix",
                   "label": "Prefix",
                   "dat_field": "7-03",
                   "required": false,
@@ -114,6 +125,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-first-name",
                   "label": "First Name",
                   "dat_field": "7-04",
                   "required": true,
@@ -126,6 +138,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-middle-name",
                   "label": "Middle Name",
                   "dat_field": "7-05",
                   "required": false,
@@ -138,6 +151,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-last-name",
                   "label": "Last Name",
                   "dat_field": "7-06",
                   "required": true,
@@ -150,6 +164,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-suffix",
                   "label": "Suffix",
                   "dat_field": "7-07",
                   "required": false,
@@ -172,6 +187,7 @@
               "children": [
                 {
                   "kind": "field",
+                  "id": "key-contacts-street1",
                   "label": "Street 1",
                   "dat_field": "7-10",
                   "required": true,
@@ -184,6 +200,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-street2",
                   "label": "Street 2",
                   "dat_field": "7-11",
                   "required": false,
@@ -196,6 +213,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-city",
                   "label": "City",
                   "dat_field": "7-12",
                   "required": true,
@@ -208,6 +226,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-county",
                   "label": "County/Parish",
                   "dat_field": "7-13",
                   "required": false,
@@ -220,6 +239,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-state",
                   "label": "State",
                   "dat_field": "7-14",
                   "required": "Conditional (when Country = 'USA')",
@@ -232,6 +252,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-province",
                   "label": "Province",
                   "dat_field": "7-15",
                   "required": false,
@@ -244,6 +265,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-country",
                   "label": "Country",
                   "dat_field": "7-16",
                   "required": true,
@@ -256,6 +278,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-zip-code",
                   "label": "Zip / Postal Code",
                   "dat_field": "7-17",
                   "required": false,
@@ -276,6 +299,7 @@
               "children": [
                 {
                   "kind": "field",
+                  "id": "key-contacts-phone",
                   "label": "Phone Number",
                   "dat_field": "7-18",
                   "required": true,
@@ -288,6 +312,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-fax",
                   "label": "Fax Number",
                   "dat_field": "7-19",
                   "required": false,
@@ -300,6 +325,7 @@
                 },
                 {
                   "kind": "field",
+                  "id": "key-contacts-email",
                   "label": "Email",
                   "dat_field": "7-20",
                   "required": true,
