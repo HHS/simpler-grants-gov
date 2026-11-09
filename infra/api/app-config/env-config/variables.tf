@@ -259,7 +259,7 @@ variable "database_newrelic_entity_guid" {
 
 variable "database_deletion_protection" {
   type        = bool
-  description = "Whether to enable deletion protection on the RDS cluster. When null, derives from whether the environment is grantee1."
+  description = "Whether to enable deletion protection on the RDS cluster."
   default     = true
 }
 
@@ -293,26 +293,26 @@ variable "sqs_max_receive_count" {
   default     = 3
 }
 
-variable "enable_workflow_service" {
-  description = "Enable workflow manager"
+variable "enable_submission_consumer" {
+  description = "Enable submission_consumer"
   type        = bool
   default     = false
 }
 
-variable "workflow_service_cpu" {
-  description = "CPU units for the workflow ECS task"
+variable "submission_consumer_cpu" {
+  description = "CPU units for the submission consumer task"
   type        = number
   default     = 1024
 }
 
-variable "workflow_service_memory" {
-  description = "Memory in MiB for the workflow ECS task"
+variable "submission_consumer_memory" {
+  description = "Memory in MiB for the submission consumer task"
   type        = number
   default     = 2048
 }
 
-variable "workflow_service_desired_count" {
-  description = "Workflow services counter count"
+variable "submission_consumer_desired_count" {
+  description = "Submission consumer counter count"
   type        = number
   default     = 1
 }

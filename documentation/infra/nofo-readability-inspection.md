@@ -1,4 +1,4 @@
-# Inspect the Readability Calculator in infra-dev
+# Inspect the Readability Calculator in dev and production
 
 Work for [#12568](https://github.com/HHS/simpler-grants-gov/issues/12568).
 This manual workflow collects a configuration snapshot and recent metric-presence
@@ -33,20 +33,41 @@ policies, permission boundaries or deployed role differences may deny a read;
 the result should identify that specific gap rather than assume a new operator
 or broader permission is necessary.
 
+## Production readiness snapshot
+
+Select **Inspect Readability Calculator production** and run it from **main**.
+This workflow uses the production account and the fixed NOFO production service
+in the same region. It uses the same read-only operation allowlist and sanitized
+report as the dev inspection. Keep public uploads disabled. Check the public
+route or admin setting separately because the workflow does not read Constance.
+
+Missing calculator rules, alarms, dashboard or subscriptions may reflect an
+incomplete rollout. Review each check independently. Subscription counts and
+pending status establish routing observations only. Verify delivery separately
+through an approved production notification test.
+
 ## What the summary contains
 
 | Check | Selected observations | What it does not establish |
 | --- | --- | --- |
 | Account/service | Expected-account match, desired/running/pending task counts and ECS Exec setting | Access to run commands, health of every request or public enablement |
 | Running tasks | Image version tags and task-definition revisions actually referenced by running tasks; selected recording/retention environment settings; user/root-filesystem/capability/tmpfs declarations | Database-stored Constance flags, effective mounted storage, parser containment or successful cleanup |
+| Load balancer | Whether the associated load balancer’s live idle timeout matches the Terraform declaration | A total upload deadline or a buffering guarantee |
 | WAF | ACL association discovered through the service's target group; pilot rule modes, priorities, threshold/window and IP aggregation; metrics/sampling settings | Exact request matching, actual throttling, emergency block timing or live protection |
 | Dashboard/alarms | Dashboard widget count; four expected alarm states, thresholds, notification settings and destination counts | Correct rendering, valid threshold selection, recipient identity or delivery |
 | Subscriptions | Email/HTTPS/other subscription counts and pending-confirmation count for the fixed NOFO monitoring topic | That the intended inbox is subscribed, messages arrive or someone responds |
-| Metrics | Datapoint counts in the last hour for ECS CPU/memory and WAF pilot Count/Block series using the observed ACL metric name | Zero traffic when data is absent, full-upload latency, worker occupancy or alarm correctness |
+| Metrics | Datapoint counts in the last hour for ECS CPU/memory and WAF pilot Count/Block series using the observed ACL resource name and rule visibility metric names | Zero traffic when data is absent, full-upload latency, worker occupancy or alarm correctness |
 | Application log configuration | Retention and subscription-filter counts for the running containers' configured log groups | Content redaction, actual forwarding or infrastructure-wide logging coverage |
 
 The service's configured task-definition revision and the running revisions can
-differ during a deployment; both are reported. Unset environment values mean
+differ during a deployment; both are reported. The load balancer check publishes a comparison only. A difference or a failed
+read leaves the slow-upload preflight incomplete. Use approved restricted access
+if the exact value is needed to investigate a difference.
+
+Startup override indicators report the presence of an ECS command, entry point,
+Gunicorn argument override or environment file without disclosing values.
+Compare these indicators with the deployed image startup command and worker logs.
+Unset environment values mean
 **unset; application default not inspected**. No-expiration usage-record defaults
 are documented in Builder; this workflow does not query its database or search
 for scheduled cleanup jobs.
@@ -87,7 +108,7 @@ Initial email setup and actual subscription/delivery testing remain separate;
 this workflow does not subscribe an address or notify anyone. Slack/New Relic
 integration is deferred under
 [#12950](https://github.com/HHS/simpler-grants-gov/issues/12950).
-Production inspection and public upload enablement are outside this workflow.
+Public upload enablement is outside the scope of both inspection workflows.
 Builder [#968](https://github.com/HHS/simpler-grants-pdf-builder/issues/968) remains
 the public-release decision tracker.
 

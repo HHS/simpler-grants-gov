@@ -24,7 +24,7 @@ def manager_api_key(db_session, enable_factory_create):
     factories.LinkRoleRoleTypeFactory.create(role=manager_role, role_type=RoleType.INTERNAL)
     factories.InternalUserRoleFactory.create(user=manager_user, role=manager_role)
 
-    return api_key.key_id
+    return api_key.raw_key
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ def test_get_e2e_token_forbidden_wrong_privilege(
 
     resp = client.post(
         E2E_TOKEN_URL,
-        headers={"X-API-Key": api_key.key_id},
+        headers={"X-API-Key": api_key.raw_key},
         json={"user_id": str(test_user.user_id)},
     )
 

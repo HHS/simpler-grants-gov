@@ -1,5 +1,4 @@
 # This module manages an SESv2 email identity.
-data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
@@ -8,13 +7,13 @@ locals {
 }
 
 # Verify email sender identity.
-# Docs: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-email-manage-verify.html
+# Docs: https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html
 resource "aws_sesv2_email_identity" "sender_domain" {
   email_identity         = var.domain_name
   configuration_set_name = aws_sesv2_configuration_set.email.configuration_set_name
 }
 
-# The configuration set applied to messages that is sent through this email channel.
+# The configuration set applied to messages sent from this identity.
 resource "aws_sesv2_configuration_set" "email" {
   configuration_set_name = local.dash_domain
 

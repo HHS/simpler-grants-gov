@@ -93,7 +93,7 @@ runs:
       env:
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
       run: |
-        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" && $PLAYWRIGHT_TARGET_ENV != "grantor1" && $PLAYWRIGHT_TARGET_ENV != "grantor2" && $PLAYWRIGHT_TARGET_ENV != "grantee1" ]]; then echo "invalid e2e test target provided" && exit 1; fi
+        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" && $PLAYWRIGHT_TARGET_ENV != "grantor1" && $PLAYWRIGHT_TARGET_ENV != "grantor2" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
       uses: actions/checkout@v6
@@ -152,9 +152,6 @@ runs:
         elif [[ ${{ inputs.target }} = "grantor2" ]]; then
           echo "base_url=https://grantor2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
           echo "api_url=https://api.grantor2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
-        elif [[ ${{ inputs.target }} = "grantee1" ]]; then
-          echo "base_url=https://grantee1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
-          echo "api_url=https://api.grantee1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
         fi
 
     # Playwright names its blob report after the shard number alone, so a run that

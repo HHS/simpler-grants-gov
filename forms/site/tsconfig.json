@@ -4,7 +4,8 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
-      "@parity/*": ["../parity/*"]
+      "@parity/*": ["../parity/*"],
+      "@xml/*": ["../emitters/xml/src/runtime/*"]
     }
   }
 }

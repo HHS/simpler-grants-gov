@@ -35,3 +35,28 @@ export interface UpdateSavedOpportunityNotificationPreferenceApiResponse extends
 > {
   data: null;
 }
+
+export interface AllOpportunitiesNotificationPreferenceResponseData {
+  is_enabled: boolean;
+}
+
+export interface AllOpportunitiesNotificationPreferenceApiResponse extends Omit<
+  APIResponse,
+  "data"
+> {
+  data: AllOpportunitiesNotificationPreferenceResponseData;
+}
+
+export interface UpdateAllOpportunitiesNotificationPreferenceBody extends Record<
+  string,
+  unknown
+> {
+  is_enabled: boolean;
+}
+
+export interface UpdateAllOpportunitiesNotificationPreferenceApiResponse extends Omit<
+  APIResponse,
+  "data"
+> {
+  data: null;
+}

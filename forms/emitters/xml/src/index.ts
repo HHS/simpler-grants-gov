@@ -1,9 +1,22 @@
-import type { DecoratorContext, Model, Program } from "@typespec/compiler";
+import type {
+  DecoratorContext,
+  Model,
+  Program,
+  Scalar,
+} from "@typespec/compiler";
+
 import { stateKeys } from "./lib.js";
+import { $transform, $transforms } from "./transforms.js";
 
 export { $lib } from "./lib.js";
 export { $onEmit } from "./emitter.js";
-export { xmlTransform, type XmlTransformRules } from "./xml-transform.js";
+export { transformOf, transformParamsOf } from "./transforms.js";
+export {
+  xmlTransform,
+  xmlTransformGaps,
+  type XmlTransformGap,
+  type XmlTransformRules,
+} from "./xml-transform.js";
 
 export const $xsd = (ctx: DecoratorContext, target: Model, url: string) =>
   ctx.program.stateMap(stateKeys.xsd).set(target, url);
@@ -22,16 +35,18 @@ export interface FormIdentity {
   expirationDate?: string;
 }
 
-const $form = (
-  ctx: DecoratorContext,
-  target: Model,
-  identity: FormIdentity,
-) => ctx.program.stateMap(stateKeys.form).set(target, identity);
+const $form = (ctx: DecoratorContext, target: Model, identity: FormIdentity) =>
+  ctx.program.stateMap(stateKeys.form).set(target, identity);
 
 /** Each form's Grants.gov identity, keyed by the model with `@Meta.form`. */
 export const formIdentities = (program: Program) =>
   program.stateMap(stateKeys.form) as Map<Model, FormIdentity>;
 
+const $attachment = (ctx: DecoratorContext, target: Scalar) =>
+  ctx.program.stateSet(stateKeys.attachment).add(target);
+
 export const $decorators = {
-  GrantsGov: { xsd: $xsd, form: $form },
+  GrantsGov: { xsd: $xsd, form: $form, attachment: $attachment },
+  // TODO(agilesix/simpler-forms#21): move to simpler-forms with `lib/mapping.tsp`.
+  "SimplerForms.Mapping": { transforms: $transforms, transform: $transform },
 };

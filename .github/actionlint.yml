@@ -1,4 +1,10 @@
 paths:
+  # GitHub supports queued pending runs; actionlint 1.7.12 does not recognize this key yet.
+  # Remove this compatibility exception when actionlint supports concurrency.queue.
+  # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
+  .github/workflows/cd-form-library.yml:
+    ignore:
+      - '^unexpected key "queue" for "concurrency" section\.'
   # actionlint doesn't know how to handle the json inside of this file
   .github/workflows/send-slack-notification.yml:
     ignore:

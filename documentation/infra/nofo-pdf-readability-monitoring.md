@@ -103,17 +103,22 @@ alarms. Production, other NOFO environments, and other services remain opted
 out. New pilot alarm actions start disabled; no email address or incident
 integration is invented. Existing generic alarm behavior is unchanged.
 
-AWS/WAFV2's `WebACL` dimension uses the ACL's **visibility metric name**, not
-its resource name or ARN. The existing service module default is the shared
-`WAF_Common_Protections` label. A monitored NOFO environment explicitly sets a
-unique label (`nofos-infra-dev-waf`) and exports its actual value to monitoring.
-The two rule metric names are `NOFO-PDFReadability-EmergencyBlock` and
-`NOFO-PDFReadability-UploadRate`; `Region` is also specified.
+The published NOFO dev rule series uses the ACL resource name
+(`nofos-infra-dev-wafv2-web-acl`) for the `WebACL` dimension. Pass the service
+module's `waf_web_acl_name` output to monitoring. The visibility metric name
+(`nofos-infra-dev-waf`) is distinct and must not be substituted in these queries.
+The `Rule` dimension still uses each rule's visibility metric name:
+`NOFO-PDFReadability-EmergencyBlock` and `NOFO-PDFReadability-UploadRate`;
+`Region` is also specified.
 
-This changes the dev ACL's metric identity without changing WAF actions or
-priorities. Old metric history remains under the old label. Review and update
-any external dev dashboard/alarms using that label, and verify the published
-metric dimensions after deployment. Other services retain their existing label.
+Read-only inspection on October 29 recovered eight emergency-rule matches in
+New Relic for October 28, 19:45–19:50 UTC under the resource-name dimension.
+The previous visibility-name queries returned no datapoints. This correction
+changes inspection/dashboard/alarm queries, not WAF actions, thresholds, metric
+publication settings or recipients. After dev deployment, verify the published
+series and corrected alarm dimensions before testing blocking. A rate-based
+rule's CountedRequests represents over-limit matches, not every scoped POST.
+See #13082 and the broader readiness tracker #12568.
 
 ## Alarm definitions
 
@@ -245,3 +250,37 @@ Authenticated Builder saved readability history remains outside this pilot.
 References: [AWS WAF dimensions](https://docs.aws.amazon.com/waf/latest/developerguide/waf-metrics.html),
 [ECS service metrics](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/available-metrics.html),
 and [Builder release gate](https://github.com/HHS/simpler-grants-pdf-builder/issues/968).
+
+
+## Prepare the production email parameter
+
+Add the intended recipient as the private Actions secret `NOFO_PROD_ALERT_EMAIL`.
+After review and merge, manually run **Set up private NOFO production alert email**
+from **main**. It creates the encrypted `/nofos/prod/monitoring/alert-email`
+parameter in the production account. It refuses to overwrite an existing
+parameter. If one exists, confirm its configuration privately before proceeding.
+
+Creating the parameter is separate from deploying the subscription. Keep public
+uploads disabled and verify delivery before enabling calculator alarm actions.
+
+After the production parameter exists, deploy the reviewed NOFO production
+configuration. Check the Terraform plan for the NOFO subscription, dashboard,
+alarms and Count-mode WAF rules before applying. Confirm the subscription from
+the intended inbox. The subscription uses the shared NOFO production monitoring
+topic, so existing service alarms that publish to it can send email after
+confirmation even while calculator-specific alarm actions are disabled.
+
+
+## Verify production alarm and recovery delivery
+
+After the production subscription is confirmed, manually run **Test NOFO
+production alarm and recovery email** from **main**. It targets the fixed
+production monitoring topic and requires exactly one confirmed email route.
+The temporary alarm name includes the run and attempt. The workflow session
+can change only that temporary alarm and read the topic subscription status.
+
+Expect one labelled ALARM email and one labelled OK email. Confirm both in the
+inbox. The workflow verifies CloudWatch notification actions and deletes its
+owned temporary alarm, including a cleanup retry on failure or cancellation.
+Check deletion evidence before retrying a failed run. Public uploads remain
+disabled during this verification.

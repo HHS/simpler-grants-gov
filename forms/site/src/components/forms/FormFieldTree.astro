@@ -19,7 +19,10 @@ const { nodes, depth = 0 } = Astro.props;
   const { children, ...section } = node;
   const total = countFields(children);
   return (
-    <details class={depth ? "field-section field-section--nested" : "field-section"} open>
+    <details
+      class={depth ? "field-section field-section--nested" : "field-section"}
+      open
+    >
       <summary>
         <SectionSummary
           section={section}

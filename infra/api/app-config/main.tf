@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-sgg1"]
+  environments = ["dev", "staging", "prod", "training", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-sgg1"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -39,7 +39,7 @@ locals {
   # If either (domain name or hosted zone) is not set in an environment, notifications will not actually be enabled.
   #
   # If enabled:
-  # 1. Creates an AWS Pinpoint application
+  # 1. Creates an IAM policy for sending email through AWS SES
   # 2. Configures email notifications using AWS SES
   enable_notifications = true
 
@@ -50,7 +50,6 @@ locals {
   environment_configs = {
     dev      = module.dev_config
     staging  = module.staging_config
-    grantee1 = module.grantee1_config
     grantor1 = module.grantor1_config
     prod     = module.prod_config
     training = module.training_config
@@ -102,7 +101,6 @@ locals {
   account_names_by_environment = {
     shared         = "simpler-grants-gov"
     dev            = "simpler-grants-gov"
-    grantee1       = "simpler-grants-gov"
     grantor1       = "simpler-grants-gov"
     staging        = "simpler-grants-gov"
     prod           = "simpler-grants-gov"

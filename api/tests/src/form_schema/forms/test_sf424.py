@@ -27,7 +27,7 @@ def valid_json_v4_0():
             "city": "Exampleburg",
             "state": "NY: New York",
             "country": "USA: UNITED STATES",
-            "zip_code": "12345",
+            "zip_code": "12345-6789",  # 9+ chars required for US addresses
         },
         "contact_person": {
             "first_name": "Bob",
@@ -621,6 +621,33 @@ def test_sf424_v4_0_state_fields_valid_values(sf424_v4_0, valid_json_v4_0):
     assert validate_json_schema_for_form(data, sf424_v4_0) == []
 
     data = valid_json_v4_0 | {"state_application_id": ""}
+    assert validate_json_schema_for_form(data, sf424_v4_0) == []
+
+
+def test_sf424_v4_0_us_zip_code_min_length(sf424_v4_0, valid_json_v4_0):
+    """US zip_code shorter than 9 characters fails minLength."""
+    data = valid_json_v4_0 | {
+        "applicant": {
+            **valid_json_v4_0["applicant"],
+            "zip_code": "12345",  # 5 chars — too short for US
+        }
+    }
+    issues = validate_json_schema_for_form(data, sf424_v4_0)
+    assert len(issues) == 1
+    assert issues[0].type == "minLength"
+    assert issues[0].field == "$.applicant.zip_code"
+
+
+def test_sf424_v4_0_non_us_zip_code_any_length(sf424_v4_0, valid_json_v4_0):
+    """Non-US zip_code has no minimum length requirement."""
+    data = valid_json_v4_0 | {
+        "applicant": {
+            "street1": "1 Rue de la Paix",
+            "city": "Paris",
+            "country": "FRA: FRANCE",
+            "zip_code": "",  # empty is fine for non-US
+        }
+    }
     assert validate_json_schema_for_form(data, sf424_v4_0) == []
 
 

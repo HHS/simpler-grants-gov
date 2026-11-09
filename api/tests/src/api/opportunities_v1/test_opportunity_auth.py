@@ -108,7 +108,7 @@ def test_opportunity_search_with_inactive_api_user_key(client, enable_factory_cr
     response = client.post(
         "/v1/opportunities/search",
         json=get_search_request(),
-        headers={"X-API-Key": inactive_api_key.key_id},
+        headers={"X-API-Key": inactive_api_key.raw_key},
     )
 
     assert response.status_code == 401
@@ -124,7 +124,7 @@ def test_opportunity_search_csv_with_inactive_api_user_key(
     response = client.post(
         "/v1/opportunities/search/csv",
         json={},
-        headers={"X-API-Key": inactive_api_key.key_id},
+        headers={"X-API-Key": inactive_api_key.raw_key},
     )
 
     assert response.status_code == 401
@@ -139,7 +139,7 @@ def test_opportunity_get_with_inactive_api_user_key(client, enable_factory_creat
 
     response = client.get(
         f"/v1/opportunities/{opportunity.opportunity_id}",
-        headers={"X-API-Key": inactive_api_key.key_id},
+        headers={"X-API-Key": inactive_api_key.raw_key},
     )
 
     assert response.status_code == 401

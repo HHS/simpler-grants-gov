@@ -50,16 +50,12 @@ module "grantor1_config" {
 
   service_override_extra_environment_variables = {
 
-    ENABLE_WORKFLOW_ENDPOINTS             = 1
-    ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
-    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
-    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "true"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL             = "https://grantor1.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
@@ -71,5 +67,5 @@ module "grantor1_config" {
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
 }

@@ -1,10 +1,11 @@
 ---
 import { getCollection } from "astro:content";
-import Base from "../../layouts/Base.astro";
+
 import FormCatalog from "../../components/forms/FormCatalog";
-import type { FormSummary } from "../../stores/formFilters";
 import { TOTAL_APPS } from "../../content.config";
+import Base from "../../layouts/Base.astro";
 import { countFields } from "../../lib/planTree";
+import type { FormSummary } from "../../stores/formFilters";
 
 const forms = await getCollection("forms");
 const summaries: FormSummary[] = forms.map((f) => ({

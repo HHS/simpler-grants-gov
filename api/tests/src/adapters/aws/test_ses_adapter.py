@@ -59,6 +59,30 @@ def test_send_email_without_email_tags(ses_client, sent_email_tags):
     assert sent_email_tags[0].email_tags == {}
 
 
+def test_send_email_with_trace_id(ses_client, sent_email_tags):
+    """The trace ID is sent to SES as a custom header"""
+    send_email(
+        to_address="recipient@example.com",
+        subject="Test Subject",
+        message="This is a test email message",
+        ses_client=ses_client,
+        trace_id="test-trace-id",
+    )
+
+    assert sent_email_tags[0].headers == {"X-Simpler-Trace-Id": "test-trace-id"}
+
+
+def test_send_email_without_trace_id(ses_client, sent_email_tags):
+    send_email(
+        to_address="recipient@example.com",
+        subject="Test Subject",
+        message="This is a test email message",
+        ses_client=ses_client,
+    )
+
+    assert sent_email_tags[0].headers == {}
+
+
 def test_send_email_html_special_characters(ses_client):
     """Test sending emails with HTML content and special characters in subject and body"""
     to_email = "recipient@example.com"

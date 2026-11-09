@@ -12,9 +12,9 @@ variables {
   load_balancer_arn_suffix = "app/nofos-infra-dev/synthetic"
   application_log_group    = "service/nofos-infra-dev"
   pdf_readability_monitoring = {
-    waf_metric_name = "nofos-infra-dev-waf"
-    cluster_name    = "nofos-infra-dev"
-    region          = "us-east-1"
+    waf_web_acl_name = "nofos-infra-dev-wafv2-web-acl"
+    cluster_name     = "nofos-infra-dev"
+    region           = "us-east-1"
   }
 }
 

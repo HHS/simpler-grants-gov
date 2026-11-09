@@ -51,7 +51,7 @@ def definition(revision=2):
 def acl():
     return {
         "Name": MARKER,
-        "VisibilityConfig": {"MetricName": MARKER},
+        "VisibilityConfig": {"MetricName": "different-visibility-metric"},
         "Rules": [
             {
                 "Name": m.RULES["emergency"],
@@ -115,6 +115,11 @@ class FakeAws:
                 ]
             },
             ("ecs", "describe-task-definition"): {"taskDefinition": definition()},
+            ("elbv2", "describe-load-balancer-attributes"): {
+                "Attributes": [
+                    {"Key": "idle_timeout.timeout_seconds", "Value": "120"},
+                ],
+            },
             ("elbv2", "describe-target-groups"): {
                 "TargetGroups": [{"LoadBalancerArns": [MARKER]}]
             },
@@ -162,7 +167,8 @@ class InspectionTests(unittest.TestCase):
     def test_full_report_is_sanitized_and_uses_only_allowed_reads(self):
         aws = FakeAws()
         results = m.Inspector(aws).run()
-        self.assertEqual(len(results), 9)
+        self.assertEqual(len(results), 10)
+        self.assertIn('"idle_timeout": "matches"', json.dumps(results))
         self.assertTrue(all(r["status"] == "observed" for r in results))
         serialized = json.dumps(results)
         for value in (MARKER, "private.registry", "task-definition/test", "SECRET_KEY"):
@@ -172,6 +178,152 @@ class InspectionTests(unittest.TestCase):
         # rather than claim the service's newly configured definition (3) is running.
         task = next(r for r in results if r["check"] == "tasks")
         self.assertEqual(task["details"]["definitions"][0]["revision"], 2)
+
+    def test_expected_timeout_matches_terraform(self):
+        source = (ROOT / "infra/modules/service/load_balancer.tf").read_text()
+        self.assertRegex(
+            source,
+            rf'(?m)^\s*idle_timeout\s*=\s*"{m.EXPECTED_ALB_IDLE_TIMEOUT_SECONDS}"\s*$',
+        )
+
+    def test_timeout_difference_and_failed_reads_block_preflight(self):
+        key = ("elbv2", "describe-load-balancer-attributes")
+        for response, expected in (
+            ({}, "load_balancer_idle_timeout_missing_or_invalid"),
+            (m.InspectionError("access_denied"), "access_denied"),
+            *(
+                (
+                    {
+                        "Attributes": [
+                            {"Key": "idle_timeout.timeout_seconds", "Value": value}
+                        ]
+                    },
+                    status,
+                )
+                for value, status in (
+                    (MARKER, "load_balancer_idle_timeout_missing_or_invalid"),
+                    ("0", "load_balancer_idle_timeout_missing_or_invalid"),
+                    ("4001", "load_balancer_idle_timeout_missing_or_invalid"),
+                    ("1733", "incomplete"),
+                )
+            ),
+        ):
+            with self.subTest(expected=expected):
+                results = m.Inspector(FakeAws({key: response})).run()
+                check = next(r for r in results if r["check"] == "load_balancer")
+                self.assertEqual(check["status"], expected)
+                if expected == "incomplete":
+                    self.assertEqual(check["details"]["idle_timeout"], "differs")
+                with (
+                    patch.object(m, "Aws", return_value=FakeAws({key: response})),
+                    patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": ""}),
+                    redirect_stdout(io.StringIO()) as out,
+                ):
+                    self.assertEqual(m.main(), 1)
+                for private in (MARKER, "1733", "4001", '"idle_timeout_seconds"'):
+                    self.assertNotIn(private, out.getvalue())
+
+    def test_task_definition_override_indicators(self):
+        for field, value, indicator in (
+            ("command", [MARKER], "startup_override_configured"),
+            ("entryPoint", [MARKER], "startup_override_configured"),
+            (
+                "environment",
+                [{"name": "GUNICORN_CMD_ARGS", "value": MARKER}],
+                "gunicorn_args_environment_configured",
+            ),
+            (
+                "secrets",
+                [{"name": "GUNICORN_CMD_ARGS", "valueFrom": MARKER}],
+                "gunicorn_args_environment_configured",
+            ),
+            (
+                "environmentFiles",
+                [{"value": MARKER}],
+                "gunicorn_args_environment_configured",
+            ),
+        ):
+            with self.subTest(field=field):
+                data = definition()
+                summary, _ = m.task_summary(data)
+                self.assertIs(summary[indicator], False)
+                data["containerDefinitions"][0][field] = value
+                summary, _ = m.task_summary(data)
+                self.assertIs(summary[indicator], True)
+                self.assertNotIn(MARKER, json.dumps(summary))
+
+    def test_running_task_overrides_are_scoped_to_container_and_revision(self):
+        for override in (
+            {"command": [MARKER]},
+            {"environment": [{"name": "GUNICORN_CMD_ARGS", "value": MARKER}]},
+            {"environmentFiles": [{"value": MARKER}]},
+        ):
+            with self.subTest(override=override):
+                tasks = [
+                    {
+                        "taskDefinitionArn": f"definition:{revision}",
+                        "lastStatus": "RUNNING",
+                        "overrides": {
+                            "containerOverrides": [{"name": name, **override}]
+                        },
+                    }
+                    for revision, name in ((2, "sidecar"), (3, m.SERVICE))
+                ]
+                aws = FakeAws(
+                    {
+                        ("ecs", "list-tasks"): {"taskArns": ["task1", "task2"]},
+                        ("ecs", "describe-tasks"): {"tasks": tasks},
+                    }
+                )
+                get = aws.get
+
+                def get_definition(service, operation, *args):
+                    if (service, operation) == ("ecs", "describe-task-definition"):
+                        return {
+                            "taskDefinition": definition(int(args[-1].split(":")[-1]))
+                        }
+                    return get(service, operation, *args)
+
+                with patch.object(aws, "get", side_effect=get_definition):
+                    summaries = m.Inspector(aws).tasks()["definitions"]
+                self.assertEqual(
+                    {
+                        item["revision"]: item[
+                            "running_task_startup_override_configured"
+                        ]
+                        for item in summaries
+                    },
+                    {2: False, 3: True},
+                )
+                self.assertNotIn(MARKER, json.dumps(summaries))
+
+    def test_production_guard_and_read_targets(self):
+        dev = FakeAws()
+        result = m.Inspector(dev, "prod").run()
+        self.assertFalse(result[0]["details"]["expected_account"])
+        self.assertEqual(len(dev.calls), 1)
+
+        container = definition()
+        container["containerDefinitions"][0]["name"] = m.PROD_SERVICE
+        aws = FakeAws({
+            ("sts", "get-caller-identity"): {"Account": m.PROD_ACCOUNT},
+            ("ecs", "describe-task-definition"): {"taskDefinition": container},
+        })
+        result = m.Inspector(aws, "prod").run()
+        self.assertTrue(result[0]["details"]["expected_account"])
+        self.assertEqual(next(r for r in result if r["check"] == "tasks")["status"], "observed")
+        self.assertIn(
+            ("ecs", "describe-services", ("--cluster", m.PROD_SERVICE, "--services", m.PROD_SERVICE)),
+            aws.calls,
+        )
+        self.assertIn(
+            ("sns", "list-subscriptions-by-topic", (
+                "--topic-arn", f"arn:aws:sns:{m.REGION}:{m.PROD_ACCOUNT}:{m.PROD_SERVICE}-monitoring",
+                "--no-paginate",
+            )),
+            aws.calls,
+        )
+        self.assertNotIn(MARKER, json.dumps(result))
 
     def test_wrong_account_stops_before_resource_queries(self):
         aws = FakeAws({("sts", "get-caller-identity"): {"Account": "wrong"}})
@@ -209,7 +361,7 @@ class InspectionTests(unittest.TestCase):
         ] = "^/readability/?$"
         self.assertFalse(m.scope_matches(old, "emergency"))
 
-    def test_metric_queries_use_deployed_metric_names_not_rule_names(self):
+    def test_metric_queries_use_acl_resource_name_and_rule_metric_names(self):
         aws = FakeAws()
         m.Inspector(aws).run()
         waf_calls = [
@@ -225,6 +377,23 @@ class InspectionTests(unittest.TestCase):
             self.assertEqual(
                 next(d["Value"] for d in dims if d["Name"] == "WebACL"), MARKER
             )
+
+    def test_missing_acl_name_does_not_fall_back_to_visibility_name(self):
+        data = acl()
+        del data["Name"]
+        aws = FakeAws({("wafv2", "get-web-acl-for-resource"): {"WebACL": data}})
+        rows = m.Inspector(aws).run()
+        self.assertEqual(
+            next(r for r in rows if r["check"] == "waf")["status"],
+            "web_acl_name_missing",
+        )
+        self.assertFalse(
+            any(
+                "AWS/WAFV2" in args
+                for _, op, args in aws.calls
+                if op == "get-metric-statistics"
+            )
+        )
 
     def test_metric_sums_and_missing_names_are_explicit(self):
         aws = FakeAws(

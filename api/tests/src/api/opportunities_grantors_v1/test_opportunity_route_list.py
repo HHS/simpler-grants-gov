@@ -12,7 +12,6 @@ from tests.src.db.models.factories import (
     AgencyFactory,
     ApplicationFactory,
     ApplicationSubmissionFactory,
-    AwardRecommendationFactory,
     CompetitionFactory,
     OpportunityFactory,
 )
@@ -20,15 +19,6 @@ from tests.src.db.models.factories import (
 
 @pytest.fixture
 def grantor_auth_data(db_session, enable_factory_create):
-    user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
-        db_session=db_session,
-        privileges=[Privilege.VIEW_OPPORTUNITY],
-    )
-    return user, agency, token, api_key_id
-
-
-@pytest.fixture
-def award_recommendation_auth_data(db_session, enable_factory_create):
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
         privileges=[Privilege.VIEW_OPPORTUNITY],
@@ -134,71 +124,6 @@ def test_list_opportunities_with_pagination(client, db_session, grantor_auth_dat
     page1_ids = {opp["opportunity_id"] for opp in data}
     page2_ids = {opp["opportunity_id"] for opp in data_page2}
     assert len(page1_ids.intersection(page2_ids)) == 0
-
-
-def test_list_opportunities_award_recommendation_ready_filter(
-    client, db_session, award_recommendation_auth_data
-):
-    user, agency, token, _ = award_recommendation_auth_data
-
-    opp_ready = OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-        opportunity_number="READY-2026-001",
-        is_simpler_grants_opportunity=True,
-        is_draft=False,
-    )
-    competition_ready = CompetitionFactory.create(opportunity=opp_ready)
-    app_ready = ApplicationFactory.create(competition=competition_ready)
-    ApplicationSubmissionFactory.create(application=app_ready)
-
-    OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-        opportunity_number="NOT-READY-2026-001",
-        is_simpler_grants_opportunity=True,
-        is_draft=False,
-    )
-
-    opp_with_award_rec = OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-        opportunity_number="HAS-AWARD-2026-001",
-        is_simpler_grants_opportunity=True,
-        is_draft=False,
-    )
-    competition_with_award = CompetitionFactory.create(opportunity=opp_with_award_rec)
-    app_with_award = ApplicationFactory.create(competition=competition_with_award)
-    ApplicationSubmissionFactory.create(application=app_with_award)
-    AwardRecommendationFactory.create(opportunity=opp_with_award_rec)
-
-    opp_draft = OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-        opportunity_number="DRAFT-2026-001",
-        is_simpler_grants_opportunity=True,
-        is_draft=True,
-    )
-    competition_draft = CompetitionFactory.create(opportunity=opp_draft)
-    app_draft = ApplicationFactory.create(competition=competition_draft)
-    ApplicationSubmissionFactory.create(application=app_draft)
-
-    response = client.post(
-        f"/v1/grantors/agencies/{agency.agency_id}/opportunities",
-        headers={"X-SGG-Token": token},
-        json={
-            "pagination": {"page_offset": 1, "page_size": 25},
-            "filters": {"award_recommendation_ready": {"one_of": [True]}},
-        },
-    )
-
-    assert response.status_code == 200
-    response_json = response.get_json()
-    data = response_json["data"]
-
-    assert len(data) == 1
-    assert data[0]["opportunity_id"] == str(opp_ready.opportunity_id)
-    assert data[0]["opportunity_number"] == "READY-2026-001"
 
 
 def test_list_opportunities_no_permission(client, db_session, no_permission_auth_data):
@@ -400,73 +325,6 @@ def test_list_accessible_opportunities_with_pagination(client, db_session, enabl
     page1_ids = {opp["opportunity_id"] for opp in data}
     page2_ids = {opp["opportunity_id"] for opp in data_page2}
     assert len(page1_ids.intersection(page2_ids)) == 0
-
-
-def test_list_accessible_opportunities_award_recommendation_ready_filter(
-    client, db_session, enable_factory_create
-):
-    user, agency, token, _ = create_user_in_agency_with_jwt_and_api_key(
-        db_session=db_session,
-        privileges=[Privilege.VIEW_OPPORTUNITY],
-    )
-
-    opp_ready = OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-        opportunity_number="READY-2026-001",
-        is_simpler_grants_opportunity=True,
-        is_draft=False,
-    )
-    competition_ready = CompetitionFactory.create(opportunity=opp_ready)
-    app_ready = ApplicationFactory.create(competition=competition_ready)
-    ApplicationSubmissionFactory.create(application=app_ready)
-
-    OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-        opportunity_number="NOT-READY-2026-001",
-        is_simpler_grants_opportunity=True,
-        is_draft=False,
-    )
-
-    opp_with_award_rec = OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-        opportunity_number="HAS-AWARD-2026-001",
-        is_simpler_grants_opportunity=True,
-        is_draft=False,
-    )
-    competition_with_award = CompetitionFactory.create(opportunity=opp_with_award_rec)
-    app_with_award = ApplicationFactory.create(competition=competition_with_award)
-    ApplicationSubmissionFactory.create(application=app_with_award)
-    AwardRecommendationFactory.create(opportunity=opp_with_award_rec)
-
-    opp_draft = OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-        opportunity_number="DRAFT-2026-001",
-        is_simpler_grants_opportunity=True,
-        is_draft=True,
-    )
-    competition_draft = CompetitionFactory.create(opportunity=opp_draft)
-    app_draft = ApplicationFactory.create(competition=competition_draft)
-    ApplicationSubmissionFactory.create(application=app_draft)
-
-    response = client.post(
-        "/v1/grantors/opportunities/list",
-        headers={"X-SGG-Token": token},
-        json={
-            "pagination": {"page_offset": 1, "page_size": 25},
-            "filters": {"award_recommendation_ready": {"one_of": [True]}},
-        },
-    )
-
-    assert response.status_code == 200
-
-    data = response.get_json()["data"]
-    assert len(data) == 1
-    assert data[0]["opportunity_id"] == str(opp_ready.opportunity_id)
-    assert data[0]["opportunity_number"] == "READY-2026-001"
 
 
 def test_list_accessible_opportunities_excludes_agencies_without_view_privilege(

@@ -66,7 +66,6 @@ const STAGING_TEST_ORG_IDS: Record<TestOrgKey, string> = {
 export const TEST_USER_IDS = {
   local: LOCAL_TEST_USER_IDS,
   staging: STAGING_TEST_USER_IDS,
-  grantee1: STAGING_TEST_USER_IDS,
   grantor1: STAGING_TEST_USER_IDS,
   grantor2: STAGING_TEST_USER_IDS,
 };
@@ -74,7 +73,6 @@ export const TEST_USER_IDS = {
 export const TEST_ORG_IDS = {
   local: LOCAL_TEST_ORG_IDS,
   staging: STAGING_TEST_ORG_IDS,
-  grantee1: STAGING_TEST_ORG_IDS,
   grantor1: STAGING_TEST_ORG_IDS,
   grantor2: STAGING_TEST_ORG_IDS,
 };

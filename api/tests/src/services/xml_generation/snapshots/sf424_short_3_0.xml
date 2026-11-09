@@ -12,7 +12,7 @@
     <globLib:Street2>Suite 200</globLib:Street2>
     <globLib:City>Boston</globLib:City>
     <globLib:State>MA: Massachusetts</globLib:State>
-    <globLib:ZipPostalCode>02115</globLib:ZipPostalCode>
+    <globLib:ZipPostalCode>02115-1234</globLib:ZipPostalCode>
     <globLib:Country>USA: UNITED STATES</globLib:Country>
   </SF424_Short_3_0:Address>
   <SF424_Short_3_0:ApplicantWebAddress>https://example.edu</SF424_Short_3_0:ApplicantWebAddress>
@@ -36,7 +36,7 @@
       <globLib:Street1>456 University Ave</globLib:Street1>
       <globLib:City>Boston</globLib:City>
       <globLib:State>MA: Massachusetts</globLib:State>
-      <globLib:ZipPostalCode>02115</globLib:ZipPostalCode>
+      <globLib:ZipPostalCode>02115-1234</globLib:ZipPostalCode>
       <globLib:Country>USA: UNITED STATES</globLib:Country>
     </globLib:Address>
     <globLib:Phone>617-555-0001</globLib:Phone>
@@ -56,7 +56,7 @@
       <globLib:Street1>456 University Ave</globLib:Street1>
       <globLib:City>Boston</globLib:City>
       <globLib:State>MA: Massachusetts</globLib:State>
-      <globLib:ZipPostalCode>02115</globLib:ZipPostalCode>
+      <globLib:ZipPostalCode>02115-1234</globLib:ZipPostalCode>
       <globLib:Country>USA: UNITED STATES</globLib:Country>
     </globLib:Address>
     <globLib:Phone>617-555-0002</globLib:Phone>

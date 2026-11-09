@@ -298,3 +298,14 @@ run "reject_allow_action" {
   }
   expect_failures = [var.pdf_readability_waf]
 }
+
+run "acl_resource_name_is_distinct_from_visibility_metric_name" {
+  command = plan
+  variables {
+    waf_metric_name = "different-visibility-label"
+  }
+  assert {
+    condition     = output.waf_web_acl_name == "nofos-infra-dev-wafv2-web-acl" && output.waf_metric_name == "different-visibility-label"
+    error_message = "Monitoring must receive the ACL resource name independently of its visibility metric label."
+  }
+}

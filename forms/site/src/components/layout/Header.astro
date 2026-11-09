@@ -23,7 +23,12 @@ function isActive(itemHref: string): boolean {
           </a>
         </em>
       </div>
-      <button class="mobile-menu-btn" type="button" aria-label="Open menu" id="mobile-menu-open">
+      <button
+        class="mobile-menu-btn"
+        type="button"
+        aria-label="Open menu"
+        id="mobile-menu-open"
+      >
         <span></span>
         <span></span>
         <span></span>
@@ -52,7 +57,14 @@ function isActive(itemHref: string): boolean {
 <div class="mobile-nav-sheet" id="mobile-nav-sheet">
   <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
   <div class="mobile-nav-panel">
-    <button class="mobile-nav-close" type="button" id="mobile-nav-close" aria-label="Close menu">&times;</button>
+    <button
+      class="mobile-nav-close"
+      type="button"
+      id="mobile-nav-close"
+      aria-label="Close menu"
+    >
+      &times;
+    </button>
     <ul class="mobile-nav-list">
       {navItems.map((item) => (
         <li>

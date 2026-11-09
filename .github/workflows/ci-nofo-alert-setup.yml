@@ -9,6 +9,8 @@ on:
       - scripts/nofo_alarm_delivery_session_policy.json
       - scripts/tests/test_nofo_alert_alarm.py
       - .github/workflows/test-nofo-alarm-delivery.yml
+      - .github/workflows/test-nofo-prod-alarm-delivery.yml
+      - scripts/nofo_prod_alarm_delivery_session_policy.json
       - scripts/nofo_alert_delivery_session_policy.json
       - scripts/tests/test_nofo_alert_delivery.py
       - .github/workflows/test-nofo-alert-delivery.yml
@@ -16,6 +18,8 @@ on:
       - scripts/nofo_alert_setup_session_policy.json
       - scripts/tests/test_nofo_alert_setup.py
       - .github/workflows/setup-nofo-alert-email.yml
+      - .github/workflows/setup-nofo-prod-alert-email.yml
+      - scripts/nofo_prod_alert_setup_session_policy.json
       - .github/workflows/ci-nofo-alert-setup.yml
   push:
     branches: [main]
@@ -26,6 +30,8 @@ on:
       - scripts/nofo_alarm_delivery_session_policy.json
       - scripts/tests/test_nofo_alert_alarm.py
       - .github/workflows/test-nofo-alarm-delivery.yml
+      - .github/workflows/test-nofo-prod-alarm-delivery.yml
+      - scripts/nofo_prod_alarm_delivery_session_policy.json
       - scripts/nofo_alert_delivery_session_policy.json
       - scripts/tests/test_nofo_alert_delivery.py
       - .github/workflows/test-nofo-alert-delivery.yml
@@ -33,6 +39,8 @@ on:
       - scripts/nofo_alert_setup_session_policy.json
       - scripts/tests/test_nofo_alert_setup.py
       - .github/workflows/setup-nofo-alert-email.yml
+      - .github/workflows/setup-nofo-prod-alert-email.yml
+      - scripts/nofo_prod_alert_setup_session_policy.json
       - .github/workflows/ci-nofo-alert-setup.yml
 
 permissions:
