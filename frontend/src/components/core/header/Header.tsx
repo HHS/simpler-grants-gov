@@ -6,6 +6,7 @@ import { LOGIN_URL } from "src/constants/auth";
 import { ExternalRoutes } from "src/constants/routes";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
+import { postUserEvent } from "src/services/event/postUserEvent";
 import { IndexType } from "src/types/generalTypes";
 import { TestUser } from "src/types/userTypes";
 import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
@@ -287,6 +288,10 @@ const NavLinks = ({
           })}
           onClick={() => {
             storeCurrentPage(location.pathname, location.search);
+            postUserEvent({
+              name: "authentication_initiated",
+              properties: { pivRequired: false },
+            });
             closeDropdownAndMobileNav();
           }}
         >
