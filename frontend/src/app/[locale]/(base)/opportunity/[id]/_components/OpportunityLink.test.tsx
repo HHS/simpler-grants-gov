@@ -35,53 +35,71 @@ describe("OpportunityLink", () => {
     expect(linkElement).toHaveAttribute("href", "https://example.com");
   });
 
-  it("renders no additional info link if URL is missing", () => {
-    const mockDataWithoutUrl: BaseOpportunity = {
-      ...mockOpportunityData,
-      summary: {
-        ...mockOpportunityData.summary,
-        additional_info_url: null,
-      },
-    };
+  it("renders the link as an unbulleted list item that opens in a new tab", () => {
+    render(<OpportunityLink opportunityData={mockOpportunityData} />);
 
-    render(<OpportunityLink opportunityData={mockDataWithoutUrl} />);
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
 
-    const linkElement = screen.queryByRole("link");
-    expect(linkElement).not.toBeInTheDocument();
+    const linkElement = screen.getByRole("link", {
+      name: "Click here for more information",
+    });
+    expect(linkElement).toHaveAttribute("target", "_blank");
+    expect(linkElement).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("renders a placeholder if URL description is missing", () => {
-    const mockDataWithoutDescription: BaseOpportunity = {
-      ...mockOpportunityData,
-      summary: {
-        ...mockOpportunityData.summary,
-        additional_info_url_description: "",
-      },
-    };
+  it.each([null, "", "   "])(
+    "renders the fallback once when the URL is %p",
+    (url) => {
+      render(
+        <OpportunityLink
+          opportunityData={{
+            ...mockOpportunityData,
+            summary: {
+              additional_info_url: url,
+              additional_info_url_description: null,
+            } as Summary,
+          }}
+        />,
+      );
 
-    render(<OpportunityLink opportunityData={mockDataWithoutDescription} />);
+      expect(screen.queryByRole("link")).not.toBeInTheDocument();
+      expect(screen.queryByRole("list")).not.toBeInTheDocument();
+      expect(screen.getAllByText("noAdditionalInfo")).toHaveLength(1);
+    },
+  );
+
+  it("renders the fallback once when both the URL and description are empty", () => {
+    render(
+      <OpportunityLink
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            additional_info_url: "",
+            additional_info_url_description: "",
+          } as Summary,
+        }}
+      />,
+    );
+
+    expect(screen.getAllByText("noAdditionalInfo")).toHaveLength(1);
+  });
+
+  it("renders the URL as the link text when the description is empty", () => {
+    render(
+      <OpportunityLink
+        opportunityData={{
+          ...mockOpportunityData,
+          summary: {
+            ...mockOpportunityData.summary,
+            additional_info_url_description: "",
+          },
+        }}
+      />,
+    );
 
     const linkElement = screen.getByRole("link", {
       name: "https://example.com",
     });
-    expect(linkElement).toBeInTheDocument();
     expect(linkElement).toHaveAttribute("href", "https://example.com");
-  });
-
-  it("renders a fallback when both URL and description are missing", () => {
-    const mockDataWithoutUrlAndDescription: BaseOpportunity = {
-      ...mockOpportunityData,
-      summary: {
-        additional_info_url: null,
-        additional_info_url_description: null,
-      } as Summary,
-    };
-
-    render(
-      <OpportunityLink opportunityData={mockDataWithoutUrlAndDescription} />,
-    );
-
-    const linkElement = screen.queryByRole("link");
-    expect(linkElement).not.toBeInTheDocument();
   });
 });
