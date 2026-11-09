@@ -1093,7 +1093,7 @@ details[open] > .group-header::before {
 // Metadata cards (two-column dl)
 .metadata-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: units(2);
   margin-bottom: units(4);
 
@@ -1110,7 +1110,7 @@ details[open] > .group-header::before {
 
 .metadata-card dl {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: units("05") units(2);
   margin: 0;
   @include u-font("sans", "2xs");
@@ -1124,6 +1124,8 @@ details[open] > .group-header::before {
 }
 
 .metadata-card dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin: 0;
 }
 
@@ -1252,24 +1254,31 @@ details[open] > .group-header::before {
   }
 }
 
+// USWDS outline buttons have different default line-height/padding at small sizes.
+// Stretch each choice within its row so all three file selectors stay aligned.
+.file-selector.usa-button-group {
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: units(1) 0;
+  margin: 0 0 units(2);
+
+  .usa-button-group__item {
+    display: flex;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .usa-button {
+    height: auto;
+    line-height: 1.2;
+    padding: units("105") units(2);
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
 .form-artifacts {
   margin-bottom: units(4);
-
-  // Keep every file choice reachable on a narrow form page.
-  > .usa-button-group {
-    flex-wrap: wrap;
-    row-gap: units(1);
-
-    .usa-button-group__item {
-      display: flex;
-      margin-top: 0;
-      margin-bottom: 0;
-    }
-
-    .usa-button {
-      height: auto;
-    }
-  }
 }
 
 .form-artifacts__copy-result {
@@ -1458,6 +1467,7 @@ details[open] > .group-header::before {
 
 // Field rows
 .field-row {
+  scroll-margin-top: units(2);
   padding: units(1) units(2) units(1) units(4);
   border-bottom: 1px solid color("base-lighter");
 
@@ -1668,4 +1678,12 @@ details[open] > .group-header::before {
   display: inline-block;
   padding: units("05") units(1);
   text-decoration: none;
+}
+
+.field-row__requirement {
+  margin-top: units("05");
+}
+
+.field-row__primary .review-link {
+  flex: 0 0 auto;
 }

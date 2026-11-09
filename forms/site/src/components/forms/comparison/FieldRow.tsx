@@ -30,6 +30,8 @@ export default function FieldRow({
         <div className="field-row__primary">
           <span className="field-row__label">{field.label}</span>
           {field.id && <ReviewLink field={field.id} />}
+        </div>
+        <div className="field-row__requirement">
           {required ? (
             <span className="field-row__required">{required}</span>
           ) : (

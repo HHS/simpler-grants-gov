@@ -291,6 +291,7 @@ class Element extends EventTarget {
   classes = new Set<string>();
   focused = false;
   scrolled = false;
+  scrollOptions?: ScrollIntoViewOptions;
   target: Element | null = null;
   classList = {
     toggle: (name: string, on: boolean) =>
@@ -306,7 +307,8 @@ class Element extends EventTarget {
   focus() {
     this.focused = true;
   }
-  scrollIntoView() {
+  scrollIntoView(options?: ScrollIntoViewOptions) {
+    this.scrollOptions = options;
     this.scrolled = true;
   }
   click() {
@@ -349,7 +351,7 @@ describe("the rendered panel adapter", () => {
     const notice = new Element();
     stop = mountFormPage(documentFor([], [], notice, [row]), page.host());
     expect(row.scrolled).toBe(true);
-    expect(row.focused).toBe(true);
+    expect(row.focused).toBe(false);
     expect(notice.textContent).toContain("Comparisons are not available");
   });
 
@@ -408,7 +410,19 @@ describe("the rendered panel adapter", () => {
     revealField(documentFor([], [], new Element(), [row]), "first-name");
     expect(group.open).toBe(true);
     expect(row.scrolled).toBe(true);
-    expect(compare.focused).toBe(true);
+    expect(compare.focused).toBe(false);
+    expect(row.scrollOptions).toEqual({ block: "start", behavior: "smooth" });
+  });
+
+  it("respects reduced motion without shifting focus to Compare", () => {
+    const row = new Element({ fieldId: "state" });
+    const doc = documentFor([], [], new Element(), [row]);
+    Object.assign(doc, {
+      defaultView: { matchMedia: () => ({ matches: true }) },
+    });
+    revealField(doc, "state");
+    expect(row.scrollOptions).toEqual({ block: "start", behavior: "instant" });
+    expect(row.focused).toBe(false);
   });
 });
 
