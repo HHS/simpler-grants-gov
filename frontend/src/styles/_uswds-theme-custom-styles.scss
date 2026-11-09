@@ -722,6 +722,10 @@ dl {
   }
 }
 
+.simpler-list-style-disc {
+  list-style-type: disc;
+}
+
 .simpler-page-anchor-offset {
   @include at-media("desktop") {
     scroll-margin-top: 6rem;
