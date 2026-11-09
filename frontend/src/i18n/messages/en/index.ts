@@ -1906,10 +1906,10 @@ export const messages = {
     beforeItems: [
       "You will or already have received an email asking for your participation in a user interview.",
       "Taking part in a research study is voluntary. If you opt-in to participate, you'll receive an emailed invitation with your scheduled time.",
-      "For remote studies, you will receive a Zoom link to participate.",
+      "For remote studies, you will receive a video conferencing link to participate (e.g. Google Meet or Zoom).",
       "For in person studies, we will coordinate logistics with you.",
       "If you require an accommodation, let us know at least 2 days prior to the interview.",
-      "The interview will be conducted via Zoom by a member of our team. One person will be conducting the interview, and one or more team members will be taking notes.",
+      "The interview will be conducted via video conferencing by a member of our team. One person will be conducting the interview, and one or more team members will be taking notes.",
     ],
     duringHeader: "During the interview",
     duringItems: [
