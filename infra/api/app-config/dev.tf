@@ -70,7 +70,6 @@ module "dev_config" {
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Dev overrides
-    FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
@@ -83,5 +82,5 @@ module "dev_config" {
 
   enable_identity_provider = local.enable_identity_provider
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
 }

@@ -403,6 +403,26 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "commit"
 
 
+class RawApiKeyFactoryMixin:
+    """For API key factories. The raw key isn't stored, only its hash, so it's
+    attached to the built object as `raw_key` for tests to send as X-API-Key.
+    """
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        raw_key = kwargs.pop("raw_key")
+        obj = super()._build(model_class, *args, **kwargs)  # type: ignore[misc]
+        obj.raw_key = raw_key
+        return obj
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        raw_key = kwargs.pop("raw_key")
+        obj = super()._create(model_class, *args, **kwargs)  # type: ignore[misc]
+        obj.raw_key = raw_key
+        return obj
+
+
 ###################
 # Opportunity Factories
 ###################
@@ -1120,7 +1140,7 @@ class UserSavedSearchFactory(BaseFactory):
     )
 
 
-class UserApiKeyFactory(BaseFactory):
+class UserApiKeyFactory(RawApiKeyFactoryMixin, BaseFactory):
     class Meta:
         model = user_models.UserApiKey
 
@@ -1131,7 +1151,9 @@ class UserApiKeyFactory(BaseFactory):
 
     key_name = factory.Faker("sentence", nb_words=3)
 
-    key_id = factory.LazyAttribute(lambda obj: obj.raw_key)
+    # Not a column. Read it back as api_key.raw_key to send as X-API-Key,
+    # or set it: UserApiKeyFactory(raw_key="my-test-key").
+    raw_key = factory.LazyFunction(generate_api_key_id)
     key_id_hash = factory.LazyAttribute(
         lambda obj: hash_api_key_id(obj.raw_key, ApiKeyConfig().pepper)
     )
@@ -1152,10 +1174,6 @@ class UserApiKeyFactory(BaseFactory):
 
         # Trait for unused keys
         never_used = factory.Trait(last_used=None)
-
-        # Not a column. Tests and fixtures send this as X-API-Key.
-        # Override this, not key_id: UserApiKeyFactory(raw_key="my-test-key").
-        raw_key = factory.LazyFunction(generate_api_key_id)
 
 
 class RoleFactory(BaseFactory):
@@ -3365,7 +3383,7 @@ class SharedLoginGovStateFactory(BaseFactory):
     nonce = Generators.UuidObj
 
 
-class SharedUserApiKeyFactory(BaseFactory):
+class SharedUserApiKeyFactory(RawApiKeyFactoryMixin, BaseFactory):
     class Meta:
         model = db_test_models.SharedUserApiKey
 
@@ -3375,9 +3393,10 @@ class SharedUserApiKeyFactory(BaseFactory):
     shared_user_id = factory.LazyAttribute(lambda k: k.shared_user.shared_user_id)
 
     key_name = factory.Faker("sentence", nb_words=3)
-    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+    # Not a column, see RawApiKeyFactoryMixin
+    raw_key = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
     key_id_hash = factory.LazyAttribute(
-        lambda obj: hash_api_key_id(obj.key_id, ApiKeyConfig().pepper)
+        lambda obj: hash_api_key_id(obj.raw_key, ApiKeyConfig().pepper)
     )
 
     last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")

@@ -23,26 +23,6 @@ export const fetchCompetitionEndpoint = {
   method: "GET" as ApiMethod,
 };
 
-export const fetchAwardRecommendationEndpoint = {
-  basePath: environment.API_URL,
-  version: "alpha",
-  namespace: "award-recommendations",
-  method: "GET" as ApiMethod,
-  requiresAuth: true,
-};
-
-export const toDynamicAwardRecommendationEndpoint = (
-  type: "POST" | "PUT" | "DELETE",
-) => {
-  return {
-    basePath: environment.API_URL,
-    version: "alpha",
-    namespace: "award-recommendations",
-    method: type as ApiMethod,
-    requiresAuth: true,
-  };
-};
-
 export const toDynamicApplicationsEndpointV1 = (type: "POST") => {
   return {
     basePath: environment.API_URL,
@@ -70,21 +50,6 @@ export const fetchFormEndpoint = {
   version: "alpha",
   namespace: "forms",
   method: "GET" as ApiMethod,
-};
-
-export const fetchFormsEndpoint = {
-  basePath: environment.API_URL,
-  version: "v1",
-  namespace: "forms",
-  method: "GET" as ApiMethod,
-};
-
-export const fetchCompetitionFormsEndpoint = {
-  basePath: environment.API_URL,
-  version: "alpha",
-  namespace: "competitions",
-  method: "PUT" as ApiMethod,
-  requiresAuth: true,
 };
 
 export const fetchOpportunityEndpoint = {
@@ -141,30 +106,6 @@ export const toDynamicOrganizationsEndpoint = (
   };
 };
 
-export const toDynamicGrantorAgenciesEndpoint = (
-  type: "POST" | "GET" | "PUT" | "DELETE",
-) => {
-  return {
-    basePath: environment.API_URL,
-    version: "v1",
-    namespace: "grantors/agencies",
-    method: type as ApiMethod,
-    requiresAuth: true,
-  };
-};
-
-export const toDynamicGrantorOpportunityEndpoint = (
-  type: "POST" | "DELETE" | "GET" | "PUT",
-) => {
-  return {
-    basePath: environment.API_URL,
-    version: "v1",
-    namespace: "grantors/opportunities",
-    method: type as ApiMethod,
-    requiresAuth: true,
-  };
-};
-
 export const getLocalUsersEndpoint = {
   basePath: environment.API_URL,
   version: "",
@@ -188,11 +129,3 @@ export const toDynamicFilesEndpoint = (type: "POST" | "GET") => ({
   method: type as ApiMethod,
   requiresAuth: true,
 });
-
-export const fetchWorkflowEndpoint = {
-  basePath: environment.API_URL,
-  version: "v1",
-  namespace: "workflows",
-  method: "GET" as ApiMethod,
-  requiresAuth: true,
-};

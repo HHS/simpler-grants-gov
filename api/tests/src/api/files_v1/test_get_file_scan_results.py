@@ -374,7 +374,7 @@ class TestGetFileScanResults403:
 
         resp = client.get(
             _build_url(pending_file_id),
-            headers={"X-API-Key": user_api_key.key_id},
+            headers={"X-API-Key": user_api_key.raw_key},
         )
 
         assert resp.status_code == 403

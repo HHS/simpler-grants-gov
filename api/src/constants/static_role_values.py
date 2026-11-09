@@ -161,29 +161,6 @@ OPPORTUNITY_PUBLISHER = Role(
     link_role_types=[LinkRoleRoleType(role_id=OPPORTUNITY_PUBLISHER_ID, role_type=RoleType.AGENCY)],
 )
 
-############################
-# Core Award Recommendation Roles
-############################
-AWARD_RECOMMENDATION_USER_ID = uuid.UUID("a5a5881e-2b55-4044-bf4d-eec45503cc56")
-AWARD_RECOMMENDATION_USER = Role(
-    role_id=AWARD_RECOMMENDATION_USER_ID,
-    role_name="Award Recommendation User",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        AWARD_RECOMMENDATION_USER_ID,
-        [
-            Privilege.VIEW_OPPORTUNITY,
-            Privilege.VIEW_AWARD_RECOMMENDATION,
-            Privilege.CREATE_AWARD_RECOMMENDATION,
-            Privilege.UPDATE_AWARD_RECOMMENDATION,
-            Privilege.SUBMIT_AWARD_RECOMMENDATION,
-        ],
-    ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=AWARD_RECOMMENDATION_USER_ID, role_type=RoleType.AGENCY)
-    ],
-)
-
 GRANTOR_PROGRAM_OFFICER_ID = uuid.UUID("66b4238b-8f22-4996-b6ba-712958fd5631")
 GRANTOR_PROGRAM_OFFICER = Role(
     role_id=GRANTOR_PROGRAM_OFFICER_ID,
@@ -209,68 +186,6 @@ GRANTOR_BUDGET_OFFICER = Role(
     ),
     link_role_types=[
         LinkRoleRoleType(role_id=GRANTOR_BUDGET_OFFICER_ID, role_type=RoleType.AGENCY)
-    ],
-)
-
-PQC_REVIEWER_ID = uuid.UUID("8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e")
-PQC_REVIEWER = Role(
-    role_id=PQC_REVIEWER_ID,
-    role_name="PQC Reviewer",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        PQC_REVIEWER_ID,
-        [Privilege.PQC_REVIEWER, Privilege.VIEW_AWARD_RECOMMENDATION],
-    ),
-    link_role_types=[LinkRoleRoleType(role_id=PQC_REVIEWER_ID, role_type=RoleType.AGENCY)],
-)
-
-GMS_REVIEWER_ID = uuid.UUID("9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f")
-GMS_REVIEWER = Role(
-    role_id=GMS_REVIEWER_ID,
-    role_name="GMS Reviewer",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        GMS_REVIEWER_ID,
-        [Privilege.GMS_REVIEWER, Privilege.VIEW_AWARD_RECOMMENDATION],
-    ),
-    link_role_types=[LinkRoleRoleType(role_id=GMS_REVIEWER_ID, role_type=RoleType.AGENCY)],
-)
-
-FMO_REVIEWER_ID = uuid.UUID("0d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a")
-FMO_REVIEWER = Role(
-    role_id=FMO_REVIEWER_ID,
-    role_name="FMO Reviewer",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        FMO_REVIEWER_ID,
-        [Privilege.FMO_REVIEWER, Privilege.VIEW_AWARD_RECOMMENDATION],
-    ),
-    link_role_types=[LinkRoleRoleType(role_id=FMO_REVIEWER_ID, role_type=RoleType.AGENCY)],
-)
-
-GMO_REVIEWER_ID = uuid.UUID("1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b")
-GMO_REVIEWER = Role(
-    role_id=GMO_REVIEWER_ID,
-    role_name="GMO Reviewer",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        GMO_REVIEWER_ID,
-        [Privilege.GMO_REVIEWER, Privilege.VIEW_AWARD_RECOMMENDATION],
-    ),
-    link_role_types=[LinkRoleRoleType(role_id=GMO_REVIEWER_ID, role_type=RoleType.AGENCY)],
-)
-
-FINAL_AWARD_REC_APPROVER_ID = uuid.UUID("2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c")
-FINAL_AWARD_REC_APPROVER = Role(
-    role_id=FINAL_AWARD_REC_APPROVER_ID,
-    role_name="Final Award Rec Approver",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        FINAL_AWARD_REC_APPROVER_ID,
-        [Privilege.FINAL_AWARD_REC_APPROVER, Privilege.VIEW_AWARD_RECOMMENDATION],
-    ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=FINAL_AWARD_REC_APPROVER_ID, role_type=RoleType.AGENCY)
     ],
 )
 
@@ -369,14 +284,8 @@ CORE_ROLES = [
     NAVA_INTERNAL_ROLE,
     SYSTEM_WORKFLOW_USER_ROLE,
     INTERNAL_WORKFLOW_USER_ROLE,
-    AWARD_RECOMMENDATION_USER,
     GRANTOR_PROGRAM_OFFICER,
     GRANTOR_BUDGET_OFFICER,
-    PQC_REVIEWER,
-    GMS_REVIEWER,
-    FMO_REVIEWER,
-    GMO_REVIEWER,
-    FINAL_AWARD_REC_APPROVER,
     INTERNAL_S3_SCANNER_ROLE,
     E2E_TEST_USER_MANAGER_ROLE,
 ]

@@ -82,7 +82,7 @@ def test_get_all_opportunities_notifications_with_api_key(
 
     response = client.get(
         f"/v1/users/{api_key.user_id}/all-opportunities/notifications",
-        headers={"X-API-Key": api_key.key_id},
+        headers={"X-API-Key": api_key.raw_key},
     )
 
     assert response.status_code == 200

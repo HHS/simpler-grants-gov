@@ -1,7 +1,8 @@
+import { fileURLToPath } from "node:url";
 import type { EnumMember, Model, Program } from "@typespec/compiler";
 import { createTester, expectDiagnostics } from "@typespec/compiler/testing";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+
 import { xmlMapping } from "../src/xml-mapping.js";
 
 const FORMS_ROOT = fileURLToPath(new URL("../../..", import.meta.url));

@@ -21,7 +21,7 @@ resource "aws_iam_role_policy_attachment" "processor_service_db_access" {
 }
 
 resource "aws_iam_role_policy_attachment" "processor_service_email_access" {
-  count = var.enable_processor_service && length(var.pinpoint_app_id) > 0 ? 1 : 0
+  count = var.enable_processor_service && var.enable_email_access ? 1 : 0
 
   role       = aws_iam_role.processor_service[0].name
   policy_arn = aws_iam_policy.email_access[0].arn

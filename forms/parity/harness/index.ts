@@ -16,8 +16,8 @@ import { datFields } from "./flatten/dat.ts";
 import { indexLeaves, jsonSchemaFields } from "./flatten/jsonSchema.ts";
 import { planFields, walkFields, type Plan } from "./flatten/plan.ts";
 import { uiSchemaFields } from "./flatten/uiSchema.ts";
-import { xsdFields } from "./flatten/xsd.ts";
 import { link } from "./flatten/xmlTransform.ts";
+import { xsdFields } from "./flatten/xsd.ts";
 import {
   loadFormSchema,
   loadIndex,

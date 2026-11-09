@@ -69,14 +69,13 @@ module "infra_dev_config" {
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation
-    FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
     ENABLE_JOB_LOCK = "true"
   }
 
-  enable_workflow_service = true
+  enable_submission_consumer = true
 
   enable_processor_service = true
 

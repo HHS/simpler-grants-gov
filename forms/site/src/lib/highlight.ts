@@ -6,14 +6,20 @@
 import { createHighlighterCore, type HighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
-export type Language = "json" | "xml";
+import { foldingTransformer } from "./codeFolding";
+
+export type Language = "json" | "xml" | "typespec";
 
 let highlighter: Promise<HighlighterCore> | undefined;
 
 const load = () =>
   (highlighter ??= createHighlighterCore({
     themes: [import("shiki/themes/github-light.mjs")],
-    langs: [import("shiki/langs/json.mjs"), import("shiki/langs/xml.mjs")],
+    langs: [
+      import("shiki/langs/json.mjs"),
+      import("shiki/langs/xml.mjs"),
+      import("shiki/langs/typespec.mjs"),
+    ],
     engine: createJavaScriptRegexEngine(),
   }));
 
@@ -21,7 +27,11 @@ const load = () =>
  * `code` as highlighted HTML: a `<pre>` holding one `<span>` per token. The `<pre>` keeps
  * the site's code style rather than the theme's colors.
  */
-export async function highlight(code: string, lang: Language): Promise<string> {
+export async function highlight(
+  code: string,
+  lang: Language,
+  foldId?: string,
+): Promise<string> {
   return (await load()).codeToHtml(code, {
     lang,
     theme: "github-light",
@@ -31,6 +41,7 @@ export async function highlight(code: string, lang: Language): Promise<string> {
           delete node.properties.style;
         },
       },
+      ...(foldId ? [foldingTransformer(foldId)] : []),
     ],
   });
 }

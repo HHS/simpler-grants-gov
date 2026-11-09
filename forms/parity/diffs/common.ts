@@ -1,4 +1,4 @@
-import type { FormDiff, Pinned, Recorded, Wording } from "../harness/model.ts";
+import type { Pinned, Recorded, Wording } from "../harness/model.ts";
 
 /** A label the form library standardized across forms, where this form's DAT words it differently. */
 export const standardLabel = (plan: string, source: string): Pinned => ({

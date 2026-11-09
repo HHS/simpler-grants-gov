@@ -32,11 +32,26 @@ npm run compile        # build the emitters, then compile every form into dist/
 npm run clean          # delete dist/, e.g. after deleting or renaming a form
 npm run test:parity    # download the Grants.gov sources, then run the parity tests
 npm run test:emitters  # run the emitters' own tests
+npm run format:check   # check shared Prettier formatting, including Astro files
+npm run format:typespec:check # check TypeSpec specs and emitter declarations
+npm run lint           # lint emitters, scripts and the parity harness
+npm run check:emitters # type check both emitters
+npm run check:scripts  # type check the JavaScript sync script
 npm run sync           # copy each form marked @Sgg.sync into the API
 npm run sync:check     # fail if a form in the API doesn't match its compiled output
 ```
 
 `specs/main.tsp` imports every form, so a single compile builds all of them. `tspconfig.yaml` sets which emitters the compile runs.
+
+Formatting and lint commands also use the site's developer tools; install `site/` dependencies first.
+Use `npm run format` and `npm run format:typespec` to apply formatting. Generated output,
+downloaded source caches and vendored USWDS assets are excluded. Prettier handles supported
+source/document formats (including Astro); TypeSpec's own formatter handles `.tsp` files.
+
+Source downloads use four attempts for network failures or HTTP 5xx, with 250/500/1,000 ms
+backoff and a 30-second timeout per attempt, including the response body. HTTP 4xx and
+changed source hashes fail without retry; a hash change still requires explicit source review
+before `parity:fetch -- --update`.
 
 ## Adding a form
 

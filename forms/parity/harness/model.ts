@@ -20,6 +20,8 @@ import type { XmlFormat } from "./xml.ts";
 export type Path = string;
 
 /** Parsed JSON, as the compiled artifacts are read. */
+// Schema keywords and extension values are open-ended; readers narrow them as they walk.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Json = Record<string, any>;
 
 export const ARRAY = "[]";
