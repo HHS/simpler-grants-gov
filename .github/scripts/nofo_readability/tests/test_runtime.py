@@ -18,6 +18,10 @@ spec.loader.exec_module(runner)
 def report():
     return {
         "checks": {key: True for key in runner.probe.CHECKS},
+        "temporary_storage": {
+            "upload": "container_overlay",
+            "analyzer": "container_overlay",
+        },
         "versions": {"pypdf": "6.21.4", "hhs-nofo-metrics": "0.7.0"},
     }
 
@@ -187,8 +191,9 @@ class RuntimeTests(unittest.TestCase):
     def test_missing_versions_cannot_pass_probe(self):
         output = io.StringIO()
 
-        def passed(checks, fixtures):
+        def passed(checks, fixtures, temporary_storage):
             checks.update({key: True for key in runner.probe.CHECKS})
+            temporary_storage.update(report()["temporary_storage"])
 
         with patch.object(runner.probe, "exercise", side_effect=passed), patch.object(
             runner.probe, "version", side_effect=RuntimeError("PRIVATE")
@@ -236,13 +241,32 @@ class RuntimeTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 runner.command()
 
-    def test_only_boolean_schema_and_safe_versions_are_publishable(self):
+    def test_storage_type_maps_to_fixed_categories(self):
+        for filesystem, category in (
+            ("tmpfs", "memory_backed"),
+            ("overlayfs", "container_overlay"),
+            ("nfs", "network"),
+            ("unexpected", "other"),
+        ):
+            with self.subTest(filesystem=filesystem), patch.object(
+                runner.probe.subprocess, "check_output", return_value=filesystem + "\n"
+            ):
+                self.assertEqual(runner.probe.storage_type("/tmp/probe"), category)
+        with patch.object(
+            runner.probe.subprocess, "check_output", side_effect=OSError("private")
+        ):
+            self.assertEqual(runner.probe.storage_type("/tmp/probe"), "unavailable")
+
+    def test_only_fixed_schema_and_safe_versions_are_publishable(self):
         self.assertEqual(
             runner.validate_report(runner.probe.PREFIX + json.dumps(report())), report()
         )
         for mutate in (
             lambda data: data["checks"].update({"raw_log": True}),
             lambda data: data["checks"].update({"linux_child_limits": "private"}),
+            lambda data: data["temporary_storage"].update({"upload": "/private/path"}),
+            lambda data: data["temporary_storage"].update({"device": "other"}),
+            lambda data: data["temporary_storage"].update({"upload": []}),
             lambda data: data["versions"].update({"pypdf": "private filename"}),
             lambda data: data.update({"raw_error": "private"}),
         ):

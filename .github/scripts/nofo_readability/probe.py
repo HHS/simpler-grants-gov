@@ -17,6 +17,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 PREFIX = "NOFO_READABILITY_RUNTIME "
+STORAGE_PATHS = {"upload", "analyzer"}
+STORAGE_TYPES = {"memory_backed", "container_overlay", "network", "other", "unavailable"}
 CHECKS = {
     "public_uploads_disabled",
     "linux_postgresql",
@@ -86,7 +88,27 @@ def verify_admission(results, connection, app):
             connection.close()
 
 
-def exercise(results, fixtures):
+def storage_type(path):
+    try:
+        filesystem = subprocess.check_output(
+            ["stat", "-f", "-c", "%T", "--", str(path)],
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=3,
+        ).strip()
+    except (OSError, subprocess.SubprocessError):
+        return "unavailable"
+
+    if filesystem in {"tmpfs", "ramfs"}:
+        return "memory_backed"
+    if filesystem == "overlayfs":
+        return "container_overlay"
+    if filesystem in {"nfs", "nfs4", "cifs", "smb2"}:
+        return "network"
+    return "other"
+
+
+def exercise(results, fixtures, temporary_storage):
     import django
 
     os.environ["DJANGO_SETTINGS_MODULE"] = "bloom_nofos.settings"
@@ -128,6 +150,8 @@ def exercise(results, fixtures):
         def tracked_directory(*args, **kwargs):
             directory = original_directory(*args, **kwargs)
             paths.append(Path(directory.name))
+            if label == "success":
+                temporary_storage["analyzer"] = storage_type(directory.name)
             return directory
 
         # Exercise Django's disk-backed upload close as well as analyzer files.
@@ -140,6 +164,8 @@ def exercise(results, fixtures):
         report = None
         outcome = "success"
         try:
+            if label == "success":
+                temporary_storage["upload"] = storage_type(paths[0])
             with contextlib.ExitStack() as stack:
                 stack.enter_context(
                     patch.object(app.tempfile, "TemporaryDirectory", tracked_directory)
@@ -191,9 +217,10 @@ def exercise(results, fixtures):
     limit_code = """
 import os, resource, sys
 from nofos import pdf_readability_worker as worker
+from nofos.readability_upload_limits import PDF_UPLOAD_BYTES
 def observe(*args):
     limits = [(resource.RLIMIT_CPU, 20), (resource.RLIMIT_AS, 1536*1024*1024),
-              (resource.RLIMIT_FSIZE, 2*1024*1024), (resource.RLIMIT_NOFILE, 64)]
+              (resource.RLIMIT_FSIZE, PDF_UPLOAD_BYTES + 1), (resource.RLIMIT_NOFILE, 64)]
     return {"metrics": {}, "limits_ok": all(resource.getrlimit(k) == (v,v) for k,v in limits),
             "environment_ok": set(os.environ) <= {"PATH", "PYTHONDONTWRITEBYTECODE", "TMPDIR", "TMP", "TEMP", "LC_CTYPE"}}
 worker.analyze = observe
@@ -222,6 +249,7 @@ sys.exit(worker.main())
 def main(encoded_fixtures):
     results = {key: False for key in CHECKS}
     versions = {}
+    temporary_storage = dict.fromkeys(STORAGE_PATHS, "unavailable")
     # Redirect setup/library output as well: never publish raw errors, reports,
     # paths, environment values, database results or document content.
     try:
@@ -232,15 +260,24 @@ def main(encoded_fixtures):
                 key: base64.b64decode(value, validate=True)
                 for key, value in encoded_fixtures.items()
             }
-            exercise(results, fixtures)
+            exercise(results, fixtures, temporary_storage)
             versions = {key: version(key) for key in ("pypdf", "hhs-nofo-metrics")}
     except Exception:
         pass
     print(
-        PREFIX + json.dumps({"checks": results, "versions": versions}, sort_keys=True)
+        PREFIX + json.dumps(
+            {
+                "checks": results,
+                "temporary_storage": temporary_storage,
+                "versions": versions,
+            },
+            sort_keys=True,
+        )
     )
     return (
         0
-        if all(results.values()) and set(versions) == {"pypdf", "hhs-nofo-metrics"}
+        if all(results.values())
+        and "unavailable" not in temporary_storage.values()
+        and set(versions) == {"pypdf", "hhs-nofo-metrics"}
         else 1
     )
