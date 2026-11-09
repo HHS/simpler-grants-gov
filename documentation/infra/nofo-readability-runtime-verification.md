@@ -13,6 +13,9 @@ After review and merge, select **Verify Readability Calculator runtime - dev**
 in GitHub Actions and run it from `main`. It takes no environment, command,
 image, recipient, fixture or feature-flag inputs. Keep public uploads disabled.
 Normal deployment concurrency prevents overlap with NOFO infra-dev deployment.
+The deployed dev image must include the request workspace from
+[Builder #1316](https://github.com/HHS/simpler-grants-pdf-builder/pull/1316).
+An older image fails the `checker_workspace_available` check.
 Do not overlap this run with an authenticated calculator analysis: the probe
 briefly uses the application's existing analysis lock and can return busy if
 another analysis holds it. Stop and investigate a failed run before retrying.
@@ -29,7 +32,7 @@ The reviewed Python payload and hash-checked synthetic fixtures travel only in
 the fixed command override (comments/formatting removed with Python's AST, then
 compressed to fit ECS's 8 KiB override limit).
 Nothing is downloaded by the container, and no arbitrary command is accepted.
-No application image change or Builder PR is required to install the probe.
+The probe uses the deployed Builder image without modifying it.
 
 ## What it checks
 
@@ -37,8 +40,8 @@ No application image change or Builder PR is required to install the probe.
 | --- | --- | --- |
 | Upload switch | Read effective Constance value before/after; stop before analysis if enabled | Never changes the switch; concurrent administrator changes must still be avoided |
 | Ordinary PDF analysis and errors | One small supported PDF, invalid bytes, and an encrypted version of the same fictional PDF, sequentially through the deployed `analyze_uploaded_pdf` handler | No HTTP form, middleware, usage-record or browser validation; Word is not covered |
-| Temporary files | Django `TemporaryUploadedFile` plus observed analyzer-owned directories; check absence before probe fallback cleanup | Only files created by this probe; no existing file scan; no assertion about HTTP receive buffering or stale files from normal service workers |
-| Effective temporary storage | Ask Linux for the filesystem type of the synthetic Django upload and the analyzer working directory before cleanup | Reports memory-backed, container overlay, network, other, or unavailable. An overlay result describes the filesystem visible inside the task. It does not by itself establish retention after worker or task termination. |
+| Temporary files | Use Builder's disk upload handler and analyzer in the same request workspace. Check that the upload file and analyzer directory are gone before fallback cleanup, then check that the workspace itself is gone | Only files created by this probe; no existing file scan; no assertion about HTTP receive buffering or stale files from normal service workers |
+| Effective temporary storage | Ask Linux for the filesystem type of the synthetic disk upload and analyzer directory inside the checker workspace before cleanup | Reports memory-backed, container overlay, network, other, or unavailable. An overlay result describes the filesystem visible inside the task. It does not by itself establish retention after worker or task termination. |
 | Timeout cleanup | Replace the child command within the probe process with a harmless two-second sleeper and a 0.1-second deadline; use real subprocess timeout/kill/wait and the application cleanup path | Instrumented timeout, not a pathological PDF or proof of the configured 15-second wall-clock deadline |
 | Linux child limits/environment | Instrument the deployed worker's analysis function in a real child to observe actual limits after its `main()` setup; use the handler's normal child environment | Verifies setup, not exhaustion resistance, filesystem/network isolation or credential reachability |
 | PostgreSQL admission/release | Hold the actual application analysis lock and attempt it from a separate PostgreSQL connection; try again after release | Independent sessions in the separate task, not two HTTP workers or a capacity benchmark |

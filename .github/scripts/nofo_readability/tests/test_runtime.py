@@ -232,7 +232,7 @@ class RuntimeTests(unittest.TestCase):
             and isinstance(node.value, str)
             and len(node.value) > 100
         )
-        source = zlib.decompress(base64.b64decode(packed)).decode()
+        source = zlib.decompress(base64.b85decode(packed)).decode()
         compile(source, "probe", "exec")
         self.assertIn("main({", source)
 

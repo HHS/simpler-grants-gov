@@ -22,6 +22,7 @@ STORAGE_TYPES = {"memory_backed", "container_overlay", "network", "other", "unav
 CHECKS = {
     "public_uploads_disabled",
     "linux_postgresql",
+    "checker_workspace_available",
     "supported_processing",
     "invalid_rejection",
     "encrypted_rejection",
@@ -113,8 +114,8 @@ def exercise(results, fixtures, temporary_storage):
 
     os.environ["DJANGO_SETTINGS_MODULE"] = "bloom_nofos.settings"
     django.setup()
-    from django.core.files.uploadedfile import TemporaryUploadedFile
     from django.db import connection
+    from django.http import HttpRequest
 
     from nofos import pdf_readability as app
 
@@ -132,6 +133,9 @@ def exercise(results, fixtures, temporary_storage):
     results["public_uploads_disabled"] = uploads_disabled()
     if not results["public_uploads_disabled"]:
         return
+    from nofos.readability_scratch import CheckerDiskUploadHandler, request_workspace
+
+    results["checker_workspace_available"] = True
     original_directory = tempfile.TemporaryDirectory
     original_run = subprocess.run
     # Derive an encrypted example from the same fictional PDF in memory, keeping
@@ -148,40 +152,44 @@ def exercise(results, fixtures, temporary_storage):
         paths = []
 
         def tracked_directory(*args, **kwargs):
+            if kwargs.get("dir") != workspace:
+                raise RuntimeError("Analyzer did not use the checker workspace")
             directory = original_directory(*args, **kwargs)
             paths.append(Path(directory.name))
             if label == "success":
                 temporary_storage["analyzer"] = storage_type(directory.name)
             return directory
 
-        # Exercise Django's disk-backed upload close as well as analyzer files.
-        upload = TemporaryUploadedFile(
-            "synthetic.pdf", "application/pdf", len(data), None
-        )
-        upload.write(data)
-        upload.seek(0)
-        paths.append(Path(upload.temporary_file_path()))
         report = None
         outcome = "success"
-        try:
-            if label == "success":
-                temporary_storage["upload"] = storage_type(paths[0])
+        with request_workspace() as workspace:
+            handler = CheckerDiskUploadHandler(HttpRequest(), workspace)
+            handler.new_file("pdf", "synthetic.pdf", "application/pdf", len(data))
             with contextlib.ExitStack() as stack:
+                stack.callback(handler.file.close)
+                handler.receive_data_chunk(data, 0)
+                upload = handler.file_complete(len(data))
+                upload_path = Path(upload.temporary_file_path())
+                if upload_path.parent != workspace:
+                    raise RuntimeError("Disk upload did not use the checker workspace")
+                paths.append(upload_path)
+                if label == "success":
+                    temporary_storage["upload"] = storage_type(upload_path)
                 stack.enter_context(
                     patch.object(app.tempfile, "TemporaryDirectory", tracked_directory)
                 )
                 if runner:
                     stack.enter_context(patch.object(app.subprocess, "run", runner))
                 try:
-                    report = app.analyze_uploaded_pdf(upload)
+                    report = app.analyze_uploaded_pdf(upload, workspace=workspace)
                 except app.PdfReadabilityError as error:
                     outcome = error.code
-        finally:
-            # Observe cleanup BEFORE the probe's fallback close.
-            results["cleanup_" + label] = len(paths) >= 2 and all(
-                not path.exists() for path in paths
-            )
-            upload.close()
+                # Observe analyzer cleanup before the fallback close and outer
+                # workspace removal can hide files left behind.
+                files_removed = len(paths) >= 2 and not any(
+                    path.exists() for path in paths
+                )
+        results["cleanup_" + label] = files_removed and not workspace.exists()
         return outcome == expected, report
 
     for label, filename, expected in (

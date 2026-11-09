@@ -55,9 +55,9 @@ def command():
     # ECS caps the entire command override at 8 KiB. Compress only this fixed,
     # reviewed source plus fixed fixtures; there is no workflow payload input.
     payload = ast.unparse(ast.parse(payload))
-    packed = base64.b64encode(zlib.compress(payload.encode(), level=9)).decode("ascii")
+    packed = base64.b85encode(zlib.compress(payload.encode(), level=9)).decode("ascii")
     bootstrap = (
-        "import base64,zlib;exec(compile(zlib.decompress(base64.b64decode("
+        "import base64,zlib;exec(compile(zlib.decompress(base64.b85decode("
         + repr(packed)
         + ")), '<fixed-dev-probe>', 'exec'))"
     )
