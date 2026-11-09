@@ -14,7 +14,8 @@ rejects opt-in for non-NOFO service names and services without a load balancer.
 Workspace-prefixed NOFO service names are supported.
 
 NOFO environment configuration passes this object through `service_config` to
-the service module. Only `infra/nofos/app-config/infra-dev.tf` opts in:
+the service module. The initial deployment opted in only
+`infra/nofos/app-config/infra-dev.tf`:
 
 ```hcl
 pdf_readability_waf = {
@@ -24,8 +25,8 @@ pdf_readability_waf = {
 }
 ```
 
-Both rules initially observe in Count mode; this does **not** enforce throttling
-or block the route. Production and every other environment remain opted out.
+Both rules initially observed in Count mode. The current environment settings
+are described under [Launch rate limit](#launch-rate-limit).
 The current `Deploy NOFOs` workflow maps its `dev` selection to `infra-dev`.
 Confirm the selected infrastructure revision, environment, account, and HTTPS
 endpoint before testing. The workflow's `version` input selects the Builder
@@ -71,6 +72,23 @@ service-module changes can automatically deploy dev; confirm the actual path
 matchers and unchanged Count actions afterward. Live blocking/restoration still
 requires the bounded verification procedure below.
 
+## Launch rate limit
+
+Production Terraform configures Block mode for approximately 30 matching POST
+requests per five minutes per public IP. This is the starting threshold for launch.
+In the [shared-IP dev test](https://github.com/HHS/simpler-grants-gov/actions/runs/42634506572),
+both clients received a 429 on their seventh request when sharing the dev limit of
+10. The production threshold gives office networks more room for overlapping
+submissions and retries. Review WAF blocks, analyzer load, and support reports
+after the first week of public use.
+
+Dev stays in Count mode at 10, both emergency rules stay in Count, and other
+environments remain opted out. Keep public uploads disabled until the separate
+launch decision. After the production deployment, inspect the live rule and check
+the signed-out unavailable page and ordinary Builder routes. To roll back rate
+enforcement, set production `rate_action` to `count` in a reviewed change,
+deploy to production, and verify the live action.
+
 ## Local checks
 
 Use Terraform 1.14.3, matching CI. All tests below use mocked providers, need no
@@ -86,8 +104,9 @@ terraform -chdir=infra/nofos/app-config test
 
 Service tests cover default behavior, rule order/actions, path and method
 configuration, source-IP aggregation, rate bounds, independent activation, and
-NOFO-only validation. The environment test verifies that only `infra-dev` opts
-in and both actions begin in Count mode. CI runs both suites. These tests verify
+NOFO-only validation. The environment test verifies that only production blocks
+uploads, dev stays in Count, and other environments remain opted out. CI runs
+both suites. These tests verify
 planned configuration, not AWS request matching, effective IAM, drift, or live
 capacity.
 
@@ -301,9 +320,8 @@ checks under [#12568](https://github.com/HHS/simpler-grants-gov/issues/12568).
 
 Rate limiting does not solve slow uploads, distributed abuse, parser isolation,
 full-request size enforcement, temporary-file retention, or notification delivery.
-No alert subscriptions, permissions, runtime evidence collector, production
-opt-in, or pilot enablement are added here. Promote agreed controls to production
-only after dev evidence and the separate reviews; public enablement remains gated.
+This rate setting does not change alert subscriptions, permissions, or runtime
+evidence collection. Public enablement remains gated.
 
 References: [AWS rate settings](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-high-level-settings.html),
 [AWS rate caveats](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-caveats.html),
