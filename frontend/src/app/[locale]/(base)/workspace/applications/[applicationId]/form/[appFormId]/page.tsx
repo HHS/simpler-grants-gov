@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
-import { ApiRequestError } from "src/errors";
+import { ApiRequestError, MissingAuthError } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { logger } from "src/services/logger/simplerLogger";
@@ -51,6 +51,8 @@ async function FormPage({ params }: formPageProps) {
   const { data, error } = await getFormData({ applicationId, appFormId });
   const t = await getTranslations("Application");
 
+  if (error === "UnauthorizedError") return <UnauthenticatedMessage />;
+
   let response;
   try {
     response = await getApplicationDetails(applicationId);
@@ -63,6 +65,9 @@ async function FormPage({ params }: formPageProps) {
       );
     }
   } catch (e) {
+    if (e instanceof MissingAuthError) {
+      return <UnauthenticatedMessage />;
+    }
     logger.error(
       { err: e, applicationId },
       "Error retrieving application details",
@@ -73,7 +78,6 @@ async function FormPage({ params }: formPageProps) {
   const { application_status } = response.data;
 
   if (error || !data) {
-    if (error === "UnauthorizedError") return <UnauthenticatedMessage />;
     if (error === "NotFound") notFound();
     return <TopLevelError />;
   }

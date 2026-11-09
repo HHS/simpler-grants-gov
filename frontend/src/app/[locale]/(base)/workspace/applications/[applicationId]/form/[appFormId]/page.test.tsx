@@ -1,5 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import FormPage from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/page";
+import {
+  ForbiddenError,
+  InternalServerError,
+  MissingAuthError,
+  NotFoundError,
+  UnauthorizedError,
+} from "src/errors";
 
 import { JSX } from "react";
 
@@ -74,15 +81,78 @@ describe("application form page", () => {
   });
   afterEach(() => jest.clearAllMocks());
 
-  it("renders the shared signed-out message at the requested URL when the session is not valid", async () => {
+  it("renders the shared signed-out message at the requested URL when there is no session", async () => {
+    // both requests fail the way they do without a session
     mockGetFormData.mockResolvedValue({ error: "UnauthorizedError" });
+    mockGetApplicationDetails.mockRejectedValue(new MissingAuthError());
 
     await renderFormPage();
 
     expect(screen.getByText("SHARED SIGNED OUT MESSAGE")).toBeInTheDocument();
+    expect(screen.queryByText("TOP LEVEL ERROR")).not.toBeInTheDocument();
     expect(screen.queryByText("APPLY FORM")).not.toBeInTheDocument();
     expect(mockRedirect).not.toHaveBeenCalled();
+    expect(mockNotFound).not.toHaveBeenCalled();
   });
+
+  it("renders the shared signed-out message when the API rejects the session token", async () => {
+    mockGetFormData.mockResolvedValue({ error: "UnauthorizedError" });
+    mockGetApplicationDetails.mockRejectedValue(
+      new UnauthorizedError("unauthorized"),
+    );
+
+    await renderFormPage();
+
+    expect(screen.getByText("SHARED SIGNED OUT MESSAGE")).toBeInTheDocument();
+    expect(screen.queryByText("TOP LEVEL ERROR")).not.toBeInTheDocument();
+    expect(screen.queryByText("APPLY FORM")).not.toBeInTheDocument();
+    expect(mockRedirect).not.toHaveBeenCalled();
+    expect(mockNotFound).not.toHaveBeenCalled();
+  });
+
+  it("renders the shared signed-out message when application details are missing auth", async () => {
+    mockGetFormData.mockResolvedValue({ data: {} });
+    mockGetApplicationDetails.mockRejectedValue(new MissingAuthError());
+
+    await renderFormPage();
+
+    expect(screen.getByText("SHARED SIGNED OUT MESSAGE")).toBeInTheDocument();
+    expect(screen.queryByText("TOP LEVEL ERROR")).not.toBeInTheDocument();
+    expect(screen.queryByText("APPLY FORM")).not.toBeInTheDocument();
+    expect(mockRedirect).not.toHaveBeenCalled();
+    expect(mockNotFound).not.toHaveBeenCalled();
+  });
+
+  it("calls notFound when the form is not found", async () => {
+    mockGetFormData.mockResolvedValue({ error: "NotFound" });
+
+    await renderFormPage();
+
+    expect(mockNotFound).toHaveBeenCalled();
+    expect(
+      screen.queryByText("SHARED SIGNED OUT MESSAGE"),
+    ).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["forbidden", new ForbiddenError("forbidden")],
+    ["not found", new NotFoundError("not found")],
+    ["server", new InternalServerError("server error")],
+  ])(
+    "renders the error page for a %s application details error",
+    async (_label, err) => {
+      mockGetFormData.mockResolvedValue({ error: "TopLevelError" });
+      mockGetApplicationDetails.mockRejectedValue(err);
+
+      await renderFormPage();
+
+      expect(screen.getByText("TOP LEVEL ERROR")).toBeInTheDocument();
+      expect(
+        screen.queryByText("SHARED SIGNED OUT MESSAGE"),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("APPLY FORM")).not.toBeInTheDocument();
+    },
+  );
 
   it("still renders the error page for other form errors", async () => {
     mockGetFormData.mockResolvedValue({ error: "TopLevelError" });
@@ -93,5 +163,6 @@ describe("application form page", () => {
     expect(
       screen.queryByText("SHARED SIGNED OUT MESSAGE"),
     ).not.toBeInTheDocument();
+    expect(screen.queryByText("APPLY FORM")).not.toBeInTheDocument();
   });
 });

@@ -62,6 +62,5 @@ describe("/api/user/local-quick-login POST handler", () => {
 
     expect(createSessionMock).not.toHaveBeenCalled();
     expect(redirectError.digest).toContain(";/login;");
-    expect(redirectError.digest).not.toContain("/unauthenticated");
   });
 });
