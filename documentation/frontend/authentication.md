@@ -84,7 +84,7 @@ The application refreshes tokens to extend the user's session without requiring 
 
 ## Observability
 
-Authentication lifecycle events go through the existing logging paths. Server-side events are logged with the Pino logger (`simplerLogger`). Client-side events are sent with `postUserEvent`, and `/api/events` logs them with the `correlationId` from the cookie.
+Authentication lifecycle events go through the existing logging paths. Server-side events are logged with the Pino logger (`simplerLogger`). Client-side events are sent with `postUserEvent`, and `/api/events` logs them with the `correlation_id` from the cookie. Their `properties` are logged as top-level attributes, so fields such as `reason` are directly queryable.
 
 | Event                           | Source | Trigger                                                       | Additional fields                   |
 | ------------------------------- | ------ | ------------------------------------------------------------- | ----------------------------------- |
@@ -103,7 +103,7 @@ Notes:
 - `logout` records the completion of sign out, not the click. `apiResult` is `success` or `error` as reported by the API logout, when present. Session expiry is never counted as a logout.
 - `session_expired` is not logged for anonymous visitors, failed session requests, or a signed-out response before the expiry time (for example after signing out in another tab).
 - `session_creation_failed` and `authentication_request_failed` are logged at error level.
-- Authentication lifecycle events never include tokens, session secrets, or saved/rejected destination URLs. The Login.gov `token` query parameter is also redacted from request-log URLs.
+- Authentication lifecycle events never include tokens, session secrets, or saved/rejected destination URLs. The `token` query parameter, which carries the Login.gov token, is also redacted from request-log URLs on any path.
 
 ### Destination outcomes
 
@@ -127,7 +127,7 @@ Expected outcomes are not logged as failures. These include a callback without a
 
 ### Correlation IDs
 
-Server-side events carry `correlation_id` and client-side events carry `correlationId`. Both come from the same `correlation_id` cookie, so a query should match either attribute. See [Correlation ID and request URLs](./analytics.md#correlation-id-and-request-urls) for the request log queries.
+Server-side and client-side events both carry `correlation_id`, from the same `correlation_id` cookie. See [Correlation ID and request URLs](./analytics.md#correlation-id-and-request-urls) for the request log queries.
 
 The correlation ID only identifies Simpler-side requests. It is not passed through Login.gov, and it is not guaranteed to be present on `/api/auth/callback` (for example when the cookie has expired or is new). Sign out deletes it after `logout` is logged. Treat the segments before and after Login.gov as separate unless their correlation IDs match.
 

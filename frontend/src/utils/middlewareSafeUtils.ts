@@ -15,29 +15,23 @@ export const stringToBoolean = (
 
 const EXTERNAL_HOST_PATTERN = /^[a-zA-Z0-9.-]+(:\d{1,5})?$/;
 
-const LOGIN_CALLBACK_PATHNAME = "/api/auth/callback";
-
-// the Login.gov token arrives as a query param on the login callback
-const redactLoginToken = (url: URL): string => {
-  if (
-    url.pathname === LOGIN_CALLBACK_PATHNAME &&
-    url.searchParams.has("token")
-  ) {
+const redactToken = (url: URL): string => {
+  if (url.searchParams.has("token")) {
     url.searchParams.set("token", "REDACTED");
   }
   return url.toString();
 };
 
-// resolves the URL for request logging, so the Login.gov token is redacted
+// resolves the URL for request logging, with any token query param redacted
 export const resolveExternalRequestUrl = (request: NextRequest): string => {
   const host = request.headers.get("host");
   const internalUrl = new URL(request.url);
 
   if (!host || !EXTERNAL_HOST_PATTERN.test(host)) {
-    return redactLoginToken(internalUrl);
+    return redactToken(internalUrl);
   }
 
-  return redactLoginToken(
+  return redactToken(
     new URL(
       `${internalUrl.protocol}//${host}${internalUrl.pathname}${internalUrl.search}`,
     ),
