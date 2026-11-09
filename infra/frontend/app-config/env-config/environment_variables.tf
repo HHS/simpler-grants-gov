@@ -95,10 +95,6 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/maintenance-banner-message"
     },
-    FEATURE_OPPORTUNITIES_LIST_OFF = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-opportunities-list-off"
-    },
     FEATURE_FEATURE_FLAG_ADMIN_OFF = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-feature-flag-admin-off"

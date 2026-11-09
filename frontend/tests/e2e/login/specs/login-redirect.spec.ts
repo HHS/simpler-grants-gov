@@ -69,13 +69,13 @@ test.describe("Login Page Redirect", () => {
     "should redirect to stored URL after login",
     { tag: [SMOKE] },
     async ({ page }) => {
-      // Given I have stored "/grantor/opportunities" as the login redirect
+      // Given I have stored "/vision" as the login redirect
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
+        sessionStorage.setItem("login-redirect", "/vision");
       });
       // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
-      await expect(page).toHaveURL(`/grantor/opportunities`);
+      await expect(page).toHaveURL(`/vision`);
     },
   );
 
@@ -118,9 +118,9 @@ test.describe("Login Page Redirect", () => {
     'should display "Redirecting..." text while redirecting',
     { tag: [FULL_REGRESSION] },
     async ({ page }) => {
-      // Given I have stored "/grantor/opportunities" as the login redirect
+      // Given I have stored "/vision" as the login redirect
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
+        sessionStorage.setItem("login-redirect", "/vision");
       });
 
       // When I open the login page
@@ -132,14 +132,12 @@ test.describe("Login Page Redirect", () => {
         redirectingText
           .waitFor({ state: "visible", timeout: 2000 })
           .then(() => "message"),
-        // And I am redirected to "/grantor/opportunities"
-        page
-          .waitForURL("/grantor/opportunities", { timeout: 15000 })
-          .then(() => "redirect"),
+        // And I am redirected to "/vision"
+        page.waitForURL("/vision", { timeout: 15000 }).then(() => "redirect"),
       ]);
 
       if (redirectResult === "message") {
-        await expect(page).toHaveURL("/grantor/opportunities", {
+        await expect(page).toHaveURL("/vision", {
           timeout: 15000,
         });
       }
