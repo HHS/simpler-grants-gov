@@ -9,10 +9,7 @@ namespace Forms.KeyContacts.Examples;
 /** A complete form, used by the form's example. */
 const form: KeyContacts = #{
   applicantOrganizationName: "Acme Corporation",
-  keyContacts: #[
-    principalInvestigator,
-    projectManager
-  ],
+  keyContacts: #[principalInvestigator, projectManager],
 };
 
 // =============================================================================

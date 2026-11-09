@@ -83,7 +83,7 @@ def user_api_key(enable_factory_create):
 
 @pytest.fixture
 def user_api_key_id(user_api_key):
-    return user_api_key.key_id
+    return user_api_key.raw_key
 
 
 @pytest.fixture
@@ -98,7 +98,7 @@ def internal_admin_user(enable_factory_create):
 def internal_admin_user_api_key(internal_admin_user) -> UserApiKey:
     """An internal user with our X-API-Key auth"""
     api_key = factories.UserApiKeyFactory.create(user=internal_admin_user)
-    return api_key.key_id
+    return api_key.raw_key
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -67,6 +67,41 @@ class AlarmTests(unittest.TestCase):
         self.cw.describe_alarms.return_value = {"MetricAlarms": []}
         self.cw.describe_alarm_history.side_effect = [history(1), history(2)]
 
+    def test_production_lifecycle_and_policy_are_isolated(self):
+        topic = "arn:aws:sns:us-east-1:315341936575:nofos-prod-monitoring"
+        self.sns.list_subscriptions_by_topic.return_value = {
+            "Subscriptions": [{"Protocol": "email", "SubscriptionArn": topic + ":test"}]
+        }
+        self.cw.describe_alarm_history.side_effect = [
+            {"AlarmHistoryItems": [{"HistorySummary": "Successfully executed action " + topic}]}
+            for _ in range(2)
+        ]
+        with patch.dict(os.environ, {"NOFO_ALARM_TEST_ENVIRONMENT": "prod"}):
+            status, output = self.run_main()
+        self.assertEqual(status, 0)
+        config = self.cw.put_metric_alarm.call_args.kwargs
+        self.assertEqual(config["AlarmName"], "NOFO-PROD-TEST-alert-delivery-123-1")
+        self.assertEqual(config["AlarmActions"], [topic])
+        self.assertEqual(config["OKActions"], [topic])
+        self.assertIn("production", config["AlarmDescription"])
+        self.cw.delete_alarms.assert_called_once_with(AlarmNames=[config["AlarmName"]])
+        self.assertNotIn("061664787759", str(self.cw.mock_calls))
+        dev = (ROOT / "scripts/nofo_alarm_delivery_session_policy.json").read_text()
+        prod = (ROOT / "scripts/nofo_prod_alarm_delivery_session_policy.json").read_text()
+        self.assertEqual(
+            json.loads(prod),
+            json.loads(dev.replace("061664787759", "315341936575")
+                       .replace("NOFO-DEV-TEST", "NOFO-PROD-TEST")
+                       .replace("nofos-infra-dev", "nofos-prod")),
+        )
+
+    def test_unknown_environment_stops_before_aws(self):
+        with patch.dict(os.environ, {"NOFO_ALARM_TEST_ENVIRONMENT": "other"}):
+            status, _ = self.run_main()
+        self.assertEqual(status, 1)
+        self.cw.put_metric_alarm.assert_not_called()
+        self.cw.delete_alarms.assert_not_called()
+
     def run_main(self, args=()):
         output = io.StringIO()
         with patch.object(sys, "argv", ["test"] + list(args)), patch.object(

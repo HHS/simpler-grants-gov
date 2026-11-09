@@ -10,8 +10,8 @@ The `user_api_key` table stores API keys that allow users to authenticate with t
 | ----------- | --------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | api_key_id  | UUID      | PRIMARY KEY                 | Unique identifier for the API key record                                                                                   |
 | key_name    | TEXT      | NOT NULL                    | Human-readable name for the API key (e.g., "Production Key", "Development Key")                                            |
-| key_id      | TEXT      | NOT NULL                    | AWS API Gateway key identifier                                                                                             |
-| key_id_hash | TEXT      | NOT NULL, UNIQUE            | HMAC-SHA256 hash of `key_id`, keyed with the API key pepper                                                                |
+| key_id      | TEXT      | NULLABLE                    | Deprecated. No longer written; will be dropped                                                                             |
+| key_id_hash | TEXT      | NOT NULL, UNIQUE            | HMAC-SHA256 hash of the raw API key, keyed with the API key pepper. The raw key itself is never stored                     |
 | user_id     | UUID      | NOT NULL, FK → user.user_id | Reference to the user who owns this API key                                                                                |
 | last_used   | TIMESTAMP | NULLABLE                    | Timestamp of when this API key was last used for authentication                                                            |
 | is_active   | BOOLEAN   | NOT NULL, DEFAULT TRUE      | Whether this API key is currently active and can be used                                                                   |
@@ -42,7 +42,6 @@ class UserApiKey(ApiSchemaTable, TimestampMixin):
 
     api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     key_name: Mapped[str]
-    key_id: Mapped[str] = mapped_column(comment="AWS API Gateway key identifier")
     key_id_hash: Mapped[str] = mapped_column(
         unique=True,
         index=True,
@@ -61,19 +60,16 @@ The table is created via Alembic migration: `2025_08_06_add_user_api_key_table.p
 
 `key_id_hash` was added as a nullable column in `2026_09_30_add_key_id_hash_to_user_api_key.py`. `2026_10_05_backfill_key_id_hash_and_finalize_.py` hashes every pre-existing row, then adds the unique index and makes the column NOT NULL.
 
+The plaintext `key_id` column is no longer written or read, and is nullable since `2026_11_05_make_user_api_key_key_id_nullable.py`. It will be dropped in a follow-up. The raw key is returned to the user once when the key is created and imported into AWS API Gateway; only its hash is kept.
+
 ## Usage Examples
 
 ### Creating an API Key
 
 ```python
-# Create an API key for a user
-api_key = UserApiKey(
-    key_name="Production API Key",
-    key_id="aws-api-gateway-key-abc123",
-    user_id=user.user_id,
-    is_active=True
-)
-db_session.add(api_key)
+# Create an API key for a user. Returns the record and the raw key; the raw key
+# is only available here, so it has to be shown to the user now.
+api_key, raw_key = create_api_key(db_session, user.user_id, {"key_name": "Production API Key"})
 db_session.commit()
 ```
 

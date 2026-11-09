@@ -12,7 +12,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { DIFFS } from "../diffs/index.ts";
-import { cachePath, LOCK_FILE, loadPlans } from "../harness/load.ts";
+import { cachePath, loadPlans, LOCK_FILE } from "../harness/load.ts";
+import { download } from "./download.ts";
 
 /** URL -> SHA-256 of its body. */
 type Lock = Record<string, string>;
@@ -42,15 +43,8 @@ function sourceUrls(): string[] {
   });
 }
 
-async function download(url: string): Promise<Buffer> {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
-  return Buffer.from(await response.arrayBuffer());
-}
-
 const lock = readLock();
 const next: Lock = {};
-const problems: string[] = [];
 const queue = sourceUrls();
 const seen = new Set<string>();
 let downloaded = 0;
@@ -65,10 +59,9 @@ while (queue.length) {
   const body = fresh ? cached : await download(url);
   const hash = sha256(body);
   if (lock[url] && lock[url] !== hash && !update) {
-    problems.push(
+    throw new Error(
       `${url} changed upstream. Review the new revision, then run \`npm run parity:fetch -- --update\`.`,
     );
-    continue;
   }
   if (!fresh) {
     mkdirSync(path.dirname(file), { recursive: true });
@@ -78,11 +71,6 @@ while (queue.length) {
   next[url] = hash;
   if (url.endsWith(".xsd"))
     queue.push(...importsOf(body.toString("utf8"), url));
-}
-
-if (problems.length) {
-  console.error(problems.join("\n"));
-  process.exit(1);
 }
 
 const sorted = Object.fromEntries(

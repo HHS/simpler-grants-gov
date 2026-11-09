@@ -1,10 +1,7 @@
 "server only";
 
 import { ApiRequestError } from "src/errors";
-import {
-  fetchUserWithMethod,
-  searchAgencies,
-} from "src/services/fetch/fetchers/fetchers";
+import { searchAgencies } from "src/services/fetch/fetchers/fetchers";
 import { logger } from "src/services/logger/simplerLogger";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
@@ -76,18 +73,4 @@ export const searchAndFlattenAgencies = async (
     logger.error({ err: e }, "Error flattening agency search results");
     throw e;
   }
-};
-
-// ------------------------------------------------------
-// Fetch user's agencies
-// ------------------------------------------------------
-export const getUserAgencies = async (
-  userId: string,
-): Promise<RelevantAgencyRecord[]> => {
-  const subPath = `${userId}/agencies`;
-  const resp = await fetchUserWithMethod("POST")({
-    subPath,
-  });
-  const json = (await resp.json()) as { data: [] };
-  return json.data;
 };

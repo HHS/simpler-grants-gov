@@ -2,7 +2,13 @@
   "title": "Project Abstract",
   "slug": "project-abstract",
   "status": "backlog",
-  "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Individual", "SF-424 Mandatory"],
+  "family": [
+    "SF-424",
+    "R&R",
+    "SF-424 Short",
+    "SF-424 Individual",
+    "SF-424 Mandatory"
+  ],
   "category": "Narrative & Attachment Forms",
   "apps_count": 7481,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/541",

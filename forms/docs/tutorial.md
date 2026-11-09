@@ -15,15 +15,15 @@ Every command and file in this guide was run as written. The outputs shown are r
 
 ## Concepts
 
-| Term | What it is | Where it lives |
-|---|---|---|
-| **DAT** | Grants.gov's Data Attribute Table: a spreadsheet listing every field's label, help text, requiredness and length. | Downloaded by `npm run parity:fetch` |
-| **XSD** | The XML schema a submission has to validate against. | Downloaded by `npm run parity:fetch` |
-| **Form plan** | Our requirements for a form: each field's label, help text, constraints and how it links to the DAT (`dat_field`), the XSD (`xml_path`) and the form's data (`json_path`). | `site/src/content/forms/<slug>.json` |
-| **Form specification** | The form itself, in TypeSpec: its data model (`form.tsp`), how it's laid out (`layout.tsp`) and how it maps to the XSD (`xsd.tsp`). | `specs/forms/<id>/` |
-| **Question bank** | Reusable questions, like a person's name or address, shared across forms so they're worded and validated the same way everywhere. | `specs/questions/` |
-| **Parity checks** | Tests that compare the plan with the DAT and XSD (*requirements*), the compiled form with the plan (*implementation*), and the XML mapping with the XSD (*XML*). | `parity/` |
-| **Recorded differences** | Known, accepted differences, each with a category (`upstream`, `intentional` or `gap`) and a reason. | `parity/diffs/<slug>.ts` |
+| Term                     | What it is                                                                                                                                                                 | Where it lives                       |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| **DAT**                  | Grants.gov's Data Attribute Table: a spreadsheet listing every field's label, help text, requiredness and length.                                                          | Downloaded by `npm run parity:fetch` |
+| **XSD**                  | The XML schema a submission has to validate against.                                                                                                                       | Downloaded by `npm run parity:fetch` |
+| **Form plan**            | Our requirements for a form: each field's label, help text, constraints and how it links to the DAT (`dat_field`), the XSD (`xml_path`) and the form's data (`json_path`). | `site/src/content/forms/<slug>.json` |
+| **Form specification**   | The form itself, in TypeSpec: its data model (`form.tsp`), how it's laid out (`layout.tsp`) and how it maps to the XSD (`xsd.tsp`).                                        | `specs/forms/<id>/`                  |
+| **Question bank**        | Reusable questions, like a person's name or address, shared across forms so they're worded and validated the same way everywhere.                                          | `specs/questions/`                   |
+| **Parity checks**        | Tests that compare the plan with the DAT and XSD (_requirements_), the compiled form with the plan (_implementation_), and the XML mapping with the XSD (_XML_).           | `parity/`                            |
+| **Recorded differences** | Known, accepted differences, each with a category (`upstream`, `intentional` or `gap`) and a reason.                                                                       | `parity/diffs/<slug>.ts`             |
 
 See [`parity/README.md`](../parity/README.md) for every check the suite runs.
 
@@ -31,10 +31,10 @@ See [`parity/README.md`](../parity/README.md) for every check the suite runs.
 
 The parity tests and the form library's field tree report the same differences, but they count them differently:
 
-| | The tests | The field tree |
-|---|---|---|
-| **What they count** | Checks. Each check compares one thing, such as the plan's labels against the DAT, and fails once, listing every field that differs. | Differences. One for each field, attribute (Label, Help, Format, ...) and source (DAT, XSD or Form) that differs. |
-| **Where to look** | The failing test's name says which comparison failed. The lines under it list the fields. | The tiles count differences and the fields they're in. **Differs in** counts them by attribute. The column (DAT, XSD or Form) says which comparison found each one. |
+|                     | The tests                                                                                                                           | The field tree                                                                                                                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **What they count** | Checks. Each check compares one thing, such as the plan's labels against the DAT, and fails once, listing every field that differs. | Differences. One for each field, attribute (Label, Help, Format, ...) and source (DAT, XSD or Form) that differs.                                                   |
+| **Where to look**   | The failing test's name says which comparison failed. The lines under it list the fields.                                           | The tiles count differences and the fields they're in. **Differs in** counts them by attribute. The column (DAT, XSD or Form) says which comparison found each one. |
 
 So the numbers rarely match. In step 5.4, four checks fail, and the field tree shows 18 unrecorded differences in 14 fields: the help text check alone finds 12. Two more things to know:
 
@@ -689,14 +689,14 @@ model TutorialContactAddress {
 
 How the plan's fields map to TypeSpec:
 
-| Plan | TypeSpec |
-|---|---|
-| `label` | `@UI.label("...")` |
-| `help_text` | The doc comment (`/** ... */`) |
-| `required: true` | A property without `?` |
-| `constraints` | `@minLength`, `@maxLength`, or an enum type |
-| `json_path` | The property name in `snake_case` (`applicantOrganizationName` becomes `applicant_organization_name`) |
-| A repeating section's `min_items` / `max_items` | `@minItems` / `@maxItems` on an array |
+| Plan                                            | TypeSpec                                                                                              |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `label`                                         | `@UI.label("...")`                                                                                    |
+| `help_text`                                     | The doc comment (`/** ... */`)                                                                        |
+| `required: true`                                | A property without `?`                                                                                |
+| `constraints`                                   | `@minLength`, `@maxLength`, or an enum type                                                           |
+| `json_path`                                     | The property name in `snake_case` (`applicantOrganizationName` becomes `applicant_organization_name`) |
+| A repeating section's `min_items` / `max_items` | `@minItems` / `@maxItems` on an array                                                                 |
 
 `Questions.Types.StateCode` and `CountryCode` are the Grants.gov code lists, generated from its UniversalCodes XSD. They're types, not questions, so this step can still use them.
 
@@ -1079,7 +1079,11 @@ export const DIFF: FormDiff = {
   },
   uiSchema: {
     differingLabels: {
-      "key_contacts[].name.first_name": { ...GIVEN_NAME, plan: "First Name", source: "Given Name" },
+      "key_contacts[].name.first_name": {
+        ...GIVEN_NAME,
+        plan: "First Name",
+        source: "Given Name",
+      },
     },
     differingHelp: {
       "key_contacts[].name.first_name": {
@@ -1363,6 +1367,7 @@ You can't have both, so pick one:
   ```
 
   The form keeps matching the DAT, but its contact fields now read differently from every other form that asks for a person. Do that for every field `Person` supplies and you've rebuilt step 2's form, with extra steps.
+
 - **B. Change the plan to the question bank's wording, and record the differences from the DAT as intentional.** The form reads like every other form that uses `Person`. The plan now says, on purpose, that Simpler Grants words these fields differently from Grants.gov. **This is what the real forms do, so do this.**
 
 ### 5.6 Update the plan
@@ -1671,30 +1676,30 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
 
 These are the fields that change:
 
-| Field (`json_path`) | Plan key | New value |
-|---|---|---|
-| `key_contacts[].name.prefix` | `help_text` | Enter the prefix. |
-| `key_contacts[].name.first_name` | `help_text` | Enter the first name. |
-| `key_contacts[].name.middle_name` | `help_text` | Enter the middle name. |
-| `key_contacts[].name.last_name` | `help_text` | Enter the last name. |
-| `key_contacts[].name.suffix` | `help_text` | Enter the suffix. |
-| `key_contacts[].address.street1` | `label` | Street 1 |
-| `key_contacts[].address.street1` | `help_text` | Enter the first line of the street address. |
-| `key_contacts[].address.street2` | `label` | Street 2 |
-| `key_contacts[].address.street2` | `help_text` | Enter the second line of the street address. |
-| `key_contacts[].address.city` | `help_text` | Enter the city. |
-| `key_contacts[].address.county` | `label` | County/Parish |
-| `key_contacts[].address.county` | `help_text` | Enter the county or parish. |
-| `key_contacts[].address.state` | `help_text` | Select the state. This field is required if the country is the United States. |
-| `key_contacts[].address.province` | `help_text` | Enter the province. |
-| `key_contacts[].address.country` | `help_text` | Select the country. |
-| `key_contacts[].address.zip_code` | `help_text` | Enter the zip / postal code. This field is required if the country is the United States. |
-| `key_contacts[].phone` | `label` | Phone Number |
-| `key_contacts[].phone` | `help_text` | Enter the phone number. |
-| `key_contacts[].fax` | `label` | Fax Number |
-| `key_contacts[].fax` | `help_text` | Enter the fax number. |
-| `key_contacts[].email` | `help_text` | Enter the email address. |
-| `key_contacts[].email` | `constraints` | minLength 1, maxLength 60, format email |
+| Field (`json_path`)               | Plan key      | New value                                                                                |
+| --------------------------------- | ------------- | ---------------------------------------------------------------------------------------- |
+| `key_contacts[].name.prefix`      | `help_text`   | Enter the prefix.                                                                        |
+| `key_contacts[].name.first_name`  | `help_text`   | Enter the first name.                                                                    |
+| `key_contacts[].name.middle_name` | `help_text`   | Enter the middle name.                                                                   |
+| `key_contacts[].name.last_name`   | `help_text`   | Enter the last name.                                                                     |
+| `key_contacts[].name.suffix`      | `help_text`   | Enter the suffix.                                                                        |
+| `key_contacts[].address.street1`  | `label`       | Street 1                                                                                 |
+| `key_contacts[].address.street1`  | `help_text`   | Enter the first line of the street address.                                              |
+| `key_contacts[].address.street2`  | `label`       | Street 2                                                                                 |
+| `key_contacts[].address.street2`  | `help_text`   | Enter the second line of the street address.                                             |
+| `key_contacts[].address.city`     | `help_text`   | Enter the city.                                                                          |
+| `key_contacts[].address.county`   | `label`       | County/Parish                                                                            |
+| `key_contacts[].address.county`   | `help_text`   | Enter the county or parish.                                                              |
+| `key_contacts[].address.state`    | `help_text`   | Select the state. This field is required if the country is the United States.            |
+| `key_contacts[].address.province` | `help_text`   | Enter the province.                                                                      |
+| `key_contacts[].address.country`  | `help_text`   | Select the country.                                                                      |
+| `key_contacts[].address.zip_code` | `help_text`   | Enter the zip / postal code. This field is required if the country is the United States. |
+| `key_contacts[].phone`            | `label`       | Phone Number                                                                             |
+| `key_contacts[].phone`            | `help_text`   | Enter the phone number.                                                                  |
+| `key_contacts[].fax`              | `label`       | Fax Number                                                                               |
+| `key_contacts[].fax`              | `help_text`   | Enter the fax number.                                                                    |
+| `key_contacts[].email`            | `help_text`   | Enter the email address.                                                                 |
+| `key_contacts[].email`            | `constraints` | minLength 1, maxLength 60, format email                                                  |
 
 The implementation checks pass. The difference has moved to where it belongs, the requirements checks: the plan now differs from the DAT.
 

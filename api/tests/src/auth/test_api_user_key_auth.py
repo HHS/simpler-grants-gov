@@ -49,11 +49,11 @@ def test_validate_api_key_in_db_success(enable_factory_create, db_session):
 
 
 def test_validate_api_key_in_db_looks_up_by_hash(enable_factory_create, db_session):
-    """The key is resolved by its hash, not by the plaintext key_id column"""
+    """The key is resolved by the hash of the key sent, and nothing else"""
     user = UserFactory.create()
     api_key = UserApiKeyFactory.create(
         user=user,
-        key_id="stale-plaintext-key",
+        raw_key="stale-plaintext-key",
         key_id_hash=hash_api_key_id("hashed-key-123", ApiKeyConfig().pepper),
     )
 

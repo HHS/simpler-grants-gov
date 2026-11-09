@@ -117,7 +117,7 @@ class TestCreatePresignedUploadSuccess:
     ):
         resp = client.post(
             URL,
-            headers={"X-API-Key": user_api_key.key_id},
+            headers={"X-API-Key": user_api_key.raw_key},
             json={"file_name": "report.pdf", "mime_type": "application/pdf"},
         )
 
