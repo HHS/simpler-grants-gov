@@ -19,7 +19,6 @@ class ApplicationSubmissionMessage(BaseModel):
             "submission_message_id": self.message_id,
             "application_id": self.application_id,
             "submitted_by_user_id": self.submitted_by_user_id,
-            "source": "queue",
         }
 
 
