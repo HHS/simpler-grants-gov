@@ -23,6 +23,19 @@ export interface SubmissionFieldMapping {
 /** Keyed by form field key (same keys as the fill data / expectedPrepopulatedFields). */
 export type SubmissionFieldMap = Record<string, SubmissionFieldMapping>;
 
+/**
+ * Today's date as YYYY-MM-DD in US Eastern time. The API's post-population
+ * `current_date` rule uses the US Eastern date (get_now_us_eastern_date), which
+ * differs from the UTC date for part of every evening, so never use UTC here.
+ */
+export const getUsEasternDateString = (date: Date = new Date()): string =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+
 /** "Yes"/"true" → "Y: Yes", anything else → "N: No" (API boolean_to_yes_no transform). */
 export const xmlYesNo = (value: string): string =>
   value === "Yes" || value === "true" ? "Y: Yes" : "N: No";
