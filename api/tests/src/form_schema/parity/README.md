@@ -5,10 +5,7 @@ hand-written form it mirrors.
 
 - [Types of checks](#types-of-checks)
   - [Functional parity](#functional-parity)
-    - [Field validation](#field-validation)
-    - [Field text](#field-text)
-    - [Field order](#field-order)
-    - [Recorded differences](#recorded-differences)
+  - [Example differences](#example-differences)
 - [Creating and using checks](#creating-and-using-checks)
   - [Adding a form](#adding-a-form)
   - [Running checks](#running-checks)
@@ -45,7 +42,8 @@ Does each field in both forms have a matching field in the other, and are matchi
 validated against the same constraints? Requiredness and every validation keyword
 (`type`, `enum`, `maxLength`, `pattern`, …) are compared separately, so a failure names
 the field and the keyword that differs. A keyword set on only one form counts as a
-difference.
+difference. Lists are compared as well as their items, so a list's bounds (`minItems`,
+`maxItems`) are checked too.
 
 #### Field text
 
@@ -63,6 +61,37 @@ would need to move are reported, each located by the fields on either side of it
 Does every difference recorded in the form's `FormDiff` still exist? An entry that names a
 field neither form has, or a difference that's been fixed, fails.
 
+### Example differences
+
+These checks are mostly there to catch problems you'd want to fix while building or
+updating a generated form. Here are the kinds of differences they tend to surface:
+
+- **The generated form accepts something it shouldn't.** If someone were to change a
+  limit, pattern or allowed value in the spec, for example accidentally raising the
+  maximum number of contacts from four to five, these checks would flag that the
+  generated form now accepts data the hand-written form (and Grants.gov) would reject.
+  Then developers could either fix the spec if the change was unintentional or document
+  it as an intentional difference, for example loosening a limit that the Grants.gov XSD
+  doesn't actually enforce.
+- **Fields show up in a different order.** If someone were to re-order the fields in a
+  question (like name or address) that are re-used across forms, these checks would flag
+  that those fields are out of order. Then developers could either restore the previous
+  order if the change was unintentional or document it as an intentional difference, for
+  example moving Country up after making State/Province conditionally visible based on
+  the answer to Country.
+- **Labels or help text change.** If someone were to update the wording of a shared
+  question in the question bank, these checks would flag every form where the label or
+  help text no longer matches the hand-written version. Then developers could either
+  override the wording on that form if the change doesn't fit, or document it as an
+  intentional difference, for example standardizing "Phone", "Phone Number" and
+  "Telephone Number" to a single label across forms.
+- **The hand-written form is the one that's wrong.** Not every difference is a mistake in
+  the generated form. If the generated form follows the Grants.gov XSD more closely than
+  the hand-written one, these checks would still flag the difference. Then developers
+  could document it with a citation to the XSD so it's clear which form is right, for
+  example the hand-written Key Contacts spelling Côte d'Ivoire with a straight
+  apostrophe when the Grants.gov code list uses a curly one.
+
 ## Creating and using checks
 
 ### Adding a form
@@ -71,7 +100,7 @@ field neither form has, or a difference that's been fixed, fails.
    hand-written form modules.
 2. Add it to `DIFFS` in `json_schema/test_forms.py`.
 
-The form then runs through every check. While `DIFFS` is empty, the form checks are
+The form then runs through every check. When `DIFFS` is empty, the form checks are
 collected and skipped.
 
 ### Running checks
@@ -96,9 +125,7 @@ uv run pytest tests/src/form_schema/parity
 
 ### Handling failed checks
 
-Fix the generated form unless the difference is intended or the hand-written form is the
-one that's wrong. In those cases, record the difference in the form's `FormDiff` with the
-reason:
+Fix the generated form unless the difference is intended or there's a bug with hand-written form. In those cases, record the difference in the form's `FormDiff` with an explanation for the discrepancy:
 
 - **Field validation:** a field only one form has goes in `absent_from_source` (generated
   only) or `absent_from_definition` (hand-written only). A requiredness or rule
