@@ -24,9 +24,9 @@
   "notes": [
     "The first attachment is mandatory; additional attachments follow it in the same list, as in the existing SGG form.",
     "Examples use synthetic attachment IDs. File ownership and metadata are resolved by the existing application service.",
-    "API installation and the authenticated file lifecycle remain separate integration steps; library examples alone are not submission evidence.",
+    "Not installed in the API yet. That and the file upload flow are tracked in the migration issue.",
     "No applicant answers are pre- or post-populated. The upload service assigns attachment references when files are uploaded.",
-    "Existing-form follow-ups remain open in HHS/simpler-grants-gov: #11171 (print E2E). Library checks do not close these integration tasks."
+    "Open follow-up on the existing SGG form: #11171 (print E2E)."
   ],
   "children": [
     {

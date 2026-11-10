@@ -1,40 +1,16 @@
 import type { FormDiff } from "../harness/model.ts";
+import {
+  ADDITIONAL_FILES,
+  attachmentListMax,
+  SGG_ATTACHMENT_WORDING,
+} from "./common.ts";
 
 export const DIFF: FormDiff = {
   slug: "project-narrative-attachment-form",
   xml: "xml-mapping",
+  wording: SGG_ATTACHMENT_WORDING,
   dat: {
-    absentFromPlan: {
-      "2-0": {
-        category: "intentional",
-        reason:
-          "The existing SGG form uses one ordered list: the first file is mandatory and later files are additional attachments. The XSD allows 1\u2013100 files in that list.",
-      },
-    },
-    differingLabels: {
-      "1-0": {
-        plan: "* Project Narrative Files",
-        source: "* Mandatory Project Narrative File Filename",
-        category: "intentional",
-        reason: "The form keeps the existing SGG attachment-list label.",
-      },
-    },
-    differingHelp: {
-      "1-0": {
-        plan: "At least one file must be attached",
-        source: "Click here to add mandatory Project Narrative File.",
-        category: "intentional",
-        reason: "The form keeps the existing SGG help for its attachment list.",
-      },
-    },
-    differingRules: {
-      "1-0/maxOccurs": {
-        plan: 100,
-        source: 1,
-        category: "intentional",
-        reason:
-          "The existing SGG form uses one ordered list: the first file is mandatory and later files are additional attachments. The XSD allows 1\u2013100 files in that list.",
-      },
-    },
+    absentFromPlan: { "2-0": ADDITIONAL_FILES },
+    differingRules: { "1-0/maxOccurs": attachmentListMax(100) },
   },
 };
