@@ -415,6 +415,7 @@ class JobType(StrEnum):
     EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
     CHECK_XSD_DRIFT = "check-xsd-drift"
     NEW_OPPORTUNITY_NOTIFICATION = "new-opportunity-notification"
+    COUNT_SUBMITTED_APPLICATIONS = "count-submitted-applications"
 
 
 class NotificationType(StrEnum):
