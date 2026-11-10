@@ -23,6 +23,9 @@ locals {
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
   ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
 
+  external_ses_configuration_set = local.external_ses_email_domain != null ? replace(local.external_ses_email_domain, ".", "-") : null
+  # Temporary workspaces share the base env's configuration set and identity
+  managed_external_ses_domains = toset(local.external_ses_email_domain != null && !local.is_temporary ? [local.external_ses_email_domain] : [])
 }
 
 # If the app has `enable_notifications` set to true AND this is not a temporary
@@ -59,6 +62,13 @@ resource "aws_iam_policy" "external_ses_access" {
         Resource = "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${local.external_ses_email_domain}"
       },
       {
+        # Required once the identity has a default configuration set.
+        Sid      = "SendSESEmailConfigurationSet"
+        Effect   = "Allow"
+        Action   = "ses:SendEmail"
+        Resource = "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:configuration-set/${local.external_ses_configuration_set}"
+      },
+      {
         # ListSuppressedDestinations is account-wide and takes no resource.
         Sid      = "ListSuppressedDestinations"
         Effect   = "Allow"
@@ -67,6 +77,77 @@ resource "aws_iam_policy" "external_ses_access" {
       }
     ]
   })
+}
+
+# Configuration set for the manually created identity in external SES envs, mirroring prod.
+resource "aws_sesv2_configuration_set" "external" {
+  for_each = local.managed_external_ses_domains
+
+  configuration_set_name = local.external_ses_configuration_set
+
+  delivery_options {
+    max_delivery_seconds = 300
+    tls_policy           = "REQUIRE"
+  }
+
+  reputation_options {
+    reputation_metrics_enabled = true
+  }
+
+  sending_options {
+    sending_enabled = true
+  }
+}
+
+# Send SES events to CloudWatch, dimensioned by the app's email_type message tag.
+resource "aws_sesv2_configuration_set_event_destination" "external_logs" {
+  for_each = aws_sesv2_configuration_set.external
+
+  configuration_set_name = each.value.configuration_set_name
+  event_destination_name = "${each.value.configuration_set_name}-email-identity-logs"
+
+  event_destination {
+    enabled = true
+    matching_event_types = [
+      "BOUNCE",
+      "CLICK",
+      "COMPLAINT",
+      "DELIVERY",
+      "OPEN",
+      "REJECT",
+      "RENDERING_FAILURE",
+      "SEND",
+    ]
+
+    cloud_watch_destination {
+      dimension_configuration {
+        dimension_name          = "email_type"
+        dimension_value_source  = "MESSAGE_TAG"
+        default_dimension_value = "other"
+      }
+    }
+  }
+}
+
+# Adopt the manually created identity so its default configuration set is managed.
+import {
+  for_each = local.managed_external_ses_domains
+  to       = aws_sesv2_email_identity.external[each.key]
+  id       = each.key
+}
+
+resource "aws_sesv2_email_identity" "external" {
+  for_each = local.managed_external_ses_domains
+
+  email_identity         = each.key
+  configuration_set_name = aws_sesv2_configuration_set.external[each.key].configuration_set_name
+
+  # IAM must allow the configuration set before it becomes the identity default.
+  depends_on = [aws_iam_policy.external_ses_access]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # If the app has `enable_notifications` set to true, create the email notification
