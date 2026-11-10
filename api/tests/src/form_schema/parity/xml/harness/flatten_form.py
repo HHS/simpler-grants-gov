@@ -30,7 +30,7 @@ class FlatForm:
     #: Elements built from uploaded files rather than from the mapping.
     attachments: frozenset[str]
 
-    #: The form's fields, from `flatten_schema.inputs()`.
+    #: The form's fields, from `flatten_schema.inputs()`, without its lists.
     fields: dict[Path, FormInput]
 
     #: Element path -> the `value_transform` types its rule declares.
@@ -62,7 +62,8 @@ def flatten(diff: FormDiff, mapping: dict[str, Any], json_schema: dict[str, Any]
     """Flatten a form's XML mapping, its JSON Schema and the XSD the mapping targets.
 
     A form with unchecked rules gets no `fields`, since the checks that read them are
-    skipped.
+    skipped. Lists are left out of `fields`, since a mapping reads a list's items, not the
+    list itself.
     """
     targets, unchecked = flatten_transform.read(mapping)
     return FlatForm(
@@ -73,6 +74,16 @@ def flatten(diff: FormDiff, mapping: dict[str, Any], json_schema: dict[str, Any]
             flatten_transform.xsd_of(mapping), flatten_transform.root_of(mapping)
         ),
         attachments=flatten_transform.attachment_elements(mapping),
-        fields={} if unchecked else flatten_schema.inputs(json_schema),
+        fields={} if unchecked else _without_lists(flatten_schema.inputs(json_schema)),
         transformed=flatten_transform.transformed(mapping),
     )
+
+
+# =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+
+
+def _without_lists(fields: dict[Path, FormInput]) -> dict[Path, FormInput]:
+    """Return `fields` without the lists `flatten_schema.inputs()` keeps beside their items."""
+    return {path: field for path, field in fields.items() if field.rules.get("type") != "array"}
