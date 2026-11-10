@@ -7,6 +7,7 @@ locals {
   ) : null
   external_ses_email_domains = {
     "infra-dev"      = "dev.simpler.grants.gov"
+    "infra-sgg1"     = "dev.simpler.grants.gov" # Same AWS account as infra-dev; shares its identity
     "infra-staging"  = "staging.simpler.grants.gov"
     "infra-training" = "training.simpler.grants.gov"
   }
