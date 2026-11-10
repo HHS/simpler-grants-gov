@@ -22,6 +22,11 @@
         "wafv2:GetWebACLForResource"
       ],
       "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["wafv2:GetLoggingConfiguration"],
+      "Resource": "arn:aws:wafv2:us-east-1:315341936575:regional/webacl/nofos-prod-wafv2-web-acl/*"
     }
   ]
 }
