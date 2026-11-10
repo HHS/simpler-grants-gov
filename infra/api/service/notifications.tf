@@ -24,7 +24,7 @@ locals {
   ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
 
   external_ses_configuration_set = local.external_ses_email_domain != null ? replace(local.external_ses_email_domain, ".", "-") : null
-  external_ses_identity_owners = ["infra-dev", "infra-staging", "infra-training"]
+  external_ses_identity_owners   = ["infra-dev", "infra-staging", "infra-training"]
   managed_external_ses_domains = toset(
     local.external_ses_email_domain != null && !local.is_temporary && contains(local.external_ses_identity_owners, var.environment_name)
     ? [local.external_ses_email_domain] : []
