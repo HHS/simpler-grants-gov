@@ -7,6 +7,7 @@ import {
   ApiRequestError,
   MissingAuthError,
   parseErrorStatus,
+  UnauthorizedError,
 } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
@@ -78,7 +79,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     }
     opportunity = opportunityResponse.data;
   } catch (e) {
-    if (e instanceof MissingAuthError) {
+    if (e instanceof MissingAuthError || e instanceof UnauthorizedError) {
       return <UnauthenticatedMessage />;
     }
     if (parseErrorStatus(e as ApiRequestError) === 404) {

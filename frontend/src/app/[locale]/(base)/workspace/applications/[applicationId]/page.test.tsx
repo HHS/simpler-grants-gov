@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import ApplicationLandingPage from "src/app/[locale]/(base)/workspace/applications/[applicationId]/page";
-import { ApiRequestError, MissingAuthError } from "src/errors";
+import {
+  ForbiddenError,
+  InternalServerError,
+  MissingAuthError,
+  NotFoundError,
+  UnauthorizedError,
+} from "src/errors";
 
 import { JSX } from "react";
 
@@ -76,24 +82,41 @@ describe("application landing page", () => {
     expect(mockRedirect).not.toHaveBeenCalled();
   });
 
-  it("still renders the error page for other request errors", async () => {
+  it("renders the shared signed-out message when the API rejects the token", async () => {
     mockGetApplicationDetails.mockRejectedValue(
-      new ApiRequestError("server error", "APIRequestError", 500),
+      new UnauthorizedError("unauthorized"),
     );
 
     await renderApplicationPage();
 
-    expect(screen.getByText("TOP LEVEL ERROR")).toBeInTheDocument();
-    expect(
-      screen.queryByText("SHARED SIGNED OUT MESSAGE"),
-    ).not.toBeInTheDocument();
+    expect(screen.getByText("SHARED SIGNED OUT MESSAGE")).toBeInTheDocument();
+    expect(screen.queryByText("TOP LEVEL ERROR")).not.toBeInTheDocument();
+    expect(screen.queryByText("APPLICATION")).not.toBeInTheDocument();
+    expect(mockRedirect).not.toHaveBeenCalled();
     expect(mockNotFound).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["forbidden", new ForbiddenError("forbidden")],
+    ["server", new InternalServerError("server error")],
+  ])(
+    "still renders the error page for a %s error",
+    async (_label, requestError) => {
+      mockGetApplicationDetails.mockRejectedValue(requestError);
+
+      await renderApplicationPage();
+
+      expect(screen.getByText("TOP LEVEL ERROR")).toBeInTheDocument();
+      expect(
+        screen.queryByText("SHARED SIGNED OUT MESSAGE"),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("APPLICATION")).not.toBeInTheDocument();
+      expect(mockNotFound).not.toHaveBeenCalled();
+    },
+  );
+
   it("still calls notFound for a 404", async () => {
-    mockGetApplicationDetails.mockRejectedValue(
-      new ApiRequestError("not found", "NotFoundError", 404),
-    );
+    mockGetApplicationDetails.mockRejectedValue(new NotFoundError("not found"));
 
     await renderApplicationPage();
 
