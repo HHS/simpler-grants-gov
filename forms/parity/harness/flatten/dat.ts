@@ -85,8 +85,8 @@ export function datFields(workbook: Uint8Array): Fields {
     if (!id || (NOT_INPUTS.has(implementation) && !populatedOutput)) continue;
     const rules: Rules = {};
     const max = Number(row[at.max]);
-    // The shared column is a monetary value for "$", not a character count.
-    // Numeric bounds are compared with the XSD; do not invent a string length here.
+    // A "$" row uses the maximum column for a dollar amount.
+    // The XSD comparison checks explicit numeric bounds.
     if (
       header(row[at.dataType]) !== "$" &&
       String(row[at.max]).trim() &&

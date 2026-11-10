@@ -61,7 +61,7 @@ npm run check:types -w emitters/sgg
 ## Population
 
 `@Sgg.prePopulate(Sgg.PrePopulationRule.agencyName)` and
-`@Sgg.postPopulate(Sgg.PostPopulationRule.currentDate)` bind an answer to an existing
-API provider. They emit `gg_pre_population` and `gg_post_population` in the rule
-schema; no provider executes in the compiler or library preview. Read-only UI and
-draft requiredness remain explicit in the definition. A field cannot have both phases.
+`@Sgg.postPopulate(Sgg.PostPopulationRule.currentDate)` say which rule fills an answer.
+They emit `gg_pre_population` and `gg_post_population` in the rule schema.
+Population runs only in the API.
+Set read-only and requiredness separately. A field can have one population rule.

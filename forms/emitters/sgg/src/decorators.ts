@@ -6,7 +6,7 @@ import type {
   Scalar,
 } from "@typespec/compiler";
 
-import { stateKeys } from "./lib.js";
+import { reportDiagnostic, stateKeys } from "./lib.js";
 
 /** How sync installs a form, from `@Sgg.sync`'s options. */
 export interface SyncOptions {
@@ -39,15 +39,36 @@ export const $sync = (
 export const $attachment = (ctx: DecoratorContext, target: Scalar) =>
   ctx.program.stateSet(stateKeys.attachment).add(target);
 
-/** Author provider bindings; execution and application context remain in the API. */
+function setPopulationRule(
+  ctx: DecoratorContext,
+  target: ModelProperty,
+  rule: EnumMember,
+  phase: "pre" | "post",
+) {
+  const rules = ctx.program.stateMap(
+    phase === "pre" ? stateKeys.prePopulation : stateKeys.postPopulation,
+  );
+  if (rules.has(target)) {
+    reportDiagnostic(ctx.program, {
+      code: "duplicate-population",
+      target: ctx.decoratorTarget,
+      format: { name: target.name, phase },
+    });
+    return;
+  }
+  rules.set(target, rule.value);
+}
+
+/** The rule the API uses to fill this answer before submission. */
 export const $prePopulate = (
   ctx: DecoratorContext,
   target: ModelProperty,
   rule: EnumMember,
-) => ctx.program.stateMap(stateKeys.prePopulation).set(target, rule.value);
+) => setPopulationRule(ctx, target, rule, "pre");
 
+/** The rule the API uses to fill this answer on submission. */
 export const $postPopulate = (
   ctx: DecoratorContext,
   target: ModelProperty,
   rule: EnumMember,
-) => ctx.program.stateMap(stateKeys.postPopulation).set(target, rule.value);
+) => setPopulationRule(ctx, target, rule, "post");

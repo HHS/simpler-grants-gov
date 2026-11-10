@@ -79,8 +79,31 @@ describe("API rule declarations", () => {
         answer: string;
       }
     `);
-    expect(p.diagnostics.length).toBeGreaterThan(0);
+    expect(p.diagnostics.map((d) => d.code)).toEqual(["invalid-argument"]);
   });
+
+  it.each([
+    ["prePopulate", "PrePopulationRule.agencyName", "PrePopulationRule.uei"],
+    [
+      "postPopulate",
+      "PostPopulationRule.signature",
+      "PostPopulationRule.signature",
+    ],
+  ])(
+    "rejects repeated @Sgg.%s on one answer",
+    async (decorator, first, second) => {
+      const p = await programWith(`
+      model Duplicate {
+        @Sgg.${decorator}(Sgg.${first})
+        @Sgg.${decorator}(Sgg.${second})
+        answer: string;
+      }
+    `);
+      expect(p.diagnostics.map((d) => d.code)).toEqual([
+        "simpler-forms-sgg/duplicate-population",
+      ]);
+    },
+  );
   it.each([
     ["prePopulate(Sgg.PrePopulationRule.agencyName)", "int32"],
     ["postPopulate(Sgg.PostPopulationRule.currentDate)", "boolean"],

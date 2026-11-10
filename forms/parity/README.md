@@ -81,8 +81,9 @@ optional section is optional. A plan's `Conditional (...)` counts as optional.
 The DAT is compared on `maxLength` only. Its minimum is 0 for every optional field and 1
 for every required one, so it restates requiredness; the XSD is the authority on
 `minLength`. A DAT list shown as a popup is a fixed code list, so its "max chars" is not a
-length rule. Likewise, a row whose Data Type is `$` states a monetary maximum,
-not a character count; monetary bounds are compared with the XSD. An exact length is stated in a plan as `minLength 12, maxLength 12`.
+length rule. Likewise, a row whose Data Type is `$` uses the maximum column for a
+dollar amount. The XSD comparison checks explicit numeric bounds. For an exact length,
+write `minLength 12, maxLength 12` in the plan.
 
 The DAT prints `*` before a required field's label. Labels compared with the DAT keep it,
 and the plan's label gets one wherever the plan says the field is required, so a label only

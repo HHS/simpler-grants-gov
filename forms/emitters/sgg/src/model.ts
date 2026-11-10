@@ -22,8 +22,9 @@ function isAttachment(p: Program, type: Type): boolean {
 const ATTACHMENT_RULE = { gg_validation: { rule: "attachment" } };
 
 /**
- * The existing API rule contract: attachment ownership and explicit pre/post providers. Rules follow the emitted answer paths, including snake casing.
- * Lists of objects use `gg_type: "array"` so the API applies them to each existing item.
+ * Rules follow the emitted answer paths and property names, including snake casing.
+ * The schema records attachment ownership and pre- or post-population rules.
+ * A list of objects uses `gg_type: "array"` so the API applies its rules per item.
  */
 export function ruleSchema(
   p: Program,

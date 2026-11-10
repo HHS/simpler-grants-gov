@@ -32,7 +32,13 @@ export const $lib = createTypeSpecLibrary({
     "conflicting-population": {
       severity: "error",
       messages: {
-        default: paramMessage`${"name"} has both pre- and post-population. Choose the answer's actual lifecycle.`,
+        default: paramMessage`${"name"} has both @Sgg.prePopulate and @Sgg.postPopulate. Use one or the other.`,
+      },
+    },
+    "duplicate-population": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"name"} has more than one @Sgg.${"phase"}Populate. Keep one rule for this answer.`,
       },
     },
     "sgg-not-a-form": {

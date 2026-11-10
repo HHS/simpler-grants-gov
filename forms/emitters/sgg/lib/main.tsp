@@ -53,7 +53,7 @@ extern dec sync(target: Model, options?: valueof SyncOptions);
  */
 extern dec attachment(target: Scalar);
 
-/** Existing API providers available before submission. No provider runs in the compiler. */
+/** Rules the API runs before submission, such as filling the agency name or UEI. */
 enum PrePopulationRule {
   agencyName: "agency_name",
   assistanceListingNumber: "assistance_listing_number",
@@ -65,7 +65,7 @@ enum PrePopulationRule {
   competitionTitle: "competition_title",
 }
 
-/** Existing API providers available when the applicant signs and submits. */
+/** Rules the API runs on submission, such as filling the signature and date signed. */
 enum PostPopulationRule {
   currentDate: "current_date",
   signature: "signature",
