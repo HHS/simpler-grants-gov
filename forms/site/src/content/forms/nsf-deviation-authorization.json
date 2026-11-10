@@ -37,11 +37,8 @@
     }
   ],
   "notes": [
-    "The DAT states minimum 0 for optional text, while the actual XSD restriction is minimum 1. Omit an unanswered property; a present empty string is not valid serialized output. No optional answer is newly required.",
-    "The misleading XSD type name StringMin0Max4000 does not override its actual minLength 1 facet.",
-    "No answers are pre- or post-populated. API installation and submission evidence are separately reviewed."
+    "The DAT says this field can be empty, but the XSD requires at least one character if the answer is present, despite the type name StringMin0Max4000. We leave an unanswered field out of the XML, so it stays optional.",
+    "No answers are pre- or post-populated. Not installed in the API yet."
   ],
-  "risks": [
-    "Program review and human interpretation of the source suggestions remain separate from syntactic validation."
-  ]
+  "risks": ["Form validation checks text length. NSF staff review the content."]
 }

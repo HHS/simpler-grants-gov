@@ -18,21 +18,18 @@
     "ApplicationMultipleAttachmentWidget"
   ],
   "new_concepts": [],
-  "description": "Research Plan documents with source-shaped XML mappings and separate API installation.",
+  "description": "Research Strategy and supporting documents for a PHS 398 research plan.",
   "notes": [
-    "The DAT and XSD contain twelve single-document fields plus Appendix: thirteen answer fields. The issue description’s fourteen-slot count does not add another source field.",
-    "No answers are pre- or post-populated. File IDs and metadata are assigned and checked by the existing upload service.",
-    "Known gap: Introduction enabling and conditional requiredness depend on the external SF424 R&R application type; Publication List depends on Renewal; Vertebrate Animals depends on R&R Other Project Information. Guidance is retained; automatic cross-form enforcement is not implemented. Unknown context is not treated as New or No.",
-    "Appendix follows DAT field 4-1 help: at most ten files. The XSD allows up to 100, so the capture business rule is intentionally narrower. The DAT maximum occurrence 1 refers to the Appendix group, not one file.",
-    "Existing Attachment and AttachmentArray controls retain separate answers for each document purpose. No source-specific question is promoted solely because its storage type is an attachment UUID.",
-    "Authored XSD mappings use the existing upload descriptor and XML mapping emitter; application installation and real file/submission evidence are separate review surfaces.",
-    "No PDF-content or external agency-specific page-limit check is claimed by JSON or XML validation.",
-    "Source DAT Q4 burden notice: Public reporting burden for this collection of information is estimated to average 10 hours per response, including the time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information.  An agency may not conduct or sponsor, and a person is not required to respond to, a collection of information unless it displays a currently valid OMB control number.  Send comments regarding this burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to: NIH, Project Clearance Branch, 6705 Rockledge Drive, MSC 7974, Bethesda, MD 20892-7974, ATTN: PRA (0925-0001).  Do not return the completed form to this address. "
+    "The issue mentions 14 slots, but the DAT and XSD have 13 fields: 12 single documents plus the Appendix.",
+    "No answers are pre- or post-populated. The upload service assigns file IDs.",
+    "The form shows the requirements for Introduction, Progress Report Publication List, and Vertebrate Animals. Enforcing them requires answers from the SF-424 R&R and R&R Other Project Information forms.",
+    "The DAT allows one Appendix group and its help for field 4-1 limits that group to 10 files. The XSD allows 100 files.",
+    "DAT 0-1 burden statement: Public reporting burden for this collection of information is estimated to average 10 hours per response, including the time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information.  An agency may not conduct or sponsor, and a person is not required to respond to, a collection of information unless it displays a currently valid OMB control number.  Send comments regarding this burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to: NIH, Project Clearance Branch, 6705 Rockledge Drive, MSC 7974, Bethesda, MD 20892-7974, ATTN: PRA (0925-0001).  Do not return the completed form to this address. "
   ],
   "risks": [
-    "External context is required to execute three conditional obligations and Introduction enabling. Unknown context must not silently default to New or No; no clearing behavior is inferred.",
-    "PDF content and agency/FOA/Application Guide page limits require file/opportunity evidence. UUID schema validation does not establish content, existence, ownership or submission readiness.",
-    "Primary XSD permits Appendix absent or present empty and preserves ordered duplicate occurrences. Later XML handling needs an explicit absence/empty policy; this definition introduces no uniqueness constraint."
+    "Until the form can read answers from the other forms, leave the application type and animal-use answers unknown. Defaulting to New or No could hide a required attachment.",
+    "The answer schema checks the format of each file ID. Checking whether the file exists, who owns it, its contents and its page count requires the upload service or later checks.",
+    "The XSD allows the Appendix to be missing or empty and allows the same file more than once. Verify how those cases are handled when the form is installed in the API."
   ],
   "children": [
     {

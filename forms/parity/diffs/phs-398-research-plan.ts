@@ -10,16 +10,16 @@ export const DIFF: FormDiff = {
         source: "3. *Research Strategy",
         category: "intentional",
         reason:
-          "The required marker precedes the whole label in the shared renderer.",
+          "The renderer puts the asterisk in front of the whole label, so it appears before the number.",
       },
     },
     differingRules: {
       "4-1/maxOccurs": {
         plan: 10,
         source: 1,
-        category: "upstream",
+        category: "intentional",
         reason:
-          "The DAT counts one Appendix group, while its help permits ten files and the XSD permits up to 100. The plan counts files and follows the DAT help.",
+          "The DAT counts one Appendix group. The form counts the files in that group and follows the DAT help's limit of 10 files.",
       },
     },
   },
@@ -30,7 +30,7 @@ export const DIFF: FormDiff = {
         source: 100,
         category: "intentional",
         reason:
-          "The plan follows the DAT help's narrower ten-file Appendix business rule.",
+          "The form follows the DAT help's limit of 10 Appendix files. The XSD allows 100.",
       },
     },
   },

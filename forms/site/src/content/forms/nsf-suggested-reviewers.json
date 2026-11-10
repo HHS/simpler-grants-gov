@@ -50,15 +50,14 @@
     }
   ],
   "notes": [
-    "The DAT states minimum 0 for optional text, while the actual XSD restriction is minimum 1. Omit an unanswered property; a present empty string is not valid serialized output. No optional answer is newly required.",
-    "The XSD root is nillable, but an empty object already produces a valid empty versioned document. Root-null transport is not an applicant-answer requirement.",
-    "Suggested reviewer names remain whole-text answers, as the source asks; no invented person-list structure or automated conflict decision is introduced.",
-    "No answers are pre- or post-populated. API installation, native behavior and external submission evidence are separate checks.",
-    "The section heading paraphrases DAT row 1, List of Suggested Reviewers or Reviewers Not to Include (optional), as Optional reviewer suggestions. This static heading change does not combine the two answer fields.",
-    "DAT heading rows 3 and 5 supply the distinct reviewer purposes used as concise field labels; each field retains its exact DAT help. The long optional-instructions paragraph is section help, using existing plaintext descriptions."
+    "The DAT says these fields can be empty, but the XSD requires at least one character when an answer is present. We leave unanswered fields out of the XML, so they stay optional.",
+    "When both fields are blank, a versioned form element with no answers is valid XML. The mapping leaves off the optional nil marker.",
+    "Reviewer names stay free text, as the source asks.",
+    "No answers are pre- or post-populated. Not installed in the API yet.",
+    "We shortened the DAT heading (\"List of Suggested Reviewers or Reviewers Not to Include (optional)\") to \"Optional reviewer suggestions\". The field labels come from DAT headings 3 and 5, each field keeps its DAT help, and the long instructions paragraph is the section help."
   ],
   "risks": [
-    "Program review and human interpretation of the source suggestions remain separate from syntactic validation."
+    "Form validation checks text length. NSF staff review the recommendations."
   ],
   "new_concepts": []
 }

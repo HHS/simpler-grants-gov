@@ -5,7 +5,7 @@ import "#forms/index.tsp";
 using SimplerForms;
 namespace Forms.NSFSuggestedReviewers;
 
-// Local bounded text transport, not one semantic question for both reviewer purposes.
+// Shared length limits for both reviewer fields. They ask two different questions.
 @minLength(1)
 @maxLength(4000)
 @UI.widget(Rendering.Widget.TextArea)
