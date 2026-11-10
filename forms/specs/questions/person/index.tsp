@@ -7,6 +7,7 @@ import "#questions/types/contact-info.tsp";
 
 import "./name.tsp";
 import "./title.tsp";
+import "./congressional-district.tsp";
 
 using SimplerForms;
 

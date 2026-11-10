@@ -2,6 +2,6 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    include: ["parity/**/*.test.ts"],
+    include: ["parity/**/*.test.ts", "validation/**/*.test.ts"],
   },
 });

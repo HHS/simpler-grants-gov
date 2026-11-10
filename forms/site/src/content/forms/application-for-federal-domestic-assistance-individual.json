@@ -1,7 +1,7 @@
 {
-  "title": "Application for Federal Domestic Assistance- Individual",
+  "title": "Application for Federal Domestic Assistance - Individual",
   "slug": "application-for-federal-domestic-assistance-individual",
-  "status": "prioritized",
+  "status": "in_progress",
   "family": ["SF-424 Individual"],
   "category": "Key Personnel & Contact Forms",
   "omb_number": "4040-0005",
@@ -18,23 +18,26 @@
     "TextAreaWidget"
   ],
   "sgg_form_id": null,
-  "description": "Application for Federal Domestic Assistance - Individual (SF424_Individual_2_0) collects application information from individual applicants seeking federal domestic assistance. Unlike other SF-424 variants, this form has no organization, EIN, or estimated funding sections -- the applicant IS the individual. It captures the applicant's name, address, contact information, citizenship status, project details, and certification. This is the simplest form in the SF-424 family, designed exclusively for individual (non-organizational) applicants.",
+  "description": "Collects applicant, citizenship, project and certification information for an individual seeking federal assistance. The applicant is the individual; this edition has no organization, UEI, EIN or estimated-funding section.",
   "notes": [
-    "State requirement: DAT describes State as \"required if Country is the United States.\" The XSD marks State as optional (within AddressDataTypeV3, minOccurs=\"0\"). Resolution: follow the XSD. State is conditionally required only when Country is USA, enforced at the UI level.",
-    "ZIP/Postal Code requirement: DAT says ZIP is \"required if the country is the United States\" with minimum 9 characters for US addresses. The XSD marks ZipPostalCode as optional (minOccurs=\"0\"). Resolution: follow the XSD for XML validation; enforce the US-specific rule at the UI level.",
-    "Citizenship conditional fields: DAT says Country of Citizenship and Residency Start Date are \"required\" when citizenship = No, but the XSD marks both as optional (minOccurs=\"0\"). Resolution: follow the XSD for XML validation; enforce the conditional requirement at the UI level.",
-    "No organization fields: Unlike all other SF-424 variants, this form has no organization name, EIN/TIN, department, division, or UEI fields in the XSD. The applicant is the individual directly.",
-    "AOR has name only: The `AuthorizedRepresentativeName` element uses `HumanNameDataType` (Prefix, FirstName, MiddleName, LastName, Suffix) with no accompanying title, phone, email, fax, or organization fields, unlike other SF-424 variants where the AOR section includes full contact information. Phone, email, and fax exist as separate top-level elements.",
-    "ZIP/Postal Code maxLength: The XSD defines ZipPostalCodeDataType with maxLength 30. We will use the XSD constraint (30) for validation.",
-    "Province maxLength: The XSD defines ProvinceDataType with maxLength 30. We will use the XSD constraint (30) for validation.",
-    "XSD element naming: The XSD uses `AuthorizedRepresentativeName`, `AuthorizedRepresentativePhoneNumber`, `AuthorizedRepresentativeEmail`, and `AuthorizedRepresentativeFax` for the individual applicant's own information. The JSON paths use `applicant.*` for clarity while maintaining the correct XML element mapping."
+    "The applicant is the individual. Reuse the existing name, address and contact questions without adding organization, EIN, UEI or an unrequested person title. Citizenship and congressional district belong under applicant.",
+    "Five opportunity/competition fields are read-only and pre-populated by existing SGG API providers. Received date, signature and date signed are optional in draft answers and required in final submission XML; they are post-populated by the API.",
+    "Citizenship candidate follows explicit DAT5c-6/7/8 business rules: for No, alien number is optional and country/residency date are required; dependent controls are inactive for Yes. Applicant wording separately refers to permanent residents and foreign nationals. That inconsistency is recorded for review; no new three-state status is invented.",
+    "Shared Address retains the existing SGG five-digit US ZIP behavior. DAT5b-9 asks for at least nine characters; this is the existing named ZIP+4 gap, not a claim of source parity or an implicit global bank change. Foreign province/postal code remain optional; State and postal code are required for USA.",
+    "DAT6c-2/3 validation messages require end date not earlier than start date. The definition declares notBefore; the SGG emitter and API rule validator enforce it through the existing rule-processing boundary.",
+    "Certification requires an affirmative checked answer. The Yes/No XML value is derived from that Boolean; legal text and the source assurance note remain visible.",
+    "XML follows the official sequence, including applicant fax/email/phone ahead of address. Layout order is independent of answer nesting and XML order.",
+    "Samples use synthetic opportunity context and signing values so JSON/XML are inspectable before API installation. Samples do not implement population or signing.",
+    "The current SGG renderer hard-codes section heading levels. Applicant fields therefore share one visible Applicant Information section, using existing UI.flatten for name/address/citizenship and inline contact fields. JSON retains those concept groups; nested visual headings can return when the shared renderer supports them.",
+    "Opportunity owns agency, assistance listing and funding opportunity values. Date Received belongs to the application and appears in a separate Application Information section. This moves it after the opportunity fields on screen; XML retains its official sequence.",
+    "Opportunity nesting uses the existing XML-shaped mapping. The older answer-shaped XML transform cannot interleave Date Received between opportunity-owned values. When API sync is enabled, select xml: mapping; no mapper implementation change is included."
   ],
   "risks": [
-    "This is the only SF-424 variant designed for individual (non-organizational) applicants. It cannot be combined with organizational SF-424 forms in the same application package.",
-    "The citizenship section has three distinct states: US citizen, permanent resident (with alien registration number), and foreign national (with country/date). The XSD uses a simple YesNoDataType for the `citizenship` element, so the UI should handle this as a multi-step conditional flow, not a simple Yes/No.",
-    "The XSD element names reference \"AuthorizedRepresentative\" but this form has no separate AOR. The applicant IS the representative. The JSON model uses clearer naming (e.g., `applicant.*`) while maintaining correct XML mapping.",
-    "The XSD element sequence places `AuthorizedRepresentativeFax` before `AuthorizedRepresentativeEmail` and `AuthorizedRepresentativePhoneNumber`, which is unusual and does not match the DAT section order. XML generation must follow the XSD sequence.",
-    "The citizenship section collects sensitive personal information (alien registration number). Ensure appropriate data handling and privacy protections."
+    "Citizenship labels and DAT conditional rules disagree; the explicit-DAT candidate and rationale require source-owner review.",
+    "US postal validation accepts five digits, but the DAT requires nine. The shared Address question needs a reviewed ZIP+4 rule; this form does not introduce a private Address or change the shared rule.",
+    "The library declares the start/end date relation. The API also needs date_not_before rule support from the separate shared-support PR before this rule works in SGG.",
+    "Grantor1/training submissions, completed external PDFs and production acceptance are separate evidence gates; local checks do not satisfy them.",
+    "Changing Country can leave both State and Province in an answer. GlobalLibrary permits only one, so that answer fails XSD validation. The shared Address/retention behavior needs a reviewed fix before API submission; this form does not clear answers or change XML handling."
   ],
   "children": [
     {
@@ -43,391 +46,409 @@
       "children": [
         {
           "kind": "field",
-          "id": "federal-agency",
           "label": "Name of Federal Agency",
-          "dat_field": "1-1",
+          "dat_field": "1",
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Pre-populated from the application cover sheet.",
-          "constraints": "maxLength 60",
-          "json_path": "federal_agency",
-          "xml_path": "SF424_Individual_2_0:FederalAgency"
+          "help_text": "The federal agency providing the funding opportunity.",
+          "constraints": "minLength 1, maxLength 60",
+          "json_path": "opportunity.agency_name",
+          "xml_path": "SF424_Individual_2_0:FederalAgency",
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "federal-agency"
         },
         {
           "kind": "field",
-          "id": "assistance-listing-number",
           "label": "Assistance Listing Number",
           "dat_field": "2-1",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Pre-populated from the application cover sheet.",
-          "constraints": "maxLength 15",
-          "json_path": "assistance_listing_number",
-          "xml_path": "SF424_Individual_2_0:CFDANumber"
+          "help_text": "The assistance listing number associated with this competition.",
+          "constraints": "minLength 1, maxLength 15",
+          "json_path": "opportunity.assistance_listing.number",
+          "xml_path": "SF424_Individual_2_0:CFDANumber",
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "assistance-listing-number"
         },
         {
           "kind": "field",
-          "id": "assistance-listing-title",
           "label": "Assistance Listing Title",
           "dat_field": "2-2",
           "required": false,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Pre-populated from the application cover sheet.",
-          "constraints": "maxLength 120",
-          "json_path": "assistance_listing_title",
-          "xml_path": "SF424_Individual_2_0:CFDATitle"
+          "help_text": "The program title associated with the assistance listing.",
+          "constraints": "minLength 1, maxLength 120",
+          "json_path": "opportunity.assistance_listing.title",
+          "xml_path": "SF424_Individual_2_0:CFDATitle",
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "assistance-listing-title"
         },
         {
           "kind": "field",
-          "id": "date-received",
-          "label": "Date Received",
-          "dat_field": "3-1",
-          "required": true,
-          "type": "Date input",
-          "widget": "TextWidget",
-          "help_text": "Completed by Grants.gov upon submission.",
-          "constraints": "xs:date format (YYYY-MM-DD)",
-          "json_path": "date_received",
-          "xml_path": "SF424_Individual_2_0:Date_Received"
-        },
-        {
-          "kind": "field",
-          "id": "funding-opportunity-number",
           "label": "Funding Opportunity Number",
           "dat_field": "4-1",
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Pre-populated from the application cover sheet.",
-          "constraints": "maxLength 40",
-          "json_path": "funding_opportunity_number",
-          "xml_path": "SF424_Individual_2_0:OpportunityID"
+          "help_text": "The number identifying the funding opportunity.",
+          "constraints": "minLength 1, maxLength 40",
+          "json_path": "opportunity.number",
+          "xml_path": "SF424_Individual_2_0:OpportunityID",
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "funding-opportunity-number"
         },
         {
           "kind": "field",
-          "id": "funding-opportunity-title",
           "label": "Funding Opportunity Title",
           "dat_field": "4-2",
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Pre-populated from the application cover sheet.",
-          "constraints": "maxLength 255",
-          "json_path": "funding_opportunity_title",
-          "xml_path": "SF424_Individual_2_0:OpportunityTitle"
+          "help_text": "The title of the funding opportunity.",
+          "constraints": "minLength 1, maxLength 255",
+          "json_path": "opportunity.title",
+          "xml_path": "SF424_Individual_2_0:OpportunityTitle",
+          "pre_populated": "From the opportunity or competition; read-only.",
+          "id": "funding-opportunity-title"
         }
       ]
     },
     {
       "kind": "section",
-      "label": "Applicant Information (Section 5a)",
+      "label": "Application Information",
       "children": [
         {
           "kind": "field",
-          "id": "prefix",
-          "label": "Prefix",
-          "dat_field": "5a-02",
-          "required": false,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Select the prefix for the applicant's name (e.g., Mr., Ms., Dr.).",
-          "constraints": "maxLength 10",
-          "json_path": "applicant.name.prefix",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:PrefixName"
-        },
-        {
-          "kind": "field",
-          "id": "first-name",
-          "label": "First Name",
-          "dat_field": "5a-03",
-          "required": true,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the applicant's first (given) name.",
-          "constraints": "maxLength 35",
-          "json_path": "applicant.name.first_name",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:FirstName"
-        },
-        {
-          "kind": "field",
-          "id": "middle-name",
-          "label": "Middle Name",
-          "dat_field": "5a-04",
-          "required": false,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the applicant's middle name.",
-          "constraints": "maxLength 25",
-          "json_path": "applicant.name.middle_name",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:MiddleName"
-        },
-        {
-          "kind": "field",
-          "id": "last-name",
-          "label": "Last Name",
-          "dat_field": "5a-05",
-          "required": true,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the applicant's last (family) name.",
-          "constraints": "maxLength 60",
-          "json_path": "applicant.name.last_name",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:LastName"
-        },
-        {
-          "kind": "field",
-          "id": "suffix",
-          "label": "Suffix",
-          "dat_field": "5a-06",
-          "required": false,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the suffix for the applicant's name (e.g., Jr., Sr., PhD).",
-          "constraints": "maxLength 10",
-          "json_path": "applicant.name.suffix",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:SuffixName"
-        }
-      ]
-    },
-    {
-      "kind": "section",
-      "label": "Address (Section 5b)",
-      "children": [
-        {
-          "kind": "field",
-          "id": "street1",
-          "label": "Street1",
-          "dat_field": "5b-1",
-          "required": true,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the first line of the applicant's street address.",
-          "constraints": "maxLength 55",
-          "json_path": "applicant.address.street1",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Street1"
-        },
-        {
-          "kind": "field",
-          "id": "street2",
-          "label": "Street2",
-          "dat_field": "5b-2",
-          "required": false,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the second line of the applicant's street address.",
-          "constraints": "maxLength 55",
-          "json_path": "applicant.address.street2",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Street2"
-        },
-        {
-          "kind": "field",
-          "id": "city",
-          "label": "City",
-          "dat_field": "5b-3",
-          "required": true,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the city for the applicant's address.",
-          "constraints": "maxLength 35",
-          "json_path": "applicant.address.city",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:City"
-        },
-        {
-          "kind": "field",
-          "id": "county",
-          "label": "County/Parish",
-          "dat_field": "5b-4",
-          "required": false,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the county or parish for the applicant's address.",
-          "constraints": "maxLength 30",
-          "json_path": "applicant.address.county",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:County"
-        },
-        {
-          "kind": "field",
-          "id": "state",
-          "label": "State",
-          "dat_field": "5b-5",
-          "required": "Conditional (when Country = \"USA: UNITED STATES\")",
-          "type": "Dropdown (state code list)",
-          "widget": "SelectWidget",
-          "help_text": "Select the state for the applicant's address. Required for US addresses.",
-          "constraints": "StateCodeDataTypeV3 enumeration",
-          "json_path": "applicant.address.state",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:State"
-        },
-        {
-          "kind": "field",
-          "id": "province",
-          "label": "Province",
-          "dat_field": "5b-6",
-          "required": "Conditional (when Country != \"USA: UNITED STATES\")",
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the province for the applicant's address. For non-US addresses.",
-          "constraints": "maxLength 30",
-          "json_path": "applicant.address.province",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Province"
-        },
-        {
-          "kind": "field",
-          "id": "country",
-          "label": "Country",
-          "dat_field": "5b-7",
-          "required": true,
-          "type": "Dropdown (country code list)",
-          "widget": "SelectWidget",
-          "help_text": "Select the country for the applicant's address.",
-          "constraints": "CountryCodeDataTypeV3 enumeration",
-          "json_path": "applicant.address.country",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Country"
-        },
-        {
-          "kind": "field",
-          "id": "zip-code",
-          "label": "Zip / Postal Code",
-          "dat_field": "5b-8",
-          "required": "No (per XSD)",
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the ZIP or postal code for the applicant's address.",
-          "constraints": "maxLength 30",
-          "json_path": "applicant.address.zip_code",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:ZipPostalCode"
-        },
-        {
-          "kind": "field",
-          "id": "phone",
-          "label": "Daytime Phone Number",
-          "dat_field": "5b-9",
-          "required": true,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the applicant's daytime telephone number.",
-          "constraints": "maxLength 25",
-          "json_path": "applicant.phone",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativePhoneNumber"
-        }
-      ]
-    },
-    {
-      "kind": "section",
-      "label": "Citizenship and Additional Contact (Section 5c)",
-      "children": [
-        {
-          "kind": "field",
-          "id": "is-us-citizen",
-          "label": "U.S. Citizenship",
-          "dat_field": "5c-2",
-          "required": true,
-          "type": "Radio (Yes/No)",
-          "widget": "RadioWidget",
-          "help_text": "Select Yes if the applicant is a citizen of the United States. Select No if the applicant is a permanent resident or foreign national.",
-          "constraints": "YesNoDataType enumeration [Y: Yes, N: No]",
-          "json_path": "citizenship.is_us_citizen",
-          "xml_path": "SF424_Individual_2_0:citizenship"
-        },
-        {
-          "kind": "field",
-          "id": "alien-registration-number",
-          "label": "Alien Registration Number",
-          "dat_field": "5c-3",
-          "required": "Conditional (when U.S. Citizenship = No)",
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the Alien Registration Number if the applicant is a permanent resident of the United States.",
-          "constraints": "maxLength 14",
-          "json_path": "citizenship.alien_registration_number",
-          "xml_path": "SF424_Individual_2_0:AlienRegistrationNumber"
-        },
-        {
-          "kind": "field",
-          "id": "country-of-citizenship",
-          "label": "Country of Citizenship",
-          "dat_field": "5c-4",
-          "required": "Conditional (when U.S. Citizenship = No)",
-          "type": "Dropdown (country code list)",
-          "widget": "SelectWidget",
-          "help_text": "Select the country of citizenship if the applicant is not a US citizen.",
-          "constraints": "CountryCodeDataTypeV3 enumeration",
-          "json_path": "citizenship.country_of_citizenship",
-          "xml_path": "SF424_Individual_2_0:CountryofOrigin"
-        },
-        {
-          "kind": "field",
-          "id": "evening-phone",
-          "label": "Evening Phone Number",
-          "dat_field": "5c-5",
-          "required": false,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the applicant's evening telephone number.",
-          "constraints": "maxLength 25",
-          "json_path": "applicant.evening_phone",
-          "xml_path": "SF424_Individual_2_0:EveningPhone"
-        },
-        {
-          "kind": "field",
-          "id": "residency-start-date",
-          "label": "Residency Start Date",
-          "dat_field": "5c-6",
-          "required": "Conditional (when U.S. Citizenship = No)",
+          "label": "Date Received",
+          "dat_field": "3-1",
+          "required": "No (post-populated; required in submission XML)",
           "type": "Date input",
           "widget": "TextWidget",
-          "help_text": "Enter the start date of the most recent residency in the US if the applicant is a foreign national. Enter in MM/DD/YYYY format.",
-          "constraints": "xs:date format (YYYY-MM-DD)",
-          "json_path": "citizenship.residency_start_date",
-          "xml_path": "SF424_Individual_2_0:VisitDate"
-        },
-        {
-          "kind": "field",
-          "id": "email",
-          "label": "Email",
-          "dat_field": "5c-7",
-          "required": true,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the applicant's email address.",
-          "constraints": "maxLength 60",
-          "json_path": "applicant.email",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeEmail"
-        },
-        {
-          "kind": "field",
-          "id": "fax",
-          "label": "Fax Number",
-          "dat_field": "5c-8",
-          "required": false,
-          "type": "Text input",
-          "widget": "TextWidget",
-          "help_text": "Enter the applicant's fax number.",
-          "constraints": "maxLength 25",
-          "json_path": "applicant.fax",
-          "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeFax"
+          "help_text": "Completed by Grants.gov upon submission.",
+          "constraints": "format date",
+          "json_path": "date_received",
+          "xml_path": "SF424_Individual_2_0:Date_Received",
+          "post_populated": "Completed by Grants.gov upon submission.",
+          "id": "date-received"
         }
       ]
     },
     {
       "kind": "section",
-      "label": "Congressional District",
+      "label": "Applicant Information",
       "children": [
         {
+          "kind": "section",
+          "label": "Name",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Prefix",
+              "dat_field": "5a-02",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "constraints": "minLength 1, maxLength 10",
+              "json_path": "applicant.name.prefix",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:PrefixName",
+              "id": "prefix"
+            },
+            {
+              "kind": "field",
+              "label": "First Name",
+              "dat_field": "5a-03",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "constraints": "minLength 1, maxLength 35",
+              "json_path": "applicant.name.first_name",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:FirstName",
+              "id": "first-name"
+            },
+            {
+              "kind": "field",
+              "label": "Middle Name",
+              "dat_field": "5a-04",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "constraints": "minLength 1, maxLength 25",
+              "json_path": "applicant.name.middle_name",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:MiddleName",
+              "id": "middle-name"
+            },
+            {
+              "kind": "field",
+              "label": "Last Name",
+              "dat_field": "5a-05",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "constraints": "minLength 1, maxLength 60",
+              "json_path": "applicant.name.last_name",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:LastName",
+              "id": "last-name"
+            },
+            {
+              "kind": "field",
+              "label": "Suffix",
+              "dat_field": "5a-06",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "constraints": "minLength 1, maxLength 10",
+              "json_path": "applicant.name.suffix",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeName/globLib:SuffixName",
+              "id": "suffix"
+            }
+          ]
+        },
+        {
+          "kind": "section",
+          "label": "Contact Information",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Phone Number",
+              "dat_field": "5a-07",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the daytime telephone number.",
+              "constraints": "minLength 1, maxLength 25",
+              "json_path": "applicant.phone",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativePhoneNumber",
+              "id": "phone"
+            },
+            {
+              "kind": "field",
+              "label": "Phone Number (Evening)",
+              "dat_field": "5a-08",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the evening telephone number.",
+              "constraints": "minLength 1, maxLength 25",
+              "json_path": "applicant.evening_phone",
+              "xml_path": "SF424_Individual_2_0:EveningPhone",
+              "id": "evening-phone"
+            },
+            {
+              "kind": "field",
+              "label": "Fax Number",
+              "dat_field": "5a-09",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the fax number.",
+              "constraints": "minLength 1, maxLength 25",
+              "json_path": "applicant.fax",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeFax",
+              "id": "fax"
+            },
+            {
+              "kind": "field",
+              "label": "Email",
+              "dat_field": "5a-10",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter a valid email address.",
+              "constraints": "maxLength 60, format email",
+              "json_path": "applicant.email",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeEmail",
+              "id": "email"
+            }
+          ]
+        },
+        {
+          "kind": "section",
+          "label": "Address",
+          "children": [
+            {
+              "kind": "field",
+              "label": "Street 1",
+              "dat_field": "5b-2",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the first line of the street address.",
+              "constraints": "minLength 1, maxLength 55",
+              "json_path": "applicant.address.street1",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Street1",
+              "id": "street1"
+            },
+            {
+              "kind": "field",
+              "label": "Street 2",
+              "dat_field": "5b-3",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the second line of the street address.",
+              "constraints": "minLength 1, maxLength 55",
+              "json_path": "applicant.address.street2",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Street2",
+              "id": "street2"
+            },
+            {
+              "kind": "field",
+              "label": "City",
+              "dat_field": "5b-4",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the city.",
+              "constraints": "minLength 1, maxLength 35",
+              "json_path": "applicant.address.city",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:City",
+              "id": "city"
+            },
+            {
+              "kind": "field",
+              "label": "County/Parish",
+              "dat_field": "5b-5",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the county or parish.",
+              "constraints": "minLength 1, maxLength 30",
+              "json_path": "applicant.address.county",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:County",
+              "id": "county"
+            },
+            {
+              "kind": "field",
+              "label": "State",
+              "dat_field": "5b-6",
+              "required": "Conditional (when Country = USA: UNITED STATES)",
+              "type": "Dropdown (state code list)",
+              "widget": "SelectWidget",
+              "help_text": "Select the state. This field is required if the country is the United States.",
+              "constraints": "StateCodeDataTypeV3 enumeration",
+              "json_path": "applicant.address.state",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:State",
+              "id": "state"
+            },
+            {
+              "kind": "field",
+              "label": "Province",
+              "dat_field": "5b-7",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the province.",
+              "constraints": "minLength 1, maxLength 30",
+              "json_path": "applicant.address.province",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Province",
+              "id": "province"
+            },
+            {
+              "kind": "field",
+              "label": "Country",
+              "dat_field": "5b-8",
+              "required": true,
+              "type": "Dropdown (country code list)",
+              "widget": "SelectWidget",
+              "help_text": "Select the country.",
+              "constraints": "CountryCodeDataTypeV3 enumeration",
+              "json_path": "applicant.address.country",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:Country",
+              "id": "country"
+            },
+            {
+              "kind": "field",
+              "label": "Zip / Postal Code",
+              "dat_field": "5b-9",
+              "required": "Conditional (when Country = USA: UNITED STATES)",
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
+              "constraints": "minLength 1, maxLength 30",
+              "json_path": "applicant.address.zip_code",
+              "xml_path": "SF424_Individual_2_0:AuthorizedRepresentativeAddress/globLib:ZipPostalCode",
+              "id": "zip-code"
+            }
+          ]
+        },
+        {
+          "kind": "section",
+          "label": "Citizenship Status",
+          "children": [
+            {
+              "kind": "field",
+              "label": "U.S. Citizenship",
+              "dat_field": "5c-2",
+              "required": true,
+              "type": "Radio (Yes/No)",
+              "widget": "RadioWidget",
+              "help_text": "",
+              "constraints": "YesNoDataType enumeration",
+              "json_path": "applicant.citizenship.is_us_citizen",
+              "xml_path": "SF424_Individual_2_0:citizenship",
+              "id": "is-us-citizen"
+            },
+            {
+              "kind": "field",
+              "label": "If permanent resident of U.S., enter the Alien Registration #",
+              "dat_field": "5c-6",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the Alien Registration Number.",
+              "constraints": "minLength 1, maxLength 14",
+              "json_path": "applicant.citizenship.alien_registration_number",
+              "xml_path": "SF424_Individual_2_0:AlienRegistrationNumber",
+              "id": "alien-registration-number"
+            },
+            {
+              "kind": "field",
+              "label": "If foreign national, enter country of citizenship",
+              "dat_field": "5c-7",
+              "required": "Conditional (when U.S. Citizenship = No)",
+              "type": "Dropdown (country code list)",
+              "widget": "SelectWidget",
+              "help_text": "Select the country. This field is required if the applicant is not a U.S. citizen.",
+              "constraints": "CountryCodeDataTypeV3 enumeration",
+              "json_path": "applicant.citizenship.country_of_citizenship",
+              "xml_path": "SF424_Individual_2_0:CountryofOrigin",
+              "id": "country-of-citizenship"
+            },
+            {
+              "kind": "field",
+              "label": "If foreign national, enter start date of most recent residency in U.S.",
+              "dat_field": "5c-8",
+              "required": "Conditional (when U.S. Citizenship = No)",
+              "type": "Date input",
+              "widget": "TextWidget",
+              "help_text": "Enter the start date of the most recent residency in the U.S. This field is required if the applicant is not a U.S. citizen.",
+              "constraints": "format date",
+              "json_path": "applicant.citizenship.residency_start_date",
+              "xml_path": "SF424_Individual_2_0:VisitDate",
+              "id": "residency-start-date"
+            }
+          ]
+        },
+        {
           "kind": "field",
-          "id": "congressional-district",
           "label": "Congressional District of Applicant",
           "dat_field": "5d",
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
-          "help_text": "Enter the Congressional District in the format: 2-character State Abbreviation - 3-character District Number (e.g., CA-012). If all districts in a state are affected, enter 'all' for the district number (e.g., MD-all).",
-          "constraints": "maxLength 6",
-          "json_path": "congressional_district",
-          "xml_path": "SF424_Individual_2_0:CongressionalDistrictApplicant"
+          "help_text": "Enter the Congressional District as a two-character state abbreviation, a hyphen and a three-digit district number (for example, CA-005). If outside the US, enter 00-000.",
+          "constraints": "minLength 1, maxLength 6",
+          "json_path": "applicant.congressional_district",
+          "xml_path": "SF424_Individual_2_0:CongressionalDistrictApplicant",
+          "id": "congressional-district"
         }
       ]
     },
@@ -437,102 +458,106 @@
       "children": [
         {
           "kind": "field",
-          "id": "title",
           "label": "Project Title",
           "dat_field": "6a",
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
           "help_text": "Enter a brief, descriptive title of the project.",
-          "constraints": "maxLength 200",
+          "constraints": "minLength 1, maxLength 200",
           "json_path": "project.title",
-          "xml_path": "SF424_Individual_2_0:ProjectTitle"
+          "xml_path": "SF424_Individual_2_0:ProjectTitle",
+          "id": "title"
         },
         {
           "kind": "field",
-          "id": "description",
           "label": "Project Description",
           "dat_field": "6b",
           "required": true,
           "type": "Text area",
           "widget": "TextAreaWidget",
           "help_text": "Enter a brief description of the project.",
-          "constraints": "maxLength 1000",
+          "constraints": "minLength 1, maxLength 1000",
           "json_path": "project.description",
-          "xml_path": "SF424_Individual_2_0:ProjectDescription"
+          "xml_path": "SF424_Individual_2_0:ProjectDescription",
+          "id": "description"
         },
         {
           "kind": "field",
-          "id": "start-date",
-          "label": "Proposed Project Start Date",
-          "dat_field": "6c-1",
-          "required": true,
-          "type": "Date input",
-          "widget": "TextWidget",
-          "help_text": "Enter the proposed start date for the project in MM/DD/YYYY format.",
-          "constraints": "xs:date format (YYYY-MM-DD)",
-          "json_path": "project.start_date",
-          "xml_path": "SF424_Individual_2_0:FundingPeriodStartDate"
-        },
-        {
-          "kind": "field",
-          "id": "end-date",
-          "label": "Proposed Project End Date",
+          "label": "Start Date",
           "dat_field": "6c-2",
           "required": true,
           "type": "Date input",
           "widget": "TextWidget",
-          "help_text": "Enter the proposed end date for the project in MM/DD/YYYY format.",
-          "constraints": "xs:date format (YYYY-MM-DD)",
+          "help_text": "Enter the start date for the proposed project.",
+          "constraints": "format date",
+          "json_path": "project.start_date",
+          "xml_path": "SF424_Individual_2_0:FundingPeriodStartDate",
+          "id": "start-date"
+        },
+        {
+          "kind": "field",
+          "label": "End Date",
+          "dat_field": "6c-3",
+          "required": true,
+          "type": "Date input",
+          "widget": "TextWidget",
+          "help_text": "Enter the end date for the proposed project. The end date cannot be earlier than the start date.",
+          "constraints": "format date",
           "json_path": "project.end_date",
-          "xml_path": "SF424_Individual_2_0:FundingPeriodEndDate"
+          "xml_path": "SF424_Individual_2_0:FundingPeriodEndDate",
+          "id": "end-date"
         }
       ]
     },
     {
       "kind": "section",
-      "label": "Certification and Signature",
+      "label": "Certification",
       "children": [
         {
           "kind": "field",
-          "id": "agree",
           "label": "I Agree",
           "dat_field": "7-2",
           "required": true,
           "type": "Checkbox",
           "widget": "CheckboxWidget",
-          "help_text": "By checking this box, you certify to the statements contained in the list of certifications and assurances.",
-          "constraints": "YesNoDataType, must be \"Y: Yes\"",
+          "help_text": "The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions.",
+          "constraints": "YesNoDataType enumeration",
           "json_path": "certification.agree",
-          "xml_path": "SF424_Individual_2_0:ApplicationCertification"
+          "xml_path": "SF424_Individual_2_0:ApplicationCertification",
+          "id": "agree"
         },
         {
           "kind": "field",
-          "id": "signature",
           "label": "Signature",
           "dat_field": "7-4",
-          "required": true,
+          "required": "No (post-populated; required in submission XML)",
           "type": "Text input (system-populated)",
           "widget": "TextWidget",
           "help_text": "Completed by Grants.gov upon submission.",
-          "constraints": "maxLength 144",
+          "constraints": "minLength 1, maxLength 144",
           "json_path": "certification.signature",
-          "xml_path": "SF424_Individual_2_0:AORSignature"
+          "xml_path": "SF424_Individual_2_0:AORSignature",
+          "post_populated": "Completed by Grants.gov upon submission.",
+          "id": "signature"
         },
         {
           "kind": "field",
-          "id": "date-signed",
           "label": "Date Signed",
           "dat_field": "7-5",
-          "required": true,
+          "required": "No (post-populated; required in submission XML)",
           "type": "Date input (system-populated)",
           "widget": "TextWidget",
           "help_text": "Completed by Grants.gov upon submission.",
-          "constraints": "xs:date format (YYYY-MM-DD)",
+          "constraints": "format date",
           "json_path": "certification.date_signed",
-          "xml_path": "SF424_Individual_2_0:AORDate"
+          "xml_path": "SF424_Individual_2_0:AORDate",
+          "post_populated": "Completed by Grants.gov upon submission.",
+          "id": "date-signed"
         }
       ]
     }
-  ]
+  ],
+  "spec_id": "sf424-individual",
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/SF424_Individual_2_0-V2.0_F668.xls"
 }
