@@ -83,11 +83,13 @@ class FieldText:
 
 
 def inputs(schema: dict[str, Any]) -> dict[Path, FormInput]:
-    """Return every field in `schema` that accepts user input, keyed by path.
+    """Return every field in `schema` that accepts user input, and every list, keyed by
+    path.
 
         {"properties": {"email": {"type": "string", "maxLength": 60}}, "required": ["email"]}
         -> {("email",): FormInput(required=True, rules={"maxLength": 60, "type": "string"})}
 
+    A list is kept as well as its items, so its bounds (e.g. `maxItems`) are compared.
     Items in a list are required if the list sets `minItems`.
 
     Raises `ValueError` if the schema uses `prefixItems`.
@@ -103,6 +105,8 @@ def inputs(schema: dict[str, Any]) -> dict[Path, FormInput]:
             return
         items = merged.get("items")
         if isinstance(items, dict):
+            if prefix:
+                out[prefix] = FormInput(required=required, rules=_rules(merged))
             walk(items, (*prefix, ARRAY), bool(merged.get("minItems")))
             return
         if prefix:

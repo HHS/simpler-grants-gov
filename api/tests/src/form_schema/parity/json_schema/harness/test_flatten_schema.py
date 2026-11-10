@@ -62,6 +62,20 @@ class TestInputs:
         }
         assert flatten_schema.inputs(schema)["contacts", "[]"].required
 
+    def test_keeps_list_bounds(self):
+        schema = {
+            "properties": {
+                "contacts": {
+                    "type": "array",
+                    "maxItems": 4,
+                    "items": {"type": "object", "properties": {"name": {"type": "string"}}},
+                }
+            }
+        }
+        assert flatten_schema.inputs(schema)["contacts",] == FormInput(
+            required=False, rules={"maxItems": 4, "type": "array"}
+        )
+
     def test_raises_on_prefix_items(self):
         schema = {
             "properties": {
