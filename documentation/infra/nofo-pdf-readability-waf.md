@@ -85,9 +85,19 @@ after the first week of public use.
 Dev stays in Count mode at 10, both emergency rules stay in Count, and other
 environments remain opted out. Keep public uploads disabled until the separate
 launch decision. After the production deployment, inspect the live rule and check
-the signed-out unavailable page and ordinary Builder routes. To roll back rate
-enforcement, set production `rate_action` to `count` in a reviewed change,
-deploy to production, and verify the live action.
+the signed-out unavailable page and ordinary Builder routes.
+
+To roll back production rate enforcement:
+
+1. In `infra/nofos/app-config/prod.tf`, set `rate_action` to `"count"`.
+   Keep the 30-request threshold, emergency rule and other environments unchanged.
+2. In the same rollback PR, update the rate-action assertion in
+   `infra/nofos/app-config/tests/pdf_readability_waf.tftest.hcl` to expect
+   `"count"` for both production and dev. Update the test name and failure
+   message to match. Leave the threshold, emergency-mode and opt-in assertions
+   intact. Run the app-config tests below before merging.
+3. After review and merge, deploy to production and verify the live rate rule
+   is in Count mode. This rollback does not change the public-upload flag.
 
 ## Local checks
 
@@ -149,12 +159,13 @@ but neither is required for this dev-only procedure.
 For each activation or restoration stage, update `pdf_readability_waf` in
 `infra/nofos/app-config/infra-dev.tf` **and** every Terraform test that asserts
 the WAF mode: currently `tests/pdf_readability_waf.tftest.hcl` and
-`tests/pdf_readability_monitoring.tftest.hcl`. The tests must continue to assert
-the rate threshold, dev-only opt-in, private notification routing and every
-other environment's null configuration. Update only the temporary mode
-expectation: rate `block` for rate and emergency stages, and emergency `true`
-only for the emergency stage. The final restoration change must return both the
-configuration and test expectations to rate `count` and emergency `false`.
+`tests/pdf_readability_monitoring.tftest.hcl`. Preserve production's existing
+WAF settings, both environments' rate thresholds and private notification
+routing, and the null WAF configuration for every other environment. Change
+only the dev mode expectations: rate `block` for rate and emergency stages, and
+emergency `true` only for the emergency stage. The final restoration change
+must return both the dev configuration and test expectations to rate `count`
+and emergency `false`.
 
 Keep the threshold at 10 and the window at 300 seconds. Do not edit shared
 modules, other environments, recipients, IAM or managed rules. Inspect the
