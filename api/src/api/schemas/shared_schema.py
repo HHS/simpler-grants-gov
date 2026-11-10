@@ -58,3 +58,13 @@ class SimpleUserSchema(Schema):
     last_name = fields.String(
         allow_none=True, metadata={"description": "Users last name", "example": "Smith"}
     )
+
+
+class OrganizationApplicationSchema(Schema):
+    application_id = fields.UUID(metadata={"description": "The application's ID"})
+    application_name = fields.String(
+        metadata={
+            "description": "Application name, or the competition title if unnamed",
+            "example": "My application",
+        }
+    )
