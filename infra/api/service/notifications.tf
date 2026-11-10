@@ -24,8 +24,11 @@ locals {
   ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
 
   external_ses_configuration_set = local.external_ses_email_domain != null ? replace(local.external_ses_email_domain, ".", "-") : null
-  # Temporary workspaces share the base env's configuration set and identity
-  managed_external_ses_domains = toset(local.external_ses_email_domain != null && !local.is_temporary ? [local.external_ses_email_domain] : [])
+  external_ses_identity_owners = ["infra-dev", "infra-staging", "infra-training"]
+  managed_external_ses_domains = toset(
+    local.external_ses_email_domain != null && !local.is_temporary && contains(local.external_ses_identity_owners, var.environment_name)
+    ? [local.external_ses_email_domain] : []
+  )
 }
 
 # If the app has `enable_notifications` set to true AND this is not a temporary
