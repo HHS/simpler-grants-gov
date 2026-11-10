@@ -397,4 +397,8 @@ jobs:
     if: failure()
     needs: [share-snapshot, restore, run-migrations]
     uses: ./.github/workflows/send-slack-notification.yml
+    with:
+      # The team environments (infra-sgg*) belong to the SGG contract team, so
+      # their restore failures go to that team's channel instead of #alerts-infra.
+      channel_id: ${{ startsWith(inputs.target_environment, 'infra-sgg') && 'sgg-contract-team' || '#alerts-infra' }}
     secrets: inherit
