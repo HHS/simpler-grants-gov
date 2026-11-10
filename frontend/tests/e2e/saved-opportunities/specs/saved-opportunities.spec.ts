@@ -197,14 +197,14 @@ test.describe("Saved Opportunities", () => {
         SAVED_OPPORTUNITY.opportunityNumber,
       );
 
-      // And a "Description" section heading should be visible
+      // And a "Summary" section heading should be visible
       await expect(
-        page.locator("h2").filter({ hasText: "Description" }),
+        page.locator("h2").filter({ hasText: "Summary" }),
       ).toBeVisible();
 
       // And the opportunity description content should be present
       await expect(page.getByTestId("opportunity-description")).toContainText(
-        "Description",
+        "Summary",
       );
     },
   );

@@ -3,8 +3,7 @@
  * @scenario Show the page title
  * @scenario Show key page content
  * @scenario Expand and collapse the opportunity description
- * @scenario Expand and collapse the close date description
- * @scenario Open Grants.gov in a new tab
+ * @scenario Show the important dates section
  */
 
 import { test as base, expect } from "@playwright/test";
@@ -21,7 +20,6 @@ type TestWithOpportunityId = {
   each opportunity must have:
 
   * sufficiently long description to hide
-  * sufficiently long close date description to hide
 
 */
 
@@ -55,8 +53,17 @@ test("has title", { tag: [DISCOVERY, SMOKE] }, async ({ page }) => {
 
 /** @scenario Show key page content */
 test("has page attributes", { tag: [DISCOVERY, SMOKE] }, async ({ page }) => {
-  // Then I should see "Application process" in "Application process section"
-  await expect(page.getByText("Application process")).toBeVisible();
+  // Then I should see the main section headings
+  for (const name of [
+    "Summary",
+    "Eligibility",
+    "Agency contact information",
+    "Link to additional information",
+  ]) {
+    await expect(
+      page.getByRole("heading", { level: 2, name, exact: true }),
+    ).toBeVisible();
+  }
 });
 
 /** @scenario Expand and collapse the opportunity description */
@@ -123,85 +130,16 @@ test(
   },
 );
 
-/** @scenario Expand and collapse the close date description */
+/** @scenario Show the important dates section */
 test(
-  "can expand and collapse close date description",
+  "has important dates",
   { tag: [DISCOVERY, FULL_REGRESSION] },
   async ({ page }) => {
-    const descriptionExpander = page.locator(
-      "div[data-testid='opportunity-status-widget'] div[data-testid='content-display-toggle']",
-    );
-
-    // Given I should see "Show full description" in "Opportunity status"
-    await expect(
-      descriptionExpander.getByText("Show full description"),
-    ).toBeVisible();
-
-    // And I should not see "Hide full description" in "Opportunity status"
-    await expect(
-      descriptionExpander.getByText("Hide full description"),
-    ).not.toBeVisible();
-    const divCountBeforeExpanding = await page.locator("div:visible").count();
-
-    // When I click "Show full description" in "Opportunity status"
-    await descriptionExpander
-      .getByRole("button", { name: /^Show full description$/ })
-      .click();
-
-    // Then I should see "Hide full description" in "Opportunity status"
-    // validate that summary has been expanded
-    await expect(
-      descriptionExpander.getByText("Show full description"),
-    ).not.toBeVisible();
-
-    // And I should not see "Show full description" in "Opportunity status"
-    await expect(
-      descriptionExpander.getByText("Hide full description"),
-    ).toBeVisible();
-
-    // And I should see more visible page content in "Opportunity status"
-    const divCountAfterExpanding = await page.locator("div:visible").count();
-    expect(divCountBeforeExpanding).toBeLessThan(divCountAfterExpanding);
-
-    // When I click "Hide full description" in "Opportunity status"
-    await descriptionExpander
-      .getByRole("button", { name: /^Hide full description$/ })
-      .click();
-
-    // Then I should see "Show full description" in "Opportunity status"
-    // validate that summary has been collapsed
-    await expect(
-      descriptionExpander.getByText("Show full description"),
-    ).toBeVisible();
-
-    // And I should not see "Hide full description" in "Opportunity status"
-    await expect(
-      descriptionExpander.getByText("Hide full description"),
-    ).not.toBeVisible();
-
-    // And I should see less visible page content in "Opportunity status"
-    const divCountAfterCollapsing = await page.locator("div:visible").count();
-    expect(divCountAfterExpanding).toBeGreaterThan(divCountAfterCollapsing);
-  },
-);
-
-/** @scenario Open Grants.gov in a new tab */
-test(
-  "can navigate to grants.gov",
-  { tag: [DISCOVERY, FULL_REGRESSION] },
-  async ({ page, context }) => {
-    // Given I should see "View on Grants.gov"
-    const newTabPromise = context.waitForEvent("page");
-
-    // When I click "View on Grants.gov"
-    await page.getByRole("button", { name: "View on Grants.gov" }).click();
-
-    // Then a new tab should open
-    const newPage = await newTabPromise;
-
-    // And the new tab URL should contain "grants.gov/search-results-detail/"
-    expect(newPage.url()).toContain(
-      "https://test.grants.gov/search-results-detail/",
-    );
+    // Then I should see the "Important dates", "Award details" and "History" sections
+    for (const name of ["Important dates", "Award details", "History"]) {
+      await expect(
+        page.getByRole("heading", { level: 2, name, exact: true }),
+      ).toBeVisible();
+    }
   },
 );
