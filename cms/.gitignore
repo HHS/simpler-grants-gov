@@ -1,4 +1,4 @@
-/.env.local
+.env.local
 
 # Installed by Composer
 /vendor/

@@ -41,6 +41,52 @@ describe("xmlMappingFields", () => {
     ]);
   });
 
+  it("compares scalar attachment and value lists at their repeated leaves", () => {
+    const lists = {
+      root: {
+        Form: {
+          Attachments: {
+            "att:AttachedFile": {
+              $each: {
+                items: { $field: "attachments" },
+                map: { $attachment: "." },
+              },
+            },
+          },
+          Code: {
+            $each: { items: { $field: "codes" }, map: { $field: "." } },
+          },
+        },
+      },
+    };
+    expect([...xmlMappingFields(lists).byLink.keys()]).toEqual([
+      "attachments[] -> Attachments/AttachedFile",
+      "codes[] -> Code",
+    ]);
+  });
+
+  it("keeps the parent list path when an inner list reads the current item", () => {
+    const lists = {
+      root: {
+        Form: {
+          Row: {
+            $each: {
+              items: { $field: "rows" },
+              map: {
+                Code: {
+                  $each: { items: { $field: "." }, map: { $field: "." } },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    expect([...xmlMappingFields(lists).byLink.keys()]).toEqual([
+      "rows[][] -> Row/Code",
+    ]);
+  });
+
   it("flattens the same fields an XML transform with the same elements does", () => {
     const rules = {
       title: { xml_transform: { target: "Title" } },

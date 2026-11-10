@@ -16,6 +16,11 @@ const props = {
 const mockUseUser = jest.fn();
 
 const mockShowSnackbar = jest.fn();
+const mockPostUserEvent = jest.fn();
+
+jest.mock("src/services/event/postUserEvent", () => ({
+  postUserEvent: (event: unknown) => mockPostUserEvent(event) as unknown,
+}));
 
 const mockUseSnackBar = jest.fn(() => ({
   showSnackbar: () => mockShowSnackbar() as unknown,
@@ -348,9 +353,15 @@ describe("Header", () => {
     await user.click(menuButton);
     const nav = screen.getByRole("navigation");
     const signInLink = within(nav).getByRole("link", { name: "login" });
+    expect(mockPostUserEvent).not.toHaveBeenCalled();
     await user.click(signInLink);
 
     expect(userUtils.storeCurrentPage).toHaveBeenCalled();
+    expect(mockPostUserEvent).toHaveBeenCalledTimes(1);
+    expect(mockPostUserEvent).toHaveBeenCalledWith({
+      name: "authentication_initiated",
+      properties: { pivRequired: false },
+    });
   });
   it("renders with locale for language selection", () => {
     render(<Header locale="es/" />);
