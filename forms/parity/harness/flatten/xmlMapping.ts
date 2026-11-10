@@ -25,8 +25,9 @@ export function xmlMappingFields(mapping: Json): XmlTransformFields {
     fields.byLink.set(link(jsonPath, xmlPath), field);
   };
 
+  const steps = (path: string) => (path === "." ? [] : path.split("."));
   const json = (item: string[], path: string) =>
-    render([...item, ...path.split(".")]);
+    render([...item, ...steps(path)]);
 
   /** The field a value reads, if it reads one: through a transform, match or when. */
   const fieldOf = (value: unknown): string | undefined => {
@@ -64,7 +65,7 @@ export function xmlMappingFields(mapping: Json): XmlTransformFields {
     if (v.$each) {
       const each = v.$each as Json;
       const items = fieldOf(each.items) ?? "";
-      return visit(each.map, xml, [...item, ...items.split("."), ARRAY]);
+      return visit(each.map, xml, [...item, ...steps(items), ARRAY]);
     }
     if (v.$when) {
       const when = v.$when as Json;

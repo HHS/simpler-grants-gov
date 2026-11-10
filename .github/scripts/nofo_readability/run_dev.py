@@ -55,9 +55,9 @@ def command():
     # ECS caps the entire command override at 8 KiB. Compress only this fixed,
     # reviewed source plus fixed fixtures; there is no workflow payload input.
     payload = ast.unparse(ast.parse(payload))
-    packed = base64.b64encode(zlib.compress(payload.encode(), level=9)).decode("ascii")
+    packed = base64.b85encode(zlib.compress(payload.encode(), level=9)).decode("ascii")
     bootstrap = (
-        "import base64,zlib;exec(compile(zlib.decompress(base64.b64decode("
+        "import base64,zlib;exec(compile(zlib.decompress(base64.b85decode("
         + repr(packed)
         + ")), '<fixed-dev-probe>', 'exec'))"
     )
@@ -80,10 +80,16 @@ def validate_report(message):
     try:
         data = json.loads(message[len(probe.PREFIX) :])
         if (
-            set(data) == {"checks", "versions"}
+            set(data) == {"checks", "temporary_storage", "versions"}
             and isinstance(data["checks"], dict)
             and set(data["checks"]) == probe.CHECKS
             and all(type(value) is bool for value in data["checks"].values())
+            and isinstance(data["temporary_storage"], dict)
+            and set(data["temporary_storage"]) == probe.STORAGE_PATHS
+            and all(
+                value in probe.STORAGE_TYPES
+                for value in data["temporary_storage"].values()
+            )
             and isinstance(data["versions"], dict)
             and set(data["versions"]) <= {"pypdf", "hhs-nofo-metrics"}
             and all(
@@ -212,6 +218,7 @@ def run():
             len(app_containers) != 1
             or app_containers[0].get("exitCode") != 0
             or not all(report["checks"].values())
+            or "unavailable" in report["temporary_storage"].values()
             or set(report["versions"]) != {"pypdf", "hhs-nofo-metrics"}
         ):
             raise RuntimeError("Verification did not pass every check.")
