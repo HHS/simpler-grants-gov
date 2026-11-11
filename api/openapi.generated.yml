@@ -9990,6 +9990,11 @@ components:
           description: Whether the user is the EBiz POC (Electronic Business Point
             of Contact) for the organization in SAM.gov
           example: false
+        is_external:
+          type: boolean
+          description: Whether the user is an external collaborator (for example a
+            consultant) rather than staff of the organization
+          example: false
     OrganizationUsersResponseSchema:
       type: object
       properties:
