@@ -6,3 +6,7 @@ directory and the [Analytics README.md](../../analytics/README.md).
 ## Design proposals
 
 - [Vulnerability finding identity and lifecycle schema](vulnerability-lifecycle-schema.md)
+
+## Database operations
+
+- [Vulnerability lifecycle migration and rollback](vulnerability-lifecycle-migration.md)
