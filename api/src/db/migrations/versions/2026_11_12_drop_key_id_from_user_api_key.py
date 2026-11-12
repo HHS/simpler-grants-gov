@@ -1,7 +1,7 @@
 """drop key_id from user_api_key
 
 Revision ID: 714b0dedaf7d
-Revises: 3c9f2e7a1b4d
+Revises: cc730f32e4eb
 Create Date: 2026-11-06 19:10:42.581367
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "714b0dedaf7d"
-down_revision = "3c9f2e7a1b4d"
+down_revision = "cc730f32e4eb"
 branch_labels = None
 depends_on = None
 
