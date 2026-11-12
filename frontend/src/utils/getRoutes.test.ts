@@ -33,6 +33,7 @@ describe("getNextRoutes", () => {
       "/(base)/workspace/applications/[applicationId]/form/[appFormId]/success",
       "/(base)/workspace/applications/[applicationId]",
       "/(base)/workspace/applications",
+      "/(base)/workspace/organizations/1/manage-users/[userId]/manage-permissions",
       "/(base)/workspace/organizations/1/manage-users/legacy",
       "/(base)/workspace/organizations/1/manage-users",
       "/(base)/workspace/organizations/1",
