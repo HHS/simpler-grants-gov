@@ -229,7 +229,7 @@ def test_epa_key_contact_v2_0_non_us_zip_optional(epa_key_contact_v2_0):
                 "street1": "456 Rio",
                 "city": "Montevideo",
                 "country": "URY: URUGUAY",
-                "zip_code": "",  # empty is fine for non-US
+                "zip_code": "11000",
             },
             "phone": "555-555-5555",
         }

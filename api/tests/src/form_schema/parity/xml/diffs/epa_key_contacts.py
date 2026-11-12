@@ -16,6 +16,14 @@ DIFF = FormDiff(
             for contact in CONTACTS
         },
         **{
+            f"{contact}.Address.ZipPostalCode/minLength": (
+                "Bug: since #12967 the shared zip_code allows an empty string, and the form adds "
+                "no minimum for any country. A blank ZIP is accepted and written as an empty "
+                "element, which ZipPostalCode (at least one character) rejects."
+            )
+            for contact in CONTACTS
+        },
+        **{
             f"{contact}.Email/minLength": (
                 "Intentional: the form omits minLength because `format: email` already "
                 "rejects an empty string, and two errors for one problem confuse applicants "

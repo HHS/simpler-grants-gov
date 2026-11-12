@@ -48,12 +48,20 @@ DIFF = FormDiff(
     },
     # Rules where the hand-written form disagrees with the Grants.gov schema, and the schema
     # says the hand-written one is wrong. Each is a defect for Simpler Grants to fix.
-    differing_rules=_each_contact(
-        ".address.country/enum",
-        "UniversalCodes-V2.0.xsd spells CIV with a typographic apostrophe (U+2019), as the "
-        "generated form does. The hand-written form offers it with a straight one (U+0027), a "
-        "value the code list does not contain.",
-    ),
+    differing_rules={
+        **_each_contact(
+            ".address.country/enum",
+            "UniversalCodes-V2.0.xsd spells CIV with a typographic apostrophe (U+2019), as the "
+            "generated form does. The hand-written form offers it with a straight one (U+0027), "
+            "a value the code list does not contain.",
+        ),
+        **_each_contact(
+            ".address.zip_code/minLength",
+            "ZipPostalCodeDataType in GlobalLibrary-V2.0.xsd needs at least one character, as "
+            "the generated form does. Since #12967 the hand-written form accepts an empty "
+            "string, which the API writes as an empty element the XSD rejects.",
+        ),
+    },
     differing_text={
         **_each_contact(
             "/title",
