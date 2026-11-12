@@ -64,7 +64,7 @@ ORG_MEMBER = Role(
 # Grants no application privileges - those are granted separately via the
 # granular application roles below. is_core=False initially so it does not
 # appear in the organization role-management endpoint's selectable list.
-# This role's is_core will be set to True when it becomes a core role in 
+# This role's is_core will be set to True when it becomes a core role in
 # the future, replacing Member.
 ORG_COLLABORATOR_ID = uuid.UUID("1850d6f8-588d-4d0e-a65a-753d4ca005b1")
 ORG_COLLABORATOR = Role(
