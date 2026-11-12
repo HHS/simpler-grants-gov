@@ -28,6 +28,7 @@ import { buildHappyPathTestData } from "tests/e2e/utils/submission/print-view-ut
 import {
   buildExpectedPdfText,
   buildExpectedXmlFields,
+  getUsEasternDateString,
 } from "tests/e2e/utils/submission/submission-field-utils";
 import {
   assertPdfContainsText,
@@ -111,8 +112,8 @@ test(
     await submitApplicationAndVerify(page, "success");
     await verifySubmissionConfirmation(page);
 
-    // SubmittedDate in the XML/PDF is the server (UTC) submission date.
-    const submittedDate = new Date().toISOString().slice(0, 10);
+    // SubmittedDate in the XML/PDF is the submission date in US Eastern time.
+    const submittedDate = getUsEasternDateString();
 
     // --- Download and unzip the generated submission zip ---
     // The zip is generated on demand after submission, so return to the

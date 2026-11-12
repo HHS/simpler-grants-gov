@@ -72,6 +72,7 @@ class TestListOrganizationUsers:
             assert isinstance(user_data["roles"], list)
             assert "is_ebiz_poc" in user_data
             assert user_data["is_ebiz_poc"] is False
+            assert user_data["is_external"] is False
 
             # Verify role structure
             for role in user_data["roles"]:
@@ -387,6 +388,33 @@ class TestListOrganizationUsers:
         # Verify regular user does not have flag set
         assert regular_user_data["is_ebiz_poc"] is False
         assert regular_user_data["email"] == "other@example.com"
+
+    def test_get_organization_users_200_with_external_user(
+        self, enable_factory_create, client, db_session
+    ):
+        """Test that an external collaborator is returned with is_external=True"""
+        owner, organization, owner_token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+        )
+        external_user, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+            organization=organization,
+        )
+        external_user.organization_users[0].is_external = True
+        db_session.commit()
+
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/users",
+            headers={"X-SGG-Token": owner_token},
+            json=_default_pagination_request(),
+        )
+
+        assert resp.status_code == 200
+        users_by_id = {u["user_id"]: u for u in resp.get_json()["data"]}
+        assert users_by_id[str(external_user.user_id)]["is_external"] is True
+        assert users_by_id[str(owner.user_id)]["is_external"] is False
 
     def test_get_organization_users_200_no_sam_entity(
         self, enable_factory_create, client, db_session

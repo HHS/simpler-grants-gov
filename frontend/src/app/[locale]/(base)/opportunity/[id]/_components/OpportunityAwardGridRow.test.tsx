@@ -33,13 +33,13 @@ describe("OpportunityAwardGridRow", () => {
 
     const contentElement = screen.getByText(content);
     expect(contentElement).toBeInTheDocument();
-    expect(contentElement).toHaveClass(
-      "font-sans-sm text-bold margin-bottom-0",
-    );
+    expect(contentElement).toHaveClass("font-sans-sm");
 
     const titleElement = screen.getByText(mockTranslations.programFunding);
     expect(titleElement).toBeInTheDocument();
-    expect(titleElement).toHaveClass("desktop-lg:font-sans-sm");
+    expect(titleElement).toHaveClass(
+      "desktop-lg:font-sans-sm margin-bottom-0 text-bold",
+    );
   });
 
   it("accepts number value for content", () => {
@@ -50,9 +50,7 @@ describe("OpportunityAwardGridRow", () => {
 
     const contentElement = screen.getByText(content.toString());
     expect(contentElement).toBeInTheDocument();
-    expect(contentElement).toHaveClass(
-      "font-sans-sm text-bold margin-bottom-0",
-    );
+    expect(contentElement).toHaveClass("font-sans-sm");
   });
 
   it("renders defaults when data is not present (money)", () => {
@@ -61,7 +59,7 @@ describe("OpportunityAwardGridRow", () => {
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
 
-    const contentElement = screen.getByText("$--");
+    const contentElement = screen.getByText("notSpecified");
     expect(contentElement).toBeInTheDocument();
   });
 
@@ -71,7 +69,14 @@ describe("OpportunityAwardGridRow", () => {
 
     render(<OpportunityAwardGridRow title={title} content={content} />);
 
-    const contentElement = screen.getByText("--");
+    const contentElement = screen.getByText("notSpecified");
     expect(contentElement).toBeInTheDocument();
+  });
+
+  it("renders a content of 0 instead of the fallback", () => {
+    render(<OpportunityAwardGridRow title="expectedAwards" content={0} />);
+
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.queryByText("notSpecified")).not.toBeInTheDocument();
   });
 });

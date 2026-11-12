@@ -94,7 +94,9 @@ class UserBuilder:
         self.jwt_token = token
         return self
 
-    def with_organization(self, organization: Organization, roles: list[Role]) -> Self:
+    def with_organization(
+        self, organization: Organization, roles: list[Role], is_external: bool = False
+    ) -> Self:
         """Add a user to an organization with a specified set of roles"""
         # First see if this user is already a member of the organization provided
         org_user = None
@@ -108,6 +110,8 @@ class UserBuilder:
                 user=self.user, organization=organization
             )
             self.db_session.add(org_user)
+
+        org_user.is_external = is_external
 
         organization_user_roles = []
         for role in roles:
