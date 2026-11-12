@@ -1,6 +1,7 @@
-"""Paths to fields in a form's response, shared by every parity check.
+"""Paths to fields and elements, shared by every parity check.
 
-A path is a tuple of property names, with `[]` standing for any item in a list.
+A path is a tuple of property names in `json_schema/`, or XSD element names in `xml/`, with
+`[]` standing for any item in a list.
 
     ("applicant", "street1")                  applicant.street1
     ("activity_line_items", "[]", "title")    activity_line_items.[].title
