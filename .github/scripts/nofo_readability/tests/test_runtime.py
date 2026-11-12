@@ -203,38 +203,77 @@ class RuntimeTests(unittest.TestCase):
         self.assertNotIn("PRIVATE", output.getvalue())
 
     def test_fixed_payload_and_override_size(self):
-        command = runner.command()
-        self.assertLess(
-            len(
-                json.dumps(
-                    {
-                        "containerOverrides": [
-                            {"name": runner.SERVICE, "command": command}
-                        ]
-                    }
-                )
-            ),
-            8192,
-        )
-        self.assertEqual(command[:2], ["sh", "-c"])
-        # Decode locally to validate the transmitted source without executing it.
         import ast
         import base64
         import shlex
         import zlib
 
-        bootstrap = shlex.split(command[2])[-1]
-        tree = ast.parse(bootstrap)
-        packed = next(
-            node.value
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Constant)
-            and isinstance(node.value, str)
-            and len(node.value) > 100
+        for mode in ("runtime", "interruption"):
+            with self.subTest(mode=mode):
+                command = runner.command(mode)
+                overrides = {
+                    "containerOverrides": [{"name": runner.SERVICE, "command": command}]
+                }
+                self.assertLess(len(json.dumps(overrides)), 8192)
+                self.assertEqual(command[:2], ["sh", "-c"])
+                # Decode locally without executing the AWS-bound payload.
+                bootstrap = shlex.split(command[2])[-1]
+                tree = ast.parse(bootstrap)
+                packed = next(
+                    node.value
+                    for node in ast.walk(tree)
+                    if isinstance(node, ast.Constant)
+                    and isinstance(node.value, str)
+                    and len(node.value) > 100
+                )
+                source = zlib.decompress(base64.b85decode(packed)).decode()
+                compile(source, "probe", "exec")
+                self.assertIn("main({", source)
+                self.assertIn("def uploads_disabled():", source)
+                self.assertEqual("synthetic-invalid.pdf" in source, mode == "runtime")
+
+    def test_interruption_report_accepts_only_fixed_boolean_checks(self):
+        data = {"checks": dict.fromkeys(runner.interruption.CHECKS, True)}
+        prefix = runner.interruption.PREFIX
+        self.assertEqual(
+            runner.validate_report(prefix + json.dumps(data), "interruption"), data
         )
-        source = zlib.decompress(base64.b85decode(packed)).decode()
-        compile(source, "probe", "exec")
-        self.assertIn("main({", source)
+        self.assertIsNone(runner.validate_report(prefix + json.dumps(data)))
+        data["checks"]["parser_exits_with_request"] = "/private/path"
+        self.assertIsNone(
+            runner.validate_report(prefix + json.dumps(data), "interruption")
+        )
+
+    def test_unrecognized_mode_is_rejected_before_aws(self):
+        env = {
+            "GITHUB_REF": "refs/heads/main",
+            "GITHUB_REPOSITORY": "HHS/simpler-grants-gov",
+            "AWS_REGION": "us-east-1",
+            "NOFO_READABILITY_CHECK": "unknown",
+        }
+        with patch.dict(os.environ, env, clear=True), patch.object(
+            runner.sys, "argv", ["run_dev.py"]
+        ), patch.object(runner.shared, "aws") as aws:
+            with self.assertRaisesRegex(RuntimeError, "Unexpected verification mode"):
+                runner.run()
+        aws.assert_not_called()
+
+    def test_interruption_without_parser_readiness_only_stops_its_request(self):
+        checks = dict.fromkeys(runner.interruption.CHECKS, False)
+        request = Mock()
+        request.poll.return_value = None
+        request.__enter__ = Mock(return_value=request)
+        request.__exit__ = Mock(return_value=False)
+        with patch.object(
+            runner.interruption.subprocess, "Popen", return_value=request
+        ) as launch, patch.object(
+            runner.interruption.select, "select", return_value=([], [], [])
+        ):
+            runner.interruption.verify_interruption(checks, lambda: None, b"synthetic")
+        launch.assert_called_once()
+        request.kill.assert_called_once_with()
+        request.communicate.assert_not_called()
+        self.assertFalse(any(checks.values()))
 
     def test_fixture_integrity_fails_closed(self):
         with patch.object(runner, "FIXTURES", {"synthetic-invalid.pdf": "wrong"}):

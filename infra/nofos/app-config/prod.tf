@@ -23,8 +23,8 @@ module "prod_config" {
   monitoring_email_alert_recipient_parameter_name = "/nofos/prod/monitoring/alert-email"
   pdf_readability_alarm_actions_enabled           = true
   pdf_readability_waf = {
-    rate_limit      = 10
-    rate_action     = "count"
+    rate_limit      = 30
+    rate_action     = "block"
     emergency_block = false
   }
 

@@ -47,6 +47,7 @@ class EnrichedOrganizationUser:
     first_name: str | None
     last_name: str | None
     is_ebiz_poc: bool
+    is_external: bool
 
 
 class OrganizationUsersListParams(BaseModel):
@@ -126,6 +127,7 @@ def _enrich_org_users_with_ebiz_poc(
                 and org_user.user.email is not None
                 and org_user.user.email.lower() == ebiz_poc_email
             ),
+            is_external=org_user.is_external,
         )
         for org_user in org_users
     ]

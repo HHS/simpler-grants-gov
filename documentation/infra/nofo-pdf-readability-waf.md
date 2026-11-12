@@ -14,7 +14,8 @@ rejects opt-in for non-NOFO service names and services without a load balancer.
 Workspace-prefixed NOFO service names are supported.
 
 NOFO environment configuration passes this object through `service_config` to
-the service module. Only `infra/nofos/app-config/infra-dev.tf` opts in:
+the service module. The initial deployment opted in only
+`infra/nofos/app-config/infra-dev.tf`:
 
 ```hcl
 pdf_readability_waf = {
@@ -24,8 +25,8 @@ pdf_readability_waf = {
 }
 ```
 
-Both rules initially observe in Count mode; this does **not** enforce throttling
-or block the route. Production and every other environment remain opted out.
+Both rules initially observed in Count mode. The current environment settings
+are described under [Launch rate limit](#launch-rate-limit).
 The current `Deploy NOFOs` workflow maps its `dev` selection to `infra-dev`.
 Confirm the selected infrastructure revision, environment, account, and HTTPS
 endpoint before testing. The workflow's `version` input selects the Builder
@@ -71,6 +72,33 @@ service-module changes can automatically deploy dev; confirm the actual path
 matchers and unchanged Count actions afterward. Live blocking/restoration still
 requires the bounded verification procedure below.
 
+## Launch rate limit
+
+Production Terraform configures Block mode for approximately 30 matching POST
+requests per five minutes per public IP. This is the starting threshold for launch.
+In the [shared-IP dev test](https://github.com/HHS/simpler-grants-gov/actions/runs/42634506572),
+both clients received a 429 on their seventh request when sharing the dev limit of
+10. The production threshold gives office networks more room for overlapping
+submissions and retries. Review WAF blocks, analyzer load, and support reports
+after the first week of public use.
+
+Dev stays in Count mode at 10, both emergency rules stay in Count, and other
+environments remain opted out. Keep public uploads disabled until the separate
+launch decision. After the production deployment, inspect the live rule and check
+the signed-out unavailable page and ordinary Builder routes.
+
+To roll back production rate enforcement:
+
+1. In `infra/nofos/app-config/prod.tf`, set `rate_action` to `"count"`.
+   Keep the 30-request threshold, emergency rule and other environments unchanged.
+2. In the same rollback PR, update the rate-action assertion in
+   `infra/nofos/app-config/tests/pdf_readability_waf.tftest.hcl` to expect
+   `"count"` for both production and dev. Update the test name and failure
+   message to match. Leave the threshold, emergency-mode and opt-in assertions
+   intact. Run the app-config tests below before merging.
+3. After review and merge, deploy to production and verify the live rate rule
+   is in Count mode. This rollback does not change the public-upload flag.
+
 ## Local checks
 
 Use Terraform 1.14.3, matching CI. All tests below use mocked providers, need no
@@ -86,8 +114,9 @@ terraform -chdir=infra/nofos/app-config test
 
 Service tests cover default behavior, rule order/actions, path and method
 configuration, source-IP aggregation, rate bounds, independent activation, and
-NOFO-only validation. The environment test verifies that only `infra-dev` opts
-in and both actions begin in Count mode. CI runs both suites. These tests verify
+NOFO-only validation. The environment test verifies that only production blocks
+uploads, dev stays in Count, and other environments remain opted out. CI runs
+both suites. These tests verify
 planned configuration, not AWS request matching, effective IAM, drift, or live
 capacity.
 
@@ -130,12 +159,13 @@ but neither is required for this dev-only procedure.
 For each activation or restoration stage, update `pdf_readability_waf` in
 `infra/nofos/app-config/infra-dev.tf` **and** every Terraform test that asserts
 the WAF mode: currently `tests/pdf_readability_waf.tftest.hcl` and
-`tests/pdf_readability_monitoring.tftest.hcl`. The tests must continue to assert
-the rate threshold, dev-only opt-in, private notification routing and every
-other environment's null configuration. Update only the temporary mode
-expectation: rate `block` for rate and emergency stages, and emergency `true`
-only for the emergency stage. The final restoration change must return both the
-configuration and test expectations to rate `count` and emergency `false`.
+`tests/pdf_readability_monitoring.tftest.hcl`. Preserve production's existing
+WAF settings, both environments' rate thresholds and private notification
+routing, and the null WAF configuration for every other environment. Change
+only the dev mode expectations: rate `block` for rate and emergency stages, and
+emergency `true` only for the emergency stage. The final restoration change
+must return both the dev configuration and test expectations to rate `count`
+and emergency `false`.
 
 Keep the threshold at 10 and the window at 300 seconds. Do not edit shared
 modules, other environments, recipients, IAM or managed rules. Inspect the
@@ -301,9 +331,8 @@ checks under [#12568](https://github.com/HHS/simpler-grants-gov/issues/12568).
 
 Rate limiting does not solve slow uploads, distributed abuse, parser isolation,
 full-request size enforcement, temporary-file retention, or notification delivery.
-No alert subscriptions, permissions, runtime evidence collector, production
-opt-in, or pilot enablement are added here. Promote agreed controls to production
-only after dev evidence and the separate reviews; public enablement remains gated.
+This rate setting does not change alert subscriptions, permissions, or runtime
+evidence collection. Public enablement remains gated.
 
 References: [AWS rate settings](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-high-level-settings.html),
 [AWS rate caveats](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-caveats.html),

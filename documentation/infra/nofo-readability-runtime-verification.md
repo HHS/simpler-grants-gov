@@ -10,13 +10,14 @@ dev WAF checks. Merging adds the tool; it does not dispatch it or deploy Builder
 ## How to run
 
 After review and merge, select **Verify Readability Calculator runtime - dev**
-in GitHub Actions and run it from `main`. It takes no environment, command,
-image, recipient, fixture or feature-flag inputs. Keep public uploads disabled.
+in GitHub Actions and run it from `main`. The `check` choice is `runtime`
+(the default) or `interruption`. It takes no environment, command, image,
+recipient, fixture or feature-flag inputs. Keep public uploads disabled.
 Normal deployment concurrency prevents overlap with NOFO infra-dev deployment.
 The deployed dev image must include the request workspace from
 [Builder #1316](https://github.com/HHS/simpler-grants-pdf-builder/pull/1316).
 An older image fails the `checker_workspace_available` check.
-Do not overlap this run with an authenticated calculator analysis: the probe
+Do not overlap the runtime check with an authenticated calculator analysis: the probe
 briefly uses the application's existing analysis lock and can return busy if
 another analysis holds it. Stop and investigate a failed run before retrying.
 
@@ -54,6 +55,27 @@ exceptions, environment values, filenames, scores, extracted text or logs.
 Only fixed boolean checks, temporary-storage categories, and package versions are published. Task startup
 logs remain in the existing restricted CloudWatch log group; the collector
 prints only schema-validated probe output from that exact task's stream.
+
+### Interruption check
+
+Select `interruption` to run only this check in one disposable dev task.
+The task checks that the public flag is off, then gives two test-owned
+processes a private temporary directory. The first creates a disk upload
+using Builder's upload handler and starts the deployed parser entry point
+with an instrumented analysis function that holds a synthetic PDF open.
+After receiving that readiness signal, the probe kills only its own
+request process. The parser must close its inherited output pipe within
+five seconds, which verifies that it exited while holding the synthetic
+file open. An independent 30-second alarm bounds the instrumented parser.
+
+The second process invokes the deployed Gunicorn startup hook. The probe
+checks that its background sweep removes the abandoned workspace without
+another request and before the probe's own cleanup. The wait is capped at
+35 seconds. Public uploads are checked again at the end. The published
+report contains only fixed pass/fail fields. The test models replacement
+worker startup inside the deployed Linux image. A real Gunicorn worker
+restart, ECS task replacement, production storage and live-service behavior
+are outside its scope.
 
 The runner waits at most five minutes for the task after launch, with a bounded
 log-delivery grace period. Failure/interruption requests stopping only its own
