@@ -208,17 +208,20 @@ export const messages = {
     intro: {
       versionHistory: "View version history on Grants.gov",
     },
+    importantDates: {
+      title: "Important dates",
+    },
     description: {
-      title: "Description",
+      title: "Summary",
       eligibility: "Eligibility",
-      eligibleApplicants: "Eligible applicants",
-      additionalInfo: "Additional information",
-      contactInfo: "Grantor contact information",
-      contactDescription: "Description",
-      email: "Email",
+      additionalInfo: "Additional information on eligibility",
+      contactInfo: "Agency contact information",
+      email: "Email:",
+      noContactInfo: "No additional contact information provided.",
+      notSpecified: "Not specified",
       showDescription: "Show full description",
       hideSummaryDescription: "Hide full description",
-      jumpToDocuments: "Jump to all documents",
+      jumpToDocuments: "Jump to documents",
       zipDownload: "Download all",
     },
     documents: {
@@ -233,12 +236,14 @@ export const messages = {
       noDocuments: "No documents are currently available.",
     },
     awardInfo: {
+      title: "Award details",
+      notSpecified: "Not specified",
       yes: "Yes",
       no: "No",
-      programFunding: "Program Funding",
+      programFunding: "Expected project funding",
       expectedAwards: "Expected awards",
-      awardCeiling: "Award Maximum",
-      awardFloor: "Award Minimum",
+      awardCeiling: "Award max.",
+      awardFloor: "Award min.",
       opportunityNumber: "Funding opportunity number",
       costSharing: "Cost sharing or matching requirement",
       fundingInstrument: "Funding instrument type",
@@ -251,33 +256,22 @@ export const messages = {
       history: "History",
       postedDate: "Posted date",
       forecastPostedDate: "Forecast posted date",
-      closingDate: "Original closing date for applications",
       archiveDate: "Archive date",
-      forecastedAwardDate: "Estimated Award Date",
-      forecastedPostDate: "Estimated Post Date",
-      forecastedCloseDate: "Estimated Application Due Date",
-      forecastedCloseDateDescription: "Estimated Due Date Description",
-      forecastedCloseDateDescriptionNotAvailable: "Not available",
-      forecastedProjectStartDate: "Estimated Project Start Date",
-      forecastedLastUpdated: "Last Updated Date",
+      forecastedAwardDate: "Forecasted award date",
+      forecastedPostDate: "Forecasted post date",
+      forecastedCloseDate: "Forecasted application due date",
+      forecastedProjectStartDate: "Forecasted project start date",
       fiscalYear: "Fiscal Year",
+      closing: "Closing",
+      closed: "Closed",
+      archived: "Archived",
+      notSpecified: "Not specified",
 
       version: "Version",
     },
     link: {
       title: "Link to additional information",
-    },
-    statusWidget: {
-      archived: "Archived: ",
-      closed: "Closed: ",
-      closing: "Closing: ",
-      forecasted: "Forecasted",
-    },
-    cta: {
-      applyTitle: "Application process",
-      applyContent:
-        "This site is a work in progress. Go to www.grants.gov to apply, track application status, and subscribe to updates.",
-      buttonContent: "View on Grants.gov",
+      noAdditionalInfo: "No additional information is available",
     },
     genericErrorCta: "Please try refreshing the page.",
   },
@@ -289,157 +283,6 @@ export const messages = {
       loadingOrganizations: "Loading organizations...",
       fallbackError: "You are not a member of any organizations.",
       close: "Close",
-    },
-  },
-  OpportunityEdit: {
-    pageTitle: "Edit opportunity",
-    metaDescription:
-      "Edit draft opportunity information and non-forecast summary fields.",
-    navTitle: "On this page",
-    button: {
-      backToOverview: "Back to overview page",
-      saveAndExit: "Save and exit",
-      saveAndGoBack: "Save and go back",
-      saveAndContinue: "Save and continue",
-    },
-    sections: {
-      fundingDetails: "Funding details",
-      eligibility: "Eligibility",
-      additionalInformation: "Additional information",
-      attachments: "Attachments",
-    },
-    labels: {
-      fundingType: "Funding type",
-      costSharing: "Cost sharing or matching requirements?",
-      category: "Category",
-      expectedNumberOfAwards: "Expected number of awards",
-      estimatedTotalProgramFunding: "Estimated total program funding",
-      awardMinimum: "Award minimum",
-      awardMaximum: "Award maximum",
-      publishDate: "Publish date",
-      closeDate: "Close date",
-      closeDateExplanation: "Close date explanation",
-      eligibleApplicants: "Eligible applicants",
-      additionalEligibilityInfo: "Additional information on eligibility",
-      fundingCategoryExplanation: "Category explanation",
-      description: "Description",
-      additionalInfoUrl: "Link to additional information",
-      additionalInfoUrlText: "Link display text",
-      grantorContactDetails: "Grantor contact details",
-      contactEmail: "Contact email",
-      contactEmailText: "Email display text",
-      yes: "Yes",
-      no: "No",
-      eligibilityBusiness: "Business",
-      eligibilityEducation: "Education",
-      eligibilityGovernment: "Government entities",
-      eligibilityNonprofit: "Nonprofit",
-      eligibilityMiscellaneous: "Miscellaneous",
-    },
-    content: {
-      fundingDetailsIntro:
-        "Provide the financial structure of this opportunity. This includes the total funding available, expected number of awards, and critical dates for the application window.",
-      eligibilityIntro:
-        "Define who is eligible to apply for these funds. Select all applicable applicant types and provide any specific requirements or restrictions regarding organizational status or geographic location.",
-      additionalInformationIntro:
-        "Use this section to provide supplementary context, such as a summary of the program's goals, agency-specific links, and contact information for programmatic or technical inquiries.",
-      notAvailable: "Not available",
-      fundingTypeHint:
-        "Select the legal relationship between the agency and the recipient",
-      costSharingHint:
-        "Indicate if the applicant is required to provide a specific percentage of non-federal funds.",
-      categoryHint: "Choose the primary functional area this funding supports",
-      fundingCategoryExplanationHint: "If category is Other",
-      expectedNumberOfAwardsHint:
-        "Enter the estimated number of individual awards the agency intends to fund.",
-      estimatedTotalProgramFundingHint:
-        "Enter the total amount of funding available for all awards under this opportunity.",
-      awardMinimumHint:
-        "Enter the smallest dollar amount that can be awarded to a single recipient.",
-      awardMaximumHint:
-        "Enter the largest dollar amount that can be awarded to a single recipient.",
-      publishDateHint:
-        "The date this opportunity will be visible to the public",
-      closeDateHint: "The final deadline for all applications to be submitted",
-      closeDateExplanationHint:
-        "Provide a reason if a specific close date is not set, such as continuous review or a rolling deadline.",
-      select: "Select",
-      selectFundingCategory: "Select funding category",
-      eligibleApplicantsHint:
-        "Select all categories of organizations or individuals that may apply for this grant.",
-      additionalEligibilityInfoHint:
-        "If eligible applicant is Other, provide further clarification on specific requirements",
-      descriptionHint:
-        "Provide a high-level summary of the funding purpose and the problems it intends to solve.",
-      additionalInfoUrlHint:
-        "Enter the full web address for more program details.",
-      additionalInfoUrlTextHint:
-        "Enter the text that will appear as the clickable link.",
-      grantorContactDetailsHint:
-        "Provide the name or department and phone number for the primary contact.",
-      contactEmailHint: "Enter a valid email address.",
-      contactEmailTextHint:
-        "Enter the text that will be shown as the email link.",
-      attachmentsIntro:
-        "Upload the official Notice of Funding Opportunity (NOFO) and any supporting templates or guidelines that applicants need to complete their submission.",
-      alerts: {
-        success: "Saved successfully",
-        successBody: "Your changes have been saved.",
-        genericError: "Unable to save draft opportunity details.",
-        missingSummaryContext: "Missing opportunity summary context for save.",
-        unauthenticated: "You must be signed in to update this opportunity.",
-        forbidden: "You do not have permission to update this opportunity.",
-        notFound: "The opportunity summary could not be found.",
-        draftOnly: "Only draft opportunity summaries can be updated.",
-        validationErrorHeading: "Error(s) Found",
-        validationErrorBody: "Please correct the following errors:",
-      },
-    },
-    validationErrors: {
-      title: "Enter a title.",
-      awardSelectionMethod: "Select an award selection method.",
-      description: "Enter a description.",
-      publishDate: "Enter a publish date.",
-      closeDate: "Enter a close date.",
-      contactEmailRequired: "Enter a contact email.",
-      contactEmailInvalid: "Enter a valid contact email.",
-      contactEmailText: "Enter email display text.",
-      closeDateOrder: "Close date must be on or after publish date.",
-      awardMinimum: "Enter an award minimum.",
-      awardMaximum: "Enter an award maximum.",
-      fundingType: "Select a funding type.",
-      fundingCategory: "Select a funding category.",
-      expectedNumberOfAwards: "Enter the expected number of awards.",
-      estimatedTotalProgramFunding:
-        "Enter the estimated total program funding.",
-      eligibleApplicants: "Select at least one eligible applicant type.",
-      additionalEligibilityInfo: "Enter additional eligibility information.",
-      additionalInfoUrl: "Enter an additional information URL.",
-      additionalInfoUrlText: "Enter additional information URL text.",
-      grantorContactDetails: "Enter grantor contact details.",
-      expectedNumberOfAwardsInput:
-        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
-      awardMinCurrencyInput:
-        "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
-      awardMaxCurrencyInput:
-        "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
-      totalFundingCurrencyInput:
-        "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
-      awardMinLessThanTotal:
-        "Award minimum cannot exceed the Estimated Total Program Funding.",
-      awardMaxLessThanTotal:
-        "Award maximum cannot exceed the Estimated Total Program Funding.",
-      awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
-      awardMaxGreaterThanMin:
-        "Award maximum cannot be less than Award minimum.",
-    },
-    attachments: {
-      uploadLabel: "Upload files",
-      uploading: "Uploading...",
-      success:
-        "Success: File scan complete. Save this form to attach the file.",
-      error:
-        "Processing failed due to a system error. Try uploading your file again.",
     },
   },
   Application: {
@@ -927,21 +770,6 @@ export const messages = {
     description:
       "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
     button: "Sign in using PIV/CAC",
-  },
-  FormSelectModal: {
-    title: "Form Library",
-    heading: "Select Forms",
-    selectAll: "Select all",
-    buttons: {
-      cancel: "Cancel",
-      save: "Save",
-    },
-    requiredStates: {
-      required: "Required",
-      conditional: "Conditionally Required",
-      auto: "Auto added",
-      always: "Always required",
-    },
   },
   Footer: {
     agencyName: "Grants.gov",
@@ -2032,54 +1860,6 @@ export const messages = {
       opportunity: "Opportunity",
     },
   },
-  Opportunities: {
-    createOpportunityButton: "Create Opportunity",
-    numOpportunities:
-      "{num, plural, =1 {1 opportunity} other {# opportunities}}",
-    errorMessage:
-      "We have encountered an error loading your opportunities, please try again later.",
-    metaDescription: "View draft and published funding opportunities",
-    noOpportunitiesMessage: {
-      primary: "You have not started any opportunities yet.",
-      secondary:
-        "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
-    },
-    showingOpportunitiesFor: "Showing opportunities for {agencyName}",
-    agencySelector: "Select agency",
-    agencyNotAuthorized:
-      "You do not have access to this agency's opportunities.",
-    noAgencies: "You are not associated with any agencies.",
-    pageHeading: "Opportunities",
-    pageTitle: "Opportunities List",
-    pageApplication: "Smarter Grants Management",
-    tableContents: {
-      agency: "Agency: ",
-      draft: "Draft",
-      individual: "Individual",
-      submitted: "Submitted",
-    },
-    tableHeadings: {
-      agency: "Agency",
-      title: "Title",
-      oppNumber: "Opp. Number",
-      fundingInstrumentType: "Funding Instrument Type",
-      lastUpdated: "Last Updated",
-      status: "Status",
-      actions: "Action",
-    },
-    actionButtons: {
-      edit: "Edit",
-      copy: "Copy",
-      delete: "Delete",
-    },
-    statusTag: {
-      draft: "Draft",
-      posted: "Open",
-      forecasted: "Forecasted",
-      archived: "Archived",
-      closed: "Closed",
-    },
-  },
   Organizations: {
     errorMessage:
       "We have encountered an error loading your organizations, please try again later.",
@@ -2120,10 +1900,10 @@ export const messages = {
     beforeItems: [
       "You will or already have received an email asking for your participation in a user interview.",
       "Taking part in a research study is voluntary. If you opt-in to participate, you'll receive an emailed invitation with your scheduled time.",
-      "For remote studies, you will receive a Zoom link to participate.",
+      "For remote studies, you will receive a video conferencing link to participate (e.g. Google Meet or Zoom).",
       "For in person studies, we will coordinate logistics with you.",
       "If you require an accommodation, let us know at least 2 days prior to the interview.",
-      "The interview will be conducted via Zoom by a member of our team. One person will be conducting the interview, and one or more team members will be taking notes.",
+      "The interview will be conducted via video conferencing by a member of our team. One person will be conducting the interview, and one or more team members will be taking notes.",
     ],
     duringHeader: "During the interview",
     duringItems: [
@@ -2133,56 +1913,6 @@ export const messages = {
       "At the end of the session, we will ask you for your verbal permission to use what we learn to make the product better.",
       "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
     ],
-  },
-  OpportunityOverview: {
-    pageTitle: "Opportunity Overview",
-    pageApplication: "Smarter Grants Management",
-    metaDescription: "Opportunity publishing progress overview",
-    labels: {
-      editOpportunityLink: "Opportunity Summary",
-      competitionLink: "Application Package",
-      previewButton: "Preview",
-      publishButton: "Publish",
-    },
-  },
-  CreateOpportunity: {
-    pageTitle: "Create Opportunity",
-    pageApplication: "Smarter Grants Management",
-    metaDescription: "Create a new funding opportunity",
-    errorMessage:
-      "We have encountered an error loading this page, please try again later.",
-    keyInfo: "Key information",
-    basicInstructions:
-      "Fill out the basic details below to begin. Once you save this information, a draft will be created, allowing you to return at any time to add more details, upload documents, and finalize your opportunity.",
-    cancel: "Cancel",
-    saveAndContinue: "Save and continue",
-    pending: "Pending...",
-    errorHeading: "Error",
-    successHeading: "Success",
-    CreateOpportunityForm: {
-      opportunityNumber: "Opportunity number",
-      opportunityNumberDesc:
-        "Enter the unique ID assigned to this funding opportunity.",
-      opportunityTitle: "Opportunity title",
-      opportunityTitleDesc:
-        "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
-      tagline: "Tagline",
-      taglineDesc:
-        "A specific one-sentence purpose statement that summarizes the highest-level goal.",
-      purposeStatement: "Purpose statement",
-      purposeStatementDesc:
-        "Provide a one-line statement that helps applicants understand the grant's purpose.",
-      agency: "Agency",
-      category: "Grant selection method",
-      categoryDesc: "Choose the evaluation process used to award these funds.",
-      categoryExplanation: "Grant selection method explanation",
-      categoryExplanationDesc:
-        'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
-      assistanceListingNumber: "Assistance listing number",
-      assistanceListingNumberDesc:
-        "Enter the 5-digit code from SAM.gov (e.g., 10.500)",
-      successMessage: "Opportunity started. Continuing shortly...",
-    },
   },
   Notifications: {
     pageTitle: "Notifications | Simpler.Grants.gov",
@@ -2211,120 +1941,10 @@ export const messages = {
       "Your notification preference was not saved. Refresh the page to try again.",
     srPendingSave: "Saving notification preference...",
   },
-  OpportunityCompetition: {
-    pageTitle: "Competition",
-    metaDescription: "Set up competition details for this opportunity.",
-    leftNavTitle: "On this page",
-    applicationRequirements: "Application requirements",
-    applicationRequirementsSubheader:
-      "What applicants must submit, how they'll be scored, and the format rules.",
-    button: {
-      processing: "Processing...",
-      back: "Save and go back",
-      saveAndExit: "Save and exit",
-      saveAndContinue: "Save and continue",
-    },
-    alerts: {
-      success: "Saved successfully",
-      successBody: "Your changes have been saved.",
-      genericError: "Unable to save competition updates.",
-      unauthenticated: "You must be signed in to update this competition.",
-      forbidden: "You do not have permission to update this competition.",
-      notFound: "This competition could not be found.",
-      networkError: "A network error occurred.",
-      validationErrors: "Errors Found",
-      validationErrorBody: "Please correct the following errors:",
-    },
-    sectionSubmissionSetUp: {
-      header: "Submission set-up",
-      subHeader:
-        "A competition is one apply-window inside an opportunity. Most opportunities have only one.",
-      publicCompetitionId: "Competition ID",
-      publicCompetitionIdHint:
-        "An ID if this opportunity has multiple competitions.",
-      competitionTitle: "Competition title",
-      competitionTitleHint: "Shown to applicants. Plain language is best.",
-      whoCanApply: "Who can apply?",
-      whoCanApplyHint:
-        "Applicants who don't match this type won't see the competition in search.",
-      whoCanApplyOrganizationsOnly: "Organizations only",
-      whoCanApplyIndividualsOnly: "Individuals only",
-      whoCanApplyBoth: "Both organizations and individuals",
-    },
-    sectionSubmissionWindow: {
-      header: "Submission window",
-      subHeader: "When applicants can submit through this package.",
-      submissionsOpen: "Open date",
-      submissionsOpenHint: "First day applicants can apply",
-      submissionsClose: "Public close date",
-      submissionsCloseHint: "Deadline listed on Grants.gov",
-      gracePeriod: "Extension period",
-      gracePeriodHint: "Number of days accepted past public close date",
-    },
-    sectionApplicationChecklist: {
-      header: "Application checklist",
-    },
-    sectionNarrativeFormatInstructions: {
-      header: "Narrative format instructions",
-    },
-    sectionAgencyContact: {
-      header: "Agency contact",
-      subHeader:
-        "Grantor contact details. Provide the name, email, and phone number for the agency contact.",
-      fullName: "Full name",
-      personTitle: "Title",
-      emailAddress: "Email address",
-      emailAddressHint: "For example: example@mail.com",
-      phoneNumber: "Phone number",
-      phoneNumberHint: "10-digit, for example: (999) 999-9999",
-      error: {
-        requiredFullName: "Full name is required.",
-        requiredPhoneNumber: "Phone number is required.",
-        requiredEmail: "Email address is required.",
-        invalidEmail:
-          "Incorrect text format. Please ensure there are no spaces or missing characters.",
-      },
-    },
-    sectionApplicationInstructions: {
-      header: "Application instructions",
-      subHeader:
-        "Upload any supporting instructions needed for the application.",
-      uploadAFile: "Upload a file",
-      multipleFiles: "For multiple files, combine them into one zip file.",
-      uploadWidget: {
-        error:
-          "Processing failed due to a system error. Try uploading your file again.",
-        success:
-          "Success: File scan complete. “Save” this form to attach the file.",
-        uploading: "Uploading...",
-      },
-    },
-    sectionRequiredForms: {
-      header: "Forms in this package",
-      subHeader: "Select the forms applicants must complete.",
-      selectFormsButton: "Select forms",
-      labelForm: "Item",
-      labelRequirement: "Requirement",
-    },
-  },
   FeatureFlagsAdmin: {
     heading: "Refresh your page",
     alertMessage:
       "Hard refresh your page when done changing Flags for the changes to fully apply.",
-  },
-  OpportunityDetailsHeader: {
-    opportunityNumber: "Opportunity #: {number}",
-    title: "Title:",
-    agency: "Agency:",
-    subAgency: "Sub-agency:",
-    draft: "Draft",
-    lastUpdated: "Last updated:",
-    backToOverview: "Back to overview page",
-    alerts: {
-      newOpportunityHeading: "Opportunity draft started",
-      newOpportunityBody:
-        "Your initial information has been saved. Complete the sections below to finish your opportunity details",
-    },
   },
   FileInput: {
     existingFiles: {
@@ -2382,10 +2002,5 @@ export const messages = {
     internalTokenHeaderPresentLabel: "Internal token header present",
     yes: "Yes",
     no: "No",
-  },
-  ProgressChecker: {
-    notStarted: "Not started",
-    inProgress: "In progress",
-    complete: "Complete",
   },
 };

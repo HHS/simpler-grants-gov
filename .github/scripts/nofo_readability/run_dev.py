@@ -4,6 +4,7 @@ import ast
 import base64
 import hashlib
 import importlib.util
+import inspect
 import json
 import os
 import re
@@ -37,27 +38,36 @@ shared = load_module(
     "nofo_task_helpers", HERE.parent / "nofo_history" / "prepare_dev.py"
 )
 probe = load_module("readability_probe", HERE / "probe.py")
+interruption = load_module("readability_interruption", HERE / "interruption.py")
 
 
-def command():
+def command(mode="runtime"):
+    if mode == "interruption":
+        # Send just the smaller interruption probe and the shared read-only flag
+        # check. The deployed task cannot import files from this repository.
+        source = inspect.getsource(probe.uploads_disabled)
+        source += "\n" + (HERE / "interruption.py").read_text()
+        fixture_names = ("synthetic-nofo-supported.pdf",)
+        main_arguments = ", uploads_disabled"
+    elif mode == "runtime":
+        source = (HERE / "probe.py").read_text()
+        fixture_names = FIXTURES
+        main_arguments = ""
+    else:
+        raise RuntimeError("Unexpected verification mode.")
     encoded = {}
-    for name, checksum in FIXTURES.items():
+    for name in fixture_names:
         data = (ROOT / "scripts/tests/fixtures/readability" / name).read_bytes()
-        if len(data) > 8192 or hashlib.sha256(data).hexdigest() != checksum:
+        if len(data) > 8192 or hashlib.sha256(data).hexdigest() != FIXTURES[name]:
             raise RuntimeError("Synthetic fixture integrity check failed.")
         encoded[name] = base64.b64encode(data).decode("ascii")
-    payload = (
-        (HERE / "probe.py").read_text()
-        + "\nraise SystemExit(main("
-        + repr(encoded)
-        + "))\n"
-    )
+    payload = f"{source}\nraise SystemExit(main({encoded!r}{main_arguments}))\n"
     # ECS caps the entire command override at 8 KiB. Compress only this fixed,
     # reviewed source plus fixed fixtures; there is no workflow payload input.
     payload = ast.unparse(ast.parse(payload))
-    packed = base64.b64encode(zlib.compress(payload.encode(), level=9)).decode("ascii")
+    packed = base64.b85encode(zlib.compress(payload.encode(), level=9)).decode("ascii")
     bootstrap = (
-        "import base64,zlib;exec(compile(zlib.decompress(base64.b64decode("
+        "import base64,zlib;exec(compile(zlib.decompress(base64.b85decode("
         + repr(packed)
         + ")), '<fixed-dev-probe>', 'exec'))"
     )
@@ -74,16 +84,32 @@ def command():
     return result
 
 
-def validate_report(message):
-    if not message.startswith(probe.PREFIX) or len(message) > 4096:
+def validate_report(message, mode="runtime"):
+    expected = interruption if mode == "interruption" else probe
+    if not message.startswith(expected.PREFIX) or len(message) > 4096:
         return None
     try:
-        data = json.loads(message[len(probe.PREFIX) :])
+        data = json.loads(message[len(expected.PREFIX) :])
+        if mode == "interruption":
+            if (
+                set(data) == {"checks"}
+                and isinstance(data["checks"], dict)
+                and set(data["checks"]) == expected.CHECKS
+                and all(type(value) is bool for value in data["checks"].values())
+            ):
+                return data
+            return None
         if (
-            set(data) == {"checks", "versions"}
+            set(data) == {"checks", "temporary_storage", "versions"}
             and isinstance(data["checks"], dict)
             and set(data["checks"]) == probe.CHECKS
             and all(type(value) is bool for value in data["checks"].values())
+            and isinstance(data["temporary_storage"], dict)
+            and set(data["temporary_storage"]) == probe.STORAGE_PATHS
+            and all(
+                value in probe.STORAGE_TYPES
+                for value in data["temporary_storage"].values()
+            )
             and isinstance(data["versions"], dict)
             and set(data["versions"]) <= {"pypdf", "hhs-nofo-metrics"}
             and all(
@@ -98,7 +124,7 @@ def validate_report(message):
     return None
 
 
-def read_report(options, task_arn):
+def read_report(options, task_arn, mode="runtime"):
     params = {
         "log_group_name": options["awslogs-group"],
         "log_stream_name": f"{options['awslogs-stream-prefix']}/{SERVICE}/{task_arn.rsplit('/', 1)[-1]}",
@@ -109,7 +135,7 @@ def read_report(options, task_arn):
     for _ in range(10):
         response = shared.aws("logs", "get-log-events", **params)
         for event in response.get("events", []):
-            report = validate_report(event.get("message", "").strip())
+            report = validate_report(event.get("message", "").strip(), mode)
             if report is not None:
                 reports.append(report)
         token = response.get("nextForwardToken")
@@ -127,6 +153,8 @@ def run():
         or os.environ.get("AWS_REGION") != "us-east-1"
     ):
         raise RuntimeError("Use the fixed main-branch dev workflow without arguments.")
+    mode = os.environ.get("NOFO_READABILITY_CHECK", "runtime")
+    probe_command = command(mode)
     if shared.aws("sts", "get-caller-identity").get("Account") != ACCOUNT:
         raise RuntimeError("Unexpected AWS account; stopped before launch.")
     # Reuse the existing state-backed discovery, but never publish init output.
@@ -171,7 +199,7 @@ def run():
         platform_version="1.4.0",
         network_configuration=service["networkConfiguration"],
         count=1,
-        overrides={"containerOverrides": [{"name": SERVICE, "command": command()}]},
+        overrides={"containerOverrides": [{"name": SERVICE, "command": probe_command}]},
     )
     tasks = response.get("tasks", [])
     if not tasks:
@@ -186,7 +214,7 @@ def run():
         report = None
         for _ in range(6):
             try:
-                report = read_report(options, task_arn)
+                report = read_report(options, task_arn, mode)
             except Exception:
                 pass
             if report is not None:
@@ -212,7 +240,13 @@ def run():
             len(app_containers) != 1
             or app_containers[0].get("exitCode") != 0
             or not all(report["checks"].values())
-            or set(report["versions"]) != {"pypdf", "hhs-nofo-metrics"}
+            or (
+                mode == "runtime"
+                and (
+                    "unavailable" in report["temporary_storage"].values()
+                    or set(report["versions"]) != {"pypdf", "hhs-nofo-metrics"}
+                )
+            )
         ):
             raise RuntimeError("Verification did not pass every check.")
     finally:

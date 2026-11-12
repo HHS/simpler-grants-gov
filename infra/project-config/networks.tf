@@ -102,7 +102,7 @@ locals {
       database_subnet_group_name   = "infra-dev-simpler-grants"
       vpc_name                     = "infra-dev-simpler-grants"
       second_octet                 = 4               # The second octet of the VPC CIDR block (10.4.0.0/20)
-      grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+      grants_gov_oracle_cidr_block = "10.201.0.0/16" # MicroHealth managed CIDR block where the test primary Oracle database for Grants.gov is located
 
       dms_transit_gateway_id = "tgw-03ae893b3141f907a" # reach the Oracle CIDR via the transit gateway instead of the VPC peering
 
@@ -141,7 +141,7 @@ locals {
       database_subnet_group_name   = "infra-staging"
       vpc_name                     = "infra-staging"
       second_octet                 = 6               # The second octet of the VPC CIDR block (10.6.0.0/20)
-      grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+      grants_gov_oracle_cidr_block = "10.201.0.0/16" # MicroHealth managed CIDR block where the test primary Oracle database for Grants.gov is located
       enable_dms                   = true            # peers with the Grants.gov Oracle DMS network, mirroring staging
 
       dms_transit_gateway_id = "tgw-03ae893b3141f907a" # reach the Oracle CIDR via the transit gateway instead of the VPC peering
@@ -159,9 +159,11 @@ locals {
       database_subnet_group_name   = "infra-training"
       vpc_name                     = "infra-training"
       second_octet                 = 7               # The second octet of the VPC CIDR block (10.7.0.0/20)
-      grants_gov_oracle_cidr_block = "10.207.0.0/16" # MicroHealth managed CIDR block where the training origin Oracle database for Grants.gov is located
+      grants_gov_oracle_cidr_block = "10.204.0.0/16" # MicroHealth managed CIDR block where the training primary Oracle database for Grants.gov is located
 
       enable_dms = true
+
+      dms_transit_gateway_id = "tgw-03ae893b3141f907a" # reach the Oracle CIDR via the transit gateway instead of the VPC peering
 
       domain_config = {
         manage_dns  = false

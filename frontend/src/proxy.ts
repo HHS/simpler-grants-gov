@@ -4,6 +4,7 @@
  * modifying the request or response headers, or responding directly.
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
+import { AUTH_GATED_PATH_PREFIXES } from "src/constants/auth";
 import { defaultLocale, locales } from "src/i18n/config";
 import {
   applyCorrelationId,
@@ -74,6 +75,26 @@ const handleCdnTest = (request: NextRequest) => {
   return response;
 };
 
+// cache/index policy only, not authorization
+const isAuthGatedPath = (pathname: string): boolean => {
+  const lowerCasePathname = pathname.toLowerCase();
+  const localePrefix = locales
+    .map((locale) => `/${locale}`)
+    .find(
+      (prefix) =>
+        lowerCasePathname === prefix ||
+        lowerCasePathname.startsWith(`${prefix}/`),
+    );
+  const unlocalizedPathname = localePrefix
+    ? lowerCasePathname.slice(localePrefix.length) || "/"
+    : lowerCasePathname;
+  return AUTH_GATED_PATH_PREFIXES.some(
+    (prefix) =>
+      unlocalizedPathname === prefix ||
+      unlocalizedPathname.startsWith(`${prefix}/`),
+  );
+};
+
 const isACdnTestRequest = (request: NextRequest): boolean => {
   return (
     request.url.includes("/cdn") &&
@@ -82,8 +103,6 @@ const isACdnTestRequest = (request: NextRequest): boolean => {
 };
 
 export default function proxy(request: NextRequest): NextResponse {
-  const cacheControl: string[] = [];
-
   // only allow for cdn testing/troubleshooting in lower envs
 
   if (isACdnTestRequest(request)) {
@@ -148,16 +167,14 @@ export default function proxy(request: NextRequest): NextResponse {
       headers: response.headers,
     });
   }
-  if (
+  if (isAuthGatedPath(request.nextUrl.pathname)) {
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  } else if (
     request.cookies.has("session") &&
     request.cookies.get("session")?.value !== ""
   ) {
-    cacheControl.push("no-store");
-    cacheControl.push("max-age=0");
-  }
-
-  if (cacheControl.length > 0) {
-    response.headers.set("Cache-Control", cacheControl.join(", "));
+    response.headers.set("Cache-Control", "no-store, max-age=0");
   }
 
   logRequest(request, response, correlationId);

@@ -105,19 +105,8 @@ const headers = [
       },
     ],
   },
-  // don't cache user specific pages: saved-opportunities, saved-search-queries
   {
-    source: "/saved/:path*",
-    headers: [
-      {
-        key: "Cache-Control",
-        value: "no-store, must-revalidate",
-      },
-    ],
-  },
-  // don't cache the user specific page for applications
-  {
-    source: "/applications",
+    source: "/print/:path*",
     headers: [
       {
         key: "Cache-Control",
@@ -276,21 +265,6 @@ const nextConfig = {
       {
         source: "/saved-search-queries",
         destination: "/workspace/saved-search-queries",
-        permanent: false,
-      },
-      {
-        source: "/opportunity/:opportunity_id/edit",
-        destination: "/grantor/opportunity/:opportunity_id/edit",
-        permanent: false,
-      },
-      {
-        source: "/opportunities",
-        destination: "/grantor/opportunities",
-        permanent: false,
-      },
-      {
-        source: "/opportunities/create",
-        destination: "/grantor/opportunities/create",
         permanent: false,
       },
     ];

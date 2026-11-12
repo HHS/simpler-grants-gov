@@ -13,7 +13,11 @@ export function uiSchemaFields(ui: Json, schema: Fields): Fields {
       const segments = [...prefix, ...fromScope(node.scope)];
       const detail = node.options?.detail as Json | undefined;
       if (detail) return walk(detail, [...segments, ARRAY]);
-      const key = render(segments);
+      const direct = render(segments);
+      const repeated = render([...segments, ARRAY]);
+      // One scalar-list control represents the schema's repeated leaf, not one scalar.
+      const key =
+        schema.has(repeated) && !schema.has(direct) ? repeated : direct;
       fields.set(key, {
         order: fields.size,
         label: node.label,
