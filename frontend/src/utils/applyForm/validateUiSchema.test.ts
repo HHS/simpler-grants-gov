@@ -628,5 +628,37 @@ describe("validateFormData", () => {
 
       expect(hasMissingContentError).toBe(true);
     });
+
+    it("should validate a field carrying a rule this renderer does not implement", () => {
+      const uiSchema = [
+        {
+          type: "field",
+          definition: "/properties/address/properties/province",
+          conditional: {
+            when: {
+              op: "notEquals",
+              ref: { scope: "item", pointer: "/address/country" },
+              value: "USA: UNITED STATES",
+            },
+            then: { interaction: "enabled" },
+            otherwise: { interaction: "disabled" },
+          },
+        },
+      ] as unknown as UiSchema;
+
+      expect(validateUiSchema(uiSchema)).toBe(false);
+    });
+
+    it("should invalidate a field whose extra property is not a rule", () => {
+      const uiSchema = [
+        {
+          type: "field",
+          definition: "/properties/address/properties/state",
+          labl: "State",
+        },
+      ] as unknown as UiSchema;
+
+      expect(Array.isArray(validateUiSchema(uiSchema))).toBe(true);
+    });
   });
 });
