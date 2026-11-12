@@ -13,6 +13,29 @@ forms/
             └── form_json.py  # form definition: FORM_JSON_SCHEMA, FORM_UI_SCHEMA, FORM_RULE_SCHEMA, FORM_XML_TRANSFORM_RULES, and the Form object
 ```
 
+A version may instead be declared using a `form.json` file, which is what the forms in
+[`../../../../forms`](../../../../forms) generate. Don't edit these files by hand: change
+the form's spec in `forms/` and run `npm run sync` from there. A `form.json` breaks
+its components (JSON schema, UI schema, etc.) into sibling schema files:
+
+```
+forms/
+└── <form_name>/
+    └── <major>/
+        └── <minor>/
+            ├── form.json           # scalars: form_id, form_name, form_version, agency_code, ...
+            ├── json_schema.json    # form_json_schema
+            ├── ui_schema.json      # form_ui_schema
+            ├── rule_schema.json    # form_rule_schema
+            └── xml_transform.json  # json_to_xml_schema
+```
+
+- A version has exactly one of `form_json.py` or `form.json`.
+- Each schema file is optional. A field can't be declared both inline in `form.json` and in its schema file.
+- Any other file in the folder, apart from `checksum`, is an error.
+- JSON has no UUID, date or enum types, so `form.json` writes those values as strings (`"form_id": "1623b310-..."`, `"expiration_date": "2029-03-31"`, `"form_renderer": "jsonforms"`) and the loader parses them. `legacy_form_id` is a number, and `is_deprecated` is a boolean.
+- The version checksum covers the schema files.
+
 All existing forms are version `1/0` in this structure. The `forms/__init__.py` at
 this level collects all forms and exposes `get_active_forms()`.
 
@@ -98,6 +121,7 @@ Our forms require the following information to create:
 * `form_type` - FormType enum - This should be used to group forms of different versions together. Generally just name this similar to the short form name without any version info.
 * `sgg_version` - `1.0` - represents a version of a form in our system, all our forms will start at `1.0`
 * `is_deprecated` - `False` - this represents whether a form is deprecated, if it's a new form, it won't be deprecated
+* `form_renderer` - FormRenderer enum - which frontend renderer displays the form, and so the format of `form_ui_schema`. Defaults to `sgg`; forms generated from `forms/` use `jsonforms`.
 
 ## Building the JSON Schema
 The JSON schema is by far the most complex part of setting up a form
