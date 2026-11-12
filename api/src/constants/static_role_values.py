@@ -60,6 +60,91 @@ ORG_MEMBER = Role(
     link_role_types=[LinkRoleRoleType(role_id=ORG_MEMBER_ID, role_type=RoleType.ORGANIZATION)],
 )
 
+# Role for collaborators within an organization.
+# Grants no application privileges - those are granted separately via the
+# granular application roles below. is_core=False initially so it does not
+# appear in the organization role-management endpoint's selectable list.
+# This role's is_core will be set to True when it becomes a core role in 
+# the future, replacing Member.
+ORG_COLLABORATOR_ID = uuid.UUID("1850d6f8-588d-4d0e-a65a-753d4ca005b1")
+ORG_COLLABORATOR = Role(
+    role_id=ORG_COLLABORATOR_ID,
+    role_name="Collaborator",
+    is_core=False,
+    link_privileges=get_link_privileges(
+        ORG_COLLABORATOR_ID,
+        [
+            Privilege.VIEW_ORG_MEMBERSHIP,
+            Privilege.VIEW_ORG_SAVED_OPPORTUNITIES,
+            Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES,
+        ],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=ORG_COLLABORATOR_ID, role_type=RoleType.ORGANIZATION)
+    ],
+)
+
+#######################################
+# Non-Core Granular Application Roles
+#######################################
+
+# These granular roles can be granted organization-wide or per application,
+# so they carry both the ORGANIZATION and APPLICATION role types. They are
+# is_core=False so they never appear in the organization
+# role-management endpoint's selectable list.
+
+VIEW_APPLICATIONS_ID = uuid.UUID("ce52a5ae-704f-42ce-85ae-ce79d2587ea2")
+VIEW_APPLICATIONS = Role(
+    role_id=VIEW_APPLICATIONS_ID,
+    role_name="View Applications",
+    is_core=False,
+    link_privileges=get_link_privileges(
+        VIEW_APPLICATIONS_ID,
+        [
+            Privilege.VIEW_APPLICATION,
+        ],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=VIEW_APPLICATIONS_ID, role_type=RoleType.ORGANIZATION),
+        LinkRoleRoleType(role_id=VIEW_APPLICATIONS_ID, role_type=RoleType.APPLICATION),
+    ],
+)
+
+MODIFY_APPLICATIONS_ID = uuid.UUID("5a90ec3f-dd41-468d-96f6-9db31ea8610b")
+MODIFY_APPLICATIONS = Role(
+    role_id=MODIFY_APPLICATIONS_ID,
+    role_name="Modify Applications",
+    is_core=False,
+    link_privileges=get_link_privileges(
+        MODIFY_APPLICATIONS_ID,
+        [
+            Privilege.START_APPLICATION,
+            Privilege.MODIFY_APPLICATION,
+        ],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=MODIFY_APPLICATIONS_ID, role_type=RoleType.ORGANIZATION),
+        LinkRoleRoleType(role_id=MODIFY_APPLICATIONS_ID, role_type=RoleType.APPLICATION),
+    ],
+)
+
+SUBMIT_APPLICATIONS_ID = uuid.UUID("40a03a19-c0c2-425e-90aa-63cff3b5d73f")
+SUBMIT_APPLICATIONS = Role(
+    role_id=SUBMIT_APPLICATIONS_ID,
+    role_name="Submit Applications",
+    is_core=False,
+    link_privileges=get_link_privileges(
+        SUBMIT_APPLICATIONS_ID,
+        [
+            Privilege.SUBMIT_APPLICATION,
+        ],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=SUBMIT_APPLICATIONS_ID, role_type=RoleType.ORGANIZATION),
+        LinkRoleRoleType(role_id=SUBMIT_APPLICATIONS_ID, role_type=RoleType.APPLICATION),
+    ],
+)
+
 ############################
 # Core Application Roles
 ############################
@@ -289,3 +374,13 @@ CORE_ROLES = [
     INTERNAL_S3_SCANNER_ROLE,
     E2E_TEST_USER_MANAGER_ROLE,
 ]
+
+NON_CORE_ROLES = [
+    ORG_COLLABORATOR,
+    VIEW_APPLICATIONS,
+    MODIFY_APPLICATIONS,
+    SUBMIT_APPLICATIONS,
+]
+
+# All statically-defined roles that get synced to the DB
+STATIC_ROLES = CORE_ROLES + NON_CORE_ROLES
