@@ -81,6 +81,19 @@ const NUMERIC = /^(minLength|maxLength|minimum|maximum)\s+(-?\d+(?:\.\d+)?)$/;
  * Returns undefined for anything it cannot read, rather than guessing.
  */
 export function readConstraints(text: string): Rules | undefined {
+  const choices = /^enum\s+(\[.*\])$/i.exec(text.trim());
+  if (choices) {
+    try {
+      const values: unknown = JSON.parse(choices[1]);
+      return Array.isArray(values) &&
+        values.length > 0 &&
+        values.every((value) => typeof value === "string")
+        ? { enum: values }
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  }
   const rules: Rules = {};
   for (const item of text.split(",").map((part) => part.trim())) {
     let match: RegExpExecArray | null;
