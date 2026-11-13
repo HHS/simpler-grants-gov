@@ -11,6 +11,7 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import { RR_KEY_PERSON_FORM } from "tests/e2e/apply/fixtures/rr-key-person-data";
+import { RR_KEY_PERSON_EXPANDED_FORM } from "tests/e2e/apply/fixtures/rr-key-person-expanded-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -29,7 +30,10 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 
 /** Each Senior/Key Person form generated from forms/specs. */
-const SENIOR_KEY_PERSON_FORMS = [RR_KEY_PERSON_FORM];
+const SENIOR_KEY_PERSON_FORMS = [
+  RR_KEY_PERSON_FORM,
+  RR_KEY_PERSON_EXPANDED_FORM,
+];
 
 // Skip non-Chrome browsers in staging to avoid OTP rate-limiting
 test.beforeEach(({ page: _ }, testInfo) => {
