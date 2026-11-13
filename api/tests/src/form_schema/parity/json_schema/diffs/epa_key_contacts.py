@@ -64,12 +64,6 @@ DIFF = FormDiff(
     },
     differing_text={
         **_each_contact(
-            "/title",
-            "The generated form titles each contact with the question bank Person's Contact "
-            "Person; its layout labels each section with the role, as the hand-written UI "
-            "schema does.",
-        ),
-        **_each_contact(
             ".email/title",
             "The question bank labels every person's email Email. The hand-written form, like "
             "the EPA Key Contacts DAT's help, says E-mail Address.",
