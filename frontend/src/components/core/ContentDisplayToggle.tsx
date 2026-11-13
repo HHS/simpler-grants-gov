@@ -18,6 +18,7 @@ type ContentDisplayToggleTypes = "default" | "centered";
  *  - add a class to toggled content to always display it at viewport sizes above the specified breakpoint
  *  - add a class to toggled button to hide it at viewport sizes above the specified breakpoint
  *  @param {boolean} positionButtonBelowContent - defines whether toggle button will appear below or above child content
+ *  @param {function} onVisibilityChange - optional callback notified with the new visibility state whenever the toggle is activated
  */
 export default function ContentDisplayToggle({
   hideCallToAction,
@@ -26,6 +27,7 @@ export default function ContentDisplayToggle({
   showContentByDefault = false,
   positionButtonBelowContent = true,
   type = "default",
+  onVisibilityChange,
   children,
 }: {
   hideCallToAction: string;
@@ -34,6 +36,7 @@ export default function ContentDisplayToggle({
   showContentByDefault?: boolean;
   type?: ContentDisplayToggleTypes;
   positionButtonBelowContent?: boolean;
+  onVisibilityChange?: (contentVisible: boolean) => void;
   children: React.ReactNode;
 }) {
   const [toggledContentVisible, setToggledContentVisible] =
@@ -69,6 +72,7 @@ export default function ContentDisplayToggle({
           type="button"
           onClick={() => {
             setToggledContentVisible(!toggledContentVisible);
+            onVisibilityChange?.(!toggledContentVisible);
           }}
           aria-pressed={toggledContentVisible}
           className="usa-button usa-button--unstyled text-no-underline"

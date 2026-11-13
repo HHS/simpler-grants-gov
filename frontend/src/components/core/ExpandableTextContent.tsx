@@ -1,5 +1,9 @@
+"use client";
+
 import DOMPurify from "isomorphic-dompurify";
 import { splitMarkup } from "src/utils/generalUtils";
+
+import { useState } from "react";
 
 import ContentDisplayToggle from "src/components/core/ContentDisplayToggle";
 
@@ -18,6 +22,9 @@ export const ExpandableTextContent = ({
   splitIfLongerThan?: number;
   emptyText?: string;
 }) => {
+  const [additionalContentVisible, setAdditionalContentVisible] =
+    useState<boolean>(false);
+
   if (textContent?.length < splitIfLongerThan) {
     return (
       <div
@@ -45,13 +52,14 @@ export const ExpandableTextContent = ({
     <>
       <div
         dangerouslySetInnerHTML={{
-          __html: preSplit + "...",
+          __html: additionalContentVisible ? preSplit : preSplit + "...",
         }}
       />
       <ContentDisplayToggle
         showCallToAction={showCallToAction}
         hideCallToAction={hideCallToAction}
         positionButtonBelowContent={false}
+        onVisibilityChange={setAdditionalContentVisible}
       >
         <div
           dangerouslySetInnerHTML={{
