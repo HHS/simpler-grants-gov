@@ -30,6 +30,21 @@ logger = logging.getLogger(__name__)
 
 OPPORTUNITY_BATCH_SIZE = 1000
 
+OPPORTUNITY_INDEX_MAPPINGS = {
+    "properties": {
+        # use an explicit mapping for `opportunity_title` so we can add a sortable normalization
+        "opportunity_title": {
+            "type": "text",
+            "fields": {
+                # preserve `opportunity_title.keyword`
+                "keyword": {"type": "keyword"},
+                # use the `sortable` normalizer to apply case- and ASCII-folding
+                "sortable": {"type": "keyword", "normalizer": "sortable"},
+            },
+        }
+    }
+}
+
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     model_config = SettingsConfigDict(env_prefix="LOAD_OPP_SEARCH_")
@@ -88,6 +103,7 @@ class LoadOpportunitiesToIndex(Task):
             self.index_name,
             shard_count=self.config.shard_count,
             replica_count=self.config.replica_count,
+            mappings=OPPORTUNITY_INDEX_MAPPINGS,
         )
 
         # load the records and mark each batch as loaded

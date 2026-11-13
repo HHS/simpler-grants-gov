@@ -109,6 +109,135 @@ class TestSearchOpportunitiesExplain:
         mock_log.assert_not_called()
 
 
+class TestSearchOpportunitiesSort:
+    def test_no_sort_order(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 0,
+                    "page_size": 10,
+                },
+            },
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert "sort" not in search_request
+
+    def test_sort_order_close_date(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 0,
+                    "page_size": 10,
+                    "sort_order": [{"order_by": "close_date", "sort_direction": "ascending"}],
+                },
+            },
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["sort"] == [{"summary.close_date": {"order": "asc"}}]
+
+    def test_sort_order_post_date(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 0,
+                    "page_size": 10,
+                    "sort_order": [{"order_by": "post_date", "sort_direction": "descending"}],
+                },
+            },
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["sort"] == [{"summary.post_date": {"order": "desc"}}]
+
+    def test_sort_by_title(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 0,
+                    "page_size": 10,
+                    "sort_order": [
+                        {"order_by": "opportunity_title", "sort_direction": "ascending"}
+                    ],
+                },
+            },
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["sort"] == [{"opportunity_title.sortable": {"order": "asc"}}]
+
+    def test_sort_by_award_floor(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 0,
+                    "page_size": 10,
+                    "sort_order": [{"order_by": "award_floor", "sort_direction": "ascending"}],
+                },
+            },
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["sort"] == [{"summary.award_floor": {"order": "asc"}}]
+
+    def test_sort_by_award_ceiling(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 0,
+                    "page_size": 10,
+                    "sort_order": [{"order_by": "award_ceiling", "sort_direction": "ascending"}],
+                },
+            },
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["sort"] == [{"summary.award_ceiling": {"order": "asc"}}]
+
+
 class TestSearchOpportunitiesCsv:
     def test_csv_search_uses_optimized_query(self):
         search_client = MagicMock()

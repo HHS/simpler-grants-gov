@@ -57,6 +57,12 @@ OPP_REQUEST_FIELD_NAME_MAPPING = {
     "assistance_listing_number": "opportunity_assistance_listings.assistance_listing_number.keyword",
 }
 
+# Sorting follows the rest of the query unless specifically overridden
+OPP_REQUEST_FIELD_SORT_MAPPING = {
+    **OPP_REQUEST_FIELD_NAME_MAPPING,
+    "opportunity_title": "opportunity_title.sortable",  # applies case- and ASCII-folding
+}
+
 FILTER_RULE_MAPPING = {
     ScoringRule.EXPANDED: EXPANDED,
     ScoringRule.AGENCY: AGENCY,
@@ -176,7 +182,7 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
     for sort_order in pagination.sort_order:
         sort_by.append(
             (
-                _adjust_field_name(sort_order.order_by, OPP_REQUEST_FIELD_NAME_MAPPING),
+                _adjust_field_name(sort_order.order_by, OPP_REQUEST_FIELD_SORT_MAPPING),
                 sort_order.sort_direction,
             )
         )

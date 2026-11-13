@@ -214,24 +214,31 @@ export async function clickPaginationPageIfPresent(
 
   // eslint-disable-next-line no-console
   console.warn(
-    `${callerLabel ?? "clickPaginationPageIfPresent"}: only one page of results ` +
+    `${
+      callerLabel ?? "clickPaginationPageIfPresent"
+    }: only one page of results ` +
       `for this criteria set; skipping navigation to page ${pageNumber}`,
   );
   return false;
 }
 
-export async function getFirstSearchResultTitle(page: Page) {
-  const firstResultSelector = page.locator(
+export async function getFirstVisibleSearchResultTitle(page: Page) {
+  const firstVisibleResultSelector = page.locator(
     ".simpler-responsive-table tr:first-child a",
   );
-  return await firstResultSelector.textContent();
+  return await firstVisibleResultSelector.textContent();
 }
 
-export async function getLastSearchResultTitle(page: Page) {
-  const lastResultSelector = page.locator(
+export async function getLastVisibleSearchResultTitle(page: Page) {
+  const lastVisibleResultSelector = page.locator(
     ".simpler-responsive-table tr:last-child a",
   );
-  return await lastResultSelector.textContent();
+  return await lastVisibleResultSelector.textContent();
+}
+
+export async function getVisibleSearchResultTitles(page: Page) {
+  const visibleResultsSelector = page.locator(".simpler-responsive-table tr a");
+  return await visibleResultsSelector.allTextContents();
 }
 
 // If descending, select the ascending variant
