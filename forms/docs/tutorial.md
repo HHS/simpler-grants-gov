@@ -115,6 +115,7 @@ Then paste this in:
       "children": [
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-applicant-organization-name",
           "label": "Applicant Organization Name",
           "dat_field": "5",
           "required": true,
@@ -138,6 +139,7 @@ Then paste this in:
       "children": [
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-project-role",
           "label": "Contact 1 Project Role",
           "dat_field": "7-01",
           "required": true,
@@ -157,6 +159,7 @@ Then paste this in:
           "children": [
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-prefix",
               "label": "Prefix",
               "dat_field": "7-03",
               "required": false,
@@ -169,6 +172,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-first-name",
               "label": "First Name",
               "dat_field": "7-04",
               "required": true,
@@ -181,6 +185,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-middle-name",
               "label": "Middle Name",
               "dat_field": "7-05",
               "required": false,
@@ -193,6 +198,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-last-name",
               "label": "Last Name",
               "dat_field": "7-06",
               "required": true,
@@ -205,6 +211,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-suffix",
               "label": "Suffix",
               "dat_field": "7-07",
               "required": false,
@@ -219,6 +226,7 @@ Then paste this in:
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-title",
           "label": "Title",
           "dat_field": "7-08",
           "required": false,
@@ -231,6 +239,7 @@ Then paste this in:
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-organizational-affiliation",
           "label": "Organizational Affiliation",
           "dat_field": "7-09",
           "required": false,
@@ -250,6 +259,7 @@ Then paste this in:
           "children": [
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-street1",
               "label": "Street1",
               "dat_field": "7-10",
               "required": true,
@@ -262,6 +272,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-street2",
               "label": "Street2",
               "dat_field": "7-11",
               "required": false,
@@ -274,6 +285,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-city",
               "label": "City",
               "dat_field": "7-12",
               "required": true,
@@ -286,6 +298,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-county",
               "label": "County",
               "dat_field": "7-13",
               "required": false,
@@ -298,6 +311,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-state",
               "label": "State",
               "dat_field": "7-14",
               "required": "Conditional (when Country = 'USA')",
@@ -310,6 +324,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-province",
               "label": "Province",
               "dat_field": "7-15",
               "required": false,
@@ -322,6 +337,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-country",
               "label": "Country",
               "dat_field": "7-16",
               "required": true,
@@ -334,6 +350,7 @@ Then paste this in:
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "7-17",
               "required": "Conditional (when Country = 'USA')",
@@ -348,6 +365,7 @@ Then paste this in:
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-phone",
           "label": "Telephone Number",
           "dat_field": "7-18",
           "required": true,
@@ -360,6 +378,7 @@ Then paste this in:
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-fax",
           "label": "Fax",
           "dat_field": "7-19",
           "required": false,
@@ -372,6 +391,7 @@ Then paste this in:
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-email",
           "label": "Email",
           "dat_field": "7-20",
           "required": true,
@@ -1213,6 +1233,8 @@ Each contact field now comes from the question bank: the name and address with t
 
 `TutorialKeyContact` belongs to this form, so it has no `@Meta.question`. That decorator publishes a model to the question bank, for other forms to reuse. Because the fields are declared in the DAT's order, step 2's layout needs no change.
 
+Don't compile yet: step 3's `xsd.tsp` still maps from the models you just replaced, so the compile fails until you update it in 5.2.
+
 ### 5.2 Reuse the shared XSD models
 
 Because the name and address are now the question bank's, the shared `globLib` models already know how to map them. In `xsd.tsp`, delete the tutorial's own `HumanNameDataType` and `AddressDataTypeV3` and use `XSD.GlobLib`'s:
@@ -1315,6 +1337,7 @@ npx vitest run parity -t key-contacts-tutorial
 ```text
  FAIL  parity/comparison.test.ts > key-contacts-tutorial > shows no unrecorded differences
  FAIL  ... > plan vs JSON schema > JSON schema matches field constraints
+  minLength differs: key_contacts[].email -- plan 1, source none
   format differs: key_contacts[].email -- plan none, source "email"
  FAIL  ... > plan vs UI schema > UI schema matches field labels
   label differs: key_contacts[].address.street1 -- plan "Street1", source "Street 1"
@@ -1326,13 +1349,15 @@ npx vitest run parity -t key-contacts-tutorial
   help differs: key_contacts[].name.prefix -- plan "Select the Prefix from the provided list or enter a new Prefix not provided on the list.", source "Enter the prefix."
   help differs: key_contacts[].name.first_name -- plan "Enter the First Name. This field is required.", source "Enter the first name."
   ...
+ FAIL  ... > XML checks > JSON schema vs XSD > JSON schema matches field constraints
+  minLength differs: key_contacts[].email -- plan none, source 1
 ```
 
-The exact list depends on the question bank's current wording, so yours may differ. Look for label and help text differences in the contact fields, and an email format.
+The exact list depends on the question bank's current wording, so yours may differ. Look for label and help text differences in the contact fields, and two differences in the email.
 
-The XML checks still pass. Only the wording changed, and the question bank adds an email format.
+The question bank's email adds `format email` and leaves out a minimum length. The XSD requires at least one character, so the XML checks find that too. Email fields leave it out on purpose: the format already rejects an empty string, and two errors for one problem is confusing. Step 5.6 records it.
 
-In the form library, the **Unrecorded differences** tile counts many more differences than there are failing checks, all in the Form column: each check fails once, but lists every field that differs. **Differs in** breaks them down into Label, Help and Format. The Label count also includes step 1's two upstream labels.
+In the form library, the **Unrecorded differences** tile counts many more differences than there are failing checks, all in the Form column: each check fails once, but lists every field that differs. **Differs in** breaks them down by attribute, such as Label, Help and Format. The Label count also includes step 1's two upstream labels.
 
 ### 5.4 Choose: match the DAT, or match the other forms
 
@@ -1379,6 +1404,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
       "children": [
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-applicant-organization-name",
           "label": "Applicant Organization Name",
           "dat_field": "5",
           "required": true,
@@ -1402,6 +1428,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
       "children": [
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-project-role",
           "label": "Contact 1 Project Role",
           "dat_field": "7-01",
           "required": true,
@@ -1421,6 +1448,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
           "children": [
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-prefix",
               "label": "Prefix",
               "dat_field": "7-03",
               "required": false,
@@ -1433,6 +1461,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-first-name",
               "label": "First Name",
               "dat_field": "7-04",
               "required": true,
@@ -1445,6 +1474,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-middle-name",
               "label": "Middle Name",
               "dat_field": "7-05",
               "required": false,
@@ -1457,6 +1487,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-last-name",
               "label": "Last Name",
               "dat_field": "7-06",
               "required": true,
@@ -1469,6 +1500,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-suffix",
               "label": "Suffix",
               "dat_field": "7-07",
               "required": false,
@@ -1483,6 +1515,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-title",
           "label": "Title",
           "dat_field": "7-08",
           "required": false,
@@ -1495,6 +1528,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-organizational-affiliation",
           "label": "Organizational Affiliation",
           "dat_field": "7-09",
           "required": false,
@@ -1514,6 +1548,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
           "children": [
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-street1",
               "label": "Street 1",
               "dat_field": "7-10",
               "required": true,
@@ -1526,6 +1561,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-street2",
               "label": "Street 2",
               "dat_field": "7-11",
               "required": false,
@@ -1538,6 +1574,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-city",
               "label": "City",
               "dat_field": "7-12",
               "required": true,
@@ -1550,6 +1587,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-county",
               "label": "County/Parish",
               "dat_field": "7-13",
               "required": false,
@@ -1562,6 +1600,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-state",
               "label": "State",
               "dat_field": "7-14",
               "required": "Conditional (when Country = 'USA')",
@@ -1574,6 +1613,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-province",
               "label": "Province",
               "dat_field": "7-15",
               "required": false,
@@ -1586,6 +1626,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-country",
               "label": "Country",
               "dat_field": "7-16",
               "required": true,
@@ -1598,6 +1639,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
             },
             {
               "kind": "field",
+              "id": "key-contacts-tutorial-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "7-17",
               "required": "Conditional (when Country = 'USA')",
@@ -1612,6 +1654,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-phone",
           "label": "Phone Number",
           "dat_field": "7-18",
           "required": true,
@@ -1624,6 +1667,7 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-fax",
           "label": "Fax Number",
           "dat_field": "7-19",
           "required": false,
@@ -1636,13 +1680,14 @@ Replace `key-contacts-tutorial.json` with this version, which uses the question 
         },
         {
           "kind": "field",
+          "id": "key-contacts-tutorial-email",
           "label": "Email",
           "dat_field": "7-20",
           "required": true,
           "type": "Text input",
           "widget": "TextWidget",
           "help_text": "Enter the email address.",
-          "constraints": "minLength 1, maxLength 60, format email",
+          "constraints": "maxLength 60, format email",
           "json_path": "key_contacts[].email",
           "xml_path": "Key_Contacts_2_0:RoleOnProject/Key_Contacts_2_0:ContactEmail"
         }
@@ -1679,9 +1724,9 @@ These are the fields that change:
 | `key_contacts[].fax`              | `label`       | Fax Number                                                                               |
 | `key_contacts[].fax`              | `help_text`   | Enter the fax number.                                                                    |
 | `key_contacts[].email`            | `help_text`   | Enter the email address.                                                                 |
-| `key_contacts[].email`            | `constraints` | minLength 1, maxLength 60, format email                                                  |
+| `key_contacts[].email`            | `constraints` | maxLength 60, format email                                                               |
 
-The implementation checks pass. The difference has moved to where it belongs, the requirements checks: the plan now differs from the DAT.
+The implementation checks pass. The differences have moved to where they belong, the requirements checks: the plan now differs from the DAT, and its email from the XSD. The XML check still finds the email's minimum length, as in 5.3.
 
 ```text
  FAIL  parity/comparison.test.ts > key-contacts-tutorial > shows no unrecorded differences
@@ -1693,17 +1738,21 @@ The implementation checks pass. The difference has moved to where it belongs, th
   label differs: 7-19 -- plan "Fax Number", source "Fax"
  FAIL  ... > Requirements checks > plan vs DAT > plan matches help text
   ...
+ FAIL  ... > Requirements checks > plan vs XSD > plan matches field constraints
+  minLength differs: RoleOnProject/ContactEmail -- plan none, source 1
+ FAIL  ... > XML checks > JSON schema vs XSD > JSON schema matches field constraints
+  minLength differs: key_contacts[].email -- plan none, source 1
 ```
 
 In the form library, the **Unrecorded differences** tile shows the same labels and help texts, now in the DAT column instead of the Form column. The email format difference is gone: the plan now says `format email`, and formats aren't compared with the DAT.
 
 ### 5.6 Record the differences as intentional
 
-You could pin each field's label and help one by one, as `parity/diffs/key-contacts.ts` does. When every difference has the same cause, `wording` accepts them all at once, with one reason. Add it to `parity/diffs/key-contacts-tutorial.ts`:
+You could pin each field's label and help one by one, as `parity/diffs/key-contacts.ts` does. When every difference has the same cause, `wording` accepts them all at once, with one reason. `emailMinLength` records the email's minimum length for both XSD comparisons, the same way every form with an email does. Add both to `parity/diffs/key-contacts-tutorial.ts`:
 
 ```ts
 import type { FormDiff, Pinned } from "../harness/model.ts";
-import { BANK_WORDING } from "./common.ts";
+import { BANK_WORDING, emailMinLength } from "./common.ts";
 
 /** The DAT stars State and Zip / Postal Code, but its Required column and the XSD make them optional. */
 const conditionalStar = (label: string): Pinned => ({
@@ -1724,10 +1773,12 @@ export const DIFF: FormDiff = {
       "7-17": conditionalStar("Zip / Postal Code"),
     },
   },
+  xsd: { differingRules: emailMinLength(["RoleOnProject/ContactEmail"]) },
+  jsonSchemaVsXsd: { differingRules: emailMinLength(["key_contacts[].email"]) },
 };
 ```
 
-`BANK_WORDING` is shared by every form that takes its wording from the question bank (see `parity/diffs/common.ts`). Each difference is still compared and shown, with both values side by side.
+`BANK_WORDING` and `emailMinLength` are shared by the forms that take their wording and email from the question bank (see `parity/diffs/common.ts`). Each difference is still compared and shown, with both values side by side.
 
 ### Check
 
