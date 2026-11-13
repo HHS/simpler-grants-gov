@@ -36,7 +36,7 @@ beforeAll(async () => {
   for (const id of ids) {
     const optionsFile = path.join(forms, "dist/sgg/forms", id, "sgg.json");
     const options = JSON.parse(await readFile(optionsFile, "utf8"));
-    options.sync = { sggVersion: "0.1.0", xml: "mapping" };
+    options.sync = { sggVersion: "1.0", xml: "mapping" };
     await writeFile(optionsFile, JSON.stringify(options));
   }
   execFileSync(process.execPath, [path.join(forms, "scripts/sync.mjs")]);
