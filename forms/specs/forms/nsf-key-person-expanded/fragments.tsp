@@ -18,10 +18,25 @@ namespace Forms.NSFKeyPersonExpanded;
  * types that differ in one field: the organization's name, or its UEI.
  */
 model NSFProfileBase {
-  // `Person` makes the email optional; every key-person profile requires it. Required here
-  // rather than with `@Validation.requiredPaths` on the entry, which emits it twice
-  // (agilesix/simpler-forms#22).
-  ...OmitProperties<Questions.People.Person, "email">;
+  /** Enter the person's name. First and last name are required. */
+  @UI.label("Name")
+  name: Questions.People.PersonName;
+
+  /** Enter the position title. */
+  @UI.label("Title")
+  title?: Questions.People.PersonTitle;
+
+  /** Enter the person's complete address. */
+  @UI.label("Address")
+  address: Questions.People.PersonAddress;
+
+  /** Enter the phone number. */
+  @UI.label("Phone Number")
+  phone: Questions.People.PersonPhoneNumber;
+
+  /** Enter the fax number. */
+  @UI.label("Fax Number")
+  fax?: Questions.People.PersonFaxNumber;
 
   /** Enter the email address. */
   @UI.label("Email")
