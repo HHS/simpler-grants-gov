@@ -176,6 +176,29 @@ def transform_map_values(
         )
 
 
+def transform_join_values(value: Any, separator: str = "", sort: bool = False) -> str:
+    """Join a list of strings into one, in order or, with ``sort``, sorted.
+
+    Sorting makes the result independent of the order the answers were chosen in, as a code
+    combined from checkbox selections needs (RR SF-424's ``RevisionCode``: A and C -> "AC").
+
+    Args:
+        value: List of strings to join
+        separator: String placed between entries
+        sort: Whether to sort the entries (by code point) first
+
+    Returns:
+        The joined string
+
+    Raises:
+        ValueTransformationError: If value is not a list of strings
+    """
+    if not isinstance(value, list) or not all(isinstance(entry, str) for entry in value):
+        raise ValueTransformationError(f"join_values requires a list of strings, got {value!r}")
+
+    return separator.join(sorted(value) if sort else value)
+
+
 # Registry of available transformations
 TRANSFORMATION_REGISTRY: dict[str, Callable[..., Any]] = {
     "boolean_to_yes_no": transform_boolean_to_yes_no,
@@ -183,6 +206,7 @@ TRANSFORMATION_REGISTRY: dict[str, Callable[..., Any]] = {
     "string_case": transform_string_case,
     "truncate_string": transform_truncate_string,
     "map_values": transform_map_values,
+    "join_values": transform_join_values,
 }
 
 

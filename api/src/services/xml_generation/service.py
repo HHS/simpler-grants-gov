@@ -6,6 +6,7 @@ from typing import Any
 
 from lxml import etree as lxml_etree
 
+from .mapping import generate_xml_from_mapping, is_xml_mapping
 from .models import XMLGenerationRequest, XMLGenerationResponse
 from .transformers.attachment_transformer import AttachmentTransformer
 from .transformers.base_transformer import RecursiveXMLTransformer
@@ -39,6 +40,17 @@ class XMLGenerationService:
             XML generation response with generated XML or error information
         """
         try:
+            # A form whose configuration is a mapping shaped like the XML opts into its own
+            # generator. Every other form takes the path below, unchanged.
+            if is_xml_mapping(request.transform_config):
+                xml_string = generate_xml_from_mapping(
+                    request.transform_config,
+                    request.application_data,
+                    request.attachment_mapping,
+                    request.pretty_print,
+                )
+                return XMLGenerationResponse(success=True, xml_data=xml_string)
+
             # An empty application_data dict is valid (a form with only optional elements)
             # and is intentionally not rejected here.
             transformer = RecursiveXMLTransformer(request.transform_config)

@@ -1,0 +1,117 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0",
+    "PerformanceSite_4_0": "http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_0-V4.0.xsd",
+  "root": {
+    "PerformanceSite_4_0": {
+      "@PerformanceSite_4_0:FormVersion": {
+        "$const": "4.0"
+      },
+      "PrimarySite": {
+        "Individual": {
+          "$transform": {
+            "name": "boolean_to_yes_no",
+            "value": {
+              "$field": "primary_site.submitting_as_individual"
+            }
+          }
+        },
+        "OrganizationName": {
+          "$field": "primary_site.organization_name"
+        },
+        "SAMUEI": {
+          "$field": "primary_site.uei"
+        },
+        "Address": {
+          "globLib:Street1": {
+            "$field": "primary_site.address.street1"
+          },
+          "globLib:Street2": {
+            "$field": "primary_site.address.street2"
+          },
+          "globLib:City": {
+            "$field": "primary_site.address.city"
+          },
+          "globLib:County": {
+            "$field": "primary_site.address.county"
+          },
+          "globLib:State": {
+            "$field": "primary_site.address.state"
+          },
+          "globLib:Province": {
+            "$field": "primary_site.address.province"
+          },
+          "globLib:ZipPostalCode": {
+            "$field": "primary_site.address.zip_code"
+          },
+          "globLib:Country": {
+            "$field": "primary_site.address.country"
+          }
+        },
+        "CongressionalDistrictProgramProject": {
+          "$field": "primary_site.congressional_district"
+        }
+      },
+      "OtherSite": {
+        "$each": {
+          "items": {
+            "$field": "additional_sites"
+          },
+          "map": {
+            "Individual": {
+              "$transform": {
+                "name": "boolean_to_yes_no",
+                "value": {
+                  "$field": "submitting_as_individual"
+                }
+              }
+            },
+            "OrganizationName": {
+              "$field": "organization_name"
+            },
+            "SAMUEI": {
+              "$field": "uei"
+            },
+            "Address": {
+              "globLib:Street1": {
+                "$field": "address.street1"
+              },
+              "globLib:Street2": {
+                "$field": "address.street2"
+              },
+              "globLib:City": {
+                "$field": "address.city"
+              },
+              "globLib:County": {
+                "$field": "address.county"
+              },
+              "globLib:State": {
+                "$field": "address.state"
+              },
+              "globLib:Province": {
+                "$field": "address.province"
+              },
+              "globLib:ZipPostalCode": {
+                "$field": "address.zip_code"
+              },
+              "globLib:Country": {
+                "$field": "address.country"
+              }
+            },
+            "CongressionalDistrictProgramProject": {
+              "$field": "congressional_district"
+            }
+          }
+        }
+      },
+      "AttachedFile": {
+        "$attachment": "additional_locations_attachment"
+      }
+    }
+  }
+}
