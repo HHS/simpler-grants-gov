@@ -113,7 +113,7 @@
         "address": {
           "allOf": [
             {
-              "$ref": "#/$defs/person.address"
+              "$ref": "#/$defs/types.address.zip-plus-four"
             }
           ],
           "description": "Enter the person's complete address.",
@@ -284,7 +284,7 @@
       "description": "Enter the position title.",
       "title": "Title"
     },
-    "person.address": {
+    "types.address.zip-plus-four": {
       "type": "object",
       "properties": {
         "street1": {
@@ -365,9 +365,28 @@
         "city",
         "country"
       ],
-      "description": "A person's address.",
+      "description": "Enter an address. A US ZIP needs all nine digits.",
       "title": "Address",
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "USA: UNITED STATES"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "properties": {
+              "zip_code": {
+                "minLength": 9
+              }
+            }
+          }
+        },
         {
           "if": {
             "properties": {
