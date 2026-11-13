@@ -27,7 +27,6 @@ describe("getNextRoutes", () => {
       "/(base)/roadmap",
       "/(base)/search",
       "/(base)/settings",
-      "/(base)/unauthenticated",
       "/(base)/vision",
       "/(base)/workspace/applications/[applicationId]/form/[appFormId]",
       "/(base)/workspace/applications/[applicationId]/form/[appFormId]/success",

@@ -1,4 +1,5 @@
 import { RJSFSchema } from "@rjsf/utils";
+import { ActionErrorCode } from "src/types/generalTypes";
 
 import { handleFormAction } from "./actions";
 
@@ -53,6 +54,7 @@ describe("handleFormAction", () => {
     expect(result).toEqual({
       ...genericPayload,
       error: true,
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     });
   });
   it("returns error state if error occurs when processing schema", async () => {

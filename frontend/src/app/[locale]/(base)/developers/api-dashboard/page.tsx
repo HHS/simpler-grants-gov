@@ -4,7 +4,6 @@ import {
 } from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyAlertProvider";
 import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
 import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
-import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
 import { getSession } from "src/services/auth/session";
 import { handleListApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
 import { logger } from "src/services/logger/simplerLogger";
@@ -13,6 +12,7 @@ import { LocalizedPageProps } from "src/types/intl";
 import { getTranslations } from "next-intl/server";
 
 import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
+import { UnauthenticatedMessage } from "src/components/core/UnauthenticatedMessage";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -24,7 +24,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
 
   const session = await getSession();
   if (!session?.token) {
-    return <Unauthenticated />;
+    return <UnauthenticatedMessage />;
   }
 
   try {

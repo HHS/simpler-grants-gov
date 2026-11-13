@@ -99,6 +99,7 @@ export default async function FormPage({ params }: FormPageProps) {
     formName,
     formSchema,
     formUiSchema,
+    jsonFormsUiSchema,
     applicationAttachments,
   } = data;
 
@@ -111,6 +112,7 @@ export default async function FormPage({ params }: FormPageProps) {
         savedFormData={applicationResponse}
         formSchema={formSchema}
         uiSchema={modifiedUiSchema}
+        jsonFormsUiSchema={jsonFormsUiSchema}
         attachments={applicationAttachments}
         setAttachmentsChanged={setAttachmentsChanged}
       />

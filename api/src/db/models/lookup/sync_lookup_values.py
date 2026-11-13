@@ -64,11 +64,11 @@ def _sync_roles(
     db_session: db.Session,
 ) -> None:
     # Import placed here to avoid circular dependencies
-    from src.constants.static_role_values import CORE_ROLES
+    from src.constants.static_role_values import STATIC_ROLES
 
-    logger.info("Syncing static core roles")
+    logger.info("Syncing static roles")
     updated_role_count = 0
-    for role in CORE_ROLES:
+    for role in STATIC_ROLES:
         instance = db_session.merge(role)
         role_name = role.role_name
         if db_session.is_modified(instance):

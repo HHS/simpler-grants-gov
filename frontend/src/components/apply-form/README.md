@@ -6,6 +6,8 @@ This component takes form and UI schemas to create a form. The form schema confo
 
 The UI schema is custom for this project. It was inspired by [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form). RJSF was not chosen because it doesn't work with server actions, it doesn't support hierarchical UI layouts natively, and the validation will move to the API which reduces the value of the tightly coupled validation in RJSF. There is a [plugin for layouts](https://github.com/audibene-labs/react-jsonschema-form-layout), however it hasn't been updated in 4 years and still requires a lot of abstraction. This component provides most of the UI rendering with a ~100 line recursive function and uses the same library for validation. The widgets however are patterned after the RJSF widgets.
 
+A form can use a [JSON Forms](https://jsonforms.io/docs/) UI schema instead. See the [JSON Forms renderer README](./jsonforms/README.md).
+
 ## UI Template
 
 File adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/templates/BaseInputTemplate.tsx
@@ -131,3 +133,9 @@ Some widgets require data from more than one field. To add more than one field, 
 ```
 
 In the widget, the data is available as a combined `value` object.
+
+## Rules in the SGG UI schema
+
+A node in an SGG UI schema can include rules, such as `conditional`, which the form spec emitter writes to describe when a field is enabled, disabled or read-only. The SGG renderer doesn't act on these rules yet, so the fields they govern render unconditionally.
+
+UI schema validation accepts any unknown _object-valued_ key on a node as a rule, so new rules can ship before the renderer supports them without breaking the form. Unknown string keys, like a mistyped `label` or `widget`, still fail validation. `getFormData` logs the rules a form declares that the renderer ignores (`unimplementedRuleKeys`).

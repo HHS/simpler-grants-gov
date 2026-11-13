@@ -3,6 +3,7 @@
 import { getSession } from "src/services/auth/session";
 import { updateApplicationFilingName } from "src/services/fetch/fetchers/applicationFetcher";
 import { logger } from "src/services/logger/simplerLogger";
+import { ActionErrorCode } from "src/types/generalTypes";
 
 import { revalidateTag } from "next/cache";
 
@@ -10,6 +11,7 @@ export type UpdateAppFilingNameActionState =
   | {
       success: boolean;
       error: string | null;
+      errorCode?: ActionErrorCode;
     }
   | undefined;
 
@@ -23,6 +25,7 @@ export const updateAppFilingNameAction = async (
     return {
       success: false,
       error: "Session has expired",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     };
   }
 

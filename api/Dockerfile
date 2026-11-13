@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:a99aa79@sha256:b4cc54478cf365fd984b2887c3e1f728aa307ad613bb86adb794d4ef02769701 AS base
+FROM ghcr.io/hhs/python-base-image:69f5010@sha256:7637c909b67e7fe29e68d8b5e981c328393f1d4d304f4c649f7210b4a0fa47c4 AS base
 
 ARG RUN_UID
 ARG RUN_USER

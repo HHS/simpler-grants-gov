@@ -7,6 +7,7 @@ import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { logger } from "src/services/logger/simplerLogger";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
+import { ActionErrorCode } from "src/types/generalTypes";
 import {
   processFormSchema,
   shapeFormData,
@@ -15,6 +16,7 @@ import {
 type ApplyFormResponse = {
   applicationId: string;
   error: boolean;
+  errorCode?: ActionErrorCode;
   formData: object;
   formId: string;
   saved: boolean;
@@ -30,6 +32,7 @@ export async function handleFormAction(
     return {
       applicationId,
       error: true,
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
       formData,
       formId,
       saved: false,

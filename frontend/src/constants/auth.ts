@@ -13,7 +13,6 @@ export const LOGIN_REDIRECT_BLOCKED_PREFIXES = [
   "/login",
   "/logout",
   "/maintenance",
-  "/unauthenticated",
   "/error",
   "/api",
   "/dev",

@@ -10,7 +10,6 @@ The `user_api_key` table stores API keys that allow users to authenticate with t
 | ----------- | --------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | api_key_id  | UUID      | PRIMARY KEY                 | Unique identifier for the API key record                                                                                   |
 | key_name    | TEXT      | NOT NULL                    | Human-readable name for the API key (e.g., "Production Key", "Development Key")                                            |
-| key_id      | TEXT      | NULLABLE                    | Deprecated. No longer written; will be dropped                                                                             |
 | key_id_hash | TEXT      | NOT NULL, UNIQUE            | HMAC-SHA256 hash of the raw API key, keyed with the API key pepper. The raw key itself is never stored                     |
 | user_id     | UUID      | NOT NULL, FK → user.user_id | Reference to the user who owns this API key                                                                                |
 | last_used   | TIMESTAMP | NULLABLE                    | Timestamp of when this API key was last used for authentication                                                            |
@@ -60,7 +59,7 @@ The table is created via Alembic migration: `2025_08_06_add_user_api_key_table.p
 
 `key_id_hash` was added as a nullable column in `2026_09_30_add_key_id_hash_to_user_api_key.py`. `2026_10_05_backfill_key_id_hash_and_finalize_.py` hashes every pre-existing row, then adds the unique index and makes the column NOT NULL.
 
-The plaintext `key_id` column is no longer written or read, and is nullable since `2026_11_05_make_user_api_key_key_id_nullable.py`. It will be dropped in a follow-up. The raw key is returned to the user once when the key is created and imported into AWS API Gateway; only its hash is kept.
+The plaintext `key_id` column was dropped in `2026_11_06_drop_key_id_from_user_api_key.py`. The raw key is returned to the user once when the key is created and imported into AWS API Gateway; only its hash is kept.
 
 ## Usage Examples
 
