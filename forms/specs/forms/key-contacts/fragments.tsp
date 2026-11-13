@@ -34,7 +34,7 @@ model KeyContact {
 
   /** Enter the person's complete address. */
   @UI.label("Address")
-  address: Questions.People.PersonAddress;
+  address: Questions.Types.AddressZipPlusFour;
 
   /** Enter the phone number. */
   @UI.label("Phone Number")

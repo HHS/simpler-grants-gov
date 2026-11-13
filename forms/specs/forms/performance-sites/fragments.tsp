@@ -28,7 +28,7 @@ model Site {
   @UI.label("UEI")
   uei?: Questions.Organizations.OrgUei;
 
-  address: Questions.Types.Address;
+  address: Questions.Types.AddressZipPlusFour;
 
   @doc("Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005, MD-all, US-all, 00-000. Required if the site is in the United States.")
   @UI.label("Project/Performance Site Congressional District")
