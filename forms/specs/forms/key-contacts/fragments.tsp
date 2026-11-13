@@ -15,8 +15,6 @@ namespace Forms.KeyContacts;
 // =============================================================================
 
 // A contact person named for their role on the project: Key Contacts `RoleOnProject`.
-@Meta.question(#{ id: "person/key-contact" })
-@Meta.tag(Catalogue.Tag.person, Catalogue.Tag.role)
 @UI.label("Key Contact")
 @example(Examples.principalInvestigator)
 model KeyContact {
@@ -58,9 +56,7 @@ model KeyContact {
 // =============================================================================
 
 /** Enter the key contact's free-text role on this project. */
-@Meta.question(#{ id: "person/key-contact/project-role" })
 @Meta.role(ResponseRole.applicantInput)
-@Meta.tag(Catalogue.Tag.person, Catalogue.Tag.role)
 @minLength(1)
 @maxLength(45)
 scalar ProjectRole extends string;
