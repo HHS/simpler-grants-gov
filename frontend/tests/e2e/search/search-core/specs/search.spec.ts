@@ -100,9 +100,8 @@ test.describe("Search page tests", () => {
       }
 
       // Then the first result should be alphabetically first by opportunity title
-      const firstSearchResultTitle = await getFirstVisibleSearchResultTitle(
-        page,
-      );
+      const firstSearchResultTitle =
+        await getFirstVisibleSearchResultTitle(page);
 
       // Assumption: on mobile, sort options live in the filter drawer.
       if (isMobile) {
