@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 from lxml import etree as lxml_etree
 
-from src.form_schema.forms.key_contacts import FORM_XML_TRANSFORM_RULES, KeyContacts_v2_0
+from src.form_schema.forms import key_contacts, key_contacts_generated
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -28,6 +28,25 @@ from tests.src.db.models.factories import (
 
 KC_NS = "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0"
 GLOB_NS = "http://apply.grants.gov/system/GlobalLibrary-V2.0"
+
+# The hand-written form and the one generated from forms/specs write the same XML.
+KEY_CONTACTS_FORMS = [
+    pytest.param(
+        (key_contacts.KeyContacts_v2_0, key_contacts.FORM_XML_TRANSFORM_RULES),
+        id="handwritten",
+    ),
+    pytest.param(
+        (key_contacts_generated.FORM, key_contacts_generated.FORM_XML_TRANSFORM_RULES),
+        id="generated",
+    ),
+]
+
+
+@pytest.fixture(params=KEY_CONTACTS_FORMS)
+def key_contacts_form(request):
+    """A Key Contacts form and the rules it writes its XML with."""
+    return request.param
+
 
 # --------------------------------------------------------------------------- #
 # Shared test fixtures                                                          #
@@ -95,7 +114,7 @@ _INTL_CONTACT = {
 # --------------------------------------------------------------------------- #
 
 
-def test_key_contacts_xml_structure():
+def test_key_contacts_xml_structure(key_contacts_form):
     """Generate XML for multiple key contacts and verify the RoleOnProject array structure."""
     application_data = {
         "applicant_organization_name": "Acme Corporation",
@@ -127,10 +146,9 @@ def test_key_contacts_xml_structure():
         ],
     }
 
+    _, transform_rules = key_contacts_form
     response = XMLGenerationService().generate_xml(
-        XMLGenerationRequest(
-            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
-        )
+        XMLGenerationRequest(application_data=application_data, transform_config=transform_rules)
     )
     assert response.success is True
 
@@ -168,11 +186,15 @@ def test_key_contacts_xml_structure():
 class TestKeyContactsXMLGeneration:
     """Unit tests for Key Contacts XML generation (no DB required)."""
 
+    @pytest.fixture(autouse=True)
+    def _use_key_contacts_form(self, key_contacts_form):
+        self.form, self.transform_rules = key_contacts_form
+
     def _generate(self, data: dict) -> str:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=data,
-            transform_config=FORM_XML_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
         )
         response = service.generate_xml(request)
         assert response.success is True, response.error_message
@@ -325,11 +347,13 @@ class TestKeyContactsLegacyParity:
         </Key_Contacts_2_0:Key_Contacts_2_0>
     """
 
+    @pytest.fixture(autouse=True)
+    def _use_key_contacts_form(self, key_contacts_form):
+        self.form, self.transform_rules = key_contacts_form
+
     def _generate(self, data: dict[str, Any]) -> lxml_etree._Element:
         service = XMLGenerationService()
-        request = XMLGenerationRequest(
-            application_data=data, transform_config=FORM_XML_TRANSFORM_RULES
-        )
+        request = XMLGenerationRequest(application_data=data, transform_config=self.transform_rules)
         response = service.generate_xml(request)
         assert response.success, f"XML generation failed: {response.error_message}"
         return lxml_etree.fromstring(response.xml_data.encode())
@@ -554,11 +578,15 @@ class TestKeyContactsSnapshot:
     and write the output to snapshots/key_contacts_2_0.xml.
     """
 
+    @pytest.fixture(autouse=True)
+    def _use_key_contacts_form(self, key_contacts_form):
+        self.form, self.transform_rules = key_contacts_form
+
     def test_full_xml_matches_snapshot(self):
         """Generated XML for a single-contact case must match the stored snapshot."""
         response = XMLGenerationService().generate_xml(
             XMLGenerationRequest(
-                application_data=_SNAPSHOT_DATA, transform_config=FORM_XML_TRANSFORM_RULES
+                application_data=_SNAPSHOT_DATA, transform_config=self.transform_rules
             )
         )
         assert response.success, response.error_message
@@ -574,6 +602,10 @@ class TestKeyContactsSnapshot:
 
 class TestKeyContactsXSDValidation:
     """XSD validation tests for Key Contacts form XML."""
+
+    @pytest.fixture(autouse=True)
+    def _use_key_contacts_form(self, key_contacts_form):
+        self.form, self.transform_rules = key_contacts_form
 
     @pytest.fixture
     def xsd_validator(self):
@@ -615,7 +647,7 @@ class TestKeyContactsXSDValidation:
             opportunity_assistance_listing=assistance_listing,
             competition_forms=[],
         )
-        form = KeyContacts_v2_0
+        form = self.form
         application = ApplicationFactory.create(competition=competition)
         competition_form = CompetitionFormFactory.create(competition=competition, form=form)
         ApplicationFormFactory.create(

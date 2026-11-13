@@ -10,6 +10,7 @@ from .epa_form_4700_4 import EPA_FORM_4700_4_v5_0
 from .epa_key_contacts import EPA_KEY_CONTACT_v2_0
 from .gg_lobbying_form import GG_LobbyingForm_v1_1
 from .key_contacts import KeyContacts_v2_0
+from .key_contacts_generated import FORM as KeyContactsGenerated_v2_0
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
 from .project_abstract import ProjectAbstract_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
@@ -47,6 +48,14 @@ _ALL_FORMS: list[Form] = [
     EPA_KEY_CONTACT_v2_0,
     KeyContacts_v2_0,
     ProjectPerformanceSiteLocation_v4_0,
+    KeyContactsGenerated_v2_0,
+]
+
+# Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
+# Each shares its hand-written form's name, so the two can't sit in one competition.
+# A form leaves this list when it replaces the hand-written form it mirrors.
+GENERATED_FORMS: list[Form] = [
+    KeyContactsGenerated_v2_0,
 ]
 
 
@@ -62,3 +71,14 @@ def init_form_registry() -> None:
 def get_active_forms() -> list[Form]:
     """Get all active forms."""
     return form_template_registry.get_all()
+
+
+def get_forms_for_all_forms_competition(forms: list[Form]) -> list[Form]:
+    """The forms a competition offering every form should include.
+
+    Leaves out GENERATED_FORMS: listed beside the hand-written form it mirrors, each would
+    show up as a second row with the same name. Each generated form gets a competition of
+    its own instead.
+    """
+    generated_ids = {form.form_id for form in GENERATED_FORMS}
+    return [form for form in forms if form.form_id not in generated_ids]
