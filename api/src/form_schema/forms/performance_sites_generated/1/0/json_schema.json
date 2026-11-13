@@ -149,7 +149,7 @@
           "title": "UEI"
         },
         "address": {
-          "$ref": "#/$defs/types.address"
+          "$ref": "#/$defs/types.address.zip-plus-four"
         },
         "congressional_district": {
           "allOf": [
@@ -235,7 +235,7 @@
           "title": "UEI"
         },
         "address": {
-          "$ref": "#/$defs/types.address"
+          "$ref": "#/$defs/types.address.zip-plus-four"
         },
         "congressional_district": {
           "allOf": [
@@ -297,7 +297,7 @@
       "description": "Enter the organization's Unique Entity Identifier (UEI) from SAM.gov.",
       "title": "Organization UEI"
     },
-    "types.address": {
+    "types.address.zip-plus-four": {
       "type": "object",
       "properties": {
         "street1": {
@@ -378,9 +378,28 @@
         "city",
         "country"
       ],
-      "description": "Enter an address.",
+      "description": "Enter an address. A US ZIP needs all nine digits.",
       "title": "Address",
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "USA: UNITED STATES"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "properties": {
+              "zip_code": {
+                "minLength": 9
+              }
+            }
+          }
+        },
         {
           "if": {
             "properties": {
