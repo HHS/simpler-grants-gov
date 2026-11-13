@@ -14,7 +14,7 @@
     "key_contacts": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/person.key-contact"
+        "$ref": "#/$defs/KeyContact"
       },
       "minItems": 1,
       "maxItems": 4,
@@ -73,20 +73,19 @@
   ],
   "description": "KEY CONTACTS, Grants.gov version 2.0.",
   "$defs": {
-    "organization.name": {
+    "ProjectRole": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 60,
-      "description": "Enter the legal name of the organization.",
-      "title": "Organization Name"
+      "maxLength": 45,
+      "description": "Enter the key contact's free-text role on this project."
     },
-    "person.key-contact": {
+    "KeyContact": {
       "type": "object",
       "properties": {
         "project_role": {
           "allOf": [
             {
-              "$ref": "#/$defs/person.key-contact.project-role"
+              "$ref": "#/$defs/ProjectRole"
             }
           ],
           "description": "Enter the individual's role on the project (e.g., project manager, fiscal contact).",
@@ -190,11 +189,12 @@
       ],
       "title": "Key Contact"
     },
-    "person.key-contact.project-role": {
+    "organization.name": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 45,
-      "description": "Enter the key contact's free-text role on this project."
+      "maxLength": 60,
+      "description": "Enter the legal name of the organization.",
+      "title": "Organization Name"
     },
     "person.name": {
       "type": "object",
