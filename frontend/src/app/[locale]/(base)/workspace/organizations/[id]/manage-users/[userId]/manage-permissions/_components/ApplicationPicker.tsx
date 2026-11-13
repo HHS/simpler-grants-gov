@@ -60,7 +60,11 @@ export const ApplicationPicker = ({
         <h4 className="margin-top-2 margin-bottom-1">
           {t("selectedApplicationsHeading")}
         </h4>
-        {selectedApplications.length > 0 ? (
+        {disabled ? (
+          <ul className="usa-list margin-top-0" data-testid="all-applications">
+            <li>{t("allApplications")}</li>
+          </ul>
+        ) : selectedApplications.length > 0 ? (
           <ul
             className="usa-list margin-top-0"
             data-testid="selected-applications"

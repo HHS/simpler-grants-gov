@@ -63,12 +63,20 @@ describe("UpdatePermissionsForm", () => {
     expect(screen.getByLabelText("Application Name 1")).toBeEnabled();
   });
 
+  it("shows all applications as selected while access isn't limited", () => {
+    renderForm();
+
+    expect(screen.getByTestId("all-applications")).toHaveTextContent(
+      "allApplications",
+    );
+  });
+
   it("lists the selected applications", () => {
     renderForm();
 
+    fireEvent.click(screen.getByLabelText(/^accessSelected/));
     expect(screen.getByTestId("no-applications-selected")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByLabelText(/^accessSelected/));
     fireEvent.click(screen.getByLabelText("Application Name 2"));
 
     expect(screen.getByTestId("selected-applications")).toHaveTextContent(
@@ -117,16 +125,52 @@ describe("UpdatePermissionsForm", () => {
     expect(lastGuardEnabled()).toBe(false);
   });
 
-  it("clears the unsaved changes warning on save without leaving the page", () => {
+  it("asks to confirm before saving", () => {
     renderForm();
 
     fireEvent.click(screen.getByLabelText(/^accessSelected/));
-    expect(lastGuardEnabled()).toBe(true);
-
     fireEvent.click(screen.getByTestId("save-permission-updates"));
+
+    // the confirmation modal's description, translated as its key in tests
+    expect(screen.getByText("description")).toBeInTheDocument();
+    expect(screen.getByTestId("confirm-permission-updates")).toHaveTextContent(
+      "confirm",
+    );
+    // nothing is saved until the user confirms
+    expect(lastGuardEnabled()).toBe(true);
+  });
+
+  it("clears the unsaved changes warning once the save is confirmed", () => {
+    renderForm();
+
+    fireEvent.click(screen.getByLabelText(/^accessSelected/));
+    fireEvent.click(screen.getByTestId("save-permission-updates"));
+    fireEvent.click(screen.getByTestId("confirm-permission-updates"));
 
     expect(lastGuardEnabled()).toBe(false);
     expect(screen.getByLabelText(/^accessSelected/)).toBeChecked();
+  });
+
+  it("keeps the changes unsaved when the save is cancelled", () => {
+    renderForm();
+
+    fireEvent.click(screen.getByLabelText(/^accessSelected/));
+    fireEvent.click(screen.getByTestId("save-permission-updates"));
+    fireEvent.click(screen.getByRole("button", { name: "cancel" }));
+
+    expect(lastGuardEnabled()).toBe(true);
+  });
+
+  it("clears hidden application selections on save", () => {
+    renderForm();
+
+    fireEvent.click(screen.getByLabelText(/^accessSelected/));
+    fireEvent.click(screen.getByLabelText("Application Name 1"));
+    fireEvent.click(screen.getByLabelText(/^accessAll/));
+    fireEvent.click(screen.getByTestId("save-permission-updates"));
+    fireEvent.click(screen.getByTestId("confirm-permission-updates"));
+
+    expect(screen.getByLabelText("Application Name 1")).not.toBeChecked();
   });
 
   it("asks the browser to confirm before leaving with unsaved changes", () => {

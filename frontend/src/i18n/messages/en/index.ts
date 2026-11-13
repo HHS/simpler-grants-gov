@@ -1854,15 +1854,16 @@ export const messages = {
       accessLegend: "Application access",
       accessDescription:
         "By default, collaborators can access all applications. However, you can restrict access if necessary.",
-      accessAll: "Access all and new applications",
+      accessAll: "Access all applications",
       accessAllDescription:
         "The user will have access to all applications, including new applications.",
       accessSelected: "Limit application access",
       accessSelectedDescription:
-        "Select which application(s) you will allow this user to access.",
+        "Select the application(s) the user can access from the list below",
       applicationListLegend: "Application Selection",
       selectedApplicationsHeading: "Selected application(s)",
       noApplicationsSelected: "No applications selected.",
+      allApplications: "All applications",
       externalHeading: "Add External label to user",
       externalDescription:
         "An external user is someone who works with an organization but is not a regular employee. This includes non-W2 workers, independent consultants, contractors, and freelancers as well as volunteers.",
@@ -1875,6 +1876,13 @@ export const messages = {
       saveButton: "Save permission updates",
       unsavedChangesWarning:
         "You have unsaved changes that will be lost if you select OK.",
+    },
+    confirmModal: {
+      heading: "Confirm changes",
+      description:
+        "This will override this user's existing permissions and be applied immediately. Please contact the user to inform them of these changes.",
+      confirm: "Confirm permission updates",
+      cancel: "Cancel",
     },
   },
   CommonWordLimit: {

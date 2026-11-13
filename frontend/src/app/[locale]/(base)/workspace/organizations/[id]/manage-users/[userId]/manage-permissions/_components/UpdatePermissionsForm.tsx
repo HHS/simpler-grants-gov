@@ -4,16 +4,18 @@ import { isEqual } from "lodash";
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import { FormEvent, useState } from "react";
+import { createRef, FormEvent, useState } from "react";
 import {
   Button,
   Checkbox,
   Fieldset,
   Form,
+  ModalRef,
   Radio,
 } from "@trussworks/react-uswds";
 
 import { ApplicationPicker } from "./ApplicationPicker";
+import { ConfirmPermissionsModal } from "./ConfirmPermissionsModal";
 import {
   ApplicationAccessScope,
   ManagedUserPermissions,
@@ -31,7 +33,8 @@ interface UpdatePermissionsFormProps {
 }
 
 // Selections are kept while "all" is chosen so they come back if the user
-// switches to "selected" again, but they don't count as a change or get saved.
+// switches to "selected" again, but they don't count as a change and are
+// cleared on save.
 const normalizeValues = (
   values: PermissionFormValues,
 ): PermissionFormValues => ({
@@ -51,6 +54,9 @@ export const UpdatePermissionsForm = ({
   const [savedValues, setSavedValues] =
     useState<PermissionFormValues>(initialValues);
   const [values, setValues] = useState<PermissionFormValues>(initialValues);
+  // SimplerModal is opened through a ref object. Created once with useState so
+  // it stays the same across renders.
+  const [confirmModalRef] = useState(() => createRef<ModalRef>());
 
   const hasUnsavedChanges = !isEqual(
     normalizeValues(values),
@@ -73,11 +79,18 @@ export const UpdatePermissionsForm = ({
         : current.selectedApplicationIds.filter((id) => id !== applicationId),
     }));
 
-  // No API call yet. Saving only marks the current values as saved so the
-  // unsaved changes warning stops showing.
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSavedValues(normalizeValues(values));
+    confirmModalRef.current?.toggleModal(undefined, true);
+  };
+
+  // No API call yet. Confirming only marks the current values as saved so the
+  // unsaved changes warning stops showing.
+  const confirmSave = () => {
+    const saved = normalizeValues(values);
+    setSavedValues(saved);
+    setValues(saved);
+    confirmModalRef.current?.toggleModal(undefined, false);
   };
 
   return (
@@ -147,6 +160,10 @@ export const UpdatePermissionsForm = ({
         </Button>
       </Form>
       <hr className="border-base-lighter margin-top-4" />
+      <ConfirmPermissionsModal
+        modalRef={confirmModalRef}
+        onConfirm={confirmSave}
+      />
     </section>
   );
 };
