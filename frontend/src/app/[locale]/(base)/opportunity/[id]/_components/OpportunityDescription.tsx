@@ -13,11 +13,13 @@ import { OpportunityEligibility } from "./OpportunityEligibility";
 type OpportunityDescriptionProps = {
   summary: Summary;
   attachments: OpportunityDocument[];
+  opportunityId: string;
 };
 
 const OpportunityDescription = ({
   summary,
   attachments,
+  opportunityId,
 }: OpportunityDescriptionProps) => {
   const t = useTranslations("OpportunityListing.description");
 
@@ -27,7 +29,10 @@ const OpportunityDescription = ({
     <div data-testid="opportunity-description">
       <div className="display-block tablet:display-flex flex-align-end margin-bottom-2">
         <h2 className="flex-1">{t("title")}</h2>
-        <OpportunityDownload attachments={attachments} />
+        <OpportunityDownload
+          attachments={attachments}
+          opportunityId={opportunityId}
+        />
       </div>
       <ExpandableTextContent
         textContent={summary.summary_description || ""}
