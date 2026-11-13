@@ -253,14 +253,8 @@ def test_min_length_violations(project_performance_site_location_v4_0):
     validate_min_length(data, expected, project_performance_site_location_v4_0)
 
 
-def test_us_zip_code_min_length(project_performance_site_location_v4_0, request):
+def test_us_zip_code_min_length(project_performance_site_location_v4_0):
     """US zip_code shorter than 9 characters fails minLength."""
-    if request.node.callspec.id == "generated":
-        request.applymarker(
-            pytest.mark.xfail(
-                strict=True, reason="the generated form has no US nine-character rule yet"
-            )
-        )
     data = {
         "primary_site": {
             "submitting_as_individual": True,
