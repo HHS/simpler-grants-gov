@@ -189,7 +189,7 @@ To upgrade the Python version, make changes in the following places:
     search for the line
     ```toml
     [project]
-    requires-python = ">=3.14,<3.15"
+    requires-python = ">=3.15,<3.16"
     ```
    Then run `uv lock` to update the [uv.lock](../../api/uv.lock) file. See [python version requirement](https://docs.astral.sh/uv/concepts/projects/config/#python-version-requirement)
 5. Ensure linters and formatters are passing by running the commands below in the `api` directory.

@@ -35,6 +35,18 @@ ignore:
       version: "3.14.10"
       type: binary
 
+  # Same CVE as above, for the API and analytics images after the Python 3.15.2
+  # upgrade (#13027). Grype lists the fix only in 3.16.0; 3.15.2 is still affected.
+  # Covered by the same #13178 risk acceptance; remove with the rule above.
+  # Issue: https://github.com/HHS/simpler-grants-gov/issues/13027
+  # Last checked: 2026-11-11
+  - vulnerability: CVE-2026-116566
+    reason: "Temporary Python 3.15.2 exception, same risk acceptance as #13178"
+    package:
+      name: python
+      version: "3.15.2"
+      type: binary
+
   # CPython hashlib FIPS enforcement regression; only 3.14.10 and only with OpenSSL in FIPS mode (not enabled in our images)
   # Fixed in 3.14.11, not yet released; remove when PYTHON_VERSION in api/docker-python-base is bumped
   # Advisory: https://github.com/python/cpython/issues/160923

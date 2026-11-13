@@ -3,16 +3,16 @@ name = "simpler-grants-gov-analytics"
 version = "0.1.0"
 description = "Python package for analyzing data related to the Simpler Grants Project"
 authors = [{ name = "widal001", email = "billy.daly@agile6.com" }]
-requires-python = ">=3.14,<3.15"
+requires-python = ">=3.15,<3.16"
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
     "dynaconf>=3.2.13,<4",
-    "pandas>=2.0.3,<3",
-    "pandas-stubs>=2.0.2.230605,<3",
+    "pandas>=3.0.6,<4",
+    "pandas-stubs>=3.0.0,<4",
     "pydantic>=2.0.3,<3",
     "slack-sdk>=3.23.0,<4",
     "sqlparse>=0.6.0",
@@ -36,7 +36,7 @@ db-migrate = "analytics.cli:migrate_database"
 dev = [
     "black>=26.3.1,<27",
     "mypy>=1.4.1,<2",
-    "pylint>=3.0.2,<4",
+    "pylint>=4.1.0,<5",
     "pytest>=8.0.0,<9",
     "pytest-cov>=5.0.0,<6",
     "ruff>=0.16.4,<0.17",
@@ -65,7 +65,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.15"
 
 plugins = ["pydantic.mypy"]
 
