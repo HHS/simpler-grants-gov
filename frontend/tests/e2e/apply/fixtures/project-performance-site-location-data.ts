@@ -47,4 +47,35 @@ export const PPSL_OPPORTUNITY_DATA: PrintViewFormData = {
   formKey: "ppsl",
   expectedPrepopulatedFields: {},
   buildTestData: buildPPSLHappyPathTestData,
+  // What the submission zip spec verifies per field (XML element and/or PDF text).
+  // additional_locations_attachment is an attachment and is not verified in the zip.
+  submissionFields: {
+    "primary_site--organization_name": {
+      xmlElement: "PerformanceSite_4_0:OrganizationName",
+      verifyInPdf: true,
+    },
+    "primary_site--address--street1": {
+      xmlElement: "globLib:Street1",
+      verifyInPdf: true,
+    },
+    "primary_site--address--street2": {
+      xmlElement: "globLib:Street2",
+      verifyInPdf: true,
+    },
+    "primary_site--address--city": {
+      xmlElement: "globLib:City",
+      verifyInPdf: true,
+    },
+    "primary_site--address--county": {
+      xmlElement: "globLib:County",
+      verifyInPdf: true,
+    },
+    "primary_site--address--state": { xmlElement: "globLib:State" },
+    "primary_site--address--zip_code": { xmlElement: "globLib:ZipPostalCode" },
+    "primary_site--address--country": { xmlElement: "globLib:Country" },
+    "primary_site--congressional_district": {
+      xmlElement: "PerformanceSite_4_0:CongressionalDistrictProgramProject",
+      verifyInPdf: true,
+    },
+  },
 };
