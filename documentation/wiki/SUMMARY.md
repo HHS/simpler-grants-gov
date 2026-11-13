@@ -126,6 +126,8 @@
     * [Simpler Grants Management Data Flow](product/decisions/adr/2025-12-24-sgm-data-flow.md)
     * [Content management system (CMS)](product/decisions/adr/2026-01-content-management-system.md)
     * [Workflow Management](product/decisions/adr/2026-02-03-workflow_management.md)
+    * [CMS sign-in and network access](product/decisions/adr/2026-11-04-cms-sign-in-and-network-access.md)
+    * [CMS content preview and environments](product/decisions/adr/2026-11-04-cms-content-preview-and-environments.md)
   * [Infra](product/decisions/infra/README.md)
     * [Use markdown architectural decision records](product/decisions/infra/0000-use-markdown-architectural-decision-records.md)
     * [CI/CD interface](product/decisions/infra/0001-ci-cd-interface.md)
