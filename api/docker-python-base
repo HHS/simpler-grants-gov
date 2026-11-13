@@ -154,8 +154,6 @@ RUN dnf install -y \
       libsolv-0.7.22-1.amzn2023.0.4 \
       gnutls-3.8.10-4.amzn2023.0.2 && \
     dnf update -y --releasever=2023.12.20260706 \
-      sqlite-3.40.0-1.amzn2023.0.8 \
-      sqlite-libs-3.40.0-1.amzn2023.0.8 \
       gnupg2-minimal-2.3.7-1.amzn2023.0.9 \
       libblkid-2.37.4-1.amzn2023.0.5 \
       libmount-2.37.4-1.amzn2023.0.5 \
@@ -190,7 +188,7 @@ RUN dnf install -y \
     dnf update -y --releasever=2023.12.20261102 \
       libxml2-2.10.4-1.amzn2023.0.22 \
       libxml2-devel-2.10.4-1.amzn2023.0.22 && \
-    # Mid-November ALAS batch: glibc (3396), rpm suite (3398), curl (3404), kernel6.18-headers (3390), rust-toolset-srpm-macros (3382)
+    # Mid-November ALAS batch: glibc (3396), curl (3404), kernel6.18-headers (3390), rust-toolset-srpm-macros (3382)
     dnf update -y --releasever=2023.12.20261109 \
       glibc-2.34-231.amzn2023.0.6 \
       glibc-common-2.34-231.amzn2023.0.6 \
@@ -198,15 +196,19 @@ RUN dnf install -y \
       glibc-gconv-extra-2.34-231.amzn2023.0.6 \
       glibc-headers-x86-2.34-231.amzn2023.0.6 \
       glibc-minimal-langpack-2.34-231.amzn2023.0.6 \
-      rpm-4.16.1.3-29.amzn2023.0.9 \
-      rpm-libs-4.16.1.3-29.amzn2023.0.9 \
-      rpm-build-libs-4.16.1.3-29.amzn2023.0.9 \
-      rpm-sign-libs-4.16.1.3-29.amzn2023.0.9 \
-      python3-rpm-4.16.1.3-29.amzn2023.0.9 \
       curl-minimal-8.21.0-5.amzn2023.0.4 \
       libcurl-minimal-8.21.0-5.amzn2023.0.4 \
       kernel6.18-headers-6.18.56-126.188.amzn2023 \
       rust-toolset-srpm-macros-1.99.1-1.amzn2023 && \
+    # Nov 12 ALAS batch: sqlite (3452), rpm suite (3430)
+    dnf update -y --releasever=2023.12.20261112 \
+      sqlite-3.40.0-1.amzn2023.0.9 \
+      sqlite-libs-3.40.0-1.amzn2023.0.9 \
+      rpm-4.16.1.3-29.amzn2023.0.10 \
+      rpm-libs-4.16.1.3-29.amzn2023.0.10 \
+      rpm-build-libs-4.16.1.3-29.amzn2023.0.10 \
+      rpm-sign-libs-4.16.1.3-29.amzn2023.0.10 \
+      python3-rpm-4.16.1.3-29.amzn2023.0.10 && \
     dnf clean all && \
     # Remove the system Python RPMs
     (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \

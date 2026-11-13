@@ -2,6 +2,9 @@ import { RJSFSchema } from "@rjsf/utils";
 import Ajv, { ValidateFunction } from "ajv";
 import addFormats from "ajv-formats";
 
+// Lets a node include rules (object-valued keys) the renderer ignores; see unimplementedRuleKeys.
+const RULE_EXTENSION = { type: "object" } as const;
+
 // JSON Schema for the UiSchema, accepts a "field", "fieldList", "multiField", or "section"
 export const UiJsonSchema: RJSFSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
@@ -98,7 +101,7 @@ export const UiJsonSchema: RJSFSchema = {
           required: ["definition"],
         },
       ],
-      additionalProperties: false,
+      additionalProperties: RULE_EXTENSION,
     },
     multiField: {
       type: "object",
@@ -183,7 +186,7 @@ export const UiJsonSchema: RJSFSchema = {
           },
         },
       ],
-      additionalProperties: false,
+      additionalProperties: RULE_EXTENSION,
     },
     schema: {
       type: "object",
@@ -306,7 +309,7 @@ export const UiJsonSchema: RJSFSchema = {
         },
       },
       required: ["type", "label", "name", "children"],
-      additionalProperties: false,
+      additionalProperties: RULE_EXTENSION,
     },
     tableChildren: {
       type: "object",

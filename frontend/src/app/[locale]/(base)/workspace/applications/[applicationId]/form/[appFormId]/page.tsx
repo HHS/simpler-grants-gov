@@ -90,6 +90,7 @@ async function FormPage({ params }: formPageProps) {
     formName,
     formSchema,
     formUiSchema,
+    jsonFormsUiSchema,
     formValidationWarnings,
     createdAt,
     updatedAt,
@@ -136,6 +137,7 @@ async function FormPage({ params }: formPageProps) {
           savedFormData={applicationResponse}
           formSchema={formSchema}
           uiSchema={formUiSchema}
+          jsonFormsUiSchema={jsonFormsUiSchema}
           formId={formId}
           attachments={applicationAttachments}
           isBudgetForm={isBudgetForm}
