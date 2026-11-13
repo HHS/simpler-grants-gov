@@ -100,7 +100,7 @@
           "label": "Project/Performance Site Congressional District"
         }
       ],
-      "label": "Primary performance site",
+      "label": "Project/Performance Site Primary Location",
       "options": {
         "description": "Identify the primary location where the work will be performed."
       }
@@ -217,7 +217,7 @@
           }
         }
       ],
-      "label": "Additional performance sites",
+      "label": "Additional Project/Performance Site Location(s)",
       "options": {
         "description": "Add each additional site separately. If there are more than 299, attach a file listing the rest."
       }
