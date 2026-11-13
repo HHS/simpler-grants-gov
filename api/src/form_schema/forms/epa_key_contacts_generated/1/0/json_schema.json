@@ -5,7 +5,7 @@
     "authorized_representative": {
       "allOf": [
         {
-          "$ref": "#/$defs/person"
+          "$ref": "#/$defs/Person"
         }
       ],
       "description": "Original awards and amendments will be sent to this individual for review and acceptance, unless otherwise indicated."
@@ -13,7 +13,7 @@
     "payee": {
       "allOf": [
         {
-          "$ref": "#/$defs/person"
+          "$ref": "#/$defs/Person"
         }
       ],
       "description": "Individual authorized to accept payments."
@@ -21,7 +21,7 @@
     "administrative_contact": {
       "allOf": [
         {
-          "$ref": "#/$defs/person"
+          "$ref": "#/$defs/Person"
         }
       ],
       "description": "Individual from Sponsored Programs Office to contact concerning administrative matters (i.e., indirect cost rate computation, rebudgeting requests etc)."
@@ -29,7 +29,7 @@
     "project_manager": {
       "allOf": [
         {
-          "$ref": "#/$defs/person"
+          "$ref": "#/$defs/Person"
         }
       ],
       "description": "Individual responsible for the technical completion of the proposed work."
@@ -109,7 +109,7 @@
   ],
   "description": "EPA KEY CONTACTS FORM, Grants.gov version 2.0.",
   "$defs": {
-    "person": {
+    "Person": {
       "type": "object",
       "properties": {
         "name": {
@@ -172,27 +172,7 @@
         "address",
         "phone"
       ],
-      "examples": [
-        {
-          "name": {
-            "prefix": "Ms.",
-            "first_name": "Alicia",
-            "last_name": "Reyes"
-          },
-          "title": "Executive Director",
-          "address": {
-            "street1": "100 Grant Avenue",
-            "city": "Denver",
-            "state": "CO: Colorado",
-            "zip_code": "80202-1234",
-            "country": "USA: UNITED STATES"
-          },
-          "phone": "3035550100",
-          "email": "alicia.reyes@example.org"
-        }
-      ],
-      "description": "A person and how to reach them.",
-      "title": "Contact Person"
+      "description": "A person and how to reach them."
     },
     "person.name": {
       "type": "object",
