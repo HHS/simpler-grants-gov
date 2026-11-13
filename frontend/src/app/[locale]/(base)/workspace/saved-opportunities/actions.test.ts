@@ -3,6 +3,7 @@ import {
   deleteSavedOpportunityForOrganization,
   saveOpportunityForOrganization,
 } from "src/services/fetch/fetchers/organizationSavedOpportunitiesFetcher";
+import { ActionErrorCode } from "src/types/generalTypes";
 
 import {
   deleteSavedOpportunityForOrganizationAction,
@@ -64,7 +65,7 @@ describe.each([
     expect(result).toEqual({
       success: false,
       error: "Session has expired",
-      errorCode: "AUTH_REQUIRED",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     });
     expect(fetcher).not.toHaveBeenCalled();
   });

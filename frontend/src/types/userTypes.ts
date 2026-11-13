@@ -1,4 +1,5 @@
 import { Organization } from "./applicationResponseTypes";
+import { ActionErrorCode } from "./generalTypes";
 
 export interface UserOrganization extends Organization {
   is_organization_owner: boolean;
@@ -92,7 +93,7 @@ export interface UserDetailWithProfile {
 export interface UserProfileResponse {
   validationErrors?: UserProfileValidationErrors;
   errorMessage?: string;
-  errorCode?: "AUTH_REQUIRED";
+  errorCode?: ActionErrorCode;
   data?: UserDetailProfile;
   success?: boolean;
 }

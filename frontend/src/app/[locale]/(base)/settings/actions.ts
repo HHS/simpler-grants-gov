@@ -3,6 +3,7 @@
 import { getSession } from "src/services/auth/session";
 import { updateUserDetails } from "src/services/fetch/fetchers/userFetcher";
 import { logger } from "src/services/logger/simplerLogger";
+import { ActionErrorCode } from "src/types/generalTypes";
 import { UserProfileResponse } from "src/types/userTypes";
 import { z } from "zod";
 
@@ -35,7 +36,7 @@ export const userProfileAction = async (
   if (!session || !session.token || !session.user_id) {
     return {
       errorMessage: "Not logged in",
-      errorCode: "AUTH_REQUIRED",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     };
   }
 

@@ -3,6 +3,7 @@
 import { getSession } from "src/services/auth/session";
 import { inviteUserToOrganization } from "src/services/fetch/fetchers/organizationsFetcher";
 import { logger } from "src/services/logger/simplerLogger";
+import { ActionErrorCode } from "src/types/generalTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import { z } from "zod";
 
@@ -16,7 +17,7 @@ export type OrganizationInviteValidationErrors = {
 export type OrganizationInviteResponse = {
   data?: OrganizationInviteRecord;
   errorMessage?: string;
-  errorCode?: "AUTH_REQUIRED";
+  errorCode?: ActionErrorCode;
   validationErrors?: OrganizationInviteValidationErrors;
   invitationCreated?: string; // organization invitation id of created invitation
 };
@@ -50,7 +51,7 @@ export const inviteUserAction = async (
   if (!session || !session.token || !session.user_id) {
     return {
       errorMessage: "Not logged in",
-      errorCode: "AUTH_REQUIRED",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     };
   }
 

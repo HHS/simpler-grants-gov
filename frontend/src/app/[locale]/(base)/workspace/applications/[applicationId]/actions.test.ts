@@ -1,5 +1,6 @@
 import { getSession } from "src/services/auth/session";
 import { updateApplicationFilingName } from "src/services/fetch/fetchers/applicationFetcher";
+import { ActionErrorCode } from "src/types/generalTypes";
 
 import { updateAppFilingNameAction } from "./actions";
 
@@ -45,7 +46,7 @@ describe("updateAppFilingNameAction", () => {
     expect(result).toEqual({
       success: false,
       error: "Session has expired",
-      errorCode: "AUTH_REQUIRED",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     });
     expect(mockedUpdate).not.toHaveBeenCalled();
   });

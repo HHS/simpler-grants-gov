@@ -3,6 +3,7 @@ import {
   updateAllOpportunitiesNotificationPreference,
   updateSavedOpportunityNotificationPreference,
 } from "src/services/fetch/fetchers/notificationsFetcher";
+import { ActionErrorCode } from "src/types/generalTypes";
 
 import {
   updateAllOpportunitiesNotificationPreferenceAction,
@@ -65,7 +66,7 @@ describe("updateSavedOpportunityNotificationPreferenceAction", () => {
     expect(result).toEqual({
       success: false,
       error: "expiredSession",
-      errorCode: "AUTH_REQUIRED",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     });
 
     expect(
@@ -87,7 +88,7 @@ describe("updateSavedOpportunityNotificationPreferenceAction", () => {
     expect(result).toEqual({
       success: false,
       error: "expiredSession",
-      errorCode: "AUTH_REQUIRED",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     });
 
     expect(

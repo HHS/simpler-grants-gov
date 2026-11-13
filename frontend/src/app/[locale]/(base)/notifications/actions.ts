@@ -6,6 +6,7 @@ import {
   updateSavedOpportunityNotificationPreference,
 } from "src/services/fetch/fetchers/notificationsFetcher";
 import { logger } from "src/services/logger/simplerLogger";
+import { ActionErrorCode } from "src/types/generalTypes";
 import {
   UpdateAllOpportunitiesNotificationPreferenceApiResponse,
   UpdateSavedOpportunityNotificationPreferenceApiResponse,
@@ -17,7 +18,7 @@ export type UpdateNotificationPreferenceActionState =
   | {
       success: boolean;
       error: string | null;
-      errorCode?: "AUTH_REQUIRED";
+      errorCode?: ActionErrorCode;
     }
   | undefined;
 
@@ -41,7 +42,7 @@ export const updateSavedOpportunityNotificationPreferenceAction = async ({
     return {
       success: false,
       error: t("expiredSession"),
-      errorCode: "AUTH_REQUIRED",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     };
   }
 
