@@ -154,7 +154,7 @@
 * [Writing standards](design-and-research/content-guidelines/README.md)
   * [Voice and tone](design-and-research/content-guidelines/voice-and-tone-guide.md)
   * [Style guide](design-and-research/content-guidelines/editoral-style.md)
-  * [Content patterns](design-and-research/content-guidelines/content-patterns.md)
+  * [Plain language guide](design-and-research/content-guidelines/content-patterns.md)
   * [Terminology usage](design-and-research/content-guidelines/terminology-usage.md)
 * [User research](design-and-research/user-research/README.md)
   * [Grants.gov archetypes](design-and-research/user-research/grants.gov-archetypes.md)
