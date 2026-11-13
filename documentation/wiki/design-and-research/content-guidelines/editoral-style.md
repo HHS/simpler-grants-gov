@@ -46,7 +46,7 @@ Buttons signal important calls to action (CTA) and help people quickly see what�
 * Use “action words” that people recognize and clearly signal what will happen when they click the button.
 * Keep button labels to 35 characters or fewer. 50-character absolute maximum. Labels over 35 characters should only occur in exceptional cases, such as modal actions or form exits, where additional context is needed for clarity.&#x20;
 * Use “trigger words” that people will recognize to clearly explain what will happen when the button is clicked&#x20;
-* EXAMPLE: Back or Continue
+  * EXAMPLE: Back or Continue
 * Don’t truncate button labels. Button labels must always be displayed in full.
 
 #### Capitalization
@@ -62,7 +62,7 @@ Use **Sentence case** with:
 * Modal titles
 * Buttons (per[ USWDS](https://designsystem.digital.gov/components/button/))
 * H2 form section headings
-* In application forms, H2s should be styled in sentence case
+  * In application forms, H2s should be styled in sentence case
 * H3 subheadings and lower&#x20;
 
 \
@@ -71,13 +71,13 @@ Use **Title Case** with:
 * Page titles and H1 headings
 * H2 page section headings
 * The subject line for Simpler.Grants.gov newsletters
-* The subject line follows a template where "\[Month] Updates" uses title case, while the latter portion after the pipe symbol uses sentence case.&#x20;
-* EXAMPLE: "May Updates | Building momentum with every release"<br>
+  * The subject line follows a template where "\[Month] Updates" uses title case, while the latter portion after the pipe symbol uses sentence case.&#x20;
+  * EXAMPLE: "May Updates | Building momentum with every release"<br>
 
 Use **CAPS** with:
 
 * Opportunity status, only when the status is a single word, and benefits from emphasis on the Search results page.&#x20;
-* EXAMPLE: CLOSING, OPEN.
+  * EXAMPLE: CLOSING, OPEN.
 
 #### Calendar year
 
@@ -100,6 +100,15 @@ Exceptions: Abbreviate days and months only when space is very limited, such as 
 * Mon., Tue., Wed., Thu., Fri., Sat., Sun.
 * Jan., Feb., Aug., Sept., Oct., Nov., Dec. (Don’t abbreviate March, April, May, June, July)
 * In application form fields, we often use the construction: mm/dd/yyyy
+
+#### Forms
+
+Clearly communicating whether form fields are required or optional helps users complete forms with confidence and reduces input errors.&#x20;
+
+* When all fields are required, use this helper text: All fields as required.&#x20;
+* When all fields are optional, use this helper text  All fields are optional.
+* When there is a mix of required and optional fields: A red asterisk (\*) indicates a required field.&#x20;
+* Don't indicate the quantity of required fields. e.g., "2 fields are required."
 
 #### Formatting
 
@@ -134,14 +143,14 @@ Best practices for linking include:
 * Hyperlink the most relevant word or phrase.
 * Use natural and descriptive language that aligns with the header of the linked page so people get what they expect. To make your link text concise, it’s OK to deviate slightly from the header of the linked page. However, If the link text is much different from the header of the next page, people might think they landed in the wrong place.
 * Be succinct – avoid links of longer than 3 or 4 words.
-* Do not use the phrase “Click here” to introduce a link.
+* **Do not use the phrase “Click here” to introduce a link.**
 * Avoid generic call-to-action links like “Learn more” and “Read more” by themselves. If you need to use them, ensure accessibility by including[ ARIA labels](https://a11y-101.com/development/aria-label). ASPA Digital content team can provide guidance on how to write ARIA labels.
-* EXAMPLE: If “Learn More” anchor text links to a page with the H1 header “Head Start,” a useful and appropriate ARIA label would be “Learn more about Head Start.”
+  * EXAMPLE: If “Learn More” anchor text links to a page with the H1 header “Head Start,” a useful and appropriate ARIA label would be “Learn more about Head Start.”
 * If the embedded link text comes at the end of a sentence, don’t hyperlink the period at the end.
-* Do this: Find additional resources from the[ National Cancer Institute](https://www.cancer.gov/).
-* Don’t do this: Find additional resources from the[ National Cancer Institute.](https://www.cancer.gov/)
+  * Do this: Find additional resources from the[ National Cancer Institute](https://www.cancer.gov/).
+  * Don’t do this: Find additional resources from the[ National Cancer Institute.](https://www.cancer.gov/)
 * For links to files such as PDFs and Excel spreadsheets, note the file type directly after the link.&#x20;
-* EXAMPLE:[ Download a home toolkit \[PDF\]](https://files.consumerfinance.gov/f/201503_cfpb_your-home-loan-toolkit-web.pdf) from the Consumer Financial Protection Bureau.
+  * EXAMPLE:[ Download a home toolkit \[PDF\]](https://files.consumerfinance.gov/f/201503_cfpb_your-home-loan-toolkit-web.pdf) from the Consumer Financial Protection Bureau.
 * Do not use the same link text for links that go to a different location – use title or an ARIA label to differentiate the links for 508 compliance. (Refer to the[ 18F guidance for links and repetitive content](https://accessibility.18f.gov/links/).)
 
 #### Lists
@@ -187,11 +196,11 @@ We want to create language that’s accurate for all audiences, that doesn’t a
 * When referring to people, use “they” and "their” instead of “he or she.”
 * Use broad and neutral terms for family relationships, like “spouse,” “partner,” “child,” and “parent.”
 * When possible, avoid “view,” “see,” “hear,” and “listen.” Instead, use:
-* Go to your dashboard
-* Review your recommendations
-* Check your application status
-* Read your letter
-* Play our video
+  * Go to your dashboard
+  * Review your recommendations
+  * Check your application status
+  * Read your letter
+  * Play our video
 * Avoid directional language, like “Read below.”&#x20;
 * Avoid referencing colors in instructions, like “Select the blue button.”
 * In most cases, we use “we” and “us” to refer to [Grants.gov](http://grants.gov) as a whole.
