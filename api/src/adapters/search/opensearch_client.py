@@ -35,6 +35,14 @@ DEFAULT_INDEX_ANALYSIS = {
             "tokenizer": "standard",
         }
     },
+    "normalizer": {
+        # Configure a normalizer for fields that need a specific mapping for sorting; without case-
+        # and ASCII-folding, a field will sort [A1, Z1, a2, z2, Á3, á4] where we want all variations
+        # on a letter to sort equivalently: [A1, a2, Á3, á4, Z1, z2]
+        "sortable": {
+            "filter": ["lowercase", "asciifolding"],
+        },
+    },
     # Change the default stemming to use snowball which handles plural
     # queries better than the default
     # NOTE - there are a lot of stemmers, Snowball is really

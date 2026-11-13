@@ -169,6 +169,24 @@ def _build_opportunities(
         agency_code="USAID-ETH",
     )
 
+    # Opportunities to test title sorting
+    factories.OpportunityFactory.create_batch(size=1, has_lower_a_title=True)
+    factories.OpportunityFactory.create_batch(size=1, has_upper_a_title=True)
+    factories.OpportunityFactory.create_batch(size=1, has_lower_z_title=True)
+    factories.OpportunityFactory.create_batch(size=1, has_upper_z_title=True)
+    factories.OpportunityFactory.create_batch(size=1, has_lower_accented_a_title=True)
+    factories.OpportunityFactory.create_batch(size=1, has_upper_accented_a_title=True)
+
+    # Opportunities to test award floor sorting
+    factories.OpportunityFactory.create_batch(size=1, has_nonzero_award_floor=True)
+    factories.OpportunityFactory.create_batch(size=1, has_zero_award_floor=True)
+    factories.OpportunityFactory.create_batch(size=1, has_null_award_floor=True)
+
+    # Opportunities to test award ceiling sorting
+    factories.OpportunityFactory.create_batch(size=1, has_nonzero_award_ceiling=True)
+    factories.OpportunityFactory.create_batch(size=1, has_zero_award_ceiling=True)
+    factories.OpportunityFactory.create_batch(size=1, has_null_award_ceiling=True)
+
     logger.info("Finished creating opportunities")
 
 

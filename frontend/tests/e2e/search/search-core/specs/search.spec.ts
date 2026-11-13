@@ -19,9 +19,10 @@ import {
 import {
   clickLastPaginationPage,
   clickPaginationPageNumber,
-  getFirstSearchResultTitle,
-  getLastSearchResultTitle,
+  getFirstVisibleSearchResultTitle,
+  getLastVisibleSearchResultTitle,
   getNumberOfOpportunitySearchResults,
+  getVisibleSearchResultTitles,
   selectSortBy,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/search-utils";
@@ -99,7 +100,8 @@ test.describe("Search page tests", () => {
       }
 
       // Then the first result should be alphabetically first by opportunity title
-      const firstSearchResultTitle = await getFirstSearchResultTitle(page);
+      const firstSearchResultTitle =
+        await getFirstVisibleSearchResultTitle(page);
 
       // Assumption: on mobile, sort options live in the filter drawer.
       if (isMobile) {
@@ -117,9 +119,192 @@ test.describe("Search page tests", () => {
       await clickLastPaginationPage(page);
 
       // Then the last result from the previous sort order should now be the first result
-      const lastSearchResultTitle = await getLastSearchResultTitle(page);
+      const lastSearchResultTitle = await getLastVisibleSearchResultTitle(page);
 
       expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
+    },
+  );
+
+  test(
+    "title sorting is done after case- and ASCII-folding",
+    { tag: [DISCOVERY, FULL_REGRESSION] },
+    async ({ page }, { project }) => {
+      const isMobile = !!project.name.match(/[Mm]obile/);
+
+      // Given I am on the "Search funding opportunities" page, searching for opportunities
+      // containing "410982c3" — run `git grep 410982c3` to match this up with seed data.
+      await page.goto("/search?query=410982c3");
+
+      // And I wait for the search results to load
+      await waitForSearchResultsInitialLoad(page);
+
+      // When I open the sort by dropdown
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // And I select "Opportunity title (A to Z)" from the sort by dropdown
+      await selectSortBy(page, "opportunityTitleAsc", isMobile);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // Then the seeded titles should be in post-folding alphabetical order
+      const visibleResultTitles = await getVisibleSearchResultTitles(page);
+
+      expect(visibleResultTitles).toStrictEqual([
+        "a1 title prefix — 410982c3",
+        "A2 title prefix — 410982c3",
+        "á3 title prefix — 410982c3",
+        "Á4 title prefix — 410982c3",
+        "z1 title prefix — 410982c3",
+        "Z2 title prefix — 410982c3",
+      ]);
+    },
+  );
+
+  test(
+    "award floor sort ascending is 0, nonzero, null",
+    { tag: [DISCOVERY, FULL_REGRESSION] },
+    async ({ page }, { project }) => {
+      const isMobile = !!project.name.match(/[Mm]obile/);
+
+      // Given I am on the "Search funding opportunities" page, searching for opportunities
+      // containing "9371979c" — run `git grep 9371979c` to match this up with seed data.
+      await page.goto("/search?query=9371979c");
+
+      // And I wait for the search results to load
+      await waitForSearchResultsInitialLoad(page);
+
+      // When I open the sort by dropdown
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // And I select "Award minimum (lowest)" from the sort by dropdown
+      await selectSortBy(page, "awardFloorAsc", isMobile);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // Then the award floors should be in zero, nonzero, null order
+      const visibleResultTitles = await getVisibleSearchResultTitles(page);
+
+      expect(visibleResultTitles).toStrictEqual([
+        "zero award floor — 9371979c",
+        "nonzero award floor — 9371979c",
+        "null award floor — 9371979c",
+      ]);
+    },
+  );
+
+  test(
+    "award floor sort descending is nonzero, zero, null",
+    { tag: [DISCOVERY, FULL_REGRESSION] },
+    async ({ page }, { project }) => {
+      const isMobile = !!project.name.match(/[Mm]obile/);
+
+      // Given I am on the "Search funding opportunities" page, searching for opportunities
+      // containing "9371979c" — run `git grep 9371979c` to match this up with seed data.
+      await page.goto("/search?query=9371979c");
+
+      // And I wait for the search results to load
+      await waitForSearchResultsInitialLoad(page);
+
+      // When I open the sort by dropdown
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // And I select "Award minimum (highest)" from the sort by dropdown
+      await selectSortBy(page, "awardFloorDesc", isMobile);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // Then the award floors should be in nonzero, zero, null order
+      const visibleResultTitles = await getVisibleSearchResultTitles(page);
+
+      expect(visibleResultTitles).toStrictEqual([
+        "nonzero award floor — 9371979c",
+        "zero award floor — 9371979c",
+        "null award floor — 9371979c",
+      ]);
+    },
+  );
+
+  test(
+    "award ceiling sort ascending is 0, nonzero, null",
+    { tag: [DISCOVERY, FULL_REGRESSION] },
+    async ({ page }, { project }) => {
+      const isMobile = !!project.name.match(/[Mm]obile/);
+
+      // Given I am on the "Search funding opportunities" page, searching for opportunities
+      // containing "ebaf8aa1" — run `git grep ebaf8aa1` to match this up with seed data.
+      await page.goto("/search?query=ebaf8aa1");
+
+      // And I wait for the search results to load
+      await waitForSearchResultsInitialLoad(page);
+
+      // When I open the sort by dropdown
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // And I select "Award maximum (lowest)" from the sort by dropdown
+      await selectSortBy(page, "awardCeilingAsc", isMobile);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // Then the award ceilings should be in zero, nonzero, null order
+      const visibleResultTitles = await getVisibleSearchResultTitles(page);
+
+      expect(visibleResultTitles).toStrictEqual([
+        "zero award ceiling — ebaf8aa1",
+        "nonzero award ceiling — ebaf8aa1",
+        "null award ceiling — ebaf8aa1",
+      ]);
+    },
+  );
+
+  test(
+    "award ceiling sort descending is nonzero, zero, null",
+    { tag: [DISCOVERY, FULL_REGRESSION] },
+    async ({ page }, { project }) => {
+      const isMobile = !!project.name.match(/[Mm]obile/);
+
+      // Given I am on the "Search funding opportunities" page, searching for opportunities
+      // containing "ebaf8aa1" — run `git grep ebaf8aa1` to match this up with seed data.
+      await page.goto("/search?query=ebaf8aa1");
+
+      // And I wait for the search results to load
+      await waitForSearchResultsInitialLoad(page);
+
+      // When I open the sort by dropdown
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // And I select "Award maximum (highest)" from the sort by dropdown
+      await selectSortBy(page, "awardCeilingDesc", isMobile);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      // Then the award ceilings should be in nonzero, zero, null order
+      const visibleResultTitles = await getVisibleSearchResultTitles(page);
+
+      expect(visibleResultTitles).toStrictEqual([
+        "nonzero award ceiling — ebaf8aa1",
+        "zero award ceiling — ebaf8aa1",
+        "null award ceiling — ebaf8aa1",
+      ]);
     },
   );
 

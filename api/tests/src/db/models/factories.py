@@ -489,6 +489,48 @@ class OpportunityFactory(BaseFactory):
         # and all of these will be set for you on the relevant models
         # See: https://factoryboy.readthedocs.io/en/stable/reference.html#traits
 
+        # Values for testing case- and ASCII-folding for opportunity title sorting. The entropy
+        # ("410982c3") at the end allows a search with just these values in an end-to-end test. Run
+        # `git grep 410982c3` to match this up with tests.
+        has_lower_a_title = factory.Trait(opportunity_title="a1 title prefix — 410982c3")
+        has_upper_a_title = factory.Trait(opportunity_title="A2 title prefix — 410982c3")
+        has_lower_z_title = factory.Trait(opportunity_title="z1 title prefix — 410982c3")
+        has_upper_z_title = factory.Trait(opportunity_title="Z2 title prefix — 410982c3")
+        has_lower_accented_a_title = factory.Trait(opportunity_title="á3 title prefix — 410982c3")
+        has_upper_accented_a_title = factory.Trait(opportunity_title="Á4 title prefix — 410982c3")
+
+        # Values for testing sorting of award floor. The entropy ("9371979c") at the end of the
+        # title allows a search with just these values in an end-to-end test.
+        # Run `git grep 9371979c` to match this up with tests.
+        has_nonzero_award_floor = factory.Trait(
+            current_opportunity_summary__has_nonzero_award_floor=True,
+            opportunity_title="nonzero award floor — 9371979c",
+        )
+        has_zero_award_floor = factory.Trait(
+            current_opportunity_summary__has_zero_award_floor=True,
+            opportunity_title="zero award floor — 9371979c",
+        )
+        has_null_award_floor = factory.Trait(
+            current_opportunity_summary__has_null_award_floor=True,
+            opportunity_title="null award floor — 9371979c",
+        )
+
+        # Values for testing sorting of award ceiling. The entropy ("ebaf8aa1") at the end of the
+        # title allows a search with just these values in an end-to-end test.
+        # Run `git grep ebaf8aa1` to match this up with tests.
+        has_nonzero_award_ceiling = factory.Trait(
+            current_opportunity_summary__has_nonzero_award_ceiling=True,
+            opportunity_title="nonzero award ceiling — ebaf8aa1",
+        )
+        has_zero_award_ceiling = factory.Trait(
+            current_opportunity_summary__has_zero_award_ceiling=True,
+            opportunity_title="zero award ceiling — ebaf8aa1",
+        )
+        has_null_award_ceiling = factory.Trait(
+            current_opportunity_summary__has_null_award_ceiling=True,
+            opportunity_title="null award ceiling — ebaf8aa1",
+        )
+
         no_current_summary = factory.Trait(current_opportunity_summary=None)
 
         # We set a trait for the OpportunitySummaryFactory for each of these as well as set the opportunity status
@@ -786,6 +828,14 @@ class OpportunitySummaryFactory(BaseFactory):
             close_date_description=factory.Faker("paragraph", nb_sentences=30),
         )
 
+        has_nonzero_award_floor = factory.Trait(award_floor=1000)
+        has_zero_award_floor = factory.Trait(award_floor=0)
+        has_null_award_floor = factory.Trait(award_floor=None)
+
+        has_nonzero_award_ceiling = factory.Trait(award_ceiling=1000)
+        has_zero_award_ceiling = factory.Trait(award_ceiling=0)
+        has_null_award_ceiling = factory.Trait(award_ceiling=None)
+
 
 class CurrentOpportunitySummaryFactory(BaseFactory):
     class Meta:
@@ -826,6 +876,16 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
         has_long_descriptions = factory.Trait(
             opportunity_summary__has_long_descriptions=True,
         )
+
+        has_nonzero_award_floor = factory.Trait(opportunity_summary__has_nonzero_award_floor=True)
+        has_zero_award_floor = factory.Trait(opportunity_summary__has_zero_award_floor=True)
+        has_null_award_floor = factory.Trait(opportunity_summary__has_null_award_floor=True)
+
+        has_nonzero_award_ceiling = factory.Trait(
+            opportunity_summary__has_nonzero_award_ceiling=True
+        )
+        has_zero_award_ceiling = factory.Trait(opportunity_summary__has_zero_award_ceiling=True)
+        has_null_award_ceiling = factory.Trait(opportunity_summary__has_null_award_ceiling=True)
 
 
 class AssistanceListingFactory(BaseFactory):
