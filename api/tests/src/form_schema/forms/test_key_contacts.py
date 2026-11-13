@@ -244,14 +244,8 @@ def test_key_contacts_v2_0_us_address_requires_state_zip(contact_minimal, key_co
     validate_required(data, EXPECTED_REQUIRED_FIELDS, key_contacts_v2_0)
 
 
-def test_key_contacts_v2_0_us_zip_code_min_length(contact_minimal, key_contacts_v2_0, request):
+def test_key_contacts_v2_0_us_zip_code_min_length(contact_minimal, key_contacts_v2_0):
     """US zip_code shorter than 9 characters fails minLength."""
-    if request.node.callspec.id == "generated":
-        request.applymarker(
-            pytest.mark.xfail(
-                strict=True, reason="the generated form has no US nine-character rule yet"
-            )
-        )
     contact_minimal["address"] = {
         "street1": "123 Main Street",
         "city": "Placeville",
