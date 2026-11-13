@@ -153,6 +153,57 @@ describe("generateXml", () => {
     expect(xml).toEqual(await fixture("performance-sites.xml"));
   });
 
+  // Project Narrative is representative of the three narrative attachment lists.
+  describe("Project Narrative attachment list", () => {
+    it("writes the API's Project Narrative snapshot", async () => {
+      const id = "a1b2c3d4-e5f6-7890-abcd-ef1234567890";
+      const xml = generateXml(
+        await mappingOf("project-narrative"),
+        { attachments: [id] },
+        {
+          attachment: () => ({
+            fileName: "project_narrative.pdf",
+            mimeType: "application/pdf",
+            fileLocation: "project_narrative.pdf",
+            hashValue: "aeB1+6gdFwih51ijIRn3b8QYn24=",
+          }),
+        },
+      );
+      expect(xml).toEqual(await fixture("project-narrative.xml"));
+    });
+
+    it("writes every attachment in answer order", async () => {
+      const xml = generateXml(
+        await mappingOf("project-narrative"),
+        { attachments: ["second", "first"] },
+        {
+          attachment: (id) => ({
+            fileName: `${id}.pdf`,
+            mimeType: "application/pdf",
+            fileLocation: `${id}.pdf`,
+            hashValue: "aeB1+6gdFwih51ijIRn3b8QYn24=",
+          }),
+        },
+      );
+      expect(xml.match(/<att:AttachedFile>/g)).toHaveLength(2);
+      expect(xml.indexOf("second.pdf")).toBeLessThan(xml.indexOf("first.pdf"));
+      expect(xml).not.toContain("<att:AttachedFile>second</att:AttachedFile>");
+    });
+
+    it("rejects an attachment absent from metadata", async () => {
+      const mapping = await mappingOf("project-narrative");
+      expect(() => generateXml(mapping, { attachments: ["missing"] })).toThrow(
+        /no attachment with id missing/,
+      );
+    });
+
+    it("does not invent an uploaded file for an empty answer", async () => {
+      const mapping = await mappingOf("project-narrative");
+      for (const data of [{}, { attachments: [] }])
+        expect(generateXml(mapping, data)).not.toContain("<att:AttachedFile>");
+    });
+  });
+
   it("writes each person's attachments inside their profile", async () => {
     const person = (sketch: string) => ({
       name: { first_name: "Ada", last_name: "Lovelace" },

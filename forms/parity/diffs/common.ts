@@ -44,6 +44,35 @@ export const BANK_WORDING: Wording = {
   },
 };
 
+/** Labels and help kept from the existing SGG forms with a single attachment list. */
+export const SGG_ATTACHMENT_WORDING: Wording = {
+  labels: {
+    category: "intentional",
+    reason:
+      "The form keeps the existing SGG form's label for its attachment list.",
+  },
+  help: {
+    category: "intentional",
+    reason:
+      "The form keeps the existing SGG form's help for its attachment list.",
+  },
+};
+
+/** The DAT's additional-file control, which the form folds into its attachment list. */
+export const ADDITIONAL_FILES: Recorded = {
+  category: "intentional",
+  reason:
+    "The DAT has a separate control for additional files. The form puts them in the same list as the required file, as the existing SGG form does.",
+};
+
+/** Compare the required-file control with the limit on the combined list. */
+export const attachmentListMax = (max: number): Pinned => ({
+  plan: max,
+  source: 1,
+  category: "intentional",
+  reason: `The DAT's 1 is for the required-file control. The list holds that file and any additional files, up to the XSD's limit of ${max}.`,
+});
+
 /** The DAT's address heading rows, which have no answer of their own. */
 export const ADDRESS_HEADING: Recorded = {
   category: "upstream",
