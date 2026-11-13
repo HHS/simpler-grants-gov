@@ -9,7 +9,10 @@ import {
 import { KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
 import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-abstract-summary-data";
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
-import { PPSL_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-performance-site-location-data";
+import {
+  PPSL_GENERATED_OPPORTUNITY_DATA,
+  PPSL_OPPORTUNITY_DATA,
+} from "tests/e2e/apply/fixtures/project-performance-site-location-data";
 import { PPSL_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-performance-site-location-field-definitions";
 import { SF424_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424-data";
 import { SF424_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-field-definitions";
@@ -43,6 +46,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   KEY_CONTACTS_OPPORTUNITY_DATA,
   KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
   PPSL_OPPORTUNITY_DATA,
+  PPSL_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
   SF424_SHORT_OPPORTUNITY_DATA,
@@ -63,6 +67,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   keyContacts: KEY_CONTACTS_FORM_CONFIG,
   keyContactsGenerated: KEY_CONTACTS_FORM_CONFIG,
   ppsl: PPSL_FORM_CONFIG,
+  ppslGenerated: PPSL_FORM_CONFIG,
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
   sf424short: SF424_SHORT_FORM_CONFIG,

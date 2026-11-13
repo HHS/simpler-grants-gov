@@ -18,6 +18,8 @@ from tests.src.form_schema.parity.xml.diffs import (
     epa_key_contacts_generated,
     key_contacts,
     key_contacts_generated,
+    performance_sites_generated,
+    project_performance_site_location,
 )
 from tests.src.form_schema.parity.xml.harness import flatten_form
 from tests.src.form_schema.parity.xml.harness.compare import (
@@ -32,6 +34,8 @@ DIFFS = [
     key_contacts_generated.DIFF,
     epa_key_contacts.DIFF,
     epa_key_contacts_generated.DIFF,
+    project_performance_site_location.DIFF,
+    performance_sites_generated.DIFF,
 ]
 
 

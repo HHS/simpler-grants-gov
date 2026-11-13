@@ -1,5 +1,6 @@
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
@@ -11,6 +12,7 @@ using SimplerForms;
 
 namespace Forms.PerformanceSites;
 
+@Sgg.sync(#{ instructions: "30e2d140-46b8-4fe0-b48c-48a5270ed118" })
 @Meta.form(#{
   id: "performance-sites",
   formName: "PROJECT/PERFORMANCE SITE LOCATION(S)",

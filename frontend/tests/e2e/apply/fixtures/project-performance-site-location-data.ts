@@ -48,3 +48,33 @@ export const PPSL_OPPORTUNITY_DATA: PrintViewFormData = {
   expectedPrepopulatedFields: {},
   buildTestData: buildPPSLHappyPathTestData,
 };
+
+/**
+ * Opportunity configuration for the Performance Sites form generated from forms/specs.
+ * It shares the hand-written form's field definitions and fill data.
+ */
+export const PPSL_GENERATED_OPPORTUNITY_DATA: PrintViewFormData = {
+  opportunityId: "4b585a14-ab56-42c1-a01f-78eba5b93d97",
+  opportunityNumber: "E2E-PPSLG-ORG-IND-01",
+  formKey: "ppslGenerated",
+  expectedPrepopulatedFields: {},
+  buildTestData: buildPPSLHappyPathTestData,
+};
+
+/**
+ * Each Performance Sites form the Performance Sites spec runs against, and the id of the
+ * print view section holding its attachment. A generated form names each section after
+ * its label.
+ */
+export const PPSL_OPPORTUNITIES = [
+  {
+    formLabel: "PROJECT/PERFORMANCE SITE LOCATION(S)",
+    opportunityNumber: PPSL_OPPORTUNITY_DATA.opportunityNumber,
+    attachmentSectionId: "form-section-additional_locations_attachment",
+  },
+  {
+    formLabel: "PROJECT/PERFORMANCE SITE LOCATION(S) (Generated)",
+    opportunityNumber: PPSL_GENERATED_OPPORTUNITY_DATA.opportunityNumber,
+    attachmentSectionId: "form-section-additional-locations",
+  },
+] as const;
