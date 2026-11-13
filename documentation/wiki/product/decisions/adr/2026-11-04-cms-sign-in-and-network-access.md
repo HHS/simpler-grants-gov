@@ -99,7 +99,7 @@ Reusing the existing VPC keeps the infrastructure code simpler and lets the fron
 - The design reuses the existing VPC and Terraform patterns, and the frontend can reach Drupal directly.
 - Every content change can be traced to a named person.
 - Content editing does not depend on Login.gov availability or AWS console access.
-- The experience is close to how content managers use Storyblok for Grants.gov today. We believe Storyblok does not use federated SSO; see the open questions below.
+- The experience is close to how content managers use Storyblok for Grants.gov today.
 
 ### Negative consequences
 
@@ -219,7 +219,6 @@ Drupal runs in its own VPC, and the VPN connects only to that VPC.
 1. Does HHS approve this approach: named Drupal accounts with MFA, reachable only through an AWS Client VPN?
 2. Who approves requests for new content manager accounts and VPN access?
 3. Does HHS have requirements for passwords, MFA type, session timeouts, or VPN authentication that the setup must meet?
-4. We assume Storyblok on Grants.gov does not use a federated SSO provider today. Is that correct?
 
 ## Follow-up work
 
