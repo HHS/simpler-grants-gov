@@ -1,5 +1,6 @@
 import { identity } from "lodash";
 import { userProfileAction } from "src/app/[locale]/(base)/settings/actions";
+import { ActionErrorCode } from "src/types/generalTypes";
 
 const getSessionMock = jest.fn();
 const mockUpdateUserDetails = jest.fn();
@@ -44,6 +45,7 @@ describe("user profile form action", () => {
     const profileFormData = new FormData();
     const result = await userProfileAction(null, profileFormData);
     expect(result.errorMessage).toEqual("Not logged in");
+    expect(result.errorCode).toEqual(ActionErrorCode.AUTH_REQUIRED);
   });
   it("returns result of update on success", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
@@ -74,5 +76,6 @@ describe("user profile form action", () => {
 
     const result = await userProfileAction(null, profileFormData);
     expect(result.errorMessage).toEqual("fake error");
+    expect(result.errorCode).toBeUndefined();
   });
 });

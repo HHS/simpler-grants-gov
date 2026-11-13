@@ -288,3 +288,7 @@ export interface ParsedError {
 }
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
+
+export enum ActionErrorCode {
+  AUTH_REQUIRED = "AUTH_REQUIRED",
+}
