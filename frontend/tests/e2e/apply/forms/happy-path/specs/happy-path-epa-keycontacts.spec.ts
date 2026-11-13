@@ -11,8 +11,10 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import { EPA_KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
-import { epaKeyContactsHappyPathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
-import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
+import {
+  EPA_KEY_CONTACTS_OPPORTUNITIES,
+  epaKeyContactsHappyPathTestData,
+} from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -23,49 +25,54 @@ import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-sta
 
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging to avoid OTP rate-limiting
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-test(
-  "Application form completion happy path - EPA Key Contacts",
-  { tag: [APPLY_FORMS, FULL_REGRESSION] },
-  async (
-    { page, context }: { page: Page; context: BrowserContext },
-    testInfo: TestInfo,
-  ) => {
-    test.setTimeout(300_000); // 5 min timeout
+for (const { formLabel, opportunityId } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
+  test(
+    `Application form completion happy path - ${formLabel}`,
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
+    async (
+      { page, context }: { page: Page; context: BrowserContext },
+      testInfo: TestInfo,
+    ) => {
+      test.setTimeout(300_000); // 5 min timeout
 
-    const isMobile = testInfo.project.name.match(/[Mm]obile/);
+      const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-    // Given the user is logged in
-    await authenticateE2eUser(page, context, !!isMobile);
+      // Given the user is logged in
+      await authenticateE2eUser(page, context, !!isMobile);
 
-    // Call reusable create application function from utils
-    /**
-     * Covers "Starting a new application" flow in the feature file
-     * (includes modal interaction, organization selection, and application creation)
-     */
-    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
+      // Call reusable create application function from utils
+      /**
+       * Covers "Starting a new application" flow in the feature file
+       * (includes modal interaction, organization selection, and application creation)
+       */
+      await createApplication(
+        page,
+        `/opportunity/${opportunityId}`,
+        testOrgLabel,
+      );
 
-    // When the user clicks on a form link
-    // Then the form opens
-    // And the user fills out the form with valid test data
-    // And the user clicks Save
-    await fillForm(
-      testInfo,
-      page,
-      EPA_KEY_CONTACTS_FORM_CONFIG,
-      epaKeyContactsHappyPathTestData,
-      false,
-    );
+      // When the user clicks on a form link
+      // Then the form opens
+      // And the user fills out the form with valid test data
+      // And the user clicks Save
+      await fillForm(
+        testInfo,
+        page,
+        EPA_KEY_CONTACTS_FORM_CONFIG,
+        epaKeyContactsHappyPathTestData,
+        false,
+      );
 
-    /* Covers "Form status validation" flow in the feature file,
-     * which includes verification of the status in form and application landing page after saving a completed form.
-     */
-    await verifyFormStatusAfterSave(page, "complete");
-  },
-);
+      /* Covers "Form status validation" flow in the feature file,
+       * which includes verification of the status in form and application landing page after saving a completed form.
+       */
+      await verifyFormStatusAfterSave(page, "complete");
+    },
+  );
+}
