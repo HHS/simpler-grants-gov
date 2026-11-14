@@ -8,5 +8,7 @@ export const $decorators = {
   "SimplerForms.Sgg": {
     sync: d.$sync,
     attachment: d.$attachment,
+    prePopulate: d.$prePopulate,
+    postPopulate: d.$postPopulate,
   },
 };
