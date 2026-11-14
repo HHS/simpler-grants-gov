@@ -1,7 +1,7 @@
 {
   "title": "Budget Narrative Attachment Form",
   "slug": "budget-narrative-attachment-form",
-  "status": "backlog",
+  "status": "in_progress",
   "family": [
     "SF-424",
     "R&R",
@@ -14,5 +14,41 @@
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/543",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/BudgetNarrativeAttachments_1_2-V1.2_F543.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/BudgetNarrativeAttachments_1_2-V1.2.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/BudgetNarrativeAttachments_1_2-V1.2_F543.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/BudgetNarrativeAttachments_1_2-V1.2_F543.xls",
+  "spec_id": "budget-narrative",
+  "sgg_form_id": "budget_narrative_attachment",
+  "omb_number": "",
+  "expiration_date": "",
+  "widgets": ["ApplicationMultipleAttachmentWidget"],
+  "description": "Budget narrative files supplied as an ordered list of uploaded attachment references.",
+  "notes": [
+    "The first attachment is mandatory; additional attachments follow it in the same list, as in the existing SGG form.",
+    "Examples use synthetic attachment IDs. File ownership and metadata are resolved by the existing application service.",
+    "Not installed in the API yet. That and the file upload flow are tracked in the migration issue.",
+    "No applicant answers are pre- or post-populated. The upload service assigns attachment references when files are uploaded.",
+    "Open follow-up on the existing SGG form: #11171 (print E2E)."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "1. Budget Narrative File(s)",
+      "children": [
+        {
+          "kind": "field",
+          "id": "attachments",
+          "label": "Budget Narrative Files",
+          "help_text": "At least one file must be attached",
+          "required": true,
+          "type": "Attachment",
+          "widget": "ApplicationMultipleAttachmentWidget",
+          "json_path": "attachments[]",
+          "xml_path": "Attachments/att:AttachedFile",
+          "dat_field": "1-0",
+          "min_items": 1,
+          "max_items": 100,
+          "constraints": "format uuid"
+        }
+      ]
+    }
+  ]
 }
