@@ -62,7 +62,16 @@ workflow; production deployment remains manual.
 
 ## Pausing
 
-Turn off the relevant Constance switch to pause uploads immediately. To stop
+Constance switch changes take effect immediately, without a deployment:
+
+- To pause all uploads, turn off both `HHS_NOFO_PDF_METRICS_PILOT_ENABLED` and
+  `HHS_NOFO_AUTHENTICATED_PDF_METRICS_PILOT_ENABLED`. While the public switch is
+  on, everyone can upload whatever the signed-in switch is set to; while the
+  signed-in switch is on, signed-in users can still upload.
+- To pause only signed-out uploads, turn off the public switch and leave the
+  signed-in switch on.
+
+To stop
 recording, change the production recording override to `"false"` and redeploy.
 Existing usage records remain available. Turning off recording does not itself
 prevent uploads.
