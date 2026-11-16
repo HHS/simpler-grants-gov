@@ -560,6 +560,57 @@ class InspectionTests(unittest.TestCase):
         with self.assertRaises(m.InspectionError):
             m.waf_summary({"Rules": []})
 
+    def test_waf_data_protection_reports_only_allowlisted_settings(self):
+        data = acl()
+        self.assertEqual(m.waf_summary(data)["data_protections"], [])
+        data["VisibilityConfig"]["SampledRequestsEnabled"] = True
+        data["DataProtectionConfig"] = {
+            "DataProtections": [
+                {"Field": {"FieldType": "BODY"}, "Action": "SUBSTITUTION"},
+                {
+                    "Field": {"FieldType": "SINGLE_HEADER", "FieldKeys": [MARKER]},
+                    "Action": "HASH",
+                    "ExcludeRuleMatchDetails": True,
+                    "ExcludeRateBasedDetails": True,
+                },
+                {"Field": {"FieldType": MARKER}, "Action": MARKER},
+            ]
+        }
+        aws = FakeAws({("wafv2", "get-web-acl-for-resource"): {"WebACL": data}})
+        report = m.Inspector(aws).run()
+        waf = next(row["details"] for row in report if row["check"] == "waf")
+        self.assertTrue(waf["web_acl_sampling_enabled"])
+        self.assertEqual(
+            waf["data_protections"],
+            [
+                {
+                    "field_type": "BODY",
+                    "action": "SUBSTITUTION",
+                    "exclude_rule_match_details": False,
+                    "exclude_rate_based_details": False,
+                },
+                {
+                    "field_type": "SINGLE_HEADER",
+                    "action": "HASH",
+                    "exclude_rule_match_details": True,
+                    "exclude_rate_based_details": True,
+                },
+                {
+                    "field_type": "other",
+                    "action": "other",
+                    "exclude_rule_match_details": False,
+                    "exclude_rate_based_details": False,
+                },
+            ],
+        )
+        self.assertNotIn(MARKER, json.dumps(report))
+
+        data["DataProtectionConfig"] = {"DataProtections": []}
+        with self.assertRaisesRegex(
+            m.InspectionError, "^invalid_waf_data_protection_configuration$"
+        ):
+            m.waf_summary(data)
+
     def test_arbitrary_aws_errors_are_not_exposed(self):
         inspector = m.Inspector(
             FakeAws({("cloudwatch", "get-dashboard"): RuntimeError(MARKER)})
