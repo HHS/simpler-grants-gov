@@ -176,120 +176,12 @@ notable constraint of OpenSearch, relative to ECS and the Database.
 We manage several secret values that need to be rotated yearly.
 
 ### Application SSL Certificates
-🚨🚨🚨 - Unclear how a cert rotation works with terraform pointing to a certificate in ACM by domain name. Leave a little extra time until we figure that out and document better below.
 
-#### Application Certificates: Part 1: Generate A Cert
-
-##### NEW more scripted process
-```bash
-bin/create-csr <domain prefix> # anything you pass as the prefix will be prepended to .simpler.grants.gov
-bin/create-csr soap.training # would yield a CSR for soap.training.simpler.grants.gov
-
-bin/create-csr # called without any domain will generate a request for the root, simpler.grants.gov domain
-```
-
-##### DEPRECIATED more manual process
-
-The process starts by generating a cert like so. You will need to generate the certs one at a time.
-
-```bash
-openssl genrsa -out api_simpler_grants_gov.key 2048
-openssl req -new \
-    -key api_simpler_grants_gov.key \
-    -out api_simpler_grants_gov.csr \
-    -subj "/C=US/O=Simpler Grants Gov/CN=api.simpler.grants.gov" \
-    -addext "subjectAltName=DNS:api.simpler.grants.gov"
-```
-
-You give the `{url}.csr` file to HHS so that they can perform the next step. When they get back to you, proceed to part 2a
-
-#### Application Certificates: Part 2a: Upload A Single Cert
-
-You will get a zip file back from HHS containing the certificate. Inside the zip there will be one file. If it isn't called `{url}.cer` then rename it so that that's its name. That's the cert. Here you have two options. If the cert isn't plain text, you need to turn it into plain text. How to determine if something is plain text or not can be done by `cat`'ing the file and seeing if it has a bunch of �'s in it, that means it's binary. Binary certs can be turned into plain text, then uploaded, like so:
-
-```bash
-openssl x509 -inform DER \
-    -in api_simpler_grants_gov.cer \
-    -out api_simpler_grants_gov.pem # the file extensions here are functionally arbitrary
-```
-
-Alternatively, if you get an error (or it's a p7b file), you might need to run:
-```bash
-openssl pkcs7 -inform DER -print-certs \
-    -in nofos_simpler_grants_gov_chain.p7b \
-    -out nofos_simpler_grants_gov_chain.pem
-```
-
-Once you have plain text certs, you need to split it into the chain and the main cert. The main cert is the first certificate in the file, and the chain is the remaining (likely 2 certificates). So split it into a certificate.pem and certificate_chain.pem.
-
-Later on (eg. during part 3), you might get the following error:
-
-> NET:ERR_CERT_AUTHORITY_INVALID
-
-If that happens, then that means that something went wrong with this step, eg. step 2a. In that case, you need to redo your work in form of step 2b.
-
-#### Application Certificates: Part 2b: Upload Multiple Certs
-
-If there are multiple certificates (eg. a chain certificate is included) then there will be given another file called something like `{url}_chain.cer` and the commands look more like this
-
-```bash
-openssl x509 -inform DER \
-    -in api_simpler_grants_gov.cer \
-    -out api_simpler_grants_gov.pem
-
-openssl x509 -inform DER \
-    -in api_simpler_grants_gov_chain.cer \
-    -out api_simpler_grants_gov_chain.pem
-
-aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
-    --certificate-chain fileb://api_simpler_grants_gov_chain.pem \
-    --private-key fileb://api_simpler_grants_gov.key
-```
-
-Or if one of the certs is in plain text, then the command looks like this
-
-```bash
-aws acm import-certificate --certificate fileb://api_simpler_grants_gov.pem \
-    --certificate-chain fileb://api_simpler_grants_gov_chain.cer \
-    --private-key fileb://api_simpler_grants_gov.key
-```
-
-In summary, Inspect which certs are binary, which are plain text, and decrypt them as needed. Then import the file with multiple certs into `--certificate-chain`.
-
-#### Application Certificates: Part 3: Attach to Load Balancer
-##### 1. Update the Service to use HTTPS
-See https://github.com/HHS/simpler-grants-gov/pull/5261 for an example of committing this change
-
-##### 2. Via Terraform
-[Set up your console for AWS Credentials](documentation/infra/set-up-infrastructure-tools.md#aws-authentication)
-```bash
-cd infra/<app name>/service
-terraform init -backend-config <env name>.s3.tfbackend
-terraform apply
-```
-##### 3. Test HTTPS access
-Hit the service at the domain name with https://
-
-#### 4. Merge the PR to main
-Otherwise the next deploy from main will tear back down HTTPS
-
-##### (Depreciated: Via the AWS Console)
-This is the last step where the cert actually starts being used. Login to the AWS console and open up this page:
-
-https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#LoadBalancers:v=3
-
-From there:
-
-- Click on the load balancer whose cert you are updating, like `api-prod`
-- Scroll down to "Listeners and rules"
-- Click `HTTPS:443`
-- Click `Certificates`
-- Click `Add certificate`
-- Choose the certificate that you just uploaded, you can determine this by looking at the `CertificateArn` CLI output, or by otherwise [inspecting the AWS console here](https://us-east-1.console.aws.amazon.com/acm/home?region=us-east-1#/certificates/list).
-- Add the certificate. This UI is confusing and likely subject to change on AWS's end, so the exact text of the buttons of the buttons isn't included in this documentation.
-- `Remove` the old certificate.
-
-At this point the new certificate should start being served... after 5 ~ 10 minutes. Check your website periodically during that turn to confirm the rotation of your cert.
+Our certificates are issued by HHS and imported into ACM, and they must be renewed by
+hand before they expire. Follow the
+[SSL/TLS Certificate Renewal Runbook](documentation/infra/ssl-certificate-management.md),
+which starts with opening a renewal ticket for each certificate so none get lost
+between the CSR and the live site.
 
 ### Login.gov Certificates
 
