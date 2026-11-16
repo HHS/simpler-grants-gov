@@ -13,6 +13,7 @@ import {
 import {
   buildKeyContactsOptionalFieldsHappyPathTestData,
   buildKeyContactsRequiredFieldsHappyPathTestData,
+  KEY_CONTACTS_OPPORTUNITIES,
 } from "tests/e2e/apply/fixtures/key-contacts-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -23,13 +24,13 @@ import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillFormPartial } from "tests/e2e/utils/forms/general-forms-filling";
 import { clickSaveButton } from "tests/e2e/utils/forms/save-form-utils";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
   buildPrintUrl,
   navigateToPrintView,
   validateAllPrintViews,
 } from "tests/e2e/utils/submission/print-view-utils";
+import { scenariosForEachForm } from "tests/e2e/utils/submission/scenarios-for-each-form";
 import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
@@ -39,26 +40,28 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-const OPPORTUNITY_NUMBER = "E2E-KC-ORG-IND-01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-
-const applicantScenarios = [
+const applicantScenarios = scenariosForEachForm(KEY_CONTACTS_OPPORTUNITIES, [
   {
-    testName: "Key Contacts - FieldList complete workflow - Organization user",
+    testName: "FieldList complete workflow - Organization user",
     orgLabel: testOrgLabel,
   },
   {
-    testName: "Key Contacts - FieldList complete workflow - Individual user",
+    testName: "FieldList complete workflow - Individual user",
     orgLabel: undefined,
   },
-] as const;
+] as const);
 
 test.describe("Key Contacts FieldList", () => {
   test.beforeEach(({ page: _ }, testInfo) => {
     skipNonChromeOnStaging(testInfo);
   });
 
-  for (const { testName, orgLabel } of applicantScenarios) {
+  for (const {
+    testName,
+    opportunityConfig,
+    form: keyContactsForm,
+    orgLabel,
+  } of applicantScenarios) {
     test(
       testName,
       {
@@ -78,12 +81,6 @@ test.describe("Key Contacts FieldList", () => {
           orgLabel,
         );
         const applicationUrl = page.url();
-        const keyContactsForm = opportunityConfig.forms.find(
-          ({ formKey }) => formKey === "keyContacts",
-        );
-        if (!keyContactsForm) {
-          throw new Error("Key Contacts form configuration was not found");
-        }
 
         const getFieldLocator = (
           fieldId: string,
