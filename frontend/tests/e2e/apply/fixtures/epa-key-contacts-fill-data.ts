@@ -1,3 +1,5 @@
+import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
+
 // Happy-path test data for the EPA Key Contacts form (EPA_KeyContacts_2_0).
 // Covers all four contact sections: Authorized Representative, Payee,
 // Administrative Contact, and Project Manager.
@@ -80,3 +82,16 @@ export const epaKeyContactsFailurePathTestData = {
   administrative_contact_name_prefix: "AC PREFIX",
   project_manager_name_prefix: "PM PREFIX",
 } as const;
+
+/**
+ * Each EPA Key Contacts form the EPA Key Contacts specs run against, and the opportunity
+ * that offers it. The hand-written form is on the opportunity with every form; the form
+ * generated from forms/specs has an opportunity of its own, since the two share a name.
+ */
+export const EPA_KEY_CONTACTS_OPPORTUNITIES = [
+  { formLabel: "EPA Key Contacts", opportunityId: OPPORTUNITY_ID },
+  {
+    formLabel: "EPA Key Contacts (Generated)",
+    opportunityId: "b677779b-2081-4212-8f38-7781f43af676",
+  },
+] as const;

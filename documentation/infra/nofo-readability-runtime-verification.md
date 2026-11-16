@@ -17,7 +17,7 @@ Normal deployment concurrency prevents overlap with NOFO infra-dev deployment.
 The deployed dev image must include the request workspace from
 [Builder #1316](https://github.com/HHS/simpler-grants-pdf-builder/pull/1316).
 An older image fails the `checker_workspace_available` check.
-Do not overlap the runtime check with an authenticated calculator analysis: the probe
+Do not overlap the runtime check with a checker analysis: the probe
 briefly uses the application's existing analysis lock and can return busy if
 another analysis holds it. Stop and investigate a failed run before retrying.
 

@@ -159,7 +159,12 @@ def _constraints(declaration: Any) -> tuple[str | None, dict[str, object]]:
         keyword = FACETS.get(name)
         if keyword is None:
             continue
-        rules[keyword] = frozenset(facet.enumeration) if keyword == "enum" else facet.value
+        if keyword == "enum":
+            rules[keyword] = frozenset(facet.enumeration)
+        elif name == "pattern":
+            rules[keyword] = "|".join(facet.regexps)
+        else:
+            rules[keyword] = facet.value
 
     return primitive, rules
 
