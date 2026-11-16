@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import select
 
 import src.util.file_util as file_util
-from src.constants.lookup_constants import ApplicationAuditEvent
+from src.constants.lookup_constants import ApplicationAuditEvent, FormRenderer
 from src.db.models.competition_models import ApplicationAudit
 from src.services.applications.process_application_attachment_changes import (
     collect_attachment_ids,
@@ -173,6 +173,83 @@ def test_process_deleted_attachment_removes_file_and_audits(
     assert len(audits) == 1
     assert audits[0].application_audit_event == ApplicationAuditEvent.ATTACHMENT_DELETED
     assert audits[0].target_attachment_id == attachment.application_attachment_id
+
+
+def test_process_json_forms_attachment_changes(
+    enable_factory_create, db_session, s3_config, create_test_form
+):
+    application = ApplicationFactory.create()
+    removed = ApplicationAttachmentFactory.create(application=application)
+    kept = ApplicationAttachmentFactory.create(application=application)
+    replacement = ApplicationAttachmentFactory.create(application=application)
+    removed_location = removed.file_location
+    form = _make_form(
+        create_test_form,
+        form_ui_schema={
+            "type": "Group",
+            "elements": [
+                {
+                    "type": "Control",
+                    "scope": "#/properties/profiles",
+                    "options": {
+                        "detail": {
+                            "type": "Group",
+                            "elements": [
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/document",
+                                    "options": {"widget": "Attachment"},
+                                },
+                            ],
+                        },
+                    },
+                },
+                {
+                    "type": "Control",
+                    "scope": "#/properties/attachments",
+                    "options": {"widget": "AttachmentArray"},
+                },
+                {"type": "Control", "scope": "#/properties/note"},
+            ],
+        },
+    )
+    form.form_renderer = FormRenderer.JSON_FORMS
+
+    assert sorted(get_attachment_field_paths(form)) == [
+        ["attachments[*]"],
+        ["profiles[*]", "document"],
+    ]
+
+    with db_session.begin():
+        process_application_attachment_changes(
+            db_session=db_session,
+            application=application,
+            form=form,
+            user=removed.user,
+            old_application_response={
+                "profiles": [{"document": str(removed.application_attachment_id)}],
+                "attachments": [str(kept.application_attachment_id)],
+                "note": str(replacement.application_attachment_id),
+            },
+            new_application_response={
+                "profiles": [{"document": str(replacement.application_attachment_id)}],
+                "attachments": [str(kept.application_attachment_id)],
+            },
+        )
+
+    db_session.refresh(removed)
+    db_session.refresh(kept)
+    assert removed.is_deleted
+    assert not file_util.file_exists(removed_location)
+    assert not kept.is_deleted
+    assert file_util.file_exists(kept.file_location)
+    assert {
+        (audit.application_audit_event, audit.target_attachment_id)
+        for audit in _get_audits(db_session, application)
+    } == {
+        (ApplicationAuditEvent.ATTACHMENT_DELETED, removed.application_attachment_id),
+        (ApplicationAuditEvent.ATTACHMENT_ADDED, replacement.application_attachment_id),
+    }
 
 
 def test_process_deleted_attachment_already_deleted_audits_only(
