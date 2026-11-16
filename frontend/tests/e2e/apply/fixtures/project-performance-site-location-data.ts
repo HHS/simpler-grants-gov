@@ -48,7 +48,6 @@ export const PPSL_OPPORTUNITY_DATA: PrintViewFormData = {
   expectedPrepopulatedFields: {},
   buildTestData: buildPPSLHappyPathTestData,
   // What the submission zip spec verifies per field (XML element and/or PDF text).
-  // additional_locations_attachment is an attachment and is not verified in the zip.
   submissionFields: {
     "primary_site--organization_name": {
       xmlElement: "PerformanceSite_4_0:OrganizationName",
