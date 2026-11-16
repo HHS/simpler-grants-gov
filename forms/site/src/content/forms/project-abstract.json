@@ -44,6 +44,7 @@
     }
   ],
   "notes": [
-    "The upload service supplies the file metadata used in submission XML. The form captures the uploaded file ID."
+    "No applicant answers are pre- or post-populated. The upload service uses the selected file ID to supply attachment metadata for Grants.gov XML.",
+    "The existing SGG directions are shown above the upload under Project Abstract File. The upload checks that a file was selected. It does not check the one-page limit or the document contents."
   ]
 }

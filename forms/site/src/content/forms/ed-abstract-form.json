@@ -34,8 +34,9 @@
     }
   ],
   "notes": [
-    "The form keeps the official instruction wording, including the separate requirements for research applications. The existing section renderer shows the bullets as text on separate lines.",
+    "The form keeps the official instruction wording, including the separate requirements for research applications. The existing section renderer shows each bullet in its own paragraph, without the original list structure or bold emphasis.",
     "The one-file requirement stays visible beside the upload. The upload control shows the selected file and handles removal and replacement. The Grants.gov close-form and attachment-added prompts do not appear in the SGG form.",
-    "The one-page limit and abstract content requirements apply to the uploaded document. The form records the file ID and does not validate the document’s length or contents."
+    "No applicant answers are pre- or post-populated. The upload service uses the selected file ID to supply attachment metadata for Grants.gov XML.",
+    "The upload checks that a file was selected. It does not check the one-page limit or the abstract contents."
   ]
 }
