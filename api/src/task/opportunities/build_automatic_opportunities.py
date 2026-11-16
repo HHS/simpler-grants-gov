@@ -59,6 +59,21 @@ from src.util import datetime_util, file_util
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_COMPETITION_TITLE = "Competition for testing purposes"
+
+# Grants.gov limits competition IDs to 40 characters (CompetitionIDDataType)
+PUBLIC_COMPETITION_ID_MAX_LENGTH = 40
+
+
+def build_public_competition_id(opportunity_number: str, competition_number: int) -> str:
+    """Build a stable public competition ID from the opportunity number,
+    e.g. E2E-SFLLL-ORG-IND-01-C01 for the first competition.
+
+    Long opportunity numbers are cut so the ID stays within the limit.
+    """
+    suffix = f"-C{competition_number:02d}"
+    return opportunity_number[: PUBLIC_COMPETITION_ID_MAX_LENGTH - len(suffix)] + suffix
+
 
 @dataclasses.dataclass
 class OpportunityContainer:
@@ -135,7 +150,9 @@ class OpportunityContainer:
 @dataclasses.dataclass
 class CompetitionContainer:
     ### Competition
-    competition_title: str | None = "Competition for testing purposes"
+    competition_title: str = DEFAULT_COMPETITION_TITLE
+    # If None, it's built from the opportunity number (see build_public_competition_id)
+    public_competition_id: str | None = None
     opening_date: date | None = dataclasses.field(
         default_factory=lambda: datetime_util.get_now_us_eastern_date()
     )
@@ -174,6 +191,7 @@ class BuildAutomaticOpportunitiesTask(Task):
     class Metrics(StrEnum):
         OPPORTUNITY_CREATED_COUNT = "opportunity_created_count"
         OPPORTUNITY_ALREADY_EXIST_COUNT = "opportunity_already_exist_count"
+        COMPETITION_BACKFILLED_COUNT = "competition_backfilled_count"
 
     def __init__(
         self,
@@ -442,7 +460,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             ),
             competitions=[
                 CompetitionContainer(
-                    competition_title=None,
+                    competition_title="Tribal Domestic Violence and Sexual Assault Coalitions Grant Program",
                     required_form_ids=[SF424_v4_0.form_id],
                     open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
                     closing_date=date(2026, 12, 31),
@@ -715,6 +733,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 },
             )
             self.increment(self.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT)
+            self.backfill_competitions(existing_opportunity, data.opportunity_number, competitions)
             return
 
         logger.info(f"Creating opportunity for scenario '{data.opportunity_number}'")
@@ -779,8 +798,14 @@ class BuildAutomaticOpportunitiesTask(Task):
         self.db_session.add(current_opportunity_summary)
 
         ### Competition(s)
-        for comp_data in competitions:
-            self.create_competition(comp_data, opportunity, opportunity_assistance_listing)
+        for competition_number, comp_data in enumerate(competitions, start=1):
+            self.create_competition(
+                comp_data,
+                opportunity,
+                opportunity_assistance_listing,
+                data.opportunity_number,
+                competition_number,
+            )
 
         ### Opportunity attachment
         file_name = data.opportunity_attachment_file_name
@@ -811,17 +836,59 @@ class BuildAutomaticOpportunitiesTask(Task):
         )
         self.increment(self.Metrics.OPPORTUNITY_CREATED_COUNT)
 
+    def backfill_competitions(
+        self,
+        opportunity: Opportunity,
+        opportunity_number: str,
+        competitions: list[CompetitionContainer],
+    ) -> None:
+        """Fill in a missing public competition ID or title on competitions
+        created before we set them. Values that are already set are left alone.
+        """
+        existing_competitions = sorted(
+            opportunity.competitions, key=lambda c: (c.created_at, c.competition_id)
+        )
+        for competition_number, competition in enumerate(existing_competitions, start=1):
+            if competition.public_competition_id and competition.competition_title:
+                continue
+
+            comp_data = (
+                competitions[competition_number - 1]
+                if competition_number <= len(competitions)
+                else CompetitionContainer()
+            )
+            if not competition.public_competition_id:
+                competition.public_competition_id = (
+                    comp_data.public_competition_id
+                    or build_public_competition_id(opportunity_number, competition_number)
+                )
+            if not competition.competition_title:
+                competition.competition_title = comp_data.competition_title
+
+            logger.info(
+                f"Backfilled competition for opportunity '{opportunity_number}'",
+                extra={
+                    "competition_id": competition.competition_id,
+                    "public_competition_id": competition.public_competition_id,
+                },
+            )
+            self.increment(self.Metrics.COMPETITION_BACKFILLED_COUNT)
+
     def create_competition(
         self,
         comp_data: CompetitionContainer,
         opportunity: Opportunity,
         opportunity_assistance_listing: OpportunityAssistanceListing | None,
+        opportunity_number: str,
+        competition_number: int,
     ) -> None:
         """Create a competition with provided info"""
 
         competition = Competition(
             competition_id=uuid.uuid4(),
             opportunity=opportunity,
+            public_competition_id=comp_data.public_competition_id
+            or build_public_competition_id(opportunity_number, competition_number),
             competition_title=comp_data.competition_title,
             opening_date=comp_data.opening_date,
             closing_date=comp_data.closing_date,
