@@ -230,7 +230,7 @@ const ApplicationTable = ({
                 applicationId={applicationId}
                 opportunityId={opportunityId}
                 text={t("downloadInstructions")}
-                unavailableText={t("attachmentUnavailable")}
+                unavailableText={t("notApplicable")}
               />
             </td>
             <td data-label={t("updated")}>
