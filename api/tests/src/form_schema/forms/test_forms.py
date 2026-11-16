@@ -247,6 +247,12 @@ def test_epa_key_contact_v2_0(epa_key_contact_v2_0):
         epa_key_contact_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
+    assert epa_key_contact_v2_0.sgg_version == "1.0"
+
+
+def test_epa_key_contact_generated_v2_0_has_instructions(epa_key_contact_generated_v2_0):
+    # The hand-written form has no instructions to share; the generated one has its own.
+    assert epa_key_contact_generated_v2_0.form_instruction_id is not None
 
 
 def test_key_contacts_v2_0(key_contacts_v2_0):

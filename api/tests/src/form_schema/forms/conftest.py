@@ -9,6 +9,7 @@ from src.form_schema.forms import (
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
+    EPAKeyContactsGenerated_v2_0,
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
@@ -146,9 +147,21 @@ def epa_form_4700_4_v5_0():
     return setup_resolved_form(EPA_FORM_4700_4_v5_0)
 
 
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(EPA_KEY_CONTACT_v2_0, id="handwritten"),
+        pytest.param(EPAKeyContactsGenerated_v2_0, id="generated"),
+    ],
+)
+def epa_key_contact_v2_0(request):
+    """Each EPA Key Contacts form: the hand-written one and the one generated from forms/specs."""
+    return setup_resolved_form(request.param)
+
+
 @pytest.fixture(scope="session")
-def epa_key_contact_v2_0():
-    return setup_resolved_form(EPA_KEY_CONTACT_v2_0)
+def epa_key_contact_generated_v2_0():
+    return setup_resolved_form(EPAKeyContactsGenerated_v2_0)
 
 
 @pytest.fixture(

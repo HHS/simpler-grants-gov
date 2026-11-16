@@ -8,6 +8,7 @@ from .budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from .cd511 import CD511_v1_1
 from .epa_form_4700_4 import EPA_FORM_4700_4_v5_0
 from .epa_key_contacts import EPA_KEY_CONTACT_v2_0
+from .epa_key_contacts_generated import FORM as EPAKeyContactsGenerated_v2_0
 from .gg_lobbying_form import GG_LobbyingForm_v1_1
 from .key_contacts import KeyContacts_v2_0
 from .key_contacts_generated import FORM as KeyContactsGenerated_v2_0
@@ -49,6 +50,7 @@ _ALL_FORMS: list[Form] = [
     KeyContacts_v2_0,
     ProjectPerformanceSiteLocation_v4_0,
     KeyContactsGenerated_v2_0,
+    EPAKeyContactsGenerated_v2_0,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -56,6 +58,7 @@ _ALL_FORMS: list[Form] = [
 # A form leaves this list when it replaces the hand-written form it mirrors.
 GENERATED_FORMS: list[Form] = [
     KeyContactsGenerated_v2_0,
+    EPAKeyContactsGenerated_v2_0,
 ]
 
 
