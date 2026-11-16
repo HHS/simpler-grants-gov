@@ -9,8 +9,10 @@ moved signed-in users to the single checker URL.
 The Readability Checker runs at one URL, `/readability-checker/`, for signed-in
 and signed-out users. Each upload attempt can be saved as a content-free usage
 record: timestamp, label, file category, outcome code, HTTP status and processing
-duration. Uploaded documents, document contents and readability scores are not
-saved. The label records whether the person was signed in:
+duration. Automatic usage records do not include uploaded documents, document
+contents, or readability scores. When Word comparison saving is enabled,
+authorized users can explicitly save a Word comparison separately. The label
+records whether the person was signed in:
 
 | Label | Recording setting | Production |
 | --- | --- | --- |
