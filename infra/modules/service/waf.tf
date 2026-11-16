@@ -20,6 +20,22 @@ resource "aws_wafv2_web_acl" "waf" {
     sampled_requests_enabled   = true
   }
 
+  # Data protection applies across this ACL, including managed rule matches.
+  dynamic "data_protection_config" {
+    for_each = try(var.pdf_readability_waf.mask_request_body, false) ? [true] : []
+    content {
+      data_protection {
+        action                     = "SUBSTITUTION"
+        exclude_rule_match_details = false
+        exclude_rate_based_details = false
+
+        field {
+          field_type = "BODY"
+        }
+      }
+    }
+  }
+
   # These controls must precede terminating Allow overrides in managed groups.
   # Null leaves every existing managed priority unchanged for other services.
   dynamic "rule" {

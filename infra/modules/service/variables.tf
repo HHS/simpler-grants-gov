@@ -453,9 +453,10 @@ variable "waf_metric_name" {
 variable "pdf_readability_waf" {
   description = "Opt-in NOFO PDF pilot controls. Null preserves existing WAF rules; Count observes without blocking."
   type = object({
-    rate_limit      = optional(number, 10)
-    rate_action     = optional(string, "count")
-    emergency_block = optional(bool, false)
+    rate_limit        = optional(number, 10)
+    rate_action       = optional(string, "count")
+    emergency_block   = optional(bool, false)
+    mask_request_body = optional(bool, false)
   })
   default = null
 

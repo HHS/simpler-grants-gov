@@ -30,9 +30,10 @@ module "infra_dev_config" {
   # Restore observation mode after the coordinated dev emergency-block test.
   # Public uploads remain off.
   pdf_readability_waf = {
-    rate_limit      = 10
-    rate_action     = "count"
-    emergency_block = false
+    rate_limit        = 10
+    rate_action       = "count"
+    emergency_block   = false
+    mask_request_body = true
   }
 
   service_override_extra_environment_variables = {}

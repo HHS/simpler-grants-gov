@@ -69,6 +69,14 @@ Field key names are omitted. ACL-level sampling is reported alongside the
 existing checker-rule sampling settings. The report covers configuration and
 does not read request samples or firewall log events.
 
+After deploying the dev-only body masking change, run the dev inspection from
+`main` with public uploads off. The dev report should show one `BODY` protection
+with action `SUBSTITUTION` and both exclusion flags false. The setting applies
+across the NOFO dev firewall, so rule-match records on other dev Builder routes
+also omit protected body values. The production inspection should continue to
+report no ACL-level data protection for this rollout. The configuration check
+requires no document upload.
+
 The WAF logging check reads only the expected ACL associated with the production
 service and only looks up retention and forwarding configuration for the expected
 CloudWatch log group. It reports no destination identifiers, header names or

@@ -41,9 +41,33 @@ run "default_preserves_existing_services" {
     condition     = length(aws_wafv2_web_acl.waf[0].rule) == 7
     error_message = "Other services must retain exactly the seven existing rules."
   }
+
+  assert {
+    condition     = length(aws_wafv2_web_acl.waf[0].data_protection_config) == 0
+    error_message = "Body masking must remain off by default."
+  }
   assert {
     condition     = sort([for r in aws_wafv2_web_acl.waf[0].rule : tostring(r.priority)]) == tolist(["0", "1", "2", "3", "4", "5", "6"])
     error_message = "Default managed priorities must remain unchanged."
+  }
+}
+
+run "mask_request_body_only_when_enabled" {
+  command = plan
+
+  variables {
+    pdf_readability_waf = { mask_request_body = true }
+  }
+
+  assert {
+    condition = alltrue([
+      for protection in one(aws_wafv2_web_acl.waf[0].data_protection_config).data_protection :
+      protection.action == "SUBSTITUTION" &&
+      one(protection.field).field_type == "BODY" &&
+      !protection.exclude_rule_match_details &&
+      !protection.exclude_rate_based_details
+    ]) && length(one(aws_wafv2_web_acl.waf[0].data_protection_config).data_protection) == 1
+    error_message = "The ACL must substitute body values, including in matching and rate-based details."
   }
 }
 
@@ -57,6 +81,11 @@ run "dev_observation_rules_precede_managed_allows" {
   assert {
     condition     = length(aws_wafv2_web_acl.waf[0].rule) == 9
     error_message = "Opting in must add only the two pilot rules."
+  }
+
+  assert {
+    condition     = length(aws_wafv2_web_acl.waf[0].data_protection_config) == 0
+    error_message = "Body masking must remain off by default."
   }
   assert {
     condition = alltrue([
