@@ -1,7 +1,6 @@
 resource "aws_cloudwatch_metric_alarm" "submission_consumer_dlq_depth" {
   count = local.enable_submission_consumer && !local.is_temporary ? 1 : 0
 
-  local.enable_submission_consumer && !local.is_temporary
   alarm_name          = "${local.submission_consumer_name}-dlq-not-empty"
   alarm_description   = "Submission consumer DLQ has messages: a submission failed processing and needs investigation or replay"
   comparison_operator = "GreaterThanOrEqualToThreshold"
