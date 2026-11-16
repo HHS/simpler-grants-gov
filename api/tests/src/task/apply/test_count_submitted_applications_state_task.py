@@ -6,12 +6,14 @@ from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
-from src.task.apply.count_submitted_applications_task import CountSubmittedApplicationTask
+from src.task.apply.count_submitted_applications_state_task import (
+    CountSubmittedApplicationsStateTask,
+)
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import ApplicationFactory
 
 
-class TestCountSubmittedApplicationsTask(BaseTestClass):
+class TestCountSubmittedApplicationsStateTask(BaseTestClass):
 
     @pytest.fixture(autouse=True)
     def cleanup(self, db_session, enable_factory_create):
@@ -23,41 +25,49 @@ class TestCountSubmittedApplicationsTask(BaseTestClass):
         db_session.commit()
 
     @pytest.fixture
-    def count_submitted_applications_task(self, db_session):
-        return CountSubmittedApplicationTask(db_session)
+    def count_submitted_applications_state_task(self, db_session):
+        return CountSubmittedApplicationsStateTask(db_session)
 
     def test_run_task(
-        self, db_session, count_submitted_applications_task, caplog, enable_factory_create
+        self, db_session, count_submitted_applications_state_task, caplog, enable_factory_create
     ):
         caplog.set_level(logging.INFO)
         oldest_application = ApplicationFactory.create(
             application_status=ApplicationStatus.SUBMITTED,
-            created_at=datetime.now() - timedelta(days=1),
+            submitted_at=datetime.now() - timedelta(days=1),
         )
         ApplicationFactory.create(
-            application_status=ApplicationStatus.SUBMITTED, created_at=datetime.now()
+            application_status=ApplicationStatus.SUBMITTED, submitted_at=datetime.now()
         )
         ApplicationFactory.create(application_status=ApplicationStatus.ACCEPTED)
-        count_submitted_applications_task.run_task()
-        record = next(r for r in caplog.records if r.message == "Submitted Application Count")
+        count_submitted_applications_state_task.run()
+        record = next(
+            r
+            for r in caplog.records
+            if getattr(r, "task_class", None) == "CountSubmittedApplicationsStateTask"
+        )
         assert record.submitted_count == 2
         assert record.oldest_submitted_age_sec > 0
         assert record.oldest_submitted_age_sec == pytest.approx(
-            int((datetime.now() - oldest_application.created_at).total_seconds()), rel=0.1
+            int((datetime.now() - oldest_application.submitted_at).total_seconds()), rel=0.1
         )
 
     def test_run_task_with_no_submitted_applications(
-        self, db_session, count_submitted_applications_task, caplog, enable_factory_create
+        self, db_session, count_submitted_applications_state_task, caplog, enable_factory_create
     ):
         caplog.set_level(logging.INFO)
         ApplicationFactory.create(
-            application_status=ApplicationStatus.ACCEPTED, created_at=datetime.now()
+            application_status=ApplicationStatus.ACCEPTED, submitted_at=datetime.now()
         )
         ApplicationFactory.create(
-            application_status=ApplicationStatus.ACCEPTED, created_at=datetime.now()
+            application_status=ApplicationStatus.ACCEPTED, submitted_at=datetime.now()
         )
         ApplicationFactory.create(application_status=ApplicationStatus.ACCEPTED)
-        count_submitted_applications_task.run_task()
-        record = next(r for r in caplog.records if r.message == "Submitted Application Count")
+        count_submitted_applications_state_task.run()
+        record = next(
+            r
+            for r in caplog.records
+            if getattr(r, "task_class", None) == "CountSubmittedApplicationsStateTask"
+        )
         assert record.submitted_count == 0
         assert record.oldest_submitted_age_sec == 0

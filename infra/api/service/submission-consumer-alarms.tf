@@ -1,10 +1,7 @@
-data "aws_sns_topic" "monitoring" {
-  name = "${local.service_name}-monitoring"
-}
-
 resource "aws_cloudwatch_metric_alarm" "submission_consumer_dlq_depth" {
-  count = local.enable_submission_consumer ? 1 : 0
+  count = local.enable_submission_consumer && !local.is_temporary ? 1 : 0
 
+  local.enable_submission_consumer && !local.is_temporary
   alarm_name          = "${local.submission_consumer_name}-dlq-not-empty"
   alarm_description   = "Submission consumer DLQ has messages: a submission failed processing and needs investigation or replay"
   comparison_operator = "GreaterThanOrEqualToThreshold"
@@ -20,12 +17,12 @@ resource "aws_cloudwatch_metric_alarm" "submission_consumer_dlq_depth" {
     QueueName = module.sqs_queue.dead_letter_queue_name
   }
 
-  alarm_actions = [data.aws_sns_topic.monitoring.arn]
-  ok_actions    = [data.aws_sns_topic.monitoring.arn]
+  alarm_actions = [module.monitoring.sns_notification_channel]
+  ok_actions    = [module.monitoring.sns_notification_channel]
 }
 
 resource "aws_cloudwatch_metric_alarm" "submission_consumer_oldest_message_age" {
-  count = local.enable_submission_consumer ? 1 : 0
+  count = local.enable_submission_consumer && !local.is_temporary ? 1 : 0
 
   alarm_name          = "${local.submission_consumer_name}-oldest-message-age"
   alarm_description   = "Oldest submission message has waited too long: consumer is down, stuck, or too slow"
@@ -42,12 +39,12 @@ resource "aws_cloudwatch_metric_alarm" "submission_consumer_oldest_message_age" 
     QueueName = module.sqs_queue.queue_name
   }
 
-  alarm_actions = [data.aws_sns_topic.monitoring.arn]
-  ok_actions    = [data.aws_sns_topic.monitoring.arn]
+  alarm_actions = [module.monitoring.sns_notification_channel]
+  ok_actions    = [module.monitoring.sns_notification_channel]
 }
 
 resource "aws_cloudwatch_metric_alarm" "submission_consumer_memory" {
-  count = local.enable_submission_consumer ? 1 : 0
+  count = local.enable_submission_consumer && !local.is_temporary ? 1 : 0
 
   alarm_name          = "${local.submission_consumer_name}-memory-high"
   alarm_description   = "Submission consumer memory utilization is high: large attachments may cause out-of-memory restarts"
@@ -66,6 +63,6 @@ resource "aws_cloudwatch_metric_alarm" "submission_consumer_memory" {
     ServiceName = aws_ecs_service.submission_consumer[0].name
   }
 
-  alarm_actions = [data.aws_sns_topic.monitoring.arn]
-  ok_actions    = [data.aws_sns_topic.monitoring.arn]
+  alarm_actions = [module.monitoring.sns_notification_channel]
+  ok_actions    = [module.monitoring.sns_notification_channel]
 }

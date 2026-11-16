@@ -408,8 +408,8 @@ locals {
       mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
-    count-submitted-applications = {
-      task_command = ["flask", "task", "count-submitted-applications"]
+    count-submitted-applications-state = {
+      task_command = ["flask", "task", "count-submitted-applications-state"]
       # Every 10 min.
       schedule_expression = "cron(0/10 * * * ? *)"
       state               = local.new-opportunity-notification-state[var.environment]
