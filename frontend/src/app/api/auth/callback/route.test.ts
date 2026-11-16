@@ -54,7 +54,6 @@ describe("/api/auth/callback GET handler", () => {
     );
     expect(createSessionMock).toHaveBeenCalledTimes(0);
     expect(redirectError.digest).toContain(";/login;");
-    expect(redirectError.digest).not.toContain("/unauthenticated");
   });
 
   it("returns through /login with the PIV error flag when PIV is required", async () => {

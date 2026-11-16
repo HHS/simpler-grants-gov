@@ -79,6 +79,26 @@ export const extricateConditionalValidationRules = (
               propertiesWithoutComplexConditionals,
             };
           }
+
+          // Mixed allOf: some entries are conditional (if/then/else) and
+          // others aren't (e.g. an inlined $ref or plain constraints).
+          // Extract just the conditional entries so mergeAllOf never sees a
+          // bare if/then/else, and let the remaining entries continue
+          // through the normal recursive path below.
+          const conditionalEntries = value.filter(isConditionalElement);
+          if (conditionalEntries.length) {
+            conditionalValidationRules[parentPath] = [
+              ...(conditionalValidationRules[parentPath] ?? []),
+              ...conditionalEntries,
+            ];
+            value = value.filter((entry) => !isConditionalElement(entry));
+            if (!value.length) {
+              return {
+                conditionalValidationRules,
+                propertiesWithoutComplexConditionals,
+              };
+            }
+          }
         } else {
           // we got an empty allOf or a non-array allOf, which shouldn't happen
           console.error("malformed schema data: ", key, value);
