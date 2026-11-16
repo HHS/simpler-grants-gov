@@ -8,7 +8,7 @@ import newrelic.agent
 
 logger = logging.getLogger(__name__)
 
-__is_initialized: bool = False
+__is_initialized: bool = False  # pylint: disable=invalid-name
 
 
 def init_newrelic() -> None:
