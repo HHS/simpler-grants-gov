@@ -14,7 +14,6 @@ namespace XSD.GlobLib;
 alias grantsGovXml = Mappings.Target.grantsGovXml;
 alias PersonName = Questions.People.PersonName;
 alias Address = Questions.Types.Address;
-alias Person = Questions.People.Person;
 
 @nsDeclarations
 enum Namespaces {
@@ -82,30 +81,25 @@ model AddressDataTypeV3 {
   country: string;
 }
 
+// Filled from each form's own person model; see the form's xsd.tsp.
 /** `globLib:ContactPersonDataTypeV3` */
 @ns(Namespaces.globLib)
 model ContactPersonDataTypeV3 {
-  @Mapping.from(grantsGovXml, Person.name)
   @name("Name")
   name: HumanNameDataType;
 
-  @Mapping.from(grantsGovXml, Person.title)
   @name("Title")
   title?: string;
 
-  @Mapping.from(grantsGovXml, Person.address)
   @name("Address")
   address: AddressDataTypeV3;
 
-  @Mapping.from(grantsGovXml, Person.phone)
   @name("Phone")
   phone?: string;
 
-  @Mapping.from(grantsGovXml, Person.fax)
   @name("Fax")
   fax?: string;
 
-  @Mapping.from(grantsGovXml, Person.email)
   @name("Email")
   email?: string;
 }

@@ -74,9 +74,9 @@ describe.each(ids)("%s API schema artifact", (id) => {
       expect(schema.$defs[ref.slice("#/$defs/".length)], ref).toBeDefined();
     }
     if (id === "epa-key-contacts") {
-      expect(references.filter((ref) => ref === "#/$defs/person").length).toBe(
-        4,
-      );
+      expect(
+        references.filter((ref) => ref === "#/$defs/EPAContact").length,
+      ).toBe(4);
       expect(schema.$defs["person.name"]).toBeDefined();
       expect(schema.$defs.StateCode).toBeDefined();
     }

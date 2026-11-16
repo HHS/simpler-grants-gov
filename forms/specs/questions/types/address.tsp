@@ -101,3 +101,15 @@ model Address {
   @UI.label("Zip / Postal Code")
   zipCode?: Questions.Types.AddressParts.ZipCode;
 }
+
+/** Enter an address. A US ZIP needs all nine digits. */
+@Meta.question(#{ id: "types/address/zip-plus-four" })
+@UI.label("Address")
+model AddressZipPlusFour is Questions.Types.Address;
+
+@@Validation.constraintsWhen(
+  AddressZipPlusFour.zipCode,
+  AddressZipPlusFour.country,
+  Questions.Types.CountryCode.USA,
+  #{ minLength: 9 }
+);
