@@ -9,3 +9,4 @@ import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
 import "./forms/performance-sites/index.tsp";
 import "./forms/project-abstract/index.tsp";
+import "./forms/ed-abstract-form/index.tsp";

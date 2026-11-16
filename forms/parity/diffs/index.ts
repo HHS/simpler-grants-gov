@@ -1,5 +1,6 @@
 import type { FormDiff } from "../harness/model.ts";
 import { DIFF as budgetNarrative } from "./budget-narrative-attachment-form.ts";
+import { DIFF as edAbstract } from "./ed-abstract-form.ts";
 import { DIFF as epaKeyContacts } from "./epa-key-contacts.ts";
 import { DIFF as keyContacts } from "./key-contacts.ts";
 import { DIFF as nsfKeyPersonExpanded } from "./nsf-senior-key-person-profile-expanded.ts";
@@ -16,6 +17,7 @@ export const DIFFS: FormDiff[] = [
   epaKeyContacts,
   projectNarrative,
   projectAbstract,
+  edAbstract,
   budgetNarrative,
   otherNarrative,
   rrKeyPerson,
