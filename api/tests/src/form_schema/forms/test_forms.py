@@ -111,6 +111,11 @@ EXPECTED_FORM_DATA = {
         "omb_number": "4040-0001",
         "expiration_date": "01/31/2029",
     },
+    828: {
+        "form_name": "NSF Senior/Key Person Profile (Expanded)",
+        "omb_number": "3145-0058",
+        "expiration_date": "11/30/2026",
+    },
 }
 
 
@@ -325,6 +330,18 @@ def test_rr_key_person_generated_v3_0(rr_key_person_generated_v3_0):
 
 def test_rr_key_person_expanded_generated_v4_0(rr_key_person_expanded_generated_v4_0):
     form = rr_key_person_expanded_generated_v4_0
+    expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.omb_number == expected_values["omb_number"]
+    assert (
+        form.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert form.sgg_version == "1.0"
+    assert form.form_instruction_id is not None
+
+
+def test_nsf_key_person_expanded_generated_v3_3(nsf_key_person_expanded_generated_v3_3):
+    form = nsf_key_person_expanded_generated_v3_3
     expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
     assert form.omb_number == expected_values["omb_number"]
     assert (
