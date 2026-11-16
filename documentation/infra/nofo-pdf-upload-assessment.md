@@ -170,16 +170,17 @@ normal review/deployment path; role names are not a new staffing requirement.
   worker count/class/timeout, ALB idle timeout and relevant WAF modes. The source
   values above are not substitutes for effective settings. Do not change WAF,
   worker counts, ALB attributes or infrastructure as part of the test itself.
-- Choose the entry route and obtain explicit authorization for any temporary
-  flag change. Prefer the restricted authenticated PDF route if its permissions,
-  CSRF handling and multipart path are verified equivalent for this question.
-  That does not establish signed-out routing or public WAF behavior. Otherwise
-  obtain Ben's separate approval to enable the public route briefly; that flag
-  makes the public endpoint available to others too, not just the test client.
+- Choose the test mode and obtain explicit authorization for any temporary
+  flag change. Prefer a signed-in upload to `/readability-checker/` with the
+  public switch off and `HHS_NOFO_AUTHENTICATED_PDF_METRICS_PILOT_ENABLED` on:
+  it uses the same handler, CSRF handling, multipart path and WAF rules as a
+  signed-out upload. It does not establish signed-out access behavior. Otherwise
+  obtain Ben's separate approval to enable the public switch briefly; that flag
+  makes the checker available to everyone, not just the test client.
 - Record the exact flag's initial/effective state, who can restore it, a maximum
   **15-minute enabled window**, and the existing escalation path if restoration
   fails. Keep a usable admin session open. There is no automatic timed flag
-  rollback. Verify the public flag stays false if using the authenticated path.
+  rollback. Verify the public flag stays false if testing signed in.
   The first test assumes the selected flag starts off; if it is already on,
   pause and agree its intended restoration state before proceeding.
 - Select an approved restricted evidence location and observer with usable
