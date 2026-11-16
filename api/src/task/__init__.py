@@ -8,6 +8,7 @@ import src.task.notifications.email_notification  # ruff: ignore[unused-import] 
 import src.task.notifications.new_opportunity_notification  # ruff: ignore[unused-import] isort:skip
 import src.task.notifications.process_notification_queue  # ruff: ignore[unused-import] isort:skip
 import src.task.sam_extracts.sam_extract_cli  # ruff: ignore[unused-import] isort:skip
+import src.task.apply.count_submitted_applications_state_task  # ruff: ignore[unused-import] isort:skip
 import src.task.apply.create_application_submission_task  # ruff: ignore[unused-import] isort:skip
 import src.task.generate_internal_token  # ruff: ignore[unused-import] isort:skip
 import src.task.forms.update_form_instruction_task  # ruff: ignore[unused-import] isort:skip
