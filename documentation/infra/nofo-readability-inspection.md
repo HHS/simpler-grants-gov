@@ -54,12 +54,20 @@ through an approved production notification test.
 | Account/service | Expected-account match, desired/running/pending task counts and ECS Exec setting | Access to run commands, health of every request or public enablement |
 | Running tasks | Image version tags and task-definition revisions actually referenced by running tasks; selected recording/retention environment settings; user/root-filesystem/capability/tmpfs declarations | Database-stored Constance flags, effective mounted storage, parser containment or successful cleanup |
 | Load balancer | Whether the associated load balancer’s live idle timeout matches the Terraform declaration | A total upload deadline or a buffering guarantee |
-| WAF | ACL association discovered through the service's target group; pilot rule modes, priorities, threshold/window and IP aggregation; metrics/sampling settings | Exact request matching, actual throttling, emergency block timing or live protection |
+| WAF | ACL association, pilot rule modes and scope, threshold/window and IP aggregation, metrics and sampling settings, and ACL-level data protection | Exact request matching, actual throttling, emergency block timing, or data recorded in logs and samples |
 | Dashboard/alarms | Dashboard widget count; four expected alarm states, thresholds, notification settings and destination counts | Correct rendering, valid threshold selection, recipient identity or delivery |
 | Subscriptions | Email/HTTPS/other subscription counts and pending-confirmation count for the fixed NOFO monitoring topic | That the intended inbox is subscribed, messages arrive or someone responds |
 | Metrics | Datapoint counts in the last hour for ECS CPU/memory and WAF pilot Count/Block series using the observed ACL resource name and rule visibility metric names | Zero traffic when data is absent, full-upload latency, worker occupancy or alarm correctness |
 | Application log configuration | Retention and subscription-filter counts for the running containers' configured log groups | Content redaction, actual forwarding or infrastructure-wide logging coverage |
 | WAF logging configuration (production) | Destination type, whether it is the expected CloudWatch log group, configured redaction field types, whether a WAF logging filter exists, and retention and subscription-filter count for the expected group | Actual log contents, effectiveness of redaction or filtering, access to logs, or retention in downstream systems |
+
+The WAF check reports data protection in both environments using the existing
+ACL read. An empty `data_protections` list means AWS returned no ACL-level data
+protection configuration. Each entry shows a recognized field type and action
+and whether rule-match or rate-based details are excluded from that protection.
+Field key names are omitted. ACL-level sampling is reported alongside the
+existing checker-rule sampling settings. The report covers configuration and
+does not read request samples or firewall log events.
 
 The WAF logging check reads only the expected ACL associated with the production
 service and only looks up retention and forwarding configuration for the expected

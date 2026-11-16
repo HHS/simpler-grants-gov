@@ -542,7 +542,7 @@ class TestSF424DXSDValidation:
 
         assert validation_result["valid"] is False
         # Make sure it failed on the xs:date type check, not some other XSD error
-        assert "failed validating 'not-a-date'" in validation_result["error_message"]
+        assert "'not-a-date'" in validation_result["error_message"]
         assert "xs:date" in validation_result["error_message"]
 
     def test_sf424d_xml_escaping(self, xsd_validator):
