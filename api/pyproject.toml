@@ -3,10 +3,10 @@ name = "simpler-grants-gov-api"
 version = "0.1.0"
 description = "Back end API for simpler.grants.gov"
 authors = [{ name = "Nava Engineering", email = "engineering@navapbc.com" }]
-requires-python = ">=3.14,<3.15"
+requires-python = ">=3.15,<3.16"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
     "SQLAlchemy[mypy]>=2.0.21,<3",
@@ -30,13 +30,13 @@ dependencies = [
     "jinja2>=3.1.5",
     "tenacity>=8.0,<9",
     "jsonschema[format-nongpl]>=4.23.0,<5",
-    "pandas>=2.0.3,<3",
-    "pandas-stubs>=2.0.2.230605,<3",
+    "pandas>=3.0.6,<4",
+    "pandas-stubs>=3.0.0,<4",
     "xlrd>=2.0.1,<3",
     "defusedxml>=0.7.1,<0.8",
     "xmltodict>=1.0.0,<2",
     "lxml>=6.0.0,<7",
-    "xmlschema>=3.4.0,<4",
+    "xmlschema>=4.3.0,<5",
     "docraptor>=3.0.0,<4",
     "jsonpath-ng>=1.7.0,<2",
     "prettytable>=3.16.0,<4",
@@ -119,7 +119,7 @@ line-length = 100
 preview = true
 
 
-target-version = "py314"
+target-version = "py315"
 
 [tool.ruff.lint]
 # See: https://docs.astral.sh/ruff/rules/ for all possible rules
