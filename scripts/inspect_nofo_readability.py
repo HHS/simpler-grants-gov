@@ -259,6 +259,40 @@ def scope_matches(statement, key):
     )
 
 
+def waf_data_protection(acl):
+    if "DataProtectionConfig" not in acl:
+        return []
+    config = acl["DataProtectionConfig"]
+    protections = config.get("DataProtections") if isinstance(config, dict) else None
+    if not isinstance(protections, list) or not protections:
+        raise InspectionError("invalid_waf_data_protection_configuration")
+
+    field_types = {
+        "BODY",
+        "QUERY_STRING",
+        "SINGLE_QUERY_ARGUMENT",
+        "SINGLE_HEADER",
+        "SINGLE_COOKIE",
+    }
+    summary = []
+    for protection in protections:
+        field = protection["Field"]["FieldType"]
+        action = protection["Action"]
+        summary.append(
+            {
+                "field_type": field if field in field_types else "other",
+                "action": action if action in {"HASH", "SUBSTITUTION"} else "other",
+                "exclude_rule_match_details": (
+                    protection.get("ExcludeRuleMatchDetails") is True
+                ),
+                "exclude_rate_based_details": (
+                    protection.get("ExcludeRateBasedDetails") is True
+                ),
+            }
+        )
+    return summary
+
+
 def waf_summary(acl):
     rules = acl.get("Rules", [])
     selected = {}
@@ -302,6 +336,10 @@ def waf_summary(acl):
     priorities = [r["priority"] for r in selected.values()]
     return {
         "rules": selected,
+        "data_protections": waf_data_protection(acl),
+        "web_acl_sampling_enabled": acl.get("VisibilityConfig", {}).get(
+            "SampledRequestsEnabled"
+        ) is True,
         "pilot_rules_before_other_rules": (
             all(type(p) is int for p in [*priorities, *others])
             and all(p < other for p in priorities for other in others)
