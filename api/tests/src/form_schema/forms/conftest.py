@@ -14,6 +14,7 @@ from src.form_schema.forms import (
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
     OtherNarrativeAttachment_v1_2,
+    PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
@@ -191,6 +192,23 @@ def attachment_form_v1_2():
     return setup_resolved_form(AttachmentForm_v1_2)
 
 
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectPerformanceSiteLocation_v4_0, id="handwritten"),
+        pytest.param(PerformanceSitesGenerated_v4_0, id="generated"),
+    ],
+)
+def project_performance_site_location_v4_0(request):
+    """Each Performance Sites form: the hand-written one and the one generated from forms/specs."""
+    return setup_resolved_form(request.param)
+
+
 @pytest.fixture(scope="session")
-def project_performance_site_location_v4_0():
+def project_performance_site_location_handwritten_v4_0():
     return setup_resolved_form(ProjectPerformanceSiteLocation_v4_0)
+
+
+@pytest.fixture(scope="session")
+def performance_sites_generated_v4_0():
+    return setup_resolved_form(PerformanceSitesGenerated_v4_0)

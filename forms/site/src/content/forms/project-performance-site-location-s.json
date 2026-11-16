@@ -182,7 +182,7 @@
     },
     {
       "kind": "section",
-      "label": "Other project/performance sites",
+      "label": "Additional Project/Performance Site Location(s)",
       "widget": "FieldListWidget",
       "children": [
         {

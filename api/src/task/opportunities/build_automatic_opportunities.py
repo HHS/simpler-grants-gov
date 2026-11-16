@@ -39,6 +39,7 @@ from src.form_schema.forms import (
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
     OtherNarrativeAttachment_v1_2,
+    PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
@@ -654,6 +655,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Project Performance Site Location(s)",
                 ProjectPerformanceSiteLocation_v4_0.form_id,
                 "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
+            ),
+            (
+                "E2E-PPSLG",
+                "Project Performance Site Location(s) (Generated)",
+                PerformanceSitesGenerated_v4_0.form_id,
+                "4b585a14-ab56-42c1-a01f-78eba5b93d97",
             ),
             (
                 "E2E-SF424",

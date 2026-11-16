@@ -10,12 +10,7 @@ from typing import Any
 import pytest
 from lxml import etree as lxml_etree
 
-from src.form_schema.forms.project_performance_site_location import (
-    FORM_XML_TRANSFORM_RULES as PERFORMANCE_SITE_TRANSFORM_RULES,
-)
-from src.form_schema.forms.project_performance_site_location import (
-    ProjectPerformanceSiteLocation_v4_0,
-)
+from src.form_schema.forms import performance_sites_generated, project_performance_site_location
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -33,6 +28,28 @@ from tests.src.db.models.factories import (
 )
 
 _FORM_NS = "http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0"
+
+# The hand-written form and the one generated from forms/specs write the same XML.
+PERFORMANCE_SITE_FORMS = [
+    pytest.param(
+        (
+            project_performance_site_location.ProjectPerformanceSiteLocation_v4_0,
+            project_performance_site_location.FORM_XML_TRANSFORM_RULES,
+        ),
+        id="handwritten",
+    ),
+    pytest.param(
+        (performance_sites_generated.FORM, performance_sites_generated.FORM_XML_TRANSFORM_RULES),
+        id="generated",
+    ),
+]
+
+
+@pytest.fixture(params=PERFORMANCE_SITE_FORMS)
+def performance_site_form(request):
+    """A Performance Sites form and the rules it writes its XML with."""
+    return request.param
+
 
 _US_SITE = {
     "submitting_as_individual": False,
@@ -76,11 +93,15 @@ _INDIVIDUAL_US_SITE = {
 class TestPerformanceSiteXMLGeneration:
     """Unit tests for Performance Site XML generation (no DB required)."""
 
+    @pytest.fixture(autouse=True)
+    def _use_performance_site_form(self, performance_site_form):
+        self.form, self.transform_rules = performance_site_form
+
     def _generate(self, data: dict) -> str:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=data,
-            transform_config=PERFORMANCE_SITE_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
         )
         response = service.generate_xml(request)
         assert response.success is True, response.error_message
@@ -182,11 +203,13 @@ class TestPerformanceSiteLegacyParity:
         </PerformanceSite_4_0:PerformanceSite_4_0>
     """
 
+    @pytest.fixture(autouse=True)
+    def _use_performance_site_form(self, performance_site_form):
+        self.form, self.transform_rules = performance_site_form
+
     def _generate(self, data: dict[str, Any]) -> lxml_etree._Element:
         service = XMLGenerationService()
-        request = XMLGenerationRequest(
-            application_data=data, transform_config=PERFORMANCE_SITE_TRANSFORM_RULES
-        )
+        request = XMLGenerationRequest(application_data=data, transform_config=self.transform_rules)
         response = service.generate_xml(request)
         assert response.success, f"XML generation failed: {response.error_message}"
         return lxml_etree.fromstring(response.xml_data.encode())
@@ -197,7 +220,7 @@ class TestPerformanceSiteLegacyParity:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=data,
-            transform_config=PERFORMANCE_SITE_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
             attachment_mapping={attachment_uuid: attachment_info},
         )
         response = service.generate_xml(request)
@@ -324,6 +347,10 @@ class TestPerformanceSiteSnapshot:
     input below and write the result to the snapshot file.
     """
 
+    @pytest.fixture(autouse=True)
+    def _use_performance_site_form(self, performance_site_form):
+        self.form, self.transform_rules = performance_site_form
+
     def test_full_xml_matches_snapshot(self):
         """Generated XML for a comprehensive case must match the stored snapshot."""
         data = {
@@ -334,7 +361,7 @@ class TestPerformanceSiteSnapshot:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=data,
-            transform_config=PERFORMANCE_SITE_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
             attachment_mapping={_ATTACHMENT_UUID: _ATTACHMENT_INFO},
         )
         response = service.generate_xml(request)
@@ -346,6 +373,10 @@ class TestPerformanceSiteSnapshot:
 
 class TestPerformanceSiteXSDValidation:
     """XSD validation tests for Performance Site Location form XML."""
+
+    @pytest.fixture(autouse=True)
+    def _use_performance_site_form(self, performance_site_form):
+        self.form, self.transform_rules = performance_site_form
 
     @pytest.fixture
     def xsd_validator(self):
@@ -387,7 +418,7 @@ class TestPerformanceSiteXSDValidation:
             opportunity_assistance_listing=assistance_listing,
             competition_forms=[],
         )
-        form = ProjectPerformanceSiteLocation_v4_0
+        form = self.form
         application = ApplicationFactory.create(competition=competition)
         competition_form = CompetitionFormFactory.create(competition=competition, form=form)
         ApplicationFormFactory.create(

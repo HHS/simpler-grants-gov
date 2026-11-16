@@ -289,3 +289,14 @@ def test_project_performance_site_location_v4_0(project_performance_site_locatio
         project_performance_site_location_v4_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
+    assert project_performance_site_location_v4_0.sgg_version == "1.0"
+    assert project_performance_site_location_v4_0.form_instruction_id is not None
+
+
+def test_performance_sites_forms_have_distinct_instructions(
+    project_performance_site_location_handwritten_v4_0, performance_sites_generated_v4_0
+):
+    assert (
+        project_performance_site_location_handwritten_v4_0.form_instruction_id
+        != performance_sites_generated_v4_0.form_instruction_id
+    )
