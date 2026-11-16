@@ -1,4 +1,6 @@
+import { readError } from "src/errors";
 import { getSession, refreshSession } from "src/services/auth/session";
+import { getCorrelationId } from "src/services/correlationId/correlationId";
 import { logger } from "src/services/logger/simplerLogger";
 import { UserProfile, UserSession } from "src/types/authTypes";
 import { isExpiring } from "src/utils/dateUtil";
@@ -19,7 +21,20 @@ export async function getUserSession(): Promise<NextResponse> {
         const refreshedSession = await refreshSession(currentSession.token);
         return NextResponse.json(toUserProfile(refreshedSession));
       } catch (e) {
-        logger.error({ err: e }, "Unable to refresh expiring token");
+        const { status } = readError(e as Error, 500);
+        logger.error(
+          {
+            err: e,
+            ...(status !== 401 &&
+              status !== 403 && {
+                event: "authentication_request_failed",
+                correlation_id: await getCorrelationId(),
+                authRequest: "session_refresh",
+                status,
+              }),
+          },
+          "Unable to refresh expiring token",
+        );
       }
     }
     return NextResponse.json(toUserProfile(currentSession));

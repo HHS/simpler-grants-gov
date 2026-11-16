@@ -532,4 +532,68 @@ describe("extricateConditionalValidationRules", () => {
       ],
     });
   });
+  it("handles an allOf that mixes conditional and non-conditional entries", () => {
+    // mirrors the shape emitted for the sf424_generated form's $defs.address,
+    // where a dereferenced $ref sits alongside if/then conditionals in the
+    // same allOf array
+    const withMixedAllOf = {
+      address: {
+        type: "object",
+        allOf: [
+          {
+            type: "object",
+            properties: {
+              street1: { type: "string" },
+            },
+          },
+          {
+            if: {
+              properties: { country: { const: "USA" } },
+              required: ["country"],
+            },
+            then: { required: ["state"] },
+          },
+          {
+            if: {
+              properties: { country: { const: "CAN" } },
+              required: ["country"],
+            },
+            then: { required: ["province"] },
+          },
+        ],
+      },
+    };
+    const result = extricateConditionalValidationRules(withMixedAllOf);
+    expect(result.propertiesWithoutComplexConditionals).toEqual({
+      address: {
+        type: "object",
+        allOf: [
+          {
+            type: "object",
+            properties: {
+              street1: { type: "string" },
+            },
+          },
+        ],
+      },
+    });
+    expect(result.conditionalValidationRules).toEqual({
+      address: [
+        {
+          if: {
+            properties: { country: { const: "USA" } },
+            required: ["country"],
+          },
+          then: { required: ["state"] },
+        },
+        {
+          if: {
+            properties: { country: { const: "CAN" } },
+            required: ["country"],
+          },
+          then: { required: ["province"] },
+        },
+      ],
+    });
+  });
 });

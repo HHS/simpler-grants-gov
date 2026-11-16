@@ -136,7 +136,6 @@ describe("isSafeLoginRedirect / getSafeLoginRedirect", () => {
     "/logout",
     "/logout/callback",
     "/maintenance",
-    "/unauthenticated",
     "/error",
     "/api",
     "/api/foo",

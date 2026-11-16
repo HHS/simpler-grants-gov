@@ -290,6 +290,52 @@ describe("ApplyForm", () => {
     const selectField = screen.getByTestId("Select");
     expect(selectField).toBeDisabled();
   });
+  it("renders the body with JSON Forms when given a JSON Forms ui schema, keeping the shared shell", () => {
+    const jsonFormsUiSchema = {
+      type: "Group",
+      label: "test schema",
+      elements: [
+        {
+          type: "Group",
+          label: "Applicant info",
+          elements: [{ type: "Control", scope: "#/properties/name" }],
+        },
+      ],
+    };
+
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={[
+          {
+            type: "section",
+            label: "Applicant info",
+            name: "applicant-info",
+            children: [{ type: "field", definition: "/properties/name" }],
+          },
+        ]}
+        jsonFormsUiSchema={jsonFormsUiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+      />,
+    );
+
+    const nameField = screen.getByTestId("name");
+    expect(nameField).toHaveAttribute("name", "name");
+    expect(nameField).toHaveValue("myself");
+    expect(nameField).toBeRequired();
+    expect(screen.queryByTestId("dob")).not.toBeInTheDocument();
+
+    expect(screen.getByTestId("apply-form-save")).toBeInTheDocument();
+    expect(screen.getByTestId("InPageNavigation")).toHaveTextContent(
+      "Applicant info",
+    );
+  });
+
   it("displays created message when updatedAt is missing", () => {
     const timestamp = "2026-06-27T12:34:56.000Z";
 

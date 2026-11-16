@@ -17,14 +17,16 @@ from tests.src.db.models.factories import UserApiKeyFactory
 
 @pytest.fixture
 def nullable_key_id_hash(db_session, test_api_schema):
-    """Allow key_id_hash to be NULL so rows can be set up as they were before the backfill.
+    """Put user_api_key back the way it was before the backfill: a plaintext key_id
+    column and a nullable key_id_hash.
 
-    Test schemas are built from SQLAlchemy metadata, where key_id_hash is NOT NULL.
-    Drop the constraint for the test and restore it afterwards so the session-scoped
-    schema is left as the other tests expect it.
+    Test schemas are built from SQLAlchemy metadata, which no longer has key_id and
+    has key_id_hash NOT NULL. Change the table for the test and restore it afterwards
+    so the session-scoped schema is left as the other tests expect it.
     """
     table = f"{test_api_schema}.user_api_key"
 
+    db_session.execute(text(f"ALTER TABLE {table} ADD COLUMN key_id TEXT"))
     db_session.execute(text(f"ALTER TABLE {table} ALTER COLUMN key_id_hash DROP NOT NULL"))
     db_session.commit()
 
@@ -33,6 +35,7 @@ def nullable_key_id_hash(db_session, test_api_schema):
     # Only leftover if a test failed before the backfill ran
     db_session.execute(delete(UserApiKey).where(UserApiKey.key_id_hash.is_(None)))
     db_session.execute(text(f"ALTER TABLE {table} ALTER COLUMN key_id_hash SET NOT NULL"))
+    db_session.execute(text(f"ALTER TABLE {table} DROP COLUMN key_id"))
     db_session.commit()
 
 

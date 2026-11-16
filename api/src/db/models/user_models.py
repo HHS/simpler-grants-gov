@@ -361,6 +361,10 @@ class OrganizationUser(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User, back_populates="organization_users", uselist=False)
 
+    # Whether the user is an external collaborator (for example a consultant) rather than
+    # staff of the organization
+    is_external: Mapped[bool] = mapped_column(default=False, server_default="false")
+
     @property
     def roles(self) -> list[Role]:
         return [our.role for our in self.organization_user_roles]

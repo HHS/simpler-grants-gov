@@ -42,9 +42,9 @@ describe("POST /api/events", () => {
     expect(response.status).toBe(200);
     expect(loggerInfoMock).toHaveBeenCalledTimes(1);
     expect(loggerInfoMock).toHaveBeenCalledWith({
-      correlationId,
+      correlation_id: correlationId,
       event: "click_legacy_opportunity_link",
-      properties: { opportunityId: 123 },
+      opportunityId: 123,
     });
   });
 
@@ -56,9 +56,8 @@ describe("POST /api/events", () => {
     expect(response.status).toBe(200);
     expect(loggerInfoMock).toHaveBeenCalledTimes(1);
     expect(loggerInfoMock).toHaveBeenCalledWith({
-      correlationId: undefined,
+      correlation_id: undefined,
       event: "opportunity_saved",
-      properties: undefined,
     });
   });
 

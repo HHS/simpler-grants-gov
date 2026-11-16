@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from src.constants.lookup_constants import Privilege
-from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
+from src.constants.static_role_values import NON_CORE_ROLES, ORG_ADMIN, ORG_MEMBER
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
 from tests.src.db.models.factories import OrganizationFactory
 
@@ -22,6 +22,11 @@ def test_list_organization_roles(client, db_session, enable_factory_create):
     assert len(data) >= 2
     # assert core_roles are listed
     assert {str(ORG_ADMIN.role_id), str(ORG_MEMBER.role_id)}.issubset(
+        {role["role_id"] for role in data}
+    )
+    # assert non-core roles (Collaborator and the granular application roles)
+    # are not in the selectable list
+    assert {str(role.role_id) for role in NON_CORE_ROLES}.isdisjoint(
         {role["role_id"] for role in data}
     )
 

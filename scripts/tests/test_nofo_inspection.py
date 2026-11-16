@@ -18,6 +18,8 @@ SPEC = importlib.util.spec_from_file_location(
 m = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(m)
 MARKER = "PRIVATE-DOCUMENT-RECIPIENT-SECRET"
+PROD_ACL_ARN = m.PROD_WAF_ARN_PREFIX + "12345678-1234-1234-1234-123456789abc"
+PROD_LOG_ARN = f"arn:aws:logs:{m.REGION}:{m.PROD_ACCOUNT}:log-group:{m.PROD_WAF_LOG_GROUP}"
 
 
 def definition(revision=2):
@@ -174,6 +176,7 @@ class InspectionTests(unittest.TestCase):
         for value in (MARKER, "private.registry", "task-definition/test", "SECRET_KEY"):
             self.assertNotIn(value, serialized)
         self.assertTrue(all((s, op) in m.READ_OPERATIONS for s, op, _ in aws.calls))
+        self.assertFalse(any(op == "get-logging-configuration" for _, op, _ in aws.calls))
         # A rolling deployment must report the actual running definition (2),
         # rather than claim the service's newly configured definition (3) is running.
         task = next(r for r in results if r["check"] == "tasks")
@@ -308,10 +311,46 @@ class InspectionTests(unittest.TestCase):
         aws = FakeAws({
             ("sts", "get-caller-identity"): {"Account": m.PROD_ACCOUNT},
             ("ecs", "describe-task-definition"): {"taskDefinition": container},
+            ("wafv2", "get-web-acl-for-resource"): {"WebACL": {**acl(), "ARN": PROD_ACL_ARN}},
+            ("wafv2", "get-logging-configuration"): {
+                "LoggingConfiguration": {
+                    "ResourceArn": PROD_ACL_ARN,
+                    "LogDestinationConfigs": [PROD_LOG_ARN + ":*"],
+                    "RedactedFields": [{"SingleHeader": {"Name": MARKER}}, {"QueryString": {}}],
+                    "LoggingFilter": {"Filters": [{"Behavior": "KEEP", "Name": MARKER}]},
+                },
+            },
+            ("logs", "describe-log-groups"): {
+                "logGroups": [
+                    {"logGroupName": MARKER, "retentionInDays": 30},
+                    {"logGroupName": m.PROD_WAF_LOG_GROUP, "retentionInDays": 1827},
+                ],
+            },
         })
         result = m.Inspector(aws, "prod").run()
         self.assertTrue(result[0]["details"]["expected_account"])
         self.assertEqual(next(r for r in result if r["check"] == "tasks")["status"], "observed")
+        self.assertEqual(
+            result[-1],
+            {
+                "check": "waf_logging",
+                "status": "observed",
+                "details": {
+                    "destination_type": "cloudwatch_logs",
+                    "expected_log_group": True,
+                    "redacted_field_types": ["query_string", "single_header"],
+                    "logging_filter_configured": True,
+                    "log_contents_inspected": False,
+                    "complete": True,
+                    "retention_days": 1827,
+                    "subscription_filter_count": 1,
+                },
+            },
+        )
+        self.assertIn(
+            ("wafv2", "get-logging-configuration", ("--resource-arn", PROD_ACL_ARN)),
+            aws.calls,
+        )
         self.assertIn(
             ("ecs", "describe-services", ("--cluster", m.PROD_SERVICE, "--services", m.PROD_SERVICE)),
             aws.calls,
@@ -324,6 +363,53 @@ class InspectionTests(unittest.TestCase):
             aws.calls,
         )
         self.assertNotIn(MARKER, json.dumps(result))
+        self.assertNotIn(PROD_ACL_ARN, json.dumps(result))
+        self.assertNotIn(m.PROD_WAF_LOG_GROUP, json.dumps(result))
+
+    def test_waf_logging_does_not_follow_unexpected_destinations(self):
+        for destination, category in (
+            (f"arn:aws:logs:{m.REGION}:{m.ACCOUNT}:log-group:{m.PROD_WAF_LOG_GROUP}", "cloudwatch_logs"),
+            (f"arn:aws:s3:::{MARKER}", "s3"),
+        ):
+            with self.subTest(category=category):
+                aws = FakeAws({
+                    ("wafv2", "get-logging-configuration"): {
+                        "LoggingConfiguration": {
+                            "ResourceArn": PROD_ACL_ARN,
+                            "LogDestinationConfigs": [destination],
+                        },
+                    },
+                })
+                inspector = m.Inspector(aws, "prod")
+                inspector.waf_arn = PROD_ACL_ARN
+                details = inspector.check("waf_logging", inspector.waf_logging)
+                self.assertEqual(inspector.results[0]["status"], "incomplete")
+                self.assertEqual(details["destination_type"], category)
+                self.assertFalse(details["expected_log_group"])
+                self.assertNotIn("retention_days", details)
+                self.assertNotIn(destination, json.dumps(inspector.results))
+                self.assertEqual(len(aws.calls), 1)
+
+    def test_waf_logging_read_failures_are_explicit(self):
+        for response, status in (
+            (m.InspectionError("access_denied"), "access_denied"),
+            (m.InspectionError("not_found"), "not_found"),
+            ({"LoggingConfiguration": {"ResourceArn": MARKER}}, "invalid_waf_logging_configuration"),
+        ):
+            with self.subTest(status=status):
+                aws = FakeAws({("wafv2", "get-logging-configuration"): response})
+                inspector = m.Inspector(aws, "prod")
+                inspector.waf_arn = PROD_ACL_ARN
+                inspector.check("waf_logging", inspector.waf_logging)
+                self.assertEqual(inspector.results, [{"check": "waf_logging", "status": status}])
+                self.assertEqual(len(aws.calls), 1)
+
+        aws = FakeAws()
+        inspector = m.Inspector(aws, "prod")
+        inspector.waf_arn = MARKER
+        inspector.check("waf_logging", inspector.waf_logging)
+        self.assertEqual(inspector.results[0]["status"], "expected_web_acl_not_discovered")
+        self.assertEqual(aws.calls, [])
 
     def test_wrong_account_stops_before_resource_queries(self):
         aws = FakeAws({("sts", "get-caller-identity"): {"Account": "wrong"}})
@@ -516,14 +602,24 @@ class InspectionTests(unittest.TestCase):
         policy = json.loads(
             (ROOT / "scripts/nofo_inspection_session_policy.json").read_text()
         )
-        self.assertEqual(len(policy["Statement"]), 1)
-        statement = policy["Statement"][0]
+        statement, waf_logging = policy["Statement"]
         self.assertEqual(statement["Effect"], "Allow")
+        self.assertEqual(statement["Resource"], "*")
         self.assertEqual(
-            set(statement["Action"]),
+            waf_logging,
+            {
+                "Effect": "Allow",
+                "Action": ["wafv2:GetLoggingConfiguration"],
+                "Resource": m.PROD_WAF_ARN_PREFIX + "*",
+            },
+        )
+        actions = statement["Action"] + waf_logging["Action"]
+        self.assertEqual(
+            set(actions),
             set(m.READ_OPERATIONS.values()) | m.DEPENDENT_READ_ACTIONS,
         )
-        self.assertFalse(any("*" in action for action in statement["Action"]))
+        self.assertEqual(len(actions), len(set(actions)))
+        self.assertFalse(any("*" in action for action in actions))
         workflow = (ROOT / ".github/workflows/inspect-nofo-readability.yml").read_text()
         self.assertIn(
             "inline-session-policy: ${{ steps.policy.outputs.json }}", workflow
@@ -544,6 +640,7 @@ class InspectionTests(unittest.TestCase):
             for service, op in (
                 ("ecs", "stop-task"),
                 ("wafv2", "update-web-acl"),
+                ("wafv2", "put-logging-configuration"),
                 ("sns", "publish"),
                 ("logs", "get-log-events"),
                 ("ssm", "get-parameter"),

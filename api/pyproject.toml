@@ -206,7 +206,6 @@ allowed-confusables = [
 # us format information better.
 "tool/console/interactive.py" = ["print"]
 "tests/lib/seed_local_soap_certificate.py" = ["print"]
-"src/task/forms/list_forms_task.py" = ["print"]
 "src/form_schema/dat_to_jsonschema_cli.py" = ["print"]
 
 

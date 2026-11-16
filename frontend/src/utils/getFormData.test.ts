@@ -7,10 +7,12 @@ const mockProcessFormSchema = jest.fn();
 const mockValidateUISchema = jest.fn();
 const mockGetApplicationFormDetailsForPrint = jest.fn();
 const mockLoggerError = jest.fn();
+const mockLoggerWarn = jest.fn();
 
 jest.mock("src/services/logger/simplerLogger", () => ({
   logger: {
     error: (...args: unknown[]) => mockLoggerError(...args) as unknown,
+    warn: (...args: unknown[]) => mockLoggerWarn(...args) as unknown,
   },
 }));
 
@@ -328,6 +330,7 @@ describe("getFormData", () => {
         formName: "Test",
         formSchema: {},
         formUiSchema: {},
+        formRenderer: "sgg",
         formValidationWarnings: [],
         createdAt: "2024-01-01T12:00:00Z",
         updatedAt: "2024-01-15T14:30:00Z",
@@ -382,10 +385,77 @@ describe("getFormData", () => {
         formName: "Test",
         formSchema: {},
         formUiSchema: {},
+        formRenderer: "sgg",
         formValidationWarnings: [],
         createdAt: "2024-01-01T12:00:00Z",
         updatedAt: "2024-01-15T14:30:00Z",
       },
+    });
+  });
+
+  describe("a form rendered with JSON Forms", () => {
+    const formSchema = {
+      type: "object",
+      properties: {
+        title: { type: "string", title: "Title" },
+      },
+    };
+    const jsonFormsUiSchema = {
+      type: "Group",
+      label: "Test",
+      elements: [
+        {
+          type: "Group",
+          label: "Project Details",
+          elements: [
+            { type: "Control", scope: "#/properties/title" },
+            { type: "Control", scope: "#/properties/missing" },
+          ],
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      mockGetSession.mockResolvedValue({ token: "session-token" });
+      mockProcessFormSchema.mockReturnValue({
+        formSchema,
+        conditionalValidationRules: {},
+      });
+      mockGetApplicationFormDetails.mockResolvedValue({
+        status_code: 200,
+        data: {
+          form: {
+            form_id: "form1",
+            form_name: "Test",
+            form_json_schema: formSchema,
+            form_ui_schema: jsonFormsUiSchema,
+            form_renderer: "jsonforms",
+          },
+          application_form_id: "form1",
+          application_response: {},
+          application_name: "cool application",
+          application_attachments: [],
+        },
+        warnings: [],
+      });
+    });
+
+    it("returns the JSON Forms ui schema alongside its section/field equivalent", async () => {
+      const result = await getFormData({
+        applicationId: "app1",
+        appFormId: "form1",
+      });
+
+      expect(result.data?.formRenderer).toEqual("jsonforms");
+      expect(result.data?.jsonFormsUiSchema).toEqual(jsonFormsUiSchema);
+      expect(result.data?.formUiSchema).toEqual([
+        {
+          type: "section",
+          name: "project-details",
+          label: "Project Details",
+          children: [{ type: "field", definition: "/properties/title" }],
+        },
+      ]);
     });
   });
 });

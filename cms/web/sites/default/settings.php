@@ -6,7 +6,7 @@
  *
  * Every environment-specific value comes from an environment variable so the
  * same image runs locally, in CI and in each AWS environment. Local values
- * live in cms/local.env. See default.settings.php for every available setting.
+ * live in cms/.env.development. See default.settings.php for every available setting.
  */
 
 $databases['default']['default'] = [

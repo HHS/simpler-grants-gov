@@ -15,6 +15,10 @@ PROD_ACCOUNT = "315341936575"
 PROD_SERVICE = "nofos-prod"
 REGION = "us-east-1"
 SERVICE = "nofos-infra-dev"
+PROD_WAF_ARN_PREFIX = (
+    f"arn:aws:wafv2:{REGION}:{PROD_ACCOUNT}:regional/webacl/{PROD_SERVICE}-wafv2-web-acl/"
+)
+PROD_WAF_LOG_GROUP = f"aws-waf-logs-wafv2-web-acl-{PROD_SERVICE}"
 RULES = {
     "emergency": "NOFO-PDFReadability-EmergencyBlock",
     "upload_rate": "NOFO-PDFReadability-UploadRate",
@@ -37,6 +41,7 @@ READ_OPERATIONS = {
     ),
     ("elbv2", "describe-target-groups"): "elasticloadbalancing:DescribeTargetGroups",
     ("wafv2", "get-web-acl-for-resource"): "wafv2:GetWebACLForResource",
+    ("wafv2", "get-logging-configuration"): "wafv2:GetLoggingConfiguration",
     ("cloudwatch", "get-dashboard"): "cloudwatch:GetDashboard",
     ("cloudwatch", "describe-alarms"): "cloudwatch:DescribeAlarms",
     ("cloudwatch", "get-metric-statistics"): "cloudwatch:GetMetricStatistics",
@@ -453,6 +458,7 @@ class Inspector:
         if not isinstance(web_acl_name, str) or not web_acl_name:
             raise InspectionError("web_acl_name_missing")
         self.waf_web_acl_name = web_acl_name
+        self.waf_arn = acl.get("ARN")
         self.rule_metrics = {
             key: next(
                 (
@@ -598,42 +604,85 @@ class Inspector:
                 result[key + "_metric_query"] = {"status": "metric_name_missing"}
         return result
 
+    def log_group_summary(self, group):
+        data = self.aws.get(
+            "logs", "describe-log-groups", "--log-group-name-prefix", group, "--no-paginate"
+        )
+        matches = [g for g in data.get("logGroups", []) if g.get("logGroupName") == group]
+        if len(matches) != 1:
+            raise InspectionError("log_group_not_found")
+        filters = self.aws.get(
+            "logs", "describe-subscription-filters", "--log-group-name", group, "--no-paginate"
+        )
+        if filters.get("nextToken"):
+            raise InspectionError("log_subscriptions_truncated")
+        return {
+            "retention_days": number(matches[0].get("retentionInDays")),
+            "subscription_filter_count": len(filters.get("subscriptionFilters", [])),
+        }
+
     def logs(self):
         groups = getattr(self, "log_groups", set())
         if not groups:
             raise InspectionError("log_group_not_discovered")
-        summaries = []
-        for group in sorted(groups):
-            data = self.aws.get(
-                "logs",
-                "describe-log-groups",
-                "--log-group-name-prefix",
-                group,
-                "--no-paginate",
-            )
-            matches = [
-                g for g in data.get("logGroups", []) if g.get("logGroupName") == group
-            ]
-            if len(matches) != 1:
-                raise InspectionError("log_group_not_found")
-            filters = self.aws.get(
-                "logs",
-                "describe-subscription-filters",
-                "--log-group-name",
-                group,
-                "--no-paginate",
-            )
-            if filters.get("nextToken"):
-                raise InspectionError("log_subscriptions_truncated")
-            summaries.append(
-                {
-                    "retention_days": number(matches[0].get("retentionInDays")),
-                    "subscription_filter_count": len(
-                        filters.get("subscriptionFilters", [])
-                    ),
-                }
-            )
-        return {"groups": summaries, "log_contents_inspected": False}
+        return {
+            "groups": [self.log_group_summary(group) for group in sorted(groups)],
+            "log_contents_inspected": False,
+        }
+
+    def waf_logging(self):
+        acl_arn = getattr(self, "waf_arn", "")
+        if not isinstance(acl_arn, str) or not acl_arn.startswith(PROD_WAF_ARN_PREFIX):
+            raise InspectionError("expected_web_acl_not_discovered")
+        config = self.aws.get(
+            "wafv2", "get-logging-configuration", "--resource-arn", acl_arn
+        ).get("LoggingConfiguration")
+        if not isinstance(config, dict) or config.get("ResourceArn") != acl_arn:
+            raise InspectionError("invalid_waf_logging_configuration")
+
+        destinations = config.get("LogDestinationConfigs")
+        redactions = config.get("RedactedFields", [])
+        logging_filter = config.get("LoggingFilter", {})
+        if (
+            not isinstance(destinations, list)
+            or len(destinations) != 1
+            or not isinstance(destinations[0], str)
+            or not destinations[0]
+            or not isinstance(redactions, list)
+            or not all(isinstance(field, dict) for field in redactions)
+            or not isinstance(logging_filter, dict)
+        ):
+            raise InspectionError("invalid_waf_logging_configuration")
+
+        destination = destinations[0]
+        arn_prefix = tuple(destination.split(":", 3)[:3])
+        destination_type = {
+            ("arn", "aws", "logs"): "cloudwatch_logs",
+            ("arn", "aws", "s3"): "s3",
+            ("arn", "aws", "firehose"): "firehose",
+        }.get(arn_prefix, "other")
+        expected = f"arn:aws:logs:{REGION}:{PROD_ACCOUNT}:log-group:{PROD_WAF_LOG_GROUP}"
+        matches = destination in {expected, f"{expected}:*"}
+        details = {
+            "destination_type": destination_type,
+            "expected_log_group": matches,
+            "redacted_field_types": [
+                label
+                for key, label in (
+                    ("Method", "method"),
+                    ("QueryString", "query_string"),
+                    ("SingleHeader", "single_header"),
+                    ("UriPath", "uri_path"),
+                )
+                if any(key in field for field in redactions)
+            ],
+            "logging_filter_configured": bool(logging_filter),
+            "log_contents_inspected": False,
+            "complete": matches,
+        }
+        if matches:
+            details.update(self.log_group_summary(PROD_WAF_LOG_GROUP))
+        return details
 
     def run(self):
         identity = self.check(
@@ -659,6 +708,8 @@ class Inspector:
             "logs",
         ):
             self.check(name, getattr(self, name))
+        if self.service_name == PROD_SERVICE:
+            self.check("waf_logging", self.waf_logging)
         return self.results
 
 
@@ -696,7 +747,7 @@ def main(environment="infra-dev"):
             stream.write(summary)
     return (
         0
-        if len(results) == 10
+        if len(results) == (11 if environment == "prod" else 10)
         and all(r["status"] == "observed" for r in results)
         and results[0]["details"]["expected_account"]
         else 1

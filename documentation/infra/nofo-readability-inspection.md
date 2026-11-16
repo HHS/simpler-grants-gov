@@ -37,9 +37,10 @@ or broader permission is necessary.
 
 Select **Inspect Readability Calculator production** and run it from **main**.
 This workflow uses the production account and the fixed NOFO production service
-in the same region. It uses the same read-only operation allowlist and sanitized
-report as the dev inspection. Keep public uploads disabled. Check the public
-route or admin setting separately because the workflow does not read Constance.
+in the same region. It uses the shared read-only collector and sanitized report
+with an additional production-only WAF logging check. Keep public uploads
+disabled. Check the public route or admin setting separately because the
+workflow does not read Constance.
 
 Missing calculator rules, alarms, dashboard or subscriptions may reflect an
 incomplete rollout. Review each check independently. Subscription counts and
@@ -58,6 +59,14 @@ through an approved production notification test.
 | Subscriptions | Email/HTTPS/other subscription counts and pending-confirmation count for the fixed NOFO monitoring topic | That the intended inbox is subscribed, messages arrive or someone responds |
 | Metrics | Datapoint counts in the last hour for ECS CPU/memory and WAF pilot Count/Block series using the observed ACL resource name and rule visibility metric names | Zero traffic when data is absent, full-upload latency, worker occupancy or alarm correctness |
 | Application log configuration | Retention and subscription-filter counts for the running containers' configured log groups | Content redaction, actual forwarding or infrastructure-wide logging coverage |
+| WAF logging configuration (production) | Destination type, whether it is the expected CloudWatch log group, configured redaction field types, whether a WAF logging filter exists, and retention and subscription-filter count for the expected group | Actual log contents, effectiveness of redaction or filtering, access to logs, or retention in downstream systems |
+
+The WAF logging check reads only the expected ACL associated with the production
+service and only looks up retention and forwarding configuration for the expected
+CloudWatch log group. It reports no destination identifiers, header names or
+filter conditions. An unexpected destination leaves the check incomplete. A
+missing logging configuration and a denied read are reported separately. The
+existing AWS role must already permit the additional read.
 
 The service's configured task-definition revision and the running revisions can
 differ during a deployment; both are reported. The load balancer check publishes a comparison only. A difference or a failed

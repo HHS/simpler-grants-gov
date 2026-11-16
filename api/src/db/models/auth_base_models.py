@@ -59,14 +59,6 @@ class BaseUserApiKey(Base):
     __abstract__ = True
 
     key_name: Mapped[str]
-    # No longer written or read. The column stays on the table (so the schema still
-    # matches the migrations) but is excluded from the mapper below, so this code
-    # never selects or inserts it and the column can be dropped in a follow-up
-    # without breaking this code mid-deploy.
-    key_id: Mapped[str | None] = mapped_column(
-        unique=True, index=True, comment="AWS API Gateway key identifier"
-    )
-    __mapper_args__ = {"exclude_properties": ["key_id"]}
     # Keyed hash of the API key. The raw key is never stored, only returned once on create.
     key_id_hash: Mapped[str] = mapped_column(
         unique=True,

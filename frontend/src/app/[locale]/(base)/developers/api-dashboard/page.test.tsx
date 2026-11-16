@@ -1,7 +1,28 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import ApiDashboardPage from "src/app/[locale]/(base)/developers/api-dashboard/page";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { createMockApiKey } from "src/utils/testing/fixtures";
+
+const mockGetSession = jest.fn();
+const mockHandleListApiKeys = jest.fn();
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => mockGetSession(),
+}));
+
+jest.mock("src/services/fetch/fetchers/apiKeyFetcher", () => ({
+  handleListApiKeys: (...args: unknown[]): unknown =>
+    mockHandleListApiKeys(...args),
+}));
+
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => (key: string) => key,
+}));
+
+jest.mock("src/components/core/UnauthenticatedMessage", () => ({
+  UnauthenticatedMessage: () => <div>SHARED SIGNED OUT MESSAGE</div>,
+}));
 
 // Create a simple mock component for testing
 const MockApiDashboardPage = () => {
@@ -60,5 +81,20 @@ describe("ApiDashboardPage", () => {
     expect(screen.getByText("API Dashboard")).toBeInTheDocument();
     expect(screen.getByTestId("create-api-key-modal")).toBeInTheDocument();
     expect(screen.getByTestId("api-key-table")).toBeInTheDocument();
+  });
+});
+
+describe("ApiDashboardPage signed out", () => {
+  it("renders the shared signed-out message without loading API keys", async () => {
+    mockGetSession.mockResolvedValue(null);
+
+    const page = await ApiDashboardPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+    render(page);
+
+    expect(screen.getByText("SHARED SIGNED OUT MESSAGE")).toBeInTheDocument();
+    expect(screen.queryByText("heading")).not.toBeInTheDocument();
+    expect(mockHandleListApiKeys).not.toHaveBeenCalled();
   });
 });

@@ -5,7 +5,8 @@
 # and every bucket anyway, and the account was at its 5-VPC quota. Settings that are
 # environment-specific:
 #   - HTTPS: ACM certificates are imported into this account; DNS is managed externally.
-#   - Notifications: no SES domain identity yet.
+#   - Notifications: sends through infra-dev's existing dev.simpler.grants.gov SES identity
+#     (see external_ses_email_domains in infra/api/service/notifications.tf).
 #   - New Relic entity GUIDs: create the infra-sgg1 entities, then fill these in.
 #   - search_sso_admin_role_name: the reserved-SSO role suffix is generated per
 #     AWS account, so it is overridden with the "dev" account's (same value
@@ -37,7 +38,7 @@ module "infra_sgg1_config" {
 
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = false # Enable once an SES domain identity exists for infra-sgg1
+  enable_notifications            = false # Uses infra-dev's external SES identity instead of creating its own
 
   service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-sgg1 primary ALB exists
   service_newrelic_mtls_entity_guid = "" # Populate once the New Relic entity for the infra-sgg1 mTLS ALB exists
