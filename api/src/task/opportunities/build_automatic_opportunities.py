@@ -44,6 +44,7 @@ from src.form_schema.forms import (
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
+    RRKeyPersonExpandedGenerated_v4_0,
     RRKeyPersonGenerated_v3_0,
     SF424_v4_0,
     SF424a_v1_0,
@@ -668,6 +669,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "R&R Senior/Key Person Profile (Generated)",
                 RRKeyPersonGenerated_v3_0.form_id,
                 "17a8581a-779f-4199-a3f6-a2ffe7293dec",
+            ),
+            (
+                "E2E-RRKPEG",
+                "R&R Senior/Key Person Profile (Expanded) (Generated)",
+                RRKeyPersonExpandedGenerated_v4_0.form_id,
+                "60993a94-d03a-4fcd-a97d-59608282c1c4",
             ),
             (
                 "E2E-SF424",
