@@ -16,6 +16,7 @@ from src.form_schema.forms import (
     KeyContactsGenerated_v2_0,
     NSFKeyPersonExpandedGenerated_v3_3,
     OtherNarrativeAttachment_v1_2,
+    OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -141,9 +142,15 @@ def budget_narrative_attachment_v1_2(request):
     return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def other_narrative_attachment_v1_2():
-    return setup_resolved_form(OtherNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(OtherNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(OtherNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def other_narrative_attachment_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(scope="session")

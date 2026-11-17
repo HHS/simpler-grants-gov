@@ -15,6 +15,7 @@ from .key_contacts import KeyContacts_v2_0
 from .key_contacts_generated import FORM as KeyContactsGenerated_v2_0
 from .nsf_key_person_expanded_generated import FORM as NSFKeyPersonExpandedGenerated_v3_3
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
+from .other_narrative_generated import FORM as OtherNarrativeGenerated_v1_2
 from .performance_sites_generated import FORM as PerformanceSitesGenerated_v4_0
 from .project_abstract import ProjectAbstract_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
@@ -63,6 +64,7 @@ _ALL_FORMS: list[Form] = [
     NSFKeyPersonExpandedGenerated_v3_3,
     ProjectNarrativeGenerated_v1_2,
     BudgetNarrativeGenerated_v1_2,
+    OtherNarrativeGenerated_v1_2,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -79,6 +81,7 @@ GENERATED_FORMS: list[Form] = [
     NSFKeyPersonExpandedGenerated_v3_3,
     ProjectNarrativeGenerated_v1_2,
     BudgetNarrativeGenerated_v1_2,
+    OtherNarrativeGenerated_v1_2,
 ]
 
 
