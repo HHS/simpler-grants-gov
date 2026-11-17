@@ -358,15 +358,6 @@ locals {
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
-    create-application-submission = {
-      task_command = ["flask", "task", "create-application-submission"]
-      # Every hour at minute 15 (offset to avoid collision with other hourly jobs)
-      schedule_expression = "cron(15 * * * ? *)"
-      state               = "ENABLED"
-      cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
-      mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
-      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
-    }
     build-automatic-opportunities = {
       task_command = ["flask", "task", "build-automatic-opportunities"]
       # Every day at 7:15am Eastern Time during DST. 8:15am during non-DST.
