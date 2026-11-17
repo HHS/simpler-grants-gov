@@ -1,8 +1,12 @@
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import { projectNarrativeAttachmentHappyPathTestData } from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
+
+const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
+
+/** The file uploaded in the form's only field ("Project Narrative Files"). */
+const PNA_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
 
 /**
  * Happy-path test data builder for the Project Narrative Attachment form.
@@ -12,7 +16,7 @@ import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-p
 export const buildPNAHappyPathTestData = (
   _suffix: number,
 ): Record<string, string> => ({
-  ...projectNarrativeAttachmentHappyPathTestData,
+  attachments: PNA_UPLOAD_FILE,
 });
 
 const baseName = (filePath: string): string => path.basename(filePath);
@@ -42,26 +46,27 @@ export const pnaDerivedValues = (
  * The opportunity is created by the local seed and by the staging automatic
  * opportunities task (prefix "E2E-PNA").
  */
-export const PNA_OPPORTUNITY_DATA: PrintViewFormData = {
-  opportunityId: "6bdc2df3-6e51-4aea-89af-bade326feba1",
-  opportunityNumber: "E2E-PNA-ORG-IND-01",
-  formKey: "projectNarrativeAttachment",
-  expectedPrepopulatedFields: {},
-  buildTestData: buildPNAHappyPathTestData,
-  // What the submission zip spec verifies (XML element and/or PDF text).
-  // attachment_mime_type and attachment_hash come from pnaDerivedValues(); the spec supplies them.
-  // FileLocation (att:href) is not verified: it carries the stored file location, not a stable value.
-  submissionFields: {
-    attachments: {
-      xmlElement: "att:FileName",
-      xmlTransform: baseName,
-      verifyInPdf: true,
-      pdfTransform: baseName,
+export const PROJECT_NARRATIVE_ATTACHMENT_OPPORTUNITY_DATA: PrintViewFormData =
+  {
+    opportunityId: "6bdc2df3-6e51-4aea-89af-bade326feba1",
+    opportunityNumber: "E2E-PNA-ORG-IND-01",
+    formKey: "projectNarrativeAttachment",
+    expectedPrepopulatedFields: {},
+    buildTestData: buildPNAHappyPathTestData,
+    // What the submission zip spec verifies (XML element and/or PDF text).
+    // attachment_mime_type and attachment_hash come from pnaDerivedValues(); the spec supplies them.
+    // FileLocation (att:href) is not verified: it carries the stored file location, not a stable value.
+    submissionFields: {
+      attachments: {
+        xmlElement: "att:FileName",
+        xmlTransform: baseName,
+        verifyInPdf: true,
+        pdfTransform: baseName,
+      },
+      attachment_mime_type: { xmlElement: "att:MimeType" },
+      attachment_hash: {
+        xmlElement: "glob:HashValue",
+        xmlAllowAttributes: true,
+      },
     },
-    attachment_mime_type: { xmlElement: "att:MimeType" },
-    attachment_hash: {
-      xmlElement: "glob:HashValue",
-      xmlAllowAttributes: true,
-    },
-  },
-};
+  };
