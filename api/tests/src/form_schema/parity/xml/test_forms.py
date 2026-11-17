@@ -16,6 +16,7 @@ from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
 from tests.src.form_schema.parity.xml.diffs import (
     budget_narrative_attachment,
     budget_narrative_generated,
+    ed_abstract_form_generated,
     epa_key_contacts,
     epa_key_contacts_generated,
     key_contacts,
@@ -58,6 +59,7 @@ DIFFS = [
     other_narrative_generated.DIFF,
     project_abstract.DIFF,
     project_abstract_generated.DIFF,
+    ed_abstract_form_generated.DIFF,
 ]
 
 
