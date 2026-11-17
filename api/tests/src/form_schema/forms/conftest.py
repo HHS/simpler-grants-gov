@@ -19,6 +19,7 @@ from src.form_schema.forms import (
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
+    ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
     ProjectNarrativeGenerated_v1_2,
@@ -109,9 +110,15 @@ def sflll_v2_0():
     return setup_resolved_form(SFLLL_v2_0)
 
 
-@pytest.fixture(scope="session")
-def project_abstract_v1_2():
-    return setup_resolved_form(ProjectAbstract_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectAbstract_v1_2, id="handwritten"),
+        pytest.param(ProjectAbstractGenerated_v1_2, id="generated"),
+    ],
+)
+def project_abstract_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(scope="session")

@@ -1,5 +1,6 @@
 import "./examples.tsp";
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
 
@@ -8,6 +9,10 @@ using SimplerForms;
 namespace Forms.ProjectAbstract;
 
 @Meta.form(#{ id: "project-abstract", formName: "Project Abstract" })
+@Sgg.sync(#{
+  instructions: "1ea1bd6a-87fc-4d90-ab1e-91bf0b2b4b68",
+  xml: "mapping",
+})
 @GrantsGov.form(#{
   legacyFormId: 541,
   shortFormName: "Project_Abstract_1_2",
