@@ -6,6 +6,7 @@ from src.db.models.competition_models import Form
 from src.form_schema.forms import (
     AttachmentForm_v1_2,
     BudgetNarrativeAttachment_v1_2,
+    BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
@@ -129,9 +130,15 @@ def project_narrative_attachment_v1_2(request):
     return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def budget_narrative_attachment_v1_2():
-    return setup_resolved_form(BudgetNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(BudgetNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(BudgetNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def budget_narrative_attachment_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(scope="session")

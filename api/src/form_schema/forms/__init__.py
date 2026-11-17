@@ -5,6 +5,7 @@ from src.db.models.competition_models import Form
 from ..registry.form_template_registry import form_template_registry
 from .attachment_form import AttachmentForm_v1_2
 from .budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
+from .budget_narrative_generated import FORM as BudgetNarrativeGenerated_v1_2
 from .cd511 import CD511_v1_1
 from .epa_form_4700_4 import EPA_FORM_4700_4_v5_0
 from .epa_key_contacts import EPA_KEY_CONTACT_v2_0
@@ -61,6 +62,7 @@ _ALL_FORMS: list[Form] = [
     RRKeyPersonExpandedGenerated_v4_0,
     NSFKeyPersonExpandedGenerated_v3_3,
     ProjectNarrativeGenerated_v1_2,
+    BudgetNarrativeGenerated_v1_2,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -76,6 +78,7 @@ GENERATED_FORMS: list[Form] = [
     RRKeyPersonExpandedGenerated_v4_0,
     NSFKeyPersonExpandedGenerated_v3_3,
     ProjectNarrativeGenerated_v1_2,
+    BudgetNarrativeGenerated_v1_2,
 ]
 
 
