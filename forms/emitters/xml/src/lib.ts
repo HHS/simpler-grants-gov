@@ -64,6 +64,12 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`The XML mapping can't write ${"element"} yet: it holds ${"reason"}.`,
       },
     },
+    "xml-mapping-field-unreachable": {
+      severity: "error",
+      messages: {
+        default: paramMessage`The XML mapping can't read ${"field"} for ${"element"}: it isn't a field of the form, or of the item, that ${"element"} is filled from.`,
+      },
+    },
     "xml-transform-unsupported": {
       severity: "warning",
       messages: {

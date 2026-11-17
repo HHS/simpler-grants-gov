@@ -3,6 +3,7 @@ import type { EnumMember, Model, Program } from "@typespec/compiler";
 import { createTester, expectDiagnostics } from "@typespec/compiler/testing";
 import { describe, expect, it } from "vitest";
 
+import { generateXml } from "../src/runtime/index.js";
 import { xmlMapping } from "../src/xml-mapping.js";
 
 const FORMS_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
@@ -157,6 +158,158 @@ describe("xmlMapping", () => {
           params: { max_length: 60 },
         },
       },
+    });
+  });
+});
+
+describe("xmlMapping with simpler-forms' mapping decorators", () => {
+  const errors = (diagnostics: readonly { severity: string }[]) =>
+    diagnostics.filter((d) => d.severity === "error");
+
+  it("writes numbered elements from a list's items, each looked up", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "types?: string[];",
+      `@Mapping.from(xml, Mapping.Item<Forms.Example.types, 0>)
+       @Mapping.match(#{ \`H: state\`: "H: State" }, Forms.Example.types)
+       @name("ApplicantTypeCode1") code1?: string;
+       @Mapping.from(xml, Mapping.Item<Forms.Example.types, 1>)
+       @name("ApplicantTypeCode2") code2?: string;`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot).toEqual({
+      ApplicantTypeCode1: {
+        $match: {
+          value: { $field: "types[0]" },
+          case: { "H: state": "H: State" },
+          default: { $field: "types[0]" },
+        },
+      },
+      ApplicantTypeCode2: { $field: "types[1]" },
+    });
+  });
+
+  it("writes a list's first item as an element and the rest as a list", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "sites?: Race[]; attachments?: string[];",
+      `@Mapping.from(xml, Mapping.Item<Forms.Example.sites, 0>)
+       @name("PrimarySite") primary?: Site;
+       @Mapping.from(xml, Mapping.Slice<Forms.Example.sites, 1>)
+       @name("OtherSite") others?: Site[];
+       @Mapping.from(xml, Mapping.Item<Forms.Example.attachments, 0>)
+       @name("ATT1") att1?: AttachedFile;
+       @Mapping.from(xml, Mapping.Slice<Forms.Example.attachments, 1, 3>)
+       @name("ATT") rest?: AttachedFile[];`,
+      `@ns(Ns.Form)
+       model Site {
+         @Mapping.from(xml, Forms.Race.name) @name("Name") name?: string;
+       }`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot).toEqual({
+      PrimarySite: { Name: { $field: "sites[0].name" } },
+      OtherSite: {
+        $each: {
+          items: { $field: "sites[1:]" },
+          map: { Name: { $field: "name" } },
+        },
+      },
+      ATT1: { $attachment: "attachments[0]" },
+      ATT: {
+        $each: {
+          items: { $field: "attachments[1:3]" },
+          map: { $attachment: "." },
+        },
+      },
+    });
+  });
+
+  it("writes a required element empty, and leaves out an optional one whose item is missing", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "dateReceived?: string; periods?: Race[];",
+      `@Mapping.from(xml, Forms.Example.dateReceived) @Mapping.required
+       @name("DateReceived") dateReceived?: string;
+       @Mapping.from(xml, Mapping.Item<Forms.Example.periods, 1>)
+       @name("BudgetYear2") year2?: Year;`,
+      `@ns(Ns.Form)
+       model Year {
+         @Mapping.from(xml, Forms.Race.name) @Mapping.required
+         @name("Total") total?: string;
+       }`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot).toEqual({
+      DateReceived: { $required: { $field: "date_received" } },
+      BudgetYear2: {
+        $when: {
+          condition: { field: "periods[1]", operator: "exists" },
+          then: { Total: { $required: { $field: "periods[1].name" } } },
+        },
+      },
+    });
+    const xml = generateXml(mapping!, { periods: [{ name: "100" }] });
+    expect(xml).toContain("<Form:DateReceived/>");
+    expect(xml).not.toContain("BudgetYear2");
+  });
+
+  describe("@Mapping.when", () => {
+    const revision = async () =>
+      mappingOf(
+        "applicationType?: string; revisionCode?: string; explanation?: string;",
+        `@Mapping.from(xml, Forms.Example.revisionCode)
+         @Mapping.when(Forms.Example.applicationType, Operator.equals, "Revision")
+         @name("RevisionCode") code?: string;
+         @Mapping.from(xml, Forms.Example.explanation)
+         @Mapping.when(Forms.Example.applicationType, Operator.equals, "Revision")
+         @Mapping.when(Forms.Example.revisionCode, Operator.equals, "E")
+         @name("RevisionCodeOtherExplanation") explanation?: string;`,
+      );
+
+    it("writes an element only while its conditions hold", async () => {
+      const { mapping, diagnostics } = await revision();
+      expect(errors(diagnostics)).toEqual([]);
+      expect(mapping?.root.FormRoot.RevisionCodeOtherExplanation).toEqual({
+        $when: {
+          condition: {
+            all: [
+              {
+                field: "application_type",
+                operator: "equals",
+                value: "Revision",
+              },
+              { field: "revision_code", operator: "equals", value: "E" },
+            ],
+          },
+          then: { $field: "explanation" },
+        },
+      });
+    });
+
+    it("leaves a draft's answers that no longer apply out of the XML, and keeps them", async () => {
+      const { mapping } = await revision();
+      const draft = {
+        application_type: "New",
+        revision_code: "E",
+        explanation: "Changed scope",
+      };
+      const kept = structuredClone(draft);
+      const elements = (response: object) =>
+        ["RevisionCode", "RevisionCodeOtherExplanation"].filter((name) =>
+          generateXml(mapping!, response).includes(`<Form:${name}>`),
+        );
+
+      expect(elements(draft)).toEqual([]);
+      expect(
+        elements({
+          ...draft,
+          application_type: "Revision",
+          revision_code: "AC",
+        }),
+      ).toEqual(["RevisionCode"]);
+      expect(elements({ ...draft, application_type: "Revision" })).toEqual([
+        "RevisionCode",
+        "RevisionCodeOtherExplanation",
+      ]);
+      expect(draft).toEqual(kept);
     });
   });
 });

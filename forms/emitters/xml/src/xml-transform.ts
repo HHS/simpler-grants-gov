@@ -14,11 +14,11 @@ import {
   jsonPropertyName,
   mappingTargets,
   modelProperties,
+  propTransform,
   resolveMapping,
   resolveMappingFrom,
   type MappingNode,
   type PropertyCasing,
-  propTransform,
 } from "./simpler-forms.js";
 
 /** One form's rules, in the shape `FORM_XML_TRANSFORM_RULES` takes. */

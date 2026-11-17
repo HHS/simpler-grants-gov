@@ -11,6 +11,7 @@ import { getNs, isAttribute } from "@typespec/xml";
 import { reportDiagnostic, stateKeys } from "./lib.js";
 import {
   XML_MAPPING_FORMAT,
+  type Condition,
   type Elements,
   type Value,
   type XmlMapping,
@@ -20,8 +21,13 @@ import {
   mappedFromRoot,
   modelProperties,
   propMappedFrom,
-  type PropertyCasing,
+  propMappedFromLinks,
+  propMappingConditions,
+  propMappingRequired,
+  propMatch,
   propTransform,
+  type MappingSelection,
+  type PropertyCasing,
 } from "./simpler-forms.js";
 import { declaredNamespaces } from "./xml-transform.js";
 
@@ -98,34 +104,50 @@ export function xmlMapping(
     const props = modelProperties(into);
     for (const prop of props.filter((p) => isAttribute(program, p))) {
       const value = literalValue(prop.type);
-      const source = sourcePath(program, prop, mapping, from);
+      const found = sourcePath(program, prop, mapping, from);
       if (value !== undefined) elements[key(prop, true)] = { $const: value };
-      else if (source)
-        elements[key(prop, true)] = { $field: path(prefix, source).join(".") };
+      else if (found)
+        elements[key(prop, true)] = wrap(
+          prop,
+          {
+            $field: selected(path(prefix, found.path), found.select).join("."),
+          },
+          from,
+          prefix,
+        );
     }
 
     for (const prop of props.filter((p) => !isAttribute(program, p))) {
       const to = shapeOf(prop.type);
-      const source = sourcePath(program, prop, mapping, from);
-      if (!source) {
+      const found = sourcePath(program, prop, mapping, from);
+      const put = (value: Value) => {
+        elements[key(prop)] = wrap(prop, value, from, prefix);
+      };
+      if (!found) {
         if (propMappedFrom(program, prop, mapping).length) continue; // reported by simpler-forms
         if (!to.object || to.array || stack.includes(to.object)) continue;
         // A wrapper: its elements read from the same field as its parent.
         const inner = walk(to.object, from, prefix, [...stack, to.object]);
-        if (Object.keys(inner).length) elements[key(prop)] = inner;
+        if (Object.keys(inner).length) put(inner);
         continue;
       }
-      const steps = path(prefix, source);
+      // An `Item` or `Slice` brackets the field's last step: `types[0]`, `sites[1:]`.
+      const steps = selected(path(prefix, found.path), found.select);
       const field = steps.join(".");
-      const shape = shapeOf(source.at(-1)!.type);
+      const listed = shapeOf(found.path.at(-1)!.type);
+      // One item of a list is a single value or object; a slice is still a list.
+      const shape =
+        found.select && "index" in found.select
+          ? { array: false, object: listed.object }
+          : listed;
       if (to.array && !to.object && shape.array && !shape.object) {
         // A list of values: the element once per value, each item the value itself.
-        elements[key(prop)] = {
+        put({
           $each: {
             items: { $field: field },
             map: leaf(program, prop, ".", to.item),
           },
-        };
+        });
         continue;
       }
       if (to.array) {
@@ -143,13 +165,13 @@ export function xmlMapping(
           });
           continue;
         }
-        elements[key(prop)] = {
+        put({
           $each: {
             items: { $field: field },
             // Inside `$each`, paths are relative to the item.
             map: walk(to.object, shape.object, [], [...stack, to.object]),
           },
-        };
+        });
         continue;
       }
       if (to.object && shape.object) {
@@ -157,13 +179,105 @@ export function xmlMapping(
           ...stack,
           to.object,
         ]);
-        if (Object.keys(inner).length) elements[key(prop)] = inner;
+        if (Object.keys(inner).length) put(guard(prop, inner, field));
         continue;
       }
-      elements[key(prop)] = leaf(program, prop, field);
+      put(leaf(program, prop, field));
     }
     return elements;
   };
+
+  /**
+   * `value` as `prop`'s decorators change it, from the inside out: looked up with
+   * `@Mapping.match`, written only while its `@Mapping.when` conditions hold, and written
+   * empty when it has nothing to write with `@Mapping.required`. `from` and `prefix` are the
+   * scope its fields are read in.
+   */
+  const wrap = (
+    prop: ModelProperty,
+    value: Value,
+    from: Model,
+    prefix: string[],
+  ): Value => {
+    let out = value;
+    const match = propMatch(program, prop);
+    if (match) {
+      const fallback = match.default;
+      out = {
+        $match: {
+          value,
+          case: match.cases,
+          ...(fallback === undefined
+            ? {}
+            : {
+                default:
+                  "value" in fallback
+                    ? fallback.value
+                    : sourceOf(prop, from) === fallback.field
+                      ? value
+                      : fieldAt(prop, fallback.field, undefined, from, prefix),
+              }),
+        },
+      };
+    }
+    const conditions = propMappingConditions(program, prop).map(
+      (c): Condition => {
+        const field = fieldAt(prop, c.source, c.select, from, prefix).$field;
+        const operator = OPERATORS[c.operator];
+        return (
+          c.value === undefined
+            ? { field, operator }
+            : { field, operator, value: c.value }
+        ) as Condition;
+      },
+    );
+    if (conditions.length)
+      out = {
+        $when: {
+          condition:
+            conditions.length === 1 ? conditions[0] : { all: conditions },
+          then: out,
+        },
+      };
+    if (propMappingRequired(program, prop)) out = { $required: out };
+    return out;
+  };
+
+  /** The field `prop`'s `@Mapping.from` names in this scope, if it names one. */
+  const sourceOf = (prop: ModelProperty, from: Model) =>
+    sourcePath(program, prop, mapping, from)?.path.at(-1);
+
+  /**
+   * `field`, which `prop`'s decorators name, as a `$field` in the scope `from` and `prefix`
+   * describe. Reported when it isn't reachable there.
+   */
+  const fieldAt = (
+    prop: ModelProperty,
+    field: ModelProperty,
+    select: MappingSelection | undefined,
+    from: Model,
+    prefix: string[],
+  ) => {
+    const found = pathTo(from, field);
+    if (!found)
+      reportDiagnostic(program, {
+        code: "xml-mapping-field-unreachable",
+        target: prop,
+        format: { element: key(prop), field: field.name },
+      });
+    return {
+      $field: selected(path(prefix, found ?? [field]), select).join("."),
+    };
+  };
+
+  /**
+   * An optional element of its own, filled from `field`, is left out when the field isn't
+   * answered: its `@Mapping.required` elements would otherwise write it, empty.
+   */
+  const guard = (prop: ModelProperty, inner: Elements, field: string): Value =>
+    prop.optional && JSON.stringify(inner).includes('"$required"')
+      ? { $when: { condition: { field, operator: "exists" }, then: inner } }
+      : inner;
 
   return {
     format: XML_MAPPING_FORMAT,
@@ -208,11 +322,32 @@ function sourcePath(
   prop: ModelProperty,
   mapping: EnumMember,
   from: Model,
-): ModelProperty[] | undefined {
-  return propMappedFrom(program, prop, mapping)
-    .map((source) => pathTo(from, source))
-    .find((found) => found !== undefined);
+): { path: ModelProperty[]; select?: MappingSelection } | undefined {
+  for (const link of propMappedFromLinks(program, prop, mapping)) {
+    const path = pathTo(from, link.source);
+    if (path) return { path, ...(link.select ? { select: link.select } : {}) };
+  }
+  return undefined;
 }
+
+/** `steps` with the bracket step `select` adds to the last: `types[0]`, `sites[1:]`. */
+function selected(steps: string[], select?: MappingSelection): string[] {
+  if (!select) return steps;
+  const bracket =
+    "index" in select
+      ? `[${select.index}]`
+      : `[${select.start || ""}:${select.stop ?? ""}]`;
+  return [...steps.slice(0, -1), `${steps.at(-1)}${bracket}`];
+}
+
+/** `SimplerForms.Operator`'s members, as the format's `$when` names them. */
+const OPERATORS = {
+  equals: "equals",
+  notEquals: "not_equals",
+  in: "in",
+  contains: "contains",
+  exists: "exists",
+} as const;
 
 function pathTo(
   model: Model,

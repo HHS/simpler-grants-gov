@@ -12,6 +12,21 @@ reads, from each form's `@Mapping.from` links to its XSD model.
 The XSD models themselves use `@typespec/xml` (`@Xml.ns`, `@Xml.name`, ...) and live in
 [`specs/xsd/`](../../specs/xsd/) and each form's `xsd.tsp`.
 
+On the XSD models, simpler-forms' mapping decorators each become one function of the XML
+mapping (`xml-mapping.json`):
+
+| On an XSD model's property                            | In the XML mapping         |
+| ----------------------------------------------------- | -------------------------- |
+| `@Mapping.from(xml, Mapping.Item<F.types, 0>)`        | `$field: "types[0]"`       |
+| `@Mapping.from(xml, Mapping.Slice<F.sites, 1>)`       | `$each` over `"sites[1:]"` |
+| `@Mapping.transform(T.truncate, #{ max_length: 60 })` | `$transform`               |
+| `@Mapping.match(#{ … }, default?)`                    | `$match`                   |
+| `@Mapping.when(F.kind, Operator.equals, "Revision")`  | `$when`                    |
+| `@Mapping.required`                                   | `$required`                |
+
+An optional element of its own with a `@Mapping.required` element inside is written only
+while the field it's filled from is answered.
+
 ## Output
 
 For every form linked in a configured mapping target (`mapping-targets` in
