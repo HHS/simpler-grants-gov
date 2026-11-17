@@ -35,13 +35,19 @@ from src.form_schema.forms import (
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
+    EPAKeyContactsGenerated_v2_0,
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
+    KeyContactsGenerated_v2_0,
+    NSFKeyPersonExpandedGenerated_v3_3,
     OtherNarrativeAttachment_v1_2,
+    PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
+    RRKeyPersonExpandedGenerated_v4_0,
+    RRKeyPersonGenerated_v3_0,
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
@@ -51,6 +57,7 @@ from src.form_schema.forms import (
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
     get_active_forms,
+    get_forms_for_all_forms_competition,
 )
 from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
 from src.task.ecs_background_task import ecs_background_task
@@ -266,7 +273,13 @@ class BuildAutomaticOpportunitiesTask(Task):
                 opportunity_title=f"Opportunity with ALL forms - {datetime_util.get_now_us_eastern_date().isoformat()}",
                 opportunity_number=f"{ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX}{datetime_util.get_now_us_eastern_date().isoformat()}",
             ),
-            competitions=[CompetitionContainer(optional_form_ids=[form.form_id for form in forms])],
+            competitions=[
+                CompetitionContainer(
+                    optional_form_ids=[
+                        form.form_id for form in get_forms_for_all_forms_competition(forms)
+                    ]
+                )
+            ],
         )
         self.backfill_previous_all_forms_opportunities()
 
@@ -627,6 +640,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631",
             ),
             (
+                "E2E-EPAKCG",
+                "EPA Key Contacts Form (Generated)",
+                EPAKeyContactsGenerated_v2_0.form_id,
+                "b677779b-2081-4212-8f38-7781f43af676",
+            ),
+            (
                 "E2E-GGLOB",
                 "Grants.gov Lobbying Form",
                 GG_LobbyingForm_v1_1.form_id,
@@ -637,6 +656,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Key Contacts Form",
                 KeyContacts_v2_0.form_id,
                 "3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31",
+            ),
+            (
+                "E2E-KCG",
+                "Key Contacts Form (Generated)",
+                KeyContactsGenerated_v2_0.form_id,
+                "1954f7d4-9d41-4d52-b7fc-c97d28815a9b",
             ),
             (
                 "E2E-ONA",
@@ -667,6 +692,30 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Project Performance Site Location(s)",
                 ProjectPerformanceSiteLocation_v4_0.form_id,
                 "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
+            ),
+            (
+                "E2E-PPSLG",
+                "Project Performance Site Location(s) (Generated)",
+                PerformanceSitesGenerated_v4_0.form_id,
+                "4b585a14-ab56-42c1-a01f-78eba5b93d97",
+            ),
+            (
+                "E2E-RRKPG",
+                "R&R Senior/Key Person Profile (Generated)",
+                RRKeyPersonGenerated_v3_0.form_id,
+                "17a8581a-779f-4199-a3f6-a2ffe7293dec",
+            ),
+            (
+                "E2E-RRKPEG",
+                "R&R Senior/Key Person Profile (Expanded) (Generated)",
+                RRKeyPersonExpandedGenerated_v4_0.form_id,
+                "60993a94-d03a-4fcd-a97d-59608282c1c4",
+            ),
+            (
+                "E2E-NSFKPEG",
+                "NSF Senior/Key Person Profile (Expanded) (Generated)",
+                NSFKeyPersonExpandedGenerated_v3_3.form_id,
+                "7b0b7e69-0943-429e-b380-ebaf69985400",
             ),
             (
                 "E2E-SF424",

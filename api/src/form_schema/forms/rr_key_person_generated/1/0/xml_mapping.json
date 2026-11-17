@@ -1,0 +1,215 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/RR_KeyPerson_3_0-V3.0",
+    "RR_KeyPerson_3_0": "http://apply.grants.gov/forms/RR_KeyPerson_3_0-V3.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/RR_KeyPerson_3_0-V3.0.xsd",
+  "root": {
+    "RR_KeyPerson_3_0": {
+      "@RR_KeyPerson_3_0:FormVersion": {
+        "$const": "3.0"
+      },
+      "PDPI": {
+        "Profile": {
+          "Name": {
+            "globLib:PrefixName": {
+              "$field": "principal_investigator.name.prefix"
+            },
+            "globLib:FirstName": {
+              "$field": "principal_investigator.name.first_name"
+            },
+            "globLib:MiddleName": {
+              "$field": "principal_investigator.name.middle_name"
+            },
+            "globLib:LastName": {
+              "$field": "principal_investigator.name.last_name"
+            },
+            "globLib:SuffixName": {
+              "$field": "principal_investigator.name.suffix"
+            }
+          },
+          "Title": {
+            "$field": "principal_investigator.title"
+          },
+          "Address": {
+            "globLib:Street1": {
+              "$field": "principal_investigator.address.street1"
+            },
+            "globLib:Street2": {
+              "$field": "principal_investigator.address.street2"
+            },
+            "globLib:City": {
+              "$field": "principal_investigator.address.city"
+            },
+            "globLib:County": {
+              "$field": "principal_investigator.address.county"
+            },
+            "globLib:State": {
+              "$field": "principal_investigator.address.state"
+            },
+            "globLib:Province": {
+              "$field": "principal_investigator.address.province"
+            },
+            "globLib:ZipPostalCode": {
+              "$field": "principal_investigator.address.zip_code"
+            },
+            "globLib:Country": {
+              "$field": "principal_investigator.address.country"
+            }
+          },
+          "Phone": {
+            "$field": "principal_investigator.phone"
+          },
+          "Fax": {
+            "$field": "principal_investigator.fax"
+          },
+          "Email": {
+            "$field": "principal_investigator.email"
+          },
+          "OrganizationName": {
+            "$field": "principal_investigator.organization_name"
+          },
+          "Department": {
+            "$field": "principal_investigator.department"
+          },
+          "Division": {
+            "$field": "principal_investigator.division"
+          },
+          "Credential": {
+            "$field": "principal_investigator.credential"
+          },
+          "ProjectRole": {
+            "$field": "principal_investigator.project_role"
+          },
+          "OtherProjectRoleCategory": {
+            "$field": "principal_investigator.other_project_role_category"
+          },
+          "BioSketchsAttached": {
+            "BioSketchAttached": {
+              "$attachment": "principal_investigator.biographical_sketch"
+            }
+          },
+          "SupportsAttached": {
+            "SupportAttached": {
+              "$attachment": "principal_investigator.current_pending_support"
+            }
+          }
+        }
+      },
+      "KeyPerson": {
+        "$each": {
+          "items": {
+            "$field": "senior_key_persons"
+          },
+          "map": {
+            "Profile": {
+              "Name": {
+                "globLib:PrefixName": {
+                  "$field": "name.prefix"
+                },
+                "globLib:FirstName": {
+                  "$field": "name.first_name"
+                },
+                "globLib:MiddleName": {
+                  "$field": "name.middle_name"
+                },
+                "globLib:LastName": {
+                  "$field": "name.last_name"
+                },
+                "globLib:SuffixName": {
+                  "$field": "name.suffix"
+                }
+              },
+              "Title": {
+                "$field": "title"
+              },
+              "Address": {
+                "globLib:Street1": {
+                  "$field": "address.street1"
+                },
+                "globLib:Street2": {
+                  "$field": "address.street2"
+                },
+                "globLib:City": {
+                  "$field": "address.city"
+                },
+                "globLib:County": {
+                  "$field": "address.county"
+                },
+                "globLib:State": {
+                  "$field": "address.state"
+                },
+                "globLib:Province": {
+                  "$field": "address.province"
+                },
+                "globLib:ZipPostalCode": {
+                  "$field": "address.zip_code"
+                },
+                "globLib:Country": {
+                  "$field": "address.country"
+                }
+              },
+              "Phone": {
+                "$field": "phone"
+              },
+              "Fax": {
+                "$field": "fax"
+              },
+              "Email": {
+                "$field": "email"
+              },
+              "OrganizationName": {
+                "$field": "organization_name"
+              },
+              "Department": {
+                "$field": "department"
+              },
+              "Division": {
+                "$field": "division"
+              },
+              "Credential": {
+                "$field": "credential"
+              },
+              "ProjectRole": {
+                "$field": "project_role"
+              },
+              "OtherProjectRoleCategory": {
+                "$field": "other_project_role_category"
+              },
+              "BioSketchsAttached": {
+                "BioSketchAttached": {
+                  "$attachment": "biographical_sketch"
+                }
+              },
+              "SupportsAttached": {
+                "SupportAttached": {
+                  "$attachment": "current_pending_support"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AdditionalProfilesAttached": {
+        "AdditionalProfileAttached": {
+          "$attachment": "additional_profiles"
+        }
+      },
+      "BioSketchsAttached": {
+        "BioSketchAttached": {
+          "$attachment": "additional_biographical_sketches"
+        }
+      },
+      "SupportsAttached": {
+        "SupportAttached": {
+          "$attachment": "additional_current_pending_support"
+        }
+      }
+    }
+  }
+}

@@ -64,7 +64,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 41
+    assert len(opportunities) == 47
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -81,7 +81,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 41
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 47
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
 
@@ -296,13 +296,19 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "E2E-CD511-ORG-IND-01": uuid.UUID("5b890089-2bb2-4123-82cd-3d321ca62efe"),
         "E2E-EPA4700-ORG-IND-01": uuid.UUID("95f80b3b-c119-4a89-a50f-1b47b95a9191"),
         "E2E-EPAKC-ORG-IND-01": uuid.UUID("1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
+        "E2E-EPAKCG-ORG-IND-01": uuid.UUID("b677779b-2081-4212-8f38-7781f43af676"),
         "E2E-GGLOB-ORG-IND-01": uuid.UUID("552d5866-501a-40b6-b1ce-2efc7a2d3aa5"),
         "E2E-KC-ORG-IND-01": uuid.UUID("3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31"),
+        "E2E-KCG-ORG-IND-01": uuid.UUID("1954f7d4-9d41-4d52-b7fc-c97d28815a9b"),
         "E2E-ONA-ORG-IND-01": uuid.UUID("717b7f78-52f2-49f9-b1b8-5d7118313d2a"),
+        "E2E-NSFKPEG-ORG-IND-01": uuid.UUID("7b0b7e69-0943-429e-b380-ebaf69985400"),
         "E2E-PABS-ORG-IND-01": uuid.UUID("d3081452-2cf8-4817-9abf-812e5d794485"),
         "E2E-PABSS-ORG-IND-01": uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
         "E2E-PNA-ORG-IND-01": uuid.UUID("6bdc2df3-6e51-4aea-89af-bade326feba1"),
         "E2E-PPSL-ORG-IND-01": uuid.UUID("8a30cbe2-f297-49b7-b996-fc22982a3eb5"),
+        "E2E-PPSLG-ORG-IND-01": uuid.UUID("4b585a14-ab56-42c1-a01f-78eba5b93d97"),
+        "E2E-RRKPEG-ORG-IND-01": uuid.UUID("60993a94-d03a-4fcd-a97d-59608282c1c4"),
+        "E2E-RRKPG-ORG-IND-01": uuid.UUID("17a8581a-779f-4199-a3f6-a2ffe7293dec"),
         "E2E-SF424-ORG-IND-01": uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
         "E2E-SF424SHORT-ORG-IND-01": uuid.UUID("425c2ffe-6fbd-4852-ab72-b64467fe3df0"),
         "E2E-SF424A-ORG-IND-01": uuid.UUID("6c25cd41-660e-473f-abff-654083b7795d"),

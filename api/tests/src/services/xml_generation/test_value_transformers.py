@@ -8,6 +8,7 @@ from src.services.xml_generation.value_transformers import (
     apply_value_transformation,
     transform_boolean_to_yes_no,
     transform_currency_format,
+    transform_join_values,
     transform_map_values,
     transform_string_case,
     transform_truncate_string,
@@ -293,3 +294,24 @@ class TestMapValues:
         mappings = {"low": 1, "medium": 5, "high": 10}
         assert transform_map_values("low", mappings) == 1
         assert transform_map_values("high", mappings) == 10
+
+
+class TestJoinValues:
+    """Test join_values transformation."""
+
+    def test_join_values_in_order(self):
+        assert transform_join_values(["C", "A"]) == "CA"
+        assert transform_join_values(["C", "A"], separator=", ") == "C, A"
+
+    def test_join_values_sorted_ignores_selection_order(self):
+        assert transform_join_values(["C", "A"], sort=True) == "AC"
+        assert transform_join_values(["A", "C"], sort=True) == "AC"
+
+    def test_join_values_via_apply_value_transformation(self):
+        config = {"type": "join_values", "params": {"sort": True}}
+        assert apply_value_transformation(["D", "B"], config) == "BD"
+
+    @pytest.mark.parametrize("value", ["A", ["A", 1], None])
+    def test_join_values_requires_a_list_of_strings(self, value):
+        with pytest.raises(ValueTransformationError, match="list of strings"):
+            transform_join_values(value)

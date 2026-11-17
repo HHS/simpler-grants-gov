@@ -1,0 +1,440 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/prefix",
+          "label": "Prefix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/first_name",
+          "label": "First Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/middle_name",
+          "label": "Middle Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/last_name",
+          "label": "Last Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/suffix",
+          "label": "Suffix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/title",
+          "label": "Title"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/organization_name",
+          "label": "Organization Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/department",
+          "label": "Department"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/division",
+          "label": "Division"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/project_role",
+          "label": "Project Role"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/other_project_role_category",
+          "label": "Other Project Role Category",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/principal_investigator/properties/project_role",
+              "schema": {
+                "enum": [
+                  "Other Professional",
+                  "Other (Specify)"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/address/properties/street1",
+          "label": "Street 1"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/address/properties/street2",
+          "label": "Street 2"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/address/properties/city",
+          "label": "City"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/address/properties/county",
+          "label": "County/Parish"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/address/properties/state",
+          "label": "State"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/address/properties/province",
+          "label": "Province",
+          "rule": {
+            "effect": "SHOW",
+            "condition": {
+              "scope": "#/properties/principal_investigator/properties/address/properties/country",
+              "schema": {
+                "allOf": [
+                  {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "const": ""
+                        },
+                        {
+                          "type": "array",
+                          "maxItems": 0
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "const": "USA: UNITED STATES"
+                    }
+                  }
+                ]
+              },
+              "failWhenUndefined": true
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/address/properties/country",
+          "label": "Country"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/address/properties/zip_code",
+          "label": "Zip / Postal Code"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/phone",
+          "label": "Phone Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/fax",
+          "label": "Fax Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/email",
+          "label": "Email"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/credential",
+          "label": "Credential, e.g., Agency Login"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/degree_type",
+          "label": "Degree Type"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/degree_year",
+          "label": "Degree Year"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/biographical_sketch",
+          "label": "Biographical Sketch",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/current_pending_support",
+          "label": "Current & Pending Support",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "PD/PI Profile",
+      "options": {
+        "description": "Enter the profile of the Project Director/Principal Investigator (PD/PI)."
+      }
+    },
+    {
+      "type": "Group",
+      "label": "Senior/Key Person Profiles",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/senior_key_persons",
+          "options": {
+            "detail": {
+              "type": "Group",
+              "elements": [
+                {
+                  "type": "Control",
+                  "scope": "#/properties/name/properties/prefix",
+                  "label": "Prefix"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/name/properties/first_name",
+                  "label": "First Name"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/name/properties/middle_name",
+                  "label": "Middle Name"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/name/properties/last_name",
+                  "label": "Last Name"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/name/properties/suffix",
+                  "label": "Suffix"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/title",
+                  "label": "Title"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/organization_name",
+                  "label": "Organization Name"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/department",
+                  "label": "Department"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/division",
+                  "label": "Division"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/project_role",
+                  "label": "Project Role"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/other_project_role_category",
+                  "label": "Other Project Role Category",
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/project_role",
+                      "schema": {
+                        "enum": [
+                          "Other Professional",
+                          "Other (Specify)"
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/street1",
+                  "label": "Street 1"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/street2",
+                  "label": "Street 2"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/city",
+                  "label": "City"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/county",
+                  "label": "County/Parish"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/state",
+                  "label": "State"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/province",
+                  "label": "Province",
+                  "rule": {
+                    "effect": "SHOW",
+                    "condition": {
+                      "scope": "#/properties/address/properties/country",
+                      "schema": {
+                        "allOf": [
+                          {
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "const": ""
+                                },
+                                {
+                                  "type": "array",
+                                  "maxItems": 0
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "not": {
+                              "const": "USA: UNITED STATES"
+                            }
+                          }
+                        ]
+                      },
+                      "failWhenUndefined": true
+                    }
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/country",
+                  "label": "Country"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/address/properties/zip_code",
+                  "label": "Zip / Postal Code"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/phone",
+                  "label": "Phone Number"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/fax",
+                  "label": "Fax Number"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/email",
+                  "label": "Email"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/credential",
+                  "label": "Credential, e.g., Agency Login"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/degree_type",
+                  "label": "Degree Type"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/degree_year",
+                  "label": "Degree Year"
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/biographical_sketch",
+                  "label": "Biographical Sketch",
+                  "options": {
+                    "widget": "Attachment"
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/current_pending_support",
+                  "label": "Current & Pending Support",
+                  "options": {
+                    "widget": "Attachment"
+                  }
+                }
+              ]
+            },
+            "widget": "CollapsibleFieldList"
+          },
+          "label": "Senior/Key Person Profiles"
+        }
+      ],
+      "options": {
+        "description": "Enter a profile for each senior/key person on the project, up to 99."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/additional_profiles",
+          "label": "Additional Senior/Key Person Profile(s)",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/additional_biographical_sketches",
+          "label": "Additional Biographical Sketch(es)",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/additional_current_pending_support",
+          "label": "Additional Current & Pending Support",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Additional Profiles and Attachments",
+      "options": {
+        "description": "If the project has more than 99 senior/key persons, attach the rest of their profiles and supporting documents, each kind in a single file."
+      }
+    }
+  ],
+  "label": "Research and Related Senior/Key Person Profile (Expanded), Grants.gov version 4.0."
+}

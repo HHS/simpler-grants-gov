@@ -15,7 +15,11 @@ from src.constants.lookup_constants import CompetitionOpenToApplicant
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
-from src.form_schema.forms import get_active_forms, init_form_registry
+from src.form_schema.forms import (
+    get_active_forms,
+    get_forms_for_all_forms_competition,
+    init_form_registry,
+)
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_agencies_and_users import _build_agencies_and_users
@@ -583,6 +587,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "165fad29-80d2-4c2d-b86b-1906fd68cf3f",
         ),
         (
+            "EPA_KeyContacts_Generated",
+            "E2E-EPAKCG",
+            "EPA Key Contacts Form (Generated)",
+            "b677779b-2081-4212-8f38-7781f43af676",
+            "c28049b0-8cfb-452d-a300-b095d465be5b",
+        ),
+        (
             "GG_LobbyingForm",
             "E2E-GGLOB",
             "Grants.gov Lobbying Form",
@@ -595,6 +606,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "Key Contacts",
             "3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31",
             "7c9e2b4a-1f6d-4a83-95b2-3d8e6f1c9a47",
+        ),
+        (
+            "Key_Contacts_Generated",
+            "E2E-KCG",
+            "Key Contacts (Generated)",
+            "1954f7d4-9d41-4d52-b7fc-c97d28815a9b",
+            "6eb15876-482c-499c-a8c5-e17588eae192",
         ),
         (
             "OtherNarrativeAttachments",
@@ -630,6 +648,34 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "Project Performance Site Location(s)",
             "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
             "7fc52d4e-6efb-421d-8b0a-8c9e982f1e0f",
+        ),
+        (
+            "PerformanceSite_Generated",
+            "E2E-PPSLG",
+            "Project Performance Site Location(s) (Generated)",
+            "4b585a14-ab56-42c1-a01f-78eba5b93d97",
+            "1123199e-23f8-4d7e-a6dc-d212e1f7ff6c",
+        ),
+        (
+            "RR_KeyPerson_Generated",
+            "E2E-RRKPG",
+            "R&R Senior/Key Person Profile (Generated)",
+            "17a8581a-779f-4199-a3f6-a2ffe7293dec",
+            "e01467fd-70b7-4cd2-9fbc-1fc455b2ce93",
+        ),
+        (
+            "RR_KeyPersonExpanded_Generated",
+            "E2E-RRKPEG",
+            "R&R Senior/Key Person Profile (Expanded) (Generated)",
+            "60993a94-d03a-4fcd-a97d-59608282c1c4",
+            "e789d45b-3123-4d32-a69b-c6883af7d370",
+        ),
+        (
+            "NSF_KeyPersonExpanded_Generated",
+            "E2E-NSFKPEG",
+            "NSF Senior/Key Person Profile (Expanded) (Generated)",
+            "7b0b7e69-0943-429e-b380-ebaf69985400",
+            "9607f84f-ab9b-4d23-a5aa-d055318a5660",
         ),
         (
             "SF424_4_0",
@@ -734,14 +780,15 @@ def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> C
     _build_custom_test_competitions(forms_map)
 
     forms = list(forms_map.values())
+    all_form_competition_forms = get_forms_for_all_forms_competition(forms)
 
     static_all_form_competition = _build_static_competition_with_all_forms(
         db_session,
-        forms,
+        all_form_competition_forms,
         static_opportunity_id=uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
         static_competition_id=uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"),
     )
-    all_form_competition = _build_competition_with_all_forms(forms)
+    all_form_competition = _build_competition_with_all_forms(all_form_competition_forms)
     competition_container = CompetitionContainer(
         static_competition_with_all_forms=static_all_form_competition,
         competition_with_all_forms=all_form_competition,

@@ -101,6 +101,21 @@ EXPECTED_FORM_DATA = {
         "omb_number": "4040-0010",
         "expiration_date": "08/31/2029",
     },
+    772: {
+        "form_name": "Research & Related Senior/Key Person Profile",
+        "omb_number": "4040-0001",
+        "expiration_date": "01/31/2029",
+    },
+    774: {
+        "form_name": "Research and Related Senior/Key Person Profile (Expanded)",
+        "omb_number": "4040-0001",
+        "expiration_date": "01/31/2029",
+    },
+    828: {
+        "form_name": "NSF Senior/Key Person Profile (Expanded)",
+        "omb_number": "3145-0058",
+        "expiration_date": "11/30/2026",
+    },
 }
 
 
@@ -247,6 +262,12 @@ def test_epa_key_contact_v2_0(epa_key_contact_v2_0):
         epa_key_contact_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
+    assert epa_key_contact_v2_0.sgg_version == "1.0"
+
+
+def test_epa_key_contact_generated_v2_0_has_instructions(epa_key_contact_generated_v2_0):
+    # The hand-written form has no instructions to share; the generated one has its own.
+    assert epa_key_contact_generated_v2_0.form_instruction_id is not None
 
 
 def test_key_contacts_v2_0(key_contacts_v2_0):
@@ -255,6 +276,17 @@ def test_key_contacts_v2_0(key_contacts_v2_0):
     assert (
         key_contacts_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert key_contacts_v2_0.sgg_version == "1.0"
+    assert key_contacts_v2_0.form_instruction_id is not None
+
+
+def test_key_contacts_forms_have_distinct_instructions(
+    key_contacts_handwritten_v2_0, key_contacts_generated_v2_0
+):
+    assert (
+        key_contacts_handwritten_v2_0.form_instruction_id
+        != key_contacts_generated_v2_0.form_instruction_id
     )
 
 
@@ -272,3 +304,49 @@ def test_project_performance_site_location_v4_0(project_performance_site_locatio
         project_performance_site_location_v4_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
+    assert project_performance_site_location_v4_0.sgg_version == "1.0"
+    assert project_performance_site_location_v4_0.form_instruction_id is not None
+
+
+def test_performance_sites_forms_have_distinct_instructions(
+    project_performance_site_location_handwritten_v4_0, performance_sites_generated_v4_0
+):
+    assert (
+        project_performance_site_location_handwritten_v4_0.form_instruction_id
+        != performance_sites_generated_v4_0.form_instruction_id
+    )
+
+
+def test_rr_key_person_generated_v3_0(rr_key_person_generated_v3_0):
+    expected_values = EXPECTED_FORM_DATA.get(rr_key_person_generated_v3_0.legacy_form_id)
+    assert rr_key_person_generated_v3_0.omb_number == expected_values["omb_number"]
+    assert (
+        rr_key_person_generated_v3_0.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert rr_key_person_generated_v3_0.sgg_version == "1.0"
+    assert rr_key_person_generated_v3_0.form_instruction_id is not None
+
+
+def test_rr_key_person_expanded_generated_v4_0(rr_key_person_expanded_generated_v4_0):
+    form = rr_key_person_expanded_generated_v4_0
+    expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.omb_number == expected_values["omb_number"]
+    assert (
+        form.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert form.sgg_version == "1.0"
+    assert form.form_instruction_id is not None
+
+
+def test_nsf_key_person_expanded_generated_v3_3(nsf_key_person_expanded_generated_v3_3):
+    form = nsf_key_person_expanded_generated_v3_3
+    expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.omb_number == expected_values["omb_number"]
+    assert (
+        form.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert form.sgg_version == "1.0"
+    assert form.form_instruction_id is not None
