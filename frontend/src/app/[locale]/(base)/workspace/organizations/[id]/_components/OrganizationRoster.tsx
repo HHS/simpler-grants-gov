@@ -1,11 +1,13 @@
 import { MissingAuthError } from "src/errors";
+import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 import { getOrganizationUsers } from "src/services/fetch/fetchers/organizationsFetcher";
 import { logger } from "src/services/logger/simplerLogger";
 import { UserDetail } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import { Alert, Table } from "@trussworks/react-uswds";
+import { cookies } from "next/headers";
+import { Alert, Table, Tag } from "@trussworks/react-uswds";
 
 import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 import { OrganizationRosterInfo } from "./OrganizationRosterInfo";
@@ -47,12 +49,20 @@ export const OrganizationRosterSkeleton = ({
   );
 };
 
+type OrganizationUserRowProps = UserDetail & {
+  showExternal?: boolean;
+  externalLabel?: string;
+};
+
 const OrganizationUserRow = ({
   email,
   first_name,
   last_name,
   roles,
-}: UserDetail) => {
+  is_external,
+  showExternal = false,
+  externalLabel,
+}: OrganizationUserRowProps) => {
   const fullName = first_name && last_name ? `${first_name} ${last_name}` : "";
   const roleNames = roles?.reduce(
     (joined, { role_name }, index) =>
@@ -64,6 +74,11 @@ const OrganizationUserRow = ({
       <td>{email}</td>
       <td>{fullName}</td>
       <td>{roleNames}</td>
+      {showExternal && (
+        <td>
+          {is_external && <Tag className="radius-sm">{externalLabel}</Tag>}
+        </td>
+      )}
     </tr>
   );
 };
@@ -74,6 +89,10 @@ export const OrganizationRoster = async ({
   organizationId: string;
 }) => {
   const t = await getTranslations("OrganizationDetail.rosterTable");
+  const showExternal = featureFlagsManager.isFeatureEnabled(
+    "enableExternalCollaborators",
+    await cookies(),
+  );
 
   let organizationUsers;
   try {
@@ -109,11 +128,21 @@ export const OrganizationRoster = async ({
               <th scope="col" className="bg-base-lightest padding-y-205">
                 {t("headings.roles")}
               </th>
+              {showExternal && (
+                <th scope="col" className="bg-base-lightest padding-y-205">
+                  {t("headings.external")}
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {organizationUsers.map((props: UserDetail) => (
-              <OrganizationUserRow {...props} key={props.email} />
+              <OrganizationUserRow
+                {...props}
+                key={props.email}
+                showExternal={showExternal}
+                externalLabel={t("externalTag")}
+              />
             ))}
           </tbody>
         </Table>

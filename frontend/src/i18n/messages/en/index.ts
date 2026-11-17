@@ -1744,7 +1744,9 @@ export const messages = {
         email: "Email",
         name: "Name",
         roles: "Roles",
+        external: "External",
       },
+      externalTag: "External",
     },
   },
   ManageUsers: {
@@ -1787,6 +1789,8 @@ export const messages = {
       actionsHeading: "Actions",
       admin: "Administrator",
       emailHeading: "Email",
+      externalHeading: "External",
+      externalTag: "External",
       member: "Member",
       nameHeading: "Name",
       noUsersFound: "No users found.",

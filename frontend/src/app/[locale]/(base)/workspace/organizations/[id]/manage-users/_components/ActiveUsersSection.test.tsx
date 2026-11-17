@@ -18,6 +18,19 @@ jest.mock("next-intl/server", () => ({
   getTranslations: (namespace: string) => getTranslationsMock(namespace),
 }));
 
+const isFeatureEnabledMock = jest.fn<boolean, [string, unknown]>(() => false);
+
+jest.mock("src/services/featureFlags/FeatureFlagManager", () => ({
+  featureFlagsManager: {
+    isFeatureEnabled: (name: string, cookies: unknown) =>
+      isFeatureEnabledMock(name, cookies),
+  },
+}));
+
+jest.mock("next/headers", () => ({
+  cookies: () => Promise.resolve({}),
+}));
+
 const tableWithResponsiveHeaderMock = jest.fn<void, [unknown]>();
 
 jest.mock("src/components/core/TableWithResponsiveHeader", () => ({
@@ -38,6 +51,7 @@ const makeResource = (
 describe("ActiveUsersSection", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    isFeatureEnabledMock.mockReturnValue(false);
   });
 
   it("renders zero-state text when there are no active users", async () => {
@@ -250,5 +264,83 @@ describe("ActiveUsersSection", () => {
 
     expect(actionsCellElement).toBeTruthy();
     expect(actionsCellElement.props.disabled).toBe(true);
+  });
+
+  describe("external collaborator column", () => {
+    const roles: UserRole[] = [
+      { role_id: "role-1", role_name: "Admin", privileges: [] },
+    ];
+
+    const users: UserDetail[] = [
+      {
+        user_id: "user-1",
+        email: "external@example.com",
+        first_name: "Ext",
+        last_name: "Ernal",
+        roles,
+        is_external: true,
+      },
+      {
+        user_id: "user-2",
+        email: "staff@example.com",
+        first_name: "Staff",
+        last_name: "Person",
+        roles,
+        is_external: false,
+      },
+    ];
+
+    const loadTableProps = async () => {
+      const component = await ActiveUsersSection({
+        organizationId: "org-123",
+        activeUsers: makeResource({ data: users }),
+        roles: makeResource({ data: roles }),
+      });
+      render(component);
+      await screen.findByTestId("active-users-table");
+      return tableWithResponsiveHeaderMock.mock.calls[0][0] as {
+        headerContent: { cellData: string }[];
+        tableRowData: { cellData: unknown }[][];
+      };
+    };
+
+    it("does not render the External column when the feature flag is off", async () => {
+      isFeatureEnabledMock.mockReturnValue(false);
+
+      const tableProps = await loadTableProps();
+
+      expect(isFeatureEnabledMock).toHaveBeenCalledWith(
+        "enableExternalCollaborators",
+        expect.anything(),
+      );
+      expect(
+        tableProps.headerContent.map((header) => header.cellData),
+      ).not.toContain("usersTable.externalHeading");
+      expect(tableProps.tableRowData[0]).toHaveLength(4);
+    });
+
+    it("renders the External column when the feature flag is on", async () => {
+      isFeatureEnabledMock.mockReturnValue(true);
+
+      const tableProps = await loadTableProps();
+
+      expect(tableProps.headerContent.map((header) => header.cellData)).toEqual(
+        [
+          "usersTable.nameHeading",
+          "usersTable.emailHeading",
+          "usersTable.roleHeading",
+          "usersTable.externalHeading",
+          "usersTable.actionsHeading",
+        ],
+      );
+
+      const [externalRow, staffRow] = tableProps.tableRowData;
+      expect(externalRow).toHaveLength(5);
+
+      render(<>{externalRow[3].cellData}</>);
+      expect(screen.getByText("usersTable.externalTag")).toBeVisible();
+
+      expect(staffRow[3].cellData).toBe("");
+    });
   });
 });

@@ -81,6 +81,7 @@ export interface UserDetailProfile {
 export interface UserDetail extends UserDetailProfile {
   user_id: string;
   email: string;
+  is_external?: boolean;
 }
 
 export interface UserDetailWithProfile {

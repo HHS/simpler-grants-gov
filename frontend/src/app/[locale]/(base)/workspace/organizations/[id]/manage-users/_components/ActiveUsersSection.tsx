@@ -1,11 +1,13 @@
 import { RemoveUserButton } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RemoveUserButton";
 import { RoleManager } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RoleManager";
+import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 import type { FetchedResource } from "src/types/authTypes";
 import type { UserDetail, UserRole } from "src/types/userTypes";
 import { formatFullName } from "src/utils/userNameUtils";
 
 import { getTranslations } from "next-intl/server";
-import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
+import { cookies } from "next/headers";
+import { ErrorMessage, GridContainer, Tag } from "@trussworks/react-uswds";
 
 import {
   TableCellData,
@@ -24,6 +26,10 @@ export async function ActiveUsersSection({
   roles,
 }: ActiveUsersSectionProps) {
   const t = await getTranslations("ManageUsers");
+  const showExternal = featureFlagsManager.isFeatureEnabled(
+    "enableExternalCollaborators",
+    await cookies(),
+  );
 
   const usersData = activeUsers.data as UserDetail[] | undefined;
   const usersError = activeUsers.error;
@@ -54,6 +60,7 @@ export async function ActiveUsersSection({
     { cellData: t("usersTable.nameHeading") },
     { cellData: t("usersTable.emailHeading") },
     { cellData: t("usersTable.roleHeading") },
+    ...(showExternal ? [{ cellData: t("usersTable.externalHeading") }] : []),
     { cellData: t("usersTable.actionsHeading") },
   ];
 
@@ -103,6 +110,18 @@ export async function ActiveUsersSection({
           ),
           className: rowClassName,
         },
+        ...(showExternal
+          ? [
+              {
+                cellData: user.is_external ? (
+                  <Tag className="radius-sm">{t("usersTable.externalTag")}</Tag>
+                ) : (
+                  ""
+                ),
+                className: rowClassName,
+              },
+            ]
+          : []),
         {
           cellData: (
             <RemoveUserButton
