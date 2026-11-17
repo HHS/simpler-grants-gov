@@ -21,8 +21,8 @@ import {
   modelProperties,
   propMappedFrom,
   type PropertyCasing,
+  propTransform,
 } from "./simpler-forms.js";
-import { transformOf, transformParamsOf } from "./transforms.js";
 import { declaredNamespaces } from "./xml-transform.js";
 
 /**
@@ -187,8 +187,7 @@ function leaf(
   type = prop.type,
 ): Value {
   if (isAttachment(program, type)) return { $attachment: field };
-  const transform = transformOf(program, prop);
-  const params = transformParamsOf(program, prop);
+  const { name: transform, params } = propTransform(program, prop) ?? {};
   return transform
     ? {
         $transform: {

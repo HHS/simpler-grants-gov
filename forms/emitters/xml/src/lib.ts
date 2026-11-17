@@ -70,21 +70,12 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`The XML transform rules leave out ${"element"}: it holds ${"reason"}, and the API writes an attachment only as a single file at the root.`,
       },
     },
-    "mapping-transform-unknown": {
-      severity: "error",
-      messages: {
-        default: paramMessage`@Mapping.transform names ${"name"}, which is not a member of an enum declared with @Mapping.transforms.`,
-      },
-    },
   },
   emitter: { options: EmitterOptionsSchema },
   state: {
     xsd: {},
     form: {},
     attachment: {},
-    transforms: {},
-    transform: {},
-    transformParams: {},
   },
 } as const);
 
