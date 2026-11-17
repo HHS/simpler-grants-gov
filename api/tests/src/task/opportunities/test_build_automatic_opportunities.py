@@ -111,7 +111,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 41
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 47
     # Nothing is missing, so nothing is backfilled or changed
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
     assert [c.public_competition_id for c in competitions] == public_competition_ids
