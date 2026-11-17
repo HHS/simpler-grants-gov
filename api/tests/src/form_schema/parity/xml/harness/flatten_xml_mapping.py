@@ -13,6 +13,8 @@ Both branches of a `when` are read, and a `required` value as the value it wraps
 
 from typing import Any
 
+from src.services.xml_generation.mapping.paths import steps
+
 from ...paths import ARRAY, Path
 
 #: The `format` a mapping in this shape declares.
@@ -150,9 +152,15 @@ def _source(value: Any, prefix: str) -> str | None:
 
 
 def _join(prefix: str, path: str) -> str:
-    """A field below `prefix`. `.` is the item itself. A whole-number step reads one entry of a
-    list, so it stands for any item: `types.0` -> `types.[]`."""
+    """A field below `prefix`. `.` is the item itself. An index reads one entry of a list, so
+    it stands for any item (`types[0]` or `types.0` -> `types.[]`); a range is still the list
+    (`sites[1:]` -> `sites`)."""
     if path == ".":
         return prefix
-    steps = [ARRAY if step.isdecimal() else step for step in path.split(".")]
-    return ".".join([prefix, *steps] if prefix else steps)
+    names: list[str] = []
+    for step in steps(path):
+        if isinstance(step, int) or (isinstance(step, str) and step.isdecimal()):
+            names.append(ARRAY)
+        elif isinstance(step, str):
+            names.append(step)
+    return ".".join([prefix, *names] if prefix else names)
