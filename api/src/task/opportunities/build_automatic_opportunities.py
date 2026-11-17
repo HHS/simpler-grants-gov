@@ -2,11 +2,12 @@ import dataclasses
 import logging
 import os
 import random
+import re
 import uuid
 from datetime import date
 from enum import StrEnum
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from src.adapters import db
 from src.adapters.aws import S3Config
@@ -64,15 +65,29 @@ DEFAULT_COMPETITION_TITLE = "Competition for testing purposes"
 # Grants.gov limits competition IDs to 40 characters (CompetitionIDDataType)
 PUBLIC_COMPETITION_ID_MAX_LENGTH = 40
 
+# A new ALL-forms opportunity is created each day, with the date after this prefix
+ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX = "SGG-ALL-Forms-"
+
 
 def build_public_competition_id(opportunity_number: str, competition_number: int) -> str:
-    """Build a stable public competition ID from the opportunity number,
-    e.g. E2E-SFLLL-ORG-IND-01-C01 for the first competition.
+    """Build a stable, uppercase public competition ID from the opportunity
+    number, e.g. SGG-ALL-FORMS-2026-11-16-C01 for the first competition.
 
     Long opportunity numbers are cut so the ID stays within the limit.
     """
     suffix = f"-C{competition_number:02d}"
-    return opportunity_number[: PUBLIC_COMPETITION_ID_MAX_LENGTH - len(suffix)] + suffix
+    return opportunity_number.upper()[: PUBLIC_COMPETITION_ID_MAX_LENGTH - len(suffix)] + suffix
+
+
+def build_competition_title(opportunity_number: str, title: str) -> str:
+    """Add the opportunity number to the default title, preserving custom titles."""
+    if title != DEFAULT_COMPETITION_TITLE:
+        return title
+
+    name = opportunity_number.removeprefix("SGG-")
+    if name.startswith("ALL-Forms-"):
+        name = re.sub(r"-\d{4}-\d{2}-\d{2}$", "", name)
+    return f"{name} {DEFAULT_COMPETITION_TITLE}"
 
 
 @dataclasses.dataclass
@@ -249,10 +264,11 @@ class BuildAutomaticOpportunitiesTask(Task):
         self.create_opportunity(
             OpportunityContainer(
                 opportunity_title=f"Opportunity with ALL forms - {datetime_util.get_now_us_eastern_date().isoformat()}",
-                opportunity_number=f"SGG-ALL-Forms-{datetime_util.get_now_us_eastern_date().isoformat()}",
+                opportunity_number=f"{ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX}{datetime_util.get_now_us_eastern_date().isoformat()}",
             ),
             competitions=[CompetitionContainer(optional_form_ids=[form.form_id for form in forms])],
         )
+        self.backfill_previous_all_forms_opportunities()
 
         # Create various other specific scenarios
         self._create_opportunity_scenarios()
@@ -836,6 +852,28 @@ class BuildAutomaticOpportunitiesTask(Task):
         )
         self.increment(self.Metrics.OPPORTUNITY_CREATED_COUNT)
 
+    def backfill_previous_all_forms_opportunities(self) -> None:
+        """ALL-forms opportunities from earlier days are never looked up again
+        (the number has the date in it), so backfill their competitions here.
+        """
+        opportunities = self.db_session.scalars(
+            select(Opportunity).where(
+                Opportunity.opportunity_number.startswith(ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX),
+                Opportunity.competitions.any(
+                    or_(
+                        Competition.public_competition_id.is_(None),
+                        Competition.competition_title.is_(None),
+                    )
+                ),
+            )
+        ).all()
+
+        for opportunity in opportunities:
+            if opportunity.opportunity_number:
+                self.backfill_competitions(
+                    opportunity, opportunity.opportunity_number, [CompetitionContainer()]
+                )
+
     def backfill_competitions(
         self,
         opportunity: Opportunity,
@@ -859,11 +897,14 @@ class BuildAutomaticOpportunitiesTask(Task):
             )
             if not competition.public_competition_id:
                 competition.public_competition_id = (
-                    comp_data.public_competition_id
-                    or build_public_competition_id(opportunity_number, competition_number)
+                    comp_data.public_competition_id.upper()
+                    if comp_data.public_competition_id
+                    else build_public_competition_id(opportunity_number, competition_number)
                 )
             if not competition.competition_title:
-                competition.competition_title = comp_data.competition_title
+                competition.competition_title = build_competition_title(
+                    opportunity_number, comp_data.competition_title
+                )
 
             logger.info(
                 f"Backfilled competition for opportunity '{opportunity_number}'",
@@ -887,9 +928,14 @@ class BuildAutomaticOpportunitiesTask(Task):
         competition = Competition(
             competition_id=uuid.uuid4(),
             opportunity=opportunity,
-            public_competition_id=comp_data.public_competition_id
-            or build_public_competition_id(opportunity_number, competition_number),
-            competition_title=comp_data.competition_title,
+            public_competition_id=(
+                comp_data.public_competition_id.upper()
+                if comp_data.public_competition_id
+                else build_public_competition_id(opportunity_number, competition_number)
+            ),
+            competition_title=build_competition_title(
+                opportunity_number, comp_data.competition_title
+            ),
             opening_date=comp_data.opening_date,
             closing_date=comp_data.closing_date,
             grace_period=comp_data.grace_period,

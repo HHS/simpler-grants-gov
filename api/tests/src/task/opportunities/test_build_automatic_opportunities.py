@@ -17,8 +17,10 @@ from src.form_schema.forms import (
     get_active_forms,
 )
 from src.task.opportunities.build_automatic_opportunities import (
+    DEFAULT_COMPETITION_TITLE,
     PUBLIC_COMPETITION_ID_MAX_LENGTH,
     BuildAutomaticOpportunitiesTask,
+    build_competition_title,
     build_public_competition_id,
 )
 
@@ -92,8 +94,15 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
         )
         assert competition.public_competition_id != str(competition.competition_id)
         assert len(competition.public_competition_id) <= PUBLIC_COMPETITION_ID_MAX_LENGTH
+        assert competition.public_competition_id.isupper()
         assert competition.competition_title
     assert len(set(public_competition_ids)) == len(public_competition_ids)
+
+    # Default titles include the form name so the competitions are easy to tell apart
+    titles_by_opp_number = {
+        c.opportunity.opportunity_number: c.competition_title for c in competitions
+    }
+    assert titles_by_opp_number["SGG-SF424_4_0"] == f"SF424_4_0 {DEFAULT_COMPETITION_TITLE}"
 
     # If we rerun the task, all opportunities should be skipped (including ALL-forms)
     task = BuildAutomaticOpportunitiesTask(db_session)
@@ -142,7 +151,7 @@ def test_backfills_missing_competition_data(enable_factory_create, db_session, f
         sflll_competition.competition_title
         == "E2E Disclosure of Lobbying Activities (SF-LLL) ORG IND CT01"
     )
-    assert doj_competition.public_competition_id == "MOCK-O-OVW-2025-172425-Dec102025-C01"
+    assert doj_competition.public_competition_id == "MOCK-O-OVW-2025-172425-DEC102025-C01"
     assert (
         doj_competition.competition_title
         == "Tribal Domestic Violence and Sexual Assault Coalitions Grant Program"
@@ -159,14 +168,72 @@ def test_backfills_missing_competition_data(enable_factory_create, db_session, f
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
 
 
+def test_backfills_previous_all_forms_opportunities(enable_factory_create, db_session, forms):
+    # A new ALL-forms opportunity is created each day
+    all_forms_numbers = ["SGG-ALL-Forms-2026-03-01", "SGG-ALL-Forms-2026-03-02"]
+    for day in ["2026-03-01", "2026-03-02"]:
+        with freeze_time(f"{day} 12:00:00"):
+            BuildAutomaticOpportunitiesTask(db_session).run()
+
+    competitions_by_opp_number = {
+        opportunity.opportunity_number: opportunity.competitions[0]
+        for opportunity in db_session.scalars(
+            select(Opportunity).where(Opportunity.opportunity_number.in_(all_forms_numbers))
+        )
+    }
+    assert set(competitions_by_opp_number) == set(all_forms_numbers)
+
+    # Simulate ALL-forms competitions created before the fix
+    for competition in competitions_by_opp_number.values():
+        competition.public_competition_id = None
+        competition.competition_title = None
+    db_session.commit()
+
+    # A later day's run never looks these opportunities up by number, but still backfills them
+    with freeze_time("2026-03-03 12:00:00"):
+        task = BuildAutomaticOpportunitiesTask(db_session)
+        task.run()
+
+    assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 2
+
+    db_session.expire_all()
+    for opp_number, competition in competitions_by_opp_number.items():
+        assert competition.public_competition_id == f"{opp_number}-C01".upper()
+        assert competition.competition_title == f"ALL-Forms {DEFAULT_COMPETITION_TITLE}"
+
+    # Once backfilled, another run has nothing left to do
+    with freeze_time("2026-03-03 12:00:00"):
+        task = BuildAutomaticOpportunitiesTask(db_session)
+        task.run()
+    assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
+
+
 def test_build_public_competition_id():
     assert build_public_competition_id("E2E-SFLLL-ORG-IND-01", 1) == "E2E-SFLLL-ORG-IND-01-C01"
     assert build_public_competition_id("E2E-SFLLL-ORG-IND-01", 12) == "E2E-SFLLL-ORG-IND-01-C12"
+    # IDs are always uppercase
+    assert (
+        build_public_competition_id("SGG-ALL-Forms-2026-11-16", 1) == "SGG-ALL-FORMS-2026-11-16-C01"
+    )
 
     # Long opportunity numbers are cut to stay within the limit
     long_id = build_public_competition_id("SGG-SupplementaryCoverSheetforNEHGrantPrograms", 1)
-    assert long_id == "SGG-SupplementaryCoverSheetforNEHGra-C01"
+    assert long_id == "SGG-SUPPLEMENTARYCOVERSHEETFORNEHGRA-C01"
     assert len(long_id) == PUBLIC_COMPETITION_ID_MAX_LENGTH
+
+
+def test_build_competition_title():
+    assert (
+        build_competition_title("SGG-SF424_4_0", DEFAULT_COMPETITION_TITLE)
+        == f"SF424_4_0 {DEFAULT_COMPETITION_TITLE}"
+    )
+    # The date is left out for ALL-forms opportunities
+    assert (
+        build_competition_title("SGG-ALL-Forms-2026-11-16", DEFAULT_COMPETITION_TITLE)
+        == f"ALL-Forms {DEFAULT_COMPETITION_TITLE}"
+    )
+    # Custom titles are kept as-is
+    assert build_competition_title("E2E-SFLLL-ORG-IND-01", "Custom title") == "Custom title"
 
 
 def test_public_competition_ids_are_unique_for_all_form_opportunities():
