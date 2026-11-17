@@ -410,7 +410,6 @@ class JobType(StrEnum):
     LOAD_TRANSFORM = "load-transform"
     SETUP_FOREIGN_TABLES = "setup-foreign-tables"
     LOAD_OPPORTUNITY_DATA_OPENSEARCH = "load-opportunity-data-opensearch"
-    SETUP_LOWER_ENV_AGENCIES = "setup-lower-env-agencies"
     CREATE_ANALYTICS_DB_CSVS = "create-analytics-db-csvs"
     CREATE_APPLICATION_SUBMISSION = "create-application-submission"
     SETUP_CERT_USER = "setup-cert-user"
