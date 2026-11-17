@@ -446,6 +446,46 @@ describe("generateXml", () => {
     );
   });
 
+  it("reads a list's entries with brackets: by index from either end, or a range", async () => {
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: {
+        Root: {
+          First: { $field: "sites[0].name" },
+          Last: { $field: "codes[-1]" },
+          Missing: { $field: "codes[5]" },
+          Code: { $field: "codes[1:3]" },
+          Other: {
+            $each: {
+              items: { $field: "sites[1:]" },
+              map: { Name: { $field: "name" } },
+            },
+          },
+        },
+      },
+    };
+    await expectValid(mapping);
+    const data = {
+      sites: [{ name: "HQ" }, { name: "Lab" }, { name: "Field" }],
+      codes: ["A", "C", "F", "K"],
+    };
+    expect(generateXml(mapping, data)).toEqual(
+      `<?xml version='1.0' encoding='utf-8'?>\n<f:Root xmlns:f="urn:f">\n  <f:First>HQ</f:First>\n  <f:Last>K</f:Last>\n  <f:Code>C</f:Code>\n  <f:Code>F</f:Code>\n  <f:Other>\n    <f:Name>Lab</f:Name>\n  </f:Other>\n  <f:Other>\n    <f:Name>Field</f:Name>\n  </f:Other>\n</f:Root>`,
+    );
+  });
+
+  it("refuses a range before a path's last step", () => {
+    const mapping: XmlMapping = {
+      format: "xml-mapping",
+      namespaces: { default: "urn:f", f: "urn:f" },
+      root: { Root: { Name: { $field: "sites[1:].name" } } },
+    };
+    expect(() => generateXml(mapping, { sites: [] })).toThrow(
+      "a range must be a path's last step: sites[1:].name",
+    );
+  });
+
   it("writes a $required element empty when it has nothing to write", async () => {
     const mapping: XmlMapping = {
       format: "xml-mapping",
