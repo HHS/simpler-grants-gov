@@ -65,6 +65,12 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`${"name"} installs its XML as transform rules, which leave out ${"elements"}. Use @Sgg.sync(#{ xml: "mapping" }), which writes them.`,
       },
     },
+    "unsupported-calculation": {
+      severity: "warning",
+      messages: {
+        default: paramMessage`${"name"} isn't calculated by the API: ${"reason"}.`,
+      },
+    },
   },
   state: {
     sync: {},

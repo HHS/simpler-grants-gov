@@ -41,11 +41,12 @@ application.
 
 ## Output
 
-One file per form, and a rule schema for a form with attachments, under `dist/sgg/`:
+One file per form, and a rule schema for a form with attachments, population rules or
+calculations, under `dist/sgg/`:
 
 ```
 forms/<id>/sgg.json           { "sync": false | { "xml": false | "transform" | "mapping", "sggVersion", "formType"?, "instructions"? }, "grantsGov": { ... } | null }
-forms/<id>/rule-schema.json   { "<field>": { "gg_validation": { "rule": "attachment" } }, ... }
+forms/<id>/rule-schema.json   { "<field>": { "gg_validation": { "rule": "attachment" } }, "<total>": { "gg_pre_population": { "rule": "sum_monetary", ... } }, ... }
 ```
 
 Set `property-casing` to match the `simpler-forms` emitter's, so the rule schema's keys
@@ -68,3 +69,35 @@ npm run check:types -w emitters/sgg
 They emit `gg_pre_population` and `gg_post_population` in the rule schema.
 Population runs only in the API.
 Set read-only and requiredness separately. A field can have one population rule.
+
+## Calculations
+
+simpler-forms' calculation decorators emit `gg_pre_population` rules, so the API fills
+those answers in from the others:
+
+| simpler-forms                                                                  | API rule                                                            |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `@Validation.computed(Op.Sum, ...)` or `@Validation.computedFrom(Op.Sum, ...)` | `sum_monetary` with `fields`                                        |
+| `Op.Subtract`                                                                  | `subtract_monetary`, the first field minus the rest                 |
+| `Op.PercentOf`                                                                 | `multiply_by_percentage` with `amount` and `percentage`             |
+| `@Validation.totals(sources...)`                                               | One `sum_monetary` per money field of the block, across the sources |
+
+```json
+"activity_totals": {
+  "federal": { "gg_pre_population": { "rule": "sum_monetary", "fields": ["activities[*].summary.federal"] } },
+  "total": { "gg_pre_population": { "rule": "sum_monetary", "fields": ["activities[*].summary.total"], "order": 2 } }
+}
+```
+
+- **Paths:** A sibling is read as `@THIS.<name>`, or by its plain name at the form's root.
+  A `@Validation.computedFrom` path starting with `/` is absolute, and `[*]` reads every
+  entry of a list. `@Validation.totals` reads its sources by absolute path, so a total
+  can't sit inside a list.
+- **Order:** A calculation that reads another calculation gets `order` one higher than
+  it, so the API writes a total of totals last. `@Validation.evaluationOrder` sets it
+  directly.
+- **Money:** `@Validation.totals` adds up the fields whose type has
+  `@Meta.tag(Catalogue.Tag.money)`.
+- **Not supported by the API**, so skipped with an `sgg/unsupported-calculation` warning:
+  a sum of counts, and a `../` path. `@Validation.materializeWhenAnySourcePresent` is
+  ignored with a warning, since the API always writes the result.
