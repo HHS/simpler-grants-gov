@@ -1,0 +1,30 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/ProjectNarrativeAttachments_1_2-V1.2",
+    "ProjectNarrativeAttachments_1_2": "http://apply.grants.gov/forms/ProjectNarrativeAttachments_1_2-V1.2",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/ProjectNarrativeAttachments_1_2-V1.2.xsd",
+  "root": {
+    "ProjectNarrativeAttachments_1_2": {
+      "@ProjectNarrativeAttachments_1_2:FormVersion": {
+        "$const": "1.2"
+      },
+      "Attachments": {
+        "att:AttachedFile": {
+          "$each": {
+            "items": {
+              "$field": "attachments"
+            },
+            "map": {
+              "$attachment": "."
+            }
+          }
+        }
+      }
+    }
+  }
+}

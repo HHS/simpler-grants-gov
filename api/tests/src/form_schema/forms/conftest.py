@@ -19,6 +19,7 @@ from src.form_schema.forms import (
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
+    ProjectNarrativeGenerated_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
     RRKeyPersonExpandedGenerated_v4_0,
     RRKeyPersonGenerated_v3_0,
@@ -116,9 +117,16 @@ def project_abstract_summary_v2_0():
     return setup_resolved_form(ProjectAbstractSummary_v2_0)
 
 
-@pytest.fixture(scope="session")
-def project_narrative_attachment_v1_2():
-    return setup_resolved_form(ProjectNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(ProjectNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def project_narrative_attachment_v1_2(request):
+    """The hand-written form and the one generated from forms/specs."""
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(scope="session")
