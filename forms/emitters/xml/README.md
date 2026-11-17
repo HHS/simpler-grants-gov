@@ -24,6 +24,15 @@ mapping (`xml-mapping.json`):
 | `@Mapping.when(F.kind, Operator.equals, "Revision")`  | `$when`                    |
 | `@Mapping.required`                                   | `$required`                |
 
+`@Mapping.when` works on any element: a value, a list, or a group of elements with no
+`@Mapping.from` of its own, like the SF-LLL's `MaterialChangeSupplement`, which is written,
+attributes and all, only for a material change:
+
+```typespec
+@Mapping.when(SFLLL.reportType, Operator.equals, "MaterialChange")
+@name("MaterialChangeSupplement") supplement?: MaterialChangeSupplement;
+```
+
 An optional element of its own with a `@Mapping.required` element inside is written only
 while the field it's filled from is answered.
 

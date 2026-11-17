@@ -311,5 +311,107 @@ describe("xmlMapping with simpler-forms' mapping decorators", () => {
       ]);
       expect(draft).toEqual(kept);
     });
+
+    it("writes a group of elements, with its attribute, only while its condition holds", async () => {
+      const { mapping, diagnostics } = await mappingOf(
+        "reportType?: string; changeYear?: string; lastReportDate?: string;",
+        `@Mapping.when(Forms.Example.reportType, Operator.equals, "MaterialChange")
+         @name("MaterialChangeSupplement") supplement?: Supplement;`,
+        `@ns(Ns.Form)
+         model Supplement {
+           @attribute @name("ReportType") reportType: "MaterialChange";
+           @Mapping.from(xml, Forms.Example.changeYear)
+           @name("MaterialChangeYear") year?: string;
+           @Mapping.from(xml, Forms.Example.lastReportDate)
+           @name("LastReportDate") lastReportDate?: string;
+         }`,
+      );
+      expect(errors(diagnostics)).toEqual([]);
+      expect(mapping?.root.FormRoot.MaterialChangeSupplement).toEqual({
+        $when: {
+          condition: {
+            field: "report_type",
+            operator: "equals",
+            value: "MaterialChange",
+          },
+          then: {
+            "@Form:ReportType": { $const: "MaterialChange" },
+            MaterialChangeYear: { $field: "change_year" },
+            LastReportDate: { $field: "last_report_date" },
+          },
+        },
+      });
+
+      const answers = { change_year: "2026", last_report_date: "2026-06-30" };
+      expect(
+        generateXml(mapping!, { ...answers, report_type: "MaterialChange" }),
+      ).toContain(
+        '<Form:MaterialChangeSupplement Form:ReportType="MaterialChange">',
+      );
+      expect(
+        generateXml(mapping!, { ...answers, report_type: "InitialFiling" }),
+      ).not.toContain("MaterialChangeSupplement");
+    });
+
+    it("writes an element filled from an object field only while its condition holds", async () => {
+      const { mapping, diagnostics } = await mappingOf(
+        "hasPartner?: boolean; partner?: Race;",
+        `@Mapping.from(xml, Forms.Example.partner)
+         @Mapping.when(Forms.Example.hasPartner, Operator.equals, true)
+         @name("Partner") partner?: Partner;`,
+        `@ns(Ns.Form)
+         model Partner {
+           @Mapping.from(xml, Forms.Race.name) @name("Name") name?: string;
+         }`,
+      );
+      expect(errors(diagnostics)).toEqual([]);
+      expect(mapping?.root.FormRoot.Partner).toEqual({
+        $when: {
+          condition: { field: "has_partner", operator: "equals", value: true },
+          then: { Name: { $field: "partner.name" } },
+        },
+      });
+
+      const partner = { name: "Partner Org" };
+      expect(generateXml(mapping!, { has_partner: true, partner })).toContain(
+        "<Form:Partner>",
+      );
+      expect(
+        generateXml(mapping!, { has_partner: false, partner }),
+      ).not.toContain("Partner");
+    });
+
+    it("writes a list only while its condition holds", async () => {
+      const { mapping, diagnostics } = await mappingOf(
+        "hasSites?: boolean; sites?: Race[];",
+        `@Mapping.from(xml, Forms.Example.sites)
+         @Mapping.when(Forms.Example.hasSites, Operator.equals, true)
+         @name("Site") sites?: Site[];`,
+        `@ns(Ns.Form)
+         model Site {
+           @Mapping.from(xml, Forms.Race.name) @name("Name") name?: string;
+         }`,
+      );
+      expect(errors(diagnostics)).toEqual([]);
+      expect(mapping?.root.FormRoot.Site).toEqual({
+        $when: {
+          condition: { field: "has_sites", operator: "equals", value: true },
+          then: {
+            $each: {
+              items: { $field: "sites" },
+              map: { Name: { $field: "name" } },
+            },
+          },
+        },
+      });
+
+      const sites = [{ name: "Main" }, { name: "Annex" }];
+      expect(
+        generateXml(mapping!, { has_sites: true, sites }).match(/<Form:Site>/g),
+      ).toHaveLength(2);
+      expect(generateXml(mapping!, { has_sites: false, sites })).not.toContain(
+        "Site",
+      );
+    });
   });
 });
