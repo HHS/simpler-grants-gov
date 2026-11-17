@@ -63,13 +63,12 @@ Use **Sentence case** with:
 * Buttons (per[ USWDS](https://designsystem.digital.gov/components/button/))
 * H2 form section headings
   * In application forms, H2s should be styled in sentence case
-* H3 subheadings and lower&#x20;
+* H2 subheadings and lower&#x20;
 
 \
 Use **Title Case** with:
 
 * Page titles and H1 headings
-* H2 page section headings
 * The subject line for Simpler.Grants.gov newsletters
   * The subject line follows a template where "\[Month] Updates" uses title case, while the latter portion after the pipe symbol uses sentence case.&#x20;
   * EXAMPLE: "May Updates | Building momentum with every release"<br>
