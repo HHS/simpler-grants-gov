@@ -160,6 +160,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             <OpportunityDescription
               summary={opportunityData.summary}
               attachments={opportunityData.attachments}
+              opportunityId={opportunityData.opportunity_id}
             />
             <OpportunityDocuments
               documents={opportunityData.attachments}
