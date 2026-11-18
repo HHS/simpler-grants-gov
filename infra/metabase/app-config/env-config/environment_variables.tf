@@ -5,6 +5,7 @@ locals {
     MB_DB_TYPE   = "postgres"
     MB_DB_USER   = "metabaseuser"
     MB_DB_DBNAME = "metabase"
+    JAVA_OPTS    = "-XX:-UseBASE64Intrinsics" # Temp mitigation for CVE-2026-114938
   }
 
   # Configuration for secrets
