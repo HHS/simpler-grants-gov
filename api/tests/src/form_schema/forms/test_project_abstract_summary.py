@@ -1,7 +1,25 @@
 import pytest
 
+from src.form_schema.forms import ProjectAbstractSummary_v2_0, ProjectAbstractSummaryGenerated_v2_0
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
-from tests.src.form_schema.forms.conftest import validate_required
+from tests.src.form_schema.forms.conftest import setup_resolved_form, validate_required
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(ProjectAbstractSummary_v2_0, id="handwritten"),
+        pytest.param(ProjectAbstractSummaryGenerated_v2_0, id="generated"),
+    ],
+)
+def project_abstract_summary_v2_0(request):
+    return setup_resolved_form(request.param)
+
+
+def test_project_abstract_summary_keeps_prefill_rules():
+    assert (
+        ProjectAbstractSummaryGenerated_v2_0.form_rule_schema
+        == ProjectAbstractSummary_v2_0.form_rule_schema
+    )
 
 
 @pytest.fixture

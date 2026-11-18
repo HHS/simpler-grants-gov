@@ -671,6 +671,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "c6e468de-2911-494e-aa14-91b527a1f53e",
         ),
         (
+            "Project_AbstractSummary_2_0_Generated",
+            "E2E-PABSSG",
+            "Project Abstract Summary (Generated)",
+            "e7b1eeb7-968e-5ad7-a682-92bf4f6fe478",
+            "3fdad41f-abbd-5b59-ad1e-54316e8637d2",
+        ),
+        (
             "ProjectNarrativeAttachments_1_2",
             "E2E-PNA",
             "Project Narrative Attachment Form",

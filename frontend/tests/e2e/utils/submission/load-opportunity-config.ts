@@ -26,7 +26,10 @@ import {
   PROJECT_ABSTRACT_OPPORTUNITY_DATA,
 } from "tests/e2e/apply/fixtures/project-abstract-data";
 import { PROJECT_ABSTRACT_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-field-definitions";
-import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-abstract-summary-data";
+import {
+  PROJECT_ABSTRACT_SUMMARY_GENERATED_OPPORTUNITY_DATA,
+  PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
+} from "tests/e2e/apply/fixtures/project-abstract-summary-data";
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import {
   PROJECT_NARRATIVE_GENERATED_OPPORTUNITY_DATA,
@@ -82,6 +85,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   PROJECT_ABSTRACT_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   ED_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
+  PROJECT_ABSTRACT_SUMMARY_GENERATED_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
   SF424_SHORT_OPPORTUNITY_DATA,
   SF424A_OPPORTUNITY_DATA,

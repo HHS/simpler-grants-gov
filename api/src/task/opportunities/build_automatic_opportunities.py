@@ -48,6 +48,7 @@ from src.form_schema.forms import (
     ProjectAbstract_v1_2,
     ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
+    ProjectAbstractSummaryGenerated_v2_0,
     ProjectNarrativeAttachment_v1_2,
     ProjectNarrativeGenerated_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
@@ -713,6 +714,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Project Abstract Summary",
                 ProjectAbstractSummary_v2_0.form_id,
                 "e3bfbd7b-2205-46a8-9aa3-714f7e130958",
+            ),
+            (
+                "E2E-PABSSG",
+                "Project Abstract Summary (Generated)",
+                ProjectAbstractSummaryGenerated_v2_0.form_id,
+                "e7b1eeb7-968e-5ad7-a682-92bf4f6fe478",
             ),
             (
                 "E2E-PNA",
