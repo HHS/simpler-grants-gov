@@ -361,7 +361,6 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
         LookupStr(JobType.LOAD_TRANSFORM, 4),
         LookupStr(JobType.SETUP_FOREIGN_TABLES, 5),
         LookupStr(JobType.LOAD_OPPORTUNITY_DATA_OPENSEARCH, 6),
-        LookupStr(JobType.SETUP_LOWER_ENV_AGENCIES, 7),
         LookupStr(JobType.CREATE_ANALYTICS_DB_CSVS, 8),
         LookupStr(JobType.CREATE_APPLICATION_SUBMISSION, 9),
         LookupStr(JobType.SETUP_CERT_USER, 10),
