@@ -449,8 +449,10 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
     def test_get_submission_list_response_multi_level_agency(
         self, db_session, enable_factory_create
     ):
-        agency = AgencyFactory.create(is_multilevel_agency=True, agency_code="DOD")
-        sub_agency = AgencyFactory.create(sub_agency_code=agency.agency_code, agency_code="DOD-HHO")
+        agency = AgencyFactory.create(is_multilevel_agency=True)
+        sub_agency = AgencyFactory.create(
+            sub_agency_code=agency.agency_code, agency_code=f"{agency.agency_code}-SUB"
+        )
 
         sam_gov_entity_1 = SamGovEntityFactory.create(
             has_debt_subject_to_offset=False, has_exclusion_status=False
