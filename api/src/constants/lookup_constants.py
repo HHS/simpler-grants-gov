@@ -257,9 +257,7 @@ class Privilege(StrEnum):
     MANAGE_COMPETITION = "manage_competition"
     READ_TEST_USER_TOKEN = "read_test_user_token"
     VIEW_OPPORTUNITY = "view_opportunity"
-    CREATE_OPPORTUNITY = "create_opportunity"
     UPDATE_OPPORTUNITY = "update_opportunity"
-    PUBLISH_OPPORTUNITY = "publish_opportunity"
     INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
     VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
@@ -333,15 +331,6 @@ class OrganizationAuditEvent(StrEnum):
     USER_ADDED = "user_added"
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
-
-
-class OpportunityAuditEvent(StrEnum):
-    OPPORTUNITY_CREATED = "opportunity_created"
-    OPPORTUNITY_UPDATED = "opportunity_updated"
-    OPPORTUNITY_SUMMARY_CREATED = "opportunity_summary_created"
-    OPPORTUNITY_SUMMARY_UPDATED = "opportunity_summary_updated"
-    COMPETITION_CREATED = "competition_created"
-    COMPETITION_UPDATED = "competition_updated"
 
 
 class WorkflowType(StrEnum):
