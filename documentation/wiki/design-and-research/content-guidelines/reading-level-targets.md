@@ -1,6 +1,6 @@
 # Reading level targets
 
-## Target Framework for Readability&#x20;
+## Target framework for readability &#x20;
 
 Product content should align to UX writing standards for readability and accessibility. We need to speak to people in a way that prevents confusion and ensures understanding.&#x20;
 
@@ -18,7 +18,7 @@ Best practice suggests aligning to readability standards using various methods:
 * So named because Hemingway wrote novels at a 5th-grade reading level
 * Skilled writers can “prioritize accessibility without sacrificing depth or sophistication”
 
-### Target Scores
+### Target scores
 
 In the private sector, it's best practice to write at a 7th grade reading level. However, due to the nature of government content, it can be challenging to meet the standard target scores for readability. It’s reasonable to adapt our target scores to accommodate the [Simpler.Grants.gov](http://simpler.grants.gov) use case.&#x20;
 
