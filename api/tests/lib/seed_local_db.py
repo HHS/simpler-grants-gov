@@ -657,6 +657,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "951d1fed-700b-4aae-b7da-40e0dc41b1a0",
         ),
         (
+            "NSF_DeviationAuthorization_Generated",
+            "E2E-NSFDA",
+            "NSF Deviation Authorization",
+            "6d58e0cb-9b08-5732-b4a5-4df7f8cedfa7",
+            "cb1415b3-e90c-5076-93f9-95f68c013935",
+        ),
+        (
             "Project_AbstractSummary_2_0",
             "E2E-PABSS",
             "Project Abstract Summary",
