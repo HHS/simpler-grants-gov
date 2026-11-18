@@ -39,7 +39,7 @@ describe("PostedOpportunityItem", () => {
       close_date_description: "Applications due by noon",
     });
 
-    expect(screen.getByText("notSpecified")).toBeInTheDocument();
+    expect(screen.queryByText("notSpecified")).not.toBeInTheDocument();
     expect(screen.getByText("Applications due by noon")).toBeInTheDocument();
   });
 
@@ -52,11 +52,11 @@ describe("PostedOpportunityItem", () => {
   });
 
   it.each([null, ""])(
-    "shows not specified when the close date is %p",
+    "shows not specified once when the close date is %p and there is no description",
     (date) => {
-      renderItem({ close_date: date });
+      renderItem({ close_date: date, close_date_description: null });
 
-      expect(screen.getByText("notSpecified")).toBeInTheDocument();
+      expect(screen.getAllByText("notSpecified")).toHaveLength(1);
     },
   );
 });
