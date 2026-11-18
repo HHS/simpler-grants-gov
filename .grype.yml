@@ -76,6 +76,25 @@ ignore:
       version: "3.15.2"
       type: binary
 
+  # NOFO Builder uses Python 3.14.10. Mirror the three medium findings from Builder PR #1400.
+  # https://github.com/HHS/simpler-grants-pdf-builder/pull/1400
+  # Review by 2026-12-02. Remove once a patched NOFO image passes without these rules.
+  - vulnerability: CVE-2026-124249
+    package:
+      name: python
+      version: "3.14.10"
+      type: binary
+  - vulnerability: CVE-2026-115559
+    package:
+      name: python
+      version: "3.14.10"
+      type: binary
+  - vulnerability: CVE-2026-115791
+    package:
+      name: python
+      version: "3.14.10"
+      type: binary
+
   # next 16.4.2 (frontend); fixed in 16.4.5, ignored until the upgrade is tested
   # Last checked: 11/18/2026
   - vulnerability: GHSA-mfr8-8qww-v76h
