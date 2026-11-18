@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 import src.util.file_util as file_util
-from src.constants.lookup_constants import ApplicationAuditEvent
+from src.constants.lookup_constants import ApplicationAuditEvent, FormRenderer
 from src.db.models.competition_models import Application, ApplicationAttachment, Form
 from src.db.models.user_models import User
 from src.services.applications.application_audit import add_audit_event
@@ -40,6 +40,42 @@ def _collect_attachment_field_paths(ui_schema_node: object, paths: list[list[str
         _collect_attachment_field_paths(ui_schema_node.get("children"), paths)
 
 
+def _collect_json_forms_attachment_field_paths(
+    node: object, parent_path: list[str], paths: list[list[str]]
+) -> None:
+    if not isinstance(node, dict):
+        return
+
+    if node.get("type") == "Control":
+        scope = node.get("scope")
+        options = node.get("options")
+        if not isinstance(scope, str) or not scope.startswith("#/properties/"):
+            return
+        if not isinstance(options, dict):
+            return
+
+        field_path = _definition_to_path(scope[1:])
+        if not field_path:
+            return
+        path = parent_path + field_path
+        widget = options.get("widget")
+        if widget == "Attachment":
+            paths.append(path)
+        else:
+            items_path = [*path[:-1], f"{path[-1]}[*]"]
+            if widget == "AttachmentArray":
+                paths.append(items_path)
+            elif isinstance(detail := options.get("detail"), dict):
+                # A repeatable group's detail uses scopes relative to each item.
+                _collect_json_forms_attachment_field_paths(detail, items_path, paths)
+        return
+
+    elements = node.get("elements")
+    if isinstance(elements, list):
+        for child in elements:
+            _collect_json_forms_attachment_field_paths(child, parent_path, paths)
+
+
 def get_attachment_field_paths(form: Form) -> list[list[str]]:
     """Determine which form fields contain attachment data from the UI schema.
 
@@ -47,7 +83,10 @@ def get_attachment_field_paths(form: Form) -> list[list[str]]:
     ``AttachmentArray`` (multi) widget in the form's UI schema.
     """
     paths: list[list[str]] = []
-    _collect_attachment_field_paths(form.form_ui_schema, paths)
+    if form.form_renderer == FormRenderer.JSON_FORMS:
+        _collect_json_forms_attachment_field_paths(form.form_ui_schema, [], paths)
+    else:
+        _collect_attachment_field_paths(form.form_ui_schema, paths)
     return paths
 
 

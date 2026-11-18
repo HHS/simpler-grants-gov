@@ -1,0 +1,90 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
+    "Key_Contacts_2_0": "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd",
+  "root": {
+    "Key_Contacts_2_0": {
+      "@Key_Contacts_2_0:FormVersion": {
+        "$const": "2.0"
+      },
+      "ApplicantOrganizationName": {
+        "$field": "applicant_organization_name"
+      },
+      "RoleOnProject": {
+        "$each": {
+          "items": {
+            "$field": "key_contacts"
+          },
+          "map": {
+            "ContactProjectRole": {
+              "$field": "project_role"
+            },
+            "ContactName": {
+              "globLib:PrefixName": {
+                "$field": "name.prefix"
+              },
+              "globLib:FirstName": {
+                "$field": "name.first_name"
+              },
+              "globLib:MiddleName": {
+                "$field": "name.middle_name"
+              },
+              "globLib:LastName": {
+                "$field": "name.last_name"
+              },
+              "globLib:SuffixName": {
+                "$field": "name.suffix"
+              }
+            },
+            "ContactTitle": {
+              "$field": "title"
+            },
+            "ContactOrganizationalAffiliation": {
+              "$field": "organizational_affiliation"
+            },
+            "ContactAddress": {
+              "globLib:Street1": {
+                "$field": "address.street1"
+              },
+              "globLib:Street2": {
+                "$field": "address.street2"
+              },
+              "globLib:City": {
+                "$field": "address.city"
+              },
+              "globLib:County": {
+                "$field": "address.county"
+              },
+              "globLib:State": {
+                "$field": "address.state"
+              },
+              "globLib:Province": {
+                "$field": "address.province"
+              },
+              "globLib:ZipPostalCode": {
+                "$field": "address.zip_code"
+              },
+              "globLib:Country": {
+                "$field": "address.country"
+              }
+            },
+            "ContactPhone": {
+              "$field": "phone"
+            },
+            "ContactFax": {
+              "$field": "fax"
+            },
+            "ContactEmail": {
+              "$field": "email"
+            }
+          }
+        }
+      }
+    }
+  }
+}

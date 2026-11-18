@@ -32,6 +32,7 @@ const OpportunityDetailsLayout = ({
         <OpportunityDescription
           summary={opportunity.summary}
           attachments={opportunity.attachments}
+          opportunityId={opportunity.opportunity_id}
         />
         <OpportunityDocuments
           documents={opportunity.attachments}
