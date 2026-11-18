@@ -1,4 +1,4 @@
-# Content guidelines
+# Writing standards
 
 Our writing standards guide how we communicate across Simpler.Grants.gov, ensuring content is consistent, clear, and aligned with user needs. These standards help create a unified voice across all product surfaces — from page headings to form instructions — while reinforcing accessibility, usability, and trust.
 
@@ -10,5 +10,6 @@ This section includes:
 * **Editorial style** – Grammar, punctuation, and formatting conventions, as well as guidance on pronouns, contractions, and capitalization, grounded in trusted external style guides.
 * **Content patterns** – Reusable content structures for things like form fields, headings, and error messages that promote clarity and consistency across experiences.
 * **Terminology usage** – Vocabulary decisions based on user research, focusing on words that are familiar, accurate, and inclusive.
+* **Reading level targets** – Guidance for measuring readability and writing content people can understand.
 
 Use these standards to create content that is consistent, accessible, and aligned with user expectations.
