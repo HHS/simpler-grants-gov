@@ -2,7 +2,6 @@ import dataclasses
 import logging
 import os
 import random
-import re
 import uuid
 from datetime import date
 from enum import StrEnum
@@ -91,10 +90,10 @@ def build_competition_title(opportunity_number: str, title: str) -> str:
     if title != DEFAULT_COMPETITION_TITLE:
         return title
 
-    name = opportunity_number.removeprefix("SGG-")
-    if name.startswith("ALL-Forms-"):
-        name = re.sub(r"-\d{4}-\d{2}-\d{2}$", "", name)
-    return f"{name} {DEFAULT_COMPETITION_TITLE}"
+    # Leave the date out so each day's ALL-forms opportunity gets the same title
+    if opportunity_number.startswith(ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX):
+        return f"ALL-Forms {DEFAULT_COMPETITION_TITLE}"
+    return f"{opportunity_number.removeprefix('SGG-')} {DEFAULT_COMPETITION_TITLE}"
 
 
 @dataclasses.dataclass
@@ -173,8 +172,6 @@ class OpportunityContainer:
 class CompetitionContainer:
     ### Competition
     competition_title: str = DEFAULT_COMPETITION_TITLE
-    # If None, it's built from the opportunity number (see build_public_competition_id)
-    public_competition_id: str | None = None
     opening_date: date | None = dataclasses.field(
         default_factory=lambda: datetime_util.get_now_us_eastern_date()
     )
@@ -945,10 +942,8 @@ class BuildAutomaticOpportunitiesTask(Task):
                 else CompetitionContainer()
             )
             if not competition.public_competition_id:
-                competition.public_competition_id = (
-                    comp_data.public_competition_id.upper()
-                    if comp_data.public_competition_id
-                    else build_public_competition_id(opportunity_number, competition_number)
+                competition.public_competition_id = build_public_competition_id(
+                    opportunity_number, competition_number
                 )
             if not competition.competition_title:
                 competition.competition_title = build_competition_title(
@@ -956,8 +951,9 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
 
             logger.info(
-                f"Backfilled competition for opportunity '{opportunity_number}'",
+                "Backfilled competition",
                 extra={
+                    "opportunity_number": opportunity_number,
                     "competition_id": competition.competition_id,
                     "public_competition_id": competition.public_competition_id,
                 },
@@ -977,10 +973,8 @@ class BuildAutomaticOpportunitiesTask(Task):
         competition = Competition(
             competition_id=uuid.uuid4(),
             opportunity=opportunity,
-            public_competition_id=(
-                comp_data.public_competition_id.upper()
-                if comp_data.public_competition_id
-                else build_public_competition_id(opportunity_number, competition_number)
+            public_competition_id=build_public_competition_id(
+                opportunity_number, competition_number
             ),
             competition_title=build_competition_title(
                 opportunity_number, comp_data.competition_title
