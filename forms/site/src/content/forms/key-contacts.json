@@ -281,7 +281,7 @@
                   "id": "key-contacts-zip-code",
                   "label": "Zip / Postal Code",
                   "dat_field": "7-17",
-                  "required": false,
+                  "required": "Conditional (when Country is the United States; if US, minLength 9)",
                   "type": "Text input",
                   "widget": "TextWidget",
                   "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
