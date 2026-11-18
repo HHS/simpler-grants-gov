@@ -7,7 +7,7 @@ import { formatFullName } from "src/utils/userNameUtils";
 
 import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
-import { ErrorMessage, GridContainer, Tag } from "@trussworks/react-uswds";
+import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import {
   TableCellData,
@@ -113,11 +113,7 @@ export async function ActiveUsersSection({
         ...(showExternal
           ? [
               {
-                cellData: user.is_external ? (
-                  <Tag className="radius-sm">{t("usersTable.externalTag")}</Tag>
-                ) : (
-                  ""
-                ),
+                cellData: user.is_external ? t("usersTable.externalLabel") : "",
                 className: rowClassName,
               },
             ]

@@ -7,7 +7,7 @@ import { UserDetail } from "src/types/userTypes";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
-import { Alert, Table, Tag } from "@trussworks/react-uswds";
+import { Alert, Table } from "@trussworks/react-uswds";
 
 import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 import { OrganizationRosterInfo } from "./OrganizationRosterInfo";
@@ -74,11 +74,7 @@ const OrganizationUserRow = ({
       <td>{email}</td>
       <td>{fullName}</td>
       <td>{roleNames}</td>
-      {showExternal && (
-        <td>
-          {is_external && <Tag className="radius-sm">{externalLabel}</Tag>}
-        </td>
-      )}
+      {showExternal && <td>{is_external && externalLabel}</td>}
     </tr>
   );
 };
@@ -141,7 +137,7 @@ export const OrganizationRoster = async ({
                 {...props}
                 key={props.email}
                 showExternal={showExternal}
-                externalLabel={t("externalTag")}
+                externalLabel={t("externalLabel")}
               />
             ))}
           </tbody>

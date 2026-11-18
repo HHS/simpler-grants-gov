@@ -80,10 +80,10 @@ describe("OrganizationRoster", () => {
     );
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     expect(screen.queryByText("headings.external")).not.toBeInTheDocument();
-    expect(screen.queryByText("externalTag")).not.toBeInTheDocument();
+    expect(screen.queryByText("externalLabel")).not.toBeInTheDocument();
   });
 
-  it("renders the External column with a tag for external users when the feature flag is on", async () => {
+  it("renders the External column with plain text for external users when the feature flag is on", async () => {
     isFeatureEnabledMock.mockReturnValue(true);
 
     await renderRoster();
@@ -94,7 +94,9 @@ describe("OrganizationRoster", () => {
     ).toBeVisible();
 
     const [, externalRow, staffRow] = screen.getAllByRole("row");
-    expect(within(externalRow).getByText("externalTag")).toBeVisible();
-    expect(within(staffRow).queryByText("externalTag")).not.toBeInTheDocument();
+    expect(within(externalRow).getByText("externalLabel")).toBeVisible();
+    expect(
+      within(staffRow).queryByText("externalLabel"),
+    ).not.toBeInTheDocument();
   });
 });

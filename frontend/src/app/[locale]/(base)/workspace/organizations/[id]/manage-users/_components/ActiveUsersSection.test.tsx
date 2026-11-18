@@ -319,7 +319,7 @@ describe("ActiveUsersSection", () => {
       expect(tableProps.tableRowData[0]).toHaveLength(4);
     });
 
-    it("renders the External column when the feature flag is on", async () => {
+    it("renders the External column as plain text when the feature flag is on", async () => {
       isFeatureEnabledMock.mockReturnValue(true);
 
       const tableProps = await loadTableProps();
@@ -337,8 +337,7 @@ describe("ActiveUsersSection", () => {
       const [externalRow, staffRow] = tableProps.tableRowData;
       expect(externalRow).toHaveLength(5);
 
-      render(<>{externalRow[3].cellData}</>);
-      expect(screen.getByText("usersTable.externalTag")).toBeVisible();
+      expect(externalRow[3].cellData).toBe("usersTable.externalLabel");
 
       expect(staffRow[3].cellData).toBe("");
     });
