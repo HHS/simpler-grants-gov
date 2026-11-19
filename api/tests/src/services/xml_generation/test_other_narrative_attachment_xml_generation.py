@@ -23,10 +23,23 @@ from lxml import etree as lxml_etree
 from src.form_schema.forms.other_narrative_attachment import (
     FORM_XML_TRANSFORM_RULES as OTHER_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
 )
+from src.form_schema.forms.other_narrative_generated import (
+    FORM_XML_TRANSFORM_RULES as GENERATED_XML_RULES,
+)
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 from src.services.xml_generation.validation.xsd_validator import XSDValidator
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(OTHER_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES, id="handwritten"),
+        pytest.param(GENERATED_XML_RULES, id="generated"),
+    ],
+)
+def xml_rules(request):
+    return request.param
 
 
 def _build_attachment(uuid_str, filename, mime, location, hash_value):
@@ -38,10 +51,32 @@ def _build_attachment(uuid_str, filename, mime, location, hash_value):
     )
 
 
+def test_generated_and_handwritten_xml_match():
+    first_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    second_id = "11111111-2222-3333-4444-555555555555"
+    attachments = dict(
+        _build_attachment(file_id, name, "application/pdf", name, "aeB1+6gdFwih51ijIRn3b8QYn24=")
+        for file_id, name in [(first_id, "narrative.pdf"), (second_id, "supplement.pdf")]
+    )
+    service = XMLGenerationService()
+    results = [
+        service.generate_xml(
+            XMLGenerationRequest(
+                application_data={"attachments": [second_id, first_id]},
+                transform_config=rules,
+                attachment_mapping=attachments,
+            )
+        )
+        for rules in (OTHER_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES, GENERATED_XML_RULES)
+    ]
+    assert all(result.success for result in results)
+    assert results[0].xml_data == results[1].xml_data
+
+
 class TestOtherNarrativeAttachmentsXMLGeneration:
     """Test cases for Other Narrative Attachments XML generation service."""
 
-    def test_generate_other_narrative_attachments_xml_basic_success(self):
+    def test_generate_other_narrative_attachments_xml_basic_success(self, xml_rules):
         """Test basic XML generation with multiple attachments and proper namespaces."""
         service = XMLGenerationService()
 
@@ -69,7 +104,7 @@ class TestOtherNarrativeAttachmentsXMLGeneration:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [uuid1, uuid2]},
-            transform_config=OTHER_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 
@@ -99,7 +134,7 @@ class TestOtherNarrativeAttachmentsXMLGeneration:
         assert "other_attachment.pdf" in xml_data
         assert "additional_attachment.pdf" in xml_data
 
-    def test_generate_other_narrative_attachments_element_order_matches_xsd(self):
+    def test_generate_other_narrative_attachments_element_order_matches_xsd(self, xml_rules):
         """Test that elements inside AttachedFile follow XSD sequence order."""
         service = XMLGenerationService()
 
@@ -116,7 +151,7 @@ class TestOtherNarrativeAttachmentsXMLGeneration:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [attachment_uuid]},
-            transform_config=OTHER_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 
@@ -152,7 +187,7 @@ class TestOtherNarrativeAttachmentsXSDValidation:
 
         return XSDValidator(xsd_dir)
 
-    def test_other_narrative_attachments_xml_validates_against_xsd(self, xsd_validator):
+    def test_other_narrative_attachments_xml_validates_against_xsd(self, xml_rules, xsd_validator):
         """Test that generated XML validates against official XSD schema."""
         service = XMLGenerationService()
 
@@ -169,7 +204,7 @@ class TestOtherNarrativeAttachmentsXSDValidation:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [attachment_uuid]},
-            transform_config=OTHER_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 
@@ -189,7 +224,9 @@ class TestOtherNarrativeAttachmentsXSDValidation:
             f"Generated XML:\n{xml_data}"
         )
 
-    def test_other_narrative_attachments_minimal_data_validates_against_xsd(self, xsd_validator):
+    def test_other_narrative_attachments_minimal_data_validates_against_xsd(
+        self, xml_rules, xsd_validator
+    ):
         """Test that Other Narrative Attachments with minimal required data (one attachment) validates against XSD."""
 
         service = XMLGenerationService()
@@ -207,7 +244,7 @@ class TestOtherNarrativeAttachmentsXSDValidation:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [attachment_uuid]},
-            transform_config=OTHER_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 

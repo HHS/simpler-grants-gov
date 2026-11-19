@@ -14,9 +14,13 @@ import pytest
 
 from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
 from tests.src.form_schema.parity.json_schema.diffs import (
+    budget_narrative,
     epa_key_contacts,
     key_contacts,
+    other_narrative,
     performance_sites,
+    project_abstract,
+    project_narrative,
 )
 from tests.src.form_schema.parity.json_schema.harness import flatten_schema, flatten_ui
 from tests.src.form_schema.parity.json_schema.harness.compare import (
@@ -27,7 +31,15 @@ from tests.src.form_schema.parity.json_schema.harness.compare import (
 from tests.src.form_schema.parity.json_schema.harness.form_diff import FormDiff
 
 # One `FormDiff` per generated form, from `diffs/`.
-DIFFS: list[FormDiff] = [key_contacts.DIFF, epa_key_contacts.DIFF, performance_sites.DIFF]
+DIFFS: list[FormDiff] = [
+    key_contacts.DIFF,
+    epa_key_contacts.DIFF,
+    performance_sites.DIFF,
+    project_narrative.DIFF,
+    budget_narrative.DIFF,
+    other_narrative.DIFF,
+    project_abstract.DIFF,
+]
 
 
 def _modules(diff):

@@ -14,11 +14,11 @@
   "omb_number": "",
   "expiration_date": "",
   "widgets": ["ApplicationMultipleAttachmentWidget"],
-  "description": "Other narrative files supplied as an ordered list of uploaded attachment references.",
+  "description": "Upload other narrative files requested by the funding opportunity.",
   "notes": [
     "The first attachment is mandatory; additional attachments follow it in the same list, as in the existing SGG form.",
     "Examples use synthetic attachment IDs. File ownership and metadata are resolved by the existing application service.",
-    "Not installed in the API yet. That and the file upload flow are tracked in the migration issue.",
+    "The generated form is registered in the individual migration PR.",
     "No applicant answers are pre- or post-populated. The upload service assigns attachment references when files are uploaded.",
     "Open follow-ups on the existing SGG form: #12483 (boundary/per-file XML) and #11178 (print E2E)."
   ],
