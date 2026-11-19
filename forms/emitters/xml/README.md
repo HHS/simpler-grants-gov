@@ -33,8 +33,34 @@ attributes and all, only for a material change:
 @name("MaterialChangeSupplement") supplement?: MaterialChangeSupplement;
 ```
 
-An optional element of its own with a `@Mapping.required` element inside is written only
-while the field it's filled from is answered.
+`@Mapping.required` writes an element even when its field is empty, e.g. `<Total/>`.
+Inside an optional element, that would write the optional element for an answer the
+applicant never gave. So an optional element that contains a `@Mapping.required` element is
+written only when the field it's filled from is answered. For example, a budget with one
+year per item in `periods`:
+
+```typespec
+@Mapping.from(xml, Mapping.Item<F.periods, 0>) @name("BudgetYear1") year1?: BudgetYear;
+@Mapping.from(xml, Mapping.Item<F.periods, 1>) @name("BudgetYear2") year2?: BudgetYear;
+
+model BudgetYear {
+  @Mapping.from(xml, F.Period.total) @Mapping.required @name("Total") total?: string;
+}
+```
+
+An applicant who enters one year:
+
+```json
+{ "periods": [{ "total": "100.00" }] }
+```
+
+the XML has `BudgetYear1`, and no `BudgetYear2`:
+
+```xml
+<BudgetYear1><Total>100.00</Total></BudgetYear1>
+```
+
+Without this rule, the XML would also have `<BudgetYear2><Total/></BudgetYear2>`.
 
 ## Output
 
