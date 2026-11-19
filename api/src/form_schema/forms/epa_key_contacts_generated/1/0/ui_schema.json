@@ -56,13 +56,13 @@
         },
         {
           "type": "Control",
-          "scope": "#/properties/authorized_representative/properties/address/properties/country",
-          "label": "Country"
+          "scope": "#/properties/authorized_representative/properties/address/properties/zip_code",
+          "label": "Zip / Postal Code"
         },
         {
           "type": "Control",
-          "scope": "#/properties/authorized_representative/properties/address/properties/zip_code",
-          "label": "Zip / Postal Code"
+          "scope": "#/properties/authorized_representative/properties/address/properties/country",
+          "label": "Country"
         },
         {
           "type": "Control",
@@ -140,13 +140,13 @@
         },
         {
           "type": "Control",
-          "scope": "#/properties/payee/properties/address/properties/country",
-          "label": "Country"
+          "scope": "#/properties/payee/properties/address/properties/zip_code",
+          "label": "Zip / Postal Code"
         },
         {
           "type": "Control",
-          "scope": "#/properties/payee/properties/address/properties/zip_code",
-          "label": "Zip / Postal Code"
+          "scope": "#/properties/payee/properties/address/properties/country",
+          "label": "Country"
         },
         {
           "type": "Control",
@@ -224,13 +224,13 @@
         },
         {
           "type": "Control",
-          "scope": "#/properties/administrative_contact/properties/address/properties/country",
-          "label": "Country"
+          "scope": "#/properties/administrative_contact/properties/address/properties/zip_code",
+          "label": "Zip / Postal Code"
         },
         {
           "type": "Control",
-          "scope": "#/properties/administrative_contact/properties/address/properties/zip_code",
-          "label": "Zip / Postal Code"
+          "scope": "#/properties/administrative_contact/properties/address/properties/country",
+          "label": "Country"
         },
         {
           "type": "Control",
@@ -308,13 +308,13 @@
         },
         {
           "type": "Control",
-          "scope": "#/properties/project_manager/properties/address/properties/country",
-          "label": "Country"
+          "scope": "#/properties/project_manager/properties/address/properties/zip_code",
+          "label": "Zip / Postal Code"
         },
         {
           "type": "Control",
-          "scope": "#/properties/project_manager/properties/address/properties/zip_code",
-          "label": "Zip / Postal Code"
+          "scope": "#/properties/project_manager/properties/address/properties/country",
+          "label": "Country"
         },
         {
           "type": "Control",

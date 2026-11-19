@@ -188,19 +188,6 @@
             },
             {
               "kind": "field",
-              "id": "authorized-representative-address-country",
-              "label": "Country",
-              "dat_field": "B1-15",
-              "required": "No (per XSD; required when section is started per SGG implementation)",
-              "type": "Dropdown (country code list)",
-              "widget": "SelectWidget",
-              "help_text": "Select the country.",
-              "constraints": "CountryCodeDataTypeV3 enumeration",
-              "json_path": "authorized_representative.address.country",
-              "xml_path": "EPA_KeyContacts_2_0:AuthorizedRepresentative/globLib:Address/globLib:Country"
-            },
-            {
-              "kind": "field",
               "id": "authorized-representative-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "B1-14",
@@ -211,6 +198,19 @@
               "constraints": "minLength 1, maxLength 30",
               "json_path": "authorized_representative.address.zip_code",
               "xml_path": "EPA_KeyContacts_2_0:AuthorizedRepresentative/globLib:Address/globLib:ZipPostalCode"
+            },
+            {
+              "kind": "field",
+              "id": "authorized-representative-address-country",
+              "label": "Country",
+              "dat_field": "B1-15",
+              "required": "No (per XSD; required when section is started per SGG implementation)",
+              "type": "Dropdown (country code list)",
+              "widget": "SelectWidget",
+              "help_text": "Select the country.",
+              "constraints": "CountryCodeDataTypeV3 enumeration",
+              "json_path": "authorized_representative.address.country",
+              "xml_path": "EPA_KeyContacts_2_0:AuthorizedRepresentative/globLib:Address/globLib:Country"
             }
           ]
         },
@@ -429,19 +429,6 @@
             },
             {
               "kind": "field",
-              "id": "payee-address-country",
-              "label": "Country",
-              "dat_field": "B2-15",
-              "required": "No (per XSD; required when section is started per SGG implementation)",
-              "type": "Dropdown (country code list)",
-              "widget": "SelectWidget",
-              "help_text": "Select the country.",
-              "constraints": "CountryCodeDataTypeV3 enumeration",
-              "json_path": "payee.address.country",
-              "xml_path": "EPA_KeyContacts_2_0:Payee/globLib:Address/globLib:Country"
-            },
-            {
-              "kind": "field",
               "id": "payee-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "B2-14",
@@ -452,6 +439,19 @@
               "constraints": "minLength 1, maxLength 30",
               "json_path": "payee.address.zip_code",
               "xml_path": "EPA_KeyContacts_2_0:Payee/globLib:Address/globLib:ZipPostalCode"
+            },
+            {
+              "kind": "field",
+              "id": "payee-address-country",
+              "label": "Country",
+              "dat_field": "B2-15",
+              "required": "No (per XSD; required when section is started per SGG implementation)",
+              "type": "Dropdown (country code list)",
+              "widget": "SelectWidget",
+              "help_text": "Select the country.",
+              "constraints": "CountryCodeDataTypeV3 enumeration",
+              "json_path": "payee.address.country",
+              "xml_path": "EPA_KeyContacts_2_0:Payee/globLib:Address/globLib:Country"
             }
           ]
         },
@@ -670,19 +670,6 @@
             },
             {
               "kind": "field",
-              "id": "administrative-contact-address-country",
-              "label": "Country",
-              "dat_field": "B3-15",
-              "required": "No (per XSD; required when section is started per SGG implementation)",
-              "type": "Dropdown (country code list)",
-              "widget": "SelectWidget",
-              "help_text": "Select the country.",
-              "constraints": "CountryCodeDataTypeV3 enumeration",
-              "json_path": "administrative_contact.address.country",
-              "xml_path": "EPA_KeyContacts_2_0:AdminstrativeContact/globLib:Address/globLib:Country"
-            },
-            {
-              "kind": "field",
               "id": "administrative-contact-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "B3-14",
@@ -693,6 +680,19 @@
               "constraints": "minLength 1, maxLength 30",
               "json_path": "administrative_contact.address.zip_code",
               "xml_path": "EPA_KeyContacts_2_0:AdminstrativeContact/globLib:Address/globLib:ZipPostalCode"
+            },
+            {
+              "kind": "field",
+              "id": "administrative-contact-address-country",
+              "label": "Country",
+              "dat_field": "B3-15",
+              "required": "No (per XSD; required when section is started per SGG implementation)",
+              "type": "Dropdown (country code list)",
+              "widget": "SelectWidget",
+              "help_text": "Select the country.",
+              "constraints": "CountryCodeDataTypeV3 enumeration",
+              "json_path": "administrative_contact.address.country",
+              "xml_path": "EPA_KeyContacts_2_0:AdminstrativeContact/globLib:Address/globLib:Country"
             }
           ]
         },
@@ -911,19 +911,6 @@
             },
             {
               "kind": "field",
-              "id": "project-manager-address-country",
-              "label": "Country",
-              "dat_field": "B4-15",
-              "required": "No (per XSD; required when section is started per SGG implementation)",
-              "type": "Dropdown (country code list)",
-              "widget": "SelectWidget",
-              "help_text": "Select the country.",
-              "constraints": "CountryCodeDataTypeV3 enumeration",
-              "json_path": "project_manager.address.country",
-              "xml_path": "EPA_KeyContacts_2_0:ProjectManager/globLib:Address/globLib:Country"
-            },
-            {
-              "kind": "field",
               "id": "project-manager-address-zip-code",
               "label": "Zip / Postal Code",
               "dat_field": "B4-14",
@@ -934,6 +921,19 @@
               "constraints": "minLength 1, maxLength 30",
               "json_path": "project_manager.address.zip_code",
               "xml_path": "EPA_KeyContacts_2_0:ProjectManager/globLib:Address/globLib:ZipPostalCode"
+            },
+            {
+              "kind": "field",
+              "id": "project-manager-address-country",
+              "label": "Country",
+              "dat_field": "B4-15",
+              "required": "No (per XSD; required when section is started per SGG implementation)",
+              "type": "Dropdown (country code list)",
+              "widget": "SelectWidget",
+              "help_text": "Select the country.",
+              "constraints": "CountryCodeDataTypeV3 enumeration",
+              "json_path": "project_manager.address.country",
+              "xml_path": "EPA_KeyContacts_2_0:ProjectManager/globLib:Address/globLib:Country"
             }
           ]
         },
