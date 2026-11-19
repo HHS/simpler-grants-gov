@@ -17,6 +17,11 @@ import {
   OTHER_NARRATIVE_OPPORTUNITY_DATA,
 } from "tests/e2e/apply/fixtures/other-narrative-attachment-data";
 import { OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/other-narrative-attachment-field-definitions";
+import {
+  PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
+  PROJECT_ABSTRACT_OPPORTUNITY_DATA,
+} from "tests/e2e/apply/fixtures/project-abstract-data";
+import { PROJECT_ABSTRACT_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-field-definitions";
 import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-abstract-summary-data";
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import {
@@ -69,6 +74,8 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   BUDGET_NARRATIVE_GENERATED_OPPORTUNITY_DATA,
   OTHER_NARRATIVE_OPPORTUNITY_DATA,
   OTHER_NARRATIVE_GENERATED_OPPORTUNITY_DATA,
+  PROJECT_ABSTRACT_OPPORTUNITY_DATA,
+  PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
   SF424_SHORT_OPPORTUNITY_DATA,
   SF424A_OPPORTUNITY_DATA,
@@ -96,6 +103,8 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   budgetNarrativeGenerated: BUDGET_NARRATIVE_ATTACHMENT_FORM_CONFIG,
   otherNarrative: OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG,
   otherNarrativeGenerated: OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG,
+  projectAbstract: PROJECT_ABSTRACT_FORM_CONFIG,
+  projectAbstractGenerated: PROJECT_ABSTRACT_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
   sf424short: SF424_SHORT_FORM_CONFIG,
   sf424a: SF424A_FORM_CONFIG,
