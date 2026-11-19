@@ -13,3 +13,4 @@ import "./forms/ed-abstract-form/index.tsp";
 import "./forms/nsf-deviation-authorization/index.tsp";
 import "./forms/nsf-suggested-reviewers/index.tsp";
 import "./forms/project-abstract-summary/index.tsp";
+import "./forms/nasa-pi-and-aor/index.tsp";

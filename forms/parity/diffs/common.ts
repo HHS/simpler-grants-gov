@@ -101,3 +101,40 @@ export const emailMinLength = (paths: string[]): Record<string, Pinned> =>
   Object.fromEntries(
     paths.map((path) => [`${path}/minLength`, EMAIL_MIN_LENGTH]),
   );
+
+/** A DAT that stars a field its Required column marks optional, because a condition requires it. */
+export const conditionalStar = (label: string, source = label): Pinned => ({
+  plan: label,
+  source: `* ${source}`,
+  category: "upstream",
+  reason:
+    "The DAT stars this field but its Required column says No: the field is required only when a condition the DAT states is met. The plan marks it conditional, so its label has no star.",
+});
+
+/** Yes/No answers, which the form stores as booleans. */
+export const YES_NO_BOOLEAN: Recorded = {
+  category: "intentional",
+  reason:
+    "The form stores this answer as a boolean. The XML mapping's boolean_to_yes_no transform writes the XSD's “Y: Yes” or “N: No”.",
+};
+
+/** The DAT's Yes and No radio buttons, which the plan lists as one answer. */
+export const RADIO_OPTIONS: Recorded = {
+  category: "upstream",
+  reason:
+    "The DAT lists each radio button as a field of its own. The plan lists the question once, with a Yes/No answer.",
+};
+
+/** Dollar amounts, which the form stores as strings. */
+export const BUDGET_AMOUNT: Recorded = {
+  category: "intentional",
+  reason:
+    "globLib:BudgetAmountDataType is a decimal from 0 to 999999999999.99. The form stores the amount as a string of up to 12 digits with optional cents, as the API's budget forms do, so no amount is rounded. The XML mapping's currency_format transform writes it with two decimal places.",
+};
+
+/** Help that only says the DAT pre-populates the field from another form. */
+export const PREPOPULATED_HELP: Recorded = {
+  category: "intentional",
+  reason:
+    "The DAT's help only says the field is pre-populated from the SF 424 (R&R). The form doesn't pre-populate it yet, so it uses the question bank's help.",
+};

@@ -1,12 +1,270 @@
 {
   "title": "NASA - PI and AOR",
   "slug": "nasa-pi-and-aor",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["R&R"],
   "category": "Key Personnel & Contact Forms",
   "apps_count": 25,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/314",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Nasa_PIandAORSupplementalDataSheet-V1.0_F314.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Nasa_PIandAORSupplementalDataSheet-V1.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Nasa_PIandAORSupplementalDataSheet-V1.0_F314.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Nasa_PIandAORSupplementalDataSheet-V1.0_F314.xls",
+  "omb_number": "2700-0092",
+  "expiration_date": "11/30/2029",
+  "widgets": ["TextWidget", "SelectWidget", "RadioWidget"],
+  "description": "NASA - PI and AOR (Nasa_PIandAORSupplementalDataSheet) asks NASA applicants for the names of the authorized organization representative (AOR) and the principal investigator (PI), the AOR's NSPIRES username, and whether the PI takes part as an employee of the U.S. Government, with the agency and amount requested if so, or of a foreign organization.",
+  "notes": [
+    "The DAT's conditional rules are not in the form yet (#13368): Federal Agency is enabled and required, and the dollar amount enabled, only if the PI is a U.S. Government employee; International Participation is disabled and set to No if so.",
+    "The dollar amount is a string of up to 12 digits with optional cents, as in the API's budget forms. The XML mapping writes it with two decimal places."
+  ],
+  "risks": [
+    "The DAT and FID still show the OMB expiration as 09/30/2026. OMB renewed 2700-0092 on 11/03/2026 through 11/30/2029 (reginfo.gov), so the form uses the renewed date.",
+    "The XSD's header names OMB numbers 2700-0085 and 2700-0087, which were discontinued in 2013. The form uses 2700-0092, as the DAT and FID do."
+  ],
+  "spec_id": "nasa-pi-and-aor",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Authorized Representative Name",
+      "json_path": "authorized_representative",
+      "xml_path": "Nasa_PIandAORSupplementalDataSheet:AuthorizedRepresentativeName",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Name",
+          "help_text": "Enter the person's name. First and last name are required.",
+          "json_path": "authorized_representative.name",
+          "xml_path": "Nasa_PIandAORSupplementalDataSheet:AuthorizedRepresentativeName/Nasa_PIandAORSupplementalDataSheet:AORName",
+          "widget": "FieldsetWidget",
+          "children": [
+            {
+              "kind": "field",
+              "id": "authorized-representative-name-prefix",
+              "label": "Prefix",
+              "dat_field": "2-1",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "SF424(R&R) field 19-1 (deferred)",
+              "json_path": "authorized_representative.name.prefix",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:AuthorizedRepresentativeName/Nasa_PIandAORSupplementalDataSheet:AORName/globLib:PrefixName"
+            },
+            {
+              "kind": "field",
+              "id": "authorized-representative-name-first-name",
+              "label": "First Name",
+              "dat_field": "2-2",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "constraints": "minLength 1, maxLength 35",
+              "pre_populated": "SF424(R&R) field 19-2 (deferred)",
+              "json_path": "authorized_representative.name.first_name",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:AuthorizedRepresentativeName/Nasa_PIandAORSupplementalDataSheet:AORName/globLib:FirstName"
+            },
+            {
+              "kind": "field",
+              "id": "authorized-representative-name-middle-name",
+              "label": "Middle Name",
+              "dat_field": "2-3",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "SF424(R&R) field 19-3 (deferred)",
+              "json_path": "authorized_representative.name.middle_name",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:AuthorizedRepresentativeName/Nasa_PIandAORSupplementalDataSheet:AORName/globLib:MiddleName"
+            },
+            {
+              "kind": "field",
+              "id": "authorized-representative-name-last-name",
+              "label": "Last Name",
+              "dat_field": "2-4",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "SF424(R&R) field 19-4 (deferred)",
+              "json_path": "authorized_representative.name.last_name",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:AuthorizedRepresentativeName/Nasa_PIandAORSupplementalDataSheet:AORName/globLib:LastName"
+            },
+            {
+              "kind": "field",
+              "id": "authorized-representative-name-suffix",
+              "label": "Suffix",
+              "dat_field": "2-5",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "SF424(R&R) field 19-5 (deferred)",
+              "json_path": "authorized_representative.name.suffix",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:AuthorizedRepresentativeName/Nasa_PIandAORSupplementalDataSheet:AORName/globLib:SuffixName"
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "id": "authorized-representative-nspires-username",
+          "label": "NSPIRES Username",
+          "dat_field": "2-6",
+          "required": false,
+          "type": "Text input",
+          "widget": "TextWidget",
+          "help_text": "If registered with NSPIRES, enter your username.",
+          "constraints": "maxLength 99",
+          "json_path": "authorized_representative.nspires_username",
+          "xml_path": "Nasa_PIandAORSupplementalDataSheet:AuthorizedRepresentativeName/Nasa_PIandAORSupplementalDataSheet:UserName"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Principal Investigator Name",
+      "json_path": "principal_investigator",
+      "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "section",
+          "label": "Name",
+          "help_text": "Enter the person's name. First and last name are required.",
+          "json_path": "principal_investigator.name",
+          "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:PDPIName",
+          "widget": "FieldsetWidget",
+          "children": [
+            {
+              "kind": "field",
+              "id": "principal-investigator-name-prefix",
+              "label": "Prefix",
+              "dat_field": "3-1",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the prefix.",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "SF424(R&R) field 14-1 (deferred)",
+              "json_path": "principal_investigator.name.prefix",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:PDPIName/globLib:PrefixName"
+            },
+            {
+              "kind": "field",
+              "id": "principal-investigator-name-first-name",
+              "label": "First Name",
+              "dat_field": "3-2",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the first name.",
+              "constraints": "minLength 1, maxLength 35",
+              "pre_populated": "SF424(R&R) field 14-2 (deferred)",
+              "json_path": "principal_investigator.name.first_name",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:PDPIName/globLib:FirstName"
+            },
+            {
+              "kind": "field",
+              "id": "principal-investigator-name-middle-name",
+              "label": "Middle Name",
+              "dat_field": "3-3",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the middle name.",
+              "constraints": "minLength 1, maxLength 25",
+              "pre_populated": "SF424(R&R) field 14-3 (deferred)",
+              "json_path": "principal_investigator.name.middle_name",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:PDPIName/globLib:MiddleName"
+            },
+            {
+              "kind": "field",
+              "id": "principal-investigator-name-last-name",
+              "label": "Last Name",
+              "dat_field": "3-4",
+              "required": true,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the last name.",
+              "constraints": "minLength 1, maxLength 60",
+              "pre_populated": "SF424(R&R) field 14-4 (deferred)",
+              "json_path": "principal_investigator.name.last_name",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:PDPIName/globLib:LastName"
+            },
+            {
+              "kind": "field",
+              "id": "principal-investigator-name-suffix",
+              "label": "Suffix",
+              "dat_field": "3-5",
+              "required": false,
+              "type": "Text input",
+              "widget": "TextWidget",
+              "help_text": "Enter the suffix.",
+              "constraints": "minLength 1, maxLength 10",
+              "pre_populated": "SF424(R&R) field 14-5 (deferred)",
+              "json_path": "principal_investigator.name.suffix",
+              "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:PDPIName/globLib:SuffixName"
+            }
+          ]
+        },
+        {
+          "kind": "field",
+          "id": "principal-investigator-us-government-participation",
+          "label": "Is this person participating in this project as an employee of the U.S. Government?",
+          "dat_field": "3-6",
+          "required": true,
+          "type": "Radio group (boolean; XML YesNoDataType)",
+          "widget": "RadioWidget",
+          "help_text": "Select Yes or No.",
+          "constraints": "YesNoDataType enumeration",
+          "json_path": "principal_investigator.us_government_participation",
+          "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:USGovernmentParticipation"
+        },
+        {
+          "kind": "field",
+          "id": "principal-investigator-federal-agency",
+          "label": "If yes, Select U.S. Government agency",
+          "dat_field": "3-7",
+          "required": "Conditional (required if the PI is participating as a U.S. Government employee)",
+          "type": "Dropdown",
+          "widget": "SelectWidget",
+          "help_text": "Select a U.S. Government agency from the list provided.",
+          "constraints": "FederalAgencyDataType",
+          "json_path": "principal_investigator.federal_agency",
+          "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:FederalAgency"
+        },
+        {
+          "kind": "field",
+          "id": "principal-investigator-federal-agency-dollar",
+          "label": "If yes, enter total dollar amount requested ($)",
+          "dat_field": "3-8",
+          "required": false,
+          "type": "Text input (dollar amount)",
+          "widget": "TextWidget",
+          "help_text": "Enter the total dollar amount.",
+          "constraints": "maxLength 15, pattern ^\\d{1,12}([.]\\d{2})?$",
+          "json_path": "principal_investigator.federal_agency_dollar",
+          "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:FederalAgencyDollar"
+        },
+        {
+          "kind": "field",
+          "id": "principal-investigator-international-participation",
+          "label": "Is this person participating in this project as an employee of a foreign organization?",
+          "dat_field": "3-9",
+          "required": true,
+          "type": "Radio group (boolean; XML YesNoDataType)",
+          "widget": "RadioWidget",
+          "help_text": "Select Yes or No.",
+          "constraints": "YesNoDataType enumeration",
+          "json_path": "principal_investigator.international_participation",
+          "xml_path": "Nasa_PIandAORSupplementalDataSheet:PrincipalInvestigatorName/Nasa_PIandAORSupplementalDataSheet:InternationalParticipation"
+        }
+      ]
+    }
+  ]
 }
