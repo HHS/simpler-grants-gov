@@ -643,6 +643,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "70238095-fbae-48c3-9007-83446416b18d",
         ),
         (
+            "Project_Abstract_1_2_Generated",
+            "E2E-PABSG",
+            "Project Abstract (Generated)",
+            "2e5d8bcd-bf18-449e-809c-15d21de7a22f",
+            "951d1fed-700b-4aae-b7da-40e0dc41b1a0",
+        ),
+        (
             "Project_AbstractSummary_2_0",
             "E2E-PABSS",
             "Project Abstract Summary",

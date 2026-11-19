@@ -44,6 +44,7 @@ from src.form_schema.forms import (
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
+    ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
     ProjectNarrativeGenerated_v1_2,
@@ -686,6 +687,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Project Abstract",
                 ProjectAbstract_v1_2.form_id,
                 "d3081452-2cf8-4817-9abf-812e5d794485",
+            ),
+            (
+                "E2E-PABSG",
+                "Project Abstract (Generated)",
+                ProjectAbstractGenerated_v1_2.form_id,
+                "2e5d8bcd-bf18-449e-809c-15d21de7a22f",
             ),
             (
                 "E2E-PABSS",

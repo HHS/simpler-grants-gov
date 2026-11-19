@@ -64,7 +64,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 50
+    assert len(opportunities) == 51
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -81,7 +81,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 50
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 51
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
 
@@ -111,7 +111,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 50
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 51
     # Nothing is missing, so nothing is backfilled or changed
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
     assert [c.public_competition_id for c in competitions] == public_competition_ids
@@ -304,6 +304,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "E2E-NSFKPEG-ORG-IND-01": uuid.UUID("7b0b7e69-0943-429e-b380-ebaf69985400"),
         "E2E-BNAG-ORG-IND-01": uuid.UUID("c45674bf-a5e8-4f90-b098-ff5158f08c5e"),
         "E2E-ONAG-ORG-IND-01": uuid.UUID("3675dfde-0c28-44aa-a733-b3ce88b29b3a"),
+        "E2E-PABSG-ORG-IND-01": uuid.UUID("2e5d8bcd-bf18-449e-809c-15d21de7a22f"),
         "E2E-PABS-ORG-IND-01": uuid.UUID("d3081452-2cf8-4817-9abf-812e5d794485"),
         "E2E-PABSS-ORG-IND-01": uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
         "E2E-PNA-ORG-IND-01": uuid.UUID("6bdc2df3-6e51-4aea-89af-bade326feba1"),
