@@ -7,6 +7,11 @@ import {
 import { BUDGET_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/budget-narrative-attachment-field-definitions";
 import { ED_ABSTRACT_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/ed-abstract-form-data";
 import { ED_ABSTRACT_FORM_CONFIG } from "tests/e2e/apply/fixtures/ed-abstract-form-field-definitions";
+import {
+  EPA_KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
+  EPA_KEY_CONTACTS_OPPORTUNITY_DATA,
+} from "tests/e2e/apply/fixtures/epa-key-contacts-data";
+import { EPA_KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
 import { GRANTSGOV_LOBBYING_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/grantsgov-lobbying-data";
 import { GRANTSGOV_LOBBYING_FORM_CONFIG } from "tests/e2e/apply/fixtures/grantsgov-lobbying-field-definitions";
 import {
@@ -92,6 +97,8 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   ED_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_GENERATED_OPPORTUNITY_DATA,
+  EPA_KEY_CONTACTS_OPPORTUNITY_DATA,
+  EPA_KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
   SF424_SHORT_OPPORTUNITY_DATA,
   SF424A_OPPORTUNITY_DATA,
@@ -125,6 +132,8 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   projectAbstract: PROJECT_ABSTRACT_FORM_CONFIG,
   projectAbstractGenerated: PROJECT_ABSTRACT_FORM_CONFIG,
   edAbstractGenerated: ED_ABSTRACT_FORM_CONFIG,
+  epaKeyContacts: EPA_KEY_CONTACTS_FORM_CONFIG,
+  epaKeyContactsGenerated: EPA_KEY_CONTACTS_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
   sf424short: SF424_SHORT_FORM_CONFIG,
   sf424a: SF424A_FORM_CONFIG,

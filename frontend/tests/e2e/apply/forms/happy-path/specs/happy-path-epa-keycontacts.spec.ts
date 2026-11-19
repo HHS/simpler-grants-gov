@@ -10,11 +10,9 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { EPA_KEY_CONTACTS_OPPORTUNITIES } from "tests/e2e/apply/fixtures/epa-key-contacts-data";
 import { EPA_KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
-import {
-  EPA_KEY_CONTACTS_OPPORTUNITIES,
-  epaKeyContactsHappyPathTestData,
-} from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
+import { epaKeyContactsHappyPathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -22,6 +20,7 @@ import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
@@ -31,7 +30,9 @@ test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { formLabel, opportunityId } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
+for (const { formLabel, opportunityNumber } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
+  const { opportunityUrl } = loadOpportunityConfig(opportunityNumber);
+
   test(
     `Application form completion happy path - ${formLabel}`,
     { tag: [APPLY_FORMS, FULL_REGRESSION] },
@@ -51,11 +52,7 @@ for (const { formLabel, opportunityId } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
        * Covers "Starting a new application" flow in the feature file
        * (includes modal interaction, organization selection, and application creation)
        */
-      await createApplication(
-        page,
-        `/opportunity/${opportunityId}`,
-        testOrgLabel,
-      );
+      await createApplication(page, opportunityUrl, testOrgLabel);
 
       // When the user clicks on a form link
       // Then the form opens
