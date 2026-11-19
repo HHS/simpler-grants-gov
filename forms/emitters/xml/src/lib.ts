@@ -64,10 +64,10 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`The XML mapping can't write ${"element"} yet: it holds ${"reason"}.`,
       },
     },
-    "xml-mapping-field-unreachable": {
+    "xml-mapping-field-out-of-scope": {
       severity: "error",
       messages: {
-        default: paramMessage`The XML mapping can't read ${"field"} for ${"element"}: it isn't a field of the form, or of the item, that ${"element"} is filled from.`,
+        default: paramMessage`A @Mapping.when or @Mapping.match on ${"element"} names ${"field"}, which isn't in ${"scope"}: the model that ${"element"} reads its fields from. Name a field of ${"scope"}, or of an object property of it. Inside a list, that's the list item.`,
       },
     },
     "xml-transform-unsupported": {
