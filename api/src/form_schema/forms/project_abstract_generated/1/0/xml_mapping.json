@@ -1,0 +1,21 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/Project_Abstract_1_2-V1.2",
+    "Project_Abstract_1_2": "http://apply.grants.gov/forms/Project_Abstract_1_2-V1.2",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_Abstract_1_2-V1.2.xsd",
+  "root": {
+    "Project_Abstract_1_2": {
+      "@Project_Abstract_1_2:FormVersion": {
+        "$const": "1.2"
+      },
+      "ProjectAbstractAddAttachment": {
+        "AttachedFile": {
+          "$attachment": "attachment"
+        }
+      }
+    }
+  }
+}
