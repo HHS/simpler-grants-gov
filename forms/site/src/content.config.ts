@@ -103,6 +103,9 @@ export type SectionNode = z.infer<typeof sectionNode>;
  */
 export const TOTAL_APPS = 621_077;
 
+/** Every form's `apps_count` added up: one submission per form in each application. */
+export const TOTAL_FORM_SUBMISSIONS = 4_072_033;
+
 export const collections = {
   forms: defineCollection({
     loader: glob({ pattern: "**/*.json", base: "./src/content/forms" }),

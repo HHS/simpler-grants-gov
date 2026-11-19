@@ -1,14 +1,13 @@
 ---
 import { getCollection } from "astro:content";
 
+import { TOTAL_FORM_SUBMISSIONS } from "../../content.config";
+
 const forms = await getCollection("forms");
 const totalForms = forms.length;
 const families = new Set(forms.flatMap((f) => f.data.family));
 const migrated = forms.filter((f) => f.data.status === "migrated");
 const migratedCount = migrated.length;
-
-// Applications usually include several forms, so sum form submissions instead.
-const totalSubmissions = forms.reduce((sum, f) => sum + f.data.apps_count, 0);
 
 const inProgressStatuses = ["in_progress", "in_review", "migrated"];
 const inProgressForms = forms.filter((f) =>
@@ -19,7 +18,7 @@ const inProgressSubmissions = inProgressForms.reduce(
   0,
 );
 const inProgressPct = (
-  (inProgressSubmissions / totalSubmissions) *
+  (inProgressSubmissions / TOTAL_FORM_SUBMISSIONS) *
   100
 ).toFixed(2);
 
@@ -37,7 +36,7 @@ const prioritizedSubmissions = prioritizedForms.reduce(
   0,
 );
 const prioritizedPct = (
-  (prioritizedSubmissions / totalSubmissions) *
+  (prioritizedSubmissions / TOTAL_FORM_SUBMISSIONS) *
   100
 ).toFixed(2);
 
@@ -57,13 +56,13 @@ const stats = [
   {
     label: "Form submissions covered (in progress)",
     value: `${inProgressPct}%`,
-    detail: `${inProgressSubmissions.toLocaleString()} of ${totalSubmissions.toLocaleString()} form submissions`,
+    detail: `${inProgressSubmissions.toLocaleString()} of ${TOTAL_FORM_SUBMISSIONS.toLocaleString()} form submissions`,
     valueClass: "stat-value--secondary",
   },
   {
     label: "Form submissions covered (prioritized+)",
     value: `${prioritizedPct}%`,
-    detail: `${prioritizedSubmissions.toLocaleString()} of ${totalSubmissions.toLocaleString()} form submissions`,
+    detail: `${prioritizedSubmissions.toLocaleString()} of ${TOTAL_FORM_SUBMISSIONS.toLocaleString()} form submissions`,
     valueClass: "",
   },
 ];
