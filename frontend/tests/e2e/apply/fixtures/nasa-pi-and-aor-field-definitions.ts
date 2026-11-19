@@ -96,11 +96,12 @@ const required = (fieldId: string, title: string): FieldError => ({
   message: `${title.replace("?", "")} is required`,
 });
 
+// An empty save leaves out each empty name, so its errors start with the name's title.
 export const NASA_PI_AND_AOR_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  required("authorized_representative--name--first_name", "First Name"),
-  required("authorized_representative--name--last_name", "Last Name"),
-  required("principal_investigator--name--first_name", "First Name"),
-  required("principal_investigator--name--last_name", "Last Name"),
+  required("authorized_representative--name--first_name", "Name First Name"),
+  required("authorized_representative--name--last_name", "Name Last Name"),
+  required("principal_investigator--name--first_name", "Name First Name"),
+  required("principal_investigator--name--last_name", "Name Last Name"),
   required(
     "principal_investigator--us_government_participation",
     US_GOVERNMENT_PARTICIPATION,
