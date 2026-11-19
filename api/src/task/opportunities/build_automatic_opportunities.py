@@ -44,6 +44,7 @@ from src.form_schema.forms import (
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
+    ProjectNarrativeGenerated_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
     RRKeyPersonExpandedGenerated_v4_0,
     RRKeyPersonGenerated_v3_0,
@@ -683,6 +684,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Project Narrative Attachment Form",
                 ProjectNarrativeAttachment_v1_2.form_id,
                 "6bdc2df3-6e51-4aea-89af-bade326feba1",
+            ),
+            (
+                "E2E-PNAG",
+                "Project Narrative Attachment Form (Generated)",
+                ProjectNarrativeGenerated_v1_2.form_id,
+                "3b41ad38-a4eb-43e2-b124-7ebf56b05b1a",
             ),
             (
                 "E2E-PPSL",

@@ -9,7 +9,7 @@ export const PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER =
 export const fieldDefinitionsProjectNarrativeAttachment: FormFillFieldDefinitions =
   {
     attachments: {
-      testId: "file-input-input",
+      selector: 'input[name="attachments-visible"][type="file"]',
       type: "file",
       field: "Project Narrative Files",
     },
