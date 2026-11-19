@@ -85,6 +85,12 @@ declare module "@sgg/frontend/components/apply-form/widgets/WidgetRenderers" {
   }) => JSX.Element;
 }
 
+declare module "@sgg/frontend/components/apply-form/jsonforms/MarkdownDescription" {
+  import type { JSX } from "react";
+
+  export const MarkdownDescription: (props: { text: string }) => JSX.Element;
+}
+
 declare module "@sgg/frontend/i18n/messages/en/index" {
   export const messages: Record<string, unknown>;
 }

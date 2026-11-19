@@ -63,4 +63,20 @@ describe("FieldsetControl", () => {
       screen.getByRole("heading", { level: 5, name: "Line Items" }),
     ).toBeInTheDocument();
   });
+
+  it("renders the section's description as markdown", () => {
+    renderSections({
+      type: "VerticalLayout",
+      elements: [
+        {
+          type: "Group",
+          label: "Assurances",
+          elements: [],
+          options: { description: "Read the **entire** statement." },
+        },
+      ],
+    });
+
+    expect(screen.getByText("entire").tagName).toBe("STRONG");
+  });
 });

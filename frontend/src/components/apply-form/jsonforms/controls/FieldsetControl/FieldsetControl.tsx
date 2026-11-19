@@ -20,6 +20,7 @@ import {
   HeadingLevel,
   useHeadingLevel,
 } from "src/components/apply-form/jsonforms/headingLevel";
+import { MarkdownDescription } from "src/components/apply-form/jsonforms/MarkdownDescription";
 
 /** Rank above the SGG adapter (10), which would otherwise render the group with `FieldsetWidget`. */
 const FIELDSET_RANK = 11;
@@ -75,12 +76,7 @@ const FieldsetControl = ({
         >
           {label}
         </Heading>
-        {description
-          ?.split("\n")
-          .filter(Boolean)
-          .map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
+        {description ? <MarkdownDescription text={description} /> : null}
         {/* Set the section's heading level, so a heading inside the section is one level below it. */}
         <HeadingLevel level={level + 1}>{children}</HeadingLevel>
       </FormGroup>
