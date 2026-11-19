@@ -1,0 +1,19 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/ED_Abstract-V1.1",
+    "AbstractAttachments": "http://apply.grants.gov/forms/ED_Abstract-V1.1",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/ED_Abstract-V1.1.xsd",
+  "root": {
+    "AbstractAttachments": {
+      "@AbstractAttachments:FormVersion": {
+        "$const": "1.1"
+      },
+      "Attachments": {
+        "$attachment": "attachment"
+      }
+    }
+  }
+}
