@@ -580,6 +580,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "77e4216a-3a93-4882-8d63-c929ac6bbcea",
         ),
         (
+            "AbstractAttachments_Generated",
+            "E2E-EDAG",
+            "ED Abstract Form",
+            "ea981400-e64a-4d17-a337-5b26b15f43cd",
+            "22f91559-1897-4f05-a153-8e86ac30c0a8",
+        ),
+        (
             "EPA4700_4",
             "E2E-EPA4700",
             "EPA Form 4700-4",

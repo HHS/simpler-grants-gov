@@ -33,6 +33,7 @@ from src.form_schema.forms import (
     BudgetNarrativeAttachment_v1_2,
     BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
+    EDAbstractGenerated_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
     EPAKeyContactsGenerated_v2_0,
@@ -633,6 +634,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Budget Narrative Attachment Form (Generated)",
                 BudgetNarrativeGenerated_v1_2.form_id,
                 "c45674bf-a5e8-4f90-b098-ff5158f08c5e",
+            ),
+            (
+                "E2E-EDAG",
+                "ED Abstract Form",
+                EDAbstractGenerated_v1_1.form_id,
+                "ea981400-e64a-4d17-a337-5b26b15f43cd",
             ),
             (
                 "E2E-EPA4700",

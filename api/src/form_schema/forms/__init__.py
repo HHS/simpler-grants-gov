@@ -7,6 +7,7 @@ from .attachment_form import AttachmentForm_v1_2
 from .budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from .budget_narrative_generated import FORM as BudgetNarrativeGenerated_v1_2
 from .cd511 import CD511_v1_1
+from .ed_abstract_form_generated import FORM as EDAbstractGenerated_v1_1
 from .epa_form_4700_4 import EPA_FORM_4700_4_v5_0
 from .epa_key_contacts import EPA_KEY_CONTACT_v2_0
 from .epa_key_contacts_generated import FORM as EPAKeyContactsGenerated_v2_0
@@ -67,6 +68,7 @@ _ALL_FORMS: list[Form] = [
     BudgetNarrativeGenerated_v1_2,
     OtherNarrativeGenerated_v1_2,
     ProjectAbstractGenerated_v1_2,
+    EDAbstractGenerated_v1_1,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -85,6 +87,7 @@ GENERATED_FORMS: list[Form] = [
     BudgetNarrativeGenerated_v1_2,
     OtherNarrativeGenerated_v1_2,
     ProjectAbstractGenerated_v1_2,
+    EDAbstractGenerated_v1_1,
 ]
 
 
