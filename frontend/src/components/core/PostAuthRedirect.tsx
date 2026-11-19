@@ -1,7 +1,12 @@
-import { LOGIN_REDIRECT_STORAGE_KEY } from "src/constants/auth";
+"use client";
+
+import {
+  LOGIN_REDIRECT_FALLBACK,
+  LOGIN_REDIRECT_STORAGE_KEY,
+} from "src/constants/auth";
 import { postUserEvent } from "src/services/event/postUserEvent";
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
-import { getSafeLoginRedirect, isSafeLoginRedirect } from "src/utils/userUtils";
+import { isSafeLoginRedirect } from "src/utils/userUtils";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -13,12 +18,19 @@ type PostAuthRedirectProps = {
   checkPiv?: boolean;
   displayMessage?: string;
   trackDestination?: boolean;
+  // server-side fallback (cookie) destination, used only when sessionStorage has
+  // no valid destination; unvalidated, so it is checked here before use
+  fallbackDestination?: string;
+  // clears the server-side fallback once the destination has been chosen
+  clearFallbackDestination?: () => Promise<void>;
 };
 
 export function PostAuthRedirect({
   checkPiv,
   displayMessage,
   trackDestination,
+  fallbackDestination,
+  clearFallbackDestination,
 }: PostAuthRedirectProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,17 +44,33 @@ export function PostAuthRedirect({
     }
     hasRedirected.current = true;
 
+    // tab-local sessionStorage first, then the shared server-side fallback, then /
     const savedDestination = SessionStorage.getItem(LOGIN_REDIRECT_STORAGE_KEY);
-    const destination = getSafeLoginRedirect(savedDestination);
     SessionStorage.removeItem(LOGIN_REDIRECT_STORAGE_KEY);
+    if (fallbackDestination !== undefined && clearFallbackDestination) {
+      clearFallbackDestination().catch(() => {
+        // the cookie expires on its own; never block the redirect on clearing it
+      });
+    }
+    const restoredDestination = isSafeLoginRedirect(savedDestination)
+      ? savedDestination
+      : isSafeLoginRedirect(fallbackDestination)
+        ? fallbackDestination
+        : null;
+    const destination = restoredDestination ?? LOGIN_REDIRECT_FALLBACK;
     if (trackDestination) {
       // never include the destination itself, only a bounded reason
       postUserEvent(
-        isSafeLoginRedirect(savedDestination)
+        restoredDestination
           ? { name: "destination_restored" }
           : {
               name: "destination_rejected",
-              properties: { reason: savedDestination ? "invalid" : "missing" },
+              properties: {
+                reason:
+                  savedDestination || fallbackDestination
+                    ? "invalid"
+                    : "missing",
+              },
             },
       );
     }
@@ -50,7 +78,14 @@ export function PostAuthRedirect({
       SessionStorage.setItem("showPivError", "true");
     }
     router.replace(destination);
-  }, [router, searchParams, checkPiv, trackDestination]);
+  }, [
+    router,
+    searchParams,
+    checkPiv,
+    trackDestination,
+    fallbackDestination,
+    clearFallbackDestination,
+  ]);
 
   return (
     <GridContainer className="margin-y-5">

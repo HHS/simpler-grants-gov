@@ -1,7 +1,7 @@
 /**
  * @feature Sign in returns to the original page
  * @featureFile e2e/login/features/login-return-to-destination.feature
- * @scenario Local mock Login.gov round trip from an auth-gated page, and browser Back from the IdP
+ * @scenario Local mock Login.gov round trip from an auth-gated page (including a "Sign in" click before hydration), and browser Back from the IdP
  */
 
 import { expect, test, type Page } from "@playwright/test";
@@ -42,18 +42,6 @@ const signedOutAlert = (page: Page) =>
 const pageSignInLink = (page: Page) =>
   page.getByRole("main").getByRole("link", { name: "Sign in", exact: true });
 
-// KNOWN PRODUCTION RACE: "Sign in" is a plain link that saves the current page as
-// the post-sign-in destination only in its client-side click handler
-// (LoginLink in src/components/core/LoginButton.tsx). A click before hydration
-// still navigates to Login.gov but saves nothing, and the user comes back to "/".
-// Nothing visible distinguishes the two cases, so the usual "re-click until it
-// works" pattern cannot apply. Wait for the network to go idle instead: the app's
-// mounted-only session fetch keeps the page busy until the client app is running.
-// Remove this wait once the race is fixed in the app.
-const waitForPageInteractive = async (page: Page) => {
-  await page.waitForLoadState("networkidle");
-};
-
 const expectSignedOutGatedPage = async (page: Page) => {
   await expect(page).toHaveURL(ORIGINAL_URL);
   await expect(signedOutAlert(page)).toBeVisible({ timeout: TIMEOUT });
@@ -79,8 +67,9 @@ test.describe("Sign in returns to the original page", () => {
     await page.goto(ORIGINAL_URL, { waitUntil: "domcontentloaded" });
     await expectSignedOutGatedPage(page);
 
-    // When I choose to sign in
-    await waitForPageInteractive(page);
+    // When I choose to sign in, as soon as the link is visible. This click can
+    // land before hydration, when LoginLink's client-side save has not run; the
+    // server-side Referer fallback in /api/auth/login must still bring the user back.
     await pageSignInLink(page).click();
 
     // Then I reach the Login.gov sign-in page (local mock)
