@@ -41,6 +41,7 @@ from src.form_schema.forms import (
     KeyContactsGenerated_v2_0,
     NSFKeyPersonExpandedGenerated_v3_3,
     OtherNarrativeAttachment_v1_2,
+    OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -673,6 +674,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Other Narrative Attachments",
                 OtherNarrativeAttachment_v1_2.form_id,
                 "717b7f78-52f2-49f9-b1b8-5d7118313d2a",
+            ),
+            (
+                "E2E-ONAG",
+                "Other Narrative Attachments (Generated)",
+                OtherNarrativeGenerated_v1_2.form_id,
+                "3675dfde-0c28-44aa-a733-b3ce88b29b3a",
             ),
             (
                 "E2E-PABS",

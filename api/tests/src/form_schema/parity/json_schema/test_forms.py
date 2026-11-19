@@ -17,6 +17,7 @@ from tests.src.form_schema.parity.json_schema.diffs import (
     budget_narrative,
     epa_key_contacts,
     key_contacts,
+    other_narrative,
     performance_sites,
     project_narrative,
 )
@@ -35,6 +36,7 @@ DIFFS: list[FormDiff] = [
     performance_sites.DIFF,
     project_narrative.DIFF,
     budget_narrative.DIFF,
+    other_narrative.DIFF,
 ]
 
 

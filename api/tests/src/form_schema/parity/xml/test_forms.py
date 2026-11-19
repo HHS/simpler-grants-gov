@@ -21,6 +21,8 @@ from tests.src.form_schema.parity.xml.diffs import (
     key_contacts,
     key_contacts_generated,
     nsf_key_person_expanded_generated,
+    other_narrative_attachment,
+    other_narrative_generated,
     performance_sites_generated,
     project_narrative_attachment,
     project_narrative_generated,
@@ -50,6 +52,8 @@ DIFFS = [
     project_narrative_generated.DIFF,
     budget_narrative_attachment.DIFF,
     budget_narrative_generated.DIFF,
+    other_narrative_attachment.DIFF,
+    other_narrative_generated.DIFF,
 ]
 
 

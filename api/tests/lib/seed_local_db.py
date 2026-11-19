@@ -629,6 +629,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "6098d8b0-8025-448e-a407-a0ac56d27d3e",
         ),
         (
+            "OtherNarrativeAttachments_Generated",
+            "E2E-ONAG",
+            "Other Narrative Attachments (Generated)",
+            "3675dfde-0c28-44aa-a733-b3ce88b29b3a",
+            "94f65d58-4b76-4293-b62d-bd6687b5d335",
+        ),
+        (
             "Project_Abstract",
             "E2E-PABS",
             "Project Abstract",
