@@ -1,16 +1,19 @@
 import { ManageUsersPageContent } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ManageUsersPageContent";
+import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 import {
   getOrganizationPendingInvitations,
   getOrganizationRoles,
   getOrganizationUsers,
 } from "src/services/fetch/fetchers/organizationsFetcher";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 
 import { AuthorizationGate } from "src/components/core/AuthorizationGate";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 
-interface ManageUsersPageProps {
+interface ManageUsersPageProps extends WithFeatureFlagProps {
   params: Promise<{ locale: string; id: string }>;
 }
 
@@ -28,8 +31,14 @@ export async function generateMetadata({
   };
 }
 
-async function ManageUsersPage({ params }: ManageUsersPageProps) {
+async function ManageUsersPage({ params, searchParams }: ManageUsersPageProps) {
   const { id: organizationId } = await params;
+  // Search params are passed so a flag set with ?_ff= applies on the first load
+  const externalCollaboratorsEnabled = featureFlagsManager.isFeatureEnabled(
+    "enableExternalCollaborators",
+    await cookies(),
+    searchParams ? await searchParams : undefined,
+  );
 
   return (
     <AuthorizationGate
@@ -47,7 +56,10 @@ async function ManageUsersPage({ params }: ManageUsersPageProps) {
       ]}
       onUnauthorized={() => <UnauthorizedMessage />}
     >
-      <ManageUsersPageContent organizationId={organizationId} />
+      <ManageUsersPageContent
+        organizationId={organizationId}
+        externalCollaboratorsEnabled={externalCollaboratorsEnabled}
+      />
     </AuthorizationGate>
   );
 }

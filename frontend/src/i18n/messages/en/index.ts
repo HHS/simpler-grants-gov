@@ -1786,7 +1786,10 @@ export const messages = {
     usersTable: {
       actionsHeading: "Actions",
       admin: "Administrator",
+      editPermissions: "Edit",
+      editPermissionsFor: "permissions for {name}",
       emailHeading: "Email",
+      managePermissionsHeading: "Manage permissions",
       member: "Member",
       nameHeading: "Name",
       noUsersFound: "No users found.",
