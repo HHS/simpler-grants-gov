@@ -583,3 +583,24 @@ export const KEY_CONTACTS_REQUIRED_FIELD_ERRORS: FieldError[] = [
     message: "Email is required",
   },
 ];
+
+// The generated form titles the phone field "Phone Number".
+export const KEY_CONTACTS_GENERATED_REQUIRED_FIELD_ERRORS: FieldError[] =
+  KEY_CONTACTS_REQUIRED_FIELD_ERRORS.map((error) =>
+    error.fieldId === "key_contacts[0]--phone"
+      ? { ...error, message: "Phone Number is required" }
+      : error,
+  );
+
+/**
+ * The alert names the entry for each error in the key contacts list, e.g.
+ * "First Name in Key Contact, Entry 1 is required", while the inline error
+ * reads "First Name is required".
+ */
+export const toKeyContactsAlertErrors = (errors: FieldError[]): FieldError[] =>
+  errors.map(({ fieldId, message }) => ({
+    fieldId,
+    message: fieldId.startsWith("key_contacts[0]--")
+      ? message.replace(/ is required$/, " in Key Contact, Entry 1 is required")
+      : message,
+  }));
