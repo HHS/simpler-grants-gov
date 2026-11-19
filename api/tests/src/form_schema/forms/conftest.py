@@ -6,6 +6,7 @@ from src.db.models.competition_models import Form
 from src.form_schema.forms import (
     AttachmentForm_v1_2,
     BudgetNarrativeAttachment_v1_2,
+    BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
@@ -16,10 +17,13 @@ from src.form_schema.forms import (
     NasaPIAndAORGenerated_v1_0,
     NSFKeyPersonExpandedGenerated_v3_3,
     OtherNarrativeAttachment_v1_2,
+    OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
+    ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
+    ProjectNarrativeGenerated_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
     RRKeyPersonExpandedGenerated_v4_0,
     RRKeyPersonGenerated_v3_0,
@@ -107,9 +111,15 @@ def sflll_v2_0():
     return setup_resolved_form(SFLLL_v2_0)
 
 
-@pytest.fixture(scope="session")
-def project_abstract_v1_2():
-    return setup_resolved_form(ProjectAbstract_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectAbstract_v1_2, id="handwritten"),
+        pytest.param(ProjectAbstractGenerated_v1_2, id="generated"),
+    ],
+)
+def project_abstract_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(scope="session")
@@ -117,19 +127,38 @@ def project_abstract_summary_v2_0():
     return setup_resolved_form(ProjectAbstractSummary_v2_0)
 
 
-@pytest.fixture(scope="session")
-def project_narrative_attachment_v1_2():
-    return setup_resolved_form(ProjectNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(ProjectNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def project_narrative_attachment_v1_2(request):
+    """The hand-written form and the one generated from forms/specs."""
+    return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def budget_narrative_attachment_v1_2():
-    return setup_resolved_form(BudgetNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(BudgetNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(BudgetNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def budget_narrative_attachment_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def other_narrative_attachment_v1_2():
-    return setup_resolved_form(OtherNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(OtherNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(OtherNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def other_narrative_attachment_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(scope="session")

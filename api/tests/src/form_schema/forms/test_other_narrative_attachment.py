@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
@@ -59,20 +61,12 @@ def test_other_narrative_v1_2_attachment_type(other_narrative_attachment_v1_2):
 def test_other_narrative_attachment_v1_2_with_valid_attachment(
     enable_factory_create, other_narrative_attachment_v1_2, verify_no_warning_error_logs
 ):
+    first_id, second_id, unused_id = (str(uuid4()) for _ in range(3))
     application_form = setup_application_for_form_validation(
-        {
-            "attachments": [
-                "854568b1-b362-4e48-800f-25828987d2f4",
-                "fbe13b07-c692-4d5f-bd97-eaafae9ea3bf",
-            ]
-        },
+        {"attachments": [first_id, second_id]},
         json_schema=other_narrative_attachment_v1_2.form_json_schema,
         rule_schema=other_narrative_attachment_v1_2.form_rule_schema,
-        attachment_ids=[
-            "854568b1-b362-4e48-800f-25828987d2f4",
-            "fbe13b07-c692-4d5f-bd97-eaafae9ea3bf",
-            "b43a1ed2-4441-4e0b-851c-663816d10a56",
-        ],
+        attachment_ids=[first_id, second_id, unused_id],
     )
 
     issues = validate_application_form(application_form, ApplicationAction.MODIFY)
@@ -83,16 +77,12 @@ def test_other_narrative_attachment_v1_2_with_valid_attachment(
 def test_other_narrative_attachment_v1_2_with_invalid_attachment(
     enable_factory_create, other_narrative_attachment_v1_2, verify_no_warning_error_logs
 ):
+    attached_id, unknown_id = str(uuid4()), str(uuid4())
     application_form = setup_application_for_form_validation(
-        {
-            "attachments": [
-                "230efa76-de05-4294-ae37-2e7bb77d0aed",
-                "e56e8d6c-f8fa-4ff5-b82c-59b14a00db62",
-            ]
-        },
+        {"attachments": [attached_id, unknown_id]},
         json_schema=other_narrative_attachment_v1_2.form_json_schema,
         rule_schema=other_narrative_attachment_v1_2.form_rule_schema,
-        attachment_ids=["230efa76-de05-4294-ae37-2e7bb77d0aed"],
+        attachment_ids=[attached_id],
     )
 
     issues = validate_application_form(application_form, ApplicationAction.MODIFY)
@@ -101,4 +91,4 @@ def test_other_narrative_attachment_v1_2_with_invalid_attachment(
     assert issues[0].type == ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT
     assert issues[0].message == "Field references application_attachment_id not on the application"
     assert issues[0].field == "$.attachments[1]"
-    assert issues[0].value == "e56e8d6c-f8fa-4ff5-b82c-59b14a00db62"
+    assert issues[0].value == unknown_id
