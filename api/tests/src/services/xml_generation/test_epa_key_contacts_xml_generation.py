@@ -437,6 +437,72 @@ class TestEPAKeyContactsXMLGeneration:
         assert auth_rep.find(f"{{{GLOB_NS}}}Phone").text.strip() == "1231231234"
 
 
+# --------------------------------------------------------------------------- #
+# Snapshot regression test                                                      #
+# --------------------------------------------------------------------------- #
+
+_SNAPSHOT_PATH = Path(__file__).parent / "snapshots" / "epa_key_contacts_2_0.xml"
+
+
+def _snapshot_contact(initials: str, first_name: str, last_name: str) -> dict:
+    """A contact with every field filled, so the snapshot covers each element."""
+    return {
+        "name": {
+            "prefix": "Dr.",
+            "first_name": first_name,
+            "middle_name": "A.",
+            "last_name": last_name,
+            "suffix": "Jr.",
+        },
+        "title": f"{initials} Title",
+        "address": {
+            "street1": "123 Main Street",
+            "street2": "Suite 100",
+            "city": "Washington",
+            "state": "DC: District of Columbia",
+            "zip_code": "200011234",
+            "country": "USA: UNITED STATES",
+        },
+        "phone": "2025550100",
+        "fax": "2025550101",
+        "email": f"{first_name.lower()}.{last_name.lower()}@example.org",
+    }
+
+
+# Data used to generate the pinned snapshot. Must stay in sync with the file.
+_SNAPSHOT_DATA = {
+    "authorized_representative": _snapshot_contact("AR", "Jane", "Doe"),
+    "payee": _snapshot_contact("PY", "John", "Smith"),
+    "administrative_contact": _snapshot_contact("AC", "Alex", "Lee"),
+    "project_manager": _snapshot_contact("PM", "Sam", "Park"),
+}
+
+
+class TestEPAKeyContactsSnapshot:
+    """Regression snapshot test pinning the full generated XML output.
+
+    To regenerate after an intentional change, write the XML that
+    XMLGenerationService generates from _SNAPSHOT_DATA to
+    snapshots/epa_key_contacts_2_0.xml.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _use_epa_key_contacts_form(self, epa_key_contacts_form):
+        self.form, self.transform_rules = epa_key_contacts_form
+
+    def test_full_xml_matches_snapshot(self):
+        """Generated XML with all four contacts must match the stored snapshot."""
+        response = XMLGenerationService().generate_xml(
+            XMLGenerationRequest(
+                application_data=_SNAPSHOT_DATA, transform_config=self.transform_rules
+            )
+        )
+        assert response.success, response.error_message
+
+        expected = _SNAPSHOT_PATH.read_text()
+        assert response.xml_data == expected
+
+
 class TestEPAKeyContactsXSDValidation:
     """XSD validation tests for EPA Key Contacts form XML."""
 
