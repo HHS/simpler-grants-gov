@@ -115,7 +115,8 @@ for (const { testName, orgLabel } of applicantScenarios) {
           printUrl: buildPrintUrl(formUrl),
           expectedPrepopulatedFields: form.expectedPrepopulatedFields,
           userEnteredFieldTestIds: form.userEnteredFieldTestIds,
-          expectedSectionHeading: form.formConfig.formName,
+          // The form has no section named for itself; its first is the AOR.
+          expectedSectionHeading: "Authorized Representative Name",
         });
       }
 
