@@ -1,9 +1,13 @@
 import type { JsonFormsRendererRegistryEntry } from "@jsonforms/core";
 
+import { fieldListControl } from "./FieldListControl";
 import { fieldsetControl } from "./FieldsetControl";
 
 /**
  * The native JSON Forms controls, each ranked above the SGG adapter (10). Add a new control
  * here; `renderers.tsx` registers this list.
  */
-export const controls: JsonFormsRendererRegistryEntry[] = [fieldsetControl];
+export const controls: JsonFormsRendererRegistryEntry[] = [
+  fieldsetControl,
+  fieldListControl,
+];

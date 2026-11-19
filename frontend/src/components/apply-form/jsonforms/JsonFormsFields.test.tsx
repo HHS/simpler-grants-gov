@@ -162,38 +162,20 @@ describe("JsonFormsFields", () => {
     expect(screen.getByText("Saved title")).toBeInTheDocument();
   });
 
-  it("skips a control a widget can't render", () => {
-    const nestedListSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        title: { type: "string", title: "Project Title" },
-        budget: {
-          type: "object",
-          properties: {
-            line_items: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: { amount: { type: "string" } },
-              },
-            },
-          },
-        },
-      },
-    };
+  it("skips rendering a control that points to an invalid JSON schema property", () => {
     render(
       <JsonFormsFields
         errors={null}
         formData={{}}
-        schema={nestedListSchema}
+        schema={{
+          type: "object",
+          properties: { title: { type: "string", title: "Project Title" } },
+        }}
         uiSchema={{
           type: "VerticalLayout",
           elements: [
             { type: "Control", scope: "#/properties/title" },
-            {
-              type: "Control",
-              scope: "#/properties/budget/properties/line_items",
-            },
+            { type: "Control", scope: "#/properties/absent" },
           ],
         }}
       />,

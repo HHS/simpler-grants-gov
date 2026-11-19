@@ -339,3 +339,28 @@ const leafDefinitions = (schema: RJSFSchema, base: Definition): Definition[] =>
         ([name, child]) => leafDefinitions(child, `${base}/properties/${name}`),
       )
     : [base];
+
+/**
+ * Return whether a field in a list entry is required: every property between the field and
+ * the innermost list above it is required. `getRequiredProperties` stops at lists, so it
+ * doesn't cover these fields.
+ */
+export const isRequiredInListEntry = (
+  schema: RJSFSchema,
+  definition: string,
+): boolean => {
+  let current: RJSFSchema | undefined = schema;
+  let required = true;
+  const parts = definition.split("/").filter(Boolean);
+  for (let index = 0; index < parts.length && current; index++) {
+    if (parts[index] === "items") {
+      required = true;
+      current = current.items as RJSFSchema | undefined;
+    } else if (parts[index] === "properties") {
+      const name = parts[++index];
+      required = required && Boolean(current.required?.includes(name));
+      current = current.properties?.[name] as RJSFSchema | undefined;
+    }
+  }
+  return required;
+};
