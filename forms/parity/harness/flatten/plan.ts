@@ -95,7 +95,12 @@ export function readConstraints(text: string): Rules | undefined {
     }
   }
   const rules: Rules = {};
-  for (const item of text.split(",").map((part) => part.trim())) {
+  // Read a trailing pattern whole, since a pattern like `\d{1,12}` contains a comma.
+  const pattern = /(?:^|,)\s*pattern\s+(\S+)\s*$/.exec(text);
+  if (pattern) rules.pattern = pattern[1];
+  const rest = pattern ? text.slice(0, pattern.index) : text;
+  if (pattern && !rest.trim()) return rules;
+  for (const item of rest.split(",").map((part) => part.trim())) {
     let match: RegExpExecArray | null;
     if ((match = NUMERIC.exec(item))) {
       rules[match[1] as "minLength"] = Number(match[2]);
