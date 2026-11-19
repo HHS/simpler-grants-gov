@@ -131,13 +131,19 @@ describe("SessionExpirationWarning", () => {
     expect(dialog()).toHaveClass("is-hidden");
   });
 
-  it("links sign out to the logout route", () => {
+  it("submits sign out to the logout route without adding a logout link", () => {
     mockUseUser.mockReturnValue(userContext(Date.now() + 60 * 1000));
     render(<SessionExpirationWarning />);
 
+    const signOut = screen.getByRole<HTMLButtonElement>("button", {
+      name: "signOut",
+      hidden: true,
+    });
+    expect(signOut).toHaveAttribute("type", "submit");
+    expect(signOut.form).toHaveAttribute("action", "/api/auth/logout");
     expect(
-      screen.getByRole("link", { name: "signOut", hidden: true }),
-    ).toHaveAttribute("href", "/api/auth/logout");
+      screen.queryByRole("link", { hidden: true }),
+    ).not.toBeInTheDocument();
   });
 
   it("passes accessibility scan when open", async () => {

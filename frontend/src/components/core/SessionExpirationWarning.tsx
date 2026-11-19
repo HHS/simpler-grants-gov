@@ -85,13 +85,16 @@ export function SessionExpirationWarning() {
         <Button type="button" onClick={staySignedIn}>
           {t("staySignedIn")}
         </Button>
-        <a
-          className="usa-button usa-button--unstyled padding-105 text-center"
-          href={LOGOUT_URL}
-          onClick={() => storeCurrentPage(location.pathname, location.search)}
+        <form
+          action={LOGOUT_URL}
+          method="get"
+          className="display-inline"
+          onSubmit={() => storeCurrentPage(location.pathname, location.search)}
         >
-          {t("signOut")}
-        </a>
+          <Button type="submit" unstyled className="padding-105 text-center">
+            {t("signOut")}
+          </Button>
+        </form>
       </ModalFooter>
     </SimplerModal>
   );
