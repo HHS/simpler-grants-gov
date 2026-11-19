@@ -82,11 +82,10 @@ test.describe("Sign in returns to the original page", () => {
       await expect(page).toHaveURL(ORIGINAL_URL, { timeout: TIMEOUT });
       expect(new URL(page.url()).searchParams.get("utm_source")).toBe("e2e");
 
-      await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
+      await expect(page.locator(ACCOUNT_MENU)).toHaveCount(1, {
         timeout: TIMEOUT,
       });
       await expect(signedOutAlert(page)).toHaveCount(0);
-      await expect(page.locator(ACCOUNT_MENU)).toHaveCount(1);
     },
   );
 

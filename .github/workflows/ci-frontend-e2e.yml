@@ -350,6 +350,13 @@ jobs:
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           # Keep the logout redirect chain on the same host Playwright uses (127.0.0.1)
           echo "LOGOUT_FINAL_DESTINATION=http://127.0.0.1:3000/api/auth/logout-callback" >> override.env
+          # host.docker.internal (local.env) only resolves under Docker Desktop, not on Linux
+          # runners, so the API calls the mock IdP by its compose service name. The mock sets the
+          # token issuer from the request host, so LOGIN_GOV_ENDPOINT has to change with them.
+          # The browser-facing authorize/endsession URLs stay on localhost.
+          echo "LOGIN_GOV_TOKEN_ENDPOINT=http://mock-oauth2-server:5001/issuer1/token" >> override.env
+          echo "LOGIN_GOV_JWK_ENDPOINT=http://mock-oauth2-server:5001/issuer1/jwks" >> override.env
+          echo "LOGIN_GOV_ENDPOINT=http://mock-oauth2-server:5001/issuer1" >> override.env
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           make run-workflow-service-async
           cd ../frontend
