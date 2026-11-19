@@ -148,13 +148,6 @@ export const NINE_DIGIT_ZIP: Recorded = {
     "The DAT asks for a nine-digit ZIP code, but the bank's Address question accepts any length, as SGG's existing forms do, so `20001` is valid. Whether to require ZIP+4 on this form is undecided.",
 };
 
-/** A DAT that asks for a nine-digit ZIP code, where the form requires it but its help doesn't say so. */
-export const ZIP_PLUS_FOUR_HELP: Recorded = {
-  category: "intentional",
-  reason:
-    "The form requires all nine digits of a US ZIP code, as the DAT does. Its help is the shared Address question's, which doesn't mention the nine digits.",
-};
-
 // =============================================================================
 // VALUES
 // =============================================================================
