@@ -14,8 +14,15 @@ from src.form_schema.forms import (
     SF424a_v1_0,
     SF424b_v1_1,
     SFLLL_v2_0,
+    get_active_forms,
 )
-from src.task.opportunities.build_automatic_opportunities import BuildAutomaticOpportunitiesTask
+from src.task.opportunities.build_automatic_opportunities import (
+    DEFAULT_COMPETITION_TITLE,
+    PUBLIC_COMPETITION_ID_MAX_LENGTH,
+    BuildAutomaticOpportunitiesTask,
+    build_competition_title,
+    build_public_competition_id,
+)
 
 # These are forms that we use in the build logic
 # that we need to make sure exist for the purposes of testing
@@ -76,6 +83,26 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 47
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
+    assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
+
+    # Every competition gets a public competition ID and a title
+    competitions = [c for opportunity in opportunities for c in opportunity.competitions]
+    public_competition_ids = [c.public_competition_id for c in competitions]
+    for competition in competitions:
+        assert competition.public_competition_id == build_public_competition_id(
+            competition.opportunity.opportunity_number, 1
+        )
+        assert competition.public_competition_id != str(competition.competition_id)
+        assert len(competition.public_competition_id) <= PUBLIC_COMPETITION_ID_MAX_LENGTH
+        assert competition.public_competition_id.isupper()
+        assert competition.competition_title
+    assert len(set(public_competition_ids)) == len(public_competition_ids)
+
+    # Default titles include the form name so the competitions are easy to tell apart
+    titles_by_opp_number = {
+        c.opportunity.opportunity_number: c.competition_title for c in competitions
+    }
+    assert titles_by_opp_number["SGG-SF424_4_0"] == f"SF424_4_0 {DEFAULT_COMPETITION_TITLE}"
 
     # If we rerun the task, all opportunities should be skipped (including ALL-forms)
     task = BuildAutomaticOpportunitiesTask(db_session)
@@ -85,6 +112,143 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 47
+    # Nothing is missing, so nothing is backfilled or changed
+    assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
+    assert [c.public_competition_id for c in competitions] == public_competition_ids
+
+
+def test_backfills_missing_competition_data(enable_factory_create, db_session, forms):
+    # The opportunities may already exist from an earlier test, so look them up
+    BuildAutomaticOpportunitiesTask(db_session).run()
+
+    competitions_by_opp_number = {
+        opportunity.opportunity_number: opportunity.competitions[0]
+        for opportunity in db_session.scalars(select(Opportunity))
+        if opportunity.competitions
+    }
+
+    # Simulate competitions created before the fix
+    sflll_competition = competitions_by_opp_number["E2E-SFLLL-ORG-IND-01"]
+    sflll_competition.public_competition_id = None
+    doj_competition = competitions_by_opp_number["MOCK-O-OVW-2025-172425-Dec102025"]
+    doj_competition.public_competition_id = None
+    doj_competition.competition_title = None
+    # Values that are already set shouldn't be changed
+    sf424_competition = competitions_by_opp_number["E2E-SF424-ORG-IND-01"]
+    sf424_competition.public_competition_id = "EXISTING-ID"
+    sf424_competition.competition_title = None
+    db_session.commit()
+
+    task = BuildAutomaticOpportunitiesTask(db_session)
+    task.run()
+
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
+    assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 3
+
+    db_session.expire_all()
+    assert sflll_competition.public_competition_id == "E2E-SFLLL-ORG-IND-01-C01"
+    assert (
+        sflll_competition.competition_title
+        == "E2E Disclosure of Lobbying Activities (SF-LLL) ORG IND CT01"
+    )
+    assert doj_competition.public_competition_id == "MOCK-O-OVW-2025-172425-DEC102025-C01"
+    assert (
+        doj_competition.competition_title
+        == "Tribal Domestic Violence and Sexual Assault Coalitions Grant Program"
+    )
+    assert sf424_competition.public_competition_id == "EXISTING-ID"
+    assert (
+        sf424_competition.competition_title
+        == "E2E Application for Federal Assistance (SF-424) ORG IND CT01"
+    )
+
+    # Once backfilled, another run has nothing left to do
+    task = BuildAutomaticOpportunitiesTask(db_session)
+    task.run()
+    assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
+
+
+def test_backfills_previous_all_forms_opportunities(enable_factory_create, db_session, forms):
+    # A new ALL-forms opportunity is created each day
+    all_forms_numbers = ["SGG-ALL-Forms-2026-03-01", "SGG-ALL-Forms-2026-03-02"]
+    for day in ["2026-03-01", "2026-03-02"]:
+        with freeze_time(f"{day} 12:00:00"):
+            BuildAutomaticOpportunitiesTask(db_session).run()
+
+    competitions_by_opp_number = {
+        opportunity.opportunity_number: opportunity.competitions[0]
+        for opportunity in db_session.scalars(
+            select(Opportunity).where(Opportunity.opportunity_number.in_(all_forms_numbers))
+        )
+    }
+    assert set(competitions_by_opp_number) == set(all_forms_numbers)
+
+    # Simulate ALL-forms competitions created before the fix
+    for competition in competitions_by_opp_number.values():
+        competition.public_competition_id = None
+        competition.competition_title = None
+    db_session.commit()
+
+    # A later day's run never looks these opportunities up by number, but still backfills them
+    with freeze_time("2026-03-03 12:00:00"):
+        task = BuildAutomaticOpportunitiesTask(db_session)
+        task.run()
+
+    assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 2
+
+    db_session.expire_all()
+    for opp_number, competition in competitions_by_opp_number.items():
+        assert competition.public_competition_id == f"{opp_number}-C01".upper()
+        assert competition.competition_title == f"ALL-Forms {DEFAULT_COMPETITION_TITLE}"
+
+    # Once backfilled, another run has nothing left to do
+    with freeze_time("2026-03-03 12:00:00"):
+        task = BuildAutomaticOpportunitiesTask(db_session)
+        task.run()
+    assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
+
+
+def test_build_public_competition_id():
+    assert build_public_competition_id("E2E-SFLLL-ORG-IND-01", 1) == "E2E-SFLLL-ORG-IND-01-C01"
+    assert build_public_competition_id("E2E-SFLLL-ORG-IND-01", 12) == "E2E-SFLLL-ORG-IND-01-C12"
+    # IDs are always uppercase
+    assert (
+        build_public_competition_id("SGG-ALL-Forms-2026-11-16", 1) == "SGG-ALL-FORMS-2026-11-16-C01"
+    )
+
+    # Long opportunity numbers are cut to stay within the limit
+    long_id = build_public_competition_id("SGG-SupplementaryCoverSheetforNEHGrantPrograms", 1)
+    assert long_id == "SGG-SUPPLEMENTARYCOVERSHEETFORNEHGRA-C01"
+    assert len(long_id) == PUBLIC_COMPETITION_ID_MAX_LENGTH
+
+
+def test_build_competition_title():
+    assert (
+        build_competition_title("SGG-SF424_4_0", DEFAULT_COMPETITION_TITLE)
+        == f"SF424_4_0 {DEFAULT_COMPETITION_TITLE}"
+    )
+    # The date is left out for ALL-forms opportunities
+    assert (
+        build_competition_title("SGG-ALL-Forms-2026-11-16", DEFAULT_COMPETITION_TITLE)
+        == f"ALL-Forms {DEFAULT_COMPETITION_TITLE}"
+    )
+    # Custom titles are kept as-is
+    assert build_competition_title("E2E-SFLLL-ORG-IND-01", "Custom title") == "Custom title"
+
+
+def test_public_competition_ids_are_unique_for_all_form_opportunities():
+    # Opportunity numbers for long form names get cut, so make sure that
+    # doesn't make two of the per-form opportunities share an ID.
+    # The form registry can hold the same form more than once, so use a set.
+    opportunity_numbers = {
+        f"SGG-{form.short_form_name}" for form in get_active_forms() if not form.is_deprecated
+    }
+    public_competition_ids = {
+        build_public_competition_id(opportunity_number, 1)
+        for opportunity_number in opportunity_numbers
+    }
+    assert len(public_competition_ids) == len(opportunity_numbers)
+    assert all(len(i) <= PUBLIC_COMPETITION_ID_MAX_LENGTH for i in public_competition_ids)
 
 
 def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):

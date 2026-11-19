@@ -332,7 +332,8 @@ class TestSearchOpportunities:
     ):
         """An unsupported status value returns 200 with the error in filterInfo.errors."""
         # Index a record so the sort fields are mapped; an empty index fails the search.
-        # Private index: the session-scoped one gets deleted by the grantors publish teardown.
+        # Private index: keeps this test isolated from other tests that mutate the
+        # session-scoped index.
         index_name = f"test-opportunity-index-{uuid.uuid4().int}"
         search_client.create_index(index_name)
         opportunity = OpportunityFactory.build(
