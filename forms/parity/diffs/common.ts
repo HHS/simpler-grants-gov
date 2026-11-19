@@ -138,17 +138,6 @@ export const PROFILE_GROUPS: Recorded = {
 };
 
 // =============================================================================
-// ZIP CODES
-// =============================================================================
-
-/** A DAT that asks for a nine-digit ZIP code, where the form accepts any length. */
-export const NINE_DIGIT_ZIP: Recorded = {
-  category: "gap",
-  reason:
-    "The DAT asks for a nine-digit ZIP code, but the bank's Address question accepts any length, as SGG's existing forms do, so `20001` is valid. Whether to require ZIP+4 on this form is undecided.",
-};
-
-// =============================================================================
 // VALUES
 // =============================================================================
 
