@@ -217,6 +217,46 @@ describe("@Mapping.from() with Mapping.Item<> and Mapping.Slice<>", () => {
   });
 });
 
+describe("@Mapping.from() on an element with a single value", () => {
+  it.each([
+    ["an object field", "Forms.Example.person"],
+    ["an item of a list of objects", "Mapping.Item<Forms.Example.people, 0>"],
+  ])("reports an error when the element reads %s", async (_source, source) => {
+    const { diagnostics } = await mappingOf(
+      "person?: Race; people?: Race[];",
+      `@Mapping.from(xml, ${source}) @name("Name") name?: string;`,
+    );
+    expectDiagnostics(diagnostics, {
+      code: "form-library-xml/xml-mapping-object-into-value",
+      severity: "error",
+    });
+  });
+
+  it("reports an error when an attribute reads an object field", async () => {
+    const { diagnostics } = await mappingOf(
+      "person?: Race;",
+      `@Mapping.from(xml, Forms.Example.person) @attribute @name("Who") who?: string;`,
+    );
+    expectDiagnostics(diagnostics, {
+      code: "form-library-xml/xml-mapping-object-into-value",
+      message:
+        "@Form:Who is a single value, but its @Mapping.from reads person, which is a Race object. Name a field of Race instead.",
+    });
+  });
+
+  it("writes an item of a list of values", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "places?: string[];",
+      `@Mapping.from(xml, Mapping.Item<Forms.Example.places, 2>)
+       @name("PlaceofPerformance3") place3?: string;`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot).toEqual({
+      PlaceofPerformance3: { $field: "places[2]" },
+    });
+  });
+});
+
 describe("@Mapping.match()", () => {
   it("looks up the answer in the cases, and writes the answer itself when no case matches", async () => {
     const { mapping, diagnostics } = await mappingOf(

@@ -64,6 +64,12 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`The XML mapping can't write ${"element"} yet: it holds ${"reason"}.`,
       },
     },
+    "xml-mapping-object-into-value": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"element"} is a single value, but its @Mapping.from reads ${"field"}, which is a ${"model"} object. Name a field of ${"model"} instead.`,
+      },
+    },
     "xml-mapping-field-out-of-scope": {
       severity: "error",
       messages: {

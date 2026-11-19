@@ -1,4 +1,9 @@
-import type { EnumMember, Model, Program } from "@typespec/compiler";
+import type {
+  EnumMember,
+  Model,
+  ModelProperty,
+  Program,
+} from "@typespec/compiler";
 import { getNs, isAttribute } from "@typespec/xml";
 
 import { reportDiagnostic, stateKeys } from "./lib.js";
@@ -24,8 +29,17 @@ import {
   applyMappingDecorators,
   skipWhenUnanswered,
 } from "./xml-mapping/decorators.js";
-import { findMappedSource, withSelection } from "./xml-mapping/fields.js";
-import { literalValue, typeShape, valueElement } from "./xml-mapping/types.js";
+import {
+  findMappedSource,
+  withSelection,
+  type MappedSource,
+} from "./xml-mapping/fields.js";
+import {
+  literalValue,
+  typeShape,
+  valueElement,
+  type TypeShape,
+} from "./xml-mapping/types.js";
 import { declaredNamespaces } from "./xml-transform.js";
 
 /**
@@ -88,6 +102,17 @@ export function xmlMapping(
 }
 
 /**
+ * Return the shape of what `found` reads. One item of a list is a single value or object; a
+ * slice is still a list.
+ */
+function selectedShape(found: MappedSource): TypeShape {
+  const listed = typeShape(found.path.at(-1)!.type);
+  return found.select && "index" in found.select
+    ? { array: false, object: listed.object }
+    : listed;
+}
+
+/**
  * Return the mapping for the elements of the XSD model `into`, reading their fields in
  * `scope`. `stack` lists the XSD models already being mapped, to stop at a recursive type.
  */
@@ -105,20 +130,26 @@ function mapElements(
   for (const prop of props.filter((p) => isAttribute(program, p))) {
     const value = literalValue(prop.type);
     const found = findMappedSource(program, prop, mapping, scope.from);
-    if (value !== undefined)
+    if (value !== undefined) {
       elements[elementKey(ctx, prop, true)] = { $const: value };
-    else if (found)
-      elements[elementKey(ctx, prop, true)] = applyMappingDecorators(
-        ctx,
-        prop,
-        {
-          $field: withSelection(
-            jsonPath(ctx, scope.prefix, found.path),
-            found.select,
-          ).join("."),
-        },
-        scope,
-      );
+      continue;
+    }
+    if (!found) continue;
+    const field = withSelection(
+      jsonPath(ctx, scope.prefix, found.path),
+      found.select,
+    ).join(".");
+    const source = selectedShape(found);
+    if (source.object && !source.array) {
+      reportObjectIntoValue(ctx, prop, field, source.object, true);
+      continue;
+    }
+    elements[elementKey(ctx, prop, true)] = applyMappingDecorators(
+      ctx,
+      prop,
+      { $field: field },
+      scope,
+    );
   }
 
   for (const prop of props.filter((p) => !isAttribute(program, p))) {
@@ -146,12 +177,7 @@ function mapElements(
       found.select,
     );
     const field = steps.join(".");
-    const listed = typeShape(found.path.at(-1)!.type);
-    // One item of a list is a single value or object; a slice is still a list.
-    const shape =
-      found.select && "index" in found.select
-        ? { array: false, object: listed.object }
-        : listed;
+    const shape = selectedShape(found);
     if (to.array && !to.object && shape.array && !shape.object) {
       // A list of values: the element once per value, each item the value itself.
       put({
@@ -200,7 +226,33 @@ function mapElements(
         put(skipWhenUnanswered(prop, inner, field));
       continue;
     }
+    if (shape.object && !shape.array) {
+      reportObjectIntoValue(ctx, prop, field, shape.object);
+      continue;
+    }
     put(valueElement(program, prop, field));
   }
   return elements;
+}
+
+/**
+ * Report an element or attribute with a single value that reads an object, since the API
+ * would write the whole object as the element's text.
+ */
+function reportObjectIntoValue(
+  ctx: MappingContext,
+  prop: ModelProperty,
+  field: string,
+  object: Model,
+  attribute = false,
+): void {
+  reportDiagnostic(ctx.program, {
+    code: "xml-mapping-object-into-value",
+    target: prop,
+    format: {
+      element: elementKey(ctx, prop, attribute),
+      field,
+      model: object.name,
+    },
+  });
 }
