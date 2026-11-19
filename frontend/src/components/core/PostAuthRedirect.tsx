@@ -18,10 +18,8 @@ type PostAuthRedirectProps = {
   checkPiv?: boolean;
   displayMessage?: string;
   trackDestination?: boolean;
-  // server-side fallback (cookie) destination, used only when sessionStorage has
-  // no valid destination; unvalidated, so it is checked here before use
+  // raw cookie value: must be validated before use
   fallbackDestination?: string;
-  // clears the server-side fallback once the destination has been chosen
   clearFallbackDestination?: () => Promise<void>;
 };
 
@@ -44,7 +42,7 @@ export function PostAuthRedirect({
     }
     hasRedirected.current = true;
 
-    // tab-local sessionStorage first, then the shared server-side fallback, then /
+    // sessionStorage is tab-local, so it wins over the cookie shared by all tabs
     const savedDestination = SessionStorage.getItem(LOGIN_REDIRECT_STORAGE_KEY);
     SessionStorage.removeItem(LOGIN_REDIRECT_STORAGE_KEY);
     if (fallbackDestination !== undefined && clearFallbackDestination) {

@@ -9,12 +9,8 @@ export const LOGOUT_URL = "/api/auth/logout";
 
 export const LOGIN_REDIRECT_STORAGE_KEY = "login-redirect";
 export const LOGIN_REDIRECT_FALLBACK = "/";
-// Server-side fallback for the post-sign-in destination, set by /api/auth/login
-// from the Referer when the client-side sessionStorage save may not have run
-// (e.g. "Sign in" clicked before hydration). sessionStorage always wins over it.
 export const LOGIN_REDIRECT_FALLBACK_COOKIE = "login-redirect-fallback";
-// 15 minutes, in seconds
-export const LOGIN_REDIRECT_FALLBACK_COOKIE_MAX_AGE = 15 * 60;
+export const LOGIN_REDIRECT_FALLBACK_COOKIE_MAX_AGE_SECONDS = 15 * 60;
 export const LOGIN_REDIRECT_BLOCKED_PREFIXES = [
   "/login",
   "/logout",

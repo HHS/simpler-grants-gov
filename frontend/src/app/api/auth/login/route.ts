@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
     );
     return new NextResponse("AUTH_LOGIN_URL not defined", { status: 500 });
   }
-  // fallback for a "Sign in" click that happened before the client-side
-  // sessionStorage save could run (see loginRedirectFallback)
+  // covers "Sign in" clicks before hydration, when LoginLink has saved nothing
   await setLoginRedirectFallback(getRefererLoginDestination(request));
   const pivRequired = request.nextUrl.searchParams.get("piv_required");
   redirect(

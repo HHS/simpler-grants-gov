@@ -139,7 +139,6 @@ describe("/api/auth/login GET handler", () => {
         },
       );
       expect(mockCookieDelete).not.toHaveBeenCalled();
-      // the destination is never logged
       expect(mockLoggerError).not.toHaveBeenCalled();
     });
 

@@ -2,7 +2,7 @@ import "server-only";
 
 import {
   LOGIN_REDIRECT_FALLBACK_COOKIE,
-  LOGIN_REDIRECT_FALLBACK_COOKIE_MAX_AGE,
+  LOGIN_REDIRECT_FALLBACK_COOKIE_MAX_AGE_SECONDS,
 } from "src/constants/auth";
 import { environment } from "src/constants/environments";
 import { isSafeLoginRedirect } from "src/utils/userUtils";
@@ -11,22 +11,16 @@ import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
 /*
-  Server-side fallback for the post-sign-in destination.
+  LoginLink saves the post-sign-in destination to sessionStorage in a click
+  handler that only exists after hydration. A "Sign in" click before hydration
+  saves nothing, so /api/auth/login also records the same-origin Referer in a
+  short-lived cookie that /login uses when sessionStorage has no valid destination.
 
-  The primary mechanism is the tab-local sessionStorage value saved by LoginLink's
-  click handler. That handler only exists after hydration, so a "Sign in" click
-  before hydration reaches /api/auth/login without saving anything. As a fallback,
-  /api/auth/login records the same-origin Referer (pathname + query only) in a
-  short-lived cookie, and /login uses it only when sessionStorage has no valid
-  destination.
-
-  Cookies are shared across tabs, so two simultaneous pre-hydration sign-ins in
-  different tabs can overwrite each other's fallback. Hydrated clicks are
-  unaffected because sessionStorage is per tab and always takes precedence.
+  Trade-off: the cookie is shared across tabs, so simultaneous pre-hydration
+  sign-ins in different tabs can overwrite each other. Hydrated clicks are
+  unaffected because tab-local sessionStorage always wins.
 */
 
-// Returns the root-relative pathname + query of a same-origin Referer, or null
-// when the Referer is missing, malformed, cross-origin, or not a safe destination.
 export const getRefererLoginDestination = (
   request: NextRequest,
 ): string | null => {
@@ -57,8 +51,7 @@ export const getRefererLoginDestination = (
   return isSafeLoginRedirect(destination) ? destination : null;
 };
 
-// Stores the validated destination, or clears any stale fallback when there is none,
-// so an earlier sign-in attempt's destination is never reused.
+// with no destination, clear any stale fallback so an earlier attempt's is never reused
 export const setLoginRedirectFallback = async (destination: string | null) => {
   const cookieStore = await cookies();
   if (!destination) {
@@ -72,11 +65,11 @@ export const setLoginRedirectFallback = async (destination: string | null) => {
     secure: environment.ENVIRONMENT === "prod",
     sameSite: "lax",
     path: "/",
-    maxAge: LOGIN_REDIRECT_FALLBACK_COOKIE_MAX_AGE,
+    maxAge: LOGIN_REDIRECT_FALLBACK_COOKIE_MAX_AGE_SECONDS,
   });
 };
 
-// Raw cookie value; the consumer must validate it before redirecting.
+// raw cookie value: the consumer must validate it before redirecting
 export const getLoginRedirectFallback = async (): Promise<
   string | undefined
 > => {
