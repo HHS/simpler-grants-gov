@@ -16,7 +16,6 @@ import src.task.certificates.setup_cert_user_task  # ruff: ignore[unused-import]
 import src.task.forms.lock_form_version_task  # ruff: ignore[unused-import] isort:skip
 import src.task.opportunities.build_automatic_opportunities  # ruff: ignore[unused-import] isort:skip
 import src.cli.xml_generation_cli  # ruff: ignore[unused-import] isort:skip
-import src.task.agencies.setup_lower_env_agencies  # ruff: ignore[unused-import] isort:skip
 import src.task.xsd_drift.check_xsd_drift_task  # ruff: ignore[unused-import] isort:skip
 
 __all__ = ["task_blueprint"]
