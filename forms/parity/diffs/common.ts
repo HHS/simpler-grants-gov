@@ -1,27 +1,33 @@
 import type { Pinned, Recorded, Wording } from "../harness/model.ts";
 
+// =============================================================================
+// WORDING
+// =============================================================================
+
+const BANK_LABEL: Recorded = {
+  category: "intentional",
+  reason:
+    "The form uses the question bank's label, which is the same on every form that asks the question. The DATs word these fields several ways.",
+};
+
+const BANK_HELP: Recorded = {
+  category: "intentional",
+  reason:
+    "The form uses the question's help, which is the same on every form that asks it. It leaves out the DAT's role names, “Please”, pre-population notes and “This field is required.”, since the form marks required fields itself.",
+};
+
 /** A label the form library standardized across forms, where this form's DAT words it differently. */
 export const standardLabel = (plan: string, source: string): Pinned => ({
   plan,
   source,
-  category: "intentional",
-  reason:
-    "Shared questions use one label across forms. The DATs word these fields several ways; the form library standardizes on the most common or clearest.",
+  ...BANK_LABEL,
 });
 
 /** Help text a shared question words once for every form, where this form's DAT words it differently. */
-export const SHARED_HELP: Recorded = {
-  category: "intentional",
-  reason:
-    "Shared questions use one help text across forms, written in the question bank, so it does not follow this DAT's wording: role names, “Please”, or “This field is required.” (the form marks required fields itself).",
-};
+export const SHARED_HELP: Recorded = BANK_HELP;
 
-/** A DAT that asks for a nine-digit ZIP code, where the form accepts any length. */
-export const NINE_DIGIT_ZIP: Recorded = {
-  category: "gap",
-  reason:
-    "The DAT asks for a nine-digit ZIP code, but the question bank accepts any length, as SGG's existing forms do, so `20001` is valid. The form keeps accepting what the API accepts today. Whether to require ZIP+4 is still undecided.",
-};
+/** Labels and help text taken from the question bank rather than worded after the DAT. */
+export const BANK_WORDING: Wording = { labels: BANK_LABEL, help: BANK_HELP };
 
 /** Prefix and Suffix, which Grants.gov offers as a list and the form does not. */
 export const FREE_TEXT_HELP: Recorded = {
@@ -30,18 +36,11 @@ export const FREE_TEXT_HELP: Recorded = {
     "Grants.gov offers a list of prefixes and suffixes alongside free text. The form uses a free-text field only, so its help does not mention a list.",
 };
 
-/** Labels and help text taken from the question bank rather than worded after the DAT. */
-export const BANK_WORDING: Wording = {
-  labels: {
-    category: "intentional",
-    reason:
-      "The form takes its labels from the question bank, which words each question once for every form that asks it.",
-  },
-  help: {
-    category: "intentional",
-    reason:
-      "The form takes its help text from the question bank, which words each question once for every form that asks it.",
-  },
+/** Help that only says the DAT pre-populates the field from another form. */
+export const PREPOPULATED_HELP: Recorded = {
+  category: "intentional",
+  reason:
+    "The DAT's help only says the field is pre-populated from the SF 424 (R&R). The form doesn't pre-populate it yet, so it uses the question bank's help.",
 };
 
 /** Labels and help kept from the existing SGG forms with a single attachment list. */
@@ -58,20 +57,67 @@ export const SGG_ATTACHMENT_WORDING: Wording = {
   },
 };
 
-/** The DAT's additional-file control, which the form folds into its attachment list. */
-export const ADDITIONAL_FILES: Recorded = {
-  category: "intentional",
+// =============================================================================
+// REQUIREDNESS AND OCCURRENCES
+// =============================================================================
+
+/** Whether two labels differ, ignoring case and repeated whitespace as the harness does. */
+const reworded = (label: string, source: string) =>
+  label.replace(/\s+/g, " ").toLowerCase() !==
+  source.replace(/\s+/g, " ").toLowerCase();
+
+/** Add the bank-label reason when the label differs by more than its star. */
+const starred = (
+  label: string,
+  source: string,
+  reason: string,
+  category: Recorded["category"] = "upstream",
+): Pinned => ({
+  plan: label,
+  source,
+  category,
+  reason: reworded(label, source.replace(/^\* /, ""))
+    ? `${reason} ${BANK_LABEL.reason}`
+    : reason,
+});
+
+/** A DAT that stars a field its Required column marks optional, because a condition requires it. */
+export const conditionalStar = (label: string, source = label): Pinned =>
+  starred(
+    label,
+    `* ${source}`,
+    "The DAT stars this field but its Required column says No: the field is required only when a condition the DAT states is met. The plan marks it conditional, so its label has no star.",
+  );
+
+/** A DAT that stars a field of an optional, repeating entry: an additional site or senior/key person. */
+export const entryStar = (label: string, source = label): Pinned =>
+  starred(
+    label,
+    `* ${source}`,
+    "The DAT stars this field in every entry. The entries are optional, so the field is required only within an entry the applicant adds, and the plan's label has no star.",
+  );
+
+/** A DAT that requires a field but doesn't star its label. */
+export const unstarredRequired = (label: string, source: string): Pinned =>
+  starred(
+    `* ${label}`,
+    source,
+    "The DAT's Required column says Yes, but its label has no star. The plan stars every required field.",
+  );
+
+/** A field the DAT requires, within an optional, repeating entry. */
+export const EACH_ENTRY_REQUIRED: Recorded = {
+  category: "upstream",
   reason:
-    "The DAT has a separate control for additional files. The form puts them in the same list as the required file, as the existing SGG form does.",
+    "The DAT marks this field required. The XSD requires it only within each entry the applicant adds, and the entries are optional.",
 };
 
-/** Compare the required-file control with the limit on the combined list. */
-export const attachmentListMax = (max: number): Pinned => ({
-  plan: max,
-  source: 1,
-  category: "intentional",
-  reason: `The DAT's 1 is for the required-file control. The list holds that file and any additional files, up to the XSD's limit of ${max}.`,
-});
+/** A field of a repeating entry that the DAT allows once. */
+export const ENTRY_OCCURRENCES: Recorded = {
+  category: "upstream",
+  reason:
+    "The DAT gives this field 1 occurrence, though it is part of an entry the XSD repeats. The plan allows it once per entry, as the DAT does for the entry's other fields.",
+};
 
 /** The DAT's address heading rows, which have no answer of their own. */
 export const ADDRESS_HEADING: Recorded = {
@@ -80,12 +126,38 @@ export const ADDRESS_HEADING: Recorded = {
     "The DAT numbers the Address heading as a field. It has no answer of its own and no element in the XSD; its fields follow it.",
 };
 
-/** Fields the key-person forms' groups place differently from the DAT. */
+// =============================================================================
+// ORDER
+// =============================================================================
+
+/** Fields the key-person forms place differently from the DAT. */
 export const PROFILE_GROUPS: Recorded = {
   category: "intentional",
   reason:
-    "Every key-person form lays a profile out in the same groups: Name, Role, Address, Contact Information, Credentials, Attachments. Role puts the organization before the department and the project role after the division, where the DAT lists them elsewhere.",
+    "The key-person forms ask for the organization's name or UEI, then its department and division, then the project role, all before the address. The DAT lists the department before the organization, and the project role after the contact details.",
 };
+
+// =============================================================================
+// ZIP CODES
+// =============================================================================
+
+/** A DAT that asks for a nine-digit ZIP code, where the form accepts any length. */
+export const NINE_DIGIT_ZIP: Recorded = {
+  category: "gap",
+  reason:
+    "The DAT asks for a nine-digit ZIP code, but the bank's Address question accepts any length, as SGG's existing forms do, so `20001` is valid. Whether to require ZIP+4 on this form is undecided.",
+};
+
+/** A DAT that asks for a nine-digit ZIP code, where the form requires it but its help doesn't say so. */
+export const ZIP_PLUS_FOUR_HELP: Recorded = {
+  category: "intentional",
+  reason:
+    "The form requires all nine digits of a US ZIP code, as the DAT does. Its help is the shared Address question's, which doesn't mention the nine digits.",
+};
+
+// =============================================================================
+// VALUES
+// =============================================================================
 
 /** Email fields, which leave out the XSD's minimum length. */
 export const EMAIL_MIN_LENGTH: Pinned = {
@@ -101,15 +173,6 @@ export const emailMinLength = (paths: string[]): Record<string, Pinned> =>
   Object.fromEntries(
     paths.map((path) => [`${path}/minLength`, EMAIL_MIN_LENGTH]),
   );
-
-/** A DAT that stars a field its Required column marks optional, because a condition requires it. */
-export const conditionalStar = (label: string, source = label): Pinned => ({
-  plan: label,
-  source: `* ${source}`,
-  category: "upstream",
-  reason:
-    "The DAT stars this field but its Required column says No: the field is required only when a condition the DAT states is met. The plan marks it conditional, so its label has no star.",
-});
 
 /** Yes/No answers, which the form stores as booleans. */
 export const YES_NO_BOOLEAN: Recorded = {
@@ -132,9 +195,21 @@ export const BUDGET_AMOUNT: Recorded = {
     "globLib:BudgetAmountDataType is a decimal from 0 to 999999999999.99. The form stores the amount as a string of up to 12 digits with optional cents, as the API's budget forms do, so no amount is rounded. The XML mapping's currency_format transform writes it with two decimal places.",
 };
 
-/** Help that only says the DAT pre-populates the field from another form. */
-export const PREPOPULATED_HELP: Recorded = {
+// =============================================================================
+// ATTACHMENTS
+// =============================================================================
+
+/** The DAT's additional-file control, which the form folds into its attachment list. */
+export const ADDITIONAL_FILES: Recorded = {
   category: "intentional",
   reason:
-    "The DAT's help only says the field is pre-populated from the SF 424 (R&R). The form doesn't pre-populate it yet, so it uses the question bank's help.",
+    "The DAT has a separate control for additional files. The form puts them in the same list as the required file, as the existing SGG form does.",
 };
+
+/** Compare the required-file control with the limit on the combined list. */
+export const attachmentListMax = (max: number): Pinned => ({
+  plan: max,
+  source: 1,
+  category: "intentional",
+  reason: `The DAT's 1 is for the required-file control. The list holds that file and any additional files, up to the XSD's limit of ${max}.`,
+});
