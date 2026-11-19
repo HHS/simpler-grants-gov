@@ -1,23 +1,13 @@
 import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
-import { NINE_DIGIT_ZIP, SHARED_HELP, standardLabel } from "./common.ts";
-
-/** The DAT stars a field the form requires only for a site in the United States. */
-const conditionalStar = (label: string, source = label): Pinned => ({
-  plan: label,
-  source: `* ${source}`,
-  category: "upstream",
-  reason:
-    "The DAT stars this field but marks it not required, and its help text requires it only for a site in the United States. The plan treats it as conditional, so it does not star it.",
-});
-
-/** The DAT stars a field each additional site requires, though additional sites are optional. */
-const siteStar = (label: string, source = label): Pinned => ({
-  plan: label,
-  source: `* ${source}`,
-  category: "upstream",
-  reason:
-    "The DAT stars this field for an additional site. Additional sites are optional, so the plan requires it only within a site that is added, and does not star it.",
-});
+import {
+  conditionalStar,
+  ENTRY_OCCURRENCES,
+  entryStar,
+  SHARED_HELP,
+  standardLabel,
+  YES_NO_BOOLEAN,
+  ZIP_PLUS_FOUR_HELP,
+} from "./common.ts";
 
 const ORGANIZATION_HELP: Recorded = {
   category: "intentional",
@@ -86,7 +76,7 @@ const help: Record<string, Pinned> = {
     source: "Select the country for the primary performance site location.",
   },
   "1-10": {
-    ...NINE_DIGIT_ZIP,
+    ...ZIP_PLUS_FOUR_HELP,
     plan: "Enter the zip / postal code. This field is required if the country is the United States.",
     source:
       "Enter the nine-digit Postal Code (e.g., ZIP code) of the primary performance site location. This field is required if the Project Performance Site is located in the United States.",
@@ -145,7 +135,7 @@ const help: Record<string, Pinned> = {
       "Select the name of the country for the primary project performance site.",
   },
   "2-10": {
-    ...NINE_DIGIT_ZIP,
+    ...ZIP_PLUS_FOUR_HELP,
     plan: "Enter the zip / postal code. This field is required if the country is the United States.",
     source:
       "Enter the nine-digit Postal Code (e.g., ZIP code) of the primary performance site location. This field is required if the Project Performance Site is located in the United States.",
@@ -169,12 +159,6 @@ const DISTRICT_PATTERN: Recorded = {
     "The XSD limits the congressional district to 6 characters but sets no pattern. The form keeps SGG's existing pattern, which matches the DAT's format: two characters, a hyphen and three characters.",
 };
 
-const INDIVIDUAL_YES_NO: Recorded = {
-  category: "intentional",
-  reason:
-    "The form stores this answer as a boolean. The XML mapping's boolean_to_yes_no transform writes the XSD's “Y: Yes” or “N: No”.",
-};
-
 export const DIFF: FormDiff = {
   slug: "project-performance-site-location-s",
   dat: {
@@ -188,12 +172,12 @@ export const DIFF: FormDiff = {
         "Project/Performance Site Congressional District",
         "Project/ Performance Site Congressional District",
       ),
-      "2-04": siteStar("Street 1", "Street1"),
+      "2-04": entryStar("Street 1", "Street1"),
       "2-05": standardLabel("Street 2", "Street2"),
-      "2-06": siteStar("City"),
+      "2-06": entryStar("City"),
       "2-07": standardLabel("County/Parish", "County"),
       "2-08": conditionalStar("State"),
-      "2-09": siteStar("Country"),
+      "2-09": entryStar("Country"),
       "2-10": conditionalStar("Zip / Postal Code", "ZIP / Postal Code"),
       "2-11": conditionalStar(
         "Project/Performance Site Congressional District",
@@ -209,13 +193,7 @@ export const DIFF: FormDiff = {
         reason:
           "The DAT gives the primary site's individual checkbox no occurrences. The XSD allows one Individual per site, and so does the plan.",
       },
-      "2-03/maxOccurs": {
-        plan: 299,
-        source: 1,
-        category: "upstream",
-        reason:
-          "The DAT gives an additional site's UEI 1 occurrence, though it and the XSD allow 299 additional sites, each with its own UEI.",
-      },
+      "2-03/maxOccurs": { plan: 299, source: 1, ...ENTRY_OCCURRENCES },
     },
   },
   xsd: {
@@ -237,12 +215,12 @@ export const DIFF: FormDiff = {
       "primary_site.submitting_as_individual/enum": {
         plan: null,
         source: ["Y: Yes", "N: No"],
-        ...INDIVIDUAL_YES_NO,
+        ...YES_NO_BOOLEAN,
       },
       "additional_sites[].submitting_as_individual/enum": {
         plan: null,
         source: ["Y: Yes", "N: No"],
-        ...INDIVIDUAL_YES_NO,
+        ...YES_NO_BOOLEAN,
       },
     },
   },
