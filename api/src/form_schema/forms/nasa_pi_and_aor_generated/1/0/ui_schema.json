@@ -1,0 +1,99 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/authorized_representative/properties/name/properties/prefix",
+          "label": "Prefix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/authorized_representative/properties/name/properties/first_name",
+          "label": "First Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/authorized_representative/properties/name/properties/middle_name",
+          "label": "Middle Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/authorized_representative/properties/name/properties/last_name",
+          "label": "Last Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/authorized_representative/properties/name/properties/suffix",
+          "label": "Suffix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/authorized_representative/properties/nspires_username",
+          "label": "NSPIRES Username"
+        }
+      ],
+      "label": "Authorized Representative Name"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/prefix",
+          "label": "Prefix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/first_name",
+          "label": "First Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/middle_name",
+          "label": "Middle Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/last_name",
+          "label": "Last Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/name/properties/suffix",
+          "label": "Suffix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/us_government_participation",
+          "label": "Is this person participating in this project as an employee of the U.S. Government?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/federal_agency",
+          "label": "If yes, Select U.S. Government agency"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/federal_agency_dollar",
+          "label": "If yes, enter total dollar amount requested ($)"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator/properties/international_participation",
+          "label": "Is this person participating in this project as an employee of a foreign organization?",
+          "options": {
+            "widget": "Radio"
+          }
+        }
+      ],
+      "label": "Principal Investigator Name"
+    }
+  ],
+  "label": "NASA - PI and AOR Supplemental Data Sheet, Grants.gov version 1.0."
+}

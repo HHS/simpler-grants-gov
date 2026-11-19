@@ -1,0 +1,85 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/Nasa_PIandAORSupplementalDataSheet-V1.0",
+    "Nasa_PIandAORSupplementalDataSheet": "http://apply.grants.gov/forms/Nasa_PIandAORSupplementalDataSheet-V1.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Nasa_PIandAORSupplementalDataSheet-V1.0.xsd",
+  "root": {
+    "Nasa_PIandAORSupplementalDataSheet": {
+      "@Nasa_PIandAORSupplementalDataSheet:FormVersion": {
+        "$const": "1.0"
+      },
+      "AuthorizedRepresentativeName": {
+        "AORName": {
+          "globLib:PrefixName": {
+            "$field": "authorized_representative.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "authorized_representative.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "authorized_representative.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "authorized_representative.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "authorized_representative.name.suffix"
+          }
+        },
+        "UserName": {
+          "$field": "authorized_representative.nspires_username"
+        }
+      },
+      "PrincipalInvestigatorName": {
+        "PDPIName": {
+          "globLib:PrefixName": {
+            "$field": "principal_investigator.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "principal_investigator.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "principal_investigator.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "principal_investigator.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "principal_investigator.name.suffix"
+          }
+        },
+        "USGovernmentParticipation": {
+          "$transform": {
+            "name": "boolean_to_yes_no",
+            "value": {
+              "$field": "principal_investigator.us_government_participation"
+            }
+          }
+        },
+        "FederalAgency": {
+          "$field": "principal_investigator.federal_agency"
+        },
+        "FederalAgencyDollar": {
+          "$transform": {
+            "name": "currency_format",
+            "value": {
+              "$field": "principal_investigator.federal_agency_dollar"
+            }
+          }
+        },
+        "InternationalParticipation": {
+          "$transform": {
+            "name": "boolean_to_yes_no",
+            "value": {
+              "$field": "principal_investigator.international_participation"
+            }
+          }
+        }
+      }
+    }
+  }
+}
