@@ -9,24 +9,16 @@ import {
   schemaSubPathMatches,
   type ArrayLayoutProps,
   type ControlElement,
-  type ControlProps,
   type JsonFormsRendererRegistryEntry,
   type JsonSchema,
   type UISchemaElement,
 } from "@jsonforms/core";
 import {
   JsonFormsDispatch,
-  useJsonForms,
   withJsonFormsArrayLayoutProps,
-  withJsonFormsControlProps,
 } from "@jsonforms/react";
-import type {
-  FieldListWidgetProps,
-  UiSchemaField,
-} from "src/types/applyForm/types";
-import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
+import type { FieldListWidgetProps } from "src/types/applyForm/types";
 import {
-  dataPathToDefinition,
   dataPathToHtmlName,
   dataPathToWarningPath,
 } from "src/utils/applyForm/dataPaths";
@@ -36,13 +28,10 @@ import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-import { renderFieldNode } from "src/components/apply-form/FormFields";
 import { useAdapterContext } from "src/components/apply-form/jsonforms/adapterContext";
-import { isRequiredInListEntry } from "src/components/apply-form/jsonforms/convertUiSchema";
 import {
   Heading,
   HeadingLevel,
-  useFieldHeadingId,
   useHeadingLevel,
 } from "src/components/apply-form/jsonforms/headingLevel";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
@@ -51,8 +40,9 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
   Render a list of objects or plain values at any path (the form's root, inside an object, or inside
   another list's entry) with JSON Forms instead of the SGG field-list widget. Store the
   entries in JSON Forms' data and dispatch each entry at its own data path (`people.0`), so
-  rules, labeled groups and nested lists inside an entry work as they do at the root. Render
-  a plain value's entry as one field at its data path (`places.0`).
+  rules, labeled groups and nested lists inside an entry work as they do at the root. Dispatch
+  a plain value's entry as a control on the entry itself (`#`), which the SGG adapter renders
+  as one field at its data path (`places.0`).
 */
 
 /** Rank above the SGG adapter (10), which would otherwise show the list with the field-list widget. */
@@ -93,47 +83,6 @@ const isPrimitiveListControl = and(
     (items) => !items.enum && items.format !== "uuid",
   ),
 );
-
-/**
- * Render one entry of a list of plain values with the SGG widget for the item schema, named,
- * read and matched to its warnings by the entry's data path. Label the field with the
- * control's label, since an item schema often has no title.
- */
-const ListValue = (props: ControlProps) => {
-  const { path, label, enabled } = props;
-  const context = useAdapterContext();
-  const fieldHeadingId = useFieldHeadingId();
-  const jsonFormsData = useJsonForms().core?.data as object | undefined;
-  const definition = dataPathToDefinition(path) as `/properties/${string}`;
-  const node: UiSchemaField = {
-    type: "field",
-    definition,
-    ...(label ? { schema: { title: label } } : {}),
-  };
-  const [rendered] = context.print ? addPrintWidgetToFields([node]) : [node];
-
-  return renderFieldNode({
-    node: rendered as UiSchemaField,
-    schema: context.schema,
-    errors: context.errors,
-    // Read the value from JSON Forms' data, which follows added and deleted entries.
-    formData: jsonFormsData ?? {},
-    requiredFieldPaths: context.requiredFieldPaths,
-    formContext: context.formContext,
-    isFormLocked: context.isFormLocked,
-    disabled: !enabled,
-    dataPath: path,
-    widgetProps: {
-      required: isRequiredInListEntry(context.schema, definition),
-      additionalDescribedById: fieldHeadingId,
-      updateOnInput: true,
-      // Update JSON Forms' data for a widget that changes without an input event.
-      onChange: (value: unknown) => props.handleChange(path, value),
-    },
-  });
-};
-
-const ListValueControl = withJsonFormsControlProps(ListValue);
 
 /** Give each entry a stable id, so deleting an entry doesn't remount the entries after it. */
 const useEntryIds = (initialCount: number) => {
@@ -185,13 +134,16 @@ const FieldListControl = (props: ArrayLayoutProps) => {
   const htmlId = dataPathToHtmlName(path);
   const headingId = (index: number) =>
     `${htmlId.replace(/\W/g, "-")}-entry-${index + 1}-heading`;
-  const detail = entryLayout(uischema, schema, options.readonly);
   const isPrimitive = schema.type !== "object" && !schema.properties;
-  const valueControl: ControlElement = {
-    type: "Control",
-    scope: "#",
-    label: schema.title ?? title,
-  };
+  // A plain value's entry is one control on the entry itself, labeled with the item's title or the list's.
+  const detail: UISchemaElement = isPrimitive
+    ? {
+        type: "Control",
+        scope: "#",
+        label: schema.title ?? title,
+        ...(options.readonly ? { options: { readonly: true } } : {}),
+      }
+    : entryLayout(uischema, schema, options.readonly);
   const entryLevel = title ? level + 2 : level + 1;
   // Use the callbacks the form passes to its field-list widgets.
   const widgetSupport = (
@@ -262,23 +214,14 @@ const FieldListControl = (props: ArrayLayoutProps) => {
 
           {/* Set the entry's heading level, and have its heading describe each field in the entry. */}
           <HeadingLevel level={entryLevel} fieldHeadingId={headingId(index)}>
-            {isPrimitive ? (
-              <ListValueControl
-                uischema={valueControl}
-                schema={schema}
-                path={`${path}.${index}`}
-                enabled={enabled && !locked}
-              />
-            ) : (
-              <JsonFormsDispatch
-                uischema={detail}
-                schema={schema}
-                path={`${path}.${index}`}
-                enabled={enabled && !locked}
-                renderers={renderers}
-                cells={cells}
-              />
-            )}
+            <JsonFormsDispatch
+              uischema={detail}
+              schema={schema}
+              path={`${path}.${index}`}
+              enabled={enabled && !locked}
+              renderers={renderers}
+              cells={cells}
+            />
           </HeadingLevel>
 
           {context.print ? null : (

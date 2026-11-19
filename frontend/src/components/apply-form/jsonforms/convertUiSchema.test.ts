@@ -61,6 +61,21 @@ describe("controlToNodes", () => {
     ]);
   });
 
+  it("labels a field with the control's label over the schema's title", () => {
+    expect(
+      controlToNodes(
+        control("#/properties/title", { label: "Project Title" }),
+        schema,
+      ),
+    ).toEqual([
+      {
+        type: "field",
+        definition: "/properties/title",
+        schema: { title: "Project Title" },
+      },
+    ]);
+  });
+
   it("passes the widget a control names through to the field", () => {
     expect(
       controlToNodes(

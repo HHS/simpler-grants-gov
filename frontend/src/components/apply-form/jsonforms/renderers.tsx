@@ -9,8 +9,10 @@ import {
   type ControlElement,
   type ControlProps,
   type JsonFormsRendererRegistryEntry,
+  type JsonSchema,
   type Layout,
   type LayoutProps,
+  type UISchemaElement,
 } from "@jsonforms/core";
 import {
   JsonFormsDispatch,
@@ -134,15 +136,28 @@ const SKIP_RANK = 1;
 
 const SkipControl = () => null;
 
+/**
+ * Match a control on a list entry's own value (`#`), like one entry of a list of strings.
+ * The form's root schema is an object, so `#` on the whole form still doesn't match.
+ */
+const isEntryValueControl = (uischema: UISchemaElement, schema: JsonSchema) =>
+  (uischema as ControlElement).scope === "#" &&
+  typeof schema.type === "string" &&
+  schema.type !== "object" &&
+  schema.type !== "array";
+
 export const adaptedControlTester = rankWith(
   ADAPTER_RANK,
   and(
     isControl,
-    // Read the control against the schema it's dispatched with: the form's, or the item
-    // schema of a list entry, which a control in the entry is scoped to.
-    (uischema, schema) =>
-      controlToNodes(uischema as ControlElement, schema as RJSFSchema).length >
-      0,
+    or(
+      // Read the control against the schema it's dispatched with: the form's, or the item
+      // schema of a list entry, which a control in the entry is scoped to.
+      (uischema, schema) =>
+        controlToNodes(uischema as ControlElement, schema as RJSFSchema)
+          .length > 0,
+      isEntryValueControl,
+    ),
   ),
 );
 

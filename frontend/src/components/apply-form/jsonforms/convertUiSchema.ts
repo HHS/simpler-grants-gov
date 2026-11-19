@@ -154,14 +154,15 @@ export const controlToNodes = (
     }));
   }
 
+  const widget =
+    options.widget && FIELD_WIDGETS.has(options.widget)
+      ? { widget: options.widget as WidgetTypes }
+      : {};
+  // Label the field with the control's label, so a layout can override the schema's title.
   return [
-    {
-      type,
-      definition,
-      ...(options.widget && FIELD_WIDGETS.has(options.widget)
-        ? { widget: options.widget as WidgetTypes }
-        : {}),
-    },
+    typeof control.label === "string"
+      ? { type, definition, schema: { title: control.label }, ...widget }
+      : { type, definition, ...widget },
   ];
 };
 
