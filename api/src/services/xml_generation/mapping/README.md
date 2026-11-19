@@ -75,10 +75,28 @@ item, and `.` is the item itself.
 </Key_Contacts_2_0:ContactName>
 ```
 
-Brackets after a name read a list's entries, as jq and Python do. `[i]` reads one entry, for an
-XSD that numbers its elements instead of repeating one; a negative index counts back from the
-end. An entry the list doesn't have writes nothing. A whole-number step (`applicant_type_code.0`)
-reads an entry too.
+#### Indexing and slicing
+
+Paths support list indexing and slicing like Python and jq. Given this list:
+
+```json
+"codes": ["a", "b", "c", "d"]
+```
+
+- `codes[0]` selects `"a"`, because indexes are zero-based.
+- `codes[-1]` selects `"d"`, because a negative index counts back from the end of the list.
+- `codes[1:]` selects `["b", "c", "d"]`, because a slice with a start but no stop selects
+  everything from the start to the end.
+- `codes[:2]` selects `["a", "b"]`, because a slice with a stop but no start selects everything
+  before the stop. The stop itself is excluded.
+- `codes[1:3]` selects `["b", "c"]`, from the start up to, but not including, the stop.
+- `codes[9]` selects nothing, because the list has no entry at that index, so the element isn't
+  written.
+- `codes.0` selects `"a"`. A whole-number step reads an entry, like `[0]`.
+
+A slice must be the path's last step: `sites[1:].name` isn't a valid path.
+
+Use an index for an XSD that numbers its elements instead of repeating one:
 
 ```json
 "ApplicantTypeCode1": { "$field": "applicant_type_code[0]" },
@@ -86,9 +104,8 @@ reads an entry too.
 "ApplicantTypeCode3": { "$field": "applicant_type_code[2]" }
 ```
 
-`[start:stop]` reads a range of entries, `stop` excluded and either bound optional, so the rest
-of a list can repeat an element after its first entries are written to their own. A range must
-be the path's last step.
+Use a slice with `$each` to write the first entries to their own elements and repeat an element
+for the rest:
 
 ```json
 "PrimarySite": { "OrganizationName": { "$field": "sites[0].name" } },

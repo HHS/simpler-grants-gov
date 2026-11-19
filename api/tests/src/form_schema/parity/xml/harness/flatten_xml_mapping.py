@@ -152,9 +152,16 @@ def _source(value: Any, prefix: str) -> str | None:
 
 
 def _join(prefix: str, path: str) -> str:
-    """A field below `prefix`. `.` is the item itself. An index reads one entry of a list, so
-    it stands for any item (`types[0]` or `types.0` -> `types.[]`); a range is still the list
-    (`sites[1:]` -> `sites`)."""
+    """Return the form field at `path` below `prefix`, named the way the parity checks name it.
+
+    The checks compare which form field each XML element reads, not which entry of a list, so
+    a field inside a list is named with `[]` for any entry, as in the JSON schema:
+
+    - An index becomes `[]`: `types[0]` and `types.0` -> `types.[]`.
+    - A slice is dropped, leaving the list: `sites[1:]` -> `sites`. The `$each` that reads the
+      slice adds the `[]` for its items, so a field inside it is `sites.[].name`.
+    - `.` is the item itself, so it returns `prefix`.
+    """
     if path == ".":
         return prefix
     names: list[str] = []
