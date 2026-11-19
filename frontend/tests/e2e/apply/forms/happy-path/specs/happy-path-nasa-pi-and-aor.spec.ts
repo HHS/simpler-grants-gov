@@ -10,11 +10,8 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import {
-  NASA_PI_AND_AOR_FORM_CONFIG,
-  NASA_PI_AND_AOR_OPPORTUNITY_ID,
-  nasaPIAndAORHappyPathTestData,
-} from "tests/e2e/apply/fixtures/nasa-pi-and-aor-data";
+import { NASA_PI_AND_AOR_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/nasa-pi-and-aor-data";
+import { NASA_PI_AND_AOR_FORM_CONFIG } from "tests/e2e/apply/fixtures/nasa-pi-and-aor-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -26,7 +23,7 @@ import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-sta
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 
-const OPPORTUNITY_URL = `/opportunity/${NASA_PI_AND_AOR_OPPORTUNITY_ID}`;
+const OPPORTUNITY_URL = `/opportunity/${NASA_PI_AND_AOR_GENERATED_OPPORTUNITY_DATA.opportunityId}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -62,7 +59,7 @@ test(
       testInfo,
       page,
       NASA_PI_AND_AOR_FORM_CONFIG,
-      nasaPIAndAORHappyPathTestData,
+      NASA_PI_AND_AOR_GENERATED_OPPORTUNITY_DATA.buildTestData(Date.now()),
       false,
     );
 
