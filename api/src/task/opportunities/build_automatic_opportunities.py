@@ -31,6 +31,7 @@ from src.db.models.opportunity_models import (
 from src.form_schema.forms import (
     AttachmentForm_v1_2,
     BudgetNarrativeAttachment_v1_2,
+    BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
@@ -625,6 +626,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "caea0f33-b356-4fcd-aae3-c0244e11da1e",
             ),
             ("E2E-CD511", "CD511 Form", CD511_v1_1.form_id, "5b890089-2bb2-4123-82cd-3d321ca62efe"),
+            (
+                "E2E-BNAG",
+                "Budget Narrative Attachment Form (Generated)",
+                BudgetNarrativeGenerated_v1_2.form_id,
+                "c45674bf-a5e8-4f90-b098-ff5158f08c5e",
+            ),
             (
                 "E2E-EPA4700",
                 "EPA Form 4700-4",

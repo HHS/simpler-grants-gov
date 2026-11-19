@@ -1,0 +1,19 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/attachments",
+          "label": "Budget Narrative Files",
+          "options": {
+            "widget": "AttachmentArray"
+          }
+        }
+      ],
+      "label": "1. Budget Narrative File(s)"
+    }
+  ]
+}

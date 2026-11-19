@@ -14,6 +14,7 @@ import pytest
 
 from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
 from tests.src.form_schema.parity.json_schema.diffs import (
+    budget_narrative,
     epa_key_contacts,
     key_contacts,
     performance_sites,
@@ -33,6 +34,7 @@ DIFFS: list[FormDiff] = [
     epa_key_contacts.DIFF,
     performance_sites.DIFF,
     project_narrative.DIFF,
+    budget_narrative.DIFF,
 ]
 
 
