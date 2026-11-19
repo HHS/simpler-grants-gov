@@ -18,6 +18,7 @@ from tests.src.form_schema.parity.xml.diffs import (
     epa_key_contacts_generated,
     key_contacts,
     key_contacts_generated,
+    nasa_pi_and_aor_generated,
     nsf_key_person_expanded_generated,
     performance_sites_generated,
     project_performance_site_location,
@@ -42,6 +43,7 @@ DIFFS = [
     rr_key_person_generated.DIFF,
     rr_key_person_expanded_generated.DIFF,
     nsf_key_person_expanded_generated.DIFF,
+    nasa_pi_and_aor_generated.DIFF,
 ]
 
 

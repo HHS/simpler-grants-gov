@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "authorized_representative": {
+      "$ref": "#/$defs/NasaAuthorizedRepresentative"
+    },
+    "principal_investigator": {
+      "$ref": "#/$defs/NasaPrincipalInvestigator"
+    }
+  },
+  "required": [
+    "authorized_representative",
+    "principal_investigator"
+  ],
+  "examples": [
+    {
+      "authorized_representative": {
+        "name": {
+          "prefix": "Ms.",
+          "first_name": "Alicia",
+          "last_name": "Reyes"
+        },
+        "nspires_username": "areyes"
+      },
+      "principal_investigator": {
+        "name": {
+          "prefix": "Dr.",
+          "first_name": "Maria",
+          "last_name": "Chen"
+        },
+        "us_government_participation": true,
+        "federal_agency": "141: National Oceanic and Atmospheric Administration (NOAA)",
+        "federal_agency_dollar": "125000.00",
+        "international_participation": false
+      }
+    }
+  ],
+  "description": "NASA - PI and AOR Supplemental Data Sheet, Grants.gov version 1.0.",
+  "$defs": {
+    "NspiresUsername": {
+      "type": "string",
+      "maxLength": 99,
+      "description": "Enter the person's NSPIRES username."
+    },
+    "NasaAuthorizedRepresentative": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name"
+            }
+          ],
+          "description": "Enter the person's name. First and last name are required.",
+          "title": "Name"
+        },
+        "nspires_username": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/NspiresUsername"
+            }
+          ],
+          "description": "If registered with NSPIRES, enter your username.",
+          "title": "NSPIRES Username"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "description": "The authorized organization representative (AOR)."
+    },
+    "NasaFederalAgency": {
+      "type": "string",
+      "enum": [
+        "101: Agency for International Development",
+        "102: Air Force Research Laboratory",
+        "103: Army Research Laboratory",
+        "104: Center for Disease Control and Prevention",
+        "105: Coast Guard",
+        "106: Customs Service",
+        "107: Defense Advanced Research Projects Agency",
+        "108: Department of Agriculture (USDA)",
+        "109: Department of Commerce (DOC)",
+        "110: Department of Defense (DOD)",
+        "111: Department of Education (ED)",
+        "112: Department of Energy (DOE)",
+        "113: Department of Health and Human Services (HHS)",
+        "114: Department of Homeland Security (DHS)",
+        "115: Department of Justice (DOJ)",
+        "116: Department of State (DOS)",
+        "117: Department of the Air Force",
+        "118: Department of the Army",
+        "119: Department of the Interior (DOI)",
+        "120: Department of the Navy",
+        "121: Department of Transportation (DOT)",
+        "122: Department of Veterans Affairs (VA)",
+        "123: Environmental Protection Agency (EPA)",
+        "124: Federal Aviation Administration (FAA)",
+        "125: Federal Emergency Management Agency (FEMA)",
+        "126: Federal Maritime Commission",
+        "127: Fish and Wildlife Service",
+        "128: Forest Service",
+        "129: NASA Ames Research Center",
+        "130: NASA Dryden Flight Research Center",
+        "131: NASA Glenn Research Center",
+        "132: NASA Goddard Space Flight Center",
+        "133: NASA Headquarters",
+        "134: NASA Johnson Space Center",
+        "135: NASA Kennedy Space Center",
+        "136: NASA Langley Research Center",
+        "137: NASA Marshall Space Flight Center",
+        "138: NASA Stennis Space Center",
+        "139: National Institute of Standards & Technology (NIST)",
+        "140: National Institutes of Health (NIH)",
+        "141: National Oceanic and Atmospheric Administration (NOAA)",
+        "142: National Park Service",
+        "143: National Science Foundation (NSF)",
+        "144: Naval Observatory",
+        "145: Naval Research Laboratory",
+        "146: Other",
+        "147: Smithsonian Institution",
+        "148: United States Geological Survey (USGS)",
+        "149: United States Marine Corps",
+        "150: Walter Reed Army Institute Research"
+      ],
+      "description": "Select a U.S. Government agency."
+    },
+    "NasaPrincipalInvestigator": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name"
+            }
+          ],
+          "description": "Enter the person's name. First and last name are required.",
+          "title": "Name"
+        },
+        "us_government_participation": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.yes-no"
+            }
+          ],
+          "title": "Is this person participating in this project as an employee of the U.S. Government?"
+        },
+        "federal_agency": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/NasaFederalAgency"
+            }
+          ],
+          "description": "Select a U.S. Government agency from the list provided.",
+          "title": "If yes, Select U.S. Government agency"
+        },
+        "federal_agency_dollar": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.budget-amount"
+            }
+          ],
+          "description": "Enter the total dollar amount.",
+          "title": "If yes, enter total dollar amount requested ($)"
+        },
+        "international_participation": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.yes-no"
+            }
+          ],
+          "title": "Is this person participating in this project as an employee of a foreign organization?"
+        }
+      },
+      "required": [
+        "name",
+        "us_government_participation",
+        "international_participation"
+      ],
+      "description": "The principal investigator (PI), and whether they take part as a government or foreign employee."
+    },
+    "person.name": {
+      "type": "object",
+      "properties": {
+        "prefix": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.prefix"
+            }
+          ],
+          "title": "Prefix"
+        },
+        "first_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.first-name"
+            }
+          ],
+          "title": "First Name"
+        },
+        "middle_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.middle-name"
+            }
+          ],
+          "title": "Middle Name"
+        },
+        "last_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.last-name"
+            }
+          ],
+          "title": "Last Name"
+        },
+        "suffix": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.suffix"
+            }
+          ],
+          "title": "Suffix"
+        }
+      },
+      "required": [
+        "first_name",
+        "last_name"
+      ],
+      "description": "A person's name, in five parts. First and last name are required.",
+      "title": "Name"
+    },
+    "person.name.prefix": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the prefix."
+    },
+    "person.name.first-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 35,
+      "description": "Enter the first name."
+    },
+    "person.name.middle-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25,
+      "description": "Enter the middle name."
+    },
+    "person.name.last-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Enter the last name."
+    },
+    "person.name.suffix": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the suffix."
+    },
+    "types.yes-no": {
+      "type": "boolean",
+      "description": "Select Yes or No.",
+      "title": "Yes or No"
+    },
+    "types.budget-amount": {
+      "type": "string",
+      "maxLength": 15,
+      "pattern": "^\\d{1,12}([.]\\d{2})?$",
+      "description": "Enter the amount in dollars, with cents if any.",
+      "title": "Amount"
+    }
+  }
+}
