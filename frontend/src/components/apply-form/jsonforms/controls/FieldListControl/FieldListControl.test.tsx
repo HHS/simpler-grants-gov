@@ -225,3 +225,149 @@ describe("FieldListControl", () => {
     expect(screen.getByTestId("people[1]--name")).toHaveValue("");
   });
 });
+
+describe("FieldListControl with a list of plain values", () => {
+  const valuesSchema: RJSFSchema = {
+    type: "object",
+    properties: {
+      places: {
+        type: "array",
+        title: "Place of Performance",
+        maxItems: 3,
+        items: { type: "string", maxLength: 50 },
+      },
+      project: {
+        type: "object",
+        properties: {
+          codes: {
+            type: "array",
+            title: "Code",
+            items: { type: "integer", title: "Project Code" },
+          },
+        },
+      },
+    },
+  };
+
+  const valuesUiSchema = {
+    type: "VerticalLayout",
+    elements: [
+      { type: "Control", scope: "#/properties/places" },
+      { type: "Control", scope: "#/properties/project/properties/codes" },
+    ],
+  } as UISchemaElement;
+
+  const valuesData = {
+    places: ["Washington, DC", "Denver, CO"],
+    project: { codes: [7] },
+  };
+
+  const renderValues = (
+    errors: FormattedFormValidationWarning[] | null = null,
+  ) =>
+    render(
+      <form data-testid="form">
+        <JsonFormsFields
+          errors={errors}
+          formData={valuesData}
+          schema={valuesSchema}
+          uiSchema={valuesUiSchema}
+        />
+      </form>,
+    );
+
+  it("renders one input per entry, named with the entry's index, so the save action reads it back", () => {
+    renderValues();
+
+    expect(screen.getByTestId("places[0]")).toHaveValue("Washington, DC");
+    expect(screen.getByTestId("places[1]")).toHaveValue("Denver, CO");
+    expect(screen.getByTestId("project--codes[0]")).toHaveValue(7);
+
+    const form = screen.getByTestId<HTMLFormElement>("form");
+    expect(shapeFormData(new FormData(form), valuesSchema)).toMatchObject(
+      valuesData,
+    );
+  });
+
+  it("labels each entry's input with the item schema's title, or the list's title when the item schema has none", () => {
+    renderValues();
+
+    expect(
+      screen.getAllByRole("textbox", { name: /Place of Performance/ }),
+    ).toHaveLength(2);
+    expect(
+      screen.getByRole("spinbutton", { name: /Project Code/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("heads each entry one level below the list, and has the entry's heading describe its input", () => {
+    renderValues();
+
+    expect(
+      screen.getByRole("heading", { level: 4, name: "Place of Performance" }),
+    ).toBeInTheDocument();
+    const heading = screen.getByRole("heading", {
+      level: 5,
+      name: "Place of Performance 2",
+    });
+    expect(screen.getByTestId("places[1]")).toHaveAttribute(
+      "aria-describedby",
+      expect.stringContaining(heading.id),
+    );
+  });
+
+  it("shows a warning on the entry it was reported for", () => {
+    renderValues([
+      {
+        field: "$.places[1]",
+        message: "Place is too long",
+        type: "maxLength",
+        value: null,
+      },
+    ]);
+
+    expect(screen.getAllByText("Place is too long")).toHaveLength(1);
+  });
+
+  it("adds and deletes entries, renaming the inputs after a deleted one", () => {
+    renderValues();
+    const places = screen.getByLabelText("Place of Performance");
+
+    fireEvent.click(
+      within(places).getByRole("button", {
+        name: "deleteEntry Place of Performance 1",
+      }),
+    );
+    expect(screen.getByTestId("places[0]")).toHaveValue("Denver, CO");
+    expect(screen.queryByTestId("places[1]")).not.toBeInTheDocument();
+
+    fireEvent.click(within(places).getByRole("button", { name: /addEntry/ }));
+    expect(screen.getByTestId("places[1]")).toHaveValue("");
+  });
+
+  it("leaves a list of enum values to the SGG multi-select widget", () => {
+    render(
+      <JsonFormsFields
+        errors={null}
+        formData={{}}
+        schema={{
+          type: "object",
+          properties: {
+            picks: {
+              type: "array",
+              title: "Pick",
+              items: { type: "string", enum: ["a", "b"] },
+            },
+          },
+        }}
+        uiSchema={{
+          type: "VerticalLayout",
+          elements: [{ type: "Control", scope: "#/properties/picks" }],
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("combobox")).toBeInTheDocument();
+    expect(screen.queryByText("addEntry")).not.toBeInTheDocument();
+  });
+});
