@@ -1,4 +1,5 @@
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "form-library-xml";
 import "#forms/index.tsp";
 import "./examples.tsp";
@@ -6,6 +7,10 @@ import "#questions/types/attachment.tsp";
 using SimplerForms;
 namespace Forms.OtherNarrative;
 @Meta.form(#{ id: "other-narrative", formName: "Other Narrative Attachments" })
+@Sgg.sync(#{
+  instructions: "cb2214f4-02d4-491b-ac5d-9abf32a1b7dc",
+  xml: "mapping",
+})
 @GrantsGov.form(#{
   legacyFormId: 542,
   shortFormName: "OtherNarrativeAttachments",

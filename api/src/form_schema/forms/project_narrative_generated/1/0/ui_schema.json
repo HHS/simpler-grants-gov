@@ -1,0 +1,19 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/attachments",
+          "label": "Project Narrative Files",
+          "options": {
+            "widget": "AttachmentArray"
+          }
+        }
+      ],
+      "label": "1. Project Narrative File(s)"
+    }
+  ]
+}

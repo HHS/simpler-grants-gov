@@ -1,0 +1,19 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/attachments",
+          "label": "Other Narrative Files",
+          "options": {
+            "widget": "AttachmentArray"
+          }
+        }
+      ],
+      "label": "1. Other Narrative File(s)"
+    }
+  ]
+}

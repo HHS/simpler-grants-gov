@@ -1,6 +1,14 @@
+from uuid import uuid4
+
 import pytest
 
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    validate_application_form,
+)
+from src.validation.validation_constants import ValidationErrorType
+from tests.lib.data_factories import setup_application_for_form_validation
 from tests.src.form_schema.forms.conftest import validate_required
 
 
@@ -48,3 +56,39 @@ def test_budget_narrative_v1_2_attachment_type(budget_narrative_attachment_v1_2)
     assert validation_issues[0].type == "format"
     assert validation_issues[0].message == "'my_attachment' is not a 'uuid'"
     assert validation_issues[0].field == "$.attachments[1]"
+
+
+def test_budget_narrative_attachment_v1_2_with_valid_attachment(
+    enable_factory_create, budget_narrative_attachment_v1_2, verify_no_warning_error_logs
+):
+    first_id, second_id, unused_id = (str(uuid4()) for _ in range(3))
+    application_form = setup_application_for_form_validation(
+        {"attachments": [first_id, second_id]},
+        json_schema=budget_narrative_attachment_v1_2.form_json_schema,
+        rule_schema=budget_narrative_attachment_v1_2.form_rule_schema,
+        attachment_ids=[first_id, second_id, unused_id],
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    assert len(issues) == 0
+
+
+def test_budget_narrative_attachment_v1_2_with_invalid_attachment(
+    enable_factory_create, budget_narrative_attachment_v1_2, verify_no_warning_error_logs
+):
+    attached_id, unknown_id = str(uuid4()), str(uuid4())
+    application_form = setup_application_for_form_validation(
+        {"attachments": [attached_id, unknown_id]},
+        json_schema=budget_narrative_attachment_v1_2.form_json_schema,
+        rule_schema=budget_narrative_attachment_v1_2.form_rule_schema,
+        attachment_ids=[attached_id],
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    assert len(issues) == 1
+    assert issues[0].type == ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT
+    assert issues[0].message == "Field references application_attachment_id not on the application"
+    assert issues[0].field == "$.attachments[1]"
+    assert issues[0].value == unknown_id
