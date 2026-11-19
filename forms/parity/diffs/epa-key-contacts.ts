@@ -13,16 +13,12 @@ const ROLES = [
   "project_manager",
 ];
 
-const addressOrder: Record<string, Recorded> = Object.fromEntries(
-  ROLES.map((role) => [
-    `${role}.address.country`,
-    {
-      category: "intentional",
-      reason:
-        "The PDF, DAT and current SGG form put ZIP/Postal Code before Country. The spec reuses the shared Address question, which puts Country first (as Key Contacts does), rather than reordering address fields per form.",
-    },
-  ]),
-);
+/** Zip / Postal Code, which the form asks after Country. */
+const ZIP_AFTER_COUNTRY: Recorded = {
+  category: "intentional",
+  reason:
+    "The form uses the bank's Address question, which asks for Country before Zip / Postal Code, as Key Contacts does. The PDF, the DAT and SGG's existing EPA form ask for the ZIP first.",
+};
 
 const NOT_ASKED: Recorded = {
   category: "intentional",
@@ -48,7 +44,7 @@ const XSD_ROLES = [
 const US_ZIP_HELP: Recorded = {
   category: "intentional",
   reason:
-    "The shared Person question requires Zip / Postal Code for a US address, and the Address question's help says so. The EPA DAT neither states nor marks that rule.",
+    "The bank's Address question requires Zip / Postal Code for a US address, and its help says so. The EPA DAT neither states nor marks that rule.",
 };
 
 /** Every help text that differs from the DAT, pinned word for word. */
@@ -446,6 +442,12 @@ export const DIFF: FormDiff = {
       ]),
     ),
     differingHelp: help,
+    outOfOrder: Object.fromEntries(
+      ["B1", "B2", "B3", "B4"].map((block) => [
+        `${block}-14`,
+        ZIP_AFTER_COUNTRY,
+      ]),
+    ),
   },
   xsd: {
     absentFromPlan: notAsked(
@@ -467,5 +469,4 @@ export const DIFF: FormDiff = {
         `${ROLES[role]}.address.${field.toLowerCase()} -> ${XSD_ROLES[role]}/Address/${field}`,
     ),
   },
-  uiSchema: { outOfOrder: addressOrder },
 };
