@@ -162,33 +162,26 @@ describe("xmlMapping", () => {
   });
 });
 
-describe("xmlMapping with simpler-forms' mapping decorators", () => {
-  const errors = (diagnostics: readonly { severity: string }[]) =>
-    diagnostics.filter((d) => d.severity === "error");
+const errors = (diagnostics: readonly { severity: string }[]) =>
+  diagnostics.filter((d) => d.severity === "error");
 
-  it("writes numbered elements from a list's items, each looked up", async () => {
+describe("@Mapping.from() with Mapping.Item<> and Mapping.Slice<>", () => {
+  it("writes each item as a separate, numbered XML element", async () => {
     const { mapping, diagnostics } = await mappingOf(
       "types?: string[];",
       `@Mapping.from(xml, Mapping.Item<Forms.Example.types, 0>)
-       @Mapping.match(#{ \`H: state\`: "H: State" }, Forms.Example.types)
        @name("ApplicantTypeCode1") code1?: string;
        @Mapping.from(xml, Mapping.Item<Forms.Example.types, 1>)
        @name("ApplicantTypeCode2") code2?: string;`,
     );
     expect(errors(diagnostics)).toEqual([]);
     expect(mapping?.root.FormRoot).toEqual({
-      ApplicantTypeCode1: {
-        $match: {
-          value: { $field: "types[0]" },
-          case: { "H: state": "H: State" },
-          default: { $field: "types[0]" },
-        },
-      },
+      ApplicantTypeCode1: { $field: "types[0]" },
       ApplicantTypeCode2: { $field: "types[1]" },
     });
   });
 
-  it("writes a list's first item as an element and the rest as a list", async () => {
+  it("writes first item as its own XML element and the rest as a list", async () => {
     const { mapping, diagnostics } = await mappingOf(
       "sites?: Race[]; attachments?: string[];",
       `@Mapping.from(xml, Mapping.Item<Forms.Example.sites, 0>)
@@ -222,13 +215,47 @@ describe("xmlMapping with simpler-forms' mapping decorators", () => {
       },
     });
   });
+});
 
-  it("writes a required element empty, and leaves out an optional one whose item is missing", async () => {
+describe("@Mapping.match()", () => {
+  it("looks up the answer in the cases, and writes the answer itself when no case matches", async () => {
     const { mapping, diagnostics } = await mappingOf(
-      "dateReceived?: string; periods?: Race[];",
+      "types?: string[];",
+      `@Mapping.from(xml, Mapping.Item<Forms.Example.types, 0>)
+       @Mapping.match(#{ \`H: state\`: "H: State" }, Forms.Example.types)
+       @name("ApplicantTypeCode1") code1?: string;`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot).toEqual({
+      ApplicantTypeCode1: {
+        $match: {
+          value: { $field: "types[0]" },
+          case: { "H: state": "H: State" },
+          default: { $field: "types[0]" },
+        },
+      },
+    });
+  });
+});
+
+describe("@Mapping.required", () => {
+  it("writes an empty element when the field isn't answered", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "dateReceived?: string;",
       `@Mapping.from(xml, Forms.Example.dateReceived) @Mapping.required
-       @name("DateReceived") dateReceived?: string;
-       @Mapping.from(xml, Mapping.Item<Forms.Example.periods, 1>)
+       @name("DateReceived") dateReceived?: string;`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot).toEqual({
+      DateReceived: { $required: { $field: "date_received" } },
+    });
+    expect(generateXml(mapping!, {})).toContain("<Form:DateReceived/>");
+  });
+
+  it("leaves out an optional element whose list item is missing, instead of writing it empty", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "periods?: Race[];",
+      `@Mapping.from(xml, Mapping.Item<Forms.Example.periods, 1>)
        @name("BudgetYear2") year2?: Year;`,
       `@ns(Ns.Form)
        model Year {
@@ -238,7 +265,6 @@ describe("xmlMapping with simpler-forms' mapping decorators", () => {
     );
     expect(errors(diagnostics)).toEqual([]);
     expect(mapping?.root.FormRoot).toEqual({
-      DateReceived: { $required: { $field: "date_received" } },
       BudgetYear2: {
         $when: {
           condition: { field: "periods[1]", operator: "exists" },
@@ -247,171 +273,188 @@ describe("xmlMapping with simpler-forms' mapping decorators", () => {
       },
     });
     const xml = generateXml(mapping!, { periods: [{ name: "100" }] });
-    expect(xml).toContain("<Form:DateReceived/>");
     expect(xml).not.toContain("BudgetYear2");
   });
+});
 
-  describe("@Mapping.when", () => {
-    const revision = async () =>
-      mappingOf(
-        "applicationType?: string; revisionCode?: string; explanation?: string;",
-        `@Mapping.from(xml, Forms.Example.revisionCode)
-         @Mapping.when(Forms.Example.applicationType, Operator.equals, "Revision")
-         @name("RevisionCode") code?: string;
-         @Mapping.from(xml, Forms.Example.explanation)
-         @Mapping.when(Forms.Example.applicationType, Operator.equals, "Revision")
-         @Mapping.when(Forms.Example.revisionCode, Operator.equals, "E")
-         @name("RevisionCodeOtherExplanation") explanation?: string;`,
-      );
+describe("@Mapping.when()", () => {
+  const revision = async () =>
+    mappingOf(
+      "applicationType?: string; revisionCode?: string; explanation?: string;",
+      `@Mapping.from(xml, Forms.Example.revisionCode)
+       @Mapping.when(Forms.Example.applicationType, Operator.equals, "Revision")
+       @name("RevisionCode") code?: string;
+       @Mapping.from(xml, Forms.Example.explanation)
+       @Mapping.when(Forms.Example.applicationType, Operator.equals, "Revision")
+       @Mapping.when(Forms.Example.revisionCode, Operator.equals, "E")
+       @name("RevisionCodeOtherExplanation") explanation?: string;`,
+    );
 
-    it("writes an element only while its conditions hold", async () => {
-      const { mapping, diagnostics } = await revision();
-      expect(errors(diagnostics)).toEqual([]);
-      expect(mapping?.root.FormRoot.RevisionCodeOtherExplanation).toEqual({
-        $when: {
-          condition: {
-            all: [
-              {
-                field: "application_type",
-                operator: "equals",
-                value: "Revision",
-              },
-              { field: "revision_code", operator: "equals", value: "E" },
-            ],
-          },
-          then: { $field: "explanation" },
-        },
-      });
-    });
-
-    it("leaves a draft's answers that no longer apply out of the XML, and keeps them", async () => {
-      const { mapping } = await revision();
-      const draft = {
-        application_type: "New",
-        revision_code: "E",
-        explanation: "Changed scope",
-      };
-      const kept = structuredClone(draft);
-      const elements = (response: object) =>
-        ["RevisionCode", "RevisionCodeOtherExplanation"].filter((name) =>
-          generateXml(mapping!, response).includes(`<Form:${name}>`),
-        );
-
-      expect(elements(draft)).toEqual([]);
-      expect(
-        elements({
-          ...draft,
-          application_type: "Revision",
-          revision_code: "AC",
-        }),
-      ).toEqual(["RevisionCode"]);
-      expect(elements({ ...draft, application_type: "Revision" })).toEqual([
-        "RevisionCode",
-        "RevisionCodeOtherExplanation",
-      ]);
-      expect(draft).toEqual(kept);
-    });
-
-    it("writes a group of elements, with its attribute, only while its condition holds", async () => {
-      const { mapping, diagnostics } = await mappingOf(
-        "reportType?: string; changeYear?: string; lastReportDate?: string;",
-        `@Mapping.when(Forms.Example.reportType, Operator.equals, "MaterialChange")
-         @name("MaterialChangeSupplement") supplement?: Supplement;`,
-        `@ns(Ns.Form)
-         model Supplement {
-           @attribute @name("ReportType") reportType: "MaterialChange";
-           @Mapping.from(xml, Forms.Example.changeYear)
-           @name("MaterialChangeYear") year?: string;
-           @Mapping.from(xml, Forms.Example.lastReportDate)
-           @name("LastReportDate") lastReportDate?: string;
-         }`,
-      );
-      expect(errors(diagnostics)).toEqual([]);
-      expect(mapping?.root.FormRoot.MaterialChangeSupplement).toEqual({
-        $when: {
-          condition: {
-            field: "report_type",
-            operator: "equals",
-            value: "MaterialChange",
-          },
-          then: {
-            "@Form:ReportType": { $const: "MaterialChange" },
-            MaterialChangeYear: { $field: "change_year" },
-            LastReportDate: { $field: "last_report_date" },
-          },
-        },
-      });
-
-      const answers = { change_year: "2026", last_report_date: "2026-06-30" };
-      expect(
-        generateXml(mapping!, { ...answers, report_type: "MaterialChange" }),
-      ).toContain(
-        '<Form:MaterialChangeSupplement Form:ReportType="MaterialChange">',
-      );
-      expect(
-        generateXml(mapping!, { ...answers, report_type: "InitialFiling" }),
-      ).not.toContain("MaterialChangeSupplement");
-    });
-
-    it("writes an element filled from an object field only while its condition holds", async () => {
-      const { mapping, diagnostics } = await mappingOf(
-        "hasPartner?: boolean; partner?: Race;",
-        `@Mapping.from(xml, Forms.Example.partner)
-         @Mapping.when(Forms.Example.hasPartner, Operator.equals, true)
-         @name("Partner") partner?: Partner;`,
-        `@ns(Ns.Form)
-         model Partner {
-           @Mapping.from(xml, Forms.Race.name) @name("Name") name?: string;
-         }`,
-      );
-      expect(errors(diagnostics)).toEqual([]);
-      expect(mapping?.root.FormRoot.Partner).toEqual({
-        $when: {
-          condition: { field: "has_partner", operator: "equals", value: true },
-          then: { Name: { $field: "partner.name" } },
-        },
-      });
-
-      const partner = { name: "Partner Org" };
-      expect(generateXml(mapping!, { has_partner: true, partner })).toContain(
-        "<Form:Partner>",
-      );
-      expect(
-        generateXml(mapping!, { has_partner: false, partner }),
-      ).not.toContain("Partner");
-    });
-
-    it("writes a list only while its condition holds", async () => {
-      const { mapping, diagnostics } = await mappingOf(
-        "hasSites?: boolean; sites?: Race[];",
-        `@Mapping.from(xml, Forms.Example.sites)
-         @Mapping.when(Forms.Example.hasSites, Operator.equals, true)
-         @name("Site") sites?: Site[];`,
-        `@ns(Ns.Form)
-         model Site {
-           @Mapping.from(xml, Forms.Race.name) @name("Name") name?: string;
-         }`,
-      );
-      expect(errors(diagnostics)).toEqual([]);
-      expect(mapping?.root.FormRoot.Site).toEqual({
-        $when: {
-          condition: { field: "has_sites", operator: "equals", value: true },
-          then: {
-            $each: {
-              items: { $field: "sites" },
-              map: { Name: { $field: "name" } },
+  it("writes an element only while all its conditions are true", async () => {
+    const { mapping, diagnostics } = await revision();
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot.RevisionCodeOtherExplanation).toEqual({
+      $when: {
+        condition: {
+          all: [
+            {
+              field: "application_type",
+              operator: "equals",
+              value: "Revision",
             },
+            { field: "revision_code", operator: "equals", value: "E" },
+          ],
+        },
+        then: { $field: "explanation" },
+      },
+    });
+  });
+
+  it("leaves answers that no longer apply out of the XML without removing them from the draft", async () => {
+    const { mapping } = await revision();
+    const draft = {
+      application_type: "New",
+      revision_code: "E",
+      explanation: "Changed scope",
+    };
+    const kept = structuredClone(draft);
+    const elements = (response: object) =>
+      ["RevisionCode", "RevisionCodeOtherExplanation"].filter((name) =>
+        generateXml(mapping!, response).includes(`<Form:${name}>`),
+      );
+
+    expect(elements(draft)).toEqual([]);
+    expect(
+      elements({
+        ...draft,
+        application_type: "Revision",
+        revision_code: "AC",
+      }),
+    ).toEqual(["RevisionCode"]);
+    expect(elements({ ...draft, application_type: "Revision" })).toEqual([
+      "RevisionCode",
+      "RevisionCodeOtherExplanation",
+    ]);
+    expect(draft).toEqual(kept);
+  });
+
+  it("writes a wrapper element and its attribute only while its condition is true", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "reportType?: string; changeYear?: string; lastReportDate?: string;",
+      `@Mapping.when(Forms.Example.reportType, Operator.equals, "MaterialChange")
+       @name("MaterialChangeSupplement") supplement?: Supplement;`,
+      `@ns(Ns.Form)
+       model Supplement {
+         @attribute @name("ReportType") reportType: "MaterialChange";
+         @Mapping.from(xml, Forms.Example.changeYear)
+         @name("MaterialChangeYear") year?: string;
+         @Mapping.from(xml, Forms.Example.lastReportDate)
+         @name("LastReportDate") lastReportDate?: string;
+       }`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot.MaterialChangeSupplement).toEqual({
+      $when: {
+        condition: {
+          field: "report_type",
+          operator: "equals",
+          value: "MaterialChange",
+        },
+        then: {
+          "@Form:ReportType": { $const: "MaterialChange" },
+          MaterialChangeYear: { $field: "change_year" },
+          LastReportDate: { $field: "last_report_date" },
+        },
+      },
+    });
+
+    const answers = { change_year: "2026", last_report_date: "2026-06-30" };
+    expect(
+      generateXml(mapping!, { ...answers, report_type: "MaterialChange" }),
+    ).toContain(
+      '<Form:MaterialChangeSupplement Form:ReportType="MaterialChange">',
+    );
+    expect(
+      generateXml(mapping!, { ...answers, report_type: "InitialFiling" }),
+    ).not.toContain("MaterialChangeSupplement");
+  });
+
+  it("writes an element filled from an object only while its condition is true", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "hasPartner?: boolean; partner?: Race;",
+      `@Mapping.from(xml, Forms.Example.partner)
+       @Mapping.when(Forms.Example.hasPartner, Operator.equals, true)
+       @name("Partner") partner?: Partner;`,
+      `@ns(Ns.Form)
+       model Partner {
+         @Mapping.from(xml, Forms.Race.name) @name("Name") name?: string;
+       }`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot.Partner).toEqual({
+      $when: {
+        condition: { field: "has_partner", operator: "equals", value: true },
+        then: { Name: { $field: "partner.name" } },
+      },
+    });
+
+    const partner = { name: "Partner Org" };
+    expect(generateXml(mapping!, { has_partner: true, partner })).toContain(
+      "<Form:Partner>",
+    );
+    expect(
+      generateXml(mapping!, { has_partner: false, partner }),
+    ).not.toContain("Partner");
+  });
+
+  it("writes a list only while its condition is true", async () => {
+    const { mapping, diagnostics } = await mappingOf(
+      "hasSites?: boolean; sites?: Race[];",
+      `@Mapping.from(xml, Forms.Example.sites)
+       @Mapping.when(Forms.Example.hasSites, Operator.equals, true)
+       @name("Site") sites?: Site[];`,
+      `@ns(Ns.Form)
+       model Site {
+         @Mapping.from(xml, Forms.Race.name) @name("Name") name?: string;
+       }`,
+    );
+    expect(errors(diagnostics)).toEqual([]);
+    expect(mapping?.root.FormRoot.Site).toEqual({
+      $when: {
+        condition: { field: "has_sites", operator: "equals", value: true },
+        then: {
+          $each: {
+            items: { $field: "sites" },
+            map: { Name: { $field: "name" } },
           },
         },
-      });
+      },
+    });
 
-      const sites = [{ name: "Main" }, { name: "Annex" }];
-      expect(
-        generateXml(mapping!, { has_sites: true, sites }).match(/<Form:Site>/g),
-      ).toHaveLength(2);
-      expect(generateXml(mapping!, { has_sites: false, sites })).not.toContain(
-        "Site",
-      );
+    const sites = [{ name: "Main" }, { name: "Annex" }];
+    expect(
+      generateXml(mapping!, { has_sites: true, sites }).match(/<Form:Site>/g),
+    ).toHaveLength(2);
+    expect(generateXml(mapping!, { has_sites: false, sites })).not.toContain(
+      "Site",
+    );
+  });
+
+  it("reports an error when a condition names a field outside the element's scope", async () => {
+    const { diagnostics } = await mappingOf(
+      "hasSites?: boolean; sites?: Race[];",
+      `@Mapping.from(xml, Forms.Example.sites) @name("Site") sites?: Site[];`,
+      `@ns(Ns.Form)
+       model Site {
+         @Mapping.from(xml, Forms.Race.name)
+         @Mapping.when(Forms.Example.hasSites, Operator.equals, true)
+         @name("Name") name?: string;
+       }`,
+    );
+    expectDiagnostics(diagnostics, {
+      code: "form-library-xml/xml-mapping-field-out-of-scope",
+      message:
+        "A @Mapping.when or @Mapping.match on Name names hasSites, which isn't in Race: the model that Name reads its fields from. Name a field of Race, or of an object property of it. Inside a list, that's the list item.",
     });
   });
 });
