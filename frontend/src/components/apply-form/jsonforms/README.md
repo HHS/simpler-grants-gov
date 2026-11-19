@@ -19,6 +19,7 @@ In these READMEs, "renderer" means the form-level renderer: the SGG renderer, or
 
 - **Layout and rules:** JSON Forms handles the layout and the rules that show, hide, enable or disable fields. Every field is still rendered by an SGG widget, through the same `renderFieldNode` → `getFieldConfig` → `renderWidget` path the SGG renderer uses.
 - **Conversion:** `getFormData` converts the JSON Forms UI schema into an SGG UI schema with `prepareJsonFormsUiSchema` (`prepareUiSchema.ts`), which calls `convertJsonFormsUiSchema` (`convertUiSchema.ts`) and logs what the conversion drops. Navigation, validation warnings and the UI schema validator all read the converted SGG UI schema. `JsonFormsFields` receives the original JSON Forms UI schema and uses it to render the form.
+- **Sections:** `FieldsetControl` renders a labeled group as a section, with the same fieldset, id (`form-section-<name>`) and classes as `FieldsetWidget`, named by its heading (`aria-labelledby`). Its heading is one level below the nearest heading (`headingLevel.tsx`), so a section inside a section is one level deeper. The form's sections are h4, set by `FORM_HEADING_LEVEL`.
 - **Data paths:** JSON Forms gives every control its data path (`people.1.name`). The adapter reads each control at that path and passes it to `getFieldConfig`, which names, reads and matches warnings for a field in a list entry by the path, since the field's schema definition is the same for every entry. `src/utils/applyForm/dataPaths.ts` converts a data path to a schema definition, an HTML field name (`people[1]--name`) and a warning path (`$.people[1].name`).
 - **Saving and validation:** These work the same way as for SGG forms. Every widget submits under its SGG field name in the HTML `<form>`. JSON Forms runs with `validationMode="NoValidation"` and only evaluates rules, against a copy of the answers that's refreshed from the `<form>` on every input.
 
@@ -59,7 +60,7 @@ JSON Forms itself supports both. Its own list components render each entry throu
 
 ## Adding a JSON Forms control
 
-A JSON Forms control is ranked above the SGG adapter (rank 10), so it renders whatever its tester matches without an SGG widget. Each new control replaces an SGG widget for JSON Forms forms, one at a time:
+A JSON Forms control is ranked above the SGG adapter (rank 10), so it renders whatever its tester matches without an SGG widget. Each new control replaces an SGG widget for JSON Forms forms, one at a time. `FieldsetControl` is the simplest example:
 
 1. Create `controls/<Name>Control/`, with the component in `<Name>Control.tsx` and its tests beside it. Put helpers that only this control uses in the same folder.
 2. Export a registry entry (`{ tester, renderer }`) from the folder's `index.ts`, and add it to the list in `controls/index.ts`. `renderers.tsx` registers that list, so it doesn't change. (JSON Forms calls these entries "renderers".)
