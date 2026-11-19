@@ -85,6 +85,15 @@ declare module "@sgg/frontend/components/apply-form/widgets/WidgetRenderers" {
   }) => JSX.Element;
 }
 
+declare module "@sgg/frontend/components/apply-form/jsonforms/headingLevel" {
+  import type { JSX, ReactNode } from "react";
+
+  export const HeadingLevel: (props: {
+    level: number;
+    children: ReactNode;
+  }) => JSX.Element;
+}
+
 declare module "@sgg/frontend/components/apply-form/jsonforms/MarkdownDescription" {
   import type { JSX } from "react";
 

@@ -2,6 +2,7 @@ import { crumbAttributes, headingTag } from "@/lib/breadcrumbs";
 import type { GroupLayout, LayoutProps } from "@jsonforms/core";
 import { JsonFormsDispatch } from "@jsonforms/react";
 import { groupName } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
+import { HeadingLevel } from "@sgg/frontend/components/apply-form/jsonforms/headingLevel";
 import { MarkdownDescription } from "@sgg/frontend/components/apply-form/jsonforms/MarkdownDescription";
 import { AdapterContext } from "@sgg/frontend/components/apply-form/jsonforms/renderers";
 import { useContext, useId } from "react";
@@ -61,7 +62,10 @@ export default function FormSection({
           <MarkdownDescription text={description} />
         </div>
       ) : null}
-      <SectionDepth.Provider value={level}>{children}</SectionDepth.Provider>
+      <SectionDepth.Provider value={level}>
+        {/* Set the frontend's heading level too, so a list in the section is headed below it. */}
+        <HeadingLevel level={Number(Heading.slice(1))}>{children}</HeadingLevel>
+      </SectionDepth.Provider>
     </fieldset>
   );
 }
