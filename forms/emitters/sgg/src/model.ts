@@ -1,7 +1,7 @@
 import type { Model, Program, Type } from "@typespec/compiler";
 import { jsonPropertyName, modelProperties } from "simpler-forms";
 
-import { Calculations, type Place } from "./calculations.js";
+import { Calculations, type Place } from "./calculations/index.js";
 import type { SyncOptions } from "./decorators.js";
 import { stateKeys } from "./lib.js";
 
@@ -67,7 +67,7 @@ function modelRules(
       continue;
     }
     Object.assign(fieldRules, calculations.computed(prop, here));
-    // A total's fields are each summed from its sources, in place of the block's own rules.
+    // Sum each field of a total from its sources, replacing the block's own rules.
     const totals = calculations.totals(prop, here);
     if (totals) Object.assign(fieldRules, totals);
     else if (item.kind === "Model" && !seen.includes(item)) {

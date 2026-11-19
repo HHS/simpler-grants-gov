@@ -41,19 +41,23 @@ application.
 
 ## Output
 
-One file per form, and a rule schema for a form with attachments, population rules or
-calculations, under `dist/sgg/`:
+Sync installs each form into the API as a `form.json` with four schema files beside it.
+Each comes from one emitter's output:
 
-```
-forms/<id>/sgg.json           { "sync": false | { "xml": false | "transform" | "mapping", "sggVersion", "formType"?, "instructions"? }, "grantsGov": { ... } | null }
-forms/<id>/rule-schema.json   { "<field>": { "gg_validation": { "rule": "attachment" } }, "<total>": { "gg_pre_population": { "rule": "sum_monetary", ... } }, ... }
-```
+| API file                                   | Contents                                                               | Emitted by         | Emitted as                                                           |
+| ------------------------------------------ | ---------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------- |
+| `json_schema.json`                         | The answers the form collects                                          | `simpler-forms`    | `dist/canonical/forms/<id>/schema.json`                              |
+| `ui_schema.json`                           | How the form is laid out                                               | `simpler-forms`    | `dist/canonical/forms/<id>/ui.json`                                  |
+| `xml_transform.json` or `xml_mapping.json` | How the answers are written as Grants.gov XML                          | `form-library-xml` | `dist/canonical/forms/<id>/xml-transform.json` or `xml-mapping.json` |
+| `rule_schema.json`                         | What the API checks or fills in: attachments, population, calculations | this emitter       | `dist/sgg/forms/<id>/rule-schema.json`, when the form has any rules  |
+| `form.json`                                | Whether and how to install the form, and its Grants.gov identity       | this emitter       | `dist/sgg/forms/<id>/sgg.json`                                       |
 
-Set `property-casing` to match the `simpler-forms` emitter's, so the rule schema's keys
-name the schema's properties.
+`sgg.json` contains the [`@Sgg.sync`](#decorators) options and the `@GrantsGov.form` identity.
+The rule schema's entries are described under [Population](#population) and
+[Calculations](#calculations). Set `property-casing` to match the `simpler-forms`
+emitter's, so the rule schema's keys name the schema's properties.
 
-The sync emitter reads these files and compiles the artifacts that the
-`simpler-forms` and `form-library-xml` emitters wrote to `dist/canonical/`, then `scripts/sync.mjs` copies them into the correct directory in the API.
+`scripts/sync.mjs` reads these files and copies them into the form's directory in the API.
 
 ## Development
 
@@ -92,12 +96,14 @@ those answers in from the others:
 - **Paths:** A sibling is read as `@THIS.<name>`, or by its plain name at the form's root.
   A `@Validation.computedFrom` path starting with `/` is absolute, and `[*]` reads every
   entry of a list. `@Validation.totals` reads its sources by absolute path, so a total
-  can't sit inside a list.
-- **Order:** A calculation that reads another calculation gets `order` one higher than
+  can't be inside a list.
+- **Order:** A calculation that reads another calculation has an `order` one higher than
   it, so the API writes a total of totals last. `@Validation.evaluationOrder` sets it
   directly.
 - **Money:** `@Validation.totals` adds up the fields whose type has
   `@Meta.tag(Catalogue.Tag.money)`.
-- **Not supported by the API**, so skipped with an `sgg/unsupported-calculation` warning:
-  a sum of counts, and a `../` path. `@Validation.materializeWhenAnySourcePresent` is
-  ignored with a warning, since the API always writes the result.
+- **Not supported by the API**, so reported as an `sgg/unsupported-calculation` error:
+  a sum of counts, a `../` path, and a total inside a list.
+- **`@Validation.materializeWhenAnySourcePresent`** is ignored with a
+  `sgg/calculation-materialization-ignored` warning, since the API writes the result even
+  when every source is empty.

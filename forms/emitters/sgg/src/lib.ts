@@ -66,9 +66,15 @@ export const $lib = createTypeSpecLibrary({
       },
     },
     "unsupported-calculation": {
-      severity: "warning",
+      severity: "error",
       messages: {
         default: paramMessage`${"name"} isn't calculated by the API: ${"reason"}.`,
+      },
+    },
+    "calculation-materialization-ignored": {
+      severity: "warning",
+      messages: {
+        default: paramMessage`${"name"} is written by the API even when its sources are empty, so @Validation.materializeWhenAnySourcePresent is ignored.`,
       },
     },
   },
