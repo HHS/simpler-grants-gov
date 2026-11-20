@@ -25,12 +25,12 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import {
   buildHappyPathTestData,
   buildPrintUrl,
   validateAllPrintViews,
 } from "tests/e2e/utils/submission/print-view-utils";
+import { scenariosForEachForm } from "tests/e2e/utils/submission/scenarios-for-each-form";
 import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
@@ -46,29 +46,24 @@ const ATTACHMENT_SECTION_IDS = {
   "senior_key_persons[0]": "form-section-senior-key-person-profiles",
 };
 
+// Each form has a matcher of its own, so build each form's scenarios on their own.
 const applicantScenarios = SENIOR_KEY_PERSON_OPPORTUNITIES.flatMap(
-  ({ formLabel, opportunityNumber, formMatcher }) => {
-    const {
-      opportunityUrl,
-      forms: [form],
-    } = loadOpportunityConfig(opportunityNumber);
-    return [
-      {
-        testName: `Complete the ${formLabel} Submission and Print View workflow for an Organization user`,
-        orgLabel: testOrgLabel,
-        opportunityUrl,
-        form,
-        formMatcher,
-      },
-      {
-        testName: `Complete the ${formLabel} Submission and Print View workflow for an Individual user`,
-        orgLabel: undefined,
-        opportunityUrl,
-        form,
-        formMatcher,
-      },
-    ];
-  },
+  (formUnderTest) =>
+    scenariosForEachForm(
+      [formUnderTest],
+      [
+        {
+          testName: "Submission and Print View workflow - Organization user",
+          orgLabel: testOrgLabel,
+          formMatcher: formUnderTest.formMatcher,
+        },
+        {
+          testName: "Submission and Print View workflow - Individual user",
+          orgLabel: undefined,
+          formMatcher: formUnderTest.formMatcher,
+        },
+      ],
+    ),
 );
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
@@ -79,7 +74,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 for (const {
   testName,
   orgLabel,
-  opportunityUrl,
+  opportunityConfig: { opportunityUrl },
   form,
   formMatcher,
 } of applicantScenarios) {
@@ -146,22 +141,26 @@ for (const {
 
       // --- Attachment Validation ---
       // validateAttachmentPrintViewSection expects one file per section, and each
-      // profile section lists every document the person attached.
+      // profile section lists every document the person attached. Count each file
+      // name, since one file can be attached to more than one document.
       for (const [person, sectionId] of Object.entries(
         ATTACHMENT_SECTION_IDS,
       )) {
-        const files = Object.entries(form.formConfig.fields)
-          .filter(
-            ([key, field]) =>
-              field.type === "file" && key.startsWith(`${person}--`),
-          )
-          .map(([key]) => testData[key]);
-        await expect(
-          page
-            .locator(`[id="${sectionId}"]`)
-            .getByRole("listitem")
-            .filter({ hasText: path.basename(files[0]) }),
-        ).toHaveCount(files.length);
+        const fileCounts = new Map<string, number>();
+        for (const [key, field] of Object.entries(form.formConfig.fields)) {
+          if (field.type === "file" && key.startsWith(`${person}--`)) {
+            const fileName = path.basename(testData[key]);
+            fileCounts.set(fileName, (fileCounts.get(fileName) ?? 0) + 1);
+          }
+        }
+        const listItems = page
+          .locator(`[id="${sectionId}"]`)
+          .getByRole("listitem");
+        for (const [fileName, count] of fileCounts) {
+          await expect(listItems.filter({ hasText: fileName })).toHaveCount(
+            count,
+          );
+        }
       }
     },
   );

@@ -21,7 +21,8 @@ import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillFormPartial } from "tests/e2e/utils/forms/general-forms-filling";
 import { clickSaveButton } from "tests/e2e/utils/forms/save-form-utils";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
+import { buildHappyPathTestData } from "tests/e2e/utils/submission/print-view-utils";
+import { scenariosForEachForm } from "tests/e2e/utils/submission/scenarios-for-each-form";
 
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
@@ -31,18 +32,27 @@ test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const {
-  formLabel,
-  opportunityNumber,
-  formMatcher,
-} of SENIOR_KEY_PERSON_OPPORTUNITIES) {
-  const {
-    opportunityUrl,
-    forms: [form],
-  } = loadOpportunityConfig(opportunityNumber);
+// Each form has a matcher of its own, so build each form's scenario on its own.
+const scenarios = SENIOR_KEY_PERSON_OPPORTUNITIES.flatMap((formUnderTest) =>
+  scenariosForEachForm(
+    [formUnderTest],
+    [
+      {
+        testName: "Application form completion happy path",
+        formMatcher: formUnderTest.formMatcher,
+      },
+    ],
+  ),
+);
 
+for (const {
+  testName,
+  opportunityConfig: { opportunityUrl },
+  form,
+  formMatcher,
+} of scenarios) {
   test(
-    `Application form completion happy path - ${formLabel}`,
+    testName,
     { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
@@ -61,7 +71,7 @@ for (const {
       // When the user opens the form
       const opened = await openForm(page, formMatcher);
       if (!opened) {
-        throw new Error(`Could not open ${formLabel}`);
+        throw new Error(`Could not open ${form.formConfig.formName}`);
       }
 
       // And adds a senior/key person beside the PD/PI
@@ -72,7 +82,7 @@ for (const {
         testInfo,
         page,
         form.formConfig.fields,
-        form.buildTestData(Date.now()),
+        buildHappyPathTestData(form, Date.now()),
       );
 
       // And clicks Save
