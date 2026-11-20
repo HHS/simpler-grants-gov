@@ -3,13 +3,18 @@ variable "app_name" {
 }
 
 variable "bot_protection_waf" {
-  description = "Opt-in scraper/bot WAF controls; null disables, action count observes without blocking."
+  # Limits are per 60s; sized from prod 7d WAF logs (normal opportunity peak ~1650/min, 2026-11-20 attack 3350/min).
+  description = "Scraper/bot WAF controls for all frontend envs; null disables, action count observes without blocking."
   type = object({
     action                  = optional(string, "count")
     page_rate_limit_per_ip  = optional(number, 600)
     opportunity_surge_limit = optional(number, 2000)
   })
-  default = null
+  default = {
+    action                  = "block"
+    page_rate_limit_per_ip  = 600
+    opportunity_surge_limit = 2000
+  }
 }
 
 variable "certificate_arn" {

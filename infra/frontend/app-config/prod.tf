@@ -32,11 +32,4 @@ module "prod_config" {
   # Defaults to `false`. Uncomment the next line to enable.
   # ⚠️ Warning! It is not recommended to enable this in a production environment.
   # enable_command_execution = true
-
-  # Limits are per 60s; sized from 7d WAF logs (normal opportunity peak ~1650/min, 2026-11-20 attack 3350/min).
-  bot_protection_waf = {
-    action                  = "block"
-    page_rate_limit_per_ip  = 600
-    opportunity_surge_limit = 2000
-  }
 }
