@@ -14,7 +14,7 @@
   "widgets": ["TextWidget", "SelectWidget", "RadioWidget"],
   "description": "NASA - PI and AOR (Nasa_PIandAORSupplementalDataSheet) asks NASA applicants for the names of the authorized organization representative (AOR) and the principal investigator (PI), the AOR's NSPIRES username, and whether the PI takes part as an employee of the U.S. Government, with the agency and amount requested if so, or of a foreign organization.",
   "notes": [
-    "The DAT's conditional rules are not in the form yet (#13368): Federal Agency is enabled and required, and the dollar amount enabled, only if the PI is a U.S. Government employee; International Participation is disabled and set to No if so.",
+    "Federal Agency is enabled and required, and the dollar amount enabled, only if the PI is a U.S. Government employee. The DAT also disables International Participation and sets it to No if so; that rule waits on #13368, since no decorator sets a value yet.",
     "The dollar amount is a string of up to 12 digits with optional cents, as in the API's budget forms. The XML mapping writes it with two decimal places."
   ],
   "risks": [

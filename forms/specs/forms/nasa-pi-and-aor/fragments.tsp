@@ -35,10 +35,16 @@ model NasaPrincipalInvestigator {
 
   /** Select a U.S. Government agency from the list provided. */
   @UI.label("If yes, Select U.S. Government agency")
+  @UI.enabledWhen(NasaPrincipalInvestigator.usGovernmentParticipation, true)
+  @Validation.requiredWhen(
+    NasaPrincipalInvestigator.usGovernmentParticipation,
+    true
+  )
   federalAgency?: NasaFederalAgency;
 
   /** Enter the total dollar amount. */
   @UI.label("If yes, enter total dollar amount requested ($)")
+  @UI.enabledWhen(NasaPrincipalInvestigator.usGovernmentParticipation, true)
   federalAgencyDollar?: Questions.Types.BudgetAmount;
 
   @UI.label("Is this person participating in this project as an employee of a foreign organization?")
