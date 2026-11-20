@@ -9,6 +9,7 @@ using SimplerForms;
 
 namespace Forms.ProjectAbstractSummary;
 
+@Sgg.sync(#{ xml: "mapping" })
 @Meta.form(#{
   id: "project-abstract-summary",
   formName: "Project Abstract Summary",
