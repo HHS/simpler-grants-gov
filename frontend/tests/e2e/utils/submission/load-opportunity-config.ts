@@ -7,6 +7,11 @@ import {
 import { BUDGET_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/budget-narrative-attachment-field-definitions";
 import { ED_ABSTRACT_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/ed-abstract-form-data";
 import { ED_ABSTRACT_FORM_CONFIG } from "tests/e2e/apply/fixtures/ed-abstract-form-field-definitions";
+import {
+  EPA_KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
+  EPA_KEY_CONTACTS_OPPORTUNITY_DATA,
+} from "tests/e2e/apply/fixtures/epa-key-contacts-data";
+import { EPA_KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
 import { GRANTSGOV_LOBBYING_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/grantsgov-lobbying-data";
 import { GRANTSGOV_LOBBYING_FORM_CONFIG } from "tests/e2e/apply/fixtures/grantsgov-lobbying-field-definitions";
 import {
@@ -16,6 +21,8 @@ import {
 import { KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
 import { NASA_PI_AND_AOR_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/nasa-pi-and-aor-data";
 import { NASA_PI_AND_AOR_FORM_CONFIG } from "tests/e2e/apply/fixtures/nasa-pi-and-aor-field-definitions";
+import { NSF_KEY_PERSON_EXPANDED_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/nsf-key-person-expanded-data";
+import { NSF_KEY_PERSON_EXPANDED_FORM_CONFIG } from "tests/e2e/apply/fixtures/nsf-key-person-expanded-field-definitions";
 import {
   OTHER_NARRATIVE_GENERATED_OPPORTUNITY_DATA,
   OTHER_NARRATIVE_OPPORTUNITY_DATA,
@@ -38,6 +45,10 @@ import {
   PPSL_OPPORTUNITY_DATA,
 } from "tests/e2e/apply/fixtures/project-performance-site-location-data";
 import { PPSL_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-performance-site-location-field-definitions";
+import { RR_KEY_PERSON_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/rr-key-person-data";
+import { RR_KEY_PERSON_EXPANDED_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/rr-key-person-expanded-data";
+import { RR_KEY_PERSON_EXPANDED_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-key-person-expanded-field-definitions";
+import { RR_KEY_PERSON_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-key-person-field-definitions";
 import { SF424_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424-data";
 import { SF424_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-field-definitions";
 import { SF424A_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424a-data";
@@ -82,6 +93,11 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   PROJECT_ABSTRACT_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   ED_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
+  EPA_KEY_CONTACTS_OPPORTUNITY_DATA,
+  EPA_KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
+  RR_KEY_PERSON_GENERATED_OPPORTUNITY_DATA,
+  RR_KEY_PERSON_EXPANDED_GENERATED_OPPORTUNITY_DATA,
+  NSF_KEY_PERSON_EXPANDED_GENERATED_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
   SF424_SHORT_OPPORTUNITY_DATA,
   SF424A_OPPORTUNITY_DATA,
@@ -113,6 +129,11 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   projectAbstract: PROJECT_ABSTRACT_FORM_CONFIG,
   projectAbstractGenerated: PROJECT_ABSTRACT_FORM_CONFIG,
   edAbstractGenerated: ED_ABSTRACT_FORM_CONFIG,
+  epaKeyContacts: EPA_KEY_CONTACTS_FORM_CONFIG,
+  epaKeyContactsGenerated: EPA_KEY_CONTACTS_FORM_CONFIG,
+  rrKeyPersonGenerated: RR_KEY_PERSON_FORM_CONFIG,
+  rrKeyPersonExpandedGenerated: RR_KEY_PERSON_EXPANDED_FORM_CONFIG,
+  nsfKeyPersonExpandedGenerated: NSF_KEY_PERSON_EXPANDED_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
   sf424short: SF424_SHORT_FORM_CONFIG,
   sf424a: SF424A_FORM_CONFIG,

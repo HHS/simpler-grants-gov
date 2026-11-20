@@ -543,8 +543,7 @@ export const KEY_CONTACTS_FORM_CONFIG = {
 // error message conventions used by other forms sharing the same refs
 // (person_name -> "First/Last Name is required", address -> "Street 1/City/
 // Country is required", phone_number -> "Telephone Number is required").
-// NOT verified against an actual failed-validation run for this form -
-// confirm before relying on these in CI.
+// failure-path-key-contacts.spec.ts checks them against an empty save.
 export const KEY_CONTACTS_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
     fieldId: "applicant_organization_name",
@@ -583,3 +582,24 @@ export const KEY_CONTACTS_REQUIRED_FIELD_ERRORS: FieldError[] = [
     message: "Email is required",
   },
 ];
+
+// The generated form titles the phone field "Phone Number".
+export const KEY_CONTACTS_GENERATED_REQUIRED_FIELD_ERRORS: FieldError[] =
+  KEY_CONTACTS_REQUIRED_FIELD_ERRORS.map((error) =>
+    error.fieldId === "key_contacts[0]--phone"
+      ? { ...error, message: "Phone Number is required" }
+      : error,
+  );
+
+/**
+ * The alert names the entry for each error in the key contacts list, e.g.
+ * "First Name in Key Contact, Entry 1 is required", while the inline error
+ * reads "First Name is required".
+ */
+export const toKeyContactsAlertErrors = (errors: FieldError[]): FieldError[] =>
+  errors.map(({ fieldId, message }) => ({
+    fieldId,
+    message: fieldId.startsWith("key_contacts[0]--")
+      ? message.replace(/ is required$/, " in Key Contact, Entry 1 is required")
+      : message,
+  }));
