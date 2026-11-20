@@ -855,3 +855,101 @@ export async function openFirstResultAndGoBack(page: Page): Promise<void> {
   });
   await waitForSearchResultsInitialLoad(page);
 }
+
+// ---------------------------------------------------------------------------
+// Seeded sort edge cases (local only)
+// ---------------------------------------------------------------------------
+
+// These records exist only in the local seed data (api/tests/lib/seed_local_db.py, traits in
+// api/tests/src/db/models/factories.py). The tokens are part of each seeded title, so a search
+// for one returns just its records. Run `git grep <token>` to match a token up with its seed data.
+export const TITLE_FOLDING_TOKEN = "410982c3";
+export const AWARD_FLOOR_TOKEN = "9371979c";
+export const AWARD_CEILING_TOKEN = "ebaf8aa1";
+
+export type SeededSortCase = {
+  name: string;
+  token: string;
+  sortValue: string;
+  expectedTitles: string[];
+};
+
+export const SEEDED_SORT_CASES: SeededSortCase[] = [
+  {
+    name: "title sorting is done after case- and ASCII-folding",
+    token: TITLE_FOLDING_TOKEN,
+    sortValue: "opportunityTitleAsc",
+    expectedTitles: [
+      "a1 title prefix — 410982c3",
+      "A2 title prefix — 410982c3",
+      "á3 title prefix — 410982c3",
+      "Á4 title prefix — 410982c3",
+      "z1 title prefix — 410982c3",
+      "Z2 title prefix — 410982c3",
+    ],
+  },
+  {
+    name: "award floor sort ascending is 0, nonzero, null",
+    token: AWARD_FLOOR_TOKEN,
+    sortValue: "awardFloorAsc",
+    expectedTitles: [
+      "zero award floor — 9371979c",
+      "nonzero award floor — 9371979c",
+      "null award floor — 9371979c",
+    ],
+  },
+  {
+    name: "award floor sort descending is nonzero, zero, null",
+    token: AWARD_FLOOR_TOKEN,
+    sortValue: "awardFloorDesc",
+    expectedTitles: [
+      "nonzero award floor — 9371979c",
+      "zero award floor — 9371979c",
+      "null award floor — 9371979c",
+    ],
+  },
+  {
+    name: "award ceiling sort ascending is 0, nonzero, null",
+    token: AWARD_CEILING_TOKEN,
+    sortValue: "awardCeilingAsc",
+    expectedTitles: [
+      "zero award ceiling — ebaf8aa1",
+      "nonzero award ceiling — ebaf8aa1",
+      "null award ceiling — ebaf8aa1",
+    ],
+  },
+  {
+    name: "award ceiling sort descending is nonzero, zero, null",
+    token: AWARD_CEILING_TOKEN,
+    sortValue: "awardCeilingDesc",
+    expectedTitles: [
+      "nonzero award ceiling — ebaf8aa1",
+      "zero award ceiling — ebaf8aa1",
+      "null award ceiling — ebaf8aa1",
+    ],
+  },
+];
+
+/**
+ * Searches for a seed token, applies the sort, and asserts the visible titles come back in
+ * exactly the expected order. Polls, so a transient hidden duplicate table or a result list
+ * that is still re-rendering cannot produce a flaky read.
+ */
+export async function expectSeededSortOrder(
+  page: Page,
+  seededCase: SeededSortCase,
+  isMobile: boolean,
+  projectName?: string,
+): Promise<void> {
+  await page.goto(`/search?query=${seededCase.token}`);
+  await waitForSearchResultsInitialLoad(page);
+
+  await applySortOption(page, seededCase.sortValue, isMobile, projectName);
+
+  await expect
+    .poll(async () => (await readResultRows(page)).map((row) => row.title), {
+      message: `titles for "${seededCase.token}" sorted by ${seededCase.sortValue}`,
+      timeout: 30000,
+    })
+    .toStrictEqual(seededCase.expectedTitles);
+}
