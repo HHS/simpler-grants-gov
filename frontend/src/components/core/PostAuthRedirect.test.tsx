@@ -197,4 +197,130 @@ describe("PostAuthRedirect", () => {
       expect(mockPostUserEvent).not.toHaveBeenCalled();
     });
   });
+
+  describe("server-side fallback destination", () => {
+    const mockClearFallback = jest.fn(() => Promise.resolve());
+
+    it("uses a valid sessionStorage destination over the fallback, and clears both", () => {
+      sessionStorage.setItem("login-redirect", "/newsletter?utm_source=tab");
+
+      render(
+        <StrictMode>
+          <PostAuthRedirect
+            trackDestination={true}
+            fallbackDestination="/workspace?utm_source=cookie"
+            clearFallbackDestination={mockClearFallback}
+          />
+        </StrictMode>,
+      );
+
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith("/newsletter?utm_source=tab");
+      expect(sessionStorage.getItem("login-redirect")).toBeNull();
+      expect(mockClearFallback).toHaveBeenCalledTimes(1);
+      expect(mockPostUserEvent).toHaveBeenCalledTimes(1);
+      expect(mockPostUserEvent).toHaveBeenCalledWith({
+        name: "destination_restored",
+      });
+    });
+
+    it("uses the fallback, preserving its query, when sessionStorage has nothing", () => {
+      render(
+        <PostAuthRedirect
+          trackDestination={true}
+          fallbackDestination="/workspace?utm_source=grants.gov&a=b"
+          clearFallbackDestination={mockClearFallback}
+        />,
+      );
+
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith(
+        "/workspace?utm_source=grants.gov&a=b",
+      );
+      expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+      expect(mockClearFallback).toHaveBeenCalledTimes(1);
+      expect(mockPostUserEvent).toHaveBeenCalledWith({
+        name: "destination_restored",
+      });
+      expect(JSON.stringify(mockPostUserEvent.mock.calls)).not.toContain(
+        "workspace",
+      );
+    });
+
+    it("uses the fallback when the sessionStorage destination is invalid", () => {
+      mockGetItem.mockReturnValue("https://malicious-site.com");
+
+      render(
+        <PostAuthRedirect
+          fallbackDestination="/workspace"
+          clearFallbackDestination={mockClearFallback}
+        />,
+      );
+
+      expect(mockReplace).toHaveBeenCalledWith("/workspace");
+    });
+
+    it.each([
+      "",
+      "https://malicious-site.com/steal",
+      "//evil.com/path",
+      "/api/auth/callback?token=secret",
+      "/login",
+    ])(
+      "goes to / and reports invalid when the only destination is the fallback %p",
+      (fallback) => {
+        render(
+          <PostAuthRedirect
+            trackDestination={true}
+            fallbackDestination={fallback}
+            clearFallbackDestination={mockClearFallback}
+          />,
+        );
+
+        expect(mockReplace).toHaveBeenCalledTimes(1);
+        expect(mockReplace).toHaveBeenCalledWith("/");
+        expect(mockClearFallback).toHaveBeenCalledTimes(1);
+        expect(mockPostUserEvent).toHaveBeenCalledWith({
+          name: "destination_rejected",
+          properties: { reason: fallback ? "invalid" : "missing" },
+        });
+        const sent = JSON.stringify(mockPostUserEvent.mock.calls);
+        expect(sent).not.toContain("malicious");
+        expect(sent).not.toContain("evil");
+        expect(sent).not.toContain("secret");
+      },
+    );
+
+    it("goes to / and reports missing with neither sessionStorage nor a fallback, without clearing", () => {
+      render(
+        <PostAuthRedirect
+          trackDestination={true}
+          clearFallbackDestination={mockClearFallback}
+        />,
+      );
+
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith("/");
+      expect(mockClearFallback).not.toHaveBeenCalled();
+      expect(mockPostUserEvent).toHaveBeenCalledWith({
+        name: "destination_rejected",
+        properties: { reason: "missing" },
+      });
+    });
+
+    it("still redirects when clearing the fallback fails", async () => {
+      const failingClear = jest.fn(() => Promise.reject(new Error("offline")));
+
+      render(
+        <PostAuthRedirect
+          fallbackDestination="/workspace"
+          clearFallbackDestination={failingClear}
+        />,
+      );
+      await Promise.resolve();
+
+      expect(failingClear).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith("/workspace");
+    });
+  });
 });

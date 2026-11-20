@@ -9,6 +9,8 @@ export const LOGOUT_URL = "/api/auth/logout";
 
 export const LOGIN_REDIRECT_STORAGE_KEY = "login-redirect";
 export const LOGIN_REDIRECT_FALLBACK = "/";
+export const LOGIN_REDIRECT_FALLBACK_COOKIE = "login-redirect-fallback";
+export const LOGIN_REDIRECT_FALLBACK_COOKIE_MAX_AGE_SECONDS = 15 * 60;
 export const LOGIN_REDIRECT_BLOCKED_PREFIXES = [
   "/login",
   "/logout",

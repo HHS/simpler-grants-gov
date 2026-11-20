@@ -1,4 +1,8 @@
 import { environment } from "src/constants/environments";
+import {
+  getRefererLoginDestination,
+  setLoginRedirectFallback,
+} from "src/services/auth/loginRedirectFallback";
 import { getCorrelationId } from "src/services/correlationId/correlationId";
 import { logger } from "src/services/logger/simplerLogger";
 
@@ -21,6 +25,8 @@ export async function GET(request: NextRequest) {
     );
     return new NextResponse("AUTH_LOGIN_URL not defined", { status: 500 });
   }
+  // covers "Sign in" clicks before hydration, when LoginLink has saved nothing
+  await setLoginRedirectFallback(getRefererLoginDestination(request));
   const pivRequired = request.nextUrl.searchParams.get("piv_required");
   redirect(
     `${environment.AUTH_LOGIN_URL}${pivRequired === "true" ? "?piv_required=True" : ""}`,
