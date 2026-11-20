@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import React from "react";
 
@@ -70,6 +70,30 @@ jest.mock(
       UserOrganizationInviteMock(props as UserOrganizationInviteProps);
       return <div data-testid="user-org-invite" />;
     },
+  }),
+);
+
+type ActiveUsersSectionProps = {
+  organizationId: string;
+  showManagePermissions: boolean;
+};
+
+const ActiveUsersSectionMock = jest.fn<void, [ActiveUsersSectionProps]>();
+
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ActiveUsersSection",
+  () => ({
+    ActiveUsersSection: (props: unknown) => {
+      ActiveUsersSectionMock(props as ActiveUsersSectionProps);
+      return <div data-testid="active-users-section" />;
+    },
+  }),
+);
+
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/InvitedUsersSection",
+  () => ({
+    InvitedUsersSection: () => <div data-testid="invited-users-section" />,
   }),
 );
 
@@ -150,5 +174,90 @@ describe("ManageUsersPageContent", () => {
     expect(PageHeaderMock).toHaveBeenCalledTimes(1);
     const pageHeaderProps = PageHeaderMock.mock.calls[0][0];
     expect(pageHeaderProps.organizationName).toBeUndefined();
+  });
+
+  it("renders the roster, then invited users, then the invite section", async () => {
+    const component = await ManageUsersPageContent({
+      organizationId,
+      authorizedData: authorizedDataStub,
+    });
+    render(component);
+
+    const sectionOrder = screen
+      .getAllByTestId(
+        /^(page-header|active-users-section|invited-users-section|user-org-invite)$/,
+      )
+      .map((element) => element.getAttribute("data-testid"));
+
+    expect(sectionOrder).toEqual([
+      "page-header",
+      "active-users-section",
+      "invited-users-section",
+      "user-org-invite",
+    ]);
+  });
+
+  describe("manage permissions links", () => {
+    const withManageMembers = (
+      privilege: Partial<AuthorizedData["confirmedPrivileges"][number]> = {},
+    ): AuthorizedData => ({
+      ...authorizedDataStub,
+      confirmedPrivileges: [
+        {
+          resourceId: organizationId,
+          resourceType: "organization",
+          privilege: "manage_org_members",
+          authorized: true,
+          ...privilege,
+        },
+      ],
+    });
+
+    const showManagePermissionsFor = async (
+      authorizedData: AuthorizedData,
+      externalCollaboratorsEnabled?: boolean,
+    ) => {
+      render(
+        await ManageUsersPageContent({
+          organizationId,
+          authorizedData,
+          externalCollaboratorsEnabled,
+        }),
+      );
+      return ActiveUsersSectionMock.mock.calls[0][0].showManagePermissions;
+    };
+
+    it("shows them when the flag is on and the user can manage members", async () => {
+      expect(await showManagePermissionsFor(withManageMembers(), true)).toBe(
+        true,
+      );
+    });
+
+    it("hides them when the flag is off", async () => {
+      expect(await showManagePermissionsFor(withManageMembers(), false)).toBe(
+        false,
+      );
+      jest.clearAllMocks();
+      // the flag defaults to off
+      expect(await showManagePermissionsFor(withManageMembers())).toBe(false);
+    });
+
+    it("hides them when the user can't manage members", async () => {
+      expect(
+        await showManagePermissionsFor(
+          withManageMembers({ authorized: false }),
+          true,
+        ),
+      ).toBe(false);
+    });
+
+    it("hides them when the privilege is for another organization", async () => {
+      expect(
+        await showManagePermissionsFor(
+          withManageMembers({ resourceId: "other-org" }),
+          true,
+        ),
+      ).toBe(false);
+    });
   });
 });

@@ -16,9 +16,11 @@ import { UserOrganizationInvite } from "./UserOrganizationInvite";
 export async function ManageUsersPageContent({
   organizationId,
   authorizedData,
+  externalCollaboratorsEnabled = false,
 }: {
   organizationId: string;
   authorizedData?: AuthorizedData;
+  externalCollaboratorsEnabled?: boolean;
 }) {
   const t = await getTranslations("ManageUsers");
   let userOrganizations: Organization | undefined;
@@ -29,7 +31,16 @@ export async function ManageUsersPageContent({
     );
   }
 
-  const { fetchedResources } = authorizedData;
+  const { fetchedResources, confirmedPrivileges } = authorizedData;
+
+  // The gate only blocks on a 403 from a fetched resource, so the privilege
+  // check result is read here to decide whether to show the permissions links
+  const canManageMembers = confirmedPrivileges.some(
+    ({ resourceId, privilege, authorized }) =>
+      resourceId === organizationId &&
+      privilege === "manage_org_members" &&
+      authorized,
+  );
 
   const { activeUsersList, organizationRolesList, invitedUsersList } =
     fetchedResources as {
@@ -80,13 +91,14 @@ export async function ManageUsersPageContent({
           <InviteLegacyUsersButton organizationId={organizationId} />
         </Grid>
       </Grid>
-      <UserOrganizationInvite organizationId={organizationId} />
       <ActiveUsersSection
         organizationId={organizationId}
         activeUsers={activeUsersList}
         roles={organizationRolesList}
+        showManagePermissions={externalCollaboratorsEnabled && canManageMembers}
       />
       <InvitedUsersSection invitedUsers={invitedUsersList} />
+      <UserOrganizationInvite organizationId={organizationId} />
     </GridContainer>
   );
 }
