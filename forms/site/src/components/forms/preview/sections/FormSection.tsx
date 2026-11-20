@@ -2,6 +2,8 @@ import { crumbAttributes, headingTag } from "@/lib/breadcrumbs";
 import type { GroupLayout, LayoutProps } from "@jsonforms/core";
 import { JsonFormsDispatch } from "@jsonforms/react";
 import { groupName } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
+import { HeadingLevel } from "@sgg/frontend/components/apply-form/jsonforms/headingLevel";
+import { MarkdownDescription } from "@sgg/frontend/components/apply-form/jsonforms/MarkdownDescription";
 import { AdapterContext } from "@sgg/frontend/components/apply-form/jsonforms/renderers";
 import { useContext, useId } from "react";
 
@@ -44,7 +46,6 @@ export default function FormSection({
 
   const level = depth + 1;
   const name = groupName(layout.label);
-  // Shown as the SGG fieldset shows a section's description: a paragraph per line.
   const description = layout.options?.description as string | undefined;
   const Heading = headingTag(level);
   return (
@@ -55,18 +56,16 @@ export default function FormSection({
       >
         {layout.label}
       </Heading>
-      {description
-        ?.split("\n")
-        .filter(Boolean)
-        .map((paragraph, i) => (
-          <p
-            key={`${name}-section-description-paragraph-${i}`}
-            className="usa-hint form-section__description"
-          >
-            {paragraph}
-          </p>
-        ))}
-      <SectionDepth.Provider value={level}>{children}</SectionDepth.Provider>
+      {/* Render the description with the apply form's component, so the preview matches it. */}
+      {description ? (
+        <div className="usa-hint form-section__description">
+          <MarkdownDescription text={description} />
+        </div>
+      ) : null}
+      <SectionDepth.Provider value={level}>
+        {/* Set the frontend's heading level too, so a list in the section is headed below it. */}
+        <HeadingLevel level={Number(Heading.slice(1))}>{children}</HeadingLevel>
+      </SectionDepth.Provider>
     </fieldset>
   );
 }

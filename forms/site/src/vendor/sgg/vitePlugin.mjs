@@ -43,6 +43,7 @@ const PREBUNDLE = [
   "json-schema-merge-allof",
   "lodash",
   "lodash/noop",
+  "markdown-to-jsx/react",
   "nanostores",
   "shiki/core",
   "shiki/engine/javascript",

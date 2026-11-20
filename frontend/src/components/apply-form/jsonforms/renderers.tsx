@@ -8,8 +8,8 @@ import {
   uiTypeIs,
   type ControlElement,
   type ControlProps,
-  type GroupLayout,
   type JsonFormsRendererRegistryEntry,
+  type Layout,
   type LayoutProps,
 } from "@jsonforms/core";
 import {
@@ -25,10 +25,9 @@ import {
 } from "src/utils/applyForm/dataPaths";
 
 import { renderFieldNode } from "src/components/apply-form/FormFields";
-import { wrapSection } from "src/components/apply-form/widgets/WidgetRenderers";
 import { useAdapterContext } from "./adapterContext";
 import { controls } from "./controls";
-import { controlToNodes, groupName } from "./convertUiSchema";
+import { controlToNodes } from "./convertUiSchema";
 
 export { AdapterContext, type AdapterContextValue } from "./adapterContext";
 
@@ -70,8 +69,8 @@ const AdaptedControl = ({ uischema, path, visible, enabled }: ControlProps) => {
 };
 
 /**
- * A layout. A labeled group is a section, rendered with the same fieldset the SGG renderer
- * uses; the root layout is the form itself, whose title the page already shows.
+ * Render a layout's elements in order. `FieldsetControl` renders a labeled group as a
+ * section, so this covers the root layout and unlabeled layouts.
  */
 const AdaptedLayout = ({
   uischema,
@@ -82,32 +81,23 @@ const AdaptedLayout = ({
   renderers,
   cells,
 }: LayoutProps) => {
-  const context = useAdapterContext();
   if (!visible) return null;
-
-  const layout = uischema as GroupLayout;
-  const children = layout.elements.map((element, index) => (
-    <JsonFormsDispatch
-      key={`${path}-${index}`}
-      uischema={element}
-      schema={schema}
-      path={path}
-      enabled={enabled}
-      renderers={renderers}
-      cells={cells}
-    />
-  ));
-
-  if (uischema === context.rootUiSchema || !layout.label) {
-    return <>{children}</>;
-  }
-  const description = layout.options?.description as string | undefined;
-  return wrapSection({
-    label: layout.label,
-    fieldName: groupName(layout.label),
-    sectionFields: <>{children}</>,
-    description,
-  });
+  const layout = uischema as Layout;
+  return (
+    <>
+      {layout.elements.map((element, index) => (
+        <JsonFormsDispatch
+          key={`${path}-${index}`}
+          uischema={element}
+          schema={schema}
+          path={path}
+          enabled={enabled}
+          renderers={renderers}
+          cells={cells}
+        />
+      ))}
+    </>
+  );
 };
 
 const ADAPTER_RANK = 10;

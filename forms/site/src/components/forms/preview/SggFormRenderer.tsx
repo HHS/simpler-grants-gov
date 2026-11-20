@@ -1,5 +1,6 @@
 import type { RJSFSchema } from "@rjsf/utils";
 import { convertJsonFormsUiSchema } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
+import { HeadingLevel } from "@sgg/frontend/components/apply-form/jsonforms/headingLevel";
 import { JsonFormsFields } from "@sgg/frontend/components/apply-form/jsonforms/JsonFormsFields";
 import {
   buildWarningTree,
@@ -92,14 +93,17 @@ export const SggFormRenderer = ({
       onSubmit={(event) => event.preventDefault()}
       noValidate
     >
-      <JsonFormsFields
-        key={`${generation.current}-${showErrors}`}
-        errors={errors}
-        formData={data as object}
-        schema={formSchema}
-        uiSchema={uischema}
-        extraRenderers={previewRenderers}
-      />
+      {/* Start the frontend's headings below an h2, since the preview's top sections are h3. */}
+      <HeadingLevel level={2}>
+        <JsonFormsFields
+          key={`${generation.current}-${showErrors}`}
+          errors={errors}
+          formData={data as object}
+          schema={formSchema}
+          uiSchema={uischema}
+          extraRenderers={previewRenderers}
+        />
+      </HeadingLevel>
     </form>
   );
 };
