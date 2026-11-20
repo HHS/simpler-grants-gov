@@ -124,6 +124,16 @@ def test_federal_agency_must_be_listed_agency(nasa_pi_and_aor_generated_v1_0):
     ]
 
 
+def test_federal_agency_is_required_when_pi_is_a_government_employee(
+    nasa_pi_and_aor_generated_v1_0,
+):
+    data = _full_form()
+    del data["principal_investigator"]["federal_agency"]
+    assert _issues(data, nasa_pi_and_aor_generated_v1_0) == [
+        ("required", "$.principal_investigator.federal_agency")
+    ]
+
+
 @pytest.mark.parametrize("amount", ["125,000", "125000.5", "1234567890123"])
 def test_dollar_amount_must_be_budget_amount(amount, nasa_pi_and_aor_generated_v1_0):
     data = _full_form()
