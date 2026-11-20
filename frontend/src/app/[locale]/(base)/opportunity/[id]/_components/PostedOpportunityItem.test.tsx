@@ -39,6 +39,7 @@ describe("PostedOpportunityItem", () => {
       close_date_description: "Applications due by noon",
     });
 
+    expect(screen.getByText("closing:")).toBeInTheDocument();
     expect(screen.queryByText("notSpecified")).not.toBeInTheDocument();
     expect(screen.getByText("Applications due by noon")).toBeInTheDocument();
   });
