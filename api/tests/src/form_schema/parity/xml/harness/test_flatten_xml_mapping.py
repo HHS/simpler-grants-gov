@@ -115,6 +115,26 @@ class TestRead:
             {},
         )
 
+    def test_reads_a_bracketed_entry_as_any_item_and_a_range_as_the_list(self):
+        entries = mapping(
+            {
+                "Type1": {"$field": "types[0]"},
+                "Last": {"$field": "types[-1]"},
+                "Primary": {"Name": {"$field": "sites[0].name"}},
+                "Other": {
+                    "$each": {
+                        "items": {"$field": "sites[1:]"},
+                        "map": {"Name": {"$field": "name"}},
+                    }
+                },
+            }
+        )
+        fields, _ = flatten_xml_mapping.read(entries)
+        assert fields["Type1",] == "types.[]"
+        assert fields["Last",] == "types.[]"
+        assert fields["Primary", "Name"] == "sites.[].name"
+        assert fields["Other", "Name"] == "sites.[].name"
+
     def test_reads_a_required_value_as_the_value_it_wraps(self):
         required = mapping(
             {

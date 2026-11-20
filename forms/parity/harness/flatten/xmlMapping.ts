@@ -25,7 +25,18 @@ export function xmlMappingFields(mapping: Json): XmlTransformFields {
     fields.byLink.set(link(jsonPath, xmlPath), field);
   };
 
-  const steps = (path: string) => (path === "." ? [] : path.split("."));
+  // An index (`types[0]`) reads one entry of a list, so it stands for any item; a range
+  // (`sites[1:]`) is still the list.
+  const steps = (path: string) =>
+    path === "."
+      ? []
+      : path.split(".").flatMap((segment) => {
+          const [name, ...brackets] = segment.split("[");
+          return [
+            ...(name ? [name] : []),
+            ...brackets.filter((b) => !b.includes(":")).map(() => ARRAY),
+          ];
+        });
   const json = (item: string[], path: string) =>
     render([...item, ...steps(path)]);
 

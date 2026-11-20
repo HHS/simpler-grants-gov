@@ -13,6 +13,8 @@ Both branches of a `when` are read, and a `required` value as the value it wraps
 
 from typing import Any
 
+from src.services.xml_generation.mapping.paths import steps
+
 from ...paths import ARRAY, Path
 
 #: The `format` a mapping in this shape declares.
@@ -150,9 +152,22 @@ def _source(value: Any, prefix: str) -> str | None:
 
 
 def _join(prefix: str, path: str) -> str:
-    """A field below `prefix`. `.` is the item itself. A whole-number step reads one entry of a
-    list, so it stands for any item: `types.0` -> `types.[]`."""
+    """Return the form field at `path` below `prefix`, named the way the parity checks name it.
+
+    The checks compare which form field each XML element reads, not which entry of a list, so
+    a field inside a list is named with `[]` for any entry, as in the JSON schema:
+
+    - An index becomes `[]`: `types[0]` and `types.0` -> `types.[]`.
+    - A slice is dropped, leaving the list: `sites[1:]` -> `sites`. The `$each` that reads the
+      slice adds the `[]` for its items, so a field inside it is `sites.[].name`.
+    - `.` is the item itself, so it returns `prefix`.
+    """
     if path == ".":
         return prefix
-    steps = [ARRAY if step.isdecimal() else step for step in path.split(".")]
-    return ".".join([prefix, *steps] if prefix else steps)
+    names: list[str] = []
+    for step in steps(path):
+        if isinstance(step, int) or (isinstance(step, str) and step.isdecimal()):
+            names.append(ARRAY)
+        elif isinstance(step, str):
+            names.append(step)
+    return ".".join([prefix, *names] if prefix else names)
