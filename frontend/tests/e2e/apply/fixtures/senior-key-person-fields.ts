@@ -70,19 +70,23 @@ export function personFields(
   return definitions;
 }
 
-/** Answers for one person's profile, with a file for each of `documents`. */
+/**
+ * Answers for one person's profile, with a file for each of `documents`. `suffix` makes
+ * the person's name unique to the run.
+ */
 export function personAnswers(
   person: string,
   initials: string,
   projectRole: string,
   extraAnswers: Record<string, string>,
   documents: Record<string, string>,
+  suffix: number,
 ): Record<string, string> {
   const answers: Record<string, string> = {
     "name--prefix": "Dr.",
-    "name--first_name": `${initials} FIRST NAME`,
+    "name--first_name": `${initials} FIRST ${suffix}`,
     "name--middle_name": `${initials} MIDDLE NAME`,
-    "name--last_name": `${initials} LAST NAME`,
+    "name--last_name": `${initials} LAST ${suffix}`,
     "name--suffix": "Jr.",
     title: `${initials} TITLE`,
     department: `${initials} DEPARTMENT`,

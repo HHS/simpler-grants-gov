@@ -9,16 +9,16 @@ import { personAnswers } from "./senior-key-person-fields";
 /**
  * Happy-path test data for the PD/PI and one senior/key person, with their documents.
  */
-export const buildNSFKeyPersonExpandedHappyPathTestData = (): Record<
-  string,
-  string
-> => ({
+export const buildNSFKeyPersonExpandedHappyPathTestData = (
+  suffix: number,
+): Record<string, string> => ({
   ...personAnswers(
     "principal_investigator",
     "PI",
     "PD/PI",
     { organization_name: "PI ORGANIZATION", nsf_id: "000123456" },
     NSF_KEY_PERSON_EXPANDED_DOCUMENTS,
+    suffix,
   ),
   ...personAnswers(
     "senior_key_persons[0]",
@@ -26,6 +26,7 @@ export const buildNSFKeyPersonExpandedHappyPathTestData = (): Record<
     "Other Senior Personnel",
     { organization_uei: "ABCDEFGHIJKL", nsf_id: "000654321" },
     NSF_KEY_PERSON_EXPANDED_DOCUMENTS,
+    suffix,
   ),
 });
 
