@@ -1,10 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import type { JsonSchema } from "@jsonforms/core";
+import { convertJsonFormsUiSchema } from "@sgg/frontend/components/apply-form/jsonforms/convertUiSchema";
 import { processFormSchema } from "@sgg/frontend/utils/applyForm/applyFormUtils";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { unadaptableScopes } from "../vendor/sgg/jsonFormsUiSchema";
 import { CANONICAL_DIR, loadFormSpec, type FormSpec } from "./formSpec";
 import { createAjv } from "./validation";
 
@@ -121,7 +121,9 @@ describe.each([
 
   it("draws every control with an SGG widget", () => {
     const { formSchema } = processFormSchema(spec.schema);
-    expect(unadaptableScopes(spec.uischema, formSchema)).toEqual([]);
+    expect(
+      convertJsonFormsUiSchema(spec.uischema, formSchema).unsupportedControls,
+    ).toEqual([]);
   });
 
   it("has an example from the TypeSpec that passes validation", () => {
