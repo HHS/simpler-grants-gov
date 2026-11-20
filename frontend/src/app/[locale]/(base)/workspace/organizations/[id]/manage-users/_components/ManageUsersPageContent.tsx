@@ -3,6 +3,7 @@ import { getOrganizationDetails } from "src/services/fetch/fetchers/organization
 import { logger } from "src/services/logger/simplerLogger";
 import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData, FetchedResource } from "src/types/authTypes";
+import { hasConfirmedPrivilege } from "src/utils/hasConfirmedPrivilege";
 
 import { getTranslations } from "next-intl/server";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
@@ -35,11 +36,10 @@ export async function ManageUsersPageContent({
 
   // The gate only blocks on a 403 from a fetched resource, so the privilege
   // check result is read here to decide whether to show the permissions links
-  const canManageMembers = confirmedPrivileges.some(
-    ({ resourceId, privilege, authorized }) =>
-      resourceId === organizationId &&
-      privilege === "manage_org_members" &&
-      authorized,
+  const canManageMembers = hasConfirmedPrivilege(
+    confirmedPrivileges,
+    organizationId,
+    "manage_org_members",
   );
 
   const { activeUsersList, organizationRolesList, invitedUsersList } =
