@@ -150,6 +150,24 @@ export const PostedWithoutCloseDate = {
   },
 };
 
+export const PostedWithoutCloseDateDescription = {
+  args: {
+    opportunity: withSummary({
+      close_date: "2026-12-15",
+      close_date_description: null,
+    }),
+  },
+};
+
+export const PostedWithoutCloseDateOrDescription = {
+  args: {
+    opportunity: withSummary({
+      close_date: null,
+      close_date_description: null,
+    }),
+  },
+};
+
 export const Forecasted = {
   args: {
     opportunity: withSummary(
