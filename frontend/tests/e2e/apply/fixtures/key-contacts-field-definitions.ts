@@ -543,8 +543,7 @@ export const KEY_CONTACTS_FORM_CONFIG = {
 // error message conventions used by other forms sharing the same refs
 // (person_name -> "First/Last Name is required", address -> "Street 1/City/
 // Country is required", phone_number -> "Telephone Number is required").
-// NOT verified against an actual failed-validation run for this form -
-// confirm before relying on these in CI.
+// failure-path-key-contacts.spec.ts checks them against an empty save.
 export const KEY_CONTACTS_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
     fieldId: "applicant_organization_name",
