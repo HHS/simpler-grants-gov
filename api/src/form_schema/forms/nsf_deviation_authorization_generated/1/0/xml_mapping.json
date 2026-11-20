@@ -1,0 +1,20 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/NSF_DeviationAuthorization-V1.1",
+    "NSF_DeviationAuthorization": "http://apply.grants.gov/forms/NSF_DeviationAuthorization-V1.1",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/NSF_DeviationAuthorization-V1.1.xsd",
+  "root": {
+    "NSF_DeviationAuthorization": {
+      "@NSF_DeviationAuthorization:FormVersion": {
+        "$const": "1.1"
+      },
+      "DeviationAuthorization": {
+        "$field": "deviation_authorization"
+      }
+    }
+  }
+}

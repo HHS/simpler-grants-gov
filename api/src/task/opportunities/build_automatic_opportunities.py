@@ -40,6 +40,7 @@ from src.form_schema.forms import (
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
+    NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
     OtherNarrativeAttachment_v1_2,
     OtherNarrativeGenerated_v1_2,
@@ -700,6 +701,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Project Abstract (Generated)",
                 ProjectAbstractGenerated_v1_2.form_id,
                 "2e5d8bcd-bf18-449e-809c-15d21de7a22f",
+            ),
+            (
+                "E2E-NSFDA",
+                "NSF Deviation Authorization",
+                NSFDeviationAuthorization_v1_1.form_id,
+                "6d58e0cb-9b08-5732-b4a5-4df7f8cedfa7",
             ),
             (
                 "E2E-PABSS",
