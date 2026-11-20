@@ -12,6 +12,7 @@ import {
 import {
   buildKeyContactsHappyPathTestData,
   buildKeyContactsRequiredFieldsHappyPathTestData,
+  KEY_CONTACTS_OPPORTUNITIES,
 } from "tests/e2e/apply/fixtures/key-contacts-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -23,13 +24,13 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
   buildHappyPathTestData,
   buildPrintUrl,
   validateAllPrintViews,
 } from "tests/e2e/utils/submission/print-view-utils";
+import { scenariosForEachForm } from "tests/e2e/utils/submission/scenarios-for-each-form";
 import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
@@ -39,9 +40,6 @@ const { APPLY_FORMS, SMOKE, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-const OPPORTUNITY_NUMBER = "E2E-KC-ORG-IND-01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-
 /**
  * Test scenarios cover both minimal (required fields only) and complete
  * (all required + optional fields) happy-path submissions for both
@@ -50,38 +48,45 @@ const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
  * Minimal scenarios: SMOKE tags (fast smoke tests)
  * Complete scenarios: FULL_REGRESSION tags (comprehensive coverage)
  */
-const applicantScenarios = [
+const applicantScenarios = scenariosForEachForm(KEY_CONTACTS_OPPORTUNITIES, [
   {
-    testName: `Key Contacts - Required fields only - Organization user`,
+    testName: "Required fields only - Organization user",
     orgLabel: testOrgLabel,
     tags: [APPLY_FORMS, SMOKE],
     buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
   },
   {
-    testName: `Key Contacts - Complete form - Organization user`,
+    testName: "Complete form - Organization user",
     orgLabel: testOrgLabel,
     tags: [APPLY_FORMS, FULL_REGRESSION],
     buildTestData: buildKeyContactsHappyPathTestData,
   },
   {
-    testName: `Key Contacts - Required fields only - Individual user`,
+    testName: "Required fields only - Individual user",
     orgLabel: undefined,
     tags: [APPLY_FORMS, SMOKE],
     buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
   },
   {
-    testName: `Key Contacts - Complete form - Individual user`,
+    testName: "Complete form - Individual user",
     orgLabel: undefined,
     tags: [APPLY_FORMS, FULL_REGRESSION],
     buildTestData: buildKeyContactsHappyPathTestData,
   },
-] as const;
+] as const);
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { testName, orgLabel, tags, buildTestData } of applicantScenarios) {
+for (const {
+  testName,
+  opportunityConfig,
+  form: keyContactsForm,
+  orgLabel,
+  tags,
+  buildTestData,
+} of applicantScenarios) {
   test(
     testName,
     { tag: [...tags] }, // Convert readonly array to mutable
@@ -105,7 +110,7 @@ for (const { testName, orgLabel, tags, buildTestData } of applicantScenarios) {
         // Use scenario-specific builder for Key Contacts form,
         // or fall back to generic builder for other forms
         const testData =
-          form.formKey === "keyContacts"
+          form.formKey === keyContactsForm.formKey
             ? buildTestData(baseSuffix + index)
             : buildHappyPathTestData(form, baseSuffix + index);
 

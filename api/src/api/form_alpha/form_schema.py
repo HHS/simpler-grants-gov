@@ -1,6 +1,6 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
-from src.constants.lookup_constants import FormType
+from src.constants.lookup_constants import FormRenderer, FormType
 
 
 class FormInstructionSchema(Schema):
@@ -128,6 +128,14 @@ class FormAlphaSchema(Schema):
         metadata={
             "description": "Whether the form is deprecated",
             "example": False,
+        },
+    )
+
+    form_renderer = fields.Enum(
+        FormRenderer,
+        metadata={
+            "description": "The frontend renderer the form uses, which sets the format of form_ui_schema",
+            "example": FormRenderer.SGG.value,
         },
     )
 

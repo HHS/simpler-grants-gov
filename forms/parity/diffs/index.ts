@@ -1,7 +1,12 @@
 import type { FormDiff } from "../harness/model.ts";
+import { DIFF as budgetNarrative } from "./budget-narrative-attachment-form.ts";
+import { DIFF as edAbstract } from "./ed-abstract-form.ts";
 import { DIFF as epaKeyContacts } from "./epa-key-contacts.ts";
 import { DIFF as keyContacts } from "./key-contacts.ts";
 import { DIFF as nsfKeyPersonExpanded } from "./nsf-senior-key-person-profile-expanded.ts";
+import { DIFF as otherNarrative } from "./other-attachments-form.ts";
+import { DIFF as projectAbstract } from "./project-abstract.ts";
+import { DIFF as projectNarrative } from "./project-narrative-attachment-form.ts";
 import { DIFF as performanceSites } from "./project-performance-site-location-s.ts";
 import { DIFF as rrKeyPersonExpanded } from "./research-and-related-senior-key-person-profile-expanded.ts";
 import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profile.ts";
@@ -10,6 +15,11 @@ import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profil
 export const DIFFS: FormDiff[] = [
   keyContacts,
   epaKeyContacts,
+  projectNarrative,
+  projectAbstract,
+  edAbstract,
+  budgetNarrative,
+  otherNarrative,
   rrKeyPerson,
   rrKeyPersonExpanded,
   nsfKeyPersonExpanded,

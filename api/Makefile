@@ -373,6 +373,9 @@ run-email-notifications: ## Send email notifications
 run-new-opportunity-notification: ## Queue the daily new opportunity email for opted-in users
 	$(FLASK_CMD) task new-opportunity-notification $(args)
 
+seed-new-opportunity-notification: ## Subscribe local users and create opportunities for the next new opportunity email
+	$(PY_RUN_CMD) python3 -m tests.lib.seed_new_opportunity_notification $(args)
+
 # The processor runs until stopped unless batches is set, then it exits after that many batches.
 # Send the emails queued in notification_queue, pass batches=N to stop after N batches.
 start-notification-processor:

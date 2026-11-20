@@ -86,6 +86,12 @@ class OrganizationUserSchema(Schema):
             "example": False,
         },
     )
+    is_external = fields.Boolean(
+        metadata={
+            "description": "Whether the user is an external collaborator (for example a consultant) rather than staff of the organization",
+            "example": False,
+        },
+    )
 
 
 class OrganizationGetResponseSchema(AbstractResponseSchema):

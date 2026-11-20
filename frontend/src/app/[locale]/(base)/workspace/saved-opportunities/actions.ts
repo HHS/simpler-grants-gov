@@ -6,11 +6,13 @@ import {
   saveOpportunityForOrganization,
 } from "src/services/fetch/fetchers/organizationSavedOpportunitiesFetcher";
 import { logger } from "src/services/logger/simplerLogger";
+import { ActionErrorCode } from "src/types/generalTypes";
 
 export type SaveOpportunityForOrganizationActionState =
   | {
       success: boolean;
       error: string | null;
+      errorCode?: ActionErrorCode;
     }
   | undefined;
 
@@ -18,6 +20,7 @@ export type DeleteSavedOpportunityForOrganizationActionState =
   | {
       success: boolean;
       error: string | null;
+      errorCode?: ActionErrorCode;
     }
   | undefined;
 
@@ -49,6 +52,7 @@ export const saveOpportunityForOrganizationAction = async ({
     return {
       success: false,
       error: "Session has expired",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     };
   }
 
@@ -93,6 +97,7 @@ export const deleteSavedOpportunityForOrganizationAction = async ({
     return {
       success: false,
       error: "Session has expired",
+      errorCode: ActionErrorCode.AUTH_REQUIRED,
     };
   }
 

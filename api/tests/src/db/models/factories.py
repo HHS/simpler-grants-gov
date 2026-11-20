@@ -55,7 +55,6 @@ from src.constants.lookup_constants import (
     JobType,
     NotificationQueueStatus,
     NotificationType,
-    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
@@ -72,8 +71,6 @@ from src.constants.lookup_constants import (
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
     APPLICATION_OWNER,
-    OPPORTUNITY_EDITOR,
-    OPPORTUNITY_PUBLISHER,
     ORG_ADMIN,
     ORG_MEMBER,
 )
@@ -1490,6 +1487,16 @@ class ApplicationFactory(BaseFactory):
     application_status = ApplicationStatus.IN_PROGRESS
     application_name = factory.Faker("sentence", nb_words=3)
 
+    # Set submitted_at automatically when application_status is SUBMITTED,
+    # mirroring what submit_application.py does in production. Tests that
+    # create a SUBMITTED application this way will have a consistent
+    # timestamp without needing to set it manually.
+    submitted_at = factory.LazyAttribute(
+        lambda o: (
+            datetime_util.utcnow() if o.application_status == ApplicationStatus.SUBMITTED else None
+        )
+    )
+
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
@@ -1902,26 +1909,6 @@ class AgencyUserFactory(BaseFactory):
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda u: u.user.user_id)
-
-    class Params:
-        # New traits for role assignment
-        as_opportunity_editor = factory.Trait(
-            agency_user_roles=factory.RelatedFactoryList(
-                "tests.src.db.models.factories.AgencyUserRoleFactory",
-                factory_related_name="agency_user",
-                size=1,
-                role_id=OPPORTUNITY_EDITOR.role_id,
-            ),
-        )
-
-        as_opportunity_publisher = factory.Trait(
-            agency_user_roles=factory.RelatedFactoryList(
-                "tests.src.db.models.factories.AgencyUserRoleFactory",
-                factory_related_name="agency_user",
-                size=1,
-                role_id=OPPORTUNITY_PUBLISHER.role_id,
-            ),
-        )
 
 
 class AgencyUserRoleFactory(BaseFactory):
@@ -3065,44 +3052,6 @@ class OrganizationAuditFactory(BaseFactory):
             organization_audit_event=OrganizationAuditEvent.USER_REMOVED,
             target_user=factory.SubFactory(UserFactory, with_profile=True),
             target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
-        )
-
-
-class OpportunityAuditFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.OpportunityAudit
-
-    opportunity_audit_id = Generators.UuidObj
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
-
-    user = factory.SubFactory(UserFactory, with_profile=True)
-    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
-
-    opportunity_audit_event = OpportunityAuditEvent.OPPORTUNITY_CREATED
-    opportunity_data = None
-    nonforecast_opportunity_summary = None
-    competition = None
-
-    class Params:
-        is_opportunity_created = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_CREATED,
-        )
-        is_opportunity_updated = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_UPDATED,
-        )
-        is_summary_created = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED,
-        )
-        is_summary_updated = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED,
-        )
-        is_competition_created = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_CREATED,
-        )
-        is_competition_updated = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_UPDATED,
         )
 
 

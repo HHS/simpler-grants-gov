@@ -1,0 +1,63 @@
+services:
+  cms:
+    container_name: grants-cms
+    build:
+      context: .
+      target: dev
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-cms}
+    env_file: ./.env.development
+    ports:
+      - 8090:8000
+    volumes:
+      - .:/app
+    depends_on:
+      cms-db:
+        condition: service_healthy
+
+  # The release image, run with the same restrictions ECS applies: non-root,
+  # read-only root filesystem with a writable /tmp, and no Linux capabilities.
+  # Started by `make release-smoke-test`.
+  cms-release:
+    container_name: grants-cms-release
+    profiles:
+      - release
+    build:
+      context: .
+      target: release
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-cms}
+    env_file: ./.env.development
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    ports:
+      - 8091:8000
+    depends_on:
+      cms-db:
+        condition: service_healthy
+
+  cms-db:
+    image: postgres:17.5-alpine
+    container_name: grants-cms-db
+    environment:
+      POSTGRES_USER: drupal
+      POSTGRES_PASSWORD: secret123
+      POSTGRES_DB: drupal
+    ports:
+      - 5433:5432
+    volumes:
+      - cmsdbdata:/var/lib/postgresql/data
+      - ./docker/postgres/init-extensions.sql:/docker-entrypoint-initdb.d/init-extensions.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U drupal -d drupal"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  cmsdbdata:

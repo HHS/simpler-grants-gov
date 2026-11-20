@@ -1,6 +1,7 @@
 include:
   - path: ./api/docker-compose.yml
   - path: ./frontend/docker-compose.yml
+  - path: ./cms/docker-compose.yml
 
 # services:
   # Define other services or override configurations

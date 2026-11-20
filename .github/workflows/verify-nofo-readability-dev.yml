@@ -1,6 +1,14 @@
 name: Verify Readability Calculator runtime - dev
 on:
   workflow_dispatch:
+    inputs:
+      check:
+        description: Synthetic check to run
+        type: choice
+        default: runtime
+        options:
+          - runtime
+          - interruption
 permissions:
   contents: read
 concurrency:
@@ -25,4 +33,6 @@ jobs:
           app_name: nofos
           environment: infra-dev
       - name: Verify synthetic processing in a separate dev task
+        env:
+          NOFO_READABILITY_CHECK: ${{ inputs.check }}
         run: python3 .github/scripts/nofo_readability/run_dev.py

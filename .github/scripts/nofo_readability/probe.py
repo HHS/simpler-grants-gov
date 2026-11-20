@@ -17,9 +17,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 PREFIX = "NOFO_READABILITY_RUNTIME "
+STORAGE_PATHS = {"upload", "analyzer"}
+STORAGE_TYPES = {"memory_backed", "container_overlay", "network", "other", "unavailable"}
 CHECKS = {
     "public_uploads_disabled",
     "linux_postgresql",
+    "checker_workspace_available",
     "supported_processing",
     "invalid_rejection",
     "encrypted_rejection",
@@ -86,13 +89,33 @@ def verify_admission(results, connection, app):
             connection.close()
 
 
-def exercise(results, fixtures):
+def storage_type(path):
+    try:
+        filesystem = subprocess.check_output(
+            ["stat", "-f", "-c", "%T", "--", str(path)],
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=3,
+        ).strip()
+    except (OSError, subprocess.SubprocessError):
+        return "unavailable"
+
+    if filesystem in {"tmpfs", "ramfs"}:
+        return "memory_backed"
+    if filesystem == "overlayfs":
+        return "container_overlay"
+    if filesystem in {"nfs", "nfs4", "cifs", "smb2"}:
+        return "network"
+    return "other"
+
+
+def exercise(results, fixtures, temporary_storage):
     import django
 
     os.environ["DJANGO_SETTINGS_MODULE"] = "bloom_nofos.settings"
     django.setup()
-    from django.core.files.uploadedfile import TemporaryUploadedFile
     from django.db import connection
+    from django.http import HttpRequest
 
     from nofos import pdf_readability as app
 
@@ -110,6 +133,9 @@ def exercise(results, fixtures):
     results["public_uploads_disabled"] = uploads_disabled()
     if not results["public_uploads_disabled"]:
         return
+    from nofos.readability_scratch import CheckerDiskUploadHandler, request_workspace
+
+    results["checker_workspace_available"] = True
     original_directory = tempfile.TemporaryDirectory
     original_run = subprocess.run
     # Derive an encrypted example from the same fictional PDF in memory, keeping
@@ -126,36 +152,44 @@ def exercise(results, fixtures):
         paths = []
 
         def tracked_directory(*args, **kwargs):
+            if kwargs.get("dir") != workspace:
+                raise RuntimeError("Analyzer did not use the checker workspace")
             directory = original_directory(*args, **kwargs)
             paths.append(Path(directory.name))
+            if label == "success":
+                temporary_storage["analyzer"] = storage_type(directory.name)
             return directory
 
-        # Exercise Django's disk-backed upload close as well as analyzer files.
-        upload = TemporaryUploadedFile(
-            "synthetic.pdf", "application/pdf", len(data), None
-        )
-        upload.write(data)
-        upload.seek(0)
-        paths.append(Path(upload.temporary_file_path()))
         report = None
         outcome = "success"
-        try:
+        with request_workspace() as workspace:
+            handler = CheckerDiskUploadHandler(HttpRequest(), workspace)
+            handler.new_file("pdf", "synthetic.pdf", "application/pdf", len(data))
             with contextlib.ExitStack() as stack:
+                stack.callback(handler.file.close)
+                handler.receive_data_chunk(data, 0)
+                upload = handler.file_complete(len(data))
+                upload_path = Path(upload.temporary_file_path())
+                if upload_path.parent != workspace:
+                    raise RuntimeError("Disk upload did not use the checker workspace")
+                paths.append(upload_path)
+                if label == "success":
+                    temporary_storage["upload"] = storage_type(upload_path)
                 stack.enter_context(
                     patch.object(app.tempfile, "TemporaryDirectory", tracked_directory)
                 )
                 if runner:
                     stack.enter_context(patch.object(app.subprocess, "run", runner))
                 try:
-                    report = app.analyze_uploaded_pdf(upload)
+                    report = app.analyze_uploaded_pdf(upload, workspace=workspace)
                 except app.PdfReadabilityError as error:
                     outcome = error.code
-        finally:
-            # Observe cleanup BEFORE the probe's fallback close.
-            results["cleanup_" + label] = len(paths) >= 2 and all(
-                not path.exists() for path in paths
-            )
-            upload.close()
+                # Observe analyzer cleanup before the fallback close and outer
+                # workspace removal can hide files left behind.
+                files_removed = len(paths) >= 2 and not any(
+                    path.exists() for path in paths
+                )
+        results["cleanup_" + label] = files_removed and not workspace.exists()
         return outcome == expected, report
 
     for label, filename, expected in (
@@ -191,9 +225,10 @@ def exercise(results, fixtures):
     limit_code = """
 import os, resource, sys
 from nofos import pdf_readability_worker as worker
+from nofos.readability_upload_limits import PDF_UPLOAD_BYTES
 def observe(*args):
     limits = [(resource.RLIMIT_CPU, 20), (resource.RLIMIT_AS, 1536*1024*1024),
-              (resource.RLIMIT_FSIZE, 2*1024*1024), (resource.RLIMIT_NOFILE, 64)]
+              (resource.RLIMIT_FSIZE, PDF_UPLOAD_BYTES + 1), (resource.RLIMIT_NOFILE, 64)]
     return {"metrics": {}, "limits_ok": all(resource.getrlimit(k) == (v,v) for k,v in limits),
             "environment_ok": set(os.environ) <= {"PATH", "PYTHONDONTWRITEBYTECODE", "TMPDIR", "TMP", "TEMP", "LC_CTYPE"}}
 worker.analyze = observe
@@ -222,6 +257,7 @@ sys.exit(worker.main())
 def main(encoded_fixtures):
     results = {key: False for key in CHECKS}
     versions = {}
+    temporary_storage = dict.fromkeys(STORAGE_PATHS, "unavailable")
     # Redirect setup/library output as well: never publish raw errors, reports,
     # paths, environment values, database results or document content.
     try:
@@ -232,15 +268,24 @@ def main(encoded_fixtures):
                 key: base64.b64decode(value, validate=True)
                 for key, value in encoded_fixtures.items()
             }
-            exercise(results, fixtures)
+            exercise(results, fixtures, temporary_storage)
             versions = {key: version(key) for key in ("pypdf", "hhs-nofo-metrics")}
     except Exception:
         pass
     print(
-        PREFIX + json.dumps({"checks": results, "versions": versions}, sort_keys=True)
+        PREFIX + json.dumps(
+            {
+                "checks": results,
+                "temporary_storage": temporary_storage,
+                "versions": versions,
+            },
+            sort_keys=True,
+        )
     )
     return (
         0
-        if all(results.values()) and set(versions) == {"pypdf", "hhs-nofo-metrics"}
+        if all(results.values())
+        and "unavailable" not in temporary_storage.values()
+        and set(versions) == {"pypdf", "hhs-nofo-metrics"}
         else 1
     )

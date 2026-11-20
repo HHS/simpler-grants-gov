@@ -37,9 +37,12 @@ never infer a pass from merged code or an empty dashboard.
   retention cutoffs are unset and no record-deletion job is active. The inspection
   workflow reads selected task environment settings, not database-stored flags or
   scheduled jobs; gaps need separate checks.
-- [ ] Use the authorized authenticated route if that is the approved test path.
-  Public uploads require separately agreed temporary dev enablement/restoration.
-  Authenticated smoke results do not prove public routing or WAF behavior.
+- [ ] If signed-in testing is the approved path, sign in and use
+  `/readability-checker/` with the public switch off and the signed-in switch on.
+  The retired `/nofos/readability-checker/` path only redirects there.
+  Signed-out uploads require separately agreed temporary dev enablement/restoration.
+  Signed-in smoke results use the same route and WAF rules but do not prove
+  signed-out access behavior.
 
 ### 2. Ordinary upload checks (one request at a time)
 

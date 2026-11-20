@@ -1,6 +1,7 @@
-# Cover the current public checker and legacy redirects; authenticated checker
-# paths remain outside these rules. Use anchored alternatives without captures
-# for AWS WAF regex compatibility.
+# Cover the Readability Checker and its legacy redirect. Signed-in and signed-out
+# users upload to the same URL, so these rules apply to both. The retired
+# /nofos/readability* paths only redirect and need no coverage. Use anchored
+# alternatives without captures for AWS WAF regex compatibility.
 locals {
   pdf_readability_managed_priority_offset = var.pdf_readability_waf == null ? 0 : 2
 }

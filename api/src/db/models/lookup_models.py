@@ -20,7 +20,6 @@ from src.constants.lookup_constants import (
     JobType,
     NotificationQueueStatus,
     NotificationType,
-    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityStatus,
     OrganizationAuditEvent,
@@ -248,9 +247,7 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.MANAGE_COMPETITION, 16),
         LookupStr(Privilege.READ_TEST_USER_TOKEN, 17),
         LookupStr(Privilege.VIEW_OPPORTUNITY, 18),
-        LookupStr(Privilege.CREATE_OPPORTUNITY, 19),
         LookupStr(Privilege.UPDATE_OPPORTUNITY, 20),
-        LookupStr(Privilege.PUBLISH_OPPORTUNITY, 21),
         LookupStr(Privilege.INTERNAL_WORKFLOW_ACCESS, 22),
         LookupStr(Privilege.PROGRAM_OFFICER_APPROVAL, 23),
         LookupStr(Privilege.BUDGET_OFFICER_APPROVAL, 24),
@@ -332,17 +329,6 @@ ORGANIZATION_AUDIT_EVENT_CONFIG: LookupConfig[OrganizationAuditEvent] = LookupCo
     ]
 )
 
-OPPORTUNITY_AUDIT_EVENT_CONFIG: LookupConfig[OpportunityAuditEvent] = LookupConfig(
-    [
-        LookupStr(OpportunityAuditEvent.OPPORTUNITY_CREATED, 1),
-        LookupStr(OpportunityAuditEvent.OPPORTUNITY_UPDATED, 2),
-        LookupStr(OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED, 3),
-        LookupStr(OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED, 4),
-        LookupStr(OpportunityAuditEvent.COMPETITION_CREATED, 5),
-        LookupStr(OpportunityAuditEvent.COMPETITION_UPDATED, 6),
-    ]
-)
-
 FILE_SCAN_STATUS_CONFIG: LookupConfig[FileScanStatus] = LookupConfig(
     [
         LookupStr(FileScanStatus.PENDING, 1),
@@ -361,7 +347,6 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
         LookupStr(JobType.LOAD_TRANSFORM, 4),
         LookupStr(JobType.SETUP_FOREIGN_TABLES, 5),
         LookupStr(JobType.LOAD_OPPORTUNITY_DATA_OPENSEARCH, 6),
-        LookupStr(JobType.SETUP_LOWER_ENV_AGENCIES, 7),
         LookupStr(JobType.CREATE_ANALYTICS_DB_CSVS, 8),
         LookupStr(JobType.CREATE_APPLICATION_SUBMISSION, 9),
         LookupStr(JobType.SETUP_CERT_USER, 10),
@@ -373,6 +358,7 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
         LookupStr(JobType.EXPORT_OPPORTUNITY_DATA, 17),
         LookupStr(JobType.CHECK_XSD_DRIFT, 18),
         LookupStr(JobType.NEW_OPPORTUNITY_NOTIFICATION, 19),
+        LookupStr(JobType.COUNT_SUBMITTED_APPLICATIONS, 20),
     ]
 )
 
@@ -765,20 +751,6 @@ class LkJobType(ApiLookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkJobType:
         return LkJobType(job_type_id=lookup.lookup_val, description=lookup.get_description())
-
-
-@LookupRegistry.register_lookup(OPPORTUNITY_AUDIT_EVENT_CONFIG)
-class LkOpportunityAuditEvent(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_opportunity_audit_event"
-
-    opportunity_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkOpportunityAuditEvent:
-        return LkOpportunityAuditEvent(
-            opportunity_audit_event_id=lookup.lookup_val, description=lookup.get_description()
-        )
 
 
 @LookupRegistry.register_lookup(NOTIFICATION_TYPE_CONFIG)

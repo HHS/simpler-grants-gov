@@ -280,6 +280,27 @@ def _build_organizations_and_users(
     user_scenarios.append("org_member_user - Organization member (Sally's Soup Emporium)")
 
     ###############################
+    # External collaborator (not admin)
+    ###############################
+
+    (
+        UserBuilder(
+            uuid.UUID("9ea859a0-ffae-4e62-ae05-bdfa16d1ad87"),
+            db_session,
+            "user as external org member",
+        )
+        .with_oauth_login("external_member_user")
+        .with_api_key("external_member_user_key")
+        .with_jwt_auth()
+        .with_organization(org1, roles=[ORG_MEMBER], is_external=True)
+        .build()
+    )
+
+    user_scenarios.append(
+        "external_member_user - External collaborator, member of Sally's Soup Emporium"
+    )
+
+    ###############################
     # User with mixed organization roles
     ###############################
 

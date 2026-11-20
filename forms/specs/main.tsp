@@ -1,7 +1,12 @@
 // Each form file compiles on its own; this entry point covers every form in one compile.
 import "./forms/epa-key-contacts/index.tsp";
 import "./forms/key-contacts/index.tsp";
+import "./forms/project-narrative/index.tsp";
+import "./forms/budget-narrative/index.tsp";
+import "./forms/other-narrative/index.tsp";
 import "./forms/nsf-key-person-expanded/index.tsp";
 import "./forms/rr-key-person-expanded/index.tsp";
 import "./forms/rr-key-person/index.tsp";
 import "./forms/performance-sites/index.tsp";
+import "./forms/project-abstract/index.tsp";
+import "./forms/ed-abstract-form/index.tsp";

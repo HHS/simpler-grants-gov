@@ -174,6 +174,13 @@ class FormType(StrEnum):
     PROJECT_PERFORMANCE_SITE_LOCATION = "ProjectPerformanceSiteLocation"
 
 
+class FormRenderer(StrEnum):
+    """The frontend renderer a form uses."""
+
+    SGG = "sgg"
+    JSON_FORMS = "jsonforms"
+
+
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
@@ -250,9 +257,7 @@ class Privilege(StrEnum):
     MANAGE_COMPETITION = "manage_competition"
     READ_TEST_USER_TOKEN = "read_test_user_token"
     VIEW_OPPORTUNITY = "view_opportunity"
-    CREATE_OPPORTUNITY = "create_opportunity"
     UPDATE_OPPORTUNITY = "update_opportunity"
-    PUBLISH_OPPORTUNITY = "publish_opportunity"
     INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
     VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
@@ -328,15 +333,6 @@ class OrganizationAuditEvent(StrEnum):
     USER_REMOVED = "user_removed"
 
 
-class OpportunityAuditEvent(StrEnum):
-    OPPORTUNITY_CREATED = "opportunity_created"
-    OPPORTUNITY_UPDATED = "opportunity_updated"
-    OPPORTUNITY_SUMMARY_CREATED = "opportunity_summary_created"
-    OPPORTUNITY_SUMMARY_UPDATED = "opportunity_summary_updated"
-    COMPETITION_CREATED = "competition_created"
-    COMPETITION_UPDATED = "competition_updated"
-
-
 class WorkflowType(StrEnum):
     OPPORTUNITY_PUBLISH = "opportunity_publish"
     APPLICATION_SUBMISSION = "application_submission"
@@ -403,7 +399,6 @@ class JobType(StrEnum):
     LOAD_TRANSFORM = "load-transform"
     SETUP_FOREIGN_TABLES = "setup-foreign-tables"
     LOAD_OPPORTUNITY_DATA_OPENSEARCH = "load-opportunity-data-opensearch"
-    SETUP_LOWER_ENV_AGENCIES = "setup-lower-env-agencies"
     CREATE_ANALYTICS_DB_CSVS = "create-analytics-db-csvs"
     CREATE_APPLICATION_SUBMISSION = "create-application-submission"
     SETUP_CERT_USER = "setup-cert-user"
@@ -415,6 +410,7 @@ class JobType(StrEnum):
     EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
     CHECK_XSD_DRIFT = "check-xsd-drift"
     NEW_OPPORTUNITY_NOTIFICATION = "new-opportunity-notification"
+    COUNT_SUBMITTED_APPLICATIONS = "count-submitted-applications"
 
 
 class NotificationType(StrEnum):

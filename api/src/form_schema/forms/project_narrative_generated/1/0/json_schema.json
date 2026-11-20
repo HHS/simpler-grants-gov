@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/types.attachment"
+      },
+      "minItems": 1,
+      "maxItems": 100,
+      "description": "At least one file must be attached",
+      "title": "Project Narrative Files"
+    }
+  },
+  "required": [
+    "attachments"
+  ],
+  "examples": [
+    {
+      "attachments": [
+        "00b9001b-6ca8-4c0c-9328-46f39e9ff14b",
+        "c8eebbcc-a6ec-4b20-9bfa-e6bcc5abb6d5"
+      ]
+    },
+    {
+      "attachments": [
+        "00b9001b-6ca8-4c0c-9328-46f39e9ff14b"
+      ]
+    }
+  ],
+  "$defs": {
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
+    }
+  }
+}

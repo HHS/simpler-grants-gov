@@ -18,13 +18,13 @@ module "prod_config" {
   database_instance_count       = 1
 
   # Production ALARM and OK receipt confirmed in run 41925215071.
-  # The WAF rules observe public checker requests.
+  # The WAF rules observe all checker requests, signed in or not.
   enable_pdf_readability_monitoring               = true
   monitoring_email_alert_recipient_parameter_name = "/nofos/prod/monitoring/alert-email"
   pdf_readability_alarm_actions_enabled           = true
   pdf_readability_waf = {
-    rate_limit      = 10
-    rate_action     = "count"
+    rate_limit      = 30
+    rate_action     = "block"
     emergency_block = false
   }
 

@@ -15,6 +15,7 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     CompetitionOpenToApplicant,
     FormFamily,
+    FormRenderer,
     FormType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
@@ -217,6 +218,7 @@ class Form:
     form_type: FormType | None = None
     sgg_version: str | None = None
     is_deprecated: bool | None = None
+    form_renderer: FormRenderer = FormRenderer.SGG
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
