@@ -1,4 +1,5 @@
 import { AuthorizedData } from "src/types/authTypes";
+import { hasConfirmedPrivilege } from "src/utils/hasConfirmedPrivilege";
 
 import { getTranslations } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
@@ -28,11 +29,10 @@ export async function ManagePermissionsPageContent({
 
   // The gate only blocks on a 403 from a fetched resource, and this page has
   // none yet, so the privilege check result has to be enforced here.
-  const canManageMembers = authorizedData.confirmedPrivileges.some(
-    ({ resourceId, privilege, authorized }) =>
-      resourceId === organizationId &&
-      privilege === "manage_org_members" &&
-      authorized,
+  const canManageMembers = hasConfirmedPrivilege(
+    authorizedData.confirmedPrivileges,
+    organizationId,
+    "manage_org_members",
   );
   if (!canManageMembers) {
     return <UnauthorizedMessage />;
