@@ -65,6 +65,18 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`${"name"} installs its XML as transform rules, which leave out ${"elements"}. Use @Sgg.sync(#{ xml: "mapping" }), which writes them.`,
       },
     },
+    "unsupported-calculation": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"name"} isn't calculated by the API: ${"reason"}.`,
+      },
+    },
+    "calculation-materialization-ignored": {
+      severity: "warning",
+      messages: {
+        default: paramMessage`${"name"} is written by the API even when its sources are empty, so @Validation.materializeWhenAnySourcePresent is ignored.`,
+      },
+    },
   },
   state: {
     sync: {},

@@ -1,6 +1,7 @@
 import type { Model, Program, Type } from "@typespec/compiler";
 import { jsonPropertyName, modelProperties } from "simpler-forms";
 
+import { Calculations, type Place } from "./calculations/index.js";
 import type { SyncOptions } from "./decorators.js";
 import { stateKeys } from "./lib.js";
 
@@ -23,18 +24,36 @@ const ATTACHMENT_RULE = { gg_validation: { rule: "attachment" } };
 
 /**
  * Rules follow the emitted answer paths and property names, including snake casing.
- * The schema records attachment ownership and pre- or post-population rules.
- * A list of objects uses `gg_type: "array"` so the API applies its rules per item.
+ * The schema records attachment ownership, pre- or post-population rules, and
+ * calculations. A list of objects uses `gg_type: "array"` so the API applies its rules
+ * per item.
  */
 export function ruleSchema(
   p: Program,
   model: Model,
   casing: "preserve" | "snake",
+): Record<string, unknown> {
+  const calculations = new Calculations(p, model, casing);
+  const rules = modelRules(p, model, casing, calculations, {
+    at: [],
+    inList: false,
+  });
+  calculations.finish();
+  return rules;
+}
+
+function modelRules(
+  p: Program,
+  model: Model,
+  casing: "preserve" | "snake",
+  calculations: Calculations,
+  place: Place,
   seen: Model[] = [],
 ): Record<string, unknown> {
   const rules: Record<string, unknown> = {};
   for (const prop of modelProperties(model)) {
     const name = jsonPropertyName(p, prop, casing);
+    const here = { at: [...place.at, name], inList: place.inList };
     const type = prop.type;
     const array = type.kind === "Model" && type.indexer?.key.name === "integer";
     const item = array ? type.indexer!.value : type;
@@ -47,8 +66,19 @@ export function ruleSchema(
       rules[name] = { ...fieldRules, ...ATTACHMENT_RULE };
       continue;
     }
-    if (item.kind === "Model" && !seen.includes(item)) {
-      const inner = ruleSchema(p, item, casing, [...seen, model]);
+    Object.assign(fieldRules, calculations.computed(prop, here));
+    // Sum each field of a total from its sources, replacing the block's own rules.
+    const totals = calculations.totals(prop, here);
+    if (totals) Object.assign(fieldRules, totals);
+    else if (item.kind === "Model" && !seen.includes(item)) {
+      const inner = modelRules(
+        p,
+        item,
+        casing,
+        calculations,
+        { at: here.at, inList: here.inList || array },
+        [...seen, model],
+      );
       if (Object.keys(inner).length)
         Object.assign(
           fieldRules,
