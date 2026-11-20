@@ -17,22 +17,19 @@ export const PostedOpportunityItem = ({ detail }: Props) => {
   const formatHistoryDate = useFormatHistoryDate();
 
   const { close_date, close_date_description } = detail.summary;
-  const hasDescriptionOnly = !close_date && !!close_date_description;
+
+  const content = close_date
+    ? formatHistoryDate(close_date)
+    : (close_date_description ?? formatHistoryDate(null));
 
   return (
     <div className="padding-05">
       <ul className="usa-list usa-list--unstyled">
-        {hasDescriptionOnly ? (
-          <li className="margin-y-1">
-            <p className="margin-bottom-0">{close_date_description}</p>
-          </li>
-        ) : (
-          <OpportunityHistoryItem
-            title={t("closing")}
-            content={formatHistoryDate(close_date)}
-            description={close_date ? close_date_description : null}
-          />
-        )}
+        <OpportunityHistoryItem
+          title={t("closing")}
+          content={content}
+          description={close_date ? close_date_description : null}
+        />
       </ul>
     </div>
   );
