@@ -5,6 +5,7 @@ import {
   UiSchemaField,
   UiSchemaFieldList,
   UiSchemaText,
+  UswdsWidgetProps,
 } from "src/types/applyForm/types";
 import {
   getRequiredProperties,
@@ -96,6 +97,8 @@ export type RenderFieldNodeProps = {
   disabled?: boolean;
   /** The field's JSON Forms data path, needed for a field in a list entry (`people.1.name`). */
   dataPath?: string;
+  /** Props that replace the ones built from the schema, e.g. `required` in a list entry. */
+  widgetProps?: Partial<UswdsWidgetProps>;
 };
 
 /**
@@ -112,6 +115,7 @@ export const renderFieldNode = ({
   isFormLocked,
   disabled,
   dataPath,
+  widgetProps,
 }: RenderFieldNodeProps) => {
   // Some renderable UiSchema nodes are definition-based and do not include an
   // inline `schema` object. Use optional chaining here so required-field checks
@@ -152,6 +156,7 @@ export const renderFieldNode = ({
       ...(disabled ? { disabled } : {}),
       formContext,
       isFormLocked,
+      ...widgetProps,
     },
     definition: "definition" in node ? node.definition : undefined,
   });
