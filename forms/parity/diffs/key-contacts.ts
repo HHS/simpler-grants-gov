@@ -1,30 +1,16 @@
 import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
 import {
+  conditionalStar,
   emailMinLength,
   FREE_TEXT_HELP,
   SHARED_HELP,
   standardLabel,
 } from "./common.ts";
 
-/** The DAT stars State and Zip but answers "No" in its Required column; both are required only for a US address. */
-const conditionalStar = (label: string): Pinned => ({
-  plan: label,
-  source: `* ${label}`,
-  category: "upstream",
-  reason:
-    "The DAT stars State and Zip / Postal Code but marks them not required, and its help text requires them only when Country is the United States. The plan treats them as conditional, so it does not star them.",
-});
-
 const KEY_CONTACT_HELP: Recorded = {
   category: "intentional",
   reason:
-    "The Key Contact question words this help more briefly than the DAT. For Project Role it also leaves out “Additional contacts are optional.”",
-};
-
-const NINE_DIGIT_HELP: Recorded = {
-  category: "intentional",
-  reason:
-    "The shared Address question's help follows the SF-424 DATs (“nine-digit Postal Code”), which the Key Contacts DAT does not use.",
+    "The form uses the help text of SGG's existing Key Contacts form, which is shorter than the DAT's. For Project Role it also leaves out “Additional contacts are optional.”",
 };
 
 /** Every help text that differs from the DAT, pinned word for word. */
@@ -98,7 +84,7 @@ const help: Record<string, Pinned> = {
   },
   // key_contacts[].address.zip_code
   "7-17": {
-    ...NINE_DIGIT_HELP,
+    ...SHARED_HELP,
     plan: "Enter the zip / postal code. This field is required if the country is the United States.",
     source:
       "Enter the Postal Code (e.g., ZIP code). This field is required if Country is the United States.",
@@ -123,11 +109,11 @@ const help: Record<string, Pinned> = {
   },
 };
 
-/** Title and Organizational Affiliation join Project Role in the Role group, ahead of the name. */
-const ROLE_GROUP: Recorded = {
+/** Title and Organizational Affiliation come before the name, with Project Role. */
+const ROLE_FIRST: Recorded = {
   category: "intentional",
   reason:
-    "The form's layout groups Project Role, Title and Organizational Affiliation under a Role heading, so Title and Organizational Affiliation come before the name. The DAT and XSD list them after it, as the data does.",
+    "The form asks for Project Role, Title and Organizational Affiliation before the name, as SGG's existing Key Contacts form does. The DAT and XSD list Title and Organizational Affiliation after it.",
 };
 
 export const DIFF: FormDiff = {
@@ -144,7 +130,7 @@ export const DIFF: FormDiff = {
       "7-19": standardLabel("Fax Number", "Fax"),
     },
     differingHelp: help,
-    outOfOrder: { "7-08": ROLE_GROUP, "7-09": ROLE_GROUP },
+    outOfOrder: { "7-08": ROLE_FIRST, "7-09": ROLE_FIRST },
   },
   xsd: { differingRules: emailMinLength(["RoleOnProject/ContactEmail"]) },
   jsonSchemaVsXsd: { differingRules: emailMinLength(["key_contacts[].email"]) },
