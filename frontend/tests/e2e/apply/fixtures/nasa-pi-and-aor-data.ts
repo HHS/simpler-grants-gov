@@ -22,7 +22,7 @@ export const buildNasaPIAndAORHappyPathTestData = (
     piFederalAgency:
       "141: National Oceanic and Atmospheric Administration (NOAA)",
     piFederalAgencyDollar: "125000.00",
-    piInternationalParticipation: "Yes",
+    piInternationalParticipation: "No",
   }) satisfies Partial<
     Record<keyof typeof fieldDefinitionsNasaPIAndAOR, string>
   >;

@@ -20,9 +20,10 @@ const text = (testId: string, section: string, field: string) => ({
   field,
 });
 
-// Each yes/no question renders one radio per answer, named by the field.
-const yesNo = (id: string, field: string) => ({
-  selector: `input[name="${id}"][value="true"]`,
+// Each yes/no question renders one radio per answer, named by the field. A configured
+// selector wins over the fill value, so the definition names the answer to click.
+const yesNo = (id: string, field: string, answer: boolean) => ({
+  selector: `input[name="${id}"][value="${answer}"]`,
   printTestId: id,
   type: "radiobutton" as const,
   section: PI,
@@ -64,6 +65,7 @@ export const fieldDefinitionsNasaPIAndAOR: FormFillFieldDefinitions = {
   piUsGovernmentParticipation: yesNo(
     "principal_investigator--us_government_participation",
     US_GOVERNMENT_PARTICIPATION,
+    true,
   ),
   piFederalAgency: {
     selector: "#principal_investigator--federal_agency",
@@ -80,6 +82,7 @@ export const fieldDefinitionsNasaPIAndAOR: FormFillFieldDefinitions = {
   piInternationalParticipation: yesNo(
     "principal_investigator--international_participation",
     INTERNATIONAL_PARTICIPATION,
+    false,
   ),
 };
 
