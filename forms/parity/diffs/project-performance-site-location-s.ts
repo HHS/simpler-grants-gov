@@ -6,7 +6,6 @@ import {
   SHARED_HELP,
   standardLabel,
   YES_NO_BOOLEAN,
-  ZIP_PLUS_FOUR_HELP,
 } from "./common.ts";
 
 const ORGANIZATION_HELP: Recorded = {
@@ -76,8 +75,8 @@ const help: Record<string, Pinned> = {
     source: "Select the country for the primary performance site location.",
   },
   "1-10": {
-    ...ZIP_PLUS_FOUR_HELP,
-    plan: "Enter the zip / postal code. This field is required if the country is the United States.",
+    ...SHARED_HELP,
+    plan: "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required.",
     source:
       "Enter the nine-digit Postal Code (e.g., ZIP code) of the primary performance site location. This field is required if the Project Performance Site is located in the United States.",
   },
@@ -135,8 +134,8 @@ const help: Record<string, Pinned> = {
       "Select the name of the country for the primary project performance site.",
   },
   "2-10": {
-    ...ZIP_PLUS_FOUR_HELP,
-    plan: "Enter the zip / postal code. This field is required if the country is the United States.",
+    ...SHARED_HELP,
+    plan: "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required.",
     source:
       "Enter the nine-digit Postal Code (e.g., ZIP code) of the primary performance site location. This field is required if the Project Performance Site is located in the United States.",
   },
