@@ -16,16 +16,16 @@ const extraAnswers = (initials: string) => ({
 /**
  * Happy-path test data for the PD/PI and one senior/key person, with their documents.
  */
-export const buildRRKeyPersonExpandedHappyPathTestData = (): Record<
-  string,
-  string
-> => ({
+export const buildRRKeyPersonExpandedHappyPathTestData = (
+  suffix: number,
+): Record<string, string> => ({
   ...personAnswers(
     "principal_investigator",
     "PI",
     "PD/PI",
     extraAnswers("PI"),
     RR_KEY_PERSON_EXPANDED_DOCUMENTS,
+    suffix,
   ),
   ...personAnswers(
     "senior_key_persons[0]",
@@ -33,6 +33,7 @@ export const buildRRKeyPersonExpandedHappyPathTestData = (): Record<
     "Co-Investigator",
     extraAnswers("SK"),
     RR_KEY_PERSON_EXPANDED_DOCUMENTS,
+    suffix,
   ),
 });
 

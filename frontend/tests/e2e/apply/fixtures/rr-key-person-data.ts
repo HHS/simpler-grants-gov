@@ -9,16 +9,16 @@ import { personAnswers } from "./senior-key-person-fields";
 /**
  * Happy-path test data for the PD/PI and one senior/key person, with their documents.
  */
-export const buildRRKeyPersonHappyPathTestData = (): Record<
-  string,
-  string
-> => ({
+export const buildRRKeyPersonHappyPathTestData = (
+  suffix: number,
+): Record<string, string> => ({
   ...personAnswers(
     "principal_investigator",
     "PI",
     "PD/PI",
     { organization_name: "PI ORGANIZATION", credential: "PI CREDENTIAL" },
     RR_KEY_PERSON_DOCUMENTS,
+    suffix,
   ),
   ...personAnswers(
     "senior_key_persons[0]",
@@ -26,6 +26,7 @@ export const buildRRKeyPersonHappyPathTestData = (): Record<
     "Co-PD/PI",
     { organization_name: "SK ORGANIZATION", credential: "SK CREDENTIAL" },
     RR_KEY_PERSON_DOCUMENTS,
+    suffix,
   ),
 });
 
