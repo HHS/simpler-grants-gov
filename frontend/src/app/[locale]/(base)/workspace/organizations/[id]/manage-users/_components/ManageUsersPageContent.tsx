@@ -91,7 +91,6 @@ export async function ManageUsersPageContent({
           <InviteLegacyUsersButton organizationId={organizationId} />
         </Grid>
       </Grid>
-      <UserOrganizationInvite organizationId={organizationId} />
       <ActiveUsersSection
         organizationId={organizationId}
         activeUsers={activeUsersList}
@@ -99,6 +98,7 @@ export async function ManageUsersPageContent({
         showManagePermissions={externalCollaboratorsEnabled && canManageMembers}
       />
       <InvitedUsersSection invitedUsers={invitedUsersList} />
+      <UserOrganizationInvite organizationId={organizationId} />
     </GridContainer>
   );
 }
