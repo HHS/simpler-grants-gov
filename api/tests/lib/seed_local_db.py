@@ -713,6 +713,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "9607f84f-ab9b-4d23-a5aa-d055318a5660",
         ),
         (
+            "Nasa_PIandAORSupplementalDataSheet_Generated",
+            "E2E-NASAPIAORG",
+            "NASA - PI and AOR Supplemental Data Sheet (Generated)",
+            "17281277-7149-4a77-b13e-89fe7e2f344a",
+            "6e013478-113e-468c-9069-de18e2c42437",
+        ),
+        (
             "SF424_4_0",
             "E2E-SF424",
             "Application for Federal Assistance (SF-424)",

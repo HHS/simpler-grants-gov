@@ -64,7 +64,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 52
+    assert len(opportunities) == 53
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -81,7 +81,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 52
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 53
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
 
@@ -111,7 +111,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 52
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 53
     # Nothing is missing, so nothing is backfilled or changed
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
     assert [c.public_competition_id for c in competitions] == public_competition_ids
@@ -301,6 +301,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "E2E-KC-ORG-IND-01": uuid.UUID("3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31"),
         "E2E-KCG-ORG-IND-01": uuid.UUID("1954f7d4-9d41-4d52-b7fc-c97d28815a9b"),
         "E2E-ONA-ORG-IND-01": uuid.UUID("717b7f78-52f2-49f9-b1b8-5d7118313d2a"),
+        "E2E-NASAPIAORG-ORG-IND-01": uuid.UUID("17281277-7149-4a77-b13e-89fe7e2f344a"),
         "E2E-NSFKPEG-ORG-IND-01": uuid.UUID("7b0b7e69-0943-429e-b380-ebaf69985400"),
         "E2E-BNAG-ORG-IND-01": uuid.UUID("c45674bf-a5e8-4f90-b098-ff5158f08c5e"),
         "E2E-ONAG-ORG-IND-01": uuid.UUID("3675dfde-0c28-44aa-a733-b3ce88b29b3a"),

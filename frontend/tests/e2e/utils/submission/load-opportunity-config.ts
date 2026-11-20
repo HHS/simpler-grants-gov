@@ -14,6 +14,8 @@ import {
   KEY_CONTACTS_OPPORTUNITY_DATA,
 } from "tests/e2e/apply/fixtures/key-contacts-data";
 import { KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
+import { NASA_PI_AND_AOR_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/nasa-pi-and-aor-data";
+import { NASA_PI_AND_AOR_FORM_CONFIG } from "tests/e2e/apply/fixtures/nasa-pi-and-aor-field-definitions";
 import {
   OTHER_NARRATIVE_GENERATED_OPPORTUNITY_DATA,
   OTHER_NARRATIVE_OPPORTUNITY_DATA,
@@ -67,6 +69,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   GRANTSGOV_LOBBYING_OPPORTUNITY_DATA,
   KEY_CONTACTS_OPPORTUNITY_DATA,
   KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
+  NASA_PI_AND_AOR_GENERATED_OPPORTUNITY_DATA,
   PPSL_OPPORTUNITY_DATA,
   PPSL_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
@@ -97,6 +100,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   grantsGovLobbying: GRANTSGOV_LOBBYING_FORM_CONFIG,
   keyContacts: KEY_CONTACTS_FORM_CONFIG,
   keyContactsGenerated: KEY_CONTACTS_FORM_CONFIG,
+  nasaPIAndAORGenerated: NASA_PI_AND_AOR_FORM_CONFIG,
   ppsl: PPSL_FORM_CONFIG,
   ppslGenerated: PPSL_FORM_CONFIG,
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
