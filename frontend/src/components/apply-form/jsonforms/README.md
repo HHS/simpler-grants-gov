@@ -6,10 +6,10 @@ Instead of the [SGG UI schema](../README.md#ui-schema), a form can use a [JSON F
 
 A field in a JSON Forms form can be rendered by two kinds of widget:
 
-| Term                         | What it is                                                                                                                                   | Where it's used                                                                          |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **SGG widget**               | One of the existing USWDS widgets in `widgets/`, patterned after RJSF widgets and registered in `widgetComponents`                           | Every field in an SGG form, and every field the SGG adapter can map in a JSON Forms form |
-| **Custom JSON Forms widget** | A component we write with JSON Forms' API (a tester plus `withJsonFormsControlProps` or `withJsonFormsLayoutProps`) instead of an SGG widget | The form library's sections and collapsible list. The apply form doesn't use any yet     |
+| Term                   | What it is                                                                                                                                        | Where it's used                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **SGG widget**         | One of the existing USWDS widgets in `widgets/`, patterned after RJSF widgets and registered in `widgetComponents`                                | Every field in an SGG form, and every field the SGG adapter can map in a JSON Forms form                          |
+| **JSON Forms control** | A component in `controls/` written with JSON Forms' API (a tester plus `withJsonFormsControlProps` or a similar wrapper) instead of an SGG widget | The form library's sections and collapsible list. See [Adding a JSON Forms control](#adding-a-json-forms-control) |
 
 The **SGG adapter** (`AdaptedControl`, `AdaptedLayout`) is what lets JSON Forms render a control with an SGG widget.
 
@@ -19,6 +19,7 @@ In these READMEs, "renderer" means the form-level renderer: the SGG renderer, or
 
 - **Layout and rules:** JSON Forms handles the layout and the rules that show, hide, enable or disable fields. Every field is still rendered by an SGG widget, through the same `renderFieldNode` → `getFieldConfig` → `renderWidget` path the SGG renderer uses.
 - **Conversion:** `getFormData` converts the JSON Forms UI schema into an SGG UI schema with `prepareJsonFormsUiSchema` (`prepareUiSchema.ts`), which calls `convertJsonFormsUiSchema` (`convertUiSchema.ts`) and logs what the conversion drops. Navigation, validation warnings and the UI schema validator all read the converted SGG UI schema. `JsonFormsFields` receives the original JSON Forms UI schema and uses it to render the form.
+- **Data paths:** JSON Forms gives every control its data path (`people.1.name`). The adapter reads each control at that path and passes it to `getFieldConfig`, which names, reads and matches warnings for a field in a list entry by the path, since the field's schema definition is the same for every entry. `src/utils/applyForm/dataPaths.ts` converts a data path to a schema definition, an HTML field name (`people[1]--name`) and a warning path (`$.people[1].name`).
 - **Saving and validation:** These work the same way as for SGG forms. Every widget submits under its SGG field name in the HTML `<form>`. JSON Forms runs with `validationMode="NoValidation"` and only evaluates rules, against a copy of the answers that's refreshed from the `<form>` on every input.
 
 ## How controls map to SGG UI schema nodes
@@ -37,13 +38,13 @@ In these READMEs, "renderer" means the form-level renderer: the SGG renderer, or
 
 `JsonFormsFields` picks a widget for each element by rank. Each widget is registered with a tester that scores how well it matches an element, and the highest score wins. A control that can't be rendered by an existing SGG widget is skipped, so the applicant doesn't see it, and the server logs a warning for it:
 
-| Rank     | Widgets                                                                  | Used for                                                                     |
-| -------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| 1        | `SkipControl`                                                            | Controls that can't be rendered by an existing SGG widget, which are skipped |
-| 10       | The SGG adapter (`AdaptedControl`, `AdaptedLayout`)                      | Everything else                                                              |
-| Above 10 | Custom JSON Forms widgets, registered in `renderers` or `extraRenderers` | Whatever their tester matches                                                |
+| Rank     | Widgets                                                                          | Used for                                                                     |
+| -------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 1        | `SkipControl`                                                                    | Controls that can't be rendered by an existing SGG widget, which are skipped |
+| 10       | The SGG adapter (`AdaptedControl`, `AdaptedLayout`)                              | Everything else                                                              |
+| Above 10 | JSON Forms controls, listed in `controls/index.ts` or passed as `extraRenderers` | Whatever their tester matches                                                |
 
-See [Adding a new widget](../widgets/README.md#adding-a-new-widget) for an SGG widget, and [Adding a custom JSON Forms widget](#adding-a-custom-json-forms-widget) below.
+See [Adding a new widget](../widgets/README.md#adding-a-new-widget) for an SGG widget, and [Adding a JSON Forms control](#adding-a-json-forms-control) below.
 
 ## Known limitations
 
@@ -56,14 +57,16 @@ The server logs a warning when a form uses either one.
 
 JSON Forms itself supports both. Its own list components render each entry through JSON Forms at that entry's path (e.g. `contacts.0`). A rule's condition is resolved relative to that path, so rules inside an entry are evaluated against that entry. A nested list inside an entry is rendered the same way. Replacing the SGG field-list widget with a custom JSON Forms list widget would remove both limitations.
 
-## Adding a custom JSON Forms widget
+## Adding a JSON Forms control
 
-A custom JSON Forms widget ranked above the SGG adapter (rank 10) takes over whatever its tester matches, so it doesn't need an SGG widget. The form library's section and collapsible list widgets are examples (`forms/site/src/components/forms/preview/renderers.ts`).
+A JSON Forms control is ranked above the SGG adapter (rank 10), so it renders whatever its tester matches without an SGG widget. Each new control replaces an SGG widget for JSON Forms forms, one at a time:
 
-1. Write the widget with `withJsonFormsControlProps` (or `withJsonFormsLayoutProps`), and a tester ranked above 10.
-2. Add it to the `renderers` list in `renderers.tsx`. (JSON Forms calls individual widgets "renderers".)
-3. Have the tester match a UI schema option, so only the controls that ask for the widget get it.
-4. Follow the same rules as the SGG widgets, because saving and validation still go through the HTML `<form>`:
-   - **Field names:** Render inputs with the same HTML field names the SGG widgets use (e.g. `address--city`, from `getFieldNameForHtml`). Otherwise the answers aren't saved.
-   - **Validation warnings:** Read warnings from `AdapterContext` to show them on the widget's fields.
+1. Create `controls/<Name>Control/`, with the component in `<Name>Control.tsx` and its tests beside it. Put helpers that only this control uses in the same folder.
+2. Export a registry entry (`{ tester, renderer }`) from the folder's `index.ts`, and add it to the list in `controls/index.ts`. `renderers.tsx` registers that list, so it doesn't change. (JSON Forms calls these entries "renderers".)
+3. Rank the tester above 10, and match only the elements the component should render, by type or by a UI schema option.
+4. Read the form's values, warnings, form context and print mode with `useAdapterContext()`.
+5. Follow the same rules as the SGG widgets, because saving and validation still go through the HTML `<form>`:
+   - **Field names:** Render inputs with the HTML field name for their data path (`dataPathToHtmlName`), the name the SGG widgets use. Otherwise the answers aren't saved.
+   - **Validation warnings:** Read warnings from `AdapterContext` to show them on the control's fields.
    - **Print mode:** Check `print` in the same context so the print view works.
+6. Dispatch any child elements at their data paths with `JsonFormsDispatch`. The adapter renders an SGG widget for each child control from its data path, so a control doesn't render its children's fields itself.

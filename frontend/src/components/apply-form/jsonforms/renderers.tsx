@@ -18,57 +18,32 @@ import {
   withJsonFormsLayoutProps,
 } from "@jsonforms/react";
 import type { RJSFSchema } from "@rjsf/utils";
-import type { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
-
-import { createContext, useContext } from "react";
-
 import {
-  renderFieldNode,
-  type RenderFieldNodeProps,
-} from "src/components/apply-form/FormFields";
+  dataPathToDefinition,
+  fieldDataPath,
+} from "src/utils/applyForm/dataPaths";
+
+import { renderFieldNode } from "src/components/apply-form/FormFields";
 import { wrapSection } from "src/components/apply-form/widgets/WidgetRenderers";
-import {
-  controlToNodes,
-  groupName,
-  type JsonFormsUiSchema,
-} from "./convertUiSchema";
+import { useAdapterContext } from "./adapterContext";
+import { controls } from "./controls";
+import { controlToNodes, groupName } from "./convertUiSchema";
 
-/*
-  JSON Forms supplies layout and rule evaluation; everything it renders is one of our widgets.
-  The props a widget needs -- saved values, warnings, the form context -- are ours rather
-  than JSON Forms', so they travel through this context instead of JSON Forms' own state.
-*/
-export type AdapterContextValue = {
-  schema: RJSFSchema;
-  formData: object;
-  errors: FormattedFormValidationWarning[] | null;
-  requiredFieldPaths: string[];
-  rootUiSchema: JsonFormsUiSchema;
-  formContext?: RenderFieldNodeProps["formContext"];
-  isFormLocked?: boolean;
-  print?: boolean;
-};
-
-export const AdapterContext = createContext<AdapterContextValue | null>(null);
-
-const useAdapterContext = (): AdapterContextValue => {
-  const value = useContext(AdapterContext);
-  if (!value) {
-    throw new Error("JSON Forms renderers must be used inside JsonFormsFields");
-  }
-  return value;
-};
+export { AdapterContext, type AdapterContextValue } from "./adapterContext";
 
 /**
  * A JSON Forms control, rendered by the widget the equivalent section/field node would get.
  * `visible` and `enabled` are JSON Forms' evaluation of the control's rule.
  */
-const AdaptedControl = ({ uischema, visible, enabled }: ControlProps) => {
+const AdaptedControl = ({ uischema, path, visible, enabled }: ControlProps) => {
   const context = useAdapterContext();
   if (!visible) return null;
 
-  const nodes = controlToNodes(uischema, context.schema);
+  // Read the control at its data path, so a control dispatched below the form's root, like
+  // one in a list entry, resolves to its field.
+  const control = { ...uischema, scope: `#${dataPathToDefinition(path)}` };
+  const nodes = controlToNodes(control, context.schema);
   const rendered = context.print ? addPrintWidgetToFields(nodes) : nodes;
 
   return (
@@ -84,6 +59,10 @@ const AdaptedControl = ({ uischema, visible, enabled }: ControlProps) => {
           formContext: context.formContext,
           isFormLocked: context.isFormLocked,
           disabled: !enabled,
+          dataPath:
+            "definition" in node && typeof node.definition === "string"
+              ? fieldDataPath(path, node.definition)
+              : undefined,
         });
       })}
     </>
@@ -145,11 +124,11 @@ export const adaptedControlTester = rankWith(
   ADAPTER_RANK,
   and(
     isControl,
-    (uischema, _schema, testerContext) =>
-      controlToNodes(
-        uischema as ControlElement,
-        testerContext.rootSchema as RJSFSchema,
-      ).length > 0,
+    // Read the control against the schema it's dispatched with: the form's, or the item
+    // schema of a list entry, which a control in the entry is scoped to.
+    (uischema, schema) =>
+      controlToNodes(uischema as ControlElement, schema as RJSFSchema).length >
+      0,
   ),
 );
 
@@ -175,4 +154,5 @@ export const renderers: JsonFormsRendererRegistryEntry[] = [
     tester: adaptedLayoutTester,
     renderer: withJsonFormsLayoutProps(AdaptedLayout),
   },
+  ...controls,
 ];

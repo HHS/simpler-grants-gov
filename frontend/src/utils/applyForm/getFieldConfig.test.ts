@@ -1103,3 +1103,82 @@ describe("getBasicMultifieldInfo", () => {
     ).toEqual(expected);
   });
 });
+
+describe("getFieldConfig with a data path", () => {
+  const formSchema: RJSFSchema = {
+    type: "object",
+    properties: {
+      title: { type: "string", title: "Title" },
+      people: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: { name: { type: "string", title: "Name" } },
+        },
+      },
+    },
+  };
+  const errors = [
+    {
+      field: "$.people[1].name",
+      definition: "/properties/people/items/properties/name",
+      message: "Name is required",
+      formatted: "Name is required",
+      type: "required",
+      value: null,
+    },
+  ];
+
+  it("names, reads and matches warnings for a field in a list entry by its data path", () => {
+    const { props } = getFieldConfig({
+      uiFieldObject: {
+        type: "field",
+        definition: "/properties/people/items/properties/name",
+      },
+      formSchema,
+      errors,
+      formData: { people: [{ name: "Ada" }, { name: "" }] },
+      requiredField: false,
+      dataPath: "people.1.name",
+    });
+
+    expect(props.id).toEqual("people[1]--name");
+    expect(props.key).toEqual("people--name");
+    expect(props.value).toEqual("");
+    expect(props.rawErrors).toEqual(["Name is required"]);
+  });
+
+  it("doesn't match a warning reported for another entry", () => {
+    const { props } = getFieldConfig({
+      uiFieldObject: {
+        type: "field",
+        definition: "/properties/people/items/properties/name",
+      },
+      formSchema,
+      errors,
+      formData: { people: [{ name: "Ada" }, { name: "" }] },
+      requiredField: false,
+      dataPath: "people.0.name",
+    });
+
+    expect(props.value).toEqual("Ada");
+    expect(props.rawErrors).toEqual([]);
+  });
+
+  it("builds the same config as without a data path for a field outside a list", () => {
+    const args = {
+      uiFieldObject: {
+        type: "field" as const,
+        definition: "/properties/title" as const,
+      },
+      formSchema,
+      errors: null,
+      formData: { title: "Saved" },
+      requiredField: true,
+    };
+
+    expect(getFieldConfig({ ...args, dataPath: "title" })).toEqual(
+      getFieldConfig(args),
+    );
+  });
+});

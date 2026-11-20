@@ -20,6 +20,11 @@ import {
 } from "src/utils/formData/formDataUtils";
 
 import { getFieldNameForHtml, getFieldSchema } from "./applyFormUtils";
+import {
+  dataPathToHtmlName,
+  dataPathToWarningPath,
+  hasListIndex,
+} from "./dataPaths";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
@@ -309,11 +314,13 @@ const getBasicFieldInfo = ({
   formSchema,
   formData,
   errors,
+  dataPath,
 }: {
   uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
   formData: object; // this will be either the saved form JSON, or an empty FormData object (?s)
   errors: FormattedFormValidationWarning[] | null;
+  dataPath?: string;
 }): FieldInfo<string> => {
   const { schema } = uiFieldObject;
   // the definition can be many things, but in this case we should have done the
@@ -341,6 +348,26 @@ const getBasicFieldInfo = ({
         * used for retrieving data from saved form data JSON
   */
   const fieldName = getNameFromDef({ definition, schema });
+
+  // A definition is the same for every entry of a list, so name, read and match warnings
+  // for a field in a list entry by its data path instead (`people.1.name`).
+  if (dataPath && hasListIndex(dataPath)) {
+    const warningPath = dataPathToWarningPath(dataPath);
+    return {
+      value: get(formData, dataPath.split(".")) as string,
+      fieldSchema,
+      rawErrors: Array.from(
+        new Set(
+          (errors ?? [])
+            .filter((warning) => warning.field === warningPath)
+            .map((warning) => warning.formatted || warning.message),
+        ),
+      ),
+      fieldName,
+      htmlFieldName: dataPathToHtmlName(dataPath),
+    };
+  }
+
   const htmlFieldName = getFieldNameForHtml({ definition, schema });
   const formDataPath = getFieldPathFromHtml(htmlFieldName);
   const value = getByPointer(formData, formDataPath) as string;
@@ -495,11 +522,13 @@ const getFieldInfo = ({
   formSchema,
   formData,
   errors,
+  dataPath,
 }: {
   uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
   formData: object;
   errors: FormattedFormValidationWarning[] | null;
+  dataPath?: string;
 }): FieldInfo<BroadlyDefinedWidgetValue> => {
   const { definition, type: uiSchemaFieldType } = uiFieldObject;
 
@@ -522,6 +551,7 @@ const getFieldInfo = ({
       formData,
       errors,
       formSchema,
+      dataPath,
     });
   }
   throw new Error(
@@ -642,12 +672,15 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
   formData,
   uiFieldObject,
   requiredField,
+  dataPath,
 }: {
   errors: FormattedFormValidationWarning[] | null;
   formSchema: RJSFSchema;
   formData: object;
   uiFieldObject: UiSchemaField | UiSchemaFieldList;
   requiredField: boolean;
+  /** The field's JSON Forms data path (`people.1.name`), needed for a field in a list entry. */
+  dataPath?: string;
 }): FieldConfig => {
   if (uiFieldObject.type === "fieldList") {
     return getFieldListConfig({
@@ -666,6 +699,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       formData,
       errors,
       formSchema,
+      dataPath,
     });
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -701,7 +735,8 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
     type: widgetType as Exclude<WidgetTypes, "FieldList">,
     props: {
       id: widgetId,
-      key: widgetId,
+      // Leave list indexes out of the key, so deleting an entry doesn't remount later entries' fields.
+      key: dataPath ? widgetId.replace(/\[\d+\]/g, "") : widgetId,
       disabled: uiFieldObject.type === "null",
       required: requiredField,
       minLength: fieldSchema?.minLength,
