@@ -10,9 +10,11 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { EPA_KEY_CONTACTS_OPPORTUNITIES } from "tests/e2e/apply/fixtures/epa-key-contacts-data";
+import {
+  buildEpaKeyContactsHappyPathTestData,
+  EPA_KEY_CONTACTS_OPPORTUNITIES,
+} from "tests/e2e/apply/fixtures/epa-key-contacts-data";
 import { EPA_KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
-import { epaKeyContactsHappyPathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -62,7 +64,7 @@ for (const { formLabel, opportunityNumber } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
         testInfo,
         page,
         EPA_KEY_CONTACTS_FORM_CONFIG,
-        epaKeyContactsHappyPathTestData,
+        buildEpaKeyContactsHappyPathTestData(),
         false,
       );
 
