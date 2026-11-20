@@ -318,9 +318,11 @@ describe("xmlTransform values", () => {
   });
 
   it("rejects a transformation no @Mapping.transforms enum declares", async () => {
-    const { program } = await valueRules("Undeclared.Transformation.shout");
-    expectDiagnostics(program.diagnostics, {
-      code: "form-library-xml/mapping-transform-unknown",
+    const diagnostics = await Tester.diagnose(
+      valueSpec("Undeclared.Transformation.shout"),
+    );
+    expectDiagnostics(diagnostics, {
+      code: "simpler-forms/mapping-transform-undeclared",
     });
   });
 

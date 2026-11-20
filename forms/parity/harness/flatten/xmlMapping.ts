@@ -46,6 +46,7 @@ export function xmlMappingFields(mapping: Json): XmlTransformFields {
     const v = value as Json;
     if (typeof v.$field === "string") return v.$field;
     if (v.$transform) return fieldOf((v.$transform as Json).value);
+    if (v.$required) return fieldOf(v.$required);
     if (v.$match) return fieldOf((v.$match as Json).value);
     if (v.$when)
       return fieldOf((v.$when as Json).then) ?? fieldOf((v.$when as Json).else);
@@ -62,6 +63,8 @@ export function xmlMappingFields(mapping: Json): XmlTransformFields {
       return add(json(item, v.$attachment), xmlPath);
     if ("$const" in v) return;
     if (v.$transform) return visit((v.$transform as Json).value, xml, item);
+    // Written empty when unanswered, but it's the same field at the same element.
+    if (v.$required) return visit(v.$required, xml, item);
     if (v.$match) {
       // The element reads the matched field, and any field a branch reads.
       const match = v.$match as Json;

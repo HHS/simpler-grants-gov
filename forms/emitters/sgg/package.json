@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@typespec/compiler": "^1.16.0",
-    "simpler-forms": "^0.1.0",
+    "simpler-forms": "^0.2.0",
     "typescript": "^5.9.3"
   }
 }

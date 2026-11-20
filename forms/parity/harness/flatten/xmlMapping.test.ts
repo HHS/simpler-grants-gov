@@ -89,6 +89,17 @@ describe("xmlMappingFields", () => {
     ]);
   });
 
+  it("reads a required element's field at the element", () => {
+    const required = {
+      root: {
+        Form: { DateReceived: { $required: { $field: "date_received" } } },
+      },
+    };
+    expect([...xmlMappingFields(required).byLink.keys()]).toEqual([
+      "date_received -> DateReceived",
+    ]);
+  });
+
   it("keeps the parent list path when an inner list reads the current item", () => {
     const lists = {
       root: {
