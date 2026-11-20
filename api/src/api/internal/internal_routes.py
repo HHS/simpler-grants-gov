@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -81,7 +80,7 @@ def setup_file_scan_scanner_user_route(
 @internal_blueprint.doc(hide=True)
 @internal_blueprint.auth_required(api_user_key_auth)
 @flask_db.with_db_session()
-def get_e2e_token(db_session: db.Session, json_data: dict[str, uuid.UUID]) -> response.ApiResponse:
+def get_e2e_token(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """
     Endpoint to fetch a viable auth token for a test user account.
     Only accessible via API key auth with the manage_test_user_token privilege,
@@ -96,6 +95,11 @@ def get_e2e_token(db_session: db.Session, json_data: dict[str, uuid.UUID]) -> re
         api_key_user = api_user_key_auth.get_user()
         db_session.add(api_key_user)
 
-        token_data = create_e2e_token(db_session, api_key_user, target_user_id)
+        token_data = create_e2e_token(
+            db_session,
+            api_key_user,
+            target_user_id,
+            json_data.get("session_duration_seconds"),
+        )
 
     return response.ApiResponse(message="Success", data=token_data)

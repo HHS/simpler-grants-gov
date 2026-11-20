@@ -144,6 +144,16 @@ class UserLoginGovLogoutCallbackSchema(Schema):
     )
 
 
+class UserTokenRefreshRequestSchema(Schema):
+    session_duration_seconds = fields.Integer(
+        allow_none=True,
+        metadata={
+            "description": "Lower environments only: shorten the session to this many seconds (30-900). Ignored elsewhere.",
+            "example": 60,
+        },
+    )
+
+
 class UserTokenRefreshResponseSchema(AbstractResponseSchema):
     # No data returned
     data = fields.MixinField(metadata={"example": None})
