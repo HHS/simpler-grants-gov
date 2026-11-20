@@ -76,7 +76,7 @@ const starred = (
   plan: label,
   source,
   category,
-  reason: reworded(label, source.replace(/^\* /, ""))
+  reason: reworded(label.replace(/^\* /, ""), source.replace(/^\* /, ""))
     ? `${reason} ${BANK_LABEL.reason}`
     : reason,
 });
