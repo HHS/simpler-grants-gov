@@ -178,7 +178,26 @@
         "us_government_participation",
         "international_participation"
       ],
-      "description": "The principal investigator (PI), and whether they take part as a government or foreign employee."
+      "description": "The principal investigator (PI), and whether they take part as a government or foreign employee.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "us_government_participation": {
+                "const": true
+              }
+            },
+            "required": [
+              "us_government_participation"
+            ]
+          },
+          "then": {
+            "required": [
+              "federal_agency"
+            ]
+          }
+        }
+      ]
     },
     "person.name": {
       "type": "object",

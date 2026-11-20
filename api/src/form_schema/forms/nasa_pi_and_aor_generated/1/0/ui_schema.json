@@ -76,12 +76,30 @@
         {
           "type": "Control",
           "scope": "#/properties/principal_investigator/properties/federal_agency",
-          "label": "If yes, Select U.S. Government agency"
+          "label": "If yes, Select U.S. Government agency",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/principal_investigator/properties/us_government_participation",
+              "schema": {
+                "const": true
+              }
+            }
+          }
         },
         {
           "type": "Control",
           "scope": "#/properties/principal_investigator/properties/federal_agency_dollar",
-          "label": "If yes, enter total dollar amount requested ($)"
+          "label": "If yes, enter total dollar amount requested ($)",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/principal_investigator/properties/us_government_participation",
+              "schema": {
+                "const": true
+              }
+            }
+          }
         },
         {
           "type": "Control",
