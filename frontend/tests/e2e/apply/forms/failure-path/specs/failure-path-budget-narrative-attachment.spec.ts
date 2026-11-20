@@ -10,6 +10,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { BUDGET_NARRATIVE_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/budget-narrative-attachment-data";
 import {
   BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER,
   BUDGET_NARRATIVE_ATTACHMENT_REQUIRED_FIELD_ERRORS,
@@ -30,74 +31,82 @@ import {
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
+const opportunities = [
+  ["handwritten", `/opportunity/${OPPORTUNITY_ID}`],
+  [
+    "generated",
+    `/opportunity/${BUDGET_NARRATIVE_GENERATED_OPPORTUNITY_DATA.opportunityId}`,
+  ],
+] as const;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-test(
-  "Budget Narrative Attachment Form - error validation on empty save",
-  { tag: [APPLY_FORMS, FULL_REGRESSION] },
-  async (
-    { page, context }: { page: Page; context: BrowserContext },
-    testInfo: TestInfo,
-  ) => {
-    test.setTimeout(300_000); // 5 min timeout
+for (const [variant, opportunityUrl] of opportunities) {
+  test(
+    `Budget Narrative Attachment Form - error validation on empty save (${variant})`,
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
+    async (
+      { page, context }: { page: Page; context: BrowserContext },
+      testInfo: TestInfo,
+    ) => {
+      test.setTimeout(300_000); // 5 min timeout
 
-    const isMobile = testInfo.project.name.match(/[Mm]obile/);
+      const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-    // Given the user is logged in
-    await authenticateE2eUser(page, context, !!isMobile);
+      // Given the user is logged in
+      await authenticateE2eUser(page, context, !!isMobile);
 
-    // And the user launches the URL for an opportunity with an open competition
-    // When the user clicks "Start Application" in the opportunity page
-    // Then the "Start a new application" modal opens
-    // When the user selects the test organization in the "Who's applying" dropdown
-    // And the user enters the application name
-    // And the user clicks "Create Application"
-    // Then a new application is created
-    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-    const applicationUrl = page.url();
+      // And the user launches the URL for an opportunity with an open competition
+      // When the user clicks "Start Application" in the opportunity page
+      // Then the "Start a new application" modal opens
+      // When the user selects the test organization in the "Who's applying" dropdown
+      // And the user enters the application name
+      // And the user clicks "Create Application"
+      // Then a new application is created
+      await createApplication(page, opportunityUrl, testOrgLabel);
+      const applicationUrl = page.url();
 
-    // And the Application landing page loads with the "Budget Narrative Attachment" form link visible
-    // And the user clicks on a form link
-    // Then the form opens
-    const opened = await openForm(
-      page,
-      BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER,
-    );
-    if (!opened) {
-      throw new Error(
-        "Could not find or open Budget Narrative Attachment Form link on the application forms page",
+      // And the Application landing page loads with the "Budget Narrative Attachment" form link visible
+      // And the user clicks on a form link
+      // Then the form opens
+      const opened = await openForm(
+        page,
+        BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER,
       );
-    }
+      if (!opened) {
+        throw new Error(
+          "Could not find or open Budget Narrative Attachment Form link on the application forms page",
+        );
+      }
 
-    // Wait for form content to be fully rendered and interactive
-    // Check for form heading to ensure the form is ready
-    await page
-      .getByText(BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER, { exact: false })
-      .first()
-      .waitFor({ state: "visible", timeout: 15000 });
+      // Wait for form content to be fully rendered and interactive
+      // Check for form heading to ensure the form is ready
+      await page
+        .getByText(BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER, { exact: false })
+        .first()
+        .waitFor({ state: "visible", timeout: 15000 });
 
-    // When the user attempts to save with no file uploaded for required attachment fields
-    await saveForm(page, true); // expect validation errors
+      // When the user attempts to save with no file uploaded for required attachment fields
+      await saveForm(page, true); // expect validation errors
 
-    // Then required field validation errors are shown on the form
-    await verifyFormStatusAfterSave(
-      page,
-      "incomplete",
-      BUDGET_NARRATIVE_ATTACHMENT_REQUIRED_FIELD_ERRORS,
-    );
+      // Then required field validation errors are shown on the form
+      await verifyFormStatusAfterSave(
+        page,
+        "incomplete",
+        BUDGET_NARRATIVE_ATTACHMENT_REQUIRED_FIELD_ERRORS,
+      );
 
-    // When the user navigates back to the application landing page
-    // Then under the "Budget Narrative Attachment" form the status shows "Some issues found. Check your entries."
-    await verifyFormStatusOnApplication(
-      page,
-      "incomplete",
-      BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER,
-      applicationUrl,
-    );
-  },
-);
+      // When the user navigates back to the application landing page
+      // Then under the "Budget Narrative Attachment" form the status shows "Some issues found. Check your entries."
+      await verifyFormStatusOnApplication(
+        page,
+        "incomplete",
+        BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER,
+        applicationUrl,
+      );
+    },
+  );
+}
