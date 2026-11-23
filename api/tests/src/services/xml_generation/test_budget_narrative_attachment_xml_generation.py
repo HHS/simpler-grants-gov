@@ -25,6 +25,9 @@ from lxml import etree as lxml_etree
 from src.form_schema.forms.budget_narrative_attachment import (
     FORM_XML_TRANSFORM_RULES as BUDGET_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
 )
+from src.form_schema.forms.budget_narrative_generated import (
+    FORM_XML_TRANSFORM_RULES as GENERATED_XML_RULES,
+)
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
@@ -47,13 +50,23 @@ _SNAPSHOT_ATTACHMENT_MAPPING = {
 _SNAPSHOT_DATA = {"attachments": [_SNAPSHOT_UUID]}
 
 
-def _generate(data: dict, attachment_mapping: dict | None = None) -> str:
+@pytest.fixture(
+    params=[
+        pytest.param(BUDGET_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES, id="handwritten"),
+        pytest.param(GENERATED_XML_RULES, id="generated"),
+    ],
+)
+def xml_rules(request):
+    return request.param
+
+
+def _generate(data: dict, attachment_mapping: dict, xml_rules: dict) -> str:
     service = XMLGenerationService()
     response = service.generate_xml(
         XMLGenerationRequest(
             application_data=data,
-            transform_config=BUDGET_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
-            attachment_mapping=attachment_mapping or {},
+            transform_config=xml_rules,
+            attachment_mapping=attachment_mapping,
         )
     )
     assert response.success, response.error_message
@@ -72,7 +85,7 @@ def _build_attachment(uuid_str, filename, mime, location, hash_value):
 class TestBudgetNarrativeAttachmentsXMLGeneration:
     """Test cases for Budget Narrative Attachments XML generation service."""
 
-    def test_generate_budget_narrative_attachments_xml_basic_success(self):
+    def test_generate_budget_narrative_attachments_xml_basic_success(self, xml_rules):
         """Test basic XML generation with multiple attachments and proper namespaces."""
         service = XMLGenerationService()
 
@@ -100,7 +113,7 @@ class TestBudgetNarrativeAttachmentsXMLGeneration:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [uuid1, uuid2]},
-            transform_config=BUDGET_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 
@@ -135,7 +148,7 @@ class TestBudgetNarrativeAttachmentsXMLGeneration:
         assert "budget_narrative.pdf" in xml_data
         assert "supplemental_budget.pdf" in xml_data
 
-    def test_generate_budget_narrative_attachments_element_order_matches_xsd(self):
+    def test_generate_budget_narrative_attachments_element_order_matches_xsd(self, xml_rules):
         """Test that elements inside AttachedFile follow XSD sequence order.
 
         Per the Attachments-V1.0.xsd, the AttachedFileDataType sequence is:
@@ -156,7 +169,7 @@ class TestBudgetNarrativeAttachmentsXMLGeneration:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [attachment_uuid]},
-            transform_config=BUDGET_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 
@@ -173,7 +186,7 @@ class TestBudgetNarrativeAttachmentsXMLGeneration:
 
         assert file_name_pos < mime_pos < location_pos < hash_pos
 
-    def test_generate_budget_narrative_attachments_namespace_declarations_on_root(self):
+    def test_generate_budget_narrative_attachments_namespace_declarations_on_root(self, xml_rules):
         """Test that all namespace declarations appear on the root element.
 
         Legacy Grants.gov XML declares xmlns:att, xmlns:glob, and xmlns:globLib
@@ -193,7 +206,7 @@ class TestBudgetNarrativeAttachmentsXMLGeneration:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [attachment_uuid]},
-            transform_config=BUDGET_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 
@@ -220,14 +233,14 @@ class TestBudgetNarrativeAttachmentsXMLGeneration:
         assert "globLib" in root.nsmap
         assert root.nsmap["globLib"] == "http://apply.grants.gov/system/GlobalLibrary-V2.0"
 
-    def test_generate_budget_narrative_attachments_snapshot(self):
+    def test_generate_budget_narrative_attachments_snapshot(self, xml_rules):
         """Regression snapshot test pinning the full generated XML output.
 
         To regenerate after an intentional change, delete
         snapshots/budget_narrative_1_2.xml and re-run the test — it will
         create the file on first run.
         """
-        xml_data = _generate(_SNAPSHOT_DATA, _SNAPSHOT_ATTACHMENT_MAPPING)
+        xml_data = _generate(_SNAPSHOT_DATA, _SNAPSHOT_ATTACHMENT_MAPPING, xml_rules)
 
         if not _SNAPSHOT_PATH.exists():
             _SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -255,7 +268,7 @@ class TestBudgetNarrativeAttachmentsXSDValidation:
 
         return XSDValidator(xsd_dir)
 
-    def test_budget_narrative_attachments_xml_validates_against_xsd(self, xsd_validator):
+    def test_budget_narrative_attachments_xml_validates_against_xsd(self, xml_rules, xsd_validator):
         """Test that generated XML validates against official XSD schema."""
         service = XMLGenerationService()
 
@@ -272,7 +285,7 @@ class TestBudgetNarrativeAttachmentsXSDValidation:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [attachment_uuid]},
-            transform_config=BUDGET_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 
@@ -292,7 +305,9 @@ class TestBudgetNarrativeAttachmentsXSDValidation:
             f"Generated XML:\n{xml_data}"
         )
 
-    def test_budget_narrative_attachments_multiple_files_validates_against_xsd(self, xsd_validator):
+    def test_budget_narrative_attachments_multiple_files_validates_against_xsd(
+        self, xml_rules, xsd_validator
+    ):
         """Test that Budget Narrative Attachments with multiple files validates against XSD."""
         service = XMLGenerationService()
 
@@ -316,7 +331,7 @@ class TestBudgetNarrativeAttachmentsXSDValidation:
 
         request = XMLGenerationRequest(
             application_data={"attachments": [uuid1, uuid2]},
-            transform_config=BUDGET_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=xml_rules,
             attachment_mapping=attachment_mapping,
         )
 

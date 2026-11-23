@@ -6,16 +6,28 @@ from src.db.models.competition_models import Form
 from src.form_schema.forms import (
     AttachmentForm_v1_2,
     BudgetNarrativeAttachment_v1_2,
+    BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
+    EPAKeyContactsGenerated_v2_0,
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
+    KeyContactsGenerated_v2_0,
+    NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
     OtherNarrativeAttachment_v1_2,
+    OtherNarrativeGenerated_v1_2,
+    PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
+    ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
+    ProjectAbstractSummaryGenerated_v2_0,
     ProjectNarrativeAttachment_v1_2,
+    ProjectNarrativeGenerated_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
+    RRKeyPersonExpandedGenerated_v4_0,
+    RRKeyPersonGenerated_v3_0,
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
@@ -100,29 +112,60 @@ def sflll_v2_0():
     return setup_resolved_form(SFLLL_v2_0)
 
 
-@pytest.fixture(scope="session")
-def project_abstract_v1_2():
-    return setup_resolved_form(ProjectAbstract_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectAbstract_v1_2, id="handwritten"),
+        pytest.param(ProjectAbstractGenerated_v1_2, id="generated"),
+    ],
+)
+def project_abstract_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def project_abstract_summary_v2_0():
-    return setup_resolved_form(ProjectAbstractSummary_v2_0)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectAbstractSummary_v2_0, id="handwritten"),
+        pytest.param(ProjectAbstractSummaryGenerated_v2_0, id="generated"),
+    ],
+)
+def project_abstract_summary_v2_0(request):
+    return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def project_narrative_attachment_v1_2():
-    return setup_resolved_form(ProjectNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(ProjectNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def project_narrative_attachment_v1_2(request):
+    """The hand-written form and the one generated from forms/specs."""
+    return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def budget_narrative_attachment_v1_2():
-    return setup_resolved_form(BudgetNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(BudgetNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(BudgetNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def budget_narrative_attachment_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def other_narrative_attachment_v1_2():
-    return setup_resolved_form(OtherNarrativeAttachment_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(OtherNarrativeAttachment_v1_2, id="handwritten"),
+        pytest.param(OtherNarrativeGenerated_v1_2, id="generated"),
+    ],
+)
+def other_narrative_attachment_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(scope="session")
@@ -145,14 +188,43 @@ def epa_form_4700_4_v5_0():
     return setup_resolved_form(EPA_FORM_4700_4_v5_0)
 
 
-@pytest.fixture(scope="session")
-def epa_key_contact_v2_0():
-    return setup_resolved_form(EPA_KEY_CONTACT_v2_0)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(EPA_KEY_CONTACT_v2_0, id="handwritten"),
+        pytest.param(EPAKeyContactsGenerated_v2_0, id="generated"),
+    ],
+)
+def epa_key_contact_v2_0(request):
+    """Each EPA Key Contacts form: the hand-written one and the one generated from forms/specs."""
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(scope="session")
-def key_contacts_v2_0():
+def epa_key_contact_generated_v2_0():
+    return setup_resolved_form(EPAKeyContactsGenerated_v2_0)
+
+
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(KeyContacts_v2_0, id="handwritten"),
+        pytest.param(KeyContactsGenerated_v2_0, id="generated"),
+    ],
+)
+def key_contacts_v2_0(request):
+    """Each Key Contacts form: the hand-written one and the one generated from forms/specs."""
+    return setup_resolved_form(request.param)
+
+
+@pytest.fixture(scope="session")
+def key_contacts_handwritten_v2_0():
     return setup_resolved_form(KeyContacts_v2_0)
+
+
+@pytest.fixture(scope="session")
+def key_contacts_generated_v2_0():
+    return setup_resolved_form(KeyContactsGenerated_v2_0)
 
 
 @pytest.fixture(scope="session")
@@ -160,6 +232,43 @@ def attachment_form_v1_2():
     return setup_resolved_form(AttachmentForm_v1_2)
 
 
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectPerformanceSiteLocation_v4_0, id="handwritten"),
+        pytest.param(PerformanceSitesGenerated_v4_0, id="generated"),
+    ],
+)
+def project_performance_site_location_v4_0(request):
+    """Each Performance Sites form: the hand-written one and the one generated from forms/specs."""
+    return setup_resolved_form(request.param)
+
+
 @pytest.fixture(scope="session")
-def project_performance_site_location_v4_0():
+def project_performance_site_location_handwritten_v4_0():
     return setup_resolved_form(ProjectPerformanceSiteLocation_v4_0)
+
+
+@pytest.fixture(scope="session")
+def performance_sites_generated_v4_0():
+    return setup_resolved_form(PerformanceSitesGenerated_v4_0)
+
+
+@pytest.fixture(scope="session")
+def rr_key_person_generated_v3_0():
+    return setup_resolved_form(RRKeyPersonGenerated_v3_0)
+
+
+@pytest.fixture(scope="session")
+def rr_key_person_expanded_generated_v4_0():
+    return setup_resolved_form(RRKeyPersonExpandedGenerated_v4_0)
+
+
+@pytest.fixture(scope="session")
+def nsf_key_person_expanded_generated_v3_3():
+    return setup_resolved_form(NSFKeyPersonExpandedGenerated_v3_3)
+
+
+@pytest.fixture(scope="session")
+def nsf_suggested_reviewers_v1_1():
+    return setup_resolved_form(NSFSuggestedReviewers_v1_1)

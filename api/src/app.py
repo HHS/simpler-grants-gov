@@ -30,15 +30,11 @@ from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
 from src.api.maintenance_mode import register_maintenance_mode_handler
-from src.api.opportunities_grantor_v1 import (
-    opportunity_grantor_blueprint as opportunities_grantor_v1_blueprint,
-)
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.api.users.user_blueprint import user_blueprint
-from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig
 from src.auth.auth_utils import get_app_security_scheme
 from src.auth.jwt import initialize_jwt_auth
@@ -75,13 +71,7 @@ class EndpointConfig(PydanticBaseEnvConfig):
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
     domain_verification_map: dict = Field(default_factory=dict)
 
-    enable_workflow_endpoints: bool = Field(False, alias="ENABLE_WORKFLOW_ENDPOINTS")
-
     enable_file_upload_endpoints: bool = Field(False, alias="ENABLE_FILE_UPLOAD_ENDPOINTS")
-
-    enable_grantor_opportunity_endpoints: bool = Field(
-        False, alias="ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS"
-    )
 
     # Do not ever change this to True, this controls endpoints we only
     # want to exist for local development.
@@ -195,11 +185,6 @@ def register_blueprints(app: APIFlask) -> None:
 
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
-
-    # Endpoint for Create Opportunity
-    if endpoint_config.enable_grantor_opportunity_endpoints:
-        app.register_blueprint(opportunities_grantor_v1_blueprint)
-
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)
@@ -231,9 +216,6 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
-
-    if endpoint_config.enable_workflow_endpoints:
-        app.register_blueprint(workflow_blueprint)
 
 
 def get_project_root_dir() -> str:

@@ -51,6 +51,7 @@ from src.api.users.user_schemas import (
     UserSetAllOpportunitiesNotificationPreferenceRequestSchema,
     UserSetAllOpportunitiesNotificationPreferenceResponseSchema,
     UserTokenLogoutResponseSchema,
+    UserTokenRefreshRequestSchema,
     UserTokenRefreshResponseSchema,
     UserUpdateProfileRequestSchema,
     UserUpdateProfileResponseSchema,
@@ -68,6 +69,7 @@ from src.auth.login_gov_jwt_auth import (
     get_login_gov_redirect_uri,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
+from src.auth.session_duration_override import get_session_duration_override
 from src.constants.lookup_constants import NotificationType
 from src.db.models.user_models import UserTokenSession
 from src.logs.flask_logger import add_extra_data_to_current_request_logs
@@ -228,17 +230,23 @@ def user_token_logout(db_session: db.Session) -> response.ApiResponse:
 
 
 @user_blueprint.post("/token/refresh")
+@user_blueprint.input(UserTokenRefreshRequestSchema, location="json")
 @user_blueprint.output(UserTokenRefreshResponseSchema)
 @user_blueprint.doc(responses=[200, 401])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
+def user_token_refresh(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     logger.info("POST /v1/users/token/refresh")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+    session_duration_seconds = get_session_duration_override(
+        json_data.get("session_duration_seconds")
+    )
 
     with db_session.begin():
-        refresh_token_expiration(user_token_session)
+        refresh_token_expiration(
+            user_token_session, session_duration_seconds=session_duration_seconds
+        )
         db_session.add(user_token_session)
 
     logger.info(

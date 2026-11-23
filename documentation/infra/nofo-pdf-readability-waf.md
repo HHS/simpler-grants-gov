@@ -45,11 +45,23 @@ They use anchored alternatives without capturing subexpressions, which AWS WAF
 [does not support](https://docs.aws.amazon.com/waf/latest/developerguide/waf-regex-pattern-support.html).
 Matching remains case-sensitive, with no text transformations;
 query strings are separate from the URI path. These rules do not match child
-paths, the authenticated `/nofos/readability-checker/` route, GET rate counts, or
-other methods. Both public path families share one per-source-IP rate budget;
+paths, the retired `/nofos/readability-checker/` and `/nofos/readability/`
+redirects, GET rate counts, or other methods. Both public path families share one per-source-IP rate budget;
 renaming or alternating between the two does not create a second configured
 rate rule. Alternate encoded/normalized route
 forms are not claimed covered; assess them separately before launch.
+
+Since [Builder #1368](https://github.com/HHS/simpler-grants-pdf-builder/pull/1368)
+([#13403](https://github.com/HHS/simpler-grants-gov/issues/13403)), signed-in and
+signed-out users both upload to `/readability-checker/`. Two Constance switches
+decide who can upload: `HHS_NOFO_PDF_METRICS_PILOT_ENABLED` opens it to everyone,
+and `HHS_NOFO_AUTHENTICATED_PDF_METRICS_PILOT_ENABLED` keeps it open to signed-in
+Builder users while the public switch is off. These rules therefore also cover
+signed-in uploads, including the production rate limit of 30 upload POSTs per
+source IP per 5 minutes, which is unchanged. The old signed-in
+`/nofos/readability-checker/` and `/nofos/readability/` paths now return a 301 to
+`/readability-checker/` without reading the request body, so they need no WAF
+coverage.
 
 The rate window is 300 seconds. The integer rate limit is configurable from
 10 to 2,000,000,000, per AWS WAF's supported range. Ten is a provisional dev
@@ -295,7 +307,13 @@ a launch threshold.
 
 The implemented configuration path is to change `emergency_block` in the target
 NOFO environment's `pdf_readability_waf` object, review/merge the change, and use
-`Deploy NOFOs` for that environment. A null configuration must first opt in before
+`Deploy NOFOs` for that environment.
+
+The emergency block applies at the WAF, which can't tell whether a request is
+signed in, so it blocks signed-in users too. To stop public uploads while keeping
+signed-in access, turn off `HHS_NOFO_PDF_METRICS_PILOT_ENABLED` and leave
+`HHS_NOFO_AUTHENTICATED_PDF_METRICS_PILOT_ENABLED` on instead. That takes effect
+without a deployment. A null configuration must first opt in before
 it has an emergency rule. Review the plan; never apply a dev object to production
 or assume changing the application `version` selects infrastructure from a PR.
 

@@ -1,8 +1,13 @@
-# Cover the current public checker and legacy redirects; authenticated checker
-# paths remain outside these rules. Use anchored alternatives without captures
-# for AWS WAF regex compatibility.
+# Cover the Readability Checker and its legacy redirect. Signed-in and signed-out
+# users upload to the same URL, so these rules apply to both. The retired
+# /nofos/readability* paths only redirect and need no coverage. Use anchored
+# alternatives without captures for AWS WAF regex compatibility.
 locals {
   pdf_readability_managed_priority_offset = var.pdf_readability_waf == null ? 0 : 2
+  # Bot rules sit before managed groups, whose Allow overrides would otherwise terminate evaluation.
+  bot_priority_base       = local.pdf_readability_managed_priority_offset
+  managed_priority_offset = local.bot_priority_base + (var.bot_protection_waf == null ? 0 : 2)
+  static_asset_uri_regex  = "^/_next/|\\.css$|\\.js$|\\.map$|\\.svg$|\\.png$|\\.jpe?g$|\\.gif$|\\.ico$|\\.webp$|\\.woff2?$|\\.txt$|\\.xml$"
 }
 
 resource "aws_wafv2_web_acl" "waf" {
@@ -143,9 +148,129 @@ resource "aws_wafv2_web_acl" "waf" {
     }
   }
 
+  # Per-IP cap on page (non-static) requests; returns 429 so well-behaved crawlers back off.
+  dynamic "rule" {
+    for_each = var.bot_protection_waf == null ? [] : [var.bot_protection_waf]
+    content {
+      name     = "Bot-PageRateLimitPerIP"
+      priority = local.bot_priority_base
+
+      action {
+        dynamic "block" {
+          for_each = rule.value.action == "block" ? [1] : []
+          content {
+            custom_response {
+              response_code = 429
+            }
+          }
+        }
+        dynamic "count" {
+          for_each = rule.value.action == "count" ? [1] : []
+          content {}
+        }
+      }
+
+      statement {
+        rate_based_statement {
+          aggregate_key_type    = "IP"
+          limit                 = rule.value.page_rate_limit_per_ip
+          evaluation_window_sec = 60
+
+          scope_down_statement {
+            not_statement {
+              statement {
+                regex_match_statement {
+                  regex_string = local.static_asset_uri_regex
+                  field_to_match {
+                    uri_path {}
+                  }
+                  text_transformation {
+                    priority = 0
+                    type     = "LOWERCASE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "Bot-PageRateLimitPerIP"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+
+  # Site-wide surge on SSR opportunity pages (distributed scrapers): challenge GETs; browsers pass silently.
+  dynamic "rule" {
+    for_each = var.bot_protection_waf == null ? [] : [var.bot_protection_waf]
+    content {
+      name     = "Bot-OpportunitySurgeChallenge"
+      priority = local.bot_priority_base + 1
+
+      action {
+        dynamic "challenge" {
+          for_each = rule.value.action == "block" ? [1] : []
+          content {}
+        }
+        dynamic "count" {
+          for_each = rule.value.action == "count" ? [1] : []
+          content {}
+        }
+      }
+
+      statement {
+        rate_based_statement {
+          aggregate_key_type    = "CONSTANT"
+          limit                 = rule.value.opportunity_surge_limit
+          evaluation_window_sec = 60
+
+          scope_down_statement {
+            and_statement {
+              statement {
+                byte_match_statement {
+                  positional_constraint = "STARTS_WITH"
+                  search_string         = "/opportunity/"
+                  field_to_match {
+                    uri_path {}
+                  }
+                  text_transformation {
+                    priority = 0
+                    type     = "LOWERCASE"
+                  }
+                }
+              }
+              statement {
+                byte_match_statement {
+                  positional_constraint = "EXACTLY"
+                  search_string         = "GET"
+                  field_to_match {
+                    method {}
+                  }
+                  text_transformation {
+                    priority = 0
+                    type     = "NONE"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "Bot-OpportunitySurgeChallenge"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+
   rule {
     name     = "AWS-AWSManagedRulesCommonRuleSet"
-    priority = 0 + local.pdf_readability_managed_priority_offset
+    priority = 0 + local.managed_priority_offset
     override_action {
       none {}
     }
@@ -198,7 +323,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesLinuxRuleSet"
-    priority = 1 + local.pdf_readability_managed_priority_offset
+    priority = 1 + local.managed_priority_offset
     override_action {
       none {
       }
@@ -218,7 +343,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesAmazonIpReputationList"
-    priority = 2 + local.pdf_readability_managed_priority_offset
+    priority = 2 + local.managed_priority_offset
     override_action {
       none {
       }
@@ -238,7 +363,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesAnonymousIpList"
-    priority = 3 + local.pdf_readability_managed_priority_offset
+    priority = 3 + local.managed_priority_offset
     override_action {
       none {
       }
@@ -266,7 +391,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
-    priority = 4 + local.pdf_readability_managed_priority_offset
+    priority = 4 + local.managed_priority_offset
     override_action {
       none {
       }
@@ -286,7 +411,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesUnixRuleSet"
-    priority = 5 + local.pdf_readability_managed_priority_offset
+    priority = 5 + local.managed_priority_offset
     override_action {
       none {
       }
@@ -306,7 +431,7 @@ resource "aws_wafv2_web_acl" "waf" {
 
   rule {
     name     = "AWS-AWSManagedRulesWindowsRuleSet"
-    priority = 6 + local.pdf_readability_managed_priority_offset
+    priority = 6 + local.managed_priority_offset
     override_action {
       none {
       }

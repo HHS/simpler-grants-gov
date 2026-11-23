@@ -5,16 +5,30 @@ from src.db.models.competition_models import Form
 from ..registry.form_template_registry import form_template_registry
 from .attachment_form import AttachmentForm_v1_2
 from .budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
+from .budget_narrative_generated import FORM as BudgetNarrativeGenerated_v1_2
 from .cd511 import CD511_v1_1
+from .ed_abstract_form_generated import FORM as EDAbstractGenerated_v1_1
 from .epa_form_4700_4 import EPA_FORM_4700_4_v5_0
 from .epa_key_contacts import EPA_KEY_CONTACT_v2_0
+from .epa_key_contacts_generated import FORM as EPAKeyContactsGenerated_v2_0
 from .gg_lobbying_form import GG_LobbyingForm_v1_1
 from .key_contacts import KeyContacts_v2_0
+from .key_contacts_generated import FORM as KeyContactsGenerated_v2_0
+from .nsf_deviation_authorization_generated import FORM as NSFDeviationAuthorization_v1_1
+from .nsf_key_person_expanded_generated import FORM as NSFKeyPersonExpandedGenerated_v3_3
+from .nsf_suggested_reviewers_generated import FORM as NSFSuggestedReviewers_v1_1
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
+from .other_narrative_generated import FORM as OtherNarrativeGenerated_v1_2
+from .performance_sites_generated import FORM as PerformanceSitesGenerated_v4_0
 from .project_abstract import ProjectAbstract_v1_2
+from .project_abstract_generated import FORM as ProjectAbstractGenerated_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
+from .project_abstract_summary_generated import FORM as ProjectAbstractSummaryGenerated_v2_0
 from .project_narrative_attachment import ProjectNarrativeAttachment_v1_2
+from .project_narrative_generated import FORM as ProjectNarrativeGenerated_v1_2
 from .project_performance_site_location import ProjectPerformanceSiteLocation_v4_0
+from .rr_key_person_expanded_generated import FORM as RRKeyPersonExpandedGenerated_v4_0
+from .rr_key_person_generated import FORM as RRKeyPersonGenerated_v3_0
 from .sf424 import SF424_v4_0
 from .sf424_short import SF424Short_v3_0
 from .sf424a import SF424a_v1_0
@@ -47,6 +61,42 @@ _ALL_FORMS: list[Form] = [
     EPA_KEY_CONTACT_v2_0,
     KeyContacts_v2_0,
     ProjectPerformanceSiteLocation_v4_0,
+    KeyContactsGenerated_v2_0,
+    EPAKeyContactsGenerated_v2_0,
+    PerformanceSitesGenerated_v4_0,
+    RRKeyPersonGenerated_v3_0,
+    RRKeyPersonExpandedGenerated_v4_0,
+    ProjectAbstractSummaryGenerated_v2_0,
+    NSFDeviationAuthorization_v1_1,
+    NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
+    ProjectNarrativeGenerated_v1_2,
+    BudgetNarrativeGenerated_v1_2,
+    OtherNarrativeGenerated_v1_2,
+    ProjectAbstractGenerated_v1_2,
+    EDAbstractGenerated_v1_1,
+]
+
+# Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
+# Each shares its hand-written form's name, so the two can't sit in one competition.
+# A form leaves this list when it replaces the hand-written form it mirrors. A generated
+# form with no hand-written twin is listed too, so the all-forms competitions don't change
+# until it's reviewed.
+GENERATED_FORMS: list[Form] = [
+    KeyContactsGenerated_v2_0,
+    EPAKeyContactsGenerated_v2_0,
+    PerformanceSitesGenerated_v4_0,
+    RRKeyPersonGenerated_v3_0,
+    RRKeyPersonExpandedGenerated_v4_0,
+    ProjectAbstractSummaryGenerated_v2_0,
+    NSFDeviationAuthorization_v1_1,
+    NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
+    ProjectNarrativeGenerated_v1_2,
+    BudgetNarrativeGenerated_v1_2,
+    OtherNarrativeGenerated_v1_2,
+    ProjectAbstractGenerated_v1_2,
+    EDAbstractGenerated_v1_1,
 ]
 
 
@@ -62,3 +112,14 @@ def init_form_registry() -> None:
 def get_active_forms() -> list[Form]:
     """Get all active forms."""
     return form_template_registry.get_all()
+
+
+def get_forms_for_all_forms_competition(forms: list[Form]) -> list[Form]:
+    """The forms a competition offering every form should include.
+
+    Leaves out GENERATED_FORMS: listed beside the hand-written form it mirrors, each would
+    show up as a second row with the same name. Each generated form gets a competition of
+    its own instead.
+    """
+    generated_ids = {form.form_id for form in GENERATED_FORMS}
+    return [form for form in forms if form.form_id not in generated_ids]

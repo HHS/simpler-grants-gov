@@ -49,11 +49,13 @@ export interface UserProfile {
 export interface SimplerJwtPayload extends JWTPayload {
   token: string;
   session_duration_minutes: number;
+  session_duration_seconds?: number;
 }
 // represents API JWT payload plus the API token, for server side use only
 export type UserSession = SimplerJwtPayload & {
   email?: string;
   expiresAt?: number;
+  sessionDurationSeconds?: number;
   user_id: string;
 };
 

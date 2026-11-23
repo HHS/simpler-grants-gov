@@ -5,7 +5,6 @@ from faker import Faker
 from sqlalchemy import select
 
 import src.adapters.db as db
-from src.constants.static_role_values import OPPORTUNITY_EDITOR, OPPORTUNITY_PUBLISHER
 from src.db.models.agency_models import Agency
 from tests.lib.seed_data_utils import UserBuilder
 from tests.src.db.models.factories import AgencyFactory
@@ -93,80 +92,78 @@ def _build_agencies_and_users(db_session: db.Session) -> None:
     user_scenarios = []
 
     ###############################
-    # User with a single agency with the opportunity editor role
+    # User with a single agency
     ###############################
     (
         UserBuilder(
             uuid.UUID("25dea202-fac8-48f6-ac52-0ec06d7176e0"),
             db_session,
-            "user with one agency with the opportunity editor role",
+            "user with one agency",
         )
         .with_oauth_login("one_agency_opp_edit")
         .with_api_key("one_agency_opp_edit_key")
         .with_jwt_auth()
-        .with_agency(agency2, roles=[OPPORTUNITY_EDITOR])
+        .with_agency(agency2, roles=[])
         .build()
     )
 
-    user_scenarios.append("one_agency_opp_edit - Opportunity Editor for USAID-ETH")
+    user_scenarios.append("one_agency_opp_edit - member of USAID-ETH")
 
     ###############################
-    # User with a single agency with the opportunity publisher role
+    # Another user with a single agency
     ###############################
     (
         UserBuilder(
             uuid.UUID("8baafd12-a523-41d6-8c19-bf67fff6ac99"),
             db_session,
-            "user with one agency with the opportunity publisher role",
+            "another user with one agency",
         )
         .with_oauth_login("one_agency_opp_pub")
         .with_api_key("one_agency_opp_pub_key")
         .with_jwt_auth()
-        .with_agency(agency2, roles=[OPPORTUNITY_PUBLISHER])
+        .with_agency(agency2, roles=[])
         .build()
     )
 
-    user_scenarios.append("one_agency_opp_pub - Opportunity Publisher for USAID-ETH")
+    user_scenarios.append("one_agency_opp_pub - member of USAID-ETH")
 
     ###############################
-    # User with two agencies, opportunity publisher for both
+    # User with two agencies
     ###############################
     (
         UserBuilder(
             uuid.UUID("b6e1561e-65ac-4793-b7c0-c3abced6051f"),
             db_session,
-            "user with two agencies, opportunity publisher for both",
+            "user with two agencies",
         )
         .with_oauth_login("two_agency_opp_pub")
         .with_api_key("two_agency_opp_pub_key")
         .with_jwt_auth()
-        .with_agency(agency2, roles=[OPPORTUNITY_PUBLISHER])
-        .with_agency(agency3, roles=[OPPORTUNITY_PUBLISHER])
+        .with_agency(agency2, roles=[])
+        .with_agency(agency3, roles=[])
         .build()
     )
 
-    user_scenarios.append("two_agency_opp_pub - Opportunity Publisher for USAID-ETH & USAID-SAF")
+    user_scenarios.append("two_agency_opp_pub - member of USAID-ETH & USAID-SAF")
 
     ###############################
-    # User with different roles for different agencies
+    # Another user with two agencies
     ###############################
     (
         UserBuilder(
             uuid.UUID("79a19a2c-d89e-4baf-a32c-091bcfb81f75"),
             db_session,
-            "user with different roles for different agencies",
+            "another user with two agencies",
         )
         .with_oauth_login("mix_agency_roles")
         .with_api_key("mix_agency_roles_key")
         .with_jwt_auth()
-        .with_agency(agency2, roles=[OPPORTUNITY_EDITOR])
-        .with_agency(agency3, roles=[OPPORTUNITY_PUBLISHER])
+        .with_agency(agency2, roles=[])
+        .with_agency(agency3, roles=[])
         .build()
     )
 
-    user_scenarios.append(
-        "mix_agency_roles - Opportunity Editor for USAID-ETH and Publisher for USAID-SAF"
-    )
+    user_scenarios.append("mix_agency_roles - member of USAID-ETH & USAID-SAF")
 
     ##############################################################
     # Log output
@@ -174,6 +171,6 @@ def _build_agencies_and_users(db_session: db.Session) -> None:
 
     # Log summary of all created user scenarios
     logger.info("=== USER SCENARIOS SUMMARY ===")
-    logger.info(f"Created {len(user_scenarios)} user scenarios with role-based access:")
+    logger.info(f"Created {len(user_scenarios)} user scenarios:")
     for scenario in user_scenarios:
         logger.info(f"• {scenario}")

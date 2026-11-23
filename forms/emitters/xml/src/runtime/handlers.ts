@@ -5,7 +5,7 @@
  * argument, and `transform`, which it calls to resolve any input that is itself a value. A
  * handler returns what its node yields, or undefined for nothing to write.
  *
- *   $field       the answer at a dotted path
+ *   $field       the answer at a path
  *   $const       a fixed value
  *   $match       the `case` entry for a value, or `default`
  *   $transform   a value changed by a function in `valueTransforms.ts`

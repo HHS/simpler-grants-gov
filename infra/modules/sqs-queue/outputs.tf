@@ -23,6 +23,11 @@ output "dead_letter_queue_arn" {
   value       = aws_sqs_queue.dead_letter.arn
 }
 
+output "dead_letter_queue_name" {
+  description = "The name of the dead letter queue"
+  value       = aws_sqs_queue.dead_letter.name
+}
+
 output "access_policy_arn" {
   description = "The ARN of the IAM policy for accessing the queue"
   value       = aws_iam_policy.access_policy.arn

@@ -1,0 +1,54 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/funding_opportunity_number",
+          "label": "Funding Opportunity Number",
+          "options": {
+            "widget": "Text"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/assistance_listing_number",
+          "label": "Assistance Listing Number(s)",
+          "options": {
+            "widget": "Text"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant_name",
+          "label": "Applicant Name",
+          "options": {
+            "widget": "Text"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project_title",
+          "label": "Descriptive Title of Applicant's Project",
+          "options": {
+            "widget": "Text"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project_abstract",
+          "label": "Project Abstract",
+          "options": {
+            "widget": "TextArea"
+          }
+        }
+      ],
+      "label": "1. Project Abstract Summary",
+      "options": {
+        "description": "This Project Abstract Summary form must be submitted or the application will be considered incomplete. Ensure the Project Abstract field succinctly describes the project in plain language that the public can understand and use without the full proposal. Use 4,000 characters or less. Do not include personally identifiable, sensitive or proprietary information. Refer to Agency instructions for any additional Project Abstract field requirements. If the application is funded, your project abstract information (as submitted) will be made available to public websites and/or databases including USAspending.gov."
+      }
+    }
+  ]
+}

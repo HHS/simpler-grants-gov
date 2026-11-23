@@ -44,7 +44,7 @@
     "@typespec/json-schema": "^1.16.0",
     "@typespec/xml": "^0.86.0",
     "fast-xml-parser": "^5.11.2",
-    "simpler-forms": "^0.1.0",
+    "simpler-forms": "^0.2.0",
     "typescript": "^5.9.3",
     "vitest": "^5.0.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"

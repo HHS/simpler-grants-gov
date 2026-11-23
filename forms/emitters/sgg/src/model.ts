@@ -22,9 +22,9 @@ function isAttachment(p: Program, type: Type): boolean {
 const ATTACHMENT_RULE = { gg_validation: { rule: "attachment" } };
 
 /**
- * The rule schema the API runs over `model`'s answers: an attachment rule on every answer
- * whose type is an `@Sgg.attachment` question, or a list of them, nested as the answers are.
- * A list of objects holding one is marked `gg_type: "array"`, so the rule runs per item.
+ * Rules follow the emitted answer paths and property names, including snake casing.
+ * The schema records attachment ownership and pre- or post-population rules.
+ * A list of objects uses `gg_type: "array"` so the API applies its rules per item.
  */
 export function ruleSchema(
   p: Program,
@@ -38,14 +38,24 @@ export function ruleSchema(
     const type = prop.type;
     const array = type.kind === "Model" && type.indexer?.key.name === "integer";
     const item = array ? type.indexer!.value : type;
+    const fieldRules: Record<string, unknown> = {};
+    const pre = p.stateMap(stateKeys.prePopulation).get(prop);
+    const post = p.stateMap(stateKeys.postPopulation).get(prop);
+    if (pre) fieldRules.gg_pre_population = { rule: pre };
+    if (post) fieldRules.gg_post_population = { rule: post };
     if (isAttachment(p, item)) {
-      rules[name] = ATTACHMENT_RULE;
+      rules[name] = { ...fieldRules, ...ATTACHMENT_RULE };
       continue;
     }
-    if (item.kind !== "Model" || seen.includes(item)) continue;
-    const inner = ruleSchema(p, item, casing, [...seen, model]);
-    if (!Object.keys(inner).length) continue;
-    rules[name] = array ? { gg_type: "array", ...inner } : inner;
+    if (item.kind === "Model" && !seen.includes(item)) {
+      const inner = ruleSchema(p, item, casing, [...seen, model]);
+      if (Object.keys(inner).length)
+        Object.assign(
+          fieldRules,
+          array ? { gg_type: "array", ...inner } : inner,
+        );
+    }
+    if (Object.keys(fieldRules).length) rules[name] = fieldRules;
   }
   return rules;
 }

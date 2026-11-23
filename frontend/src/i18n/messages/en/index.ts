@@ -765,6 +765,14 @@ export const messages = {
     button: "Sign in with Login.gov",
     close: "Cancel",
   },
+  SessionExpirationWarning: {
+    title: "Your session is about to expire",
+    description:
+      "For your security, you will be signed out due to inactivity. Any unsaved changes will be lost.",
+    countdown: "Time remaining: {time}",
+    staySignedIn: "Stay signed in",
+    signOut: "Sign out",
+  },
   PivRequiredModal: {
     title: "Your account requires additional identity verification.",
     description:
@@ -1824,6 +1832,65 @@ export const messages = {
         email: "Email is required",
         role: "Role is required",
       },
+    },
+  },
+  ManagePermissions: {
+    pageTitle: "Manage permissions | Simpler.Grants.gov",
+    breadcrumbOrganization: "Organization",
+    pageHeading: "Manage permissions",
+    userSummary: "{name}, {roleName}",
+    roleLastUpdated: "Role last updated by {name} on {date}",
+    onThisPage: "On this page",
+    currentPermissions: {
+      heading: "Current Permissions",
+      roleSummary: "This user is a <strong>{roleName}</strong>.",
+      description:
+        "<strong>Collaborators</strong> have access to some or all applications for their organization. Additional permissions include:",
+      applicationsLabel: "Applications",
+      applicationsDescription: "Create and submit applications",
+      formsLabel: "Forms",
+      formsDescription: "Create, edit, and delete forms and attachments",
+      savedOpportunitiesLabel: "Save Opportunities",
+      savedOpportunitiesDescription:
+        "Save new opportunities and remove saved opportunities",
+    },
+    updatePermissions: {
+      heading: "Update Permissions",
+      submissionHeading: "Application submission management",
+      submissionDescription:
+        "By default, collaborators can submit all applications.",
+      accessLegend: "Application access",
+      accessDescription:
+        "By default, collaborators can access all applications. However, you can restrict access if necessary.",
+      accessAll: "Access all applications",
+      accessAllDescription:
+        "The user will have access to all applications, including new applications.",
+      accessSelected: "Limit application access",
+      accessSelectedDescription:
+        "Select the application(s) the user can access from the list below",
+      applicationListLegend: "Application Selection",
+      selectedApplicationsHeading: "Selected application(s)",
+      noApplicationsSelected: "No applications selected.",
+      allApplications: "All applications",
+      externalHeading: "Add External label to user",
+      externalDescription:
+        "An external user is someone who works with an organization but is not a regular employee. This includes non-W2 workers, independent consultants, contractors, and freelancers as well as volunteers.",
+      externalPurpose:
+        "Add this optional label to use for your organization's auditing purposes.",
+      externalCheckbox: "Yes, mark this user as 'External'",
+      saveHeading: "Save permission updates",
+      saveDescription:
+        "Changes to permissions will take effect immediately. Contact the user to inform them of these changes.",
+      saveButton: "Save permission updates",
+      unsavedChangesWarning:
+        "You have unsaved changes that will be lost if you select OK.",
+    },
+    confirmModal: {
+      heading: "Confirm changes",
+      description:
+        "This will override this user's existing permissions and be applied immediately. Please contact the user to inform them of these changes.",
+      confirm: "Confirm permission updates",
+      cancel: "Cancel",
     },
   },
   CommonWordLimit: {

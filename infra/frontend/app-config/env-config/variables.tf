@@ -2,6 +2,21 @@ variable "app_name" {
   type = string
 }
 
+variable "bot_protection_waf" {
+  # Limits are per 60s; sized from prod 7d WAF logs (normal opportunity peak ~1650/min, 2026-11-20 attack 3350/min).
+  description = "Scraper/bot WAF controls for all frontend envs; null disables, action count observes without blocking."
+  type = object({
+    action                  = optional(string, "count")
+    page_rate_limit_per_ip  = optional(number, 600)
+    opportunity_surge_limit = optional(number, 2000)
+  })
+  default = {
+    action                  = "block"
+    page_rate_limit_per_ip  = 600
+    opportunity_surge_limit = 2000
+  }
+}
+
 variable "certificate_arn" {
   type        = string
   description = "The ARN of the certificate to use for the application"

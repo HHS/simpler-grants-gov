@@ -15,6 +15,7 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     CompetitionOpenToApplicant,
     FormFamily,
+    FormRenderer,
     FormType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
@@ -34,7 +35,6 @@ from src.util.file_util import pre_sign_file_location, safe_presign_or_s3_cdnify
 # Add conditional import for type checking
 if TYPE_CHECKING:
     from src.db.models.user_models import ApplicationUser, User
-    from src.db.models.workflow_models import Workflow
 
 
 class Competition(ApiSchemaTable, TimestampMixin):
@@ -217,6 +217,7 @@ class Form:
     form_type: FormType | None = None
     sgg_version: str | None = None
     is_deprecated: bool | None = None
+    form_renderer: FormRenderer = FormRenderer.SGG
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
@@ -323,15 +324,6 @@ class Application(ApiSchemaTable, TimestampMixin):
         "ApplicationAudit",
         uselist=True,
         back_populates="application",
-        cascade="all, delete-orphan",
-    )
-
-    # We mostly add this so if we delete an application, any corresponding
-    # workflows are deleted as well.
-    workflows: Mapped[list[Workflow]] = relationship(
-        "Workflow",
-        back_populates="application",
-        uselist=True,
         cascade="all, delete-orphan",
     )
 
@@ -446,15 +438,6 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
     application_submission_number: Mapped[str | None]
     project_title: Mapped[str | None]
     total_requested_amount: Mapped[Decimal | None]
-
-    # We mostly add this so if we delete a submission, any corresponding
-    # workflows are deleted as well.
-    workflows: Mapped[list[Workflow]] = relationship(
-        "Workflow",
-        back_populates="application_submission",
-        uselist=True,
-        cascade="all, delete-orphan",
-    )
 
     application_submission_notes: Mapped[list[ApplicationSubmissionNote]] = relationship(
         back_populates="application_submission",

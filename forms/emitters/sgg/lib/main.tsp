@@ -24,9 +24,16 @@ model SyncOptions {
 
   /**
    * The form's version in Simpler Grants, which the API reports as its legacy form version.
-   * Defaults to `1.0`, where every form starts.
+   * Defaults to `1.0`, where every form starts. Sync installs each version in its own
+   * `<major>/<minor>` folder.
    */
   sggVersion?: string;
+
+  /**
+   * The form's `FormType` in the API, e.g. `KeyContacts`. Leave it out for a form that
+   * has no `FormType` yet.
+   */
+  formType?: string;
 
   /**
    * The UUID of the form's instructions: a form instruction record in the API, uploaded to
@@ -52,3 +59,27 @@ extern dec sync(target: Model, options?: valueof SyncOptions);
  * form's rule schema.
  */
 extern dec attachment(target: Scalar);
+
+/** Rules the API runs before submission, such as filling the agency name or UEI. */
+enum PrePopulationRule {
+  agencyName: "agency_name",
+  assistanceListingNumber: "assistance_listing_number",
+  assistanceListingTitle: "assistance_listing_program_title",
+  opportunityNumber: "opportunity_number",
+  opportunityTitle: "opportunity_title",
+  uei: "uei",
+  competitionId: "public_competition_id",
+  competitionTitle: "competition_title",
+}
+
+/** Rules the API runs on submission, such as filling the signature and date signed. */
+enum PostPopulationRule {
+  currentDate: "current_date",
+  signature: "signature",
+}
+
+/** Populate this answer using an existing API provider before submission. */
+extern dec prePopulate(target: ModelProperty, rule: PrePopulationRule);
+
+/** Populate this answer using an existing API provider upon submission. */
+extern dec postPopulate(target: ModelProperty, rule: PostPopulationRule);

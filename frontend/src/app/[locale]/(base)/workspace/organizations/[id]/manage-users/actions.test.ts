@@ -1,5 +1,6 @@
 import { identity } from "lodash";
 import { inviteUserAction } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/actions";
+import { ActionErrorCode } from "src/types/generalTypes";
 
 const getSessionMock = jest.fn();
 const mockCreateInvitation = jest.fn();
@@ -59,6 +60,7 @@ describe("user profile form action", () => {
       "generic error message",
     );
     expect(result.errorMessage).toEqual("Not logged in");
+    expect(result.errorCode).toEqual(ActionErrorCode.AUTH_REQUIRED);
   });
   it("returns result of update on success", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
@@ -99,5 +101,6 @@ describe("user profile form action", () => {
       "generic error message",
     );
     expect(result.errorMessage).toEqual("generic error message: fake error");
+    expect(result.errorCode).toBeUndefined();
   });
 });

@@ -36,7 +36,7 @@ beforeAll(async () => {
   for (const id of ids) {
     const optionsFile = path.join(forms, "dist/sgg/forms", id, "sgg.json");
     const options = JSON.parse(await readFile(optionsFile, "utf8"));
-    options.sync = { sggVersion: "0.1.0", xml: "mapping" };
+    options.sync = { sggVersion: "1.0", xml: "mapping" };
     await writeFile(optionsFile, JSON.stringify(options));
   }
   execFileSync(process.execPath, [path.join(forms, "scripts/sync.mjs")]);
@@ -74,16 +74,18 @@ describe.each(ids)("%s API schema artifact", (id) => {
       expect(schema.$defs[ref.slice("#/$defs/".length)], ref).toBeDefined();
     }
     if (id === "epa-key-contacts") {
-      expect(references.filter((ref) => ref === "#/$defs/person").length).toBe(
-        4,
-      );
+      expect(
+        references.filter((ref) => ref === "#/$defs/EPAContact").length,
+      ).toBe(4);
       expect(schema.$defs["person.name"]).toBeDefined();
       expect(schema.$defs.StateCode).toBeDefined();
     }
-    // The expanded preview schema is deliberately a different consumer artifact.
+    // The preview inlines references that the installed schema preserves.
     const expanded = await dereferenceFormSchema(
       path.join(CANONICAL_DIR, "forms", id, "schema.json"),
     );
-    expect(`${JSON.stringify(expanded, null, 2)}\n`).not.toBe(installed);
+    expect(refs(expanded)).toEqual([]);
+    if (references.length > 0)
+      expect(`${JSON.stringify(expanded, null, 2)}\n`).not.toBe(installed);
   });
 });

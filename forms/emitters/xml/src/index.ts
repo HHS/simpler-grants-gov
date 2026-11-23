@@ -6,11 +6,9 @@ import type {
 } from "@typespec/compiler";
 
 import { stateKeys } from "./lib.js";
-import { $transform, $transforms } from "./transforms.js";
 
 export { $lib } from "./lib.js";
 export { $onEmit } from "./emitter.js";
-export { transformOf, transformParamsOf } from "./transforms.js";
 export {
   xmlTransform,
   xmlTransformGaps,
@@ -47,6 +45,4 @@ const $attachment = (ctx: DecoratorContext, target: Scalar) =>
 
 export const $decorators = {
   GrantsGov: { xsd: $xsd, form: $form, attachment: $attachment },
-  // TODO(agilesix/simpler-forms#21): move to simpler-forms with `lib/mapping.tsp`.
-  "SimplerForms.Mapping": { transforms: $transforms, transform: $transform },
 };

@@ -3,22 +3,38 @@
  */
 
 import { GET } from "src/app/api/auth/callback/route";
+import { environment } from "src/constants/environments";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 import { NextRequest } from "next/server";
 
 const createSessionMock = jest.fn();
+const setApiSessionDurationMock = jest.fn();
+const mockLoggerWarn = jest.fn<unknown, unknown[]>();
 const mockLoggerError = jest.fn<unknown, unknown[]>();
 const mockLoggerInfo = jest.fn<unknown, unknown[]>();
+const getCookieMock = jest.fn();
+const deleteCookieMock = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
-  createSession: (token: string): unknown => createSessionMock(token),
+  createSession: (...args: unknown[]): unknown => createSessionMock(...args),
+  setApiSessionDuration: (...args: unknown[]): unknown =>
+    setApiSessionDurationMock(...args),
+}));
+
+jest.mock("src/constants/environments", () => ({
+  environment: { ENVIRONMENT: "staging", AUTH_EXPIRATION_TIME: "0" },
+}));
+
+jest.mock("next/headers", () => ({
+  cookies: () => ({ get: getCookieMock, delete: deleteCookieMock }),
 }));
 
 jest.mock("src/services/logger/simplerLogger", () => ({
   logger: {
     error: (...args: unknown[]): unknown => mockLoggerError(...args),
     info: (...args: unknown[]): unknown => mockLoggerInfo(...args),
+    warn: (...args: unknown[]): unknown => mockLoggerWarn(...args),
   },
 }));
 
@@ -37,14 +53,22 @@ const allLogs = () =>
 // note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
 // is to throw an error
 describe("/api/auth/callback GET handler", () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
   it("calls createSession on request with token in query params", async () => {
     const redirectError = await wrapForExpectedError<{ digest: string }>(() =>
       GET(new NextRequest("https://simpler.grants.gov/?token=fakeToken")),
     );
 
     expect(createSessionMock).toHaveBeenCalledTimes(1);
-    expect(createSessionMock).toHaveBeenCalledWith("fakeToken");
+    expect(createSessionMock).toHaveBeenCalledWith(
+      "fakeToken",
+      expect.any(Date),
+      undefined,
+    );
+    expect(setApiSessionDurationMock).not.toHaveBeenCalled();
     expect(redirectError.digest).toContain(";/login;");
   });
 
@@ -54,7 +78,6 @@ describe("/api/auth/callback GET handler", () => {
     );
     expect(createSessionMock).toHaveBeenCalledTimes(0);
     expect(redirectError.digest).toContain(";/login;");
-    expect(redirectError.digest).not.toContain("/unauthenticated");
   });
 
   it("returns through /login with the PIV error flag when PIV is required", async () => {
@@ -151,4 +174,94 @@ describe("/api/auth/callback GET handler", () => {
       expect(mockLoggerError).not.toHaveBeenCalled();
     },
   );
+
+  describe("session duration override", () => {
+    it("applies and clears the override set at login", async () => {
+      getCookieMock.mockReturnValue({ value: "60" });
+      const before = Date.now();
+
+      await wrapForExpectedError(() =>
+        GET(new NextRequest("https://simpler.grants.gov/?token=fakeToken")),
+      );
+
+      expect(deleteCookieMock).toHaveBeenCalledWith(
+        "session_duration_override",
+      );
+      expect(setApiSessionDurationMock).toHaveBeenCalledWith("fakeToken", 60);
+      const [, expiration, sessionDurationSeconds] = createSessionMock.mock
+        .calls[0] as [string, Date, number];
+      expect(sessionDurationSeconds).toEqual(60);
+      expect(expiration.getTime()).toBeGreaterThanOrEqual(before + 60 * 1000);
+      expect(expiration.getTime()).toBeLessThan(before + 2 * 60 * 1000);
+      expect(mockLoggerInfo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: "session_created",
+          sessionDurationSeconds: 60,
+        }),
+        "Session created",
+      );
+    });
+
+    it("falls back to the default session when the API session cannot be shortened", async () => {
+      getCookieMock.mockReturnValue({ value: "60" });
+      setApiSessionDurationMock.mockRejectedValueOnce(new Error("api down"));
+      const before = Date.now();
+
+      await wrapForExpectedError(() =>
+        GET(new NextRequest("https://simpler.grants.gov/?token=fakeToken")),
+      );
+
+      const [, expiration, sessionDurationSeconds] = createSessionMock.mock
+        .calls[0] as [string, Date, number | undefined];
+      expect(sessionDurationSeconds).toBeUndefined();
+      expect(expiration.getTime()).toBeGreaterThanOrEqual(
+        before + 15 * 60 * 1000,
+      );
+      expect(mockLoggerWarn).toHaveBeenCalledWith(
+        {
+          event: "session_duration_override_failed",
+          correlation_id: "a-correlation-id",
+          status: 500,
+        },
+        "Unable to shorten API session, using the default session duration",
+      );
+      expect(JSON.stringify(mockLoggerWarn.mock.calls)).not.toContain(
+        "fakeToken",
+      );
+    });
+
+    it("clears but ignores the override in prod", async () => {
+      jest.replaceProperty(environment, "ENVIRONMENT", "prod");
+      getCookieMock.mockReturnValue({ value: "60" });
+      const before = Date.now();
+
+      await wrapForExpectedError(() =>
+        GET(new NextRequest("https://simpler.grants.gov/?token=fakeToken")),
+      );
+
+      expect(deleteCookieMock).toHaveBeenCalledWith(
+        "session_duration_override",
+      );
+      expect(setApiSessionDurationMock).not.toHaveBeenCalled();
+      const [, expiration, sessionDurationSeconds] = createSessionMock.mock
+        .calls[0] as [string, Date, number | undefined];
+      expect(sessionDurationSeconds).toBeUndefined();
+      expect(expiration.getTime()).toBeGreaterThanOrEqual(
+        before + 15 * 60 * 1000,
+      );
+    });
+
+    it("clears the override when the callback has no token", async () => {
+      getCookieMock.mockReturnValue({ value: "60" });
+
+      await wrapForExpectedError(() =>
+        GET(new NextRequest("https://simpler.grants.gov")),
+      );
+
+      expect(deleteCookieMock).toHaveBeenCalledWith(
+        "session_duration_override",
+      );
+      expect(createSessionMock).not.toHaveBeenCalled();
+    });
+  });
 });

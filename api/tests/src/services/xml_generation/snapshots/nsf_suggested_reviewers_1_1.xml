@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<NSF_SuggestedReviewers:NSF_SuggestedReviewers xmlns:NSF_SuggestedReviewers="http://apply.grants.gov/forms/NSF_SuggestedReviewers-V1.1" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" NSF_SuggestedReviewers:FormVersion="1.1">
+  <NSF_SuggestedReviewers:SuggestedReviewers>Dr. Ada Example, Example University; microbial ecology &amp; &lt;soils&gt;.</NSF_SuggestedReviewers:SuggestedReviewers>
+  <NSF_SuggestedReviewers:ReviewersNotToInclude>"Dr. Ben Example"; recent collaborator.</NSF_SuggestedReviewers:ReviewersNotToInclude>
+</NSF_SuggestedReviewers:NSF_SuggestedReviewers>
