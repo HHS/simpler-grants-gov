@@ -15,6 +15,7 @@ from src.form_schema.forms import (
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
+    NasaPIAndAORGenerated_v1_0,
     NSFKeyPersonExpandedGenerated_v3_3,
     NSFSuggestedReviewers_v1_1,
     OtherNarrativeAttachment_v1_2,
@@ -274,6 +275,11 @@ def rr_key_person_expanded_generated_v4_0():
 @pytest.fixture(scope="session")
 def nsf_key_person_expanded_generated_v3_3():
     return setup_resolved_form(NSFKeyPersonExpandedGenerated_v3_3)
+
+
+@pytest.fixture(scope="session")
+def nasa_pi_and_aor_generated_v1_0():
+    return setup_resolved_form(NasaPIAndAORGenerated_v1_0)
 
 
 @pytest.fixture(scope="session")
