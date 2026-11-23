@@ -360,6 +360,17 @@ describe("formDataToObject string fields", () => {
     });
   });
 
+  it.each(["Line one\r\nLine two", "Line one\rLine two", "Line one\nLine two"])(
+    "sends each line break in a string field as \\n (%j)",
+    (text) => {
+      const formData = new FormData();
+      formData.append("answer", text);
+      expect(
+        formDataToObject(formData, { answer: { type: "string" } }, undefined),
+      ).toEqual({ answer: "Line one\nLine two" });
+    },
+  );
+
   it("keeps strings as entered inside nested objects and array items", () => {
     const formData = new FormData();
     formData.append("contact--name", '"Dr. Ada Example"');

@@ -29,7 +29,8 @@ type FormDataToJsonOptions = {
   into proper data types based on specified type from schema definition
 
   note:
-  - string type fields keep the text as entered (or undefined/null), even when it looks like JSON
+  - string type fields keep the text as entered (or undefined/null), even when it looks like JSON,
+    with line breaks sent as \n
   - string representations of booleans are cast to booleans
   - for number type fields, cast to number as long as a value is present
   - for fields with no type that represent a number, ensure they remain strings (or undefined/null)
@@ -45,7 +46,12 @@ const parseValue = (
   type: string | undefined,
   defaultValue: null | undefined,
 ) => {
-  if (type === "string") return value || defaultValue;
+  if (type === "string") {
+    // browsers submit a line break as \r\n but count it as one character
+    const text =
+      typeof value === "string" ? value.replace(/\r\n?/g, "\n") : value;
+    return text || defaultValue;
+  }
   if (value === "false") return false;
   if (value === "true") return true;
   if (

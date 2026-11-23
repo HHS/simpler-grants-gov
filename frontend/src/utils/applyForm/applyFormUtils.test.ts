@@ -117,6 +117,19 @@ describe("shapeFormData", () => {
       expect(shapeFormData(formData, formSchema)).toEqual({ answer: text });
     },
   );
+
+  it("counts each line break in a string field as one character", () => {
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: { answer: { type: "string", maxLength: 4000 } },
+    };
+    const formData = new FormData();
+    formData.append("answer", `${"a".repeat(3998)}\r\nb`);
+
+    expect(shapeFormData(formData, formSchema)).toEqual({
+      answer: `${"a".repeat(3998)}\nb`,
+    });
+  });
 });
 
 describe("getFieldSchema", () => {
