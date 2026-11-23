@@ -7,18 +7,12 @@
 # See documentation/infra/cms-vpn.md for issuing and revoking client certificates.
 #----------------------------------------------------------------------------
 
-module "network" {
-  source       = "../../modules/network/data"
-  name         = local.environment_config.network_name
-  project_name = module.project_config.project_name
-}
-
 locals {
   vpn_name = "${local.service_config.service_name}-vpn"
 
   # The Amazon-provided DNS server is at the VPC's base address plus two. VPN clients
   # use it to resolve Drupal's private hostname.
-  vpc_dns_server = cidrhost(data.aws_vpc.network.cidr_block, 2)
+  vpc_dns_server = cidrhost(module.network.vpc_cidr_block, 2)
 }
 
 data "aws_acm_certificate" "vpn_server" {
@@ -34,7 +28,7 @@ data "aws_acm_certificate" "vpn_client_ca" {
 resource "aws_security_group" "vpn" {
   name_prefix = local.vpn_name
   description = "Client VPN endpoint for CMS content managers. Allows only Drupal and DNS."
-  vpc_id      = data.aws_vpc.network.id
+  vpc_id      = module.network.vpc_id
 
   lifecycle {
     create_before_destroy = true
@@ -76,7 +70,7 @@ resource "aws_ec2_client_vpn_endpoint" "cms" {
   description            = local.vpn_name
   server_certificate_arn = data.aws_acm_certificate.vpn_server.arn
   client_cidr_block      = local.vpn_config.client_cidr_block
-  vpc_id                 = data.aws_vpc.network.id
+  vpc_id                 = module.network.vpc_id
   security_group_ids     = [aws_security_group.vpn.id]
   dns_servers            = [local.vpc_dns_server]
 
@@ -117,7 +111,7 @@ resource "aws_ec2_client_vpn_network_association" "cms" {
 # The VPN security group above is what limits users to Drupal and DNS.
 resource "aws_ec2_client_vpn_authorization_rule" "vpc" {
   client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.cms.id
-  target_network_cidr    = data.aws_vpc.network.cidr_block
+  target_network_cidr    = module.network.vpc_cidr_block
   authorize_all_groups   = true
   description            = "VPC access, limited to Drupal and DNS by the VPN security group"
 }
