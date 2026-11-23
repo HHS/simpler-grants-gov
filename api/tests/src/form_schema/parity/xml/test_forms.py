@@ -27,6 +27,7 @@ from tests.src.form_schema.parity.xml.diffs import (
     other_narrative_attachment,
     other_narrative_generated,
     performance_sites_generated,
+    phs_398_research_plan_generated,
     project_abstract,
     project_abstract_generated,
     project_abstract_summary_generated,
@@ -66,6 +67,7 @@ DIFFS = [
     project_abstract.DIFF,
     project_abstract_generated.DIFF,
     ed_abstract_form_generated.DIFF,
+    phs_398_research_plan_generated.DIFF,
 ]
 
 

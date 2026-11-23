@@ -1,0 +1,92 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/PHS398_ResearchPlan_5_0-V5.0",
+    "PHS398_ResearchPlan_5_0": "http://apply.grants.gov/forms/PHS398_ResearchPlan_5_0-V5.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PHS398_ResearchPlan_5_0-V5.0.xsd",
+  "root": {
+    "PHS398_ResearchPlan_5_0": {
+      "@PHS398_ResearchPlan_5_0:FormVersion": {
+        "$const": "5.0"
+      },
+      "ResearchPlanAttachments": {
+        "IntroductionToApplication": {
+          "attFile": {
+            "$attachment": "introduction_to_application"
+          }
+        },
+        "SpecificAims": {
+          "attFile": {
+            "$attachment": "specific_aims"
+          }
+        },
+        "ResearchStrategy": {
+          "attFile": {
+            "$attachment": "research_strategy"
+          }
+        },
+        "ProgressReportPublicationList": {
+          "attFile": {
+            "$attachment": "progress_report_publication_list"
+          }
+        },
+        "VertebrateAnimals": {
+          "attFile": {
+            "$attachment": "vertebrate_animals"
+          }
+        },
+        "SelectAgentResearch": {
+          "attFile": {
+            "$attachment": "select_agent_research"
+          }
+        },
+        "MultiplePDPILeadershipPlan": {
+          "attFile": {
+            "$attachment": "multiple_pd_pi_leadership_plan"
+          }
+        },
+        "ConsortiumContractualArrangements": {
+          "attFile": {
+            "$attachment": "consortium_contractual_arrangements"
+          }
+        },
+        "LettersOfSupport": {
+          "attFile": {
+            "$attachment": "letters_of_support"
+          }
+        },
+        "ResourceSharingPlans": {
+          "attFile": {
+            "$attachment": "resource_sharing_plans"
+          }
+        },
+        "OtherPlans": {
+          "attFile": {
+            "$attachment": "other_plans"
+          }
+        },
+        "KeyBiologicalAndOrChemicalResources": {
+          "attFile": {
+            "$attachment": "authentication_of_key_biological_and_or_chemical_resources"
+          }
+        },
+        "Appendix": {
+          "att:AttachedFile": {
+            "$each": {
+              "items": {
+                "$field": "appendix"
+              },
+              "map": {
+                "$attachment": "."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

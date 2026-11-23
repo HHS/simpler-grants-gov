@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='utf-8'?>
+<PHS398_ResearchPlan_5_0:PHS398_ResearchPlan_5_0 xmlns:PHS398_ResearchPlan_5_0="http://apply.grants.gov/forms/PHS398_ResearchPlan_5_0-V5.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" PHS398_ResearchPlan_5_0:FormVersion="5.0">
+  <PHS398_ResearchPlan_5_0:ResearchPlanAttachments>
+    <PHS398_ResearchPlan_5_0:IntroductionToApplication>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>52c8fa66-726e-5560-9942-c6fc78e179ab.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="52c8fa66-726e-5560-9942-c6fc78e179ab.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">MTkKvpqgMqEgFxvqK+go6lLJlnE=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:IntroductionToApplication>
+    <PHS398_ResearchPlan_5_0:SpecificAims>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>ff2cc96a-b28b-5254-88f8-7883a836c3a6.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="ff2cc96a-b28b-5254-88f8-7883a836c3a6.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">KRsvsRjawRVAmuN8FfUA787nPec=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:SpecificAims>
+    <PHS398_ResearchPlan_5_0:ResearchStrategy>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>3f51dac1-fad0-501b-9058-1b9d0502679c.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="3f51dac1-fad0-501b-9058-1b9d0502679c.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">E3NFQl/eujXV1uHO7/GU/ylioXA=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:ResearchStrategy>
+    <PHS398_ResearchPlan_5_0:ProgressReportPublicationList>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>2094319d-16e5-591d-a09c-7874ee9316e5.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="2094319d-16e5-591d-a09c-7874ee9316e5.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">YSUkSb6qJO/F1O3Vh71sj4IqoHw=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:ProgressReportPublicationList>
+    <PHS398_ResearchPlan_5_0:VertebrateAnimals>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>24202acd-c35a-568e-bbfb-cafa812cd9c4.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="24202acd-c35a-568e-bbfb-cafa812cd9c4.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">DnR+NvTUqMWScXtLpYg/j+Zo1gY=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:VertebrateAnimals>
+    <PHS398_ResearchPlan_5_0:SelectAgentResearch>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>75c6210f-59b2-546a-b61c-cb1ff4036433.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="75c6210f-59b2-546a-b61c-cb1ff4036433.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">qCRH+3iM32Ce6VJak42HNsrI8Ac=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:SelectAgentResearch>
+    <PHS398_ResearchPlan_5_0:MultiplePDPILeadershipPlan>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>0e223ab6-735b-53a8-9ede-b3f302ba5418.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="0e223ab6-735b-53a8-9ede-b3f302ba5418.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">ZOBoQ2ykAof3hScgxshLh3FWmHo=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:MultiplePDPILeadershipPlan>
+    <PHS398_ResearchPlan_5_0:ConsortiumContractualArrangements>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>f497e4b8-6206-5812-be33-580c9faa3bca.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="f497e4b8-6206-5812-be33-580c9faa3bca.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">5nJ/fYG0mPuH2H3XLM+Bc06882Q=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:ConsortiumContractualArrangements>
+    <PHS398_ResearchPlan_5_0:LettersOfSupport>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>b60b2c48-5048-5654-82c0-759118391ac5.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="b60b2c48-5048-5654-82c0-759118391ac5.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">P+ICt6TtYNiumzrdCiq4uYLDHac=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:LettersOfSupport>
+    <PHS398_ResearchPlan_5_0:ResourceSharingPlans>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>ac920745-317c-5875-880a-82a7e4b791e6.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="ac920745-317c-5875-880a-82a7e4b791e6.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">09yZ/94pBBfv46oFsXEOfifQyGk=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:ResourceSharingPlans>
+    <PHS398_ResearchPlan_5_0:OtherPlans>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>4b4f6c1f-3cc7-5fbd-98b8-c067455ea0e5.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="4b4f6c1f-3cc7-5fbd-98b8-c067455ea0e5.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">zgGMJoUgo8qw6ml3nQq0rgPvyvg=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:OtherPlans>
+    <PHS398_ResearchPlan_5_0:KeyBiologicalAndOrChemicalResources>
+      <PHS398_ResearchPlan_5_0:attFile>
+        <att:FileName>fc59348b-e178-5e8c-b353-36c088537e86.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="fc59348b-e178-5e8c-b353-36c088537e86.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">a+c/8QXrBcdpCKJEdjp3QS6LY8I=</glob:HashValue>
+      </PHS398_ResearchPlan_5_0:attFile>
+    </PHS398_ResearchPlan_5_0:KeyBiologicalAndOrChemicalResources>
+    <PHS398_ResearchPlan_5_0:Appendix>
+      <att:AttachedFile>
+        <att:FileName>704d7a25-4569-57eb-8da5-bad187885922.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="704d7a25-4569-57eb-8da5-bad187885922.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">WpG5h18h8kONiiHx8nWmSkST0Pg=</glob:HashValue>
+      </att:AttachedFile>
+      <att:AttachedFile>
+        <att:FileName>d2dd1f4c-b9c5-5db5-8c91-7a704784ea0c.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="d2dd1f4c-b9c5-5db5-8c91-7a704784ea0c.pdf"/>
+        <glob:HashValue glob:hashAlgorithm="SHA-1">YA4qNC1s6+tA03pPw2dKUDPWYVQ=</glob:HashValue>
+      </att:AttachedFile>
+    </PHS398_ResearchPlan_5_0:Appendix>
+  </PHS398_ResearchPlan_5_0:ResearchPlanAttachments>
+</PHS398_ResearchPlan_5_0:PHS398_ResearchPlan_5_0>

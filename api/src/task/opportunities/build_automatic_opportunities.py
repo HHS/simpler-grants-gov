@@ -46,6 +46,7 @@ from src.form_schema.forms import (
     OtherNarrativeAttachment_v1_2,
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
+    PHS398ResearchPlan_v5_0,
     ProjectAbstract_v1_2,
     ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -643,6 +644,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "ED Abstract Form",
                 EDAbstractGenerated_v1_1.form_id,
                 "ea981400-e64a-4d17-a337-5b26b15f43cd",
+            ),
+            (
+                "E2E-PHSRP",
+                "PHS 398 Research Plan",
+                PHS398ResearchPlan_v5_0.form_id,
+                "42e83601-97ac-5980-9fb1-577d2e1735f5",
             ),
             (
                 "E2E-EPA4700",

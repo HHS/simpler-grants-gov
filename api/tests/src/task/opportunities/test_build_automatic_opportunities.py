@@ -64,7 +64,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 55
+    assert len(opportunities) == 56
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -81,7 +81,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 55
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 56
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
 
@@ -111,7 +111,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 55
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 56
     # Nothing is missing, so nothing is backfilled or changed
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
     assert [c.public_competition_id for c in competitions] == public_competition_ids
@@ -311,6 +311,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "E2E-NSFSR-ORG-IND-01": uuid.UUID("97621d95-418a-4c00-96ab-3817c7dc7fe2"),
         "E2E-PABSS-ORG-IND-01": uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
         "E2E-PABSSG-ORG-IND-01": uuid.UUID("e7b1eeb7-968e-5ad7-a682-92bf4f6fe478"),
+        "E2E-PHSRP-ORG-IND-01": uuid.UUID("42e83601-97ac-5980-9fb1-577d2e1735f5"),
         "E2E-PNA-ORG-IND-01": uuid.UUID("6bdc2df3-6e51-4aea-89af-bade326feba1"),
         "E2E-PNAG-ORG-IND-01": uuid.UUID("3b41ad38-a4eb-43e2-b124-7ebf56b05b1a"),
         "E2E-PPSL-ORG-IND-01": uuid.UUID("8a30cbe2-f297-49b7-b996-fc22982a3eb5"),

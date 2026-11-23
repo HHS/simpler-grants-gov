@@ -1,0 +1,67 @@
+{
+  "introduction_to_application": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "specific_aims": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "research_strategy": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "progress_report_publication_list": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "vertebrate_animals": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "select_agent_research": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "multiple_pd_pi_leadership_plan": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "consortium_contractual_arrangements": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "letters_of_support": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "resource_sharing_plans": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "other_plans": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "authentication_of_key_biological_and_or_chemical_resources": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "appendix": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  }
+}

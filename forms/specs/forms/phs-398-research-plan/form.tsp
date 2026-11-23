@@ -1,6 +1,7 @@
 import "./examples.tsp";
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
 using SimplerForms;
@@ -8,6 +9,7 @@ namespace Forms.Phs398ResearchPlan;
 
 /** PHS 398 Research Plan, Grants.gov version 5.0. */
 @Meta.form(#{ id: "phs-398-research-plan", formName: "PHS 398 Research Plan" })
+@Sgg.sync(#{ xml: "mapping" })
 @GrantsGov.form(#{
   legacyFormId: 797,
   shortFormName: "PHS398_ResearchPlan_5_0",
