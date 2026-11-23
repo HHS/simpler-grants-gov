@@ -17,12 +17,9 @@ from src.db.models.entity_models import (
     Organization,
     OrganizationInvitation,
 )
-from src.db.models.user_models import OrganizationUser, OrganizationUserRole, Role, User
+from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User
 from src.services.organizations_v1.organization_audit import add_audit_event
 from src.util.datetime_util import utcnow
-
-ORG_COLLABORATOR = "Collaborator"
-APPLICATION_ROLES = ["View Applications", "Modify Applications", "Submit Applications"]
 
 
 def org_invitation_response(
@@ -95,14 +92,6 @@ def org_invitation_response(
         for role_id in set(role_ids_to_add):
             org_user_role = OrganizationUserRole(organization_user=org_user, role_id=role_id)
             db_session.add(org_user_role)
-
-        if any([r for r in invitation.linked_roles if r.role.role_name == ORG_COLLABORATOR]):
-            application_role_ids = db_session.execute(
-                select(Role.role_id).where(Role.role_name.in_(APPLICATION_ROLES))
-            ).scalars()
-            for role_id in application_role_ids:
-                org_user_role = OrganizationUserRole(organization_user=org_user, role_id=role_id)
-                db_session.add(org_user_role)
 
         # Update response time
         invitation.accepted_at = now
