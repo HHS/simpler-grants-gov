@@ -13,17 +13,6 @@ const ROLES = [
   "project_manager",
 ];
 
-const addressOrder: Record<string, Recorded> = Object.fromEntries(
-  ROLES.map((role) => [
-    `${role}.address.country`,
-    {
-      category: "intentional",
-      reason:
-        "The PDF, DAT and current SGG form put ZIP/Postal Code before Country. The spec reuses the shared Address question, which puts Country first (as Key Contacts does), rather than reordering address fields per form.",
-    },
-  ]),
-);
-
 const NOT_ASKED: Recorded = {
   category: "intentional",
   reason:
@@ -48,7 +37,7 @@ const XSD_ROLES = [
 const US_ZIP_HELP: Recorded = {
   category: "intentional",
   reason:
-    "The shared Person question requires Zip / Postal Code for a US address, and the Address question's help says so. The EPA DAT neither states nor marks that rule.",
+    "The bank's Address question requires Zip / Postal Code for a US address, and its help says so. The EPA DAT neither states nor marks that rule.",
 };
 
 /** Every help text that differs from the DAT, pinned word for word. */
@@ -467,5 +456,4 @@ export const DIFF: FormDiff = {
         `${ROLES[role]}.address.${field.toLowerCase()} -> ${XSD_ROLES[role]}/Address/${field}`,
     ),
   },
-  uiSchema: { outOfOrder: addressOrder },
 };
