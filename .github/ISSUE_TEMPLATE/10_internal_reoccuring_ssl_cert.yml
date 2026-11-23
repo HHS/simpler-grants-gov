@@ -1,0 +1,49 @@
+name: Internal - Reoccuring Task - SSL Certificate Renewal
+description: Track renewing one SSL certificate from CSR to the live site
+title: "[Cert renewal] <domain> expires <date>"
+type: Task
+labels: ["topic: infra", "Maintenance"]
+body:
+  - type: input
+    id: domain
+    attributes:
+      label: Domain
+      description: One domain per ticket
+      placeholder: files.simpler.grants.gov
+    validations:
+      required: true
+
+  - type: input
+    id: expiration_date
+    attributes:
+      label: Expiration Date
+      description: When does the current certificate expire?
+      placeholder: January 1st, 2000
+    validations:
+      required: true
+
+  - type: textarea
+    id: info
+    attributes:
+      label: Information
+      description: Links to the HHS email thread and any other context
+      value: |
+        This certificate needs to be renewed through HHS and re-imported into ACM before it expires.
+
+        * [Runbook](https://github.com/HHS/simpler-grants-gov/blob/main/documentation/infra/ssl-certificate-management.md)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Leave these unchecked when the ticket is created, then check each one off as it is done. Do not close the ticket until the live site serves the new certificate.
+      options:
+        - label: CSR and private key created, and the private key stored in Secrets Manager
+        - label: CSR sent to HHS (email thread linked above)
+        - label: Signed certificate received from HHS and checked against the private key
+        - label: Certificate re-imported into ACM over the ARN in use
+        - label: Live site serves the new certificate (openssl output pasted in a comment)
+    validations:
+      required: false
