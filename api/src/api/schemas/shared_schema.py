@@ -65,9 +65,10 @@ class OrganizationApplicationSchema(Schema):
 
     application_id = fields.UUID(metadata={"description": "The application's ID"})
     application_name = fields.String(
+        attribute="application_display_name",
         metadata={
             "description": "Application name. Falls back to the competition title, then to "
             "'Untitled Application', so it is never null",
             "example": "My application",
-        }
+        },
     )
