@@ -13,13 +13,6 @@ const ROLES = [
   "project_manager",
 ];
 
-/** Zip / Postal Code, which the form asks after Country. */
-const ZIP_AFTER_COUNTRY: Recorded = {
-  category: "intentional",
-  reason:
-    "The form uses the bank's Address question, which asks for Country before Zip / Postal Code, as Key Contacts does. The PDF, the DAT and SGG's existing EPA form ask for the ZIP first.",
-};
-
 const NOT_ASKED: Recorded = {
   category: "intentional",
   reason:
@@ -442,12 +435,6 @@ export const DIFF: FormDiff = {
       ]),
     ),
     differingHelp: help,
-    outOfOrder: Object.fromEntries(
-      ["B1", "B2", "B3", "B4"].map((block) => [
-        `${block}-14`,
-        ZIP_AFTER_COUNTRY,
-      ]),
-    ),
   },
   xsd: {
     absentFromPlan: notAsked(
