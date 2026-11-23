@@ -10,15 +10,13 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { EPA_KEY_CONTACTS_OPPORTUNITIES } from "tests/e2e/apply/fixtures/epa-key-contacts-data";
 import {
   EPA_KEY_CONTACTS_FORM_MATCHER,
   EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS,
   fieldDefinitionsEPAKeyContacts,
 } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
-import {
-  EPA_KEY_CONTACTS_OPPORTUNITIES,
-  epaKeyContactsFailurePathTestData,
-} from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
+import { epaKeyContactsFailurePathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -31,6 +29,7 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
@@ -40,7 +39,9 @@ test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { formLabel, opportunityId } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
+for (const { formLabel, opportunityNumber } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
+  const { opportunityUrl } = loadOpportunityConfig(opportunityNumber);
+
   test(
     `${formLabel} Form - error validation with prefix-only data`,
     { tag: [APPLY_FORMS, FULL_REGRESSION] },
@@ -62,11 +63,7 @@ for (const { formLabel, opportunityId } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
       // And the user enters the application name
       // And the user clicks "Create Application"
       // Then a new application is created
-      await createApplication(
-        page,
-        `/opportunity/${opportunityId}`,
-        testOrgLabel,
-      );
+      await createApplication(page, opportunityUrl, testOrgLabel);
       const applicationUrl = page.url();
 
       // And the Application landing page loads with the "EPA Key Contacts" form link visible
