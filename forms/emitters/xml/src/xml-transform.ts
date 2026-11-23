@@ -14,12 +14,12 @@ import {
   jsonPropertyName,
   mappingTargets,
   modelProperties,
+  propTransform,
   resolveMapping,
   resolveMappingFrom,
   type MappingNode,
   type PropertyCasing,
 } from "./simpler-forms.js";
-import { transformOf, transformParamsOf } from "./transforms.js";
 
 /** One form's rules, in the shape `FORM_XML_TRANSFORM_RULES` takes. */
 export type XmlTransformRules = Record<string, unknown>;
@@ -215,8 +215,8 @@ class Rules {
       return undefined;
     }
     const namespace = elementNamespace(this.program, target);
-    const valueTransform = transformOf(this.program, target);
-    const params = transformParamsOf(this.program, target);
+    const { name: valueTransform, params } =
+      propTransform(this.program, target) ?? {};
     const transform = {
       target: xmlName(this.program, target),
       ...(node.kind === "object" ? { type: "nested_object" } : {}),

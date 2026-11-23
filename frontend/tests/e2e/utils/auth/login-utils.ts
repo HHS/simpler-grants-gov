@@ -32,8 +32,13 @@ export const initializePlaywrightSessionSecrets = () => {
 };
 
 // 12 hour expiration for test tokens to avoid expiration issues
-export const newExpirationDate = () =>
-  new Date(Date.now() + 12 * 60 * 60 * 1000);
+export const newExpirationDate = (sessionDurationSeconds?: number) =>
+  new Date(
+    Date.now() +
+      (sessionDurationSeconds
+        ? sessionDurationSeconds * 1000
+        : 12 * 60 * 60 * 1000),
+  );
 
 /*
   encrypts a server session token (fetched from POST /v1/internal/e2e-token)
@@ -41,6 +46,7 @@ export const newExpirationDate = () =>
 */
 export const generateSpoofedSession = async (
   serverToken: string,
+  sessionDurationSeconds?: number,
 ): Promise<string> => {
   if (!clientJwtKey) {
     throw new Error("Unable to spoof login, missing auth key");
@@ -52,10 +58,13 @@ export const generateSpoofedSession = async (
 
   const fakeToken = await new SignJWT({
     token: serverToken,
+    ...(sessionDurationSeconds && {
+      session_duration_seconds: sessionDurationSeconds,
+    }),
   })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
     .setIssuedAt()
-    .setExpirationTime(newExpirationDate())
+    .setExpirationTime(newExpirationDate(sessionDurationSeconds))
     .sign(clientJwtKey);
 
   return fakeToken;
@@ -66,8 +75,12 @@ export const generateSpoofedSession = async (
 export const createSpoofedSessionCookie = async (
   context: BrowserContext,
   serverToken: string,
+  sessionDurationSeconds?: number,
 ) => {
-  const token = await generateSpoofedSession(serverToken);
+  const token = await generateSpoofedSession(
+    serverToken,
+    sessionDurationSeconds,
+  );
   // Mirror the attributes the app sets on the real session cookie
   // (see createSession in src/services/auth/session.ts). In particular:
   //  - sameSite "Lax": addCookies otherwise defaults to SameSite=None, which
@@ -82,7 +95,9 @@ export const createSpoofedSessionCookie = async (
       url: playwrightEnv.baseUrl,
       httpOnly: true,
       sameSite: "Lax",
-      expires: Math.floor(newExpirationDate().getTime() / 1000),
+      expires: Math.floor(
+        newExpirationDate(sessionDurationSeconds).getTime() / 1000,
+      ),
     },
   ]);
 };

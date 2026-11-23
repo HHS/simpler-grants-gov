@@ -20,6 +20,7 @@ from tests.src.form_schema.parity.json_schema.diffs import (
     other_narrative,
     performance_sites,
     project_abstract,
+    project_abstract_summary,
     project_narrative,
 )
 from tests.src.form_schema.parity.json_schema.harness import flatten_schema, flatten_ui
@@ -39,6 +40,7 @@ DIFFS: list[FormDiff] = [
     budget_narrative.DIFF,
     other_narrative.DIFF,
     project_abstract.DIFF,
+    project_abstract_summary.DIFF,
 ]
 
 

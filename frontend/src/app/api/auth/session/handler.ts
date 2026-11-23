@@ -18,7 +18,10 @@ export async function getUserSession(): Promise<NextResponse> {
   if (currentSession) {
     if (isExpiring(currentSession.expiresAt)) {
       try {
-        const refreshedSession = await refreshSession(currentSession.token);
+        const refreshedSession = await refreshSession(
+          currentSession.token,
+          currentSession.sessionDurationSeconds,
+        );
         return NextResponse.json(toUserProfile(refreshedSession));
       } catch (e) {
         const { status } = readError(e as Error, 500);

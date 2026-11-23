@@ -10,3 +10,6 @@ import "./forms/rr-key-person/index.tsp";
 import "./forms/performance-sites/index.tsp";
 import "./forms/project-abstract/index.tsp";
 import "./forms/ed-abstract-form/index.tsp";
+import "./forms/nsf-deviation-authorization/index.tsp";
+import "./forms/nsf-suggested-reviewers/index.tsp";
+import "./forms/project-abstract-summary/index.tsp";

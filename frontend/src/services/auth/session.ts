@@ -2,6 +2,7 @@ import "server-only";
 
 import { createPublicKey, KeyObject } from "crypto";
 import { environment } from "src/constants/environments";
+import { parseSessionDurationOverride } from "src/services/auth/sessionDurationOverride";
 import {
   API_JWT_ENCRYPTION_ALGORITHM,
   CLIENT_JWT_ENCRYPTION_ALGORITHM,
@@ -9,7 +10,10 @@ import {
   encrypt,
   newExpirationDate,
 } from "src/services/auth/sessionUtils";
-import { postTokenRefresh } from "src/services/fetch/fetchers/fetchers";
+import {
+  postTokenRefresh,
+  postTokenRefreshWithToken,
+} from "src/services/fetch/fetchers/fetchers";
 import { logger } from "src/services/logger/simplerLogger";
 import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
@@ -54,11 +58,20 @@ const decryptLoginGovToken = async (
 };
 
 // ecrypts the api token into client token, then sets client token on cookie
-export const createSession = async (token: string, expiration: Date) => {
+export const createSession = async (
+  token: string,
+  expiration: Date,
+  sessionDurationSeconds?: number,
+) => {
   if (!clientJwtKey) {
     initializeSessionSecrets();
   }
-  const session = await encrypt(token, expiration, clientJwtKey);
+  const session = await encrypt(
+    token,
+    expiration,
+    clientJwtKey,
+    sessionDurationSeconds,
+  );
   const cookie = await cookies();
   cookie.set("session", session, {
     httpOnly: true,
@@ -82,7 +95,7 @@ export const getSession = async (): Promise<UserSession | null> => {
   if (!payload) {
     return null;
   }
-  const { token, exp } = payload;
+  const { token, exp, session_duration_seconds } = payload;
   const session = await decryptLoginGovToken(token);
   return session
     ? {
@@ -91,6 +104,9 @@ export const getSession = async (): Promise<UserSession | null> => {
         // expiration timestamp in the login.gov token is in seconds, in order to compare using
         // JS date functions it should be in ms
         expiresAt: exp ? exp * 1000 : undefined,
+        sessionDurationSeconds: parseSessionDurationOverride(
+          session_duration_seconds,
+        ),
       }
     : null;
 };
@@ -101,14 +117,16 @@ export const getSession = async (): Promise<UserSession | null> => {
 export const createAndReturnSession = async (
   token: string,
   expiration: Date,
+  sessionDurationSeconds?: number,
 ) => {
-  await createSession(token, expiration);
+  await createSession(token, expiration, sessionDurationSeconds);
   const apiSession = await decryptLoginGovToken(token);
   return apiSession
     ? {
         ...apiSession,
         token,
         expiresAt: expiration ? expiration.getTime() : undefined,
+        sessionDurationSeconds,
       }
     : null;
 };
@@ -117,10 +135,29 @@ export const createAndReturnSession = async (
 // note that the API token itself is not updated other than bumping the expiration
 export const refreshSession = async (
   apiSessionToken: string,
+  sessionDurationSeconds?: number,
 ): Promise<UserSession | null> => {
   // update expiration on the API side
-  await postTokenRefresh();
+  await postTokenRefresh(
+    sessionDurationSeconds
+      ? { body: { session_duration_seconds: sessionDurationSeconds } }
+      : undefined,
+  );
   // re-encrypt the existing API token with a refreshed expiration date
   // and return decrypted user info
-  return createAndReturnSession(apiSessionToken, newExpirationDate());
+  return createAndReturnSession(
+    apiSessionToken,
+    newExpirationDate(sessionDurationSeconds),
+    sessionDurationSeconds,
+  );
+};
+
+export const setApiSessionDuration = async (
+  apiSessionToken: string,
+  sessionDurationSeconds: number,
+) => {
+  await postTokenRefreshWithToken({
+    body: { session_duration_seconds: sessionDurationSeconds },
+    additionalHeaders: { "X-SGG-Token": apiSessionToken },
+  });
 };

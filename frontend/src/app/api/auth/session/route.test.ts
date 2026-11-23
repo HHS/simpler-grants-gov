@@ -16,7 +16,7 @@ const mockLoggerError = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
-  refreshSession: (token: string): unknown => refreshSessionMock(token),
+  refreshSession: (...args: unknown[]): unknown => refreshSessionMock(...args),
 }));
 
 jest.mock("src/services/logger/simplerLogger", () => ({
@@ -75,12 +75,28 @@ describe("session GET request", () => {
 
     await getUserSession();
 
-    expect(refreshSessionMock).toHaveBeenCalledWith("fakeToken");
+    expect(refreshSessionMock).toHaveBeenCalledWith("fakeToken", undefined);
     expect(responseJsonMock).toHaveBeenCalledTimes(1);
     expect(responseJsonMock).toHaveBeenCalledWith({
       isLoggedIn: true,
       expiresAt: refreshedExpiresAt,
     });
+  });
+
+  it("keeps a session duration override when refreshing", async () => {
+    getSessionMock.mockImplementation(() => ({
+      ...fullSession,
+      expiresAt: Date.now() + 30 * 1000,
+      sessionDurationSeconds: 60,
+    }));
+    refreshSessionMock.mockImplementation(() => ({
+      ...fullSession,
+      expiresAt: Date.now() + 60 * 1000,
+    }));
+
+    await getUserSession();
+
+    expect(refreshSessionMock).toHaveBeenCalledWith("fakeToken", 60);
   });
 
   it.each([

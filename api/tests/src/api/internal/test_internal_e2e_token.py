@@ -1,8 +1,10 @@
 import uuid
+from datetime import datetime
 from email.utils import parsedate_to_datetime
 
 import jwt
 import pytest
+from freezegun import freeze_time
 from sqlalchemy import select
 
 from src.constants.lookup_constants import Privilege, RoleType
@@ -150,3 +152,26 @@ def test_get_e2e_token_missing_user_id_returns_422(client, db_session, manager_a
     resp = client.post(E2E_TOKEN_URL, headers={"X-API-Key": manager_api_key}, json={})
 
     assert resp.status_code == 422
+
+
+def test_get_e2e_token_session_duration_override(
+    client, db_session, manager_api_key, test_user, monkeypatch
+):
+    """A lower environment can request a shorter token session"""
+    monkeypatch.setenv("ENVIRONMENT", "staging")
+
+    with freeze_time("2024-11-22 12:00:00", tz_offset=0):
+        resp = client.post(
+            E2E_TOKEN_URL,
+            headers={"X-API-Key": manager_api_key},
+            json={"user_id": str(test_user.user_id), "session_duration_seconds": 60},
+        )
+
+    assert resp.status_code == 200
+    decoded_token = jwt.decode(
+        resp.get_json()["data"]["token"], options={"verify_signature": False}
+    )
+    token_session = db_session.execute(
+        select(UserTokenSession).where(UserTokenSession.token_id == decoded_token["sub"])
+    ).scalar_one()
+    assert token_session.expires_at == datetime.fromisoformat("2024-11-22 12:01:00+00:00")

@@ -1,10 +1,8 @@
-import {
-  resolveEncodedName,
-  type EnumMember,
-  type Model,
-  type ModelProperty,
-  type Program,
-  type Type,
+import type {
+  EnumMember,
+  Model,
+  ModelProperty,
+  Program,
 } from "@typespec/compiler";
 import { getNs, isAttribute } from "@typespec/xml";
 
@@ -16,13 +14,32 @@ import {
   type XmlMapping,
 } from "./runtime/format.js";
 import {
-  jsonPropertyName,
   mappedFromRoot,
   modelProperties,
   propMappedFrom,
   type PropertyCasing,
 } from "./simpler-forms.js";
-import { transformOf, transformParamsOf } from "./transforms.js";
+import {
+  elementKey,
+  jsonPath,
+  type MappingContext,
+  type ReadScope,
+} from "./xml-mapping/context.js";
+import {
+  applyMappingDecorators,
+  skipWhenUnanswered,
+} from "./xml-mapping/decorators.js";
+import {
+  findMappedSource,
+  withSelection,
+  type MappedSource,
+} from "./xml-mapping/fields.js";
+import {
+  literalValue,
+  typeShape,
+  valueElement,
+  type TypeShape,
+} from "./xml-mapping/types.js";
 import { declaredNamespaces } from "./xml-transform.js";
 
 /**
@@ -64,106 +81,7 @@ export function xmlMapping(
   }
   const xsdUrl = program.stateMap(stateKeys.xsd).get(root) as
     string | undefined;
-
-  const key = (prop: ModelProperty | Model, attribute = false) => {
-    const name = resolveEncodedName(program, prop, "application/xml");
-    const ns =
-      getNs(program, prop) ??
-      (prop.kind === "ModelProperty" && prop.model
-        ? getNs(program, prop.model)
-        : undefined);
-    // An attribute is unqualified unless prefixed, so it always takes one.
-    if (attribute) return `@${ns?.prefix ?? rootNs.prefix}:${name}`;
-    return ns && ns.namespace !== rootNs.namespace
-      ? `${ns.prefix}:${name}`
-      : name;
-  };
-  const path = (prefix: string[], steps: ModelProperty[]) => [
-    ...prefix,
-    ...steps.map((step) => jsonPropertyName(program, step, casing)),
-  ];
-
-  /**
-   * `into`'s elements, filled from `from`, which sits at `prefix` below the response or the
-   * current item.
-   */
-  const walk = (
-    into: Model,
-    from: Model,
-    prefix: string[],
-    stack: Model[],
-  ): Elements => {
-    const elements: Elements = {};
-    // Attributes first, as an element's start tag carries them.
-    const props = modelProperties(into);
-    for (const prop of props.filter((p) => isAttribute(program, p))) {
-      const value = literalValue(prop.type);
-      const source = sourcePath(program, prop, mapping, from);
-      if (value !== undefined) elements[key(prop, true)] = { $const: value };
-      else if (source)
-        elements[key(prop, true)] = { $field: path(prefix, source).join(".") };
-    }
-
-    for (const prop of props.filter((p) => !isAttribute(program, p))) {
-      const to = shapeOf(prop.type);
-      const source = sourcePath(program, prop, mapping, from);
-      if (!source) {
-        if (propMappedFrom(program, prop, mapping).length) continue; // reported by simpler-forms
-        if (!to.object || to.array || stack.includes(to.object)) continue;
-        // A wrapper: its elements read from the same field as its parent.
-        const inner = walk(to.object, from, prefix, [...stack, to.object]);
-        if (Object.keys(inner).length) elements[key(prop)] = inner;
-        continue;
-      }
-      const steps = path(prefix, source);
-      const field = steps.join(".");
-      const shape = shapeOf(source.at(-1)!.type);
-      if (to.array && !to.object && shape.array && !shape.object) {
-        // A list of values: the element once per value, each item the value itself.
-        elements[key(prop)] = {
-          $each: {
-            items: { $field: field },
-            map: leaf(program, prop, ".", to.item),
-          },
-        };
-        continue;
-      }
-      if (to.array) {
-        if (!shape.array) continue; // reported by simpler-forms
-        if (!to.object || !shape.object) {
-          reportDiagnostic(program, {
-            code: "xml-mapping-unsupported",
-            target: prop,
-            format: {
-              element: key(prop),
-              reason: to.object
-                ? "a list of elements filled from a list of values"
-                : "a list of values filled from a list of objects",
-            },
-          });
-          continue;
-        }
-        elements[key(prop)] = {
-          $each: {
-            items: { $field: field },
-            // Inside `$each`, paths are relative to the item.
-            map: walk(to.object, shape.object, [], [...stack, to.object]),
-          },
-        };
-        continue;
-      }
-      if (to.object && shape.object) {
-        const inner = walk(to.object, shape.object, steps, [
-          ...stack,
-          to.object,
-        ]);
-        if (Object.keys(inner).length) elements[key(prop)] = inner;
-        continue;
-      }
-      elements[key(prop)] = leaf(program, prop, field);
-    }
-    return elements;
-  };
+  const ctx: MappingContext = { program, mapping, casing, rootNs };
 
   return {
     format: XML_MAPPING_FORMAT,
@@ -172,98 +90,169 @@ export function xmlMapping(
       ...declaredNamespaces(program, rootNs),
     },
     ...(xsdUrl ? { xsd_url: xsdUrl } : {}),
-    root: { [key(root)]: walk(root, form, [], [root]) },
+    root: {
+      [elementKey(ctx, root)]: mapElements(
+        ctx,
+        root,
+        { from: form, prefix: [] },
+        [root],
+      ),
+    },
   };
 }
 
 /**
- * A value element: its field, as an attachment, transformed, or as it is. `type` is the
- * value's, which for a list of values is each entry's.
+ * Return the shape of what `found` reads. One item of a list is a single value or object; a
+ * slice is still a list.
  */
-function leaf(
-  program: Program,
+function selectedShape(found: MappedSource): TypeShape {
+  const listed = typeShape(found.path.at(-1)!.type);
+  return found.select && "index" in found.select
+    ? { array: false, object: listed.object }
+    : listed;
+}
+
+/**
+ * Return the mapping for the elements of the XSD model `into`, reading their fields in
+ * `scope`. `stack` lists the XSD models already being mapped, to stop at a recursive type.
+ */
+function mapElements(
+  ctx: MappingContext,
+  into: Model,
+  scope: ReadScope,
+  stack: Model[],
+): Elements {
+  const { program, mapping } = ctx;
+  const elements: Elements = {};
+  const props = modelProperties(into);
+
+  // Write attributes first, since they go in the element's start tag.
+  for (const prop of props.filter((p) => isAttribute(program, p))) {
+    const value = literalValue(prop.type);
+    const found = findMappedSource(program, prop, mapping, scope.from);
+    if (value !== undefined) {
+      elements[elementKey(ctx, prop, true)] = { $const: value };
+      continue;
+    }
+    if (!found) continue;
+    const field = withSelection(
+      jsonPath(ctx, scope.prefix, found.path),
+      found.select,
+    ).join(".");
+    const source = selectedShape(found);
+    if (source.object && !source.array) {
+      reportObjectIntoValue(ctx, prop, field, source.object, true);
+      continue;
+    }
+    elements[elementKey(ctx, prop, true)] = applyMappingDecorators(
+      ctx,
+      prop,
+      { $field: field },
+      scope,
+    );
+  }
+
+  for (const prop of props.filter((p) => !isAttribute(program, p))) {
+    const to = typeShape(prop.type);
+    const found = findMappedSource(program, prop, mapping, scope.from);
+    const put = (value: Value) => {
+      elements[elementKey(ctx, prop)] = applyMappingDecorators(
+        ctx,
+        prop,
+        value,
+        scope,
+      );
+    };
+    if (!found) {
+      if (propMappedFrom(program, prop, mapping).length) continue; // reported by simpler-forms
+      if (!to.object || to.array || stack.includes(to.object)) continue;
+      // A wrapper: its elements read from the same field as its parent.
+      const inner = mapElements(ctx, to.object, scope, [...stack, to.object]);
+      if (Object.keys(inner).length) put(inner);
+      continue;
+    }
+    // An `Item` or `Slice` brackets the field's last step: `types[0]`, `sites[1:]`.
+    const steps = withSelection(
+      jsonPath(ctx, scope.prefix, found.path),
+      found.select,
+    );
+    const field = steps.join(".");
+    const shape = selectedShape(found);
+    if (to.array && !to.object && shape.array && !shape.object) {
+      // A list of values: the element once per value, each item the value itself.
+      put({
+        $each: {
+          items: { $field: field },
+          map: valueElement(program, prop, ".", to.item),
+        },
+      });
+      continue;
+    }
+    if (to.array) {
+      if (!shape.array) continue; // reported by simpler-forms
+      if (!to.object || !shape.object) {
+        reportDiagnostic(program, {
+          code: "xml-mapping-unsupported",
+          target: prop,
+          format: {
+            element: elementKey(ctx, prop),
+            reason: to.object
+              ? "a list of elements filled from a list of values"
+              : "a list of values filled from a list of objects",
+          },
+        });
+        continue;
+      }
+      put({
+        $each: {
+          items: { $field: field },
+          // Inside `$each`, paths are relative to the item.
+          map: mapElements(ctx, to.object, { from: shape.object, prefix: [] }, [
+            ...stack,
+            to.object,
+          ]),
+        },
+      });
+      continue;
+    }
+    if (to.object && shape.object) {
+      const inner = mapElements(
+        ctx,
+        to.object,
+        { from: shape.object, prefix: steps },
+        [...stack, to.object],
+      );
+      if (Object.keys(inner).length)
+        put(skipWhenUnanswered(prop, inner, field));
+      continue;
+    }
+    if (shape.object && !shape.array) {
+      reportObjectIntoValue(ctx, prop, field, shape.object);
+      continue;
+    }
+    put(valueElement(program, prop, field));
+  }
+  return elements;
+}
+
+/**
+ * Report an element or attribute with a single value that reads an object, since the API
+ * would write the whole object as the element's text.
+ */
+function reportObjectIntoValue(
+  ctx: MappingContext,
   prop: ModelProperty,
   field: string,
-  type = prop.type,
-): Value {
-  if (isAttachment(program, type)) return { $attachment: field };
-  const transform = transformOf(program, prop);
-  const params = transformParamsOf(program, prop);
-  return transform
-    ? {
-        $transform: {
-          name: transform,
-          value: { $field: field },
-          ...(params ? { params } : {}),
-        },
-      }
-    : { $field: field };
-}
-
-/**
- * The properties from `from` to the field `prop`'s `@Mapping.from` names: a field of `from`
- * itself, or one below an object field of it with no element of its own.
- */
-function sourcePath(
-  program: Program,
-  prop: ModelProperty,
-  mapping: EnumMember,
-  from: Model,
-): ModelProperty[] | undefined {
-  return propMappedFrom(program, prop, mapping)
-    .map((source) => pathTo(from, source))
-    .find((found) => found !== undefined);
-}
-
-function pathTo(
-  model: Model,
-  field: ModelProperty,
-  seen: Model[] = [],
-): ModelProperty[] | undefined {
-  for (const prop of modelProperties(model))
-    if (copies(prop, field)) return [prop];
-  for (const prop of modelProperties(model)) {
-    const shape = shapeOf(prop.type);
-    if (!shape.object || shape.array || seen.includes(shape.object)) continue;
-    const below = pathTo(shape.object, field, [...seen, model]);
-    if (below) return [prop, ...below];
-  }
-  return undefined;
-}
-
-/** A copy made by spread or `is` counts as the property it was copied from. */
-const copies = (prop: ModelProperty, field: ModelProperty) => {
-  for (let p: ModelProperty | undefined = prop; p; p = p.sourceProperty)
-    if (p === field) return true;
-  return false;
-};
-
-/** Whether a type is a `@GrantsGov.attachment` scalar: an upload id. */
-const isAttachment = (program: Program, type: Type | undefined) =>
-  type?.kind === "Scalar" && program.stateSet(stateKeys.attachment).has(type);
-
-/**
- * Whether a type is a list, and the object it holds (directly or as each entry), if any. A
- * list's `item` is its entries' type.
- */
-function shapeOf(type: Type): { array: boolean; object?: Model; item?: Type } {
-  if (type.kind === "Model" && type.indexer?.key.name === "integer") {
-    const item = type.indexer.value;
-    return {
-      array: true,
-      object: item.kind === "Model" ? item : undefined,
-      item,
-    };
-  }
-  return { array: false, object: type.kind === "Model" ? type : undefined };
-}
-
-function literalValue(type: Type): string | number | boolean | undefined {
-  if (
-    type.kind === "String" ||
-    type.kind === "Number" ||
-    type.kind === "Boolean"
-  )
-    return type.value;
-  return undefined;
+  object: Model,
+  attribute = false,
+): void {
+  reportDiagnostic(ctx.program, {
+    code: "xml-mapping-object-into-value",
+    target: prop,
+    format: {
+      element: elementKey(ctx, prop, attribute),
+      field,
+      model: object.name,
+    },
+  });
 }
