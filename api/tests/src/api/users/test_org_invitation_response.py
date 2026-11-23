@@ -4,6 +4,12 @@ import pytest
 from sqlalchemy import select
 
 from src.constants.lookup_constants import OrganizationAuditEvent, OrganizationInvitationStatus
+from src.constants.static_role_values import (
+    MODIFY_APPLICATIONS_ID,
+    ORG_COLLABORATOR_ID,
+    SUBMIT_APPLICATIONS_ID,
+    VIEW_APPLICATIONS_ID,
+)
 from src.db.models.entity_models import OrganizationInvitation
 from src.db.models.user_models import Role
 from tests.src.db.models import factories
@@ -219,7 +225,7 @@ def test_org_invitation_with_collaborator_role_adds_application_roles(
     for role in roles:
         LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv, role=role)
     collaborator_role = db_session.execute(
-        select(Role).where(Role.role_name == "Collaborator")
+        select(Role).where(Role.role_id == ORG_COLLABORATOR_ID)
     ).scalar_one_or_none()
     LinkOrganizationInvitationToRoleFactory.create(
         organization_invitation=inv, role=collaborator_role
@@ -243,14 +249,14 @@ def test_org_invitation_with_collaborator_role_adds_application_roles(
     # Verify status
     assert res.status == OrganizationInvitationStatus.ACCEPTED
 
-    expected_roles = [r.role_name for r in user.organization_users[0].roles]
+    expected_roles = [r.role_id for r in user.organization_users[0].roles]
     # No duplicate roles
     assert len(expected_roles) == len(set(expected_roles))
 
-    assert "Modify Applications" in expected_roles
-    assert "View Applications" in expected_roles
-    assert "Submit Applications" in expected_roles
-    assert "Collaborator" in expected_roles
+    assert MODIFY_APPLICATIONS_ID in expected_roles
+    assert VIEW_APPLICATIONS_ID in expected_roles
+    assert SUBMIT_APPLICATIONS_ID in expected_roles
+    assert ORG_COLLABORATOR_ID in expected_roles
 
 
 def test_org_invitation_with_admin_role_does_not_add_application_roles(
@@ -283,3 +289,51 @@ def test_org_invitation_with_admin_role_does_not_add_application_roles(
     expected_roles = [r.role_name for r in user.organization_users[0].roles]
     assert len(expected_roles) == 1
     assert "Organization Admin" in expected_roles
+
+
+def test_org_invitation_with_collaborator_roles_only_add_roles_once(
+    client, db_session, user, user_auth_token, enable_factory_create
+):
+    inv = OrganizationInvitationFactory.create(invitee_email=user.email)
+    roles = RoleFactory.create_batch(3)
+    for role in roles:
+        LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv, role=role)
+    collaborator_role = db_session.execute(
+        select(Role).where(Role.role_id == ORG_COLLABORATOR_ID)
+    ).scalar_one_or_none()
+    view_applications = db_session.execute(
+        select(Role).where(Role.role_id == VIEW_APPLICATIONS_ID)
+    ).scalar_one_or_none()
+    LinkOrganizationInvitationToRoleFactory.create(
+        organization_invitation=inv, role=collaborator_role
+    )
+    LinkOrganizationInvitationToRoleFactory.create(
+        organization_invitation=inv, role=view_applications
+    )
+
+    assert inv.status == OrganizationInvitationStatus.PENDING
+
+    resp = client.post(
+        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}/organizations",
+        json={"status": OrganizationInvitationStatus.ACCEPTED},
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert resp.status_code == 200
+
+    res = (
+        db_session.query(OrganizationInvitation)
+        .filter(OrganizationInvitation.organization_invitation_id == inv.organization_invitation_id)
+        .first()
+    )
+    # Verify status
+    assert res.status == OrganizationInvitationStatus.ACCEPTED
+
+    expected_roles = [r.role_id for r in user.organization_users[0].roles]
+    # No duplicate roles
+    assert len(expected_roles) == len(set(expected_roles))
+
+    assert MODIFY_APPLICATIONS_ID in expected_roles
+    assert VIEW_APPLICATIONS_ID in expected_roles
+    assert SUBMIT_APPLICATIONS_ID in expected_roles
+    assert ORG_COLLABORATOR_ID in expected_roles
