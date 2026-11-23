@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "suggested_reviewers": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ReviewerText"
+        }
+      ],
+      "description": "Provide the First, Middle, and Last Name of suggested reviewers that you believe are especially well qualified to review this proposal.",
+      "title": "Suggested reviewers"
+    },
+    "reviewers_not_to_include": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ReviewerText"
+        }
+      ],
+      "description": "Designate persons you would prefer not review this proposal and indicate why.",
+      "title": "Reviewers not to include"
+    }
+  },
+  "examples": [
+    {
+      "suggested_reviewers": "Dr. Ada Example, Department of Biology, Example University; expertise: microbial ecology.",
+      "reviewers_not_to_include": "Dr. Ben Example, Example Institute; recent collaborator with the principal investigator."
+    },
+    {
+      "reviewers_not_to_include": "Dr. Ben Example; recent collaborator."
+    },
+    {
+      "suggested_reviewers": "Dr. Ada Example; expertise: microbial ecology."
+    },
+    {}
+  ],
+  "$defs": {
+    "ReviewerText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    }
+  }
+}
