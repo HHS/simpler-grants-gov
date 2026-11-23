@@ -11,6 +11,8 @@ namespace XSD.ApplicationAttachments;
 enum Namespaces {
   AttachmentForm_1_2: "http://apply.grants.gov/forms/AttachmentForm_1_2-V1.2",
   att: "http://apply.grants.gov/system/Attachments-V1.0",
+  globLib: "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+  glob: "http://apply.grants.gov/system/Global-V1.0",
 }
 
 @name("AttachmentForm_1_2")
