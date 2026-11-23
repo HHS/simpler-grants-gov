@@ -116,6 +116,11 @@ EXPECTED_FORM_DATA = {
         "omb_number": "3145-0058",
         "expiration_date": "11/30/2026",
     },
+    308: {
+        "form_name": "NSF Suggested Reviewers",
+        "omb_number": "3145-0058",
+        "expiration_date": "11/30/2026",
+    },
 }
 
 
@@ -350,3 +355,16 @@ def test_nsf_key_person_expanded_generated_v3_3(nsf_key_person_expanded_generate
     )
     assert form.sgg_version == "1.0"
     assert form.form_instruction_id is not None
+
+
+def test_nsf_suggested_reviewers_v1_1(nsf_suggested_reviewers_v1_1):
+    form = nsf_suggested_reviewers_v1_1
+    expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.form_name == expected_values["form_name"]
+    assert form.omb_number == expected_values["omb_number"]
+    assert (
+        form.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert form.sgg_version == "1.0"
+    assert form.form_renderer == "jsonforms"

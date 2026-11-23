@@ -42,6 +42,7 @@ from src.form_schema.forms import (
     KeyContactsGenerated_v2_0,
     NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
     OtherNarrativeAttachment_v1_2,
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
@@ -708,6 +709,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "NSF Deviation Authorization",
                 NSFDeviationAuthorization_v1_1.form_id,
                 "6d58e0cb-9b08-5732-b4a5-4df7f8cedfa7",
+            ),
+            (
+                "E2E-NSFSR",
+                "NSF Suggested Reviewers",
+                NSFSuggestedReviewers_v1_1.form_id,
+                "97621d95-418a-4c00-96ab-3817c7dc7fe2",
             ),
             (
                 "E2E-PABSS",
