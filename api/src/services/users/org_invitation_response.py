@@ -8,6 +8,7 @@ from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import OrganizationAuditEvent, OrganizationInvitationStatus
 from src.constants.static_role_values import (
     MODIFY_APPLICATIONS_ID,
+    ORG_ADMIN_ID,
     ORG_COLLABORATOR_ID,
     SUBMIT_APPLICATIONS_ID,
     VIEW_APPLICATIONS_ID,
@@ -83,10 +84,11 @@ def org_invitation_response(
         # application roles. Skip any the invitation already carries so we
         # don't insert duplicate (organization_user_id, role_id) rows.
         role_ids_to_add = [r.role_id for r in invitation.linked_roles]
-        is_collaborator = any(
-            [role_id for role_id in role_ids_to_add if role_id == ORG_COLLABORATOR_ID]
-        )
-        if is_collaborator:
+        is_admin = ORG_ADMIN_ID in role_ids_to_add
+        is_collaborator = ORG_COLLABORATOR_ID in role_ids_to_add
+        if is_admin:
+            role_ids_to_add = [r for r in role_ids_to_add if r != ORG_COLLABORATOR_ID]
+        elif is_collaborator:
             role_ids_to_add += [
                 VIEW_APPLICATIONS_ID,
                 MODIFY_APPLICATIONS_ID,

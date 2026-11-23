@@ -267,6 +267,12 @@ def test_org_invitation_with_admin_role_does_not_add_application_roles(
         select(Role).where(Role.role_name == "Organization Admin")
     ).scalar_one_or_none()
     LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv, role=admin_role)
+    collaborator_role = db_session.execute(
+        select(Role).where(Role.role_id == ORG_COLLABORATOR_ID)
+    ).scalar_one_or_none()
+    LinkOrganizationInvitationToRoleFactory.create(
+        organization_invitation=inv, role=collaborator_role
+    )
 
     assert inv.status == OrganizationInvitationStatus.PENDING
 
