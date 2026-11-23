@@ -108,3 +108,9 @@ variable "notification_monitoring" {
     error_message = "Enqueue window must be 1-168 hours, oldest age duration 1-1440 minutes, and thresholds greater than 0."
   }
 }
+
+variable "scheduled_job_state_machine_arns" {
+  type        = map(string)
+  default     = {}
+  description = "Map of scheduled job name to its Step Functions state machine ARN. Each entry gets an alarm that fires when an execution fails."
+}

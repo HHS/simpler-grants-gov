@@ -126,3 +126,8 @@ output "waf_web_acl_name" {
   description = "Web ACL resource name used by the published NOFO WAF rule metric WebACL dimension."
   value       = var.enable_load_balancer ? aws_wafv2_web_acl.waf[0].name : null
 }
+
+output "scheduled_job_state_machine_arns" {
+  description = "Map of scheduled job name to its Step Functions state machine ARN."
+  value       = { for job_name, state_machine in aws_sfn_state_machine.scheduled_jobs : job_name => state_machine.arn }
+}

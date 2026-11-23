@@ -200,6 +200,30 @@ run "job_failed_cause_passes_the_error_as_arguments" {
   }
 }
 
+run "scheduled_job_state_machine_arns_cover_every_job" {
+  command = plan
+
+  variables {
+    scheduled_jobs = {
+      "sprint-reports" = {
+        task_command        = ["make", "gh-extract-transform-and-load"]
+        schedule_expression = "rate(8 hours)"
+        state               = "ENABLED"
+      }
+      "opportunity-load-csvs" = {
+        task_command        = ["analytics", "etl", "opportunity-load"]
+        schedule_expression = "cron(0 11 * * ? *)"
+        state               = "DISABLED"
+      }
+    }
+  }
+
+  assert {
+    condition     = toset(keys(output.scheduled_job_state_machine_arns)) == toset(["sprint-reports", "opportunity-load-csvs"])
+    error_message = "Every scheduled job, enabled or not, must export its state machine ARN for alarms."
+  }
+}
+
 run "default_waf_metric_identity_is_unchanged" {
   command = plan
   assert {
