@@ -85,7 +85,7 @@ const help: Record<string, Pinned> = {
   // key_contacts[].address.zip_code
   "7-17": {
     ...SHARED_HELP,
-    plan: "Enter the zip / postal code. This field is required if the country is the United States.",
+    plan: "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required.",
     source:
       "Enter the Postal Code (e.g., ZIP code). This field is required if Country is the United States.",
   },
