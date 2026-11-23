@@ -83,7 +83,10 @@ def org_invitation_response(
         # application roles. Skip any the invitation already carries so we
         # don't insert duplicate (organization_user_id, role_id) rows.
         role_ids_to_add = [r.role_id for r in invitation.linked_roles]
-        if any([r for r in invitation.linked_roles if r.role.role_id == ORG_COLLABORATOR_ID]):
+        is_collaborator = any(
+            [role_id for role_id in role_ids_to_add if role_id == ORG_COLLABORATOR_ID]
+        )
+        if is_collaborator:
             role_ids_to_add += [
                 VIEW_APPLICATIONS_ID,
                 MODIFY_APPLICATIONS_ID,
