@@ -14,6 +14,7 @@ import { DIFF as phsResearchTraining } from "./phs-398-research-training-program
 import { DIFF as projectAbstractSummary } from "./project-abstract-summary.ts";
 import { DIFF as projectAbstract } from "./project-abstract.ts";
 import { DIFF as projectNarrative } from "./project-narrative-attachment-form.ts";
+import { DIFF as trainingSubaward } from "./phs-398-training-subaward-budget-attachment-s-form.ts";
 import { DIFF as performanceSites } from "./project-performance-site-location-s.ts";
 import { DIFF as rrKeyPersonExpanded } from "./research-and-related-senior-key-person-profile-expanded.ts";
 import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profile.ts";
@@ -38,4 +39,5 @@ export const DIFFS: FormDiff[] = [
   nsfDeviation,
   nsfReviewers,
   projectAbstractSummary,
+  trainingSubaward,
 ];
