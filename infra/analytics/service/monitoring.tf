@@ -12,4 +12,8 @@ module "monitoring" {
   application_log_group                       = module.service.application_log_group
   email_alert_recipients                      = local.monitoring_config.email_alert_recipients
   incident_management_service_integration_url = local.incident_management_service_integration_url
+
+  # Alarm on a failed execution of every scheduled job. Skipped in temporary
+  # environments, which would otherwise alert on every preview deploy.
+  scheduled_job_state_machine_arns = local.is_temporary ? {} : module.service.scheduled_job_state_machine_arns
 }
