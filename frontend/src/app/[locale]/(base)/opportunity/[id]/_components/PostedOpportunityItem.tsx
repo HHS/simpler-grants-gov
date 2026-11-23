@@ -20,7 +20,7 @@ export const PostedOpportunityItem = ({ detail }: Props) => {
 
   const content = close_date
     ? formatHistoryDate(close_date)
-    : (close_date_description ?? formatHistoryDate(null));
+    : (close_date_description || formatHistoryDate(null));
 
   return (
     <div className="padding-05">
