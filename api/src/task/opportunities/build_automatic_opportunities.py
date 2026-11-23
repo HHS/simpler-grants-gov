@@ -47,6 +47,7 @@ from src.form_schema.forms import (
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     PHS398ResearchPlan_v5_0,
+    PHSCareerDevelopmentGenerated_v6_0,
     PHSResearchTrainingGenerated_v5_0,
     ProjectAbstract_v1_2,
     ProjectAbstractGenerated_v1_2,
@@ -645,6 +646,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "PHS 398 Research Training Program Plan",
                 PHSResearchTrainingGenerated_v5_0.form_id,
                 "1809b683-2b2f-4419-878f-ade5be1b9334",
+            ),
+            (
+                "E2E-PCDG",
+                "PHS 398 Career Development Award Supplemental Form",
+                PHSCareerDevelopmentGenerated_v6_0.form_id,
+                "a0338d21-e63b-4b66-a40a-cc5a95a1e055",
             ),
             (
                 "E2E-EDAG",
