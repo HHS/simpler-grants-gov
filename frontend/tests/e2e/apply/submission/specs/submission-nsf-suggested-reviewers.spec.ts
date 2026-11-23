@@ -56,6 +56,8 @@ for (const [applicant, orgLabel] of [
       expect(await openForm(page, form.formConfig.formName)).toBe(true);
       await saveForm(page);
       await verifyFormStatusAfterSave(page, "complete");
+      // Reload to clear the saved message, so the next saveForm waits for its own save.
+      await page.reload();
 
       await suggested.fill("Dr. Ada Example");
       await notToInclude.fill("Dr. Ben Example");
