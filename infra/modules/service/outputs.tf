@@ -1,6 +1,6 @@
 output "public_endpoint" {
   description = "The public endpoint for the service."
-  value       = var.enable_load_balancer ? "http://${aws_lb.alb[0].dns_name}" : null
+  value       = local.has_public_alb ? "http://${aws_lb.alb[0].dns_name}" : null
 }
 
 output "cdn_endpoint" {
@@ -27,12 +27,12 @@ output "cluster_name" {
 
 output "internal_alb_security_group_id" {
   description = "Security group of the internal ALB, null when the service has none"
-  value       = local.enable_internal_alb ? aws_security_group.internal_alb[0].id : null
+  value       = local.has_internal_alb ? aws_security_group.internal_alb[0].id : null
 }
 
 output "load_balancer_arn_suffix" {
   description = "The ARN suffix for use with CloudWatch Metrics."
-  value       = var.enable_load_balancer ? aws_lb.alb[0].arn_suffix : null
+  value       = local.has_public_alb ? aws_lb.alb[0].arn_suffix : null
 }
 
 output "application_log_group" {
@@ -124,10 +124,10 @@ output "processor_service_role_name" {
 
 output "waf_metric_name" {
   description = "WebACL visibility metric name; distinct from the ACL resource name used by NOFO rule metric queries."
-  value       = var.enable_load_balancer ? aws_wafv2_web_acl.waf[0].visibility_config[0].metric_name : null
+  value       = local.has_public_alb ? aws_wafv2_web_acl.waf[0].visibility_config[0].metric_name : null
 }
 
 output "waf_web_acl_name" {
   description = "Web ACL resource name used by the published NOFO WAF rule metric WebACL dimension."
-  value       = var.enable_load_balancer ? aws_wafv2_web_acl.waf[0].name : null
+  value       = local.has_public_alb ? aws_wafv2_web_acl.waf[0].name : null
 }

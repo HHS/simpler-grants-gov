@@ -70,12 +70,12 @@ run "no_alb_created_when_load_balancer_disabled" {
   command = plan
 
   variables {
-    enable_load_balancer = false
+    load_balancer_mode = "none"
   }
 
   assert {
     condition     = length(aws_lb.alb) == 0
-    error_message = "No ALB should be created when enable_load_balancer is false"
+    error_message = "No ALB should be created when load_balancer_mode is none"
   }
 }
 
@@ -84,7 +84,7 @@ run "alb_created_when_load_balancer_enabled" {
 
   assert {
     condition     = length(aws_lb.alb) == 1
-    error_message = "One ALB should be created when enable_load_balancer is true (default)"
+    error_message = "One ALB should be created in the default public mode"
   }
 }
 
@@ -219,25 +219,23 @@ run "explicit_waf_metric_identity_is_exported" {
   }
 }
 
-run "rejects_private_load_balancer_with_public_load_balancer" {
+run "rejects_unknown_load_balancer_mode" {
   command = plan
 
   variables {
-    enable_private_load_balancer = true
+    load_balancer_mode = "internal"
   }
 
-  expect_failures = [var.enable_private_load_balancer]
+  expect_failures = [var.load_balancer_mode]
 }
 
 run "private_load_balancer_has_no_public_alb" {
   command = plan
 
   variables {
-    enable_load_balancer           = false
-    enable_private_load_balancer   = true
-    domain_name                    = "cms.staging.example.gov"
-    certificate_arn                = "arn:aws:acm:us-east-1:123456789012:certificate/mock"
-    internal_alb_allow_vpc_ingress = false
+    load_balancer_mode = "private"
+    domain_name        = "cms.staging.example.gov"
+    certificate_arn    = "arn:aws:acm:us-east-1:123456789012:certificate/mock"
     internal_alb_ingress_security_group_ids = {
       frontend = "sg-0fedcba9876543210"
     }
@@ -260,7 +258,7 @@ run "private_load_balancer_has_no_public_alb" {
 
   assert {
     condition     = length(aws_security_group_rule.internal_alb_ingress_from_vpc) == 0
-    error_message = "VPC-wide ingress must be off when internal_alb_allow_vpc_ingress is false"
+    error_message = "A private-only service must not allow VPC-wide ingress"
   }
 
   assert {
@@ -272,11 +270,14 @@ run "private_load_balancer_has_no_public_alb" {
 run "secure_alb_keeps_restricted_public_alb_and_vpc_ingress" {
   command = plan
 
-  # enable_secure_alb is used with the API Gateway VPC Link, as in the api service
+  # Secure mode is used with the API Gateway VPC Link, as in the api service
   variables {
-    enable_secure_alb  = true
+    load_balancer_mode = "secure"
     enable_api_gateway = true
     domain_name        = "api.staging.example.gov"
+    internal_alb_ingress_security_group_ids = {
+      ignored = "sg-0fedcba9876543210"
+    }
   }
 
   override_data {
@@ -288,11 +289,16 @@ run "secure_alb_keeps_restricted_public_alb_and_vpc_ingress" {
 
   assert {
     condition     = length(aws_lb.alb) == 1 && length(aws_security_group.alb_restricted) == 1
-    error_message = "enable_secure_alb must keep the restricted public ALB"
+    error_message = "Secure mode must keep the restricted public ALB"
   }
 
   assert {
     condition     = length(aws_security_group_rule.internal_alb_ingress_from_vpc) == 1
-    error_message = "enable_secure_alb must keep VPC-wide ingress to the internal ALB by default"
+    error_message = "Secure mode must keep VPC-wide ingress to the internal ALB"
+  }
+
+  assert {
+    condition     = length(aws_security_group_rule.internal_alb_ingress_from_security_groups) == 0
+    error_message = "Named ingress applies only in private mode"
   }
 }

@@ -1,8 +1,7 @@
-data "aws_vpc" "network" {
-  filter {
-    name   = "tag:Name"
-    values = [local.network_config.vpc_name]
-  }
+module "network" {
+  source       = "../../modules/network/data"
+  name         = local.environment_config.network_name
+  project_name = module.project_config.project_name
 }
 
 data "aws_security_groups" "aws_services" {
@@ -13,7 +12,7 @@ data "aws_security_groups" "aws_services" {
 
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
+    values = [module.network.vpc_id]
   }
 }
 
@@ -26,7 +25,7 @@ data "aws_security_groups" "frontend" {
 
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
+    values = [module.network.vpc_id]
   }
 }
 
@@ -115,12 +114,10 @@ module "service" {
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
 
-  enable_load_balancer         = false
-  enable_private_load_balancer = true
-  domain_name                  = local.service_config.domain_name
-  certificate_arn              = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
+  load_balancer_mode = "private"
+  domain_name        = local.service_config.domain_name
+  certificate_arn    = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
 
-  internal_alb_allow_vpc_ingress = false
   internal_alb_ingress_security_group_ids = {
     frontend = one(data.aws_security_groups.frontend.ids)
     vpn      = aws_security_group.vpn.id

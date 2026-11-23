@@ -166,43 +166,27 @@ variable "enable_api_gateway_domain_name" {
   default     = true
 }
 
-variable "enable_load_balancer" {
-  description = "Whether to enable a load balancer for the service"
-  type        = bool
-  default     = true
-}
-
-variable "enable_secure_alb" {
+variable "load_balancer_mode" {
   description = <<EOT
-    Limit ALB traffic to internal vpc only
+    How the service is exposed:
+    - "public": a public ALB (the default)
+    - "secure": a public ALB with ingress closed, plus an internal ALB that anything in
+      the VPC can reach. Used with the API Gateway VPC Link.
+    - "private": only an internal ALB, reachable from internal_alb_ingress_security_group_ids.
+      domain_name resolves to it through a private hosted zone in the VPC.
+    - "none": no load balancer
   EOT
-  type        = bool
-  default     = false
-}
-
-variable "enable_private_load_balancer" {
-  description = <<EOT
-    Serve the service only through the internal ALB, with no public ALB. domain_name
-    then resolves to the internal ALB through a private hosted zone in the VPC.
-    Use instead of enable_load_balancer, not together with it.
-  EOT
-  type        = bool
-  default     = false
+  type        = string
+  default     = "public"
 
   validation {
-    condition     = !(var.enable_private_load_balancer && var.enable_load_balancer)
-    error_message = "Set enable_load_balancer = false when enable_private_load_balancer is true."
+    condition     = contains(["public", "secure", "private", "none"], var.load_balancer_mode)
+    error_message = "load_balancer_mode must be one of: public, secure, private, none."
   }
 }
 
-variable "internal_alb_allow_vpc_ingress" {
-  description = "Whether anything in the VPC can reach the internal ALB on port 443. Set to false to allow only internal_alb_ingress_security_group_ids."
-  type        = bool
-  default     = true
-}
-
 variable "internal_alb_ingress_security_group_ids" {
-  description = "Security groups allowed to reach the internal ALB on port 443, keyed by a static name (for example \"frontend\")"
+  description = "Security groups allowed to reach the internal ALB on port 443, keyed by a static name (for example \"frontend\"). Used in private mode."
   type        = map(string)
   default     = {}
 }
@@ -488,7 +472,7 @@ variable "pdf_readability_waf" {
 
   validation {
     condition = var.pdf_readability_waf == null ? true : (
-      can(regex("(^|-)nofos-", var.service_name)) && var.enable_load_balancer
+      can(regex("(^|-)nofos-", var.service_name)) && contains(["public", "secure"], var.load_balancer_mode)
     )
     error_message = "PDF readability WAF controls require a NOFO service (nofos- or a workspace-prefixed -nofos-) with a load balancer."
   }

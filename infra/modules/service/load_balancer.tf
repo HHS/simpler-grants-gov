@@ -2,6 +2,11 @@
 # Load balancer
 #---------------
 
+locals {
+  has_public_alb   = contains(["public", "secure"], var.load_balancer_mode)
+  has_internal_alb = contains(["secure", "private"], var.load_balancer_mode)
+}
+
 # ALB for an app running in ECS
 # TODO(https://github.com/navapbc/template-infra/issues/165) Protect ALB with WAF
 # trivy:ignore:AVD-AWS-0053
@@ -10,7 +15,7 @@ resource "aws_lb" "alb" {
 
   # we need an identical alb, with mtls enabled
   # so we piggy back off existing and just spin up two when the api sets this true
-  count           = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+  count           = local.has_public_alb ? var.enable_mtls_load_balancer ? 2 : 1 : 0
   depends_on      = [aws_s3_bucket_policy.access_logs]
   ip_address_type = "dualstack"
   # adjust name for the mtls alb that's in slot 1
@@ -18,7 +23,7 @@ resource "aws_lb" "alb" {
   idle_timeout = "120"
   internal     = false
 
-  security_groups = [count.index == 0 && local.enable_restricted_public_alb ? aws_security_group.alb_restricted[0].id : aws_security_group.alb.id]
+  security_groups = [count.index == 0 && local.public_alb_ingress_closed ? aws_security_group.alb_restricted[0].id : aws_security_group.alb.id]
   subnets         = module.network.public_subnet_ids
 
   # Use a separate line to support automated terraform destroy commands
@@ -53,7 +58,7 @@ resource "aws_lb_listener" "alb_listener_http" {
   # checkov:skip=CKV_AWS_103:Require TLS 1.2 as part of implementing HTTPS support
 
   # there is no mtls for http so we don't need to do the same dance here
-  count = var.enable_load_balancer ? 1 : 0
+  count = local.has_public_alb ? 1 : 0
 
   load_balancer_arn = aws_lb.alb[0].arn
   port              = "80"
@@ -87,7 +92,7 @@ resource "aws_lb_listener" "mtls_listener_http" {
 }
 
 resource "aws_lb_listener_rule" "http_to_https_redirect" {
-  count = var.enable_load_balancer && var.certificate_arn != null ? 1 : 0
+  count = local.has_public_alb && var.certificate_arn != null ? 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_http[0].arn
   priority     = 50
@@ -112,7 +117,7 @@ resource "aws_lb_listener_rule" "http_to_https_redirect" {
 
 resource "aws_lb_listener_rule" "app_http_forward" {
   # there is no mtls for http so we don't need to do the same dance here
-  count = var.enable_load_balancer ? 1 : 0
+  count = local.has_public_alb ? 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_http[0].arn
   priority     = 111
@@ -129,7 +134,7 @@ resource "aws_lb_listener_rule" "app_http_forward" {
 }
 
 resource "aws_lb_listener" "alb_listener_https" {
-  count = var.enable_load_balancer && var.certificate_arn != null ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+  count = local.has_public_alb && var.certificate_arn != null ? var.enable_mtls_load_balancer ? 2 : 1 : 0
 
   load_balancer_arn = aws_lb.alb[count.index].arn
   port              = 443
@@ -155,7 +160,7 @@ resource "aws_lb_listener" "alb_listener_https" {
 
 # Optional resource, used for if the ALB has multiple certificates
 resource "aws_lb_listener_certificate" "alb_listener_https_optional_extra_certs" {
-  for_each = toset(var.enable_load_balancer ? var.optional_extra_alb_certs : [])
+  for_each = toset(local.has_public_alb ? var.optional_extra_alb_certs : [])
 
   listener_arn    = aws_lb_listener.alb_listener_https[0].arn
   certificate_arn = each.value
@@ -164,7 +169,7 @@ resource "aws_lb_listener_certificate" "alb_listener_https_optional_extra_certs"
 resource "aws_lb_listener_rule" "app_https_forward" {
   # we need an identical https forward, with mtls enabled
   # so we piggy back off existing and just spin up two when the api sets this true
-  count = var.enable_load_balancer && var.certificate_arn != null ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+  count = local.has_public_alb && var.certificate_arn != null ? var.enable_mtls_load_balancer ? 2 : 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_https[count.index].arn
   priority     = 91
@@ -184,7 +189,7 @@ resource "aws_lb_listener_rule" "app_https_forward" {
 resource "aws_lb_target_group" "app_tg" {
   # you must use a prefix, to facilitate successful tg changes
   # checkov:skip=CKV_AWS_378:We are using HTTPS, just not here specifically.
-  count                = var.enable_load_balancer ? 1 : 0
+  count                = local.has_public_alb ? 1 : 0
   name_prefix          = "app-"
   port                 = var.container_port
   protocol             = "HTTP"
