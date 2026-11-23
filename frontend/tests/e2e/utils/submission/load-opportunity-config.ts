@@ -38,10 +38,7 @@ import {
   PROJECT_NARRATIVE_GENERATED_OPPORTUNITY_DATA,
   PROJECT_NARRATIVE_OPPORTUNITY_DATA,
 } from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
-import {
-  PROJECT_NARRATIVE_ATTACHMENT_FORM_CONFIG,
-  PROJECT_NARRATIVE_ATTACHMENT_FORM_CONFIG,
-} from "tests/e2e/apply/fixtures/project-narrative-attachment-field-definitions";
+import { PROJECT_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-narrative-attachment-field-definitions";
 import {
   PPSL_GENERATED_OPPORTUNITY_DATA,
   PPSL_OPPORTUNITY_DATA,
