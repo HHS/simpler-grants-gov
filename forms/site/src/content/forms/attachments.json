@@ -35,6 +35,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "attachment-1",
           "label": "1) Please attach Attachment 1",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -47,6 +48,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-2",
           "label": "2) Please attach Attachment 2",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -59,6 +61,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-3",
           "label": "3) Please attach Attachment 3",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -71,6 +74,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-4",
           "label": "4) Please attach Attachment 4",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -83,6 +87,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-5",
           "label": "5) Please attach Attachment 5",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -95,6 +100,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-6",
           "label": "6) Please attach Attachment 6",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -107,6 +113,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-7",
           "label": "7) Please attach Attachment 7",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -119,6 +126,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-8",
           "label": "8) Please attach Attachment 8",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -131,6 +139,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-9",
           "label": "9) Please attach Attachment 9",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -143,6 +152,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-10",
           "label": "10) Please attach Attachment 10",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -155,6 +165,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-11",
           "label": "11) Please attach Attachment 11",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -167,6 +178,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-12",
           "label": "12) Please attach Attachment 12",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -179,6 +191,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-13",
           "label": "13) Please attach Attachment 13",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -191,6 +204,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-14",
           "label": "14) Please attach Attachment 14",
           "help_text": "Click to add this attachment.",
           "required": false,
@@ -203,6 +217,7 @@
         },
         {
           "kind": "field",
+          "id": "attachment-15",
           "label": "15) Please attach Attachment 15",
           "help_text": "Click to add this attachment.",
           "required": false,
