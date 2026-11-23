@@ -14,6 +14,7 @@ from .epa_key_contacts_generated import FORM as EPAKeyContactsGenerated_v2_0
 from .gg_lobbying_form import GG_LobbyingForm_v1_1
 from .key_contacts import KeyContacts_v2_0
 from .key_contacts_generated import FORM as KeyContactsGenerated_v2_0
+from .nasa_pi_and_aor_generated import FORM as NasaPIAndAORGenerated_v1_0
 from .nsf_deviation_authorization_generated import FORM as NSFDeviationAuthorization_v1_1
 from .nsf_key_person_expanded_generated import FORM as NSFKeyPersonExpandedGenerated_v3_3
 from .nsf_suggested_reviewers_generated import FORM as NSFSuggestedReviewers_v1_1
@@ -85,6 +86,7 @@ _ALL_FORMS: list[Form] = [
     EDAbstractGenerated_v1_1,
     PHSCareerDevelopmentGenerated_v6_0,
     PHSResearchTrainingGenerated_v5_0,
+    NasaPIAndAORGenerated_v1_0,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -110,6 +112,7 @@ GENERATED_FORMS: list[Form] = [
     EDAbstractGenerated_v1_1,
     PHSCareerDevelopmentGenerated_v6_0,
     PHSResearchTrainingGenerated_v5_0,
+    NasaPIAndAORGenerated_v1_0,
 ]
 
 

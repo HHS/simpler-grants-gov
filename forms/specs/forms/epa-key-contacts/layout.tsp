@@ -42,10 +42,24 @@ model EPAKeyContactsLayout {
 model EPAContactLayout {
   @UI.flatten name: Forms.EPAKeyContacts.EPAContact.name;
   title: Forms.EPAKeyContacts.EPAContact.title;
-  @UI.flatten address: Forms.EPAKeyContacts.EPAContact.address;
+
+  @UI.flatten
+  @UI.field(Forms.EPAKeyContacts.EPAContact.address)
+  address: EPAAddressLayout;
+
   phone: Forms.EPAKeyContacts.EPAContact.phone;
   fax: Forms.EPAKeyContacts.EPAContact.fax;
   email: Forms.EPAKeyContacts.EPAContact.email;
-  @UI.omit county: Forms.EPAKeyContacts.EPAContact.address::type.county;
-  @UI.omit province: Forms.EPAKeyContacts.EPAContact.address::type.province;
+}
+
+/** An EPA contact's address, which asks for Zip / Postal Code before Country, as the PDF does. */
+model EPAAddressLayout {
+  street1: Questions.People.PersonAddress.street1;
+  street2: Questions.People.PersonAddress.street2;
+  city: Questions.People.PersonAddress.city;
+  @UI.omit county: Questions.People.PersonAddress.county;
+  state: Questions.People.PersonAddress.state;
+  @UI.omit province: Questions.People.PersonAddress.province;
+  zipCode: Questions.People.PersonAddress.zipCode;
+  country: Questions.People.PersonAddress.country;
 }
