@@ -133,14 +133,73 @@ class OrganizationListRolesResponseSchema(AbstractResponseSchema):
     data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
 
 
+class ApplicationRoleGrantSchema(Schema):
+    application_id = fields.UUID(
+        required=True,
+        metadata={"description": "ID of an application owned by the organization"},
+    )
+    role_ids = fields.List(
+        fields.UUID(required=True),
+        required=True,
+        validate=Length(min=1),
+        metadata={"description": "Granular application role IDs for this application"},
+    )
+
+
 class OrganizationUpdateUserRolesRequestSchema(Schema):
-    role_ids = fields.List(fields.UUID(required=True), validate=Length(min=1))
+    role_ids = fields.List(
+        fields.UUID(required=True),
+        required=True,
+        validate=Length(min=1),
+        metadata={
+            "description": "Exactly one base role (Admin, Collaborator, or Member), plus any granular application roles granted organization-wide"
+        },
+    )
+    individual_application_roles = fields.List(
+        fields.Nested(ApplicationRoleGrantSchema),
+        load_default=list,
+        metadata={
+            "description": "Full replacement of the user's per-application roles in the organization. Defaults to an empty list."
+        },
+    )
+    is_external = fields.Boolean(
+        allow_none=True,
+        load_default=None,
+        metadata={
+            "description": "Whether the user is external to the organization. Null or omitted leaves it unchanged."
+        },
+    )
+
+
+class ApplicationRoleAssignmentSchema(Schema):
+    application_id = fields.UUID(metadata={"description": "Application unique identifier"})
+    roles = fields.List(
+        fields.Nested(RoleSchema),
+        metadata={"description": "Granular application roles for this application"},
+    )
+
+
+class OrganizationUpdateUserRolesDataSchema(Schema):
+    roles = fields.List(
+        fields.Nested(RoleSchema),
+        metadata={"description": "User roles in this organization"},
+    )
+    individual_application_roles = fields.List(
+        fields.Nested(ApplicationRoleAssignmentSchema),
+        metadata={"description": "User roles on individual applications in this organization"},
+    )
+    is_external = fields.Boolean(
+        metadata={"description": "Whether the user is external to the organization"},
+    )
 
 
 class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
     """Schema for PUT /organizations/:organization_id/users/:user_id"""
 
-    data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
+    data = fields.Nested(
+        OrganizationUpdateUserRolesDataSchema,
+        metadata={"description": "The user's updated roles"},
+    )
 
 
 class OrganizationRemoveUserResponseSchema(AbstractResponseSchema):

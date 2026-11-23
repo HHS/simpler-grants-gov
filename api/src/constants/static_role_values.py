@@ -145,6 +145,13 @@ SUBMIT_APPLICATIONS = Role(
     ],
 )
 
+# Every organization user has exactly one of these base roles
+ORGANIZATION_BASE_ROLE_IDS = frozenset({ORG_ADMIN_ID, ORG_MEMBER_ID, ORG_COLLABORATOR_ID})
+
+GRANULAR_APPLICATION_ROLE_IDS = frozenset(
+    {VIEW_APPLICATIONS_ID, MODIFY_APPLICATIONS_ID, SUBMIT_APPLICATIONS_ID}
+)
+
 ############################
 # Core Application Roles
 ############################

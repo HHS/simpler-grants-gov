@@ -1,15 +1,26 @@
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import select
 
 from src.constants.lookup_constants import OrganizationAuditEvent, Privilege
+from src.constants.static_role_values import (
+    APPLICATION_OWNER_ID,
+    ORG_COLLABORATOR_ID,
+    VIEW_APPLICATIONS_ID,
+)
 from src.db.models.user_models import (
+    ApplicationUser,
     OrganizationUser,
     OrganizationUserRole,
+    Role,
     UserSavedOpportunityNotification,
 )
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
 from tests.src.db.models.factories import (
+    ApplicationFactory,
+    ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     OrganizationFactory,
     UserSavedOpportunityNotificationFactory,
 )
@@ -125,6 +136,52 @@ class TestRemoveUserFromOrganization:
             .all()
         )
         assert len(roles_after) == 0
+
+    def test_remove_user_deletes_application_roles(
+        self, enable_factory_create, seed_form_registry, client, db_session
+    ):
+        """Test that removing a Collaborator deletes their roles on the organization's applications"""
+        _, organization, admin_token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+        target_user, _, _ = create_user_in_org(
+            role=db_session.get(Role, ORG_COLLABORATOR_ID),
+            db_session=db_session,
+            organization=organization,
+        )
+
+        org_applications = ApplicationFactory.create_batch(2, organization=organization)
+        other_org_application = ApplicationFactory.create(organization=OrganizationFactory.create())
+        application_roles = [
+            (org_applications[0], [VIEW_APPLICATIONS_ID]),
+            (org_applications[1], [APPLICATION_OWNER_ID, VIEW_APPLICATIONS_ID]),
+            (other_org_application, [VIEW_APPLICATIONS_ID]),
+        ]
+        for application, role_ids in application_roles:
+            app_user = ApplicationUserFactory.create(application=application, user=target_user)
+            for role_id in role_ids:
+                ApplicationUserRoleFactory.create(
+                    application_user=app_user, role=db_session.get(Role, role_id)
+                )
+
+        resp = client.delete(
+            f"/v1/organizations/{organization.organization_id}/users/{target_user.user_id}",
+            headers={"X-SGG-Token": admin_token},
+        )
+
+        assert resp.status_code == 200
+
+        app_users = db_session.scalars(
+            select(ApplicationUser).where(ApplicationUser.user_id == target_user.user_id)
+        ).all()
+        assert {
+            app_user.application_id: {role.role_id for role in app_user.roles}
+            for app_user in app_users
+        } == {
+            org_applications[1].application_id: {APPLICATION_OWNER_ID},
+            other_org_application.application_id: {VIEW_APPLICATIONS_ID},
+        }
 
     def test_remove_user_403_insufficient_privileges(
         self, enable_factory_create, client, db_session
