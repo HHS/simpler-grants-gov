@@ -104,6 +104,19 @@ describe("shapeFormData", () => {
     const data = shapeFormData(formData, {});
     expect(data).toMatchObject(shapedFormData);
   });
+  it.each(["null", "true", '"Dr. Ada Example"', '["Dr. Ada Example"]'])(
+    "keeps text that looks like JSON in a string field (%p)",
+    (text) => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: { answer: { type: "string", maxLength: 4000 } },
+      };
+      const formData = new FormData();
+      formData.append("answer", text);
+
+      expect(shapeFormData(formData, formSchema)).toEqual({ answer: text });
+    },
+  );
 });
 
 describe("getFieldSchema", () => {
