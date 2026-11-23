@@ -34,6 +34,7 @@ import {
   expectNoSortInURL,
   expectRenderedSortOptions,
   expectRowsSorted,
+  expectSeededSortOrder,
   expectSortInURL,
   expectSortSelected,
   gotoPartialResultsSearch,
@@ -42,6 +43,7 @@ import {
   openFirstResultAndGoBack,
   readResultRows,
   SEARCH_PAGE_SIZE,
+  SEEDED_SORT_CASES,
   selectSortCase,
   SORT_CASES,
   verifySortedAcrossPages,
@@ -54,7 +56,7 @@ import {
 
 const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
-const { baseUrl } = playwrightEnv;
+const { baseUrl, targetEnv } = playwrightEnv;
 
 // The partial-result-set check needs a search that returns 2-25 results (one page, at
 // least two rows to compare). Each isolated form test opportunity adds another E2E-*
@@ -389,6 +391,28 @@ test.describe("Search results sorting", () => {
           "partial result set",
           partialCount,
         );
+      },
+    );
+  }
+});
+
+// The records these tests search for exist only in the local seed data
+// (api/tests/lib/seed_local_db.py), so they are skipped against other environments.
+test.describe("Search results sorting - seeded edge cases", () => {
+  test.skip(
+    targetEnv !== "local",
+    "Requires seed data from api/tests/lib/seed_local_db.py, which is only loaded locally",
+  );
+
+  for (const seededCase of SEEDED_SORT_CASES) {
+    test(
+      seededCase.name,
+      { tag: [DISCOVERY, FULL_REGRESSION] },
+      async ({ page }, testInfo) => {
+        const projectName = testInfo.project.name;
+        const isMobile = !!projectName.match(/[Mm]obile/);
+
+        await expectSeededSortOrder(page, seededCase, isMobile, projectName);
       },
     );
   }
