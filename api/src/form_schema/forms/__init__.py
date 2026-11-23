@@ -21,6 +21,9 @@ from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
 from .other_narrative_generated import FORM as OtherNarrativeGenerated_v1_2
 from .performance_sites_generated import FORM as PerformanceSitesGenerated_v4_0
 from .phs_398_research_plan_generated import FORM as PHS398ResearchPlan_v5_0
+from .phs_398_research_training_program_plan_generated import (
+    FORM as PHSResearchTrainingGenerated_v5_0,
+)
 from .project_abstract import ProjectAbstract_v1_2
 from .project_abstract_generated import FORM as ProjectAbstractGenerated_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
@@ -77,6 +80,7 @@ _ALL_FORMS: list[Form] = [
     ProjectAbstractGenerated_v1_2,
     PHS398ResearchPlan_v5_0,
     EDAbstractGenerated_v1_1,
+    PHSResearchTrainingGenerated_v5_0,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -100,6 +104,7 @@ GENERATED_FORMS: list[Form] = [
     ProjectAbstractGenerated_v1_2,
     PHS398ResearchPlan_v5_0,
     EDAbstractGenerated_v1_1,
+    PHSResearchTrainingGenerated_v5_0,
 ]
 
 

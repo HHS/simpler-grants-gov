@@ -47,6 +47,7 @@ from src.form_schema.forms import (
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     PHS398ResearchPlan_v5_0,
+    PHSResearchTrainingGenerated_v5_0,
     ProjectAbstract_v1_2,
     ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -638,6 +639,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Budget Narrative Attachment Form (Generated)",
                 BudgetNarrativeGenerated_v1_2.form_id,
                 "c45674bf-a5e8-4f90-b098-ff5158f08c5e",
+            ),
+            (
+                "E2E-PRTG",
+                "PHS 398 Research Training Program Plan",
+                PHSResearchTrainingGenerated_v5_0.form_id,
+                "1809b683-2b2f-4419-878f-ade5be1b9334",
             ),
             (
                 "E2E-EDAG",

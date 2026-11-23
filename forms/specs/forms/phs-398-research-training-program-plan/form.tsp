@@ -1,6 +1,7 @@
 import "./examples.tsp";
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
 using SimplerForms;
@@ -11,6 +12,7 @@ namespace Forms.Phs398ResearchTrainingProgramPlan;
   id: "phs-398-research-training-program-plan",
   formName: "PHS 398 Research Training Program Plan",
 })
+@Sgg.sync(#{ xml: "mapping" })
 @GrantsGov.form(#{
   legacyFormId: 798,
   shortFormName: "PHS398_ResearchTrainingProgramPlan_5_0",

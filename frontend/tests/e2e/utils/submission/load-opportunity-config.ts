@@ -25,6 +25,8 @@ import {
 import { OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/other-narrative-attachment-field-definitions";
 import { PHS_RESEARCH_PLAN_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/phs-research-plan-form-data";
 import { PHS_RESEARCH_PLAN_FORM_CONFIG } from "tests/e2e/apply/fixtures/phs-research-plan-form-field-definitions";
+import { PHS_RESEARCH_TRAINING_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/phs-research-training-data";
+import { PHS_RESEARCH_TRAINING_FORM_CONFIG } from "tests/e2e/apply/fixtures/phs-research-training-field-definitions";
 import {
   PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_OPPORTUNITY_DATA,
@@ -91,6 +93,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   ED_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   PHS_RESEARCH_PLAN_GENERATED_OPPORTUNITY_DATA,
+  PHS_RESEARCH_TRAINING_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_GENERATED_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
   SF424_SHORT_OPPORTUNITY_DATA,
@@ -125,6 +128,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   projectAbstractGenerated: PROJECT_ABSTRACT_FORM_CONFIG,
   edAbstractGenerated: ED_ABSTRACT_FORM_CONFIG,
   phsResearchPlanGenerated: PHS_RESEARCH_PLAN_FORM_CONFIG,
+  phsResearchTrainingGenerated: PHS_RESEARCH_TRAINING_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
   sf424short: SF424_SHORT_FORM_CONFIG,
   sf424a: SF424A_FORM_CONFIG,

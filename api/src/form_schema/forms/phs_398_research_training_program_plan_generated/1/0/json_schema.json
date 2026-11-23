@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "introduction_to_application": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "1. Introduction to Application (for Resubmission and Revision applications)"
+    },
+    "program_plan": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "2. Program Plan"
+    },
+    "responsible_conduct_of_research": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "3. Plan for Instruction in the Responsible Conduct of Research"
+    },
+    "methods_for_enhancing_reproducibility": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "4. Plan for Instruction in Methods for Enhancing Reproducibility"
+    },
+    "multiple_pd_pi_leadership_plan": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "5. Multiple PD/PI Leadership Plan (if applicable)"
+    },
+    "progress_report": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "6. Progress Report (for Renewal applications)"
+    },
+    "participating_faculty_biosketches": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "7. Participating Faculty Biosketches"
+    },
+    "letters_of_support": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "8. Letters of Support"
+    },
+    "data_tables": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "9. Data Tables"
+    },
+    "vertebrate_animals": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "10. Vertebrate Animals"
+    },
+    "select_agent_research": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "11. Select Agent Research"
+    },
+    "consortium_contractual_arrangements": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "12. Consortium/Contractual Arrangements"
+    },
+    "other_plans": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "13. Other Plan(s)"
+    },
+    "appendix": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/types.attachment"
+      },
+      "maxItems": 10,
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "14. Appendix"
+    }
+  },
+  "required": [
+    "program_plan"
+  ],
+  "examples": [
+    {
+      "program_plan": "00000000-0000-4000-8000-000000079801"
+    },
+    {
+      "introduction_to_application": "00000000-0000-4000-8000-000000079801",
+      "program_plan": "00000000-0000-4000-8000-000000079802",
+      "responsible_conduct_of_research": "00000000-0000-4000-8000-000000079803",
+      "methods_for_enhancing_reproducibility": "00000000-0000-4000-8000-000000079804",
+      "multiple_pd_pi_leadership_plan": "00000000-0000-4000-8000-000000079805",
+      "progress_report": "00000000-0000-4000-8000-000000079806",
+      "participating_faculty_biosketches": "00000000-0000-4000-8000-000000079807",
+      "letters_of_support": "00000000-0000-4000-8000-000000079808",
+      "data_tables": "00000000-0000-4000-8000-000000079809",
+      "vertebrate_animals": "00000000-0000-4000-8000-000000079810",
+      "select_agent_research": "00000000-0000-4000-8000-000000079811",
+      "consortium_contractual_arrangements": "00000000-0000-4000-8000-000000079812",
+      "other_plans": "00000000-0000-4000-8000-000000079813",
+      "appendix": [
+        "00000000-0000-4000-8000-000000079820",
+        "00000000-0000-4000-8000-000000079821"
+      ]
+    },
+    {
+      "program_plan": "00000000-0000-4000-8000-000000079801",
+      "appendix": [
+        "00000000-0000-4000-8000-000000079830",
+        "00000000-0000-4000-8000-000000079831",
+        "00000000-0000-4000-8000-000000079832",
+        "00000000-0000-4000-8000-000000079833",
+        "00000000-0000-4000-8000-000000079834",
+        "00000000-0000-4000-8000-000000079835",
+        "00000000-0000-4000-8000-000000079836",
+        "00000000-0000-4000-8000-000000079837",
+        "00000000-0000-4000-8000-000000079838",
+        "00000000-0000-4000-8000-000000079839"
+      ]
+    }
+  ],
+  "description": "PHS 398 Research Training Program Plan, Grants.gov version 5.0.",
+  "$defs": {
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
+    }
+  }
+}

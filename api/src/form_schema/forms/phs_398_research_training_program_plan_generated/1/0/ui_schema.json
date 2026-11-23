@@ -1,0 +1,163 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/introduction_to_application",
+          "label": "1. Introduction to Application (for Resubmission and Revision applications)",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Introduction",
+      "options": {
+        "description": "Include an Introduction to Application for Resubmission or Revision applications."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/program_plan",
+          "label": "2. Program Plan",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/responsible_conduct_of_research",
+          "label": "3. Plan for Instruction in the Responsible Conduct of Research",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/methods_for_enhancing_reproducibility",
+          "label": "4. Plan for Instruction in Methods for Enhancing Reproducibility",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/multiple_pd_pi_leadership_plan",
+          "label": "5. Multiple PD/PI Leadership Plan (if applicable)",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/progress_report",
+          "label": "6. Progress Report (for Renewal applications)",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Training Program Section",
+      "options": {
+        "description": "Attach the required Program Plan. Include a Progress Report for a Renewal application. For a Resubmission it is optional. For other application types it does not apply."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/participating_faculty_biosketches",
+          "label": "7. Participating Faculty Biosketches",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/letters_of_support",
+          "label": "8. Letters of Support",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/data_tables",
+          "label": "9. Data Tables",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Faculty, Trainees and Training Record Section",
+      "options": {
+        "description": "Prepare each applicable faculty, support and training-record document for its named purpose. Follow funding opportunity and agency instructions."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/vertebrate_animals",
+          "label": "10. Vertebrate Animals",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/select_agent_research",
+          "label": "11. Select Agent Research",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/consortium_contractual_arrangements",
+          "label": "12. Consortium/Contractual Arrangements",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/other_plans",
+          "label": "13. Other Plan(s)",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Other Training Program Section",
+      "options": {
+        "description": "Include Vertebrate Animals when you selected Yes to “Are Vertebrate Animals Used?” on R&R Other Project Information. Prepare each other applicable document for its named purpose and follow agency instructions."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/appendix",
+          "label": "14. Appendix",
+          "options": {
+            "widget": "AttachmentArray"
+          }
+        }
+      ],
+      "label": "Appendix",
+      "options": {
+        "description": "Attach up to ten PDF files in the order required by the funding opportunity and agency instructions."
+      }
+    }
+  ],
+  "label": "PHS 398 Research Training Program Plan, Grants.gov version 5.0."
+}

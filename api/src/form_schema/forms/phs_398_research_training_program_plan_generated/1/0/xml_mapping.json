@@ -1,0 +1,95 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/PHS398_ResearchTrainingProgramPlan_5_0-V5.0",
+    "PHS398_ResearchTrainingProgramPlan_5_0": "http://apply.grants.gov/forms/PHS398_ResearchTrainingProgramPlan_5_0-V5.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PHS398_ResearchTrainingProgramPlan_5_0-V5.0.xsd",
+  "root": {
+    "PHS398_ResearchTrainingProgramPlan_5_0": {
+      "@PHS398_ResearchTrainingProgramPlan_5_0:FormVersion": {
+        "$const": "5.0"
+      },
+      "ResearchTrainingProgramPlanAttachments": {
+        "IntroductionToApplication": {
+          "attFile": {
+            "$attachment": "introduction_to_application"
+          }
+        },
+        "ProgramPlan": {
+          "attFile": {
+            "$attachment": "program_plan"
+          }
+        },
+        "ResponsibleConductOfResearch": {
+          "attFile": {
+            "$attachment": "responsible_conduct_of_research"
+          }
+        },
+        "MethodsForEnhancingReproducibility": {
+          "attFile": {
+            "$attachment": "methods_for_enhancing_reproducibility"
+          }
+        },
+        "MultiplePDPILeadershipPlan": {
+          "attFile": {
+            "$attachment": "multiple_pd_pi_leadership_plan"
+          }
+        },
+        "ProgressReport": {
+          "attFile": {
+            "$attachment": "progress_report"
+          }
+        },
+        "ParticipatingFacultyBiosketches": {
+          "attFile": {
+            "$attachment": "participating_faculty_biosketches"
+          }
+        },
+        "LettersOfSupport": {
+          "attFile": {
+            "$attachment": "letters_of_support"
+          }
+        },
+        "DataTables": {
+          "attFile": {
+            "$attachment": "data_tables"
+          }
+        },
+        "VertebrateAnimals": {
+          "attFile": {
+            "$attachment": "vertebrate_animals"
+          }
+        },
+        "SelectAgentResearch": {
+          "attFile": {
+            "$attachment": "select_agent_research"
+          }
+        },
+        "ConsortiumContractualArrangements": {
+          "attFile": {
+            "$attachment": "consortium_contractual_arrangements"
+          }
+        },
+        "OtherPlans": {
+          "attFile": {
+            "$attachment": "other_plans"
+          }
+        },
+        "Appendix": {
+          "att:AttachedFile": {
+            "$each": {
+              "items": {
+                "$field": "appendix"
+              },
+              "map": {
+                "$attachment": "."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
