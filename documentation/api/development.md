@@ -203,8 +203,8 @@ Individual services can be run through Docker, which can be useful in concert wi
 #### Local Email
 
 Local development captures email in [Mailpit](https://mailpit.axllent.org/) instead of
-sending it to real recipients. This includes organization invitations, workflow approval
-messages, and scheduled notifications. Run `make run-email-notifications` after seeding
+sending it to real recipients. This includes organization invitations and scheduled
+notifications. Run `make run-email-notifications` after seeding
 suitable local data to generate scheduled messages.
 
 `local.env` uses the Docker service name `mailpit` for SMTP. When running API commands
