@@ -1,12 +1,392 @@
 {
   "title": "PHS 398 Career Development Award Supplemental Form",
   "slug": "phs-398-career-development-award-supplemental-form",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["R&R"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 13920,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/799",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/PHS398_CareerDevelopmentAwardSup_6_0-V6.0_F799.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PHS398_CareerDevelopmentAwardSup_6_0-V6.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/PHS398_CareerDevelopmentAwardSup_6_0-V6.0_F799.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/PHS398_CareerDevelopmentAwardSup_6_0-V6.0_F799.xls",
+  "omb_number": "0925-0001",
+  "expiration_date": "12/31/2027",
+  "xsd_root": "PHS398_CareerDevelopmentAwardSup_6_0",
+  "spec_id": "phs-398-career-development-award-supplemental-form",
+  "widgets": [
+    "ApplicationAttachmentWidget",
+    "ApplicationMultipleAttachmentWidget",
+    "RadioWidget",
+    "CheckboxWidget"
+  ],
+  "new_concepts": [],
+  "description": "Research strategy, supporting documents and citizenship for a PHS 398 career development application.",
+  "notes": [
+    "No answers are pre- or post-populated. The upload service assigns file IDs.",
+    "The empty form requires Research Strategy and a Yes or No citizenship answer. Candidate Information and Specific Aims are described as required in help, but the DAT marks both optional, the PDF has no required markers for them and the XSD allows omission. Follow the applicable opportunity instructions.",
+    "Answering No requires a non-U.S. citizenship status. The permanent-residency checkbox is optional and applies only to applicants with a temporary U.S. visa.",
+    "The XML omits a previous citizenship follow-up when the applicant changes to an answer for which it no longer applies.",
+    "The Introduction is required and enabled for Resubmission or Revision. The Progress Report Publication List is enabled for Renewal or Resubmission and required for Renewal. The DAT clears these attachments when their application type does not apply. Vertebrate Animals is required when the other form says animals are used.",
+    "The DAT allows one Appendix group with up to 10 PDFs. The XSD allows up to 100 PDFs in that group.",
+    "DAT 0-1 burden statement: Public reporting burden for this collection of information is estimated to average 10 hours per response, including the time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. An agency may not conduct or sponsor, and a person is not required to respond to, a collection of information unless it displays a currently valid OMB control number. Send comments regarding this burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to: NIH, Project Clearance Branch, 6705 Rockledge Drive, MSC 7974, Bethesda, MD 20892-7974, ATTN: PRA (0925-0001). Do not return the completed form to this address."
+  ],
+  "risks": [
+    "Introduction, Progress Report Publication List and Vertebrate Animals depend on other form answers. The definition shows instructions for these fields. Runtime enforcement requires those answers.",
+    "The XSD allows the whole attachment wrapper to be absent. The applicant form requires Research Strategy, as marked in the DAT and PDF.",
+    "Actual PDF content, file ownership and page limits require the application upload service and opportunity instructions."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Introduction",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "introduction-to-application",
+          "label": "1. Introduction to Application (for Resubmission and Revision applications)",
+          "required": "Conditional: required for Resubmission or Revision on SF-424 R&R",
+          "dat_field": "1-1",
+          "json_path": "introduction_to_application",
+          "xml_path": "CareerDevelopmentAwardAttachments/IntroductionToApplication/attFile",
+          "help_text": "Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        }
+      ],
+      "help_text": "Attach an Introduction to Application for Resubmission and Revision applications."
+    },
+    {
+      "kind": "section",
+      "label": "Candidate Section",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "candidate-information-and-goals",
+          "label": "2. Candidate Information and Goals for Career Development",
+          "required": false,
+          "dat_field": "2-1",
+          "json_path": "candidate_information_and_goals",
+          "xml_path": "CareerDevelopmentAwardAttachments/CandidateInformationAndGoals/attFile",
+          "help_text": "Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Research Plan Section",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "specific-aims",
+          "label": "3. Specific Aims",
+          "required": false,
+          "dat_field": "3-1",
+          "json_path": "specific_aims",
+          "xml_path": "CareerDevelopmentAwardAttachments/SpecificAims/attFile",
+          "help_text": "Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "research-strategy",
+          "label": "4. Research Strategy",
+          "required": true,
+          "dat_field": "3-2",
+          "json_path": "research_strategy",
+          "xml_path": "CareerDevelopmentAwardAttachments/ResearchStrategy/attFile",
+          "help_text": "Attach PDF formatted file. This attachment is required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "progress-report-publication-list",
+          "label": "5. Progress Report Publication List (for Renewal applications)",
+          "required": "Conditional: required for Renewal on SF-424 R&R",
+          "dat_field": "3-3",
+          "json_path": "progress_report_publication_list",
+          "xml_path": "CareerDevelopmentAwardAttachments/ProgressReportPublicationList/attFile",
+          "help_text": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "responsible-conduct-of-research",
+          "label": "6. Training in the Responsible Conduct of Research",
+          "required": false,
+          "dat_field": "3-4",
+          "json_path": "responsible_conduct_of_research",
+          "xml_path": "CareerDevelopmentAwardAttachments/ResponsibleConductOfResearch/attFile",
+          "help_text": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        }
+      ],
+      "help_text": "Research Strategy is required. Include the Progress Report Publication List for Renewal applications. It is optional for Resubmission."
+    },
+    {
+      "kind": "section",
+      "label": "Other Candidate Information Section",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "mentoring-plan",
+          "label": "7. Candidate's Plan to Provide Mentoring",
+          "required": false,
+          "dat_field": "4-1",
+          "json_path": "mentoring_plan",
+          "xml_path": "CareerDevelopmentAwardAttachments/MentoringPlan/attFile",
+          "help_text": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Mentor, Co-Mentor, Consultant, Collaborators Section",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "statements-of-support",
+          "label": "8. Plans and Statements of Mentor and Co-Mentor(s)",
+          "required": false,
+          "dat_field": "5-1",
+          "json_path": "statements_of_support",
+          "xml_path": "CareerDevelopmentAwardAttachments/StatementsOfSupport/attFile",
+          "help_text": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "letters-of-support",
+          "label": "9. Letters of Support from Collaborators, Contributors, and Consultants",
+          "required": false,
+          "dat_field": "5-2",
+          "json_path": "letters_of_support",
+          "xml_path": "CareerDevelopmentAwardAttachments/LettersOfSupport/attFile",
+          "help_text": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Environment and Institutional Commitment to the Candidate Section",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "institutional-environment",
+          "label": "10. Description of Institutional Environment",
+          "required": false,
+          "dat_field": "6-1",
+          "json_path": "institutional_environment",
+          "xml_path": "CareerDevelopmentAwardAttachments/InsitutionalEnvironment/attFile",
+          "help_text": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "institutional-commitment",
+          "label": "11. Institutional Commitment to Candidate’s Research Career Development",
+          "required": false,
+          "dat_field": "6-2",
+          "json_path": "institutional_commitment",
+          "xml_path": "CareerDevelopmentAwardAttachments/InstitutionalCommitment/attFile",
+          "help_text": "Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "candidates-contribution",
+          "label": "12. Description of Candidate's Contribution to Program Goals",
+          "required": false,
+          "dat_field": "6-3",
+          "json_path": "candidates_contribution",
+          "xml_path": "CareerDevelopmentAwardAttachments/CandidatesContribution/attFile",
+          "help_text": "Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Other Research Plan Section",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "vertebrate-animals",
+          "label": "13. Vertebrate Animals",
+          "required": "Conditional: required if vertebrate animal use is Yes on R&R Other Project Information",
+          "dat_field": "7-1",
+          "json_path": "vertebrate_animals",
+          "xml_path": "CareerDevelopmentAwardAttachments/VertebrateAnimals/attFile",
+          "help_text": "Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "select-agent-research",
+          "label": "14. Select Agent Research",
+          "required": false,
+          "dat_field": "7-2",
+          "json_path": "select_agent_research",
+          "xml_path": "CareerDevelopmentAwardAttachments/SelectAgentResearch/attFile",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "consortium-contractual-arrangements",
+          "label": "15. Consortium/Contractual Arrangements",
+          "required": false,
+          "dat_field": "7-3",
+          "json_path": "consortium_contractual_arrangements",
+          "xml_path": "CareerDevelopmentAwardAttachments/ConsortiumContractualArrangements/attFile",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "resource-sharing-plans",
+          "label": "16. Resource Sharing",
+          "required": false,
+          "dat_field": "7-4",
+          "json_path": "resource_sharing_plans",
+          "xml_path": "CareerDevelopmentAwardAttachments/ResourceSharingPlans/attFile",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "other-plans",
+          "label": "17. Other Plan(s)",
+          "required": false,
+          "dat_field": "7-5",
+          "json_path": "other_plans",
+          "xml_path": "CareerDevelopmentAwardAttachments/OtherPlans/attFile",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        },
+        {
+          "kind": "field",
+          "id": "key-biological-and-or-chemical-resources",
+          "label": "18. Authentication of Key Biological and/or Chemical Resources",
+          "required": false,
+          "dat_field": "7-6",
+          "json_path": "key_biological_and_or_chemical_resources",
+          "xml_path": "CareerDevelopmentAwardAttachments/KeyBiologicalAndOrChemicalResources/attFile",
+          "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Uploaded attachment ID (UUID string)",
+          "widget": "ApplicationAttachmentWidget",
+          "constraints": "format uuid"
+        }
+      ],
+      "help_text": "Include Vertebrate Animals if you answered Yes to the animals-used question on R&R Other Project Information."
+    },
+    {
+      "kind": "section",
+      "label": "Appendix",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "appendix",
+          "label": "19. Appendix",
+          "required": false,
+          "dat_field": "8-1",
+          "json_path": "appendix[]",
+          "xml_path": "CareerDevelopmentAwardAttachments/Appendix/AttachedFile",
+          "help_text": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "type": "Ordered list of uploaded attachment IDs (UUID strings)",
+          "widget": "ApplicationMultipleAttachmentWidget",
+          "constraints": "format uuid",
+          "min_items": 0,
+          "max_items": 10
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "label": "Citizenship",
+      "widget": "FieldsetWidget",
+      "children": [
+        {
+          "kind": "field",
+          "id": "is-us-citizen-or-national",
+          "label": "20. U.S. Citizen or Non-Citizen National?",
+          "required": true,
+          "dat_field": "9-1-1",
+          "json_path": "is_us_citizen_or_national",
+          "xml_path": "CitizenshipIndicator",
+          "type": "Boolean",
+          "widget": "RadioWidget",
+          "constraints": "YesNoDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "id": "non-us-citizenship-status",
+          "label": "If no, select most appropriate Non-U.S. Citizen option",
+          "required": "Conditional: required when U.S. Citizen or Non-Citizen National is No",
+          "dat_field": "9-2-1",
+          "json_path": "non_us_citizenship_status",
+          "xml_path": "isNonUSCitizenship",
+          "type": "Citizenship status",
+          "widget": "RadioWidget",
+          "constraints": "NonUSCitizenshipDataType enumeration"
+        },
+        {
+          "kind": "field",
+          "id": "permanent-resident-by-award",
+          "label": "Expect permanent resident status by the award start date",
+          "required": false,
+          "dat_field": "9-3",
+          "json_path": "permanent_resident_by_award",
+          "xml_path": "PermanentResidentByAwardIndicator",
+          "help_text": "Check if candidate is a non-U.S. citizen with a temporary visa applying for an award that requires permanent residency status, and expect to be granted a permanent resident visa by the start date of the award.",
+          "type": "Boolean",
+          "widget": "CheckboxWidget",
+          "constraints": "YesNoDataType enumeration"
+        }
+      ]
+    }
+  ]
 }
