@@ -83,7 +83,7 @@ export function mountFormPage(root: Document, host: Window): () => void {
   };
 }
 
-/** Reveal a plan row inside collapsed groups before the native comparison sheet opens. */
+/** Reveal a linked row without moving keyboard focus into its Compare control. */
 export function revealField(root: Document, id: string) {
   const row = [...root.querySelectorAll<HTMLElement>("[data-field-id]")].find(
     (element) => element.dataset.fieldId === id,
@@ -92,8 +92,13 @@ export function revealField(root: Document, id: string) {
   for (let parent = row.parentElement; parent; parent = parent.parentElement)
     if (parent.tagName === "DETAILS")
       (parent as HTMLDetailsElement).open = true;
-  row.scrollIntoView({ block: "center" });
-  (row.querySelector<HTMLElement>("[data-compare-field]") ?? row).focus();
+  const reduceMotion = root.defaultView?.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  row.scrollIntoView({
+    block: "start",
+    behavior: reduceMotion ? "instant" : "smooth",
+  });
 }
 
 /** Keep every SSR store reader on its server snapshot until its actual React commit. */
