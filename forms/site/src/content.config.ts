@@ -97,7 +97,14 @@ export type FormNode = z.infer<typeof formNode>;
 export type FieldNode = z.infer<typeof fieldNode>;
 export type SectionNode = z.infer<typeof sectionNode>;
 
-export const TOTAL_APPS = 4_072_033;
+/**
+ * Grants.gov applications submitted over two years. Most applications include several
+ * forms, so the per-form shares of this total overlap and don't add up across forms.
+ */
+export const TOTAL_APPS = 621_077;
+
+/** Every form's `apps_count` added up: one submission per form in each application. */
+export const TOTAL_FORM_SUBMISSIONS = 4_072_033;
 
 export const collections = {
   forms: defineCollection({

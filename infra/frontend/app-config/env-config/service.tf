@@ -12,6 +12,7 @@ locals {
     newrelic_host_entity_guid     = var.service_host_newrelic_entity_guid
     domain_name                   = var.domain_name
     enable_cdn_alias              = var.enable_cdn_alias
+    bot_protection_waf            = var.bot_protection_waf
     instance_scaling_max_capacity = var.instance_scaling_max_capacity
     instance_scaling_min_capacity = var.instance_scaling_min_capacity
     instance_cpu                  = var.instance_cpu

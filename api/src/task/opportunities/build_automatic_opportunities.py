@@ -6,7 +6,7 @@ import uuid
 from datetime import date
 from enum import StrEnum
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from src.adapters import db
 from src.adapters.aws import S3Config
@@ -31,19 +31,27 @@ from src.db.models.opportunity_models import (
 from src.form_schema.forms import (
     AttachmentForm_v1_2,
     BudgetNarrativeAttachment_v1_2,
+    BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
+    EDAbstractGenerated_v1_1,
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
     EPAKeyContactsGenerated_v2_0,
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
+    NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
     OtherNarrativeAttachment_v1_2,
+    OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
+    ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
+    ProjectAbstractSummaryGenerated_v2_0,
     ProjectNarrativeAttachment_v1_2,
+    ProjectNarrativeGenerated_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
     RRKeyPersonExpandedGenerated_v4_0,
     RRKeyPersonGenerated_v3_0,
@@ -65,6 +73,35 @@ from src.task.task_blueprint import task_blueprint
 from src.util import datetime_util, file_util
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_COMPETITION_TITLE = "Competition for testing purposes"
+
+# Grants.gov limits competition IDs to 40 characters (CompetitionIDDataType)
+PUBLIC_COMPETITION_ID_MAX_LENGTH = 40
+
+# A new ALL-forms opportunity is created each day, with the date after this prefix
+ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX = "SGG-ALL-Forms-"
+
+
+def build_public_competition_id(opportunity_number: str, competition_number: int) -> str:
+    """Build a stable, uppercase public competition ID from the opportunity
+    number, e.g. SGG-ALL-FORMS-2026-11-16-C01 for the first competition.
+
+    Long opportunity numbers are cut so the ID stays within the limit.
+    """
+    suffix = f"-C{competition_number:02d}"
+    return opportunity_number.upper()[: PUBLIC_COMPETITION_ID_MAX_LENGTH - len(suffix)] + suffix
+
+
+def build_competition_title(opportunity_number: str, title: str) -> str:
+    """Add the opportunity number to the default title, preserving custom titles."""
+    if title != DEFAULT_COMPETITION_TITLE:
+        return title
+
+    # Leave the date out so each day's ALL-forms opportunity gets the same title
+    if opportunity_number.startswith(ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX):
+        return f"ALL-Forms {DEFAULT_COMPETITION_TITLE}"
+    return f"{opportunity_number.removeprefix('SGG-')} {DEFAULT_COMPETITION_TITLE}"
 
 
 @dataclasses.dataclass
@@ -142,7 +179,7 @@ class OpportunityContainer:
 @dataclasses.dataclass
 class CompetitionContainer:
     ### Competition
-    competition_title: str | None = "Competition for testing purposes"
+    competition_title: str = DEFAULT_COMPETITION_TITLE
     opening_date: date | None = dataclasses.field(
         default_factory=lambda: datetime_util.get_now_us_eastern_date()
     )
@@ -181,6 +218,7 @@ class BuildAutomaticOpportunitiesTask(Task):
     class Metrics(StrEnum):
         OPPORTUNITY_CREATED_COUNT = "opportunity_created_count"
         OPPORTUNITY_ALREADY_EXIST_COUNT = "opportunity_already_exist_count"
+        COMPETITION_BACKFILLED_COUNT = "competition_backfilled_count"
 
     def __init__(
         self,
@@ -238,7 +276,7 @@ class BuildAutomaticOpportunitiesTask(Task):
         self.create_opportunity(
             OpportunityContainer(
                 opportunity_title=f"Opportunity with ALL forms - {datetime_util.get_now_us_eastern_date().isoformat()}",
-                opportunity_number=f"SGG-ALL-Forms-{datetime_util.get_now_us_eastern_date().isoformat()}",
+                opportunity_number=f"{ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX}{datetime_util.get_now_us_eastern_date().isoformat()}",
             ),
             competitions=[
                 CompetitionContainer(
@@ -248,6 +286,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
             ],
         )
+        self.backfill_previous_all_forms_opportunities()
 
         # Create various other specific scenarios
         self._create_opportunity_scenarios()
@@ -455,7 +494,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             ),
             competitions=[
                 CompetitionContainer(
-                    competition_title=None,
+                    competition_title="Tribal Domestic Violence and Sexual Assault Coalitions Grant Program",
                     required_form_ids=[SF424_v4_0.form_id],
                     open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
                     closing_date=date(2026, 12, 31),
@@ -594,6 +633,18 @@ class BuildAutomaticOpportunitiesTask(Task):
             ),
             ("E2E-CD511", "CD511 Form", CD511_v1_1.form_id, "5b890089-2bb2-4123-82cd-3d321ca62efe"),
             (
+                "E2E-BNAG",
+                "Budget Narrative Attachment Form (Generated)",
+                BudgetNarrativeGenerated_v1_2.form_id,
+                "c45674bf-a5e8-4f90-b098-ff5158f08c5e",
+            ),
+            (
+                "E2E-EDAG",
+                "ED Abstract Form",
+                EDAbstractGenerated_v1_1.form_id,
+                "ea981400-e64a-4d17-a337-5b26b15f43cd",
+            ),
+            (
                 "E2E-EPA4700",
                 "EPA Form 4700-4",
                 EPA_FORM_4700_4_v5_0.form_id,
@@ -636,10 +687,34 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "717b7f78-52f2-49f9-b1b8-5d7118313d2a",
             ),
             (
+                "E2E-ONAG",
+                "Other Narrative Attachments (Generated)",
+                OtherNarrativeGenerated_v1_2.form_id,
+                "3675dfde-0c28-44aa-a733-b3ce88b29b3a",
+            ),
+            (
                 "E2E-PABS",
                 "Project Abstract",
                 ProjectAbstract_v1_2.form_id,
                 "d3081452-2cf8-4817-9abf-812e5d794485",
+            ),
+            (
+                "E2E-PABSG",
+                "Project Abstract (Generated)",
+                ProjectAbstractGenerated_v1_2.form_id,
+                "2e5d8bcd-bf18-449e-809c-15d21de7a22f",
+            ),
+            (
+                "E2E-NSFDA",
+                "NSF Deviation Authorization",
+                NSFDeviationAuthorization_v1_1.form_id,
+                "6d58e0cb-9b08-5732-b4a5-4df7f8cedfa7",
+            ),
+            (
+                "E2E-NSFSR",
+                "NSF Suggested Reviewers",
+                NSFSuggestedReviewers_v1_1.form_id,
+                "97621d95-418a-4c00-96ab-3817c7dc7fe2",
             ),
             (
                 "E2E-PABSS",
@@ -648,10 +723,22 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "e3bfbd7b-2205-46a8-9aa3-714f7e130958",
             ),
             (
+                "E2E-PABSSG",
+                "Project Abstract Summary (Generated)",
+                ProjectAbstractSummaryGenerated_v2_0.form_id,
+                "e7b1eeb7-968e-5ad7-a682-92bf4f6fe478",
+            ),
+            (
                 "E2E-PNA",
                 "Project Narrative Attachment Form",
                 ProjectNarrativeAttachment_v1_2.form_id,
                 "6bdc2df3-6e51-4aea-89af-bade326feba1",
+            ),
+            (
+                "E2E-PNAG",
+                "Project Narrative Attachment Form (Generated)",
+                ProjectNarrativeGenerated_v1_2.form_id,
+                "3b41ad38-a4eb-43e2-b124-7ebf56b05b1a",
             ),
             (
                 "E2E-PPSL",
@@ -764,6 +851,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 },
             )
             self.increment(self.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT)
+            self.backfill_competitions(existing_opportunity, data.opportunity_number, competitions)
             return
 
         logger.info(f"Creating opportunity for scenario '{data.opportunity_number}'")
@@ -828,8 +916,14 @@ class BuildAutomaticOpportunitiesTask(Task):
         self.db_session.add(current_opportunity_summary)
 
         ### Competition(s)
-        for comp_data in competitions:
-            self.create_competition(comp_data, opportunity, opportunity_assistance_listing)
+        for competition_number, comp_data in enumerate(competitions, start=1):
+            self.create_competition(
+                comp_data,
+                opportunity,
+                opportunity_assistance_listing,
+                data.opportunity_number,
+                competition_number,
+            )
 
         ### Opportunity attachment
         file_name = data.opportunity_attachment_file_name
@@ -860,18 +954,87 @@ class BuildAutomaticOpportunitiesTask(Task):
         )
         self.increment(self.Metrics.OPPORTUNITY_CREATED_COUNT)
 
+    def backfill_previous_all_forms_opportunities(self) -> None:
+        """ALL-forms opportunities from earlier days are never looked up again
+        (the number has the date in it), so backfill their competitions here.
+        """
+        opportunities = self.db_session.scalars(
+            select(Opportunity).where(
+                Opportunity.opportunity_number.startswith(ALL_FORMS_OPPORTUNITY_NUMBER_PREFIX),
+                Opportunity.competitions.any(
+                    or_(
+                        Competition.public_competition_id.is_(None),
+                        Competition.competition_title.is_(None),
+                    )
+                ),
+            )
+        ).all()
+
+        for opportunity in opportunities:
+            if opportunity.opportunity_number:
+                self.backfill_competitions(
+                    opportunity, opportunity.opportunity_number, [CompetitionContainer()]
+                )
+
+    def backfill_competitions(
+        self,
+        opportunity: Opportunity,
+        opportunity_number: str,
+        competitions: list[CompetitionContainer],
+    ) -> None:
+        """Fill in a missing public competition ID or title on competitions
+        created before we set them. Values that are already set are left alone.
+        """
+        existing_competitions = sorted(
+            opportunity.competitions, key=lambda c: (c.created_at, c.competition_id)
+        )
+        for competition_number, competition in enumerate(existing_competitions, start=1):
+            if competition.public_competition_id and competition.competition_title:
+                continue
+
+            comp_data = (
+                competitions[competition_number - 1]
+                if competition_number <= len(competitions)
+                else CompetitionContainer()
+            )
+            if not competition.public_competition_id:
+                competition.public_competition_id = build_public_competition_id(
+                    opportunity_number, competition_number
+                )
+            if not competition.competition_title:
+                competition.competition_title = build_competition_title(
+                    opportunity_number, comp_data.competition_title
+                )
+
+            logger.info(
+                "Backfilled competition",
+                extra={
+                    "opportunity_number": opportunity_number,
+                    "competition_id": competition.competition_id,
+                    "public_competition_id": competition.public_competition_id,
+                },
+            )
+            self.increment(self.Metrics.COMPETITION_BACKFILLED_COUNT)
+
     def create_competition(
         self,
         comp_data: CompetitionContainer,
         opportunity: Opportunity,
         opportunity_assistance_listing: OpportunityAssistanceListing | None,
+        opportunity_number: str,
+        competition_number: int,
     ) -> None:
         """Create a competition with provided info"""
 
         competition = Competition(
             competition_id=uuid.uuid4(),
             opportunity=opportunity,
-            competition_title=comp_data.competition_title,
+            public_competition_id=build_public_competition_id(
+                opportunity_number, competition_number
+            ),
+            competition_title=build_competition_title(
+                opportunity_number, comp_data.competition_title
+            ),
             opening_date=comp_data.opening_date,
             closing_date=comp_data.closing_date,
             grace_period=comp_data.grace_period,

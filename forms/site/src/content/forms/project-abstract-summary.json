@@ -1,12 +1,102 @@
 {
   "title": "Project Abstract Summary",
   "slug": "project-abstract-summary",
-  "status": "backlog",
+  "status": "in_progress",
   "family": ["SF-424", "R&R", "SF-424 Short", "SF-424 Mandatory"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 45380,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/591",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Project_AbstractSummary_2_0-V2.0_F591.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Project_AbstractSummary_2_0-V2.0_F591.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Project_AbstractSummary_2_0-V2.0_F591.xls",
+  "spec_id": "project-abstract-summary",
+  "sgg_form_id": "project_abstract_summary",
+  "omb_number": "4040-0019",
+  "expiration_date": "06/30/2028",
+  "widgets": ["TextWidget", "TextAreaWidget"],
+  "description": "Five text fields describing the funding opportunity, applicant, project, and a public-facing abstract.",
+  "notes": [
+    "Four answers are required. On an SGG application, the funding opportunity supplies its number. The standalone preview accepts the same answers through sample data or manual entry.",
+    "SGG fills the funding opportunity number and, when available, the assistance listing number at application start and Save. It uses application context for the two values that Grants.gov describes as coming from the cover sheet. No answers are set on submission.",
+    "Applicant Name uses the existing organization-name question and writes to OrganizationName in Grants.gov XML. The project title remains a single-line field, as in the current SGG form."
+  ],
+  "risks": [
+    "The abstract can be made public. Keep the existing instructions about plain language and sensitive information visible above the fields."
+  ],
+  "children": [
+    {
+      "kind": "section",
+      "label": "1. Project Abstract Summary",
+      "help_text": "This Project Abstract Summary form must be submitted or the application will be considered incomplete. Ensure the Project Abstract field succinctly describes the project in plain language that the public can understand and use without the full proposal. Use 4,000 characters or less. Do not include personally identifiable, sensitive or proprietary information. Refer to Agency instructions for any additional Project Abstract field requirements. If the application is funded, your project abstract information (as submitted) will be made available to public websites and/or databases including USAspending.gov.",
+      "children": [
+        {
+          "kind": "field",
+          "label": "Funding Opportunity Number",
+          "help_text": "SGG fills this from the selected funding opportunity.",
+          "required": true,
+          "type": "string",
+          "widget": "TextWidget",
+          "json_path": "funding_opportunity_number",
+          "xml_path": "FundingOpportunityNumber",
+          "dat_field": "01-0",
+          "constraints": "minLength 1, maxLength 40",
+          "pre_populated": "SGG fills this from the selected funding opportunity.",
+          "id": "funding-opportunity-number"
+        },
+        {
+          "kind": "field",
+          "label": "Assistance Listing Number(s)",
+          "help_text": "SGG fills this when the competition or opportunity supplies an assistance listing.",
+          "required": false,
+          "type": "string",
+          "widget": "TextWidget",
+          "json_path": "assistance_listing_number",
+          "xml_path": "CFDANumber",
+          "dat_field": "02-0",
+          "constraints": "minLength 1, maxLength 15",
+          "pre_populated": "SGG uses the competition’s listing or the opportunity’s single listing when available.",
+          "id": "assistance-listing-number"
+        },
+        {
+          "kind": "field",
+          "label": "Applicant Name",
+          "help_text": "This is the legal name of applicant which will undertake the assistance activity. This field is required.",
+          "required": true,
+          "type": "string",
+          "widget": "TextWidget",
+          "json_path": "applicant_name",
+          "xml_path": "OrganizationName",
+          "dat_field": "03-0",
+          "constraints": "minLength 1, maxLength 60",
+          "id": "applicant-name"
+        },
+        {
+          "kind": "field",
+          "label": "Descriptive Title of Applicant's Project",
+          "help_text": "This is the project title or brief description of the project. This field is required.",
+          "required": true,
+          "type": "string",
+          "widget": "TextWidget",
+          "json_path": "project_title",
+          "xml_path": "ProjectTitle",
+          "dat_field": "04-0",
+          "constraints": "minLength 1, maxLength 250",
+          "id": "project-title"
+        },
+        {
+          "kind": "field",
+          "label": "Project Abstract",
+          "help_text": "Enter a work summary or abstract of the work to be performed under this project. This field is required.",
+          "required": true,
+          "type": "string",
+          "widget": "TextAreaWidget",
+          "json_path": "project_abstract",
+          "xml_path": "ProjectAbstract",
+          "dat_field": "05-0",
+          "constraints": "minLength 1, maxLength 4000",
+          "id": "project-abstract"
+        }
+      ]
+    }
+  ]
 }

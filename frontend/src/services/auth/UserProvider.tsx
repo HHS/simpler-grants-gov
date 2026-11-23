@@ -20,6 +20,10 @@ import React, {
   useState,
 } from "react";
 
+// setTimeout overflows past this delay
+const MAX_TIMEOUT_DELAY_MS = 2 ** 31 - 1;
+const EXPIRATION_CHECK_BUFFER_MS = 1000;
+
 export default function UserProvider({
   featureFlagDefaults,
   children,
@@ -123,6 +127,30 @@ export default function UserProvider({
       return true;
     }
   }, [localUser?.expiresAt, getUserSession]);
+
+  useEffect(() => {
+    if (
+      !featureFlags.enableSessionExpirationAlerts ||
+      !localUser?.isLoggedIn ||
+      !localUser.expiresAt
+    ) {
+      return;
+    }
+    const delay = localUser.expiresAt - Date.now() + EXPIRATION_CHECK_BUFFER_MS;
+    if (delay > MAX_TIMEOUT_DELAY_MS) return;
+    const timeout = setTimeout(
+      () => {
+        getUserSession().then(noop).catch(noop);
+      },
+      Math.max(delay, 0),
+    );
+    return () => clearTimeout(timeout);
+  }, [
+    featureFlags.enableSessionExpirationAlerts,
+    localUser?.isLoggedIn,
+    localUser?.expiresAt,
+    getUserSession,
+  ]);
 
   const value = useMemo(
     () => ({

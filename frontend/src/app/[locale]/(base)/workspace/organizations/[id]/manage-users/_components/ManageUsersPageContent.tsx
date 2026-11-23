@@ -80,13 +80,13 @@ export async function ManageUsersPageContent({
           <InviteLegacyUsersButton organizationId={organizationId} />
         </Grid>
       </Grid>
-      <UserOrganizationInvite organizationId={organizationId} />
       <ActiveUsersSection
         organizationId={organizationId}
         activeUsers={activeUsersList}
         roles={organizationRolesList}
       />
       <InvitedUsersSection invitedUsers={invitedUsersList} />
+      <UserOrganizationInvite organizationId={organizationId} />
     </GridContainer>
   );
 }

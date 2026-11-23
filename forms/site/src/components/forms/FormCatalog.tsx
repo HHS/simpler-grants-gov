@@ -428,7 +428,7 @@ function FormCard({ form }: { form: FormSummary }) {
         </span>
         <span className="form-card__stat">
           <strong>{form.apps_pct}%</strong>{" "}
-          <span className="form-card__stat-label">coverage</span>
+          <span className="form-card__stat-label">of apps</span>
         </span>
         <span className="form-card__stat">
           <strong>{form.fieldCount}</strong>{" "}

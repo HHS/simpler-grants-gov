@@ -12,7 +12,10 @@ export const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
 export const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 
 // returns a new date 15 minutes from time of function call
-export const newExpirationDate = () => {
+export const newExpirationDate = (sessionDurationSeconds?: number) => {
+  if (sessionDurationSeconds) {
+    return new Date(Date.now() + sessionDurationSeconds * 1000);
+  }
   if (
     environment.AUTH_EXPIRATION_TIME !== "0" &&
     environment.ENVIRONMENT === "local"
@@ -51,8 +54,14 @@ export const encrypt = async (
   token: string,
   expiresAt: Date,
   clientJwtKey: Uint8Array,
+  sessionDurationSeconds?: number,
 ): Promise<string> => {
-  const jwt = await new SignJWT({ token })
+  const jwt = await new SignJWT({
+    token,
+    ...(sessionDurationSeconds && {
+      session_duration_seconds: sessionDurationSeconds,
+    }),
+  })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
     .setIssuedAt()
     .setExpirationTime(expiresAt || "")

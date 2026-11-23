@@ -153,19 +153,6 @@ locals {
     "infra-sgg1"     = ["flask", "task", "sam-extracts"]
     prod             = ["flask", "task", "sam-extracts"]
   }
-  setup-lower-env-agencies-state = {
-    dev              = "ENABLED"
-    "infra-dev"      = "ENABLED"
-    staging          = "ENABLED"
-    "infra-staging"  = "ENABLED"
-    training         = "DISABLED"
-    "infra-training" = "DISABLED"
-    "infra-sgg2"     = "DISABLED"
-    "infra-sgg3"     = "DISABLED"
-    grantor1         = "DISABLED"
-    "infra-sgg1"     = "DISABLED"
-    prod             = "DISABLED"
-  }
   build-automatic-opportunities-state = {
     dev              = "ENABLED"
     "infra-dev"      = "ENABLED"
@@ -358,15 +345,6 @@ locals {
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
-    create-application-submission = {
-      task_command = ["flask", "task", "create-application-submission"]
-      # Every hour at minute 15 (offset to avoid collision with other hourly jobs)
-      schedule_expression = "cron(15 * * * ? *)"
-      state               = "ENABLED"
-      cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
-      mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
-      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
-    }
     build-automatic-opportunities = {
       task_command = ["flask", "task", "build-automatic-opportunities"]
       # Every day at 7:15am Eastern Time during DST. 8:15am during non-DST.
@@ -374,17 +352,6 @@ locals {
       schedule_expression = "cron(15 12 * * ? *)"
       # Only enable in dev/staging/training, do not run in prod
       state            = local.build-automatic-opportunities-state[var.environment]
-      cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
-      mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
-      environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
-    }
-    setup-lower-env-agencies = {
-      task_command = ["flask", "task", "setup-lower-env-agencies"]
-      # Every day at 7:45am Eastern Time during DST. 8:45am during non-DST.
-      # Runs just before the agency search load job that runs at the top of the hour.
-      schedule_expression = "cron(45 12 * * ? *)"
-      # Only enable in dev/staging, do not run in training/prod
-      state            = local.setup-lower-env-agencies-state[var.environment]
       cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)

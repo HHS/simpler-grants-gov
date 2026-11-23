@@ -25,10 +25,7 @@ from pathlib import Path
 import pytest
 from lxml import etree as lxml_etree
 
-from src.form_schema.forms.project_narrative_attachment import (
-    FORM_XML_TRANSFORM_RULES as PROJECT_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
-)
-from src.form_schema.forms.project_narrative_attachment import ProjectNarrativeAttachment_v1_2
+from src.form_schema.forms import project_narrative_attachment, project_narrative_generated
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.models.attachment import AttachmentFile
 from src.services.xml_generation.service import XMLGenerationService
@@ -67,19 +64,42 @@ _SNAPSHOT_ATTACHMENT_MAPPING = {
 _SNAPSHOT_DATA = {"attachments": [_SNAPSHOT_UUID]}
 
 
-def _generate_response(data: dict, attachment_mapping: dict | None = None):
+@pytest.fixture(
+    params=[
+        pytest.param(
+            (
+                project_narrative_attachment.ProjectNarrativeAttachment_v1_2,
+                project_narrative_attachment.FORM_XML_TRANSFORM_RULES,
+            ),
+            id="handwritten",
+        ),
+        pytest.param(
+            (
+                project_narrative_generated.FORM,
+                project_narrative_generated.FORM_XML_TRANSFORM_RULES,
+            ),
+            id="generated",
+        ),
+    ]
+)
+def project_narrative_form(request):
+    """Each form and the XML rules used by its real submission consumer."""
+    return request.param
+
+
+def _generate_response(transform_rules: dict, data: dict, attachment_mapping: dict | None = None):
     service = XMLGenerationService()
     return service.generate_xml(
         XMLGenerationRequest(
             application_data=data,
-            transform_config=PROJECT_NARRATIVE_ATTACHMENTS_TRANSFORM_RULES,
+            transform_config=transform_rules,
             attachment_mapping=attachment_mapping or {},
         )
     )
 
 
-def _generate(data: dict, attachment_mapping: dict | None = None) -> str:
-    response = _generate_response(data, attachment_mapping)
+def _generate(transform_rules: dict, data: dict, attachment_mapping: dict | None = None) -> str:
+    response = _generate_response(transform_rules, data, attachment_mapping)
     assert response.success, response.error_message
     return response.xml_data
 
@@ -104,6 +124,10 @@ def _build_attachment_mapping(count: int) -> dict[str, AttachmentInfo]:
 class TestProjectNarrativeAttachmentsXMLGeneration:
     """Test cases for Project Narrative Attachments XML generation service."""
 
+    @pytest.fixture(autouse=True)
+    def _use_project_narrative_form(self, project_narrative_form):
+        self.form, self.transform_rules = project_narrative_form
+
     def test_generate_project_narrative_attachments_xml_basic_success(self):
         """Test basic XML generation with multiple attachments and proper namespaces."""
         uuid1 = str(uuid.uuid4())
@@ -124,7 +148,9 @@ class TestProjectNarrativeAttachmentsXMLGeneration:
             ),
         }
 
-        response = _generate_response({"attachments": [uuid1, uuid2]}, attachment_mapping)
+        response = _generate_response(
+            self.transform_rules, {"attachments": [uuid1, uuid2]}, attachment_mapping
+        )
 
         assert response.success is True
         assert response.xml_data is not None
@@ -165,7 +191,7 @@ class TestProjectNarrativeAttachmentsXMLGeneration:
         Per the Attachments-V1.0.xsd, the AttachedFileDataType sequence is:
         FileName -> MimeType -> FileLocation -> HashValue
         """
-        xml_data = _generate(_SNAPSHOT_DATA, _SNAPSHOT_ATTACHMENT_MAPPING)
+        xml_data = _generate(self.transform_rules, _SNAPSHOT_DATA, _SNAPSHOT_ATTACHMENT_MAPPING)
 
         attached_file = _parse(xml_data).find(f".//{{{ATT_NS}}}AttachedFile")
         assert attached_file is not None
@@ -183,7 +209,7 @@ class TestProjectNarrativeAttachmentsXMLGeneration:
         Legacy Grants.gov XML declares xmlns:att, xmlns:glob, and xmlns:globLib
         on the root element. This test ensures Simpler's output matches that behavior.
         """
-        xml_data = _generate(_SNAPSHOT_DATA, _SNAPSHOT_ATTACHMENT_MAPPING)
+        xml_data = _generate(self.transform_rules, _SNAPSHOT_DATA, _SNAPSHOT_ATTACHMENT_MAPPING)
 
         root = _parse(xml_data)
 
@@ -195,7 +221,9 @@ class TestProjectNarrativeAttachmentsXMLGeneration:
         """Test that the form's maximum of 100 attachments all appear in the XML."""
         attachment_mapping = _build_attachment_mapping(100)
 
-        xml_data = _generate({"attachments": list(attachment_mapping)}, attachment_mapping)
+        xml_data = _generate(
+            self.transform_rules, {"attachments": list(attachment_mapping)}, attachment_mapping
+        )
 
         attached_files = _parse(xml_data).findall(f".//{{{ATT_NS}}}AttachedFile")
         assert len(attached_files) == 100
@@ -218,7 +246,7 @@ class TestProjectNarrativeAttachmentsXMLGeneration:
         }
 
         response = _generate_response(
-            {"attachments": [known_uuid, missing_uuid]}, attachment_mapping
+            self.transform_rules, {"attachments": [known_uuid, missing_uuid]}, attachment_mapping
         )
 
         assert response.success is False
@@ -233,7 +261,7 @@ class TestProjectNarrativeAttachmentsXMLGeneration:
         snapshots/project_narrative_1_2.xml and re-run the test — it will
         create the file on first run.
         """
-        xml_data = _generate(_SNAPSHOT_DATA, _SNAPSHOT_ATTACHMENT_MAPPING)
+        xml_data = _generate(self.transform_rules, _SNAPSHOT_DATA, _SNAPSHOT_ATTACHMENT_MAPPING)
 
         if not _SNAPSHOT_PATH.exists():
             _SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -245,6 +273,10 @@ class TestProjectNarrativeAttachmentsXMLGeneration:
 
 class TestProjectNarrativeAttachmentsXSDValidation:
     """XSD validation tests for Project Narrative Attachments XML."""
+
+    @pytest.fixture(autouse=True)
+    def _use_project_narrative_form(self, project_narrative_form):
+        self.form, self.transform_rules = project_narrative_form
 
     @pytest.fixture
     def xsd_validator(self):
@@ -271,7 +303,9 @@ class TestProjectNarrativeAttachmentsXSDValidation:
         """Test that generated XML validates against the official XSD schema."""
         attachment_mapping = _build_attachment_mapping(attachment_count)
 
-        xml_data = _generate({"attachments": list(attachment_mapping)}, attachment_mapping)
+        xml_data = _generate(
+            self.transform_rules, {"attachments": list(attachment_mapping)}, attachment_mapping
+        )
 
         attached_files = _parse(xml_data).findall(f".//{{{ATT_NS}}}AttachedFile")
         assert len(attached_files) == attachment_count
@@ -292,7 +326,9 @@ class TestProjectNarrativeAttachmentsXSDValidation:
         """
         attachment_mapping = _build_attachment_mapping(101)
 
-        xml_data = _generate({"attachments": list(attachment_mapping)}, attachment_mapping)
+        xml_data = _generate(
+            self.transform_rules, {"attachments": list(attachment_mapping)}, attachment_mapping
+        )
 
         validation_result = self._validate(xsd_validator, xml_data)
 
@@ -312,9 +348,7 @@ class TestProjectNarrativeAttachmentsXSDValidation:
         attachment_mapping = _build_attachment_mapping(2)
 
         competition = CompetitionFactory.create(competition_forms=[])
-        competition_form = CompetitionFormFactory.create(
-            competition=competition, form=ProjectNarrativeAttachment_v1_2
-        )
+        competition_form = CompetitionFormFactory.create(competition=competition, form=self.form)
         application = ApplicationFactory.create(competition=competition)
         ApplicationFormFactory.create(
             application=application,

@@ -11,7 +11,6 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
-    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -23,7 +22,6 @@ from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
     LkFundingInstrument,
-    LkOpportunityAuditEvent,
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
@@ -32,8 +30,7 @@ from src.util.file_util import safe_presign_or_s3_cdnify_url
 if TYPE_CHECKING:
     from src.db.models.competition_models import Competition
     from src.db.models.entity_models import OrganizationSavedOpportunity
-    from src.db.models.user_models import User, UserOpportunityNotificationLog, UserSavedOpportunity
-    from src.db.models.workflow_models import Workflow
+    from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 
 
 class Opportunity(ApiSchemaTable, TimestampMixin):
@@ -122,13 +119,6 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
-    opportunity_audits: Mapped[list[OpportunityAudit]] = relationship(
-        "OpportunityAudit",
-        back_populates="opportunity",
-        uselist=True,
-        cascade="all, delete-orphan",
-    )
-
     derived_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
         uselist=True,
         cascade="all, delete-orphan",
@@ -142,15 +132,6 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     )
     saved_opportunities_by_organizations: Mapped[list[OrganizationSavedOpportunity]] = relationship(
         "OrganizationSavedOpportunity",
-        back_populates="opportunity",
-        uselist=True,
-        cascade="all, delete-orphan",
-    )
-
-    # We mostly add this so if we delete an opportunity, any corresponding
-    # workflows are deleted as well.
-    workflows: Mapped[list[Workflow]] = relationship(
-        "Workflow",
         back_populates="opportunity",
         uselist=True,
         cascade="all, delete-orphan",
@@ -602,36 +583,3 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity, back_populates="versions")
 
     opportunity_data: Mapped[dict] = mapped_column(JSONB)
-
-
-class OpportunityAudit(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "opportunity_audit"
-
-    opportunity_audit_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, primary_key=True, default=uuid.uuid4
-    )
-
-    opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Opportunity.opportunity_id), nullable=False, index=True
-    )
-    opportunity: Mapped[Opportunity] = relationship(
-        Opportunity, back_populates="opportunity_audits"
-    )
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
-    )
-    user: Mapped[User] = relationship("User")
-
-    opportunity_audit_event: Mapped[OpportunityAuditEvent] = mapped_column(
-        "opportunity_audit_event_id",
-        LookupColumn(LkOpportunityAuditEvent),
-        ForeignKey(LkOpportunityAuditEvent.opportunity_audit_event_id),
-        nullable=False,
-    )
-
-    # Only one of the following JSONB columns will be populated per row,
-    # depending on which entity was created or updated.
-    opportunity_data: Mapped[dict | None] = mapped_column("opportunity", JSONB)
-    nonforecast_opportunity_summary: Mapped[dict | None] = mapped_column(JSONB)
-    competition: Mapped[dict | None] = mapped_column(JSONB)

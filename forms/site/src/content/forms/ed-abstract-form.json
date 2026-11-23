@@ -1,12 +1,42 @@
 {
   "title": "ED Abstract Form",
   "slug": "ed-abstract-form",
-  "status": "backlog",
+  "status": "migrated",
   "family": ["SF-424"],
   "category": "Narrative & Attachment Forms",
   "apps_count": 11970,
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/267",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/ED_Abstract-V1.1_F267.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/ED_Abstract-V1.1.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/ED_Abstract-V1.1_F267.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/ED_Abstract-V1.1_F267.xls",
+  "spec_id": "ed-abstract-form",
+  "description": "One required abstract file for a Department of Education application.",
+  "widgets": ["ApplicationAttachmentWidget"],
+  "children": [
+    {
+      "kind": "section",
+      "label": "Abstract",
+      "help_text": "An abstract is to be submitted in accordance with the following:\n\n1. Abstract Requirements\n\n• Abstracts must not exceed one page and should use language that will be understood by a range of audiences.\n\n• Abstracts must include the project title, goals, and expected outcomes and contributions related to research, policy, and practice.\n\n• Abstracts must include the population(s) to be served.\n\n• Abstracts must include primary activities to be performed by the recipient.\n\n• Abstracts must include subrecipient activities that are known or specified at the time of application submission.\n\nFor research applications, abstracts also include the following:\n\n• Theoretical and conceptual background of the study (i.e., prior research that the investigation builds upon and that provides a compelling rationale for this study).\n\n• Research issues, hypotheses and questions being addressed.\n\n• Study design including a brief description of the sample including sample size, methods, principals, and dependent, independent, and control variables, as well as the approach to data analysis.\n\n[Note: For a non-electronic submission, include the name and address of your organization and the name, phone number and e-mail address of the contact person for this project.]\n\nYou must attach one and only one file to this page.",
+      "children": [
+        {
+          "kind": "field",
+          "id": "attachment",
+          "label": "Attachment",
+          "required": true,
+          "type": "Attachment",
+          "widget": "ApplicationAttachmentWidget",
+          "dat_field": "5-0",
+          "json_path": "attachment",
+          "xml_path": "Attachments",
+          "constraints": "format uuid"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The form keeps the official instruction wording, including the separate requirements for research applications. The existing section renderer shows each bullet in its own paragraph, without the original list structure or bold emphasis.",
+    "The one-file requirement stays visible beside the upload. The upload control shows the selected file and handles removal and replacement. The Grants.gov close-form and attachment-added prompts do not appear in the SGG form.",
+    "No applicant answers are pre- or post-populated. The upload service uses the selected file ID to supply attachment metadata for Grants.gov XML.",
+    "The upload checks that a file was selected. It does not check the one-page limit or the abstract contents."
+  ]
 }

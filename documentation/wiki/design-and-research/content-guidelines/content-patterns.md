@@ -2,15 +2,15 @@
 
 ### What is plain language?
 
-Simply put, plain language is language our audience understands and feels comfortable with. For our framework, we define it as language that is clear, concise, useful, and accessible.&#x20;
+Simply put, plain language is language our audience understands and feels comfortable with. For our framework, we define it as language that is clear, concise, useful, and accessible.
 
-It’s also the law. [The Plain Writing Act of 2010](https://digital.gov/resources/plain-writing-act) defines plain writing as “writing that is clear, concise, well-organized, and follows other best practices appropriate to the subject or field and intended audience.”&#x20;
+It’s also the law. [The Plain Writing Act of 2010](https://digital.gov/resources/plain-writing-act) defines plain writing as “writing that is clear, concise, well-organized, and follows other best practices appropriate to the subject or field and intended audience.”
 
 #### Why plain language?
 
-If our ultimate goal is to “build the simplest, most accessible, and easiest-to-use way to publish, find, apply for, award and manage Federal financial opportunities ever built, inside or outside the federal government,” then it’s imperative that we use plain language.&#x20;
+If our ultimate goal is to “build the simplest, most accessible, and easiest-to-use way to publish, find, apply for, award and manage Federal financial opportunities ever built, inside or outside the federal government,” then it’s imperative that we use plain language.
 
-Plain language has many benefits, including:&#x20;
+Plain language has many benefits, including:
 
 * Improved clarity: Plain language removes ambiguity and jargon. It makes it easier for readers to grasp the intended message quickly and accurately.
 * Increased trust: When information is presented in a straightforward manner, it builds credibility and makes the organization appear more trustworthy.
@@ -18,7 +18,7 @@ Plain language has many benefits, including:&#x20;
 
 #### Step 1: Think about your audience
 
-We want to write for our audience using terminology they’re familiar with, answering their questions directly, and referring them to resources when needed.&#x20;
+We want to write for our audience using terminology they’re familiar with, answering their questions directly, and referring them to resources when needed.
 
 When writing for applicants, we should should keep the following pain points in mind:
 
@@ -38,9 +38,9 @@ Figure out the main idea of what you need to communicate and put that first. Wri
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Except in November and December due to the Thanksgiving and Christmas holidays, we will hold office hours on the third Wednesday of every month from 2-4 pm. | We’ll hold office hours on the third Wednesday of every month from 2-4 pm, except in November and December due to the Thanksgiving and Christmas holidays. |
 
-**Keep your sentences and paragraphs to one topic**&#x20;
+**Keep your sentences and paragraphs to one topic**
 
-Long, complex sentences containing multiple phrases and clauses can confuse the reader. Break up long sentences and paragraphs up into multiple sentences or paragraphs, wherever possible.&#x20;
+Long, complex sentences containing multiple phrases and clauses can confuse the reader. Break up long sentences and paragraphs up into multiple sentences or paragraphs, wherever possible.
 
 | **INSTEAD OF**                                                                                                                          | **✅ TRY THIS**                                                                                                                                  |
 | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -48,7 +48,7 @@ Long, complex sentences containing multiple phrases and clauses can confuse the 
 
 If breaking a sentence into smaller ones makes the content sound awkward, choppy, and/or repetitive, it may be better to rewrite the sentence using a numbered list or bullet points of items.
 
-* Use numbers if you are referring to specific steps that must be done in a particular order.&#x20;
+* Use numbers if you are referring to specific steps that must be done in a particular order.
 * Use bullet points If your list of items does not have to be done in a specific order or is not a list of steps.
 
 | **NUMBERED LIST**                                                                                                                                                                                                                                                                                                                                                                                                             | **BULLET POINT LIST**                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -57,7 +57,7 @@ If breaking a sentence into smaller ones makes the content sound awkward, choppy
 
 **Use positive language to tell readers what you want them to do**
 
-Positive language (telling your readers what you do want them to do) is simpler and less confusing than negative language (telling readers what you do not want them to do). Avoid double negatives, or sentences that involve two negative or negating words.&#x20;
+Positive language (telling your readers what you do want them to do) is simpler and less confusing than negative language (telling readers what you do not want them to do). Avoid double negatives, or sentences that involve two negative or negating words.
 
 | **INSTEAD OF**                                                            | **✅ TRY THIS**                                          |
 | ------------------------------------------------------------------------- | ------------------------------------------------------- |
@@ -68,14 +68,14 @@ Positive language (telling your readers what you do want them to do) is simpler 
 
 **Avoid unnecessary words**
 
-The federal plain language guidelines say that, “Wordy, dense construction is one of the biggest problems in government writing.” In many cases, you can “weed out” wordy sentences by looking for unnecessary or redundant words.&#x20;
+The federal plain language guidelines say that, “Wordy, dense construction is one of the biggest problems in government writing.” In many cases, you can “weed out” wordy sentences by looking for unnecessary or redundant words.
 
 When developing or critiquing content, ask yourself:
 
 * Can I cut this word without changing the meaning?
 * Does this word add value? Do I need it?
 
-Modifiers like absolutely, actually, completely, really, quite, totally, and very are generally not necessary.&#x20;
+Modifiers like absolutely, actually, completely, really, quite, totally, and very are generally not necessary.
 
 | **INSTEAD OF**                                                                                                   | **✅ TRY THIS**                                                                                      |
 | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -91,7 +91,7 @@ On longer form content, figure out what information is ‘need to know’ vs. �
 
 **Direct reader’s next action**
 
-We should always make sure to provide guidance on the next action to take rather than throwing too many options at people, which can cause information overload. Useful content is practical and focused. &#x20;
+We should always make sure to provide guidance on the next action to take rather than throwing too many options at people, which can cause information overload. Useful content is practical and focused.
 
 **Minimize cross-referencing**
 
@@ -113,7 +113,7 @@ Rules for capitalization, punctuation, date/time formats, and other elements sho
 
 **Use common words instead of jargon and technical language, where possible**
 
-Readers complain about jargon more than any other writing fault. Writers often fail to realize that terms they know well may be difficult or meaningless to their audience. Try to substitute everyday language for jargon as often as possible.&#x20;
+Readers complain about jargon more than any other writing fault. Writers often fail to realize that terms they know well may be difficult or meaningless to their audience. Try to substitute everyday language for jargon as often as possible.
 
 **Define words where you use them**
 
@@ -121,11 +121,11 @@ If you can’t replace the jargon, provide the definition where you use it. Put 
 
 **Keep definitions short and free of regulatory/statutory language**
 
-You want your definitions to be as short and to the point as possible. Don’t include regulatory or statutory language, except in very specific circumstances where there is a reason to include the regulatory or statutory definition of a term.&#x20;
+You want your definitions to be as short and to the point as possible. Don’t include regulatory or statutory language, except in very specific circumstances where there is a reason to include the regulatory or statutory definition of a term.
 
 **Aim for reading level targets**
 
-Replacing uncommon or jargon-y words with more common ones where possible will help people accomplish their task easier and build trust with Simpler. See the Reading Level Targets section for more detailed guidance on readability.
+Replacing uncommon or jargon-y words with more common ones where possible will help people accomplish their task easier and build trust with Simpler. See the Reading level targets for detailed guidance on readability.
 
 #### Step 7: Make it compassionate
 

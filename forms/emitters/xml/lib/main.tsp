@@ -1,6 +1,5 @@
 // The JS that implements the `extern dec` declarations below.
 import "../dist/src/index.js";
-import "./mapping.tsp";
 
 using TypeSpec.Reflection;
 

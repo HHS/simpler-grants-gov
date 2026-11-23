@@ -151,11 +151,12 @@
   * [Typography](design-and-research/brand-guidelines/typography.md)
   * [Iconography](design-and-research/brand-guidelines/iconography.md)
   * [Photos and illustrations](design-and-research/brand-guidelines/photos-and-illustrations.md)
-* [Writing standards](design-and-research/content-guidelines/README.md)
+* [Content standards](design-and-research/content-guidelines/README.md)
   * [Voice and tone](design-and-research/content-guidelines/voice-and-tone-guide.md)
   * [Style guide](design-and-research/content-guidelines/editoral-style.md)
   * [Plain language guide](design-and-research/content-guidelines/content-patterns.md)
   * [Terminology usage](design-and-research/content-guidelines/terminology-usage.md)
+  * [Reading level targets](design-and-research/content-guidelines/reading-level-targets.md)
 * [User research](design-and-research/user-research/README.md)
   * [Grants.gov archetypes](design-and-research/user-research/grants.gov-archetypes.md)
 
