@@ -27,8 +27,14 @@ resource "aws_security_group" "alb" {
 
 }
 
+# With enable_secure_alb, the public ALB stays up but its ingress is closed.
+# A private-only service (enable_private_load_balancer) has no public ALB at all.
+locals {
+  enable_restricted_public_alb = var.enable_load_balancer && local.enable_internal_alb
+}
+
 resource "aws_security_group" "alb_restricted" {
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.enable_restricted_public_alb ? 1 : 0
 
   name_prefix = "${var.service_name}-alb-restricted"
   description = "Public ALB with ingress closed; traffic is served by the internal ALB"
@@ -41,7 +47,7 @@ resource "aws_security_group" "alb_restricted" {
 }
 
 resource "aws_security_group_rule" "alb_restricted_app_egress" {
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.enable_restricted_public_alb ? 1 : 0
 
   depends_on = [aws_security_group.app]
 
@@ -84,7 +90,7 @@ resource "aws_security_group_rule" "alb_app_local_health_check" {
 }
 
 resource "aws_security_group_rule" "https_ingress" {
-  count             = var.certificate_arn != null ? 1 : 0
+  count             = var.enable_load_balancer && var.certificate_arn != null ? 1 : 0
   security_group_id = aws_security_group.alb.id
 
   description = "Allow HTTPS traffic from public internet"
@@ -110,7 +116,7 @@ resource "aws_security_group_rule" "http_ingress_ipv6" {
 }
 
 resource "aws_security_group_rule" "https_ingress_ipv6" {
-  count             = var.certificate_arn != null ? 1 : 0
+  count             = var.enable_load_balancer && var.certificate_arn != null ? 1 : 0
   security_group_id = aws_security_group.alb.id
 
   description      = "Allow HTTPS traffic from public internet"
@@ -170,10 +176,8 @@ resource "aws_security_group" "app" {
     to_port     = var.container_port
     security_groups = concat(
       [aws_security_group.alb.id],
-      local.enable_internal_alb ? [
-        aws_security_group.internal_alb[0].id,
-        aws_security_group.alb_restricted[0].id,
-      ] : [],
+      local.enable_internal_alb ? [aws_security_group.internal_alb[0].id] : [],
+      local.enable_restricted_public_alb ? [aws_security_group.alb_restricted[0].id] : [],
     )
   }
 

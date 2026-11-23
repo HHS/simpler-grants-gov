@@ -2,7 +2,7 @@
 # API Gateway's VPC Link private integration only reaches an internal load balancer
 
 locals {
-  enable_internal_alb = var.enable_load_balancer && var.enable_secure_alb
+  enable_internal_alb = (var.enable_load_balancer && var.enable_secure_alb) || var.enable_private_load_balancer
 
   # ALB names are capped at 32 characters.
   internal_alb_name = substr("${var.service_name}-internal", 0, 32)
@@ -40,7 +40,7 @@ data "aws_vpc" "internal_alb" {
 }
 
 resource "aws_security_group_rule" "internal_alb_ingress_from_vpc" {
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.enable_internal_alb && var.internal_alb_allow_vpc_ingress ? 1 : 0
 
   security_group_id = aws_security_group.internal_alb[0].id
   description       = "Allow HTTPS from in-VPC callers"
@@ -49,6 +49,18 @@ resource "aws_security_group_rule" "internal_alb_ingress_from_vpc" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = [data.aws_vpc.internal_alb[0].cidr_block]
+}
+
+resource "aws_security_group_rule" "internal_alb_ingress_from_security_groups" {
+  for_each = local.enable_internal_alb ? var.internal_alb_ingress_security_group_ids : {}
+
+  security_group_id        = aws_security_group.internal_alb[0].id
+  description              = "Allow HTTPS from ${each.key}"
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = each.value
 }
 
 resource "aws_security_group_rule" "internal_alb_app_egress" {
@@ -138,10 +150,15 @@ resource "aws_lb_listener_certificate" "internal_https_extra_certs" {
   certificate_arn = each.value
 }
 
-# Private hosted zone overriding alb.<env> inside the VPC so it resolves to the internal ALB.
+# Private hosted zone so a name resolves to the internal ALB inside the VPC: alb.<env>
+# (optional_extra_alb_domains) for the API, or domain_name for a private-only service.
 
 locals {
-  enable_internal_alb_zone = local.enable_internal_alb && length(var.optional_extra_alb_domains) > 0
+  internal_alb_zone_domain = (
+    var.enable_private_load_balancer ? var.domain_name :
+    length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : null
+  )
+  enable_internal_alb_zone = local.enable_internal_alb && local.internal_alb_zone_domain != null
 }
 
 resource "aws_route53_zone" "internal_alb" {
@@ -149,7 +166,7 @@ resource "aws_route53_zone" "internal_alb" {
   # checkov:skip=CKV2_AWS_39:Query logging is not available for private hosted zones
   count = local.enable_internal_alb_zone ? 1 : 0
 
-  name    = var.optional_extra_alb_domains[0]
+  name    = local.internal_alb_zone_domain
   comment = "Private resolution for the internal ${var.service_name} ALB"
 
   vpc {
@@ -161,7 +178,7 @@ resource "aws_route53_record" "internal_alb" {
   count = local.enable_internal_alb_zone ? 1 : 0
 
   zone_id = aws_route53_zone.internal_alb[0].zone_id
-  name    = var.optional_extra_alb_domains[0]
+  name    = local.internal_alb_zone_domain
   type    = "A"
 
   alias {

@@ -25,6 +25,11 @@ output "cluster_name" {
   value = aws_ecs_cluster.cluster.name
 }
 
+output "internal_alb_security_group_id" {
+  description = "Security group of the internal ALB, null when the service has none"
+  value       = local.enable_internal_alb ? aws_security_group.internal_alb[0].id : null
+}
+
 output "load_balancer_arn_suffix" {
   description = "The ARN suffix for use with CloudWatch Metrics."
   value       = var.enable_load_balancer ? aws_lb.alb[0].arn_suffix : null

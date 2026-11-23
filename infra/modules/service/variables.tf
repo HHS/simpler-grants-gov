@@ -180,6 +180,33 @@ variable "enable_secure_alb" {
   default     = false
 }
 
+variable "enable_private_load_balancer" {
+  description = <<EOT
+    Serve the service only through the internal ALB, with no public ALB. domain_name
+    then resolves to the internal ALB through a private hosted zone in the VPC.
+    Use instead of enable_load_balancer, not together with it.
+  EOT
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !(var.enable_private_load_balancer && var.enable_load_balancer)
+    error_message = "Set enable_load_balancer = false when enable_private_load_balancer is true."
+  }
+}
+
+variable "internal_alb_allow_vpc_ingress" {
+  description = "Whether anything in the VPC can reach the internal ALB on port 443. Set to false to allow only internal_alb_ingress_security_group_ids."
+  type        = bool
+  default     = true
+}
+
+variable "internal_alb_ingress_security_group_ids" {
+  description = "Security groups allowed to reach the internal ALB on port 443, keyed by a static name (for example \"frontend\")"
+  type        = map(string)
+  default     = {}
+}
+
 variable "enable_alb_cdn" {
   description = "Whether to enable an ALB origin CDN for the service. Cannot be enabled at the same time as the S3 CDN."
   type        = bool

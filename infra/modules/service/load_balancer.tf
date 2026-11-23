@@ -18,7 +18,7 @@ resource "aws_lb" "alb" {
   idle_timeout = "120"
   internal     = false
 
-  security_groups = [count.index == 0 && local.enable_internal_alb ? aws_security_group.alb_restricted[0].id : aws_security_group.alb.id]
+  security_groups = [count.index == 0 && local.enable_restricted_public_alb ? aws_security_group.alb_restricted[0].id : aws_security_group.alb.id]
   subnets         = module.network.public_subnet_ids
 
   # Use a separate line to support automated terraform destroy commands
@@ -87,7 +87,7 @@ resource "aws_lb_listener" "mtls_listener_http" {
 }
 
 resource "aws_lb_listener_rule" "http_to_https_redirect" {
-  count = var.certificate_arn != null ? 1 : 0
+  count = var.enable_load_balancer && var.certificate_arn != null ? 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_http[0].arn
   priority     = 50
