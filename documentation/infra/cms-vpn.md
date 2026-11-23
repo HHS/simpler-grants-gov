@@ -23,22 +23,27 @@ The decisions behind this setup are in the [CMS sign-in and network access ADR](
 
 ## One-time setup: certificates
 
-The VPN needs two certificates in ACM in the simpler-grants-gov account before `infra/cms/service` can be applied:
+Each environment's VPN needs two certificates in ACM in the simpler-grants-gov account before `infra/cms/service` can be applied:
 
-| Certificate | ACM domain | Used for |
+| Environment | VPN server certificate | Client CA certificate |
 | --- | --- | --- |
-| VPN server certificate | `vpn-server.cms.simpler.grants.gov` | The certificate the VPN endpoint presents to clients |
-| Client CA certificate | `vpn-client-ca.cms.simpler.grants.gov` | The certificate authority (CA) that issues each person's client certificate |
+| staging | `vpn-server.cms.staging.simpler.grants.gov` | `vpn-client-ca.cms.staging.simpler.grants.gov` |
+| prod | `vpn-server.cms.simpler.grants.gov` | `vpn-client-ca.cms.simpler.grants.gov` |
 
-Create both with [easy-rsa](https://github.com/OpenVPN/easy-rsa), following the AWS guide [Mutual authentication](https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/mutual.html). Use the domains above as the certificates' common names, then import both into ACM with `aws acm import-certificate`.
+- The **server certificate** is what the VPN endpoint presents to clients.
+- The **client CA certificate** belongs to the certificate authority (CA) that issues each person's client certificate.
 
-Store the CA's private key in AWS Secrets Manager or the team's password manager. Never commit it. Whoever holds the CA key can issue VPN access.
+Each environment has its own CA. A client certificate issued by the staging CA can't connect to the prod VPN, so giving someone staging access doesn't give them prod access.
+
+Create the certificates with [easy-rsa](https://github.com/OpenVPN/easy-rsa), following the AWS guide [Mutual authentication](https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/mutual.html). Use a separate easy-rsa CA for each environment. Use the domains above as the certificates' common names, then import them into ACM with `aws acm import-certificate`.
+
+Store each CA's private key in AWS Secrets Manager or the team's password manager. Never commit it. Whoever holds a CA key can issue VPN access to that environment.
 
 ## Give someone VPN access
 
 Give VPN access at the same time as the person's Drupal account, after their access request is approved.
 
-1. Issue a client certificate for the person with the CA, using their name or email as the common name. Each person gets their own certificate. Never share one.
+1. Issue a client certificate for the person with that environment's CA, using their name or email as the common name. Each person gets their own certificate. Never share one.
 2. Download the VPN client configuration:
 
    ```bash
@@ -54,7 +59,7 @@ Give VPN access at the same time as the person's Drupal account, after their acc
 
 Remove VPN access at the same time as the person's Drupal account.
 
-1. Revoke the person's certificate with the CA, and generate a new certificate revocation list.
+1. Revoke the person's certificate with that environment's CA, and generate a new certificate revocation list.
 2. Import the list into the VPN endpoint:
 
    ```bash

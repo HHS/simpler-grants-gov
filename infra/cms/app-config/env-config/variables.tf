@@ -67,11 +67,13 @@ variable "vpn_subnet_count" {
 variable "vpn_server_certificate_domain" {
   type        = string
   description = "Domain of the ACM certificate the VPN endpoint presents to clients"
-  default     = "vpn-server.cms.simpler.grants.gov"
 }
 
 variable "vpn_client_ca_certificate_domain" {
   type        = string
-  description = "Domain of the ACM certificate for the CA that issues per-user VPN client certificates"
-  default     = "vpn-client-ca.cms.simpler.grants.gov"
+  description = <<EOT
+    Domain of the ACM certificate for the CA that issues per-user VPN client certificates.
+    Each environment needs its own CA, so a certificate issued for one environment's VPN
+    can't connect to another's.
+  EOT
 }

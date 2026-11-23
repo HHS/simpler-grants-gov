@@ -10,5 +10,7 @@ module "staging_config" {
   domain_name  = "cms.staging.simpler.grants.gov"
   enable_https = true
 
-  vpn_client_cidr_block = "172.16.0.0/22"
+  vpn_client_cidr_block            = "172.16.0.0/22"
+  vpn_server_certificate_domain    = "vpn-server.cms.staging.simpler.grants.gov"
+  vpn_client_ca_certificate_domain = "vpn-client-ca.cms.staging.simpler.grants.gov"
 }
