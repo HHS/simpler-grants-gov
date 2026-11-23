@@ -44,12 +44,16 @@ Feature: Apply - Application Form Failure Path
 			| epa-keycontacts                      | EPA Key Contacts                            | partial data entered with required fields missing |
 			| epa4700-4                            | EPA Form 4700-4                             | required fields left empty                        |
 			| grantsgov-lobbying                   | Grants.gov Lobbying                         | required fields left empty                        |
+			| key-contacts                         | Key Contacts                                | required fields left empty                        |
+			| nasa-pi-and-aor                      | NASA PI and AOR                             | required fields left empty                        |
 			| other-narrative-attachment           | Other Narrative Attachments                 | no file uploaded for required attachment fields   |
 			| phs-research-plan                    | PHS 398 Research Plan                       | Research Strategy attachment missing              |
 			| phs-research-training | PHS 398 Research Training Program Plan | required fields left empty |
 			| project-abstract-summary             | Project Abstract Summary                    | required fields left empty                        |
 			| project-abstract                     | Project Abstract                            | required fields left empty                        |
 			| project-narrative-attachment         | Project Narrative Attachment                | no file uploaded for required attachment fields   |
+			| project-performance-site-location    | Project/Performance Site Location(s)        | required fields left empty                        |
+			| senior-key-person                    | Senior/Key Person Profile                   | required fields left empty                        |
 			| sf424                                | Application for Federal Assistance (SF-424) | required fields left empty                        |
 			| sf424a                               | SF-424A                                     | required fields left empty                        |
 			| sf424b                               | SF-424B                                     | required fields left empty                        |

@@ -97,7 +97,9 @@ export const PPSL_FORM_CONFIG = {
   fields: fieldDefinitionsPPSL,
 } as const;
 
-// Sourced from FORM_JSON_SCHEMA required arrays in form_json.py
+// Errors from an empty save. The frontend drops the empty address, so the API
+// reports the whole address missing and each address error starts with
+// "Address". Congressional District is required only for a US address.
 export const PPSL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
     fieldId: "primary_site--organization_name",
@@ -105,18 +107,14 @@ export const PPSL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "primary_site--address--street1",
-    message: "Street 1 is required",
+    message: "Address Street 1 is required",
   },
   {
     fieldId: "primary_site--address--city",
-    message: "City is required",
+    message: "Address City is required",
   },
   {
     fieldId: "primary_site--address--country",
-    message: "Country is required",
-  },
-  {
-    fieldId: "primary_site--congressional_district",
-    message: "Congressional District is required",
+    message: "Address Country is required",
   },
 ];

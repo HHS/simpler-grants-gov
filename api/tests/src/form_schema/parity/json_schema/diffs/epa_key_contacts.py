@@ -3,8 +3,7 @@
 Every field has the same path in both, so nothing is mapped. The four contacts are the same
 question bank Person asked four times, so most entries repeat once per contact. The two
 accept the same answers except where the hand-written form disagrees with the Grants.gov
-schema. The rest is wording the generated form takes from the DAT and the question bank,
-and where the bank's address asks for the zip code.
+schema. The rest is wording the generated form takes from the DAT and the question bank.
 """
 
 from ..harness.form_diff import FormDiff
@@ -82,10 +81,4 @@ DIFF = FormDiff(
         **_each_contact(".fax/description", BANK_HELP_ADDED),
         **_each_contact(".email/description", BANK_HELP_ADDED),
     },
-    out_of_order=_each_contact(
-        ".address.zip_code",
-        "The question bank's Address asks for the zip code after the country, for every form "
-        "that asks it. The hand-written form, like the XSD, asks for it after the state. This "
-        "only changes the on-screen order: the XML follows the XSD.",
-    ),
 )
