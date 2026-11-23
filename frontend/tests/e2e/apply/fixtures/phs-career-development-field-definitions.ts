@@ -10,6 +10,7 @@ export const PHS_CAREER_DEVELOPMENT_FORM_CONFIG = {
   fields: {
     is_us_citizen_or_national: {
       selector: '#is_us_citizen_or_national >> role=radio[name="Yes"i]',
+      printTestId: "is_us_citizen_or_national",
       field: "U.S. citizen or national",
       type: "radiobutton",
     },
