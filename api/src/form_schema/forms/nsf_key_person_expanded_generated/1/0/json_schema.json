@@ -128,7 +128,7 @@
         "address": {
           "allOf": [
             {
-              "$ref": "#/$defs/person.address"
+              "$ref": "#/$defs/types.address.zip-plus-four"
             }
           ],
           "description": "Enter the person's complete address.",
@@ -226,7 +226,7 @@
         "address": {
           "allOf": [
             {
-              "$ref": "#/$defs/person.address"
+              "$ref": "#/$defs/types.address.zip-plus-four"
             }
           ],
           "description": "Enter the person's complete address.",
@@ -418,7 +418,7 @@
       "description": "Enter the position title.",
       "title": "Title"
     },
-    "person.address": {
+    "types.address.zip-plus-four": {
       "type": "object",
       "properties": {
         "street1": {
@@ -490,7 +490,7 @@
               "$ref": "#/$defs/types.address.zip-code"
             }
           ],
-          "description": "Enter the zip / postal code. This field is required if the country is the United States.",
+          "description": "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required.",
           "title": "Zip / Postal Code"
         }
       },
@@ -499,9 +499,28 @@
         "city",
         "country"
       ],
-      "description": "A person's address.",
+      "description": "Enter an address. A US ZIP needs all nine digits.",
       "title": "Address",
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "USA: UNITED STATES"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "properties": {
+              "zip_code": {
+                "minLength": 9
+              }
+            }
+          }
+        },
         {
           "if": {
             "properties": {
