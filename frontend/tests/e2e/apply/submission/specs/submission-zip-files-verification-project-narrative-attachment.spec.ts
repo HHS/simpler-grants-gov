@@ -2,8 +2,9 @@
  * @feature Apply - Submission zip content verification
  * @scenario Complete the Project Narrative Attachment application end to end (create,
  * fill, submit), download the generated submission zip from the application page, then
- * verify GrantApplication.xml, ProjectNarrativeAttachments_1_2.pdf and the attached
- * file contain the data entered during this run.
+ * verify GrantApplication.xml, the form PDF and the attached file contain the data
+ * entered during this run. Covers the legacy form (E2E-PNA-ORG-IND-01) only; the
+ * generated form (E2E-PNAG-ORG-IND-01) is not covered.
  */
 
 import fs from "fs";
@@ -14,7 +15,11 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { pnaDerivedValues } from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
+import {
+  PROJECT_NARRATIVE_OPPORTUNITY_DATA,
+  PROJECT_NARRATIVE_ZIP_PDF_NAME,
+  projectNarrativeDerivedValues,
+} from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
 import { PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER } from "tests/e2e/apply/fixtures/project-narrative-attachment-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -48,11 +53,9 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-const OPPORTUNITY_NUMBER = "E2E-PNA-ORG-IND-01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
+const { opportunityNumber, formKey } = PROJECT_NARRATIVE_OPPORTUNITY_DATA;
 
-// Zip entry is "<form.short_form_name>.pdf" (ProjectNarrativeAttachments_1_2 in the API form definition).
-const PNA_ZIP_PDF_NAME = "ProjectNarrativeAttachments_1_2.pdf";
+const opportunityConfig = loadOpportunityConfig(opportunityNumber);
 
 // Runs only against staging, in Chrome. The submission zip is built by the
 // submission consumer/task, which does not run in the local e2e environment.
@@ -65,7 +68,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 test(
-  "Downloaded Submission ZIP contains expected Project Narrative Attachment XML, PDF and attached file",
+  "Downloaded Submission ZIP contains expected Project Narrative Attachment Form XML, PDF and attached file",
   { tag: [APPLY_FORMS, FULL_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
@@ -79,7 +82,7 @@ test(
     // --- Login ---
     await authenticateE2eUser(page, context, !!isMobile);
 
-    // --- Create a new application for the Project Narrative Attachment opportunity ---
+    // --- Create a new application for this Project Narrative opportunity ---
     await createApplication(
       page,
       opportunityConfig.opportunityUrl,
@@ -88,8 +91,8 @@ test(
     const applicationUrl = page.url();
 
     // --- Fill every form on the opportunity ---
-    let pnaTestData: Record<string, string> | undefined;
-    let pnaForm: ResolvedPrintViewForm | undefined;
+    let narrativeTestData: Record<string, string> | undefined;
+    let narrativeForm: ResolvedPrintViewForm | undefined;
 
     for (const [index, form] of opportunityConfig.forms.entries()) {
       const testData = buildHappyPathTestData(form, baseSuffix + index);
@@ -103,18 +106,18 @@ test(
         applicationUrl,
       );
 
-      if (form.formKey === "projectNarrativeAttachment") {
-        pnaTestData = testData;
-        pnaForm = form;
+      if (form.formKey === formKey) {
+        narrativeTestData = testData;
+        narrativeForm = form;
       }
     }
 
-    if (!pnaTestData || !pnaForm) {
+    if (!narrativeTestData || !narrativeForm) {
       throw new Error(
-        `Project Narrative Attachment form not found for opportunity ${OPPORTUNITY_NUMBER}`,
+        `Project Narrative Attachment Form not found for opportunity ${opportunityNumber}`,
       );
     }
-    const d = pnaTestData;
+    const d = narrativeTestData;
 
     // --- Submit ---
     await page.goto(applicationUrl);
@@ -132,19 +135,19 @@ test(
     const contents = await downloadAndUnzipSubmission(page);
 
     // MIME type and hash of the uploaded file; not part of the typed test data.
-    const systemValues = pnaDerivedValues(d);
+    const systemValues = projectNarrativeDerivedValues(d);
 
     await test.step("Verify GrantApplication.xml field values", () => {
       assertXmlContainsFields(
         contents,
-        buildExpectedXmlFields(pnaForm, d, systemValues),
+        buildExpectedXmlFields(narrativeForm, d, systemValues),
       );
     });
 
-    await test.step("Verify ProjectNarrativeAttachments_1_2.pdf form title and file name", async () => {
-      await assertPdfContainsText(contents, PNA_ZIP_PDF_NAME, [
+    await test.step(`Verify ${PROJECT_NARRATIVE_ZIP_PDF_NAME} form title and file name`, async () => {
+      await assertPdfContainsText(contents, PROJECT_NARRATIVE_ZIP_PDF_NAME, [
         PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER,
-        ...buildExpectedPdfText(pnaForm, d, systemValues),
+        ...buildExpectedPdfText(narrativeForm, d, systemValues),
       ]);
     });
 
