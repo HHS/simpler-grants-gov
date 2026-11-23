@@ -1,4 +1,5 @@
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "form-library-xml";
 import "#forms/index.tsp";
 import "./examples.tsp";
@@ -8,6 +9,10 @@ namespace Forms.BudgetNarrative;
 @Meta.form(#{
   id: "budget-narrative",
   formName: "Budget Narrative Attachment Form",
+})
+@Sgg.sync(#{
+  instructions: "f8b3c40c-cc55-4b58-ac38-1837b8ae4922",
+  xml: "mapping",
 })
 @GrantsGov.form(#{
   legacyFormId: 543,

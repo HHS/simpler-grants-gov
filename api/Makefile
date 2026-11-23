@@ -358,14 +358,14 @@ populate-search-opportunities: ## Load opportunities from the DB into the search
 populate-search-agencies: ## Load agencies from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-agency-data $(args)
 
-run-workflow-service: ## Run the workflow service
-	$(FLASK_CMD) workflow workflow-main
+run-submission-consumer: ## Run the application submission consumer
+	$(FLASK_CMD) submission-consumer run
 
 # This doesn't use our usual pre-defined prefix command since this only works
 # when run with docker as we use it to run the code async. Outside docker that
 # isn't something we have a simple way to support that.
-run-workflow-service-async: ## Run the workflow service without blocking
-	docker compose run --detach --rm grants-api flask workflow workflow-main
+run-submission-consumer-async: ## Run the application submission consumer without blocking
+	docker compose run --detach --rm grants-api flask submission-consumer run
 
 run-email-notifications: ## Send email notifications
 	$(FLASK_CMD) task email-notifications $(args)
@@ -445,10 +445,3 @@ validate-simpler-endpoints:
 
 generate-xml: ## Generate XML from JSON (usage: make generate-xml json='{"field": "value"}' form=SF424_4_0 [attachments='{"uuid": {...}}'])
 	$(PY_RUN_CMD) flask task generate-xml --json '$(json)' --form $(or $(form),SF424_4_0) $(if $(attachments),--attachments '$(attachments)')
-
-#####################
-# Workflow State Machine
-#####################
-
-create-workflow-diagrams: ## Create diagrams of all of our defined workflows
-	$(PY_RUN_CMD) create-workflow-diagrams

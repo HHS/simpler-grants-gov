@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
@@ -41,14 +43,12 @@ def test_project_abstract_v1_2_attachment_type(project_abstract_v1_2):
 def test_project_abstract_v1_2_with_valid_attachment(
     enable_factory_create, project_abstract_v1_2, verify_no_warning_error_logs
 ):
+    attachment_id = str(uuid4())
     application_form = setup_application_for_form_validation(
-        {"attachment": "c64b0b36-3298-4d63-982e-07ec50c79d81"},
+        {"attachment": attachment_id},
         json_schema=project_abstract_v1_2.form_json_schema,
         rule_schema=project_abstract_v1_2.form_rule_schema,
-        attachment_ids=[
-            "c64b0b36-3298-4d63-982e-07ec50c79d81",
-            "dc435ad9-02a9-4e05-b28c-db6ba5fc39d7",
-        ],
+        attachment_ids=[attachment_id, str(uuid4())],
     )
 
     issues = validate_application_form(application_form, ApplicationAction.MODIFY)
@@ -59,11 +59,12 @@ def test_project_abstract_v1_2_with_valid_attachment(
 def test_project_abstract_v1_2_with_invalid_attachment(
     enable_factory_create, project_abstract_v1_2, verify_no_warning_error_logs
 ):
+    unknown_id = str(uuid4())
     application_form = setup_application_for_form_validation(
-        {"attachment": "e74282d5-f41c-4b38-b5a2-e0a5ccdc8b99"},
+        {"attachment": unknown_id},
         json_schema=project_abstract_v1_2.form_json_schema,
         rule_schema=project_abstract_v1_2.form_rule_schema,
-        attachment_ids=["05056742-2b05-47bd-b5e7-8469fa9126ff"],
+        attachment_ids=[str(uuid4())],
     )
 
     issues = validate_application_form(application_form, ApplicationAction.MODIFY)
@@ -71,4 +72,4 @@ def test_project_abstract_v1_2_with_invalid_attachment(
     assert len(issues) == 1
     assert issues[0].type == ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT
     assert issues[0].message == "Field references application_attachment_id not on the application"
-    assert issues[0].value == "e74282d5-f41c-4b38-b5a2-e0a5ccdc8b99"
+    assert issues[0].value == unknown_id

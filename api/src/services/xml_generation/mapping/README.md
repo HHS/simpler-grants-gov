@@ -58,7 +58,8 @@ where its content comes from:
 
 ### `$field`: the answer at a path
 
-A dotted path into the response. Inside `$each`, the path is relative to the item.
+A path into the response: steps separated by `.`. Inside `$each`, the path is relative to the
+item, and `.` is the item itself.
 
 ```json
 "ContactName": {
@@ -74,13 +75,46 @@ A dotted path into the response. Inside `$each`, the path is relative to the ite
 </Key_Contacts_2_0:ContactName>
 ```
 
-A whole-number step reads a list's entry by index, for an XSD that numbers its elements
-instead of repeating one. An entry the list doesn't have writes nothing.
+#### Indexing and slicing
+
+Paths support list indexing and slicing like Python and jq. Given this list:
 
 ```json
-"ApplicantTypeCode1": { "$field": "applicant_type_code.0" },
-"ApplicantTypeCode2": { "$field": "applicant_type_code.1" },
-"ApplicantTypeCode3": { "$field": "applicant_type_code.2" }
+"codes": ["a", "b", "c", "d"]
+```
+
+- `codes[0]` selects `"a"`, because indexes are zero-based.
+- `codes[-1]` selects `"d"`, because a negative index counts back from the end of the list.
+- `codes[1:]` selects `["b", "c", "d"]`, because a slice with a start but no stop selects
+  everything from the start to the end.
+- `codes[:2]` selects `["a", "b"]`, because a slice with a stop but no start selects everything
+  before the stop. The stop itself is excluded.
+- `codes[1:3]` selects `["b", "c"]`, from the start up to, but not including, the stop.
+- `codes[9]` selects nothing, because the list has no entry at that index, so the element isn't
+  written.
+- `codes.0` selects `"a"`. A whole-number step reads an entry, like `[0]`.
+
+A slice must be the path's last step: `sites[1:].name` isn't a valid path.
+
+Use an index for an XSD that numbers its elements instead of repeating one:
+
+```json
+"ApplicantTypeCode1": { "$field": "applicant_type_code[0]" },
+"ApplicantTypeCode2": { "$field": "applicant_type_code[1]" },
+"ApplicantTypeCode3": { "$field": "applicant_type_code[2]" }
+```
+
+Use a slice with `$each` to write the first entries to their own elements and repeat an element
+for the rest:
+
+```json
+"PrimarySite": { "OrganizationName": { "$field": "sites[0].name" } },
+"OtherSite": {
+  "$each": {
+    "items": { "$field": "sites[1:]" },
+    "map": { "OrganizationName": { "$field": "name" } }
+  }
+}
 ```
 
 ### `$const`: a fixed value

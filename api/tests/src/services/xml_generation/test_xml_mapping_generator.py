@@ -183,6 +183,51 @@ class TestValues:
             "</Form:Root>"
         )
 
+    def test_reads_a_lists_entries_with_brackets_by_index_from_either_end_or_a_range(
+        self,
+    ) -> None:
+        mapping = _small_mapping(
+            {
+                "First": {"$field": "sites[0].name"},
+                "Last": {"$field": "codes[-1]"},
+                "Missing": {"$field": "codes[5]"},
+                "Code": {"$field": "codes[1:3]"},
+                "Other": {
+                    "$each": {
+                        "items": {"$field": "sites[1:]"},
+                        "map": {"Name": {"$field": "name"}},
+                    }
+                },
+            }
+        )
+        data = {
+            "sites": [{"name": "HQ"}, {"name": "Lab"}, {"name": "Field"}],
+            "codes": ["A", "C", "F", "K"],
+        }
+
+        xml = _generate(mapping, data)
+
+        assert xml == (
+            "<?xml version='1.0' encoding='utf-8'?>\n"
+            '<Form:Root xmlns:Form="urn:form" xmlns:lib="urn:lib"'
+            ' xmlns:att="http://apply.grants.gov/system/Attachments-V1.0">\n'
+            "  <Form:First>HQ</Form:First>\n"
+            "  <Form:Last>K</Form:Last>\n"
+            "  <Form:Code>C</Form:Code>\n"
+            "  <Form:Code>F</Form:Code>\n"
+            "  <Form:Other>\n"
+            "    <Form:Name>Lab</Form:Name>\n"
+            "  </Form:Other>\n"
+            "  <Form:Other>\n"
+            "    <Form:Name>Field</Form:Name>\n"
+            "  </Form:Other>\n"
+            "</Form:Root>"
+        )
+
+    def test_rejects_a_range_before_a_paths_last_step(self) -> None:
+        with pytest.raises(ValueError, match="a range must be a path's last step"):
+            _generate(_small_mapping({"Name": {"$field": "sites[1:].name"}}), {"sites": []})
+
     def test_writes_a_boolean_as_true_or_false(self) -> None:
         mapping = _small_mapping({"Agrees": {"$field": "agrees"}, "@Form:Flag": {"$field": "flag"}})
 

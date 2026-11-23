@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://apply.grants.gov/forms/NSF_DeviationAuthorization-V1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:NSF_DeviationAuthorization="http://apply.grants.gov/forms/NSF_DeviationAuthorization-V1.1" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.0">
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:element name="NSF_DeviationAuthorization">
+		<xs:complexType>
+			<xs:sequence minOccurs="0">
+				<xs:element name="DeviationAuthorization" type="NSF_DeviationAuthorization:StringMin0Max4000" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="1.1"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="StringMin0Max4000">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="4000"/>
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

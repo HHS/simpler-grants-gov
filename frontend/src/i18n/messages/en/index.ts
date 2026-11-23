@@ -765,6 +765,14 @@ export const messages = {
     button: "Sign in with Login.gov",
     close: "Cancel",
   },
+  SessionExpirationWarning: {
+    title: "Your session is about to expire",
+    description:
+      "For your security, you will be signed out due to inactivity. Any unsaved changes will be lost.",
+    countdown: "Time remaining: {time}",
+    staySignedIn: "Stay signed in",
+    signOut: "Sign out",
+  },
   PivRequiredModal: {
     title: "Your account requires additional identity verification.",
     description:

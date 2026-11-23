@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "attachment": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": ""
+    }
+  },
+  "required": [
+    "attachment"
+  ],
+  "examples": [
+    {
+      "attachment": "00000000-0000-4000-8000-000000000267"
+    }
+  ],
+  "$defs": {
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
+    }
+  }
+}

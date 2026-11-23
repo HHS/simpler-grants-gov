@@ -1,7 +1,7 @@
 {
   "title": "Project Abstract",
   "slug": "project-abstract",
-  "status": "backlog",
+  "status": "migrated",
   "family": [
     "SF-424",
     "R&R",
@@ -14,5 +14,37 @@
   "fid_url": "https://www.grants.gov/forms/form-items-description/fid/541",
   "pdf_url": "https://apply07.grants.gov/apply/forms/readonly/Project_Abstract_1_2-V1.2_F541.pdf",
   "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_Abstract_1_2-V1.2.xsd",
-  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Project_Abstract_1_2-V1.2_F541.xls"
+  "dat_url": "https://apply07.grants.gov/apply/forms/sample/Project_Abstract_1_2-V1.2_F541.xls",
+  "spec_id": "project-abstract",
+  "sgg_form_id": "project_abstract",
+  "omb_number": "4040-0010",
+  "expiration_date": "2029-08-31",
+  "widgets": ["ApplicationAttachmentWidget"],
+  "description": "One required project abstract file.",
+  "children": [
+    {
+      "kind": "section",
+      "label": "Project Abstract File",
+      "help_text": "The Project Abstract must not exceed one page and must contain a summary of the proposed activity suitable for dissemination to the public. It should be a self-contained description of the project and should contain a statement of objectives and methods to be employed. It should be informative to other persons working in the same or related fields and insofar as possible understandable to a technically literate lay reader. This Abstract must not include any proprietary/confidential information.",
+      "children": [
+        {
+          "kind": "field",
+          "id": "attachment",
+          "label": "Project Abstract File",
+          "help_text": "A file must be attached.",
+          "required": true,
+          "type": "Attachment",
+          "widget": "ApplicationAttachmentWidget",
+          "dat_field": "5",
+          "json_path": "attachment",
+          "xml_path": "ProjectAbstractAddAttachment/AttachedFile",
+          "constraints": "format uuid"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "No applicant answers are pre- or post-populated. The upload service uses the selected file ID to supply attachment metadata for Grants.gov XML.",
+    "The existing SGG directions are shown above the upload under Project Abstract File. The upload checks that a file was selected. It does not check the one-page limit or the document contents."
+  ]
 }
