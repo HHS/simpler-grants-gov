@@ -46,12 +46,6 @@ def upgrade():
     #   df17eaaf-701b-4b9f-9a88-0406beabc68e = Internal Workflow User
     #   66b4238b-8f22-4996-b6ba-712958fd5631 = Grantor Program Officer
     #   4d00cb3c-0cc5-4876-8e09-7067ae0530a2 = Grantor Budget Officer
-    workflow_role_ids = (
-        "'18258804-a281-41cd-9afb-06061fa7593c', "
-        "'df17eaaf-701b-4b9f-9a88-0406beabc68e', "
-        "'66b4238b-8f22-4996-b6ba-712958fd5631', "
-        "'4d00cb3c-0cc5-4876-8e09-7067ae0530a2'"
-    )
     op.execute(
         sa.text(
             "DELETE FROM api.internal_user_role WHERE role_id IN ("
@@ -65,12 +59,26 @@ def upgrade():
         )
     )
     op.execute(
-        sa.text(f"DELETE FROM api.link_role_privilege WHERE role_id IN ({workflow_role_ids})")
+        sa.text(
+            "DELETE FROM api.link_role_privilege WHERE role_id IN ("
+            "'18258804-a281-41cd-9afb-06061fa7593c', 'df17eaaf-701b-4b9f-9a88-0406beabc68e', "
+            "'66b4238b-8f22-4996-b6ba-712958fd5631', '4d00cb3c-0cc5-4876-8e09-7067ae0530a2')"
+        )
     )
     op.execute(
-        sa.text(f"DELETE FROM api.link_role_role_type WHERE role_id IN ({workflow_role_ids})")
+        sa.text(
+            "DELETE FROM api.link_role_role_type WHERE role_id IN ("
+            "'18258804-a281-41cd-9afb-06061fa7593c', 'df17eaaf-701b-4b9f-9a88-0406beabc68e', "
+            "'66b4238b-8f22-4996-b6ba-712958fd5631', '4d00cb3c-0cc5-4876-8e09-7067ae0530a2')"
+        )
     )
-    op.execute(sa.text(f"DELETE FROM api.role WHERE role_id IN ({workflow_role_ids})"))
+    op.execute(
+        sa.text(
+            "DELETE FROM api.role WHERE role_id IN ("
+            "'18258804-a281-41cd-9afb-06061fa7593c', 'df17eaaf-701b-4b9f-9a88-0406beabc68e', "
+            "'66b4238b-8f22-4996-b6ba-712958fd5631', '4d00cb3c-0cc5-4876-8e09-7067ae0530a2')"
+        )
+    )
 
     # Delete the workflow privilege lookup rows, leaving ID gaps:
     #   22 = internal_workflow_access
