@@ -6,6 +6,7 @@ from sqlalchemy import select
 from src.constants.lookup_constants import OrganizationAuditEvent, OrganizationInvitationStatus
 from src.constants.static_role_values import (
     MODIFY_APPLICATIONS_ID,
+    ORG_ADMIN_ID,
     ORG_COLLABORATOR_ID,
     SUBMIT_APPLICATIONS_ID,
     VIEW_APPLICATIONS_ID,
@@ -226,7 +227,7 @@ def test_org_invitation_with_collaborator_role_adds_application_roles(
         LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv, role=role)
     collaborator_role = db_session.execute(
         select(Role).where(Role.role_id == ORG_COLLABORATOR_ID)
-    ).scalar_one_or_none()
+    ).scalar_one()
     LinkOrganizationInvitationToRoleFactory.create(
         organization_invitation=inv, role=collaborator_role
     )
@@ -263,16 +264,8 @@ def test_org_invitation_with_admin_role_does_not_add_application_roles(
     client, db_session, user, user_auth_token, enable_factory_create
 ):
     inv = OrganizationInvitationFactory.create(invitee_email=user.email)
-    admin_role = db_session.execute(
-        select(Role).where(Role.role_name == "Organization Admin")
-    ).scalar_one_or_none()
+    admin_role = db_session.execute(select(Role).where(Role.role_id == ORG_ADMIN_ID)).scalar_one()
     LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv, role=admin_role)
-    collaborator_role = db_session.execute(
-        select(Role).where(Role.role_id == ORG_COLLABORATOR_ID)
-    ).scalar_one_or_none()
-    LinkOrganizationInvitationToRoleFactory.create(
-        organization_invitation=inv, role=collaborator_role
-    )
 
     assert inv.status == OrganizationInvitationStatus.PENDING
 
@@ -292,9 +285,9 @@ def test_org_invitation_with_admin_role_does_not_add_application_roles(
     # Verify status
     assert res.status == OrganizationInvitationStatus.ACCEPTED
 
-    expected_roles = [r.role_name for r in user.organization_users[0].roles]
+    expected_roles = [r.role_id for r in user.organization_users[0].roles]
     assert len(expected_roles) == 1
-    assert "Organization Admin" in expected_roles
+    assert ORG_ADMIN_ID in expected_roles
 
 
 def test_org_invitation_with_collaborator_roles_only_add_roles_once(
@@ -306,10 +299,10 @@ def test_org_invitation_with_collaborator_roles_only_add_roles_once(
         LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv, role=role)
     collaborator_role = db_session.execute(
         select(Role).where(Role.role_id == ORG_COLLABORATOR_ID)
-    ).scalar_one_or_none()
+    ).scalar_one()
     view_applications = db_session.execute(
         select(Role).where(Role.role_id == VIEW_APPLICATIONS_ID)
-    ).scalar_one_or_none()
+    ).scalar_one()
     LinkOrganizationInvitationToRoleFactory.create(
         organization_invitation=inv, role=collaborator_role
     )
