@@ -25,7 +25,6 @@ from src.adapters import search
 from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.login_gov_jwt import LoginGovConfig
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
-from src.adapters.search import SearchClient
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.schema import Schemas
@@ -41,21 +40,12 @@ from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
 from src.search.backend.load_agencies_to_index import AGENCY_INDEX_ANALYSIS, AGENCY_INDEX_MAPPINGS
+from src.task.service_background_task import _init_newrelic_app
 from src.util.local import load_local_env_vars
-from src.workflow.registry.workflow_client_registry import (
-    WorkflowClientRegistry,
-    init_workflow_client_registry,
-)
-from src.workflow.workflow_background_task import _init_newrelic_app
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint, mock_oauth_logout_endpoint
 from tests.lib.db_testing import cascade_delete_from_db_table
-from tests.src.db.models.factories import (
-    InternalUserRoleFactory,
-    RoleFactory,
-    UserFactory,
-    UserProfileFactory,
-)
+from tests.src.db.models.factories import InternalUserRoleFactory, RoleFactory, UserFactory
 
 # Import the test-only models so they're attached to the metadata and get
 # created alongside the real tables in the db_client fixture below.
@@ -873,7 +863,7 @@ def s3_scanner_user(db_session, monkeypatch) -> User:
     """Create the local file-scanner user with the INTERNAL_S3_SCAN privilege
     and point LOCAL_FILE_SCANNER_USER_ID at them.
 
-    Mirrors the workflow_user fixture pattern but skips enable_factory_create
+    Skips enable_factory_create
     so it can compose with a test-local moto context. enable_factory_create
     pulls in mock_s3_bucket -> mock_s3, whose s3-only whitelist would block
     the DynamoDB calls these tests also need.
@@ -888,30 +878,3 @@ def s3_scanner_user(db_session, monkeypatch) -> User:
     monkeypatch.setenv("LOCAL_FILE_SCANNER_USER_ID", str(user.user_id))
 
     return user
-
-
-@pytest.fixture
-def workflow_user(enable_factory_create, monkeypatch) -> User:
-    """Get the workflow user, setting them up with expected params
-
-    Also sets the workflow user ID env var to the user created here.
-
-    This fixture has autouse=True so it's automatically available for all
-    workflow tests without needing to explicitly request it.
-    """
-    user = UserFactory.create()
-    UserProfileFactory.create(user=user, first_name="System", last_name="User")
-
-    role = RoleFactory.create(
-        privileges=[Privilege.INTERNAL_WORKFLOW_ACCESS], role_types=[RoleType.INTERNAL]
-    )
-    InternalUserRoleFactory.create(user=user, role=role)
-
-    monkeypatch.setenv("WORKFLOW_SERVICE_INTERNAL_USER_ID", str(user.user_id))
-
-    return user
-
-
-@pytest.fixture(scope="session")
-def workflow_client_registry(search_client: SearchClient) -> WorkflowClientRegistry:
-    return init_workflow_client_registry(search_client=search_client)

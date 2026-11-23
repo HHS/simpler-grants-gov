@@ -258,14 +258,8 @@ class Privilege(StrEnum):
     READ_TEST_USER_TOKEN = "read_test_user_token"
     VIEW_OPPORTUNITY = "view_opportunity"
     UPDATE_OPPORTUNITY = "update_opportunity"
-    INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
     VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
-    INTERNAL_WORKFLOW_EVENT_SEND = "internal_workflow_event_send"
-
-    # These privileges are associated with workflow approvals
-    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
-    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
     INTERNAL_S3_SCAN = "internal_s3_scan"
 
@@ -331,57 +325,6 @@ class OrganizationAuditEvent(StrEnum):
     USER_ADDED = "user_added"
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
-
-
-class WorkflowType(StrEnum):
-    OPPORTUNITY_PUBLISH = "opportunity_publish"
-    APPLICATION_SUBMISSION = "application_submission"
-    INITIAL_PROTOTYPE = "initial_prototype"
-
-    # Because of how we use the workflow type to find
-    # the state machine and its configuration, we need
-    # to define any workflows for tests here as well.
-    # These workflow types aren't real, and are instead
-    # reserved for testing.
-    BASIC_TEST_WORKFLOW = "basic_test_workflow"
-    NO_CONCURRENT_TEST_WORKFLOW = "no_concurrent_test_workflow"
-    LIMITED_APPROVAL_TEST_WORKFLOW = "limited_approval_test_workflow"
-
-    def get_human_friendly_text(self) -> str:
-        return self.value.replace("_", " ").title()
-
-
-class ApprovalType(StrEnum):
-    INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
-
-    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
-    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
-
-
-class ApprovalResponseType(StrEnum):
-    APPROVED = "approved"
-    DECLINED = "declined"
-    REQUIRES_MODIFICATION = "requires_modification"
-
-
-class WorkflowEntityType(StrEnum):
-    OPPORTUNITY = "opportunity"
-    APPLICATION = "application"
-    APPLICATION_SUBMISSION = "application_submission"
-
-
-class WorkflowEventType(StrEnum):
-    START_WORKFLOW = "start_workflow"
-    PROCESS_WORKFLOW = "process_workflow"
-
-
-class WorkflowEventProcessingResult(StrEnum):
-    """Enum representing the result of processing an SQS event."""
-
-    SUCCESS = "success"
-    NON_RETRYABLE_ERROR = "non_retryable_error"
-    RETRYABLE_ERROR = "retryable_error"
-    GENERAL_ERROR = "general_error"
 
 
 class FileScanStatus(StrEnum):
