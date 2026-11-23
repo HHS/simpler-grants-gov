@@ -2,17 +2,15 @@ import type { FormDiff, Recorded } from "../harness/model.ts";
 import {
   ADDRESS_HEADING,
   BANK_WORDING,
+  conditionalStar,
+  EACH_ENTRY_REQUIRED,
   emailMinLength,
+  ENTRY_OCCURRENCES,
+  entryStar,
   NINE_DIGIT_ZIP,
   PROFILE_GROUPS,
+  unstarredRequired,
 } from "./common.ts";
-
-/** Key-person fields the DAT allows once, though the XSD allows 99 key persons. */
-const ONCE: Recorded = {
-  category: "upstream",
-  reason:
-    "The DAT gives this key-person field 1 occurrence. The XSD allows 99 key persons, as the DAT's other key-person fields do.",
-};
 
 /** NSF ID's length, which the XSD sets with a pattern. */
 const NSF_ID_LENGTH: Recorded = {
@@ -27,6 +25,33 @@ export const DIFF: FormDiff = {
   wording: BANK_WORDING,
   dat: {
     absentFromPlan: { "1-10": ADDRESS_HEADING, "2-10": ADDRESS_HEADING },
+    differingLabels: {
+      "1-15": conditionalStar("State"),
+      "1-17": conditionalStar("Zip / Postal Code"),
+      "1-28": unstarredRequired(
+        "Current & Pending Support",
+        "Attach Current & Pending (Other) Support",
+      ),
+      "2-02": entryStar("First Name"),
+      "2-04": entryStar("Last Name"),
+      "2-08": conditionalStar("Organization UEI", "Organization UEI ID"),
+      "2-11": entryStar("Street 1", "Street1"),
+      "2-13": entryStar("City"),
+      "2-15": conditionalStar("State"),
+      "2-16": entryStar("Country"),
+      "2-17": conditionalStar("Zip / Postal Code"),
+      "2-18": entryStar("Phone Number"),
+      "2-20": entryStar("Email", "E-Mail"),
+      "2-21": entryStar("Project Role"),
+      "2-29": entryStar(
+        "Collaborators & Other Affiliations",
+        "Attach Collaborators & Other Affiliations",
+      ),
+      "2-30": entryStar(
+        "Synergistic Activities",
+        "Attach Synergistic Activities",
+      ),
+    },
     differingHelp: {
       "1-17": {
         plan: "Enter the zip / postal code. This field is required if the country is the United States.",
@@ -50,14 +75,12 @@ export const DIFF: FormDiff = {
     differingRules: {
       "1-23/maxLength": { plan: null, source: 9, ...NSF_ID_LENGTH },
       "2-23/maxLength": { plan: null, source: 9, ...NSF_ID_LENGTH },
-      "2-23/maxOccurs": { plan: 99, source: 1, ...ONCE },
-      "2-30/maxOccurs": { plan: 99, source: 1, ...ONCE },
+      "2-23/maxOccurs": { plan: 99, source: 1, ...ENTRY_OCCURRENCES },
+      "2-30/maxOccurs": { plan: 99, source: 1, ...ENTRY_OCCURRENCES },
       "2-30/required": {
         plan: "conditional",
         source: "yes",
-        category: "upstream",
-        reason:
-          "The DAT marks Synergistic Activities required. The XSD requires it only for each key person entered, and key persons are optional.",
+        ...EACH_ENTRY_REQUIRED,
       },
     },
   },
