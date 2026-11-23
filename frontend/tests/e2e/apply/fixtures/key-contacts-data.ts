@@ -1,6 +1,7 @@
 import type { fieldDefinitionsKeyContacts } from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
+import type { FormUnderTest } from "tests/e2e/utils/submission/scenarios-for-each-form";
 
 /**
  * Required-fields-only happy-path test data for the Key Contacts form.
@@ -86,3 +87,32 @@ export const KEY_CONTACTS_OPPORTUNITY_DATA: PrintViewFormData = {
   expectedPrepopulatedFields: {},
   buildTestData: buildKeyContactsHappyPathTestData,
 };
+
+/**
+ * Opportunity configuration for the Key Contacts form generated from forms/specs.
+ * It shares the hand-written form's field definitions and fill data.
+ */
+export const KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA: PrintViewFormData = {
+  opportunityId: "1954f7d4-9d41-4d52-b7fc-c97d28815a9b",
+  opportunityNumber: "E2E-KCG-ORG-IND-01",
+  formKey: "keyContactsGenerated",
+  expectedPrepopulatedFields: {},
+  buildTestData: buildKeyContactsHappyPathTestData,
+};
+
+/**
+ * Each Key Contacts form the Key Contacts specs run against.
+ */
+export const KEY_CONTACTS_OPPORTUNITIES: FormUnderTest[] = [
+  {
+    formLabel: "Key Contacts",
+    opportunityNumber: KEY_CONTACTS_OPPORTUNITY_DATA.opportunityNumber,
+    formKey: KEY_CONTACTS_OPPORTUNITY_DATA.formKey,
+  },
+  {
+    formLabel: "Key Contacts (Generated)",
+    opportunityNumber:
+      KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA.opportunityNumber,
+    formKey: KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA.formKey,
+  },
+];

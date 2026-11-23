@@ -58,7 +58,10 @@ const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 const { baseUrl, targetEnv } = playwrightEnv;
 
-const PARTIAL_RESULTS_SEARCH_TERM = "E2E-*";
+// The partial-result-set check needs a search that returns 2-25 results (one page, at
+// least two rows to compare). Each isolated form test opportunity adds another E2E-*
+// result, so search only the SF-424 family's six (E2E-SF424*) to stay under a page.
+const PARTIAL_RESULTS_SEARCH_TERM = "E2E-SF424*";
 
 // KNOWN APP DEFECT: on desktop the Sort by select is inside the results <Suspense>, which is keyed
 // on every search param (SearchResults.tsx), so changing the sort remounts the select and focus

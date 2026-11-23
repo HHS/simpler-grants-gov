@@ -32,8 +32,8 @@ module "infra_sgg1_config" {
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
-  database_engine_version       = "17.7"
-  database_newrelic_entity_guid = "" # Populate once the New Relic entity for the infra-sgg1 RDS cluster exists
+  database_engine_version       = "17.9" # Matches the live cluster (auto minor upgrade)
+  database_newrelic_entity_guid = ""     # Populate once the New Relic entity for the infra-sgg1 RDS cluster exists
   database_deletion_protection  = false
 
   has_incident_management_service = local.has_incident_management_service
@@ -49,9 +49,10 @@ module "infra_sgg1_config" {
   instance_scaling_min_capacity   = 2
   instance_scaling_max_capacity   = 4
 
-  database_min_capacity   = 2
+  # Single writer, no reader: low-traffic team env (30-day writer avg ~2 ACU).
+  database_min_capacity   = 0.5
   database_max_capacity   = 4
-  database_instance_count = 2
+  database_instance_count = 1
 
   has_search            = true
   search_engine_version = "OpenSearch_2.15"

@@ -146,9 +146,7 @@ def test_verify_job_lock_raises_when_locked_by_does_not_match(
     caplog, db_session, enable_factory_create
 ):
     caplog.set_level(logging.INFO)
-    job_lock = JobLockFactory.create(
-        job_type=JobType.SETUP_LOWER_ENV_AGENCIES, locked_by=uuid.uuid4()
-    )
+    job_lock = JobLockFactory.create(job_type=JobType.SAM_EXTRACTS, locked_by=uuid.uuid4())
 
     task_job_lock = TaskJobLock(db_session, job_type=JobType.CREATE_ANALYTICS_DB_CSVS)
 

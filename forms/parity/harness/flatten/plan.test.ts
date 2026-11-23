@@ -36,6 +36,19 @@ describe("readConstraints", () => {
     });
   });
 
+  it("reads explicit JSON choices without splitting commas inside a value", () => {
+    expect(readConstraints('enum ["Application", "Other, specify"]')).toEqual({
+      enum: ["Application", "Other, specify"],
+    });
+  });
+
+  it.each(["enum [Application]", 'enum ["Application", 2]', "enum []"])(
+    "refuses ambiguous choices: %s",
+    (text) => {
+      expect(readConstraints(text)).toBeUndefined();
+    },
+  );
+
   it("refuses unreadable text", () => {
     expect(readConstraints("max 10 chars")).toBeUndefined();
   });

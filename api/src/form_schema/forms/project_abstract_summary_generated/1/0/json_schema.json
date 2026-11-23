@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "funding_opportunity_number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "SGG fills this from the selected funding opportunity.",
+      "title": "Funding Opportunity Number"
+    },
+    "assistance_listing_number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
+      "description": "SGG fills this when the competition or opportunity supplies an assistance listing.",
+      "title": "Assistance Listing Number(s)"
+    },
+    "applicant_name": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/organization.name"
+        }
+      ],
+      "description": "This is the legal name of applicant which will undertake the assistance activity. This field is required.",
+      "title": "Applicant Name"
+    },
+    "project_title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 250,
+      "description": "This is the project title or brief description of the project. This field is required.",
+      "title": "Descriptive Title of Applicant's Project"
+    },
+    "project_abstract": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "description": "Enter a work summary or abstract of the work to be performed under this project. This field is required.",
+      "title": "Project Abstract"
+    }
+  },
+  "required": [
+    "funding_opportunity_number",
+    "applicant_name",
+    "project_title",
+    "project_abstract"
+  ],
+  "examples": [
+    {
+      "funding_opportunity_number": "XYZ-456",
+      "assistance_listing_number": "12.345",
+      "applicant_name": "My Business Inc",
+      "project_title": "Space Exploration",
+      "project_abstract": "We are going to Pluto"
+    },
+    {
+      "funding_opportunity_number": "ABC-123",
+      "applicant_name": "My Company LLC",
+      "project_title": "Research into Science",
+      "project_abstract": "We plan to do research on science"
+    }
+  ],
+  "$defs": {
+    "organization.name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Enter the legal name of the organization.",
+      "title": "Organization Name"
+    }
+  }
+}

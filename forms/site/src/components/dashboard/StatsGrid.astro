@@ -1,7 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 
-import { TOTAL_APPS } from "../../content.config";
+import { TOTAL_FORM_SUBMISSIONS } from "../../content.config";
 
 const forms = await getCollection("forms");
 const totalForms = forms.length;
@@ -13,11 +13,14 @@ const inProgressStatuses = ["in_progress", "in_review", "migrated"];
 const inProgressForms = forms.filter((f) =>
   inProgressStatuses.includes(f.data.status),
 );
-const inProgressApps = inProgressForms.reduce(
+const inProgressSubmissions = inProgressForms.reduce(
   (sum, f) => sum + f.data.apps_count,
   0,
 );
-const inProgressPct = ((inProgressApps / TOTAL_APPS) * 100).toFixed(2);
+const inProgressPct = (
+  (inProgressSubmissions / TOTAL_FORM_SUBMISSIONS) *
+  100
+).toFixed(2);
 
 const prioritizedStatuses = [
   "prioritized",
@@ -28,11 +31,14 @@ const prioritizedStatuses = [
 const prioritizedForms = forms.filter((f) =>
   prioritizedStatuses.includes(f.data.status),
 );
-const prioritizedApps = prioritizedForms.reduce(
+const prioritizedSubmissions = prioritizedForms.reduce(
   (sum, f) => sum + f.data.apps_count,
   0,
 );
-const prioritizedPct = ((prioritizedApps / TOTAL_APPS) * 100).toFixed(2);
+const prioritizedPct = (
+  (prioritizedSubmissions / TOTAL_FORM_SUBMISSIONS) *
+  100
+).toFixed(2);
 
 const stats = [
   {
@@ -48,15 +54,15 @@ const stats = [
     valueClass: "stat-value--primary",
   },
   {
-    label: "Apps covered (in progress)",
+    label: "Form submissions covered (in progress)",
     value: `${inProgressPct}%`,
-    detail: `${inProgressApps.toLocaleString()} of ${TOTAL_APPS.toLocaleString()}`,
+    detail: `${inProgressSubmissions.toLocaleString()} of ${TOTAL_FORM_SUBMISSIONS.toLocaleString()} form submissions`,
     valueClass: "stat-value--secondary",
   },
   {
-    label: "Apps covered (prioritized+)",
+    label: "Form submissions covered (prioritized+)",
     value: `${prioritizedPct}%`,
-    detail: `${prioritizedApps.toLocaleString()} of ${TOTAL_APPS.toLocaleString()}`,
+    detail: `${prioritizedSubmissions.toLocaleString()} of ${TOTAL_FORM_SUBMISSIONS.toLocaleString()} form submissions`,
     valueClass: "",
   },
 ];

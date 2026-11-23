@@ -25,7 +25,10 @@ const { baseUrl, apiUrl, testUserManagerApiKey } = playwrightEnv;
 
 // Fetches a server-side session token for a test user by calling the internal
 // e2e-token endpoint with the manager API key and the target user id.
-const fetchE2eSessionToken = async (userId: string): Promise<string> => {
+const fetchE2eSessionToken = async (
+  userId: string,
+  sessionDurationSeconds?: number,
+): Promise<string> => {
   if (!testUserManagerApiKey) {
     throw new Error(
       "Unable to spoof login: test user manager API key is not set",
@@ -37,7 +40,10 @@ const fetchE2eSessionToken = async (userId: string): Promise<string> => {
       "Content-Type": "application/json",
     },
     method: "POST",
-    body: JSON.stringify({ user_id: userId }),
+    body: JSON.stringify({
+      user_id: userId,
+      session_duration_seconds: sessionDurationSeconds,
+    }),
   });
   if (!response.ok) {
     throw new Error(`unable to fetch e2e user token: ${response.status}`);
@@ -51,6 +57,7 @@ export async function authenticateE2eUser(
   context: BrowserContext,
   isMobile: boolean,
   testUserKey: TestUserKey = "primaryOrgAdmin",
+  { sessionDurationSeconds }: { sessionDurationSeconds?: number } = {},
 ): Promise<void> {
   // primaryOrgAdmin is the identity every mutating test shares, so spread it
   // across the seeded pool per worker/shard. Every other key maps to one user.
@@ -58,8 +65,8 @@ export async function authenticateE2eUser(
     testUserKey === "primaryOrgAdmin"
       ? getShardedPrimaryOrgAdminId()
       : getTestUserId(testUserKey);
-  const token = await fetchE2eSessionToken(userId);
-  await createSpoofedSessionCookie(context, token);
+  const token = await fetchE2eSessionToken(userId, sessionDurationSeconds);
+  await createSpoofedSessionCookie(context, token, sessionDurationSeconds);
 
   // Give the spoofed session cookie a moment to settle before navigating, then
   // let the page hydrate the authenticated state after load. Mobile needs longer

@@ -2,6 +2,7 @@ import {
   decrypt,
   deleteSession,
   encrypt,
+  newExpirationDate,
 } from "src/services/auth/sessionUtils";
 
 type RecursiveObject = {
@@ -62,10 +63,10 @@ jest.mock("jose", () => ({
       sign: typeof jest.fn;
       token: string;
     },
-    { token = "" } = {},
+    payload: { token?: string } = {},
   ) {
-    reallyFakeMockJWTConstructor();
-    setJWTMocksWithToken(token);
+    reallyFakeMockJWTConstructor(payload);
+    setJWTMocksWithToken(payload.token ?? "");
     return {
       ...fakeJWTInstance(),
     };
@@ -78,6 +79,22 @@ describe("deleteSession", () => {
     await deleteSession();
     expect(deleteCookiesMock).toHaveBeenCalledTimes(1);
     expect(deleteCookiesMock).toHaveBeenCalledWith("session");
+  });
+});
+
+describe("newExpirationDate", () => {
+  it("defaults to 15 minutes from now", () => {
+    const before = Date.now();
+    const expiration = newExpirationDate().getTime();
+    expect(expiration).toBeGreaterThanOrEqual(before + 15 * 60 * 1000);
+    expect(expiration).toBeLessThanOrEqual(Date.now() + 15 * 60 * 1000);
+  });
+
+  it("uses the session duration override when provided", () => {
+    const before = Date.now();
+    const expiration = newExpirationDate(60).getTime();
+    expect(expiration).toBeGreaterThanOrEqual(before + 60 * 1000);
+    expect(expiration).toBeLessThanOrEqual(Date.now() + 60 * 1000);
   });
 });
 
@@ -104,6 +121,16 @@ describe("encrypt", () => {
 
     // this is synthetic but generally proves things are working
     expect(encrypted).toEqual(token);
+    expect(reallyFakeMockJWTConstructor).toHaveBeenCalledWith({ token });
+  });
+
+  it("includes the session duration override claim when provided", async () => {
+    await encrypt("fakeToken", new Date(), fakeKey, 60);
+
+    expect(reallyFakeMockJWTConstructor).toHaveBeenCalledWith({
+      token: "fakeToken",
+      session_duration_seconds: 60,
+    });
   });
 });
 

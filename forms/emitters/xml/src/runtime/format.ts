@@ -48,8 +48,9 @@ export type Value =
 export type Branch = Value | string | number | boolean;
 
 /**
- * The value at a dotted path, relative to the response or, inside `$each`, to the item. `.`
- * is the item itself, for a list of values.
+ * The value at a path, relative to the response or, inside `$each`, to the item. `.` is the
+ * item itself, for a list of values. `[i]` reads a list's entry (`types[0]`, `types[-1]`), and
+ * `[start:stop]`, as the last step, a range of them (`sites[1:]`); see `runtime/paths.ts`.
  */
 export interface Field {
   $field: string;

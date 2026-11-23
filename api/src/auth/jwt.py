@@ -172,12 +172,19 @@ class JwtAuth:
 
 
 def refresh_token_expiration(
-    token_session: BaseUserTokenSession, config: ApiJwtConfig | None = None
+    token_session: BaseUserTokenSession,
+    config: ApiJwtConfig | None = None,
+    session_duration_seconds: int | None = None,
 ) -> BaseUserTokenSession:
     if config is None:
         config = get_config()
 
-    expiration_time = datetime_util.utcnow() + timedelta(minutes=config.token_expiration_minutes)
+    duration = (
+        timedelta(seconds=session_duration_seconds)
+        if session_duration_seconds
+        else timedelta(minutes=config.token_expiration_minutes)
+    )
+    expiration_time = datetime_util.utcnow() + duration
     token_session.expires_at = expiration_time
 
     return token_session

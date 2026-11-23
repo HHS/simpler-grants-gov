@@ -65,6 +65,41 @@ describe("xmlMappingFields", () => {
     ]);
   });
 
+  it("reads a list's entry or range of entries as its repeated item", () => {
+    const entries = {
+      root: {
+        Form: {
+          Code1: { $field: "codes[0]" },
+          Code2: { $field: "codes[-1]" },
+          PrimarySite: { Name: { $field: "sites[0].name" } },
+          OtherSite: {
+            $each: {
+              items: { $field: "sites[1:]" },
+              map: { Name: { $field: "name" } },
+            },
+          },
+        },
+      },
+    };
+    expect([...xmlMappingFields(entries).byLink.keys()]).toEqual([
+      "codes[] -> Code1",
+      "codes[] -> Code2",
+      "sites[].name -> PrimarySite/Name",
+      "sites[].name -> OtherSite/Name",
+    ]);
+  });
+
+  it("reads a required element's field at the element", () => {
+    const required = {
+      root: {
+        Form: { DateReceived: { $required: { $field: "date_received" } } },
+      },
+    };
+    expect([...xmlMappingFields(required).byLink.keys()]).toEqual([
+      "date_received -> DateReceived",
+    ]);
+  });
+
   it("keeps the parent list path when an inner list reads the current item", () => {
     const lists = {
       root: {

@@ -87,6 +87,7 @@ class EtlDataset(BaseDataset):
 
         # transform entity id columns
         df = EtlDataset.transform_entity_id_columns(df)
+        df = EtlDataset.convert_missing_strings_to_none(df)
 
         return cls(df)
 
@@ -115,6 +116,7 @@ class EtlDataset(BaseDataset):
 
         # transform entity id columns
         df = EtlDataset.transform_entity_id_columns(df)
+        df = EtlDataset.convert_missing_strings_to_none(df)
 
         return cls(df)
 
@@ -124,6 +126,15 @@ class EtlDataset(BaseDataset):
         prefix = "https://github.com/"
         for col in ("deliverable_ghid", "epic_ghid", "issue_ghid", "issue_parent"):
             df[col] = df[col].str.replace(prefix, "")
+
+        return df
+
+    @classmethod
+    def convert_missing_strings_to_none(cls, df: pd.DataFrame) -> pd.DataFrame:
+        """Use object dtype with None for missing strings so they load into the db as NULL."""
+        str_cols: list[str] = list(df.select_dtypes(include="str").columns)
+        for col in str_cols:
+            df[col] = df[col].astype(object).where(df[col].notna(), None)
 
         return df
 
