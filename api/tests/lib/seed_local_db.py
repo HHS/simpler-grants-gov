@@ -664,6 +664,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "cb1415b3-e90c-5076-93f9-95f68c013935",
         ),
         (
+            "NSF_SuggestedReviewers_Generated",
+            "E2E-NSFSR",
+            "NSF Suggested Reviewers",
+            "97621d95-418a-4c00-96ab-3817c7dc7fe2",
+            "5c51d2ad-d5ee-4d45-8811-f18b495e7bed",
+        ),
+        (
             "Project_AbstractSummary_2_0",
             "E2E-PABSS",
             "Project Abstract Summary",

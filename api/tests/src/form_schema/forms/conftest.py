@@ -15,6 +15,7 @@ from src.form_schema.forms import (
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
     NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
     OtherNarrativeAttachment_v1_2,
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
@@ -266,3 +267,8 @@ def rr_key_person_expanded_generated_v4_0():
 @pytest.fixture(scope="session")
 def nsf_key_person_expanded_generated_v3_3():
     return setup_resolved_form(NSFKeyPersonExpandedGenerated_v3_3)
+
+
+@pytest.fixture(scope="session")
+def nsf_suggested_reviewers_v1_1():
+    return setup_resolved_form(NSFSuggestedReviewers_v1_1)
