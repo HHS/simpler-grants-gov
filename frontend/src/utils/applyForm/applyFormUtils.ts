@@ -96,6 +96,20 @@ const validationWarningOverrides = (
   title?: string | null,
 ) => {
   const formattedTitle = title ? title.replace("?", "") : "Field";
+
+  // Match ISO date errors (e.g. '275760-01-01' is not a 'date')
+  const datePatternRegex = /'?(\d{4,})-(\d{2})-(\d{2})'? is not a '?date'?/i;
+  if (datePatternRegex.test(message)) {
+    return message.replace(
+      datePatternRegex,
+      "$2-$3-$1 is not a valid date. Please use MM-DD-YYYY format.",
+    );
+  }
+
+  if (message.includes('must match format "date"')) {
+    return `${formattedTitle} must be a valid date in MM-DD-YYYY format.`;
+  }
+
   return message
     .replace(fieldName, formattedTitle)
     .replace(/'/g, "")
