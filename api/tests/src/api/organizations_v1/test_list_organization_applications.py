@@ -114,30 +114,25 @@ def test_list_organization_applications_only_this_org(client, db_session, enable
     assert [app["application_id"] for app in data] == [str(own_application.application_id)]
 
 
-def test_list_organization_applications_status_filter(client, db_session, enable_factory_create):
-    """Test that IN_PROGRESS and SUBMITTED applications are returned and ACCEPTED is not"""
+def test_list_organization_applications_all_statuses(client, db_session, enable_factory_create):
+    """Test that applications are returned regardless of status"""
     user, organization, token = create_user_in_org(
         privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.VIEW_APPLICATION],
         db_session=db_session,
     )
-    in_progress = ApplicationFactory.create(
-        organization=organization, application_status=ApplicationStatus.IN_PROGRESS
-    )
-    submitted = ApplicationFactory.create(
-        organization=organization, application_status=ApplicationStatus.SUBMITTED
-    )
-    # Excluded until maintainers confirm whether ACCEPTED counts as "open/submitted"
-    ApplicationFactory.create(
-        organization=organization, application_status=ApplicationStatus.ACCEPTED
-    )
+    applications = [
+        ApplicationFactory.create(organization=organization, application_status=status)
+        for status in ApplicationStatus
+    ]
 
     resp = _list_applications(client, organization.organization_id, token)
 
     assert resp.status_code == 200
     data = resp.get_json()["data"]
+    # One application was created per status, so this set equality fails
+    # if an application in any status gets filtered out
     assert {app["application_id"] for app in data} == {
-        str(in_progress.application_id),
-        str(submitted.application_id),
+        str(app.application_id) for app in applications
     }
 
 

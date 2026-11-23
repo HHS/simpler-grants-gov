@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
-from src.constants.lookup_constants import ApplicationStatus, Privilege
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
@@ -26,11 +26,6 @@ def get_organization_applications(db_session: db.Session, organization_id: UUID)
     stmt = (
         select(Application)
         .where(Application.organization_id == organization_id)
-        .where(
-            Application.application_status.in_(
-                [ApplicationStatus.IN_PROGRESS, ApplicationStatus.SUBMITTED]
-            )
-        )
         .order_by(Application.created_at.desc())
         .options(selectinload(Application.competition))
     )
