@@ -11,6 +11,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { ATTACHMENT_OPPORTUNITIES } from "tests/e2e/apply/fixtures/attachment-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -41,22 +42,23 @@ const TAGS = [APPLY_FORMS, FULL_REGRESSION];
 
 const { testOrgLabel } = playwrightEnv;
 
-const OPPORTUNITY_NUMBER = "E2E-ATT-ORG-IND-01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-const attachmentForm = opportunityConfig.forms[0];
-
-const applicantScenarios = [
-  {
-    scenarioName: "Organization applicant",
-    orgLabel: testOrgLabel,
-    expectedApplicantAddedActivity: "Organization Added",
-  },
-  {
-    scenarioName: "Individual applicant",
-    orgLabel: undefined,
-    expectedApplicantAddedActivity: "User added:",
-  },
-] as const;
+const applicantScenarios = ATTACHMENT_OPPORTUNITIES.flatMap(
+  (opportunity) =>
+    [
+      {
+        scenarioName: "Organization applicant",
+        ...opportunity,
+        orgLabel: testOrgLabel,
+        expectedApplicantAddedActivity: "Organization Added",
+      },
+      {
+        scenarioName: "Individual applicant",
+        ...opportunity,
+        orgLabel: undefined,
+        expectedApplicantAddedActivity: "User added:",
+      },
+    ] as const,
+);
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
@@ -66,8 +68,16 @@ for (const {
   scenarioName,
   orgLabel,
   expectedApplicantAddedActivity,
+  variant,
+  opportunityNumber,
+  sectionHeading,
+  firstSection,
+  secondSection,
+  secondField,
 } of applicantScenarios) {
-  test.describe.serial(scenarioName, () => {
+  const opportunityConfig = loadOpportunityConfig(opportunityNumber);
+  const attachmentForm = opportunityConfig.forms[0];
+  test.describe.serial(`${scenarioName} (${variant})`, () => {
     let browser: Browser;
     let context: BrowserContext;
     let page: Page;
@@ -254,22 +264,22 @@ for (const {
         // Confirm the full form layout rendered, not just the filled section - the
         // unfilled "Attachment 2" section should still be present.
         await expect(
-          page.getByRole("heading", { name: "1) Attachment 1", exact: true }),
+          page.getByRole("heading", { name: sectionHeading, exact: true }),
         ).toBeVisible();
         await expect(
-          page.getByText("Attachment 2", { exact: true }),
+          page.getByText(secondField, { exact: true }),
         ).toBeVisible();
-        await expect(page.locator("#form-section-attachment2")).toContainText(
-          "Attachment 2",
+        await expect(page.locator(`#${secondSection}`)).toContainText(
+          secondField,
         );
 
         // Only the persisted attachment shows up as user-entered content.
         await validateAttachmentPrintViewSection(
           page,
-          "form-section-attachment1",
+          firstSection,
           testData.att1,
         );
-        await expect(page.locator("#form-section-attachment1")).toContainText(
+        await expect(page.locator(`#${firstSection}`)).toContainText(
           "sample-upload-kb.pdf",
         );
 

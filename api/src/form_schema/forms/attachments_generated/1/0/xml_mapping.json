@@ -1,0 +1,93 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/AttachmentForm_1_2-V1.2",
+    "AttachmentForm_1_2": "http://apply.grants.gov/forms/AttachmentForm_1_2-V1.2",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
+  "root": {
+    "AttachmentForm_1_2": {
+      "@AttachmentForm_1_2:FormVersion": {
+        "$const": "1.2"
+      },
+      "ATT1": {
+        "ATT1File": {
+          "$attachment": "att1"
+        }
+      },
+      "ATT2": {
+        "ATT2File": {
+          "$attachment": "att2"
+        }
+      },
+      "ATT3": {
+        "ATT3File": {
+          "$attachment": "att3"
+        }
+      },
+      "ATT4": {
+        "ATT4File": {
+          "$attachment": "att4"
+        }
+      },
+      "ATT5": {
+        "ATT5File": {
+          "$attachment": "att5"
+        }
+      },
+      "ATT6": {
+        "ATT6File": {
+          "$attachment": "att6"
+        }
+      },
+      "ATT7": {
+        "ATT7File": {
+          "$attachment": "att7"
+        }
+      },
+      "ATT8": {
+        "ATT8File": {
+          "$attachment": "att8"
+        }
+      },
+      "ATT9": {
+        "ATT9File": {
+          "$attachment": "att9"
+        }
+      },
+      "ATT10": {
+        "ATT10File": {
+          "$attachment": "att10"
+        }
+      },
+      "ATT11": {
+        "ATT11File": {
+          "$attachment": "att11"
+        }
+      },
+      "ATT12": {
+        "ATT12File": {
+          "$attachment": "att12"
+        }
+      },
+      "ATT13": {
+        "ATT13File": {
+          "$attachment": "att13"
+        }
+      },
+      "ATT14": {
+        "ATT14File": {
+          "$attachment": "att14"
+        }
+      },
+      "ATT15": {
+        "ATT15File": {
+          "$attachment": "att15"
+        }
+      }
+    }
+  }
+}

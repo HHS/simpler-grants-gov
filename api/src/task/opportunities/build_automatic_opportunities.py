@@ -30,6 +30,7 @@ from src.db.models.opportunity_models import (
 )
 from src.form_schema.forms import (
     AttachmentForm_v1_2,
+    AttachmentsGenerated_v1_2,
     BudgetNarrativeAttachment_v1_2,
     BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
@@ -622,6 +623,12 @@ class BuildAutomaticOpportunitiesTask(Task):
         # Isolated form test opportunities
         ISOLATED_FORM_OPPORTUNITIES = [
             # form names are abbreviated in opportunity number to be under the 40 char limit
+            (
+                "E2E-ATTG",
+                "Attachments (Generated)",
+                AttachmentsGenerated_v1_2.form_id,
+                "84fd9552-81fa-4765-a6f0-13ece83d68ab",
+            ),
             (
                 "E2E-ATT",
                 "Attachment Form",

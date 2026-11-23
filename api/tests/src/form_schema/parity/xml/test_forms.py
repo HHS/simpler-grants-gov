@@ -14,6 +14,8 @@ import pytest
 
 from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
 from tests.src.form_schema.parity.xml.diffs import (
+    attachment_form,
+    attachments_generated,
     budget_narrative_attachment,
     budget_narrative_generated,
     ed_abstract_form_generated,
@@ -48,6 +50,8 @@ from tests.src.form_schema.parity.xml.harness.compare import (
 )
 
 DIFFS = [
+    attachment_form.DIFF,
+    attachments_generated.DIFF,
     key_contacts.DIFF,
     key_contacts_generated.DIFF,
     epa_key_contacts.DIFF,

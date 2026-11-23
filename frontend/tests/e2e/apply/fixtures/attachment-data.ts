@@ -38,6 +38,32 @@ export const ATTACHMENT_OPPORTUNITY_DATA: PrintViewFormData = {
   buildTestData: buildAttachmentHappyPathTestData,
 };
 
+export const ATTACHMENT_GENERATED_OPPORTUNITY_DATA: PrintViewFormData = {
+  ...ATTACHMENT_OPPORTUNITY_DATA,
+  opportunityId: "84fd9552-81fa-4765-a6f0-13ece83d68ab",
+  opportunityNumber: "E2E-ATTG-ORG-IND-01",
+  formKey: "attachmentGenerated",
+};
+
+export const ATTACHMENT_OPPORTUNITIES = [
+  {
+    variant: "handwritten",
+    opportunityNumber: ATTACHMENT_OPPORTUNITY_DATA.opportunityNumber,
+    sectionHeading: "1) Attachment 1",
+    firstSection: "form-section-attachment1",
+    secondSection: "form-section-attachment2",
+    secondField: "Attachment 2",
+  },
+  {
+    variant: "generated",
+    opportunityNumber: ATTACHMENT_GENERATED_OPPORTUNITY_DATA.opportunityNumber,
+    sectionHeading: "Application files",
+    firstSection: "form-section-application-files",
+    secondSection: "form-section-application-files",
+    secondField: "2) Please attach Attachment 2",
+  },
+] as const;
+
 export const SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB = "TestZip3543Kb.zip";
 export const SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB = path.join(
   TEST_UPLOAD_DIR,

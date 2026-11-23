@@ -12,6 +12,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { ATTACHMENT_OPPORTUNITIES } from "tests/e2e/apply/fixtures/attachment-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -41,9 +42,6 @@ const TAGS = [APPLY_FORMS, FULL_REGRESSION];
 const { testOrgLabel } = playwrightEnv;
 
 // Same opportunity/form as submission-printview-attachment-persistence-history.spec.ts
-const OPPORTUNITY_NUMBER = "E2E-ATT-ORG-IND-01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-const attachmentForm = opportunityConfig.forms[0];
 const INFECTED_FIXTURE_PATH =
   "tests/e2e/test-upload-files/scenario-infected.pdf";
 
@@ -57,23 +55,37 @@ test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-const applicantScenarios = [
-  {
-    applicantType: "Organization",
-    orgLabel: testOrgLabel,
-  },
+const applicantScenarios = ATTACHMENT_OPPORTUNITIES.flatMap(
+  (opportunity) =>
+    [
+      {
+        applicantType: "Organization",
+        ...opportunity,
+        orgLabel: testOrgLabel,
+      },
 
-  {
-    applicantType: "Individual",
-    orgLabel: undefined,
-  },
-] as const;
+      {
+        applicantType: "Individual",
+        ...opportunity,
+        orgLabel: undefined,
+      },
+    ] as const,
+);
 
 // Conditionally run this suite only if virus scanner is available
 if (playwrightEnv.hasInfectedFileScanner) {
-  for (const { applicantType, orgLabel } of applicantScenarios) {
+  for (const {
+    applicantType,
+    orgLabel,
+    variant,
+    opportunityNumber,
+    sectionHeading,
+    firstSection,
+  } of applicantScenarios) {
+    const opportunityConfig = loadOpportunityConfig(opportunityNumber);
+    const attachmentForm = opportunityConfig.forms[0];
     test.describe
-      .serial(`Attachment form - virus scan failure and recovery - ${applicantType}`, () => {
+      .serial(`Attachment form - virus scan failure and recovery - ${applicantType} (${variant})`, () => {
       // This test requires a virus scanner (local mock or staged) to validate the
       // infected file rejection workflow.
 
@@ -274,18 +286,18 @@ if (playwrightEnv.hasInfectedFileScanner) {
 
           await expect(
             page.getByRole("heading", {
-              name: "1) Attachment 1",
+              name: sectionHeading,
               exact: true,
             }),
           ).toBeVisible();
 
           await validateAttachmentPrintViewSection(
             page,
-            "form-section-attachment1",
+            firstSection,
             VALID_FILE_NAME,
           );
 
-          await expect(page.locator("#form-section-attachment1")).toContainText(
+          await expect(page.locator(`#${firstSection}`)).toContainText(
             VALID_FILE_NAME,
           );
 

@@ -1,7 +1,7 @@
 {
   "title": "Attachments",
   "slug": "attachments",
-  "status": "in_progress",
+  "status": "migrated",
   "family": [
     "SF-424",
     "R&R",
@@ -19,6 +19,7 @@
   "widgets": ["ApplicationAttachmentWidget"],
   "new_concepts": [],
   "notes": [
+    "The generated form installs alongside the handwritten Attachment Form. Deployed submission evidence is tracked in #13272.",
     "Each of the 15 slots is optional. The agency specifies the documents, filenames and sequence for its opportunity.",
     "The definition keeps the numbered slots used in SGG. A file in slot 15 is written to ATT15/ATT15File even when earlier slots are empty.",
     "No answers are pre- or post-populated. The application assigns an ID to each uploaded file."

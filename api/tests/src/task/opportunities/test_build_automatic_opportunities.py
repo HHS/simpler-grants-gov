@@ -64,7 +64,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 58
+    assert len(opportunities) == 59
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -81,7 +81,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 58
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 59
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
 
@@ -111,7 +111,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 58
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 59
     # Nothing is missing, so nothing is backfilled or changed
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
     assert [c.public_competition_id for c in competitions] == public_competition_ids
@@ -291,6 +291,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
         "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
         "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
+        "E2E-ATTG-ORG-IND-01": uuid.UUID("84fd9552-81fa-4765-a6f0-13ece83d68ab"),
         "E2E-ATT-ORG-IND-01": uuid.UUID("97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
         "E2E-BNA-ORG-IND-01": uuid.UUID("caea0f33-b356-4fcd-aae3-c0244e11da1e"),
         "E2E-CD511-ORG-IND-01": uuid.UUID("5b890089-2bb2-4123-82cd-3d321ca62efe"),

@@ -1,12 +1,14 @@
 import "./examples.tsp";
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
 using SimplerForms;
 namespace Forms.ApplicationAttachments;
 
 @Meta.form(#{ id: "attachments", formName: "Attachments" })
+@Sgg.sync(#{ xml: "mapping" })
 @GrantsGov.form(#{
   legacyFormId: 540,
   shortFormName: "AttachmentForm_1_2",
