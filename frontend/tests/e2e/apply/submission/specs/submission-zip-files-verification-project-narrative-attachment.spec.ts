@@ -16,9 +16,9 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
-  PROJECT_NARRATIVE_OPPORTUNITY_DATA,
-  PROJECT_NARRATIVE_ZIP_PDF_NAME,
-  projectNarrativeDerivedValues,
+  PROJECT_NARRATIVE_ATTACHMENT_OPPORTUNITY_DATA,
+  PROJECT_NARRATIVE_ATTACHMENT_ZIP_PDF_NAME,
+  projectNarrativeAttachmentDerivedValues,
 } from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
 import { PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER } from "tests/e2e/apply/fixtures/project-narrative-attachment-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
@@ -53,7 +53,8 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-const { opportunityNumber, formKey } = PROJECT_NARRATIVE_OPPORTUNITY_DATA;
+const { opportunityNumber, formKey } =
+  PROJECT_NARRATIVE_ATTACHMENT_OPPORTUNITY_DATA;
 
 const opportunityConfig = loadOpportunityConfig(opportunityNumber);
 
@@ -135,7 +136,7 @@ test(
     const contents = await downloadAndUnzipSubmission(page);
 
     // MIME type and hash of the uploaded file; not part of the typed test data.
-    const systemValues = projectNarrativeDerivedValues(d);
+    const systemValues = projectNarrativeAttachmentDerivedValues(d);
 
     await test.step("Verify GrantApplication.xml field values", () => {
       assertXmlContainsFields(
@@ -144,11 +145,15 @@ test(
       );
     });
 
-    await test.step(`Verify ${PROJECT_NARRATIVE_ZIP_PDF_NAME} form title and file name`, async () => {
-      await assertPdfContainsText(contents, PROJECT_NARRATIVE_ZIP_PDF_NAME, [
-        PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER,
-        ...buildExpectedPdfText(narrativeForm, d, systemValues),
-      ]);
+    await test.step(`Verify ${PROJECT_NARRATIVE_ATTACHMENT_ZIP_PDF_NAME} form title and file name`, async () => {
+      await assertPdfContainsText(
+        contents,
+        PROJECT_NARRATIVE_ATTACHMENT_ZIP_PDF_NAME,
+        [
+          PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER,
+          ...buildExpectedPdfText(narrativeForm, d, systemValues),
+        ],
+      );
     });
 
     await test.step("Verify the attached file is in the zip, unchanged", () => {
