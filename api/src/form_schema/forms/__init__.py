@@ -28,7 +28,9 @@ from .project_abstract_summary_generated import FORM as ProjectAbstractSummaryGe
 from .project_narrative_attachment import ProjectNarrativeAttachment_v1_2
 from .project_narrative_generated import FORM as ProjectNarrativeGenerated_v1_2
 from .project_performance_site_location import ProjectPerformanceSiteLocation_v4_0
-from .research_and_related_other_project_information_generated import FORM as RROtherProjectInformationGenerated_v1_4
+from .research_and_related_other_project_information_generated import (
+    FORM as RROtherProjectInformationGenerated_v1_4,
+)
 from .research_related_personal_data_generated import FORM as RRPersonalDataGenerated_v1_2
 from .rr_key_person_expanded_generated import FORM as RRKeyPersonExpandedGenerated_v4_0
 from .rr_key_person_generated import FORM as RRKeyPersonGenerated_v3_0

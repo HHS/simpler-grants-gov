@@ -36,3 +36,41 @@ def test_other_attachment_limit(count, valid):
     files = [f"00000000-0000-4000-8000-{index:012d}" for index in range(count)]
     answers = {**REQUIRED, "other_attachments": files}
     assert (validate_json_schema_for_form(answers, FORM) == []) is valid
+
+
+@pytest.mark.parametrize(
+    "inactive,active,required_fields",
+    [
+        (
+            {"human_subjects_involved": False, "exempt_from_federal_regulations": True},
+            {"human_subjects_involved": True},
+            {"exemption_numbers"},
+        ),
+        (
+            {
+                "human_subjects_involved": True,
+                "exempt_from_federal_regulations": True,
+                "exemption_numbers": ["E1"],
+                "irb_review_pending": False,
+            },
+            {"exempt_from_federal_regulations": False},
+            {"irb_approval_date"},
+        ),
+        (
+            {"vertebrate_animals_used": False, "iacuc_review_pending": False},
+            {"vertebrate_animals_used": True},
+            {"iacuc_approval_date", "animal_welfare_assurance_number"},
+        ),
+        (
+            {"environmental_impact": False, "assessment_or_exemption_performed": True},
+            {"environmental_impact": True, "environmental_impact_explanation": "Field sampling"},
+            {"assessment_or_exemption_explanation"},
+        ),
+    ],
+)
+def test_a_follow_up_is_required_only_in_its_active_branch(inactive, active, required_fields):
+    answers = {**REQUIRED, **inactive}
+    assert validate_json_schema_for_form(answers, FORM) == []
+
+    errors = validate_json_schema_for_form({**answers, **active}, FORM)
+    assert {error.field for error in errors} == {f"$.{field}" for field in required_fields}

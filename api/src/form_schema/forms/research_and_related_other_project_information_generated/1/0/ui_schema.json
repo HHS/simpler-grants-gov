@@ -16,79 +16,98 @@
               }
             },
             {
-              "type": "Control",
-              "scope": "#/properties/exempt_from_federal_regulations",
-              "label": "Is the Project Exempt from Federal regulations?",
-              "options": {
-                "widget": "Radio"
-              },
-              "rule": {
-                "effect": "ENABLE",
-                "condition": {
-                  "scope": "#/properties/human_subjects_involved",
-                  "schema": {
-                    "const": true
-                  }
-                }
-              }
-            },
-            {
-              "type": "Control",
-              "scope": "#/properties/exemption_numbers",
-              "label": "If yes, check appropriate exemption number.",
-              "options": {
-                "widget": "MultiSelect"
-              },
-              "rule": {
-                "effect": "ENABLE",
-                "condition": {
+              "type": "Group",
+              "elements": [
+                {
+                  "type": "Control",
                   "scope": "#/properties/exempt_from_federal_regulations",
-                  "schema": {
-                    "const": true
+                  "label": "Is the Project Exempt from Federal regulations?",
+                  "options": {
+                    "widget": "Radio"
+                  },
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/human_subjects_involved",
+                      "schema": {
+                        "const": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/exemption_numbers",
+                  "label": "If yes, check appropriate exemption number.",
+                  "options": {
+                    "widget": "MultiSelect"
+                  },
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/exempt_from_federal_regulations",
+                      "schema": {
+                        "const": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Group",
+                  "elements": [
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/irb_review_pending",
+                      "label": "If no, is the IRB review Pending?",
+                      "options": {
+                        "widget": "Radio"
+                      }
+                    },
+                    {
+                      "type": "Control",
+                      "scope": "#/properties/irb_approval_date",
+                      "label": "IRB Approval Date:",
+                      "rule": {
+                        "effect": "ENABLE",
+                        "condition": {
+                          "scope": "#/properties/irb_review_pending",
+                          "schema": {
+                            "const": false
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "rule": {
+                    "effect": "SHOW",
+                    "condition": {
+                      "scope": "#/properties/exempt_from_federal_regulations",
+                      "schema": {
+                        "const": false
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/human_subject_assurance_number",
+                  "label": "Human Subject Assurance Number: ",
+                  "options": {
+                    "widget": "Text"
+                  },
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/human_subjects_involved",
+                      "schema": {
+                        "const": true
+                      }
+                    }
                   }
                 }
-              }
-            },
-            {
-              "type": "Control",
-              "scope": "#/properties/irb_review_pending",
-              "label": "If no, is the IRB review Pending?",
-              "options": {
-                "widget": "Radio"
-              },
+              ],
               "rule": {
-                "effect": "ENABLE",
-                "condition": {
-                  "scope": "#/properties/exempt_from_federal_regulations",
-                  "schema": {
-                    "const": false
-                  }
-                }
-              }
-            },
-            {
-              "type": "Control",
-              "scope": "#/properties/irb_approval_date",
-              "label": "IRB Approval Date:",
-              "rule": {
-                "effect": "ENABLE",
-                "condition": {
-                  "scope": "#/properties/irb_review_pending",
-                  "schema": {
-                    "const": false
-                  }
-                }
-              }
-            },
-            {
-              "type": "Control",
-              "scope": "#/properties/human_subject_assurance_number",
-              "label": "Human Subject Assurance Number: ",
-              "options": {
-                "widget": "Text"
-              },
-              "rule": {
-                "effect": "ENABLE",
+                "effect": "SHOW",
                 "condition": {
                   "scope": "#/properties/human_subjects_involved",
                   "schema": {
@@ -112,45 +131,59 @@
               }
             },
             {
-              "type": "Control",
-              "scope": "#/properties/iacuc_review_pending",
-              "label": "Is the IACUC review Pending?",
-              "options": {
-                "widget": "Radio"
-              },
-              "rule": {
-                "effect": "ENABLE",
-                "condition": {
-                  "scope": "#/properties/vertebrate_animals_used",
-                  "schema": {
-                    "const": true
-                  }
-                }
-              }
-            },
-            {
-              "type": "Control",
-              "scope": "#/properties/iacuc_approval_date",
-              "label": "IACUC Approval Date:",
-              "rule": {
-                "effect": "ENABLE",
-                "condition": {
+              "type": "Group",
+              "elements": [
+                {
+                  "type": "Control",
                   "scope": "#/properties/iacuc_review_pending",
-                  "schema": {
-                    "const": false
+                  "label": "Is the IACUC review Pending?",
+                  "options": {
+                    "widget": "Radio"
+                  },
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/vertebrate_animals_used",
+                      "schema": {
+                        "const": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/iacuc_approval_date",
+                  "label": "IACUC Approval Date:",
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/iacuc_review_pending",
+                      "schema": {
+                        "const": false
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/animal_welfare_assurance_number",
+                  "label": "Animal Welfare Assurance Number:",
+                  "options": {
+                    "widget": "Text"
+                  },
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/vertebrate_animals_used",
+                      "schema": {
+                        "const": true
+                      }
+                    }
                   }
                 }
-              }
-            },
-            {
-              "type": "Control",
-              "scope": "#/properties/animal_welfare_assurance_number",
-              "label": "Animal Welfare Assurance Number:",
-              "options": {
-                "widget": "Text"
-              },
+              ],
               "rule": {
-                "effect": "ENABLE",
+                "effect": "SHOW",
                 "condition": {
                   "scope": "#/properties/vertebrate_animals_used",
                   "schema": {
@@ -191,50 +224,64 @@
               }
             },
             {
-              "type": "Control",
-              "scope": "#/properties/environmental_impact_explanation",
-              "label": "4.b. If yes, please explain:",
-              "options": {
-                "widget": "Text"
-              },
-              "rule": {
-                "effect": "ENABLE",
-                "condition": {
-                  "scope": "#/properties/environmental_impact",
-                  "schema": {
-                    "const": true
+              "type": "Group",
+              "elements": [
+                {
+                  "type": "Control",
+                  "scope": "#/properties/environmental_impact_explanation",
+                  "label": "4.b. If yes, please explain:",
+                  "options": {
+                    "widget": "Text"
+                  },
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/environmental_impact",
+                      "schema": {
+                        "const": true
+                      }
+                    }
                   }
-                }
-              }
-            },
-            {
-              "type": "Control",
-              "scope": "#/properties/assessment_or_exemption_performed",
-              "label": "4.c. If this project has an actual or potential impact on the environment, has an exemption been authorized or an environmental assessment (EA) or environmental impact statement (EIS) been performed?",
-              "options": {
-                "widget": "Radio"
-              },
-              "rule": {
-                "effect": "ENABLE",
-                "condition": {
-                  "scope": "#/properties/environmental_impact",
-                  "schema": {
-                    "const": true
-                  }
-                }
-              }
-            },
-            {
-              "type": "Control",
-              "scope": "#/properties/assessment_or_exemption_explanation",
-              "label": "4.d. If yes, please explain:",
-              "options": {
-                "widget": "Text"
-              },
-              "rule": {
-                "effect": "ENABLE",
-                "condition": {
+                },
+                {
+                  "type": "Control",
                   "scope": "#/properties/assessment_or_exemption_performed",
+                  "label": "4.c. If this project has an actual or potential impact on the environment, has an exemption been authorized or an environmental assessment (EA) or environmental impact statement (EIS) been performed?",
+                  "options": {
+                    "widget": "Radio"
+                  },
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/environmental_impact",
+                      "schema": {
+                        "const": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Control",
+                  "scope": "#/properties/assessment_or_exemption_explanation",
+                  "label": "4.d. If yes, please explain:",
+                  "options": {
+                    "widget": "Text"
+                  },
+                  "rule": {
+                    "effect": "ENABLE",
+                    "condition": {
+                      "scope": "#/properties/assessment_or_exemption_performed",
+                      "schema": {
+                        "const": true
+                      }
+                    }
+                  }
+                }
+              ],
+              "rule": {
+                "effect": "SHOW",
+                "condition": {
+                  "scope": "#/properties/environmental_impact",
                   "schema": {
                     "const": true
                   }

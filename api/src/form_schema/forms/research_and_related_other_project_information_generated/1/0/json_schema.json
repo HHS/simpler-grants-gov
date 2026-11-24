@@ -8,7 +8,7 @@
           "$ref": "#/$defs/types.yes-no"
         }
       ],
-      "description": "If activities involving human subjects are planned at any time during the proposed project at any performance site, check yes.  Check yes, even if the proposed project is exempt from Regulations for the Protection of Human Subjects.  If no, skip the rest of block 1.  This field is required.\n\nIf activities involving human subjects are not planned at any time during the proposed project at any performance site, click here for no.  Skip the rest of block 1.  This field is required. ",
+      "description": "If activities involving human subjects are planned at any time during the proposed project at any performance site, check yes.  Check yes, even if the proposed project is exempt from Regulations for the Protection of Human Subjects.  If no, skip the rest of block 1.  This field is required.\n\nIf activities involving human subjects are not planned at any time during the proposed project at any performance site, click here for no.  Skip the rest of block 1.  This field is required.",
       "title": "1. Are Human Subjects Involved?"
     },
     "exempt_from_federal_regulations": {
@@ -57,7 +57,7 @@
           "$ref": "#/$defs/types.yes-no"
         }
       ],
-      "description": "If activities involving vertebrate animals are planned at any time during the proposed project at any performance site, check yes.  If no, skip the rest of block 2.  This field is required. ",
+      "description": "If activities involving vertebrate animals are planned at any time during the proposed project at any performance site, check yes.  If no, skip the rest of block 2.  This field is required.",
       "title": "2. Are Vertebrate Animals Used?"
     },
     "iacuc_review_pending": {
@@ -213,7 +213,7 @@
         "$ref": "#/$defs/types.attachment"
       },
       "maxItems": 100,
-      "description": "Attach a file to provide any other project information not provided above or in accordance with the announcement and/or agency-specific instruction. \n\nOptional Other Attachment Check Box. Indicates whether an Optional Other Attachment is attached.",
+      "description": "Attach any other project information the opportunity or agency asks for.",
       "title": "12. Other Attachments"
     }
   },
@@ -294,31 +294,18 @@
   "allOf": [
     {
       "if": {
+        "required": [
+          "human_subjects_involved",
+          "exempt_from_federal_regulations"
+        ],
         "properties": {
           "human_subjects_involved": {
             "const": true
-          }
-        },
-        "required": [
-          "human_subjects_involved"
-        ]
-      },
-      "then": {
-        "required": [
-          "exempt_from_federal_regulations"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
+          },
           "exempt_from_federal_regulations": {
             "const": true
           }
-        },
-        "required": [
-          "exempt_from_federal_regulations"
-        ]
+        }
       },
       "then": {
         "required": [
@@ -333,35 +320,97 @@
     },
     {
       "if": {
+        "required": [
+          "human_subjects_involved",
+          "exempt_from_federal_regulations"
+        ],
         "properties": {
+          "human_subjects_involved": {
+            "const": true
+          },
           "exempt_from_federal_regulations": {
             "const": false
           }
-        },
-        "required": [
-          "exempt_from_federal_regulations"
-        ]
+        }
       },
       "then": {
         "required": [
           "irb_review_pending"
+        ],
+        "if": {
+          "required": [
+            "irb_review_pending"
+          ],
+          "properties": {
+            "irb_review_pending": {
+              "const": false
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "irb_approval_date"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "vertebrate_animals_used",
+          "iacuc_review_pending"
+        ],
+        "properties": {
+          "vertebrate_animals_used": {
+            "const": true
+          },
+          "iacuc_review_pending": {
+            "const": false
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "iacuc_approval_date",
+          "animal_welfare_assurance_number"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "environmental_impact",
+          "assessment_or_exemption_performed"
+        ],
+        "properties": {
+          "environmental_impact": {
+            "const": true
+          },
+          "assessment_or_exemption_performed": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "assessment_or_exemption_explanation"
         ]
       }
     },
     {
       "if": {
         "properties": {
-          "irb_review_pending": {
-            "const": false
+          "human_subjects_involved": {
+            "const": true
           }
         },
         "required": [
-          "irb_review_pending"
+          "human_subjects_involved"
         ]
       },
       "then": {
         "required": [
-          "irb_approval_date"
+          "exempt_from_federal_regulations"
         ]
       }
     },
@@ -385,24 +434,6 @@
     {
       "if": {
         "properties": {
-          "iacuc_review_pending": {
-            "const": false
-          }
-        },
-        "required": [
-          "iacuc_review_pending"
-        ]
-      },
-      "then": {
-        "required": [
-          "iacuc_approval_date",
-          "animal_welfare_assurance_number"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
           "environmental_impact": {
             "const": true
           }
@@ -414,23 +445,6 @@
       "then": {
         "required": [
           "environmental_impact_explanation"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "assessment_or_exemption_performed": {
-            "const": true
-          }
-        },
-        "required": [
-          "assessment_or_exemption_performed"
-        ]
-      },
-      "then": {
-        "required": [
-          "assessment_or_exemption_explanation"
         ]
       }
     },
