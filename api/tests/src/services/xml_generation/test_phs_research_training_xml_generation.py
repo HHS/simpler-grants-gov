@@ -42,6 +42,8 @@ def test_attachment_sections_and_order():
     assert result.success, result.error_message
     outcome = XSDValidator(XSD_DIR).validate_xml(result.xml_data, XSD)
     assert outcome["valid"], outcome["error_message"]
+    filename = "phs_398_research_training_program_plan_5_0.xml"
+    assert result.xml_data == (Path(__file__).parent / "snapshots" / filename).read_text()
     root = etree.fromstring(result.xml_data.encode())
     assert root.findtext(".//{*}ProgramPlan//{*}FileName") == "primary.pdf"
     assert [node.text for node in root.findall(".//{*}Appendix//{*}FileName")] == [
