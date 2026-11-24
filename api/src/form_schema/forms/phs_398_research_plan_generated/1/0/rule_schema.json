@@ -54,7 +54,7 @@
       "rule": "attachment"
     }
   },
-  "authentication_of_key_biological_and_or_chemical_resources": {
+  "key_biological_and_or_chemical_resources": {
     "gg_validation": {
       "rule": "attachment"
     }

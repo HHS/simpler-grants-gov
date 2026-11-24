@@ -30,7 +30,7 @@ _FIELDS = (
     ("resource_sharing_plans", "ResourceSharingPlans"),
     ("other_plans", "OtherPlans"),
     (
-        "authentication_of_key_biological_and_or_chemical_resources",
+        "key_biological_and_or_chemical_resources",
         "KeyBiologicalAndOrChemicalResources",
     ),
 )
