@@ -18,6 +18,7 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { fillField } from "tests/e2e/utils/fields/fill-fields";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
@@ -75,27 +76,17 @@ test(
       page.locator('input[name="faculty_or_student_owned"][value="false"]'),
     ).toBeChecked();
 
-    const program = page.locator("#program_type");
-    const receivedAwards = page.locator(
-      'input[name="phase_ii_awards_received"][value="true"]',
+    await fillField(
+      page,
+      {
+        ...SBIR_STTR_FORM_CONFIG.fields.phase_ii_awards_received,
+        selector: 'input[name="phase_ii_awards_received"][value="true"]',
+      },
+      true,
     );
-    if (!(await receivedAwards.isVisible())) {
-      await page
-        .getByRole("button", { name: "SBIR questions", exact: true })
-        .click();
-    }
-    await receivedAwards.check();
     const history = page.locator("#commercialization_history-visible");
     await expect(history).toBeEnabled();
-    if (!(await program.isVisible())) {
-      await page
-        .getByRole("button", {
-          name: "Agency and small business identification",
-          exact: true,
-        })
-        .click();
-    }
-    await program.selectOption("STTR");
+    await page.locator("#program_type").selectOption("STTR");
     await expect(history).toHaveCount(0);
   },
 );
