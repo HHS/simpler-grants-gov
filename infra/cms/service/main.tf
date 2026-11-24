@@ -103,6 +103,7 @@ module "service" {
   service_name         = local.service_config.service_name
   environment_name     = var.environment_name
   image_repository_url = module.app_config.build_repository_config.repository_url
+  image_repository_arn = module.app_config.build_repository_config.repository_arn
   image_tag            = local.image_tag
   network_name         = local.environment_config.network_name
   project_name         = module.project_config.project_name
@@ -129,5 +130,18 @@ module "service" {
     ENVIRONMENT = var.environment_name
   }
 
+  secrets = [{
+    name      = "DRUPAL_HASH_SALT"
+    valueFrom = module.drupal_hash_salt.secret_arn
+  }]
+
   is_temporary = false
+}
+
+# Drupal uses the hash salt for one-time login links, form tokens and other
+# security tokens. It is generated once per environment and kept in Parameter Store.
+module "drupal_hash_salt" {
+  source            = "../../modules/secret"
+  manage_method     = "generated"
+  secret_store_name = "/cms/${var.environment_name}/drupal-hash-salt"
 }
