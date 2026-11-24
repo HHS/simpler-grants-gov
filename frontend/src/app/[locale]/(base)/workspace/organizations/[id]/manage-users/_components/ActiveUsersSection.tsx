@@ -133,7 +133,7 @@ export async function ActiveUsersSection({
     });
 
   return (
-    <section className="usa-table-container--scrollable margin-bottom-5 margin-top-5">
+    <section className="usa-table-container--scrollable margin-bottom-5 margin-top-0">
       <h2 className="margin-bottom-1 font-sans-lg">
         {t("activeUsersHeading")}
       </h2>

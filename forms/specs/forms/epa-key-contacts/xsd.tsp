@@ -16,6 +16,7 @@ namespace XSD.EPAKeyContacts20;
 alias grantsGovXml = Mappings.Target.grantsGovXml;
 alias EPAKeyContacts = Forms.EPAKeyContacts.EPAKeyContacts;
 alias GlobLib = XSD.GlobLib;
+alias Contact = Forms.EPAKeyContacts.EPAContact;
 
 @nsDeclarations
 enum Namespaces {
@@ -48,3 +49,35 @@ model Root {
 
   @attribute @name("FormVersion") formVersion: "2.0";
 }
+
+// =============================================================================
+// CONTACT PERSON
+// =============================================================================
+
+// Each role's `ContactPersonDataTypeV3` is filled from the form's own `EPAContact`.
+@@Mapping.from(
+  GlobLib.ContactPersonDataTypeV3.name,
+  grantsGovXml,
+  Contact.name
+);
+@@Mapping.from(
+  GlobLib.ContactPersonDataTypeV3.title,
+  grantsGovXml,
+  Contact.title
+);
+@@Mapping.from(
+  GlobLib.ContactPersonDataTypeV3.address,
+  grantsGovXml,
+  Contact.address
+);
+@@Mapping.from(
+  GlobLib.ContactPersonDataTypeV3.phone,
+  grantsGovXml,
+  Contact.phone
+);
+@@Mapping.from(GlobLib.ContactPersonDataTypeV3.fax, grantsGovXml, Contact.fax);
+@@Mapping.from(
+  GlobLib.ContactPersonDataTypeV3.email,
+  grantsGovXml,
+  Contact.email
+);

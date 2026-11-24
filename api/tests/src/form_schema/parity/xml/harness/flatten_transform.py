@@ -7,7 +7,8 @@ produce and the form fields that fill them.
 
 A container (`nested_object`, `array`) or a `static_value` takes no value from the form, so
 its field is None. An attachment's `xml_transform.target` is a placeholder that only fixes
-its position; the element it produces is named in `_xml_config.attachment_fields`.
+its position; the element it produces is named in `_xml_config.attachment_fields`. An
+attachment field with no placeholder rule is written at the root, after the rules.
 """
 
 from typing import Any
@@ -112,6 +113,11 @@ def read(mapping: dict[str, Any]) -> tuple[dict[Path, str | None], dict[str, str
                 descend(items_rules, (*level, target), f"{source}.{ARRAY}")
 
     descend({k: v for k, v in mapping.items() if k != "_xml_config"}, (), "")
+    for field, attachment in attachments.items():
+        if field in mapping:
+            continue  # placed by its placeholder rule above
+        source = f"{field}.{ARRAY}" if attachment.get("type") == "multiple" else field
+        targets[attachment["xml_element"],] = source
     return targets, unchecked
 
 

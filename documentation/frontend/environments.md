@@ -29,7 +29,7 @@ When running Next in a non-dockerized situation, variables are also pulled direc
 
 Since the .env.development file is tracked in git, any sensitive environment variables used for local development or testing - for example to connect to a non-dev API instance - **SHOULD NOT** be entered into this file, even temporarily. Instead, pass any necessary env vars directly from the command line or look into something like [direnv](https://direnv.net/).
 
-The `AUTH_EXPIRATION_TIME` environment variable will allow you to control the time your login token will remain valid. The value in .env.development is 1 year, but you can set a different value as needed in .env.local. This variable is only functional when `ENVIRONMENT` is "local".
+The `AUTH_EXPIRATION_TIME` environment variable will allow you to control the time your login token will remain valid. The value in .env.development is 1 year, but you can set a different value as needed in .env.local. This variable is only functional when `ENVIRONMENT` is "local". To test session expiration in local, dev or staging without changing environment variables, use the `session_duration_seconds` login URL parameter described in [authentication](./authentication.md#shorter-sessions-for-qa-and-e2e-testing-lower-environments-only).
 
 ## Test (and testing)
 

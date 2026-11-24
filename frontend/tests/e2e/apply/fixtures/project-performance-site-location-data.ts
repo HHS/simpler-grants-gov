@@ -47,4 +47,64 @@ export const PPSL_OPPORTUNITY_DATA: PrintViewFormData = {
   formKey: "ppsl",
   expectedPrepopulatedFields: {},
   buildTestData: buildPPSLHappyPathTestData,
+  // What the submission zip spec verifies per field (XML element and/or PDF text).
+  submissionFields: {
+    "primary_site--organization_name": {
+      xmlElement: "PerformanceSite_4_0:OrganizationName",
+      verifyInPdf: true,
+    },
+    "primary_site--address--street1": {
+      xmlElement: "globLib:Street1",
+      verifyInPdf: true,
+    },
+    "primary_site--address--street2": {
+      xmlElement: "globLib:Street2",
+      verifyInPdf: true,
+    },
+    "primary_site--address--city": {
+      xmlElement: "globLib:City",
+      verifyInPdf: true,
+    },
+    "primary_site--address--county": {
+      xmlElement: "globLib:County",
+      verifyInPdf: true,
+    },
+    "primary_site--address--state": { xmlElement: "globLib:State" },
+    "primary_site--address--zip_code": { xmlElement: "globLib:ZipPostalCode" },
+    "primary_site--address--country": { xmlElement: "globLib:Country" },
+    "primary_site--congressional_district": {
+      xmlElement: "PerformanceSite_4_0:CongressionalDistrictProgramProject",
+      verifyInPdf: true,
+    },
+  },
 };
+
+/**
+ * Opportunity configuration for the Performance Sites form generated from forms/specs.
+ * It shares the hand-written form's field definitions and fill data.
+ */
+export const PPSL_GENERATED_OPPORTUNITY_DATA: PrintViewFormData = {
+  opportunityId: "4b585a14-ab56-42c1-a01f-78eba5b93d97",
+  opportunityNumber: "E2E-PPSLG-ORG-IND-01",
+  formKey: "ppslGenerated",
+  expectedPrepopulatedFields: {},
+  buildTestData: buildPPSLHappyPathTestData,
+};
+
+/**
+ * Each Performance Sites form the Performance Sites spec runs against, and the id of the
+ * print view section holding its attachment. A generated form names each section after
+ * its label.
+ */
+export const PPSL_OPPORTUNITIES = [
+  {
+    formLabel: "PROJECT/PERFORMANCE SITE LOCATION(S)",
+    opportunityNumber: PPSL_OPPORTUNITY_DATA.opportunityNumber,
+    attachmentSectionId: "form-section-additional_locations_attachment",
+  },
+  {
+    formLabel: "PROJECT/PERFORMANCE SITE LOCATION(S) (Generated)",
+    opportunityNumber: PPSL_GENERATED_OPPORTUNITY_DATA.opportunityNumber,
+    attachmentSectionId: "form-section-additional-locations",
+  },
+] as const;

@@ -15,19 +15,19 @@ namespace Forms.EPAKeyContacts;
 model EPAKeyContactsLayout {
   @UI.label("Authorized Representative")
   @UI.field(EPAKeyContacts.authorizedRepresentative)
-  authorizedRepresentative: EPAContact<"the Authorized Representative's ">;
+  authorizedRepresentative: EPAContactLayout;
 
   @UI.label("Payee")
   @UI.field(EPAKeyContacts.payee)
-  payee: EPAContact<"the Payee's ">;
+  payee: EPAContactLayout;
 
   @UI.label("Administrative Contact")
   @UI.field(EPAKeyContacts.administrativeContact)
-  administrativeContact: EPAContact<"the Administrative Contact's ">;
+  administrativeContact: EPAContactLayout;
 
   @UI.label("Project Manager")
   @UI.field(EPAKeyContacts.projectManager)
-  projectManager: EPAContact<"the Project Manager's ">;
+  projectManager: EPAContactLayout;
 }
 
 // =============================================================================
@@ -35,32 +35,31 @@ model EPAKeyContactsLayout {
 // =============================================================================
 
 /**
- * One EPA contact: their title under a Role heading after the name, and no County or
- * Province, which `globLib:ContactPersonDataTypeV3` permits but neither the official PDF
- * nor the existing SGG form asks. Relative to `Person`, so one model serves every role;
- * `Whose` names the role in each group's description, as the DAT does: "the Payee's ".
+ * One EPA contact, without County or Province, which `globLib:ContactPersonDataTypeV3`
+ * permits but neither the official PDF nor the existing SGG form asks. Relative to
+ * `EPAContact`, so one model serves every role.
  */
-model EPAContact<Whose extends valueof string> {
-  @doc("Enter ${Whose}name. First and last name are required.")
-  name: Questions.People.Person.name;
+model EPAContactLayout {
+  @UI.flatten name: Forms.EPAKeyContacts.EPAContact.name;
+  title: Forms.EPAKeyContacts.EPAContact.title;
 
-  @doc("Enter ${Whose}position title.")
-  @UI.label("Role")
-  role: {
-    title: Questions.People.Person.title;
-  };
+  @UI.flatten
+  @UI.field(Forms.EPAKeyContacts.EPAContact.address)
+  address: EPAAddressLayout;
 
-  @doc("Enter ${Whose}complete address.")
-  address: Questions.People.Person.address;
+  phone: Forms.EPAKeyContacts.EPAContact.phone;
+  fax: Forms.EPAKeyContacts.EPAContact.fax;
+  email: Forms.EPAKeyContacts.EPAContact.email;
+}
 
-  @doc("Enter ${Whose}phone number, fax number and email. Phone number is required.")
-  @UI.label("Contact Information")
-  contact: {
-    phone: Questions.People.Person.phone;
-    fax: Questions.People.Person.fax;
-    email: Questions.People.Person.email;
-  };
-
-  @UI.omit county: Questions.People.Person.address::type.county;
-  @UI.omit province: Questions.People.Person.address::type.province;
+/** An EPA contact's address, which asks for Zip / Postal Code before Country, as the PDF does. */
+model EPAAddressLayout {
+  street1: Questions.People.PersonAddress.street1;
+  street2: Questions.People.PersonAddress.street2;
+  city: Questions.People.PersonAddress.city;
+  @UI.omit county: Questions.People.PersonAddress.county;
+  state: Questions.People.PersonAddress.state;
+  @UI.omit province: Questions.People.PersonAddress.province;
+  zipCode: Questions.People.PersonAddress.zipCode;
+  country: Questions.People.PersonAddress.country;
 }

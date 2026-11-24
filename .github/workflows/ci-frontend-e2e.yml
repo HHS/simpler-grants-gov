@@ -351,7 +351,7 @@ jobs:
           # Keep the logout redirect chain on the same host Playwright uses (127.0.0.1)
           echo "LOGOUT_FINAL_DESTINATION=http://127.0.0.1:3000/api/auth/logout-callback" >> override.env
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
-          make run-workflow-service-async
+          make run-submission-consumer-async
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh

@@ -40,28 +40,34 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-// Only the opportunity number is declared here.
-// All opportunity/form details are resolved from form specific fixtures.
-const OPPORTUNITY_NUMBER = "TEST-PRINT-ORG-IND-ON01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-
 const applicantScenarios = [
+  { label: "Project Abstract Summary", number: "TEST-PRINT-ORG-IND-ON01" },
   {
-    testName: `Complete the Project Abstract Summary Form Submission and Print View workflow for an Organization user`,
-    orgLabel: testOrgLabel,
+    label: "generated Project Abstract Summary",
+    number: "E2E-PABSSG-ORG-IND-01",
   },
-  {
-    testName: `Complete the Project Abstract Summary Form Submission and Print View workflow for an Individual user`,
-    orgLabel: undefined,
-  },
-] as const;
+].flatMap(({ label, number }) => {
+  const opportunityConfig = loadOpportunityConfig(number);
+  return [
+    {
+      testName: `Complete the ${label} Form Submission and Print View workflow for an Organization user`,
+      orgLabel: testOrgLabel,
+      opportunityConfig,
+    },
+    {
+      testName: `Complete the ${label} Form Submission and Print View workflow for an Individual user`,
+      orgLabel: undefined,
+      opportunityConfig,
+    },
+  ];
+});
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { testName, orgLabel } of applicantScenarios) {
+for (const { testName, orgLabel, opportunityConfig } of applicantScenarios) {
   test(
     testName,
     { tag: [APPLY_FORMS, FULL_REGRESSION] },

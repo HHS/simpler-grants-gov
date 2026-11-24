@@ -4,17 +4,11 @@ import uuid
 from pydantic import Field
 
 import src.adapters.db as db
-from src.constants.static_role_values import (
-    E2E_TEST_USER_MANAGER_ROLE,
-    OPPORTUNITY_PUBLISHER,
-    ORG_ADMIN,
-    ORG_MEMBER,
-)
+from src.constants.static_role_values import E2E_TEST_USER_MANAGER_ROLE, ORG_ADMIN, ORG_MEMBER
 from src.util.env_config import PydanticBaseEnvConfig
 from tests.lib.seed_agencies_and_users import setup_agency
 from tests.lib.seed_data_utils import UserBuilder
 from tests.lib.seed_orgs_and_users import setup_org
-from tests.src.db.models.factories import AssistanceListingFactory
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +29,9 @@ logger = logging.getLogger(__name__)
 # test user UUIDs.
 E2E_MANAGER_USER_ID = uuid.UUID("c3d4e5f6-a7b8-4c5d-9e0f-1a2b3c4d5e6f")
 
-# Dedicated agency for the E2E test user's grantor role. Kept separate from the
-# agencies in seed_agencies_and_users so opportunities created by E2E runs stay
-# isolated, and so the grantor opportunities page auto-selects a single agency.
+# Dedicated agency for the E2E test users. Kept separate from the agencies in
+# seed_agencies_and_users so data created by E2E runs stays isolated.
 E2E_AGENCY_ID = uuid.UUID("d4e5f6a7-b8c9-4d5e-9f0a-1b2c3d4e5f60")
-
-# Fixed assistance listing the opportunity-creation E2E test enters on the
-# Create Opportunity page. Staging has real ALN data; local/CI must seed this
-# specific number or the create endpoint returns a 404.
-E2E_ASSISTANCE_LISTING_ID = uuid.UUID("e5f6a7b8-c9d0-4e5f-a0b1-2c3d4e5f6a70")
-E2E_ASSISTANCE_LISTING_NUMBER = "00.000"
 
 # Dedicated organization for E2E test users that need organization membership.
 # Mirrors the setup of the staging test user's organization. This id is
@@ -91,18 +78,6 @@ class _SeedE2EConfig(PydanticBaseEnvConfig):
 def _build_users_and_tokens(db_session: db.Session) -> None:
     config = _SeedE2EConfig()
 
-    # Seed the assistance listing the create-opportunity E2E test references.
-    # merge() on a fixed id keeps this idempotent across repeated seed runs so
-    # get_assistance_listing's scalar_one_or_none lookup stays unambiguous.
-    db_session.merge(
-        AssistanceListingFactory.build(
-            assistance_listing_id=E2E_ASSISTANCE_LISTING_ID,
-            assistance_listing_number=E2E_ASSISTANCE_LISTING_NUMBER,
-            program_title="Test ALN",
-        ),
-        load=True,
-    )
-
     e2e_agency = setup_agency(
         db_session,
         agency_id=E2E_AGENCY_ID,
@@ -122,9 +97,7 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
         UserBuilder(uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"), db_session, "user for e2e")
         .with_e2e_test_user()
         .with_api_key("e2e-test-key")
-        # Grantor role so the Create Opportunity link shows and opportunity
-        # creation E2E tests can create and publish opportunities.
-        .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+        .with_agency(e2e_agency, roles=[])
         .build()
     )
 
@@ -145,7 +118,7 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
             UserBuilder(pool_user_id, db_session, "user for e2e (pool)")
             .with_e2e_test_user()
             .with_organization(sally_org, roles=[ORG_ADMIN])
-            .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+            .with_agency(e2e_agency, roles=[])
             .build()
         )
 
@@ -155,12 +128,12 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
         UserBuilder(E2E_ORG_MEMBER_USER_ID, db_session, "e2e org member test user")
         .with_e2e_test_user()
         .with_organization(e2e_organization, roles=[ORG_MEMBER])
-        .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+        .with_agency(e2e_agency, roles=[])
         .build()
     )
 
-    # Dedicated local user with no agency membership, used to verify the no-agency
-    # failure path on the grantor opportunities page.
+    # Dedicated local user with no agency membership, used to verify
+    # no-agency failure paths.
     (
         UserBuilder(E2E_NO_AGENCY_USER_ID, db_session, "e2e no-agency test user")
         .with_e2e_test_user()

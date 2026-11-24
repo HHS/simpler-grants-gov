@@ -1,5 +1,6 @@
 """Tests for XML generation configuration."""
 
+from src.services.xml_generation import config as xml_config_module
 from src.services.xml_generation.config import is_form_xml_supported, load_xml_transform_config
 
 
@@ -140,3 +141,27 @@ class TestXMLTransformConfig:
 
         # Unsupported form
         assert is_form_xml_supported("UNKNOWN_FORM") is False
+
+
+class TestXSDURLMap:
+    """Test cases for the map of forms to their XSD URLs."""
+
+    def test_reads_xsd_url_from_either_format(self, monkeypatch):
+        """Test that a form in the XML mapping format keeps its XSD URL at the top level."""
+        monkeypatch.setattr(
+            xml_config_module,
+            "_build_xml_form_map",
+            lambda: {
+                "TRANSFORM": {"_xml_config": {"xsd_url": "https://example.test/Transform.xsd"}},
+                "MAPPING": {
+                    "format": "xml-mapping",
+                    "xsd_url": "https://example.test/Mapping.xsd",
+                },
+                "NO_URL": {"_xml_config": {}},
+            },
+        )
+
+        assert xml_config_module._build_xml_form_xsd_url_map() == {
+            "TRANSFORM": "https://example.test/Transform.xsd",
+            "MAPPING": "https://example.test/Mapping.xsd",
+        }

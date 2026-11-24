@@ -1,7 +1,7 @@
 {
   "title": "Project/Performance Site Location(s)",
   "slug": "project-performance-site-location-s",
-  "status": "in_review",
+  "status": "migrated",
   "family": [
     "SF-424",
     "R&R",
@@ -155,8 +155,8 @@
           "kind": "field",
           "id": "primary-site-address-zip-code",
           "label": "Zip / Postal Code",
-          "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
-          "required": "Conditional (when the site country is USA: UNITED STATES)",
+          "help_text": "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required.",
+          "required": "Conditional (when the site country is USA: UNITED STATES; if US, minLength 9)",
           "type": "Text input",
           "widget": "TextWidget",
           "json_path": "primary_site.address.zip_code",
@@ -182,7 +182,7 @@
     },
     {
       "kind": "section",
-      "label": "Other project/performance sites",
+      "label": "Additional Project/Performance Site Location(s)",
       "widget": "FieldListWidget",
       "children": [
         {
@@ -319,8 +319,8 @@
           "kind": "field",
           "id": "additional-sites-address-zip-code",
           "label": "Zip / Postal Code",
-          "help_text": "Enter the zip / postal code. This field is required if the country is the United States.",
-          "required": "Conditional (when this additional site exists and its country is USA: UNITED STATES)",
+          "help_text": "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required.",
+          "required": "Conditional (when this additional site exists and its country is USA: UNITED STATES; if US, minLength 9)",
           "type": "Text input",
           "widget": "TextWidget",
           "json_path": "additional_sites[].address.zip_code",

@@ -185,6 +185,8 @@ module "service" {
   hostname        = module.app_config.hostname
   enable_waf      = module.app_config.enable_waf
 
+  bot_protection_waf = local.service_config.bot_protection_waf
+
   fargate_cpu              = local.service_config.instance_cpu
   fargate_memory           = local.service_config.instance_memory
   enable_command_execution = local.service_config.enable_command_execution

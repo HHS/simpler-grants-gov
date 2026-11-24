@@ -47,6 +47,67 @@ ignore:
       version: "3.15.2"
       type: binary
 
+  # Python 3.15.2 CVEs (api + analytics); Grype lists fixes only in 3.16.0 / 3.16.0a2
+  # Ignored until we can test a Python upgrade; remove when PYTHON_VERSION is bumped
+  # Last checked: 11/18/2026
+  - vulnerability: CVE-2026-124249
+    package:
+      name: python
+      version: "3.15.2"
+      type: binary
+  - vulnerability: CVE-2026-115559
+    package:
+      name: python
+      version: "3.15.2"
+      type: binary
+  - vulnerability: CVE-2026-103995
+    package:
+      name: python
+      version: "3.15.2"
+      type: binary
+  - vulnerability: CVE-2026-115791
+    package:
+      name: python
+      version: "3.15.2"
+      type: binary
+  - vulnerability: CVE-2026-19552
+    package:
+      name: python
+      version: "3.15.2"
+      type: binary
+
+  # NOFO Builder uses Python 3.14.10. Mirror the three medium findings from Builder PR #1400.
+  # https://github.com/HHS/simpler-grants-pdf-builder/pull/1400
+  # Review by 2026-12-02. Remove once a patched NOFO image passes without these rules.
+  - vulnerability: CVE-2026-124249
+    package:
+      name: python
+      version: "3.14.10"
+      type: binary
+  - vulnerability: CVE-2026-115559
+    package:
+      name: python
+      version: "3.14.10"
+      type: binary
+  - vulnerability: CVE-2026-115791
+    package:
+      name: python
+      version: "3.14.10"
+      type: binary
+
+  # next 16.4.2 (frontend); fixed in 16.4.5, ignored until the upgrade is tested
+  # Last checked: 11/18/2026
+  - vulnerability: GHSA-mfr8-8qww-v76h
+    package:
+      name: next
+      version: "16.4.2"
+      type: npm
+  - vulnerability: GHSA-vc7v-qv4w-wrv8
+    package:
+      name: next
+      version: "16.4.2"
+      type: npm
+
   # CPython hashlib FIPS enforcement regression; only 3.14.10 and only with OpenSSL in FIPS mode (not enabled in our images)
   # Fixed in 3.14.11, not yet released; remove when PYTHON_VERSION in api/docker-python-base is bumped
   # Advisory: https://github.com/python/cpython/issues/160923

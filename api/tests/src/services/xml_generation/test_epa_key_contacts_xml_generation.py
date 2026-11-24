@@ -12,10 +12,7 @@ from pathlib import Path
 import pytest
 from lxml import etree as lxml_etree
 
-from src.form_schema.forms.epa_key_contacts import (
-    FORM_XML_TRANSFORM_RULES as EPA_KEY_CONTACTS_TRANSFORM_RULES,
-)
-from src.form_schema.forms.epa_key_contacts import EPA_KEY_CONTACT_v2_0
+from src.form_schema.forms import epa_key_contacts, epa_key_contacts_generated
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -30,6 +27,24 @@ from tests.src.db.models.factories import (
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
+
+# The hand-written form and the one generated from forms/specs write the same XML.
+EPA_KEY_CONTACTS_FORMS = [
+    pytest.param(
+        (epa_key_contacts.EPA_KEY_CONTACT_v2_0, epa_key_contacts.FORM_XML_TRANSFORM_RULES),
+        id="handwritten",
+    ),
+    pytest.param(
+        (epa_key_contacts_generated.FORM, epa_key_contacts_generated.FORM_XML_TRANSFORM_RULES),
+        id="generated",
+    ),
+]
+
+
+@pytest.fixture(params=EPA_KEY_CONTACTS_FORMS)
+def epa_key_contacts_form(request):
+    """An EPA Key Contacts form and the rules it writes its XML with."""
+    return request.param
 
 
 def _create_sample_contact_person(prefix="Dr.", first_name="John", last_name="Smith"):
@@ -60,6 +75,10 @@ def _create_sample_contact_person(prefix="Dr.", first_name="John", last_name="Sm
 class TestEPAKeyContactsXMLGeneration:
     """Test cases for EPA Key Contacts XML generation service."""
 
+    @pytest.fixture(autouse=True)
+    def _use_epa_key_contacts_form(self, epa_key_contacts_form):
+        self.form, self.transform_rules = epa_key_contacts_form
+
     def test_generate_epa_key_contacts_xml_basic_success(self):
         """Test basic EPA Key Contacts XML generation with one contact."""
         application_data = {
@@ -71,7 +90,7 @@ class TestEPAKeyContactsXMLGeneration:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            transform_config=EPA_KEY_CONTACTS_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
         )
 
         response = service.generate_xml(request)
@@ -109,7 +128,7 @@ class TestEPAKeyContactsXMLGeneration:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            transform_config=EPA_KEY_CONTACTS_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
         )
 
         response = service.generate_xml(request)
@@ -159,7 +178,7 @@ class TestEPAKeyContactsXMLGeneration:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            transform_config=EPA_KEY_CONTACTS_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
         )
 
         response = service.generate_xml(request)
@@ -201,7 +220,7 @@ class TestEPAKeyContactsXMLGeneration:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            transform_config=EPA_KEY_CONTACTS_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
         )
 
         response = service.generate_xml(request)
@@ -239,7 +258,7 @@ class TestEPAKeyContactsXMLGeneration:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            transform_config=EPA_KEY_CONTACTS_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
         )
 
         response = service.generate_xml(request)
@@ -264,7 +283,7 @@ class TestEPAKeyContactsXMLGeneration:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            transform_config=EPA_KEY_CONTACTS_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
         )
 
         response = service.generate_xml(request)
@@ -380,7 +399,7 @@ class TestEPAKeyContactsXMLGeneration:
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            transform_config=EPA_KEY_CONTACTS_TRANSFORM_RULES,
+            transform_config=self.transform_rules,
             pretty_print=True,
         )
         response = service.generate_xml(request)
@@ -418,8 +437,78 @@ class TestEPAKeyContactsXMLGeneration:
         assert auth_rep.find(f"{{{GLOB_NS}}}Phone").text.strip() == "1231231234"
 
 
+# --------------------------------------------------------------------------- #
+# Snapshot regression test                                                      #
+# --------------------------------------------------------------------------- #
+
+_SNAPSHOT_PATH = Path(__file__).parent / "snapshots" / "epa_key_contacts_2_0.xml"
+
+
+def _snapshot_contact(initials: str, first_name: str, last_name: str) -> dict:
+    """A contact with every field filled, so the snapshot covers each element."""
+    return {
+        "name": {
+            "prefix": "Dr.",
+            "first_name": first_name,
+            "middle_name": "A.",
+            "last_name": last_name,
+            "suffix": "Jr.",
+        },
+        "title": f"{initials} Title",
+        "address": {
+            "street1": "123 Main Street",
+            "street2": "Suite 100",
+            "city": "Washington",
+            "state": "DC: District of Columbia",
+            "zip_code": "200011234",
+            "country": "USA: UNITED STATES",
+        },
+        "phone": "2025550100",
+        "fax": "2025550101",
+        "email": f"{first_name.lower()}.{last_name.lower()}@example.org",
+    }
+
+
+# Data used to generate the pinned snapshot. Must stay in sync with the file.
+_SNAPSHOT_DATA = {
+    "authorized_representative": _snapshot_contact("AR", "Jane", "Doe"),
+    "payee": _snapshot_contact("PY", "John", "Smith"),
+    "administrative_contact": _snapshot_contact("AC", "Alex", "Lee"),
+    "project_manager": _snapshot_contact("PM", "Sam", "Park"),
+}
+
+
+class TestEPAKeyContactsSnapshot:
+    """Regression snapshot test pinning the full generated XML output.
+
+    To regenerate after an intentional change, write the XML that
+    XMLGenerationService generates from _SNAPSHOT_DATA to
+    snapshots/epa_key_contacts_2_0.xml.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _use_epa_key_contacts_form(self, epa_key_contacts_form):
+        self.form, self.transform_rules = epa_key_contacts_form
+
+    def test_full_xml_matches_snapshot(self):
+        """Generated XML with all four contacts must match the stored snapshot."""
+        response = XMLGenerationService().generate_xml(
+            XMLGenerationRequest(
+                application_data=_SNAPSHOT_DATA, transform_config=self.transform_rules
+            )
+        )
+        assert response.success, response.error_message
+
+        expected = _SNAPSHOT_PATH.read_text()
+        assert response.xml_data == expected
+
+
 class TestEPAKeyContactsXSDValidation:
     """XSD validation tests for EPA Key Contacts form XML."""
+
+    @pytest.fixture(autouse=True)
+    def _use_epa_key_contacts_form(self, epa_key_contacts_form):
+        self.form, self.transform_rules = epa_key_contacts_form
 
     @pytest.fixture
     def xsd_validator(self):
@@ -464,7 +553,7 @@ class TestEPAKeyContactsXSDValidation:
             competition_forms=[],
         )
 
-        epa_kc_form = EPA_KEY_CONTACT_v2_0
+        epa_kc_form = self.form
 
         application = ApplicationFactory.create(
             competition=competition, application_name="EPA Key Contacts Test Application"
@@ -586,7 +675,7 @@ class TestEPAKeyContactsXSDValidation:
             competition_forms=[],
         )
 
-        epa_kc_form = EPA_KEY_CONTACT_v2_0
+        epa_kc_form = self.form
 
         application = ApplicationFactory.create(
             competition=competition,

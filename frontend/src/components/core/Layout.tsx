@@ -16,6 +16,7 @@ import Header from "./header/Header";
 import { PivRequiredModal } from "./loginModal/PivRequiredModal";
 import MaintenanceBanner from "./MaintenanceBanner";
 import RouteFocusManager from "./RouteFocusManager";
+import { SessionExpirationWarning } from "./SessionExpirationWarning";
 
 type Props = {
   children: React.ReactNode;
@@ -69,6 +70,7 @@ export default async function Layout({ children, locale }: Props) {
           </RouteFocusManager>
         </LoginModalProvider>
         <PivRequiredModal />
+        <SessionExpirationWarning />
         <Footer />
         <GrantsIdentifier />
       </div>

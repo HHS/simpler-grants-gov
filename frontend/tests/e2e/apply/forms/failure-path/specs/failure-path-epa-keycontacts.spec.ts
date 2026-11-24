@@ -10,13 +10,13 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { EPA_KEY_CONTACTS_OPPORTUNITIES } from "tests/e2e/apply/fixtures/epa-key-contacts-data";
 import {
   EPA_KEY_CONTACTS_FORM_MATCHER,
   EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS,
   fieldDefinitionsEPAKeyContacts,
 } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
 import { epaKeyContactsFailurePathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
-import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -29,78 +29,81 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 
 const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
-
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-test(
-  "EPA Key Contacts Form - error validation with prefix-only data",
-  { tag: [APPLY_FORMS, FULL_REGRESSION] },
-  async (
-    { page, context }: { page: Page; context: BrowserContext },
-    testInfo: TestInfo,
-  ) => {
-    test.setTimeout(300_000); // 5 min timeout
+for (const { formLabel, opportunityNumber } of EPA_KEY_CONTACTS_OPPORTUNITIES) {
+  const { opportunityUrl } = loadOpportunityConfig(opportunityNumber);
 
-    const isMobile = testInfo.project.name.match(/[Mm]obile/);
+  test(
+    `${formLabel} Form - error validation with prefix-only data`,
+    { tag: [APPLY_FORMS, FULL_REGRESSION] },
+    async (
+      { page, context }: { page: Page; context: BrowserContext },
+      testInfo: TestInfo,
+    ) => {
+      test.setTimeout(300_000); // 5 min timeout
 
-    // Given the user is logged in
-    await authenticateE2eUser(page, context, !!isMobile);
+      const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-    // And the user launches the URL for an opportunity with an open competition
-    // When the user clicks "Start Application" in the opportunity page
-    // Then the "Start a new application" modal opens
-    // When the user selects the test organization in the "Who's applying" dropdown
-    // And the user enters the application name
-    // And the user clicks "Create Application"
-    // Then a new application is created
-    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-    const applicationUrl = page.url();
+      // Given the user is logged in
+      await authenticateE2eUser(page, context, !!isMobile);
 
-    // And the Application landing page loads with the "EPA Key Contacts" form link visible
-    // And the user clicks on a form link
-    // Then the form opens
-    const opened = await openForm(page, EPA_KEY_CONTACTS_FORM_MATCHER);
-    if (!opened) {
-      throw new Error(
-        "Could not find or open EPA Key Contacts form link on the application forms page",
+      // And the user launches the URL for an opportunity with an open competition
+      // When the user clicks "Start Application" in the opportunity page
+      // Then the "Start a new application" modal opens
+      // When the user selects the test organization in the "Who's applying" dropdown
+      // And the user enters the application name
+      // And the user clicks "Create Application"
+      // Then a new application is created
+      await createApplication(page, opportunityUrl, testOrgLabel);
+      const applicationUrl = page.url();
+
+      // And the Application landing page loads with the "EPA Key Contacts" form link visible
+      // And the user clicks on a form link
+      // Then the form opens
+      const opened = await openForm(page, EPA_KEY_CONTACTS_FORM_MATCHER);
+      if (!opened) {
+        throw new Error(
+          "Could not find or open EPA Key Contacts form link on the application forms page",
+        );
+      }
+
+      // Fill only the prefix fields in each section to trigger validation errors
+      // for all other required fields (First Name, Last Name, Address, Phone, etc.)
+      await fillFormPartial(
+        testInfo,
+        page,
+        fieldDefinitionsEPAKeyContacts,
+        epaKeyContactsFailurePathTestData,
       );
-    }
 
-    // Fill only the prefix fields in each section to trigger validation errors
-    // for all other required fields (First Name, Last Name, Address, Phone, etc.)
-    await fillFormPartial(
-      testInfo,
-      page,
-      fieldDefinitionsEPAKeyContacts,
-      epaKeyContactsFailurePathTestData,
-    );
+      // Save with prefix-only data — expect validation errors for missing required fields
+      // When the user attempts to save with partial data entered with required fields missing
+      await saveForm(page, true);
 
-    // Save with prefix-only data — expect validation errors for missing required fields
-    // When the user attempts to save with partial data entered with required fields missing
-    await saveForm(page, true);
+      // Then required field validation errors are shown on the form
+      await verifyFormStatusAfterSave(
+        page,
+        "incomplete",
+        EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS,
+      );
 
-    // Then required field validation errors are shown on the form
-    await verifyFormStatusAfterSave(
-      page,
-      "incomplete",
-      EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS,
-    );
-
-    // When the user navigates back to the application landing page
-    // Then under the "EPA Key Contacts" form the status shows "Some issues found. Check your entries."
-    await verifyFormStatusOnApplication(
-      page,
-      "incomplete",
-      EPA_KEY_CONTACTS_FORM_MATCHER,
-      applicationUrl,
-    );
-  },
-);
+      // When the user navigates back to the application landing page
+      // Then under the "EPA Key Contacts" form the status shows "Some issues found. Check your entries."
+      await verifyFormStatusOnApplication(
+        page,
+        "incomplete",
+        EPA_KEY_CONTACTS_FORM_MATCHER,
+        applicationUrl,
+      );
+    },
+  );
+}

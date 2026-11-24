@@ -82,21 +82,94 @@ The application refreshes tokens to extend the user's session without requiring 
 1. **Frontend Behavior**:
    - The refreshed session is returned to the frontend, ensuring the user remains authenticated without interruption.
 
+## Session Expiration
+
+### Default behavior
+
+A session expires after 15 minutes without activity. Clicks, key presses, route changes and client requests within the last 10 minutes of a session refresh it for another 15 minutes (see [Token Expiration Refreshes](#token-expiration-refreshes)). The frontend session and the API token are refreshed together, so they always expire at the same time.
+
+When a session expires:
+
+- The `session` cookie stops being sent by the browser, and its signed `exp` claim is checked on every read. An expired cookie is treated as no session, so server-rendered pages, Next API routes and API calls made on the user's behalf all behave as signed out. The API rejects the expired token on its own as well.
+- The UI switches to the signed-out state and shows the "You've been logged out. Please sign in again." message from the Header. Without the feature flag below, this happens on the user's next click, key press, route change or client request.
+- `session_expired` is logged once (see [Observability](#observability)).
+
+### Expiration alerts (`enableSessionExpirationAlerts`)
+
+With the `enableSessionExpirationAlerts` feature flag on:
+
+1. **Warning before expiry.** A "Your session is about to expire" dialog opens 2 minutes before the session expires (or halfway through, for sessions shorter than 4 minutes). It shows a live countdown and two actions:
+   - **Stay signed in** (also the X button, Escape, or clicking outside the dialog) refreshes the session and closes the dialog.
+   - **Sign out** signs the user out through the normal logout flow and returns them to the same page afterwards.
+
+   The dialog also closes on its own if the session is refreshed by activity in this or another tab.
+
+2. **Automatic logout at expiry.** If the user does nothing, they are logged out at the expiry time with no action needed. They stay on the current URL, the page is refreshed in the signed-out state (auth-gated pages show the sign-in message, and private data is no longer shown), and the "You've been logged out" message appears.
+
+> **Production impact:** `enableSessionExpirationAlerts` defaults to off, so production behavior does not change until the flag is turned on. Turn it on per browser with `?_ff=enableSessionExpirationAlerts:true` or `/dev/feature-flags`. Rolling it out to everyone means changing the default or adding a `FEATURE_` environment variable, which needs Product and Design sign-off on the dialog copy.
+
+### Shorter sessions for QA and E2E testing (lower environments only)
+
+> **Lower environments only.** The override below only works when `ENVIRONMENT` is `local`, `dev` or `staging`, in both the frontend and the API. Every other environment, including `prod` and `training`, ignores it, both when the session is created and every time it is read or refreshed. An override can only shorten a session (30 to 900 seconds), never make it longer than the 15 minute default.
+
+To get a short session, start sign in from this URL instead of the Sign in button:
+
+```
+/api/auth/login?session_duration_seconds=60
+```
+
+- `/api/auth/login` stores the requested duration in a short-lived, single-use `session_duration_override` cookie so it survives the Login.gov round trip.
+- `/api/auth/callback` reads and deletes that cookie. It first shortens the API token to the same duration (`POST /v1/users/token/refresh` with `session_duration_seconds`), then sets the frontend session to expire at the same time and writes the duration into the signed `session` cookie as `session_duration_seconds`. If the API cannot be updated, sign in continues with the default 15 minute session and a `session_duration_override_failed` warning is logged, so the two never get out of sync.
+- Refreshes send the same duration to the API, so the session behaves as it does in production, just faster: activity keeps it alive, and inactivity for `session_duration_seconds` ends it in both the frontend and the API.
+- Values outside 30-900, non-integers, or any value in a non-allowed environment are ignored with a `session_duration_override_ignored` warning, and sign in continues with the default 15 minutes.
+
+E2E tests sign in with a spoofed session cookie instead of Login.gov. Pass the same duration to the helper, which also passes it to `POST /v1/internal/e2e-token` so the API token matches:
+
+```ts
+await authenticateE2eUser(page, context, isMobile, "primaryOrgAdmin", {
+  sessionDurationSeconds: 60,
+});
+```
+
+To test alerts in E2E, also turn the flag on, for example by visiting a page with `?_ff=enableSessionExpirationAlerts:true` first.
+
+`AUTH_EXPIRATION_TIME` is separate. It is an environment variable for local development only (see [environments](./environments.md)), and the URL override takes precedence over it.
+
+### QA validation
+
+In dev or staging:
+
+1. Open any page with `?_ff=enableSessionExpirationAlerts:true` to turn on expiration alerts for your browser.
+2. Go to `/api/auth/login?session_duration_seconds=60` and sign in.
+3. Open an authenticated page, for example `/workspace`, and do nothing.
+4. After about 30 seconds, expected: the "Your session is about to expire" dialog opens with a countdown from 0:30.
+5. Choose **Stay signed in**. Expected: the dialog closes and you stay signed in. It opens again about 30 seconds later.
+6. This time do nothing. Expected: when the countdown ends, you stay on the same URL, the dialog closes, the "You've been logged out" message appears, the header shows Sign in, and the workspace shows the sign-in message.
+7. Reload the page or go to another protected page. Expected: it is still signed out.
+8. Sign in again with the normal Sign in button. Expected: access returns, and the session uses the default 15 minutes.
+9. Repeat steps 2-4 and choose **Sign out**. Expected: you are signed out and returned to the same page.
+10. Repeat steps 2-3 but click somewhere on the page every ~20 seconds. Expected: the dialog never opens and you stay signed in.
+11. With the flag off, repeat steps 2-3. Expected: no dialog. Nothing changes until you click or navigate after 60 seconds, then the logged-out message appears.
+12. In prod (or training), `/api/auth/login?session_duration_seconds=60` must give a normal 15 minute session.
+
 ## Observability
 
 Authentication lifecycle events go through the existing logging paths. Server-side events are logged with the Pino logger (`simplerLogger`). Client-side events are sent with `postUserEvent`, and `/api/events` logs them with the `correlation_id` from the cookie. Their `properties` are logged as top-level attributes, so fields such as `reason` are directly queryable. Properties named `level`, `msg`, `time`, `event` or `correlation_id` are ignored.
 
-| Event                           | Source | Trigger                                                       | Additional fields                   |
-| ------------------------------- | ------ | ------------------------------------------------------------- | ----------------------------------- |
-| `authentication_initiated`      | Client | User starts Sign in or Create account                         | `pivRequired`                       |
-| `callback_received`             | Server | Login.gov callback reaches the frontend                       | `tokenPresent`, `pivRequiredError`  |
-| `session_created`               | Server | Frontend session creation succeeds                            | —                                   |
-| `session_creation_failed`       | Server | Frontend session creation fails                               | `err`                               |
-| `destination_restored`          | Client | `/login` restores a valid saved destination                   | —                                   |
-| `destination_rejected`          | Client | `/login` falls back instead of using the saved destination    | `reason`                            |
-| `session_expired`               | Client | A previously signed-in session expires                        | —                                   |
-| `logout`                        | Server | Explicit logout completes and the frontend session is deleted | `apiResult`                         |
-| `authentication_request_failed` | Server | Authentication infrastructure/configuration request fails     | `authRequest`, `reason` or `status` |
+| Event                                 | Source | Trigger                                                                                     | Additional fields                        |
+| ------------------------------------- | ------ | ------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `authentication_initiated`            | Client | User starts Sign in or Create account                                                       | `pivRequired`                            |
+| `callback_received`                   | Server | Login.gov callback reaches the frontend                                                     | `tokenPresent`, `pivRequiredError`       |
+| `session_created`                     | Server | Frontend session creation succeeds                                                          | `sessionDurationSeconds` (override only) |
+| `session_creation_failed`             | Server | Frontend session creation fails                                                             | `err`                                    |
+| `destination_restored`                | Client | `/login` restores a valid saved destination                                                 | —                                        |
+| `destination_rejected`                | Client | `/login` falls back instead of using the saved destination                                  | `reason`                                 |
+| `session_expired`                     | Client | A previously signed-in session expires                                                      | —                                        |
+| `logout`                              | Server | Explicit logout completes and the frontend session is deleted                               | `apiResult`                              |
+| `authentication_request_failed`       | Server | Authentication infrastructure/configuration request fails                                   | `authRequest`, `reason` or `status`      |
+| `session_duration_override_requested` | Server | Lower env sign in starts with a valid `session_duration_seconds`                            | `sessionDurationSeconds`                 |
+| `session_duration_override_ignored`   | Server | `session_duration_seconds` is invalid or the environment does not allow it (logged at warn) | `environment`                            |
+| `session_duration_override_failed`    | Server | The API token could not be shortened, so the default duration is used (logged at warn)      | `status`                                 |
 
 Notes:
 

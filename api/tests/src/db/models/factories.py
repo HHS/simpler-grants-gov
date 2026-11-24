@@ -32,7 +32,6 @@ import src.db.models.sam_extract_models as sam_extract_models
 import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
-import src.db.models.workflow_models as workflow_models
 import src.util.datetime_util as datetime_util
 import tests.lib.db_test_models.db_test_models as db_test_models
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
@@ -43,8 +42,6 @@ from src.constants.lookup_constants import (
     ApplicantType,
     ApplicationAuditEvent,
     ApplicationStatus,
-    ApprovalResponseType,
-    ApprovalType,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -55,7 +52,6 @@ from src.constants.lookup_constants import (
     JobType,
     NotificationQueueStatus,
     NotificationType,
-    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
@@ -66,14 +62,10 @@ from src.constants.lookup_constants import (
     SamGovImportType,
     SamGovProcessingStatus,
     UserType,
-    WorkflowEntityType,
-    WorkflowType,
 )
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
     APPLICATION_OWNER,
-    OPPORTUNITY_EDITOR,
-    OPPORTUNITY_PUBLISHER,
     ORG_ADMIN,
     ORG_MEMBER,
 )
@@ -84,7 +76,6 @@ from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.form_schema.forms import SF424_v4_0, init_form_registry
 from src.util import file_util
 from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
-from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
 SCHEMA = OpportunityVersionSchema()
@@ -1913,26 +1904,6 @@ class AgencyUserFactory(BaseFactory):
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda u: u.user.user_id)
 
-    class Params:
-        # New traits for role assignment
-        as_opportunity_editor = factory.Trait(
-            agency_user_roles=factory.RelatedFactoryList(
-                "tests.src.db.models.factories.AgencyUserRoleFactory",
-                factory_related_name="agency_user",
-                size=1,
-                role_id=OPPORTUNITY_EDITOR.role_id,
-            ),
-        )
-
-        as_opportunity_publisher = factory.Trait(
-            agency_user_roles=factory.RelatedFactoryList(
-                "tests.src.db.models.factories.AgencyUserRoleFactory",
-                factory_related_name="agency_user",
-                size=1,
-                role_id=OPPORTUNITY_PUBLISHER.role_id,
-            ),
-        )
-
 
 class AgencyUserRoleFactory(BaseFactory):
     class Meta:
@@ -3078,44 +3049,6 @@ class OrganizationAuditFactory(BaseFactory):
         )
 
 
-class OpportunityAuditFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.OpportunityAudit
-
-    opportunity_audit_id = Generators.UuidObj
-
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
-
-    user = factory.SubFactory(UserFactory, with_profile=True)
-    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
-
-    opportunity_audit_event = OpportunityAuditEvent.OPPORTUNITY_CREATED
-    opportunity_data = None
-    nonforecast_opportunity_summary = None
-    competition = None
-
-    class Params:
-        is_opportunity_created = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_CREATED,
-        )
-        is_opportunity_updated = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_UPDATED,
-        )
-        is_summary_created = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED,
-        )
-        is_summary_updated = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED,
-        )
-        is_competition_created = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_CREATED,
-        )
-        is_competition_updated = factory.Trait(
-            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_UPDATED,
-        )
-
-
 class OrganizationSavedOpportunityFactory(BaseFactory):
     class Meta:
         model = entity_models.OrganizationSavedOpportunity
@@ -3180,108 +3113,6 @@ class LegacyOrganizationCertificateFactory(BaseLegacyCertificateFactory):
 
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
     organization = factory.SubFactory(OrganizationFactory)
-
-
-class WorkflowFactory(BaseFactory):
-    class Meta:
-        model = workflow_models.Workflow
-
-    workflow_id = Generators.UuidObj
-    workflow_type = WorkflowType.BASIC_TEST_WORKFLOW
-    current_workflow_state = "start"
-    is_active = True
-
-    opportunity = None
-    application = None
-    application_submission = None
-
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        workflow_type = kwargs.get(
-            "workflow_type",
-            WorkflowType.BASIC_TEST_WORKFLOW,
-        )
-
-        entity_fields = {
-            WorkflowEntityType.OPPORTUNITY: "opportunity",
-            WorkflowEntityType.APPLICATION: "application",
-            WorkflowEntityType.APPLICATION_SUBMISSION: "application_submission",
-        }
-
-        supplied_entities = [
-            field_name
-            for field_name in entity_fields.values()
-            if kwargs.get(field_name) is not None
-        ]
-
-        if len(supplied_entities) > 1:
-            raise ValueError(
-                "WorkflowFactory requires exactly one workflow entity; "
-                f"received: {', '.join(sorted(supplied_entities))}"
-            )
-
-        if not supplied_entities:
-            config, _ = WorkflowRegistry.get_state_machine_for_workflow_type(workflow_type)
-
-            factory_by_entity_type = {
-                WorkflowEntityType.OPPORTUNITY: OpportunityFactory,
-                WorkflowEntityType.APPLICATION: ApplicationFactory,
-                WorkflowEntityType.APPLICATION_SUBMISSION: (ApplicationSubmissionFactory),
-            }
-
-            entity_factory = factory_by_entity_type.get(config.entity_type)
-            entity_field = entity_fields.get(config.entity_type)
-
-            if entity_factory is None or entity_field is None:
-                raise ValueError(
-                    "WorkflowFactory does not have a factory configured for "
-                    f"workflow entity type {config.entity_type}"
-                )
-
-            kwargs[entity_field] = entity_factory.create()
-
-        return super()._create(model_class, *args, **kwargs)
-
-
-class WorkflowEventHistoryFactory(BaseFactory):
-    class Meta:
-        model = workflow_models.WorkflowEventHistory
-
-    event_id = Generators.UuidObj
-    event_data = {}
-    sent_at = Generators.UtcNow
-    is_successfully_processed = True
-
-
-class WorkflowAuditFactory(BaseFactory):
-    class Meta:
-        model = workflow_models.WorkflowAudit
-
-    workflow_audit_id = Generators.UuidObj
-    acting_user = factory.SubFactory(UserFactory)
-    acting_user_id = factory.LazyAttribute(lambda o: o.acting_user.user_id)
-    transition_event = "process"
-    source_state = "start"
-    target_state = "end"
-
-
-class WorkflowApprovalFactory(BaseFactory):
-    class Meta:
-        model = workflow_models.WorkflowApproval
-
-    workflow_approval_id = Generators.UuidObj
-
-    workflow = factory.SubFactory(WorkflowFactory)
-    workflow_id = factory.LazyAttribute(lambda a: a.workflow.workflow_id)
-
-    approving_user = factory.SubFactory(UserFactory)
-    approving_user_id = factory.LazyAttribute(lambda a: a.approving_user.user_id)
-    approval_type = factory.fuzzy.FuzzyChoice(ApprovalType)
-    is_still_valid = True
-    approval_response_type = ApprovalResponseType.APPROVED
-
-    event = factory.SubFactory(WorkflowEventHistoryFactory)
-    event_id = factory.LazyAttribute(lambda a: a.event.event_id)
 
 
 class ApplicationSubmissionRetrievedFactory(BaseFactory):

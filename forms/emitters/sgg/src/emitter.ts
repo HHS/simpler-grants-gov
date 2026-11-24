@@ -13,7 +13,7 @@ import { modelSync, ruleSchema } from "./model.js";
 /**
  * Writes what scripts/sync.mjs needs to install each form into the API: whether it is
  * installed and with its XML transform rules, and the Grants.gov identity it is registered
- * under. One sgg.json per form, and a rule-schema.json for a form with attachments,
+ * under. One sgg.json per form, and a rule-schema.json for a form with any API rules,
  * beside the artifacts the `simpler-forms` and `form-library-xml` emitters write, so the
  * sync step reads files rather than the specification.
  */
