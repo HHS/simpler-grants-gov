@@ -47,6 +47,8 @@ def test_citizenship_and_attachment_sections(citizen):
     assert result.success, result.error_message
     outcome = XSDValidator(XSD_DIR).validate_xml(result.xml_data, XSD)
     assert outcome["valid"], outcome["error_message"]
+    filename = f"phs_398_career_development_6_0_{'citizen' if citizen else 'noncitizen'}.xml"
+    assert result.xml_data == (Path(__file__).parent / "snapshots" / filename).read_text()
     root = etree.fromstring(result.xml_data.encode())
     assert root.findtext(".//{*}ResearchStrategy//{*}FileName") == "primary.pdf"
     assert [node.text for node in root.findall(".//{*}Appendix//{*}FileName")] == [

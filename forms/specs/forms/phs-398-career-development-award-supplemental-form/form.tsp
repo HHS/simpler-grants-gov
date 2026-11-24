@@ -3,6 +3,7 @@ import "simpler-forms";
 import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
+import "#questions/research/index.tsp";
 import "./examples.tsp";
 
 using SimplerForms;
@@ -36,9 +37,8 @@ namespace Forms.Phs398CareerDevelopmentAwardSupplemental;
   }
 )
 model Form {
-  /** Attach PDF formatted file. Required if you selected "Resubmission" or "Revision" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
-  introductionToApplication?: Questions.Types.Attachment;
+  introductionToApplication?: Questions.Research.IntroductionToApplication;
 
   /** Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies. */
   @UI.label("2. Candidate Information and Goals for Career Development")
@@ -84,25 +84,21 @@ model Form {
   @UI.label("12. Description of Candidate's Contribution to Program Goals")
   candidatesContribution?: Questions.Types.Attachment;
 
-  /** Attach PDF formatted file. Required if you checked "Yes" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("13. Vertebrate Animals")
-  vertebrateAnimals?: Questions.Types.Attachment;
+  vertebrateAnimals?: Questions.Research.VertebrateAnimals;
 
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("14. Select Agent Research")
-  selectAgentResearch?: Questions.Types.Attachment;
+  selectAgentResearch?: Questions.Research.SelectAgentResearch;
 
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("15. Consortium/Contractual Arrangements")
-  consortiumContractualArrangements?: Questions.Types.Attachment;
+  consortiumContractualArrangements?: Questions.Research.ConsortiumContractualArrangements;
 
   /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("16. Resource Sharing")
   resourceSharingPlans?: Questions.Types.Attachment;
 
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("17. Other Plan(s)")
-  otherPlans?: Questions.Types.Attachment;
+  otherPlans?: Questions.Research.OtherPlans;
 
   /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("18. Authentication of Key Biological and/or Chemical Resources")
@@ -112,7 +108,7 @@ model Form {
   @UI.label("19. Appendix")
   @UI.widget(Rendering.Widget.AttachmentArray)
   @maxItems(10)
-  appendix?: Questions.Types.Attachment[];
+  appendix?: Questions.Research.AppendixAttachment[];
 
   @UI.label("20. U.S. Citizen or Non-Citizen National?")
   @UI.widget(Rendering.Widget.Radio)

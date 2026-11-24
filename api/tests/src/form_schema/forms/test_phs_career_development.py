@@ -23,8 +23,42 @@ def answers():
     return {"research_strategy": str(uuid4()), "is_us_citizen_or_national": True}
 
 
-def test_required_document(form, answers):
+@pytest.mark.parametrize(
+    "field",
+    [
+        "introduction_to_application",
+        "candidate_information_and_goals",
+        "specific_aims",
+        "research_strategy",
+        "progress_report_publication_list",
+        "responsible_conduct_of_research",
+        "mentoring_plan",
+        "statements_of_support",
+        "letters_of_support",
+        "institutional_environment",
+        "institutional_commitment",
+        "candidates_contribution",
+        "vertebrate_animals",
+        "select_agent_research",
+        "consortium_contractual_arrangements",
+        "resource_sharing_plans",
+        "other_plans",
+        "key_biological_and_or_chemical_resources",
+    ],
+)
+def test_named_document_uuid(form, answers, field):
+    answers[field] = str(uuid4())
     assert validate_json_schema_for_form(answers, form) == []
+    answers[field] = "not-a-file-id"
+    issues = validate_json_schema_for_form(answers, form)
+    assert [(issue.type, issue.field) for issue in issues] == [("format", f"$.{field}")]
+
+
+def test_optional_documents_can_be_omitted(form, answers):
+    assert validate_json_schema_for_form(answers, form) == []
+
+
+def test_required_document(form, answers):
     del answers["research_strategy"]
     assert [issue.type for issue in validate_json_schema_for_form(answers, form)] == ["required"]
 

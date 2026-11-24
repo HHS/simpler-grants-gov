@@ -61,6 +61,9 @@ Feature: Apply - Application Form Happy Path
       | Other Narrative Attachments        |
       | Budget Narrative Attachment        |
       | Supplemental Cover Sheet NEH       |
+      | PHS 398 Research Plan              |
+      | PHS 398 Research Training Program Plan |
+      | PHS 398 Career Development Award Supplemental Form |
       | Attachments                        |
  
   # Expected happy path form status on the application landing page:
