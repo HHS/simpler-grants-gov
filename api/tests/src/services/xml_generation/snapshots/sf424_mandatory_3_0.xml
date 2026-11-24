@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SF424_Mandatory_3_0:SF424_Mandatory_3_0 xmlns:SF424_Mandatory_3_0="http://apply.grants.gov/forms/SF424_Mandatory_3_0-V3.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" SF424_Mandatory_3_0:FormVersion="3.0">
+  <SF424_Mandatory_3_0:TypeOfSubmission>Other</SF424_Mandatory_3_0:TypeOfSubmission>
+  <SF424_Mandatory_3_0:TypeOfSubmissionOtherDescription>Formula grant request</SF424_Mandatory_3_0:TypeOfSubmissionOtherDescription>
+  <SF424_Mandatory_3_0:Frequency>Other</SF424_Mandatory_3_0:Frequency>
+  <SF424_Mandatory_3_0:FrequencyOtherDescription>Semiannual</SF424_Mandatory_3_0:FrequencyOtherDescription>
+  <SF424_Mandatory_3_0:ConsolidatedRequest>Y: Yes</SF424_Mandatory_3_0:ConsolidatedRequest>
+  <SF424_Mandatory_3_0:ConsolidatedRequestExplanation>Consolidated submission for two community programs.</SF424_Mandatory_3_0:ConsolidatedRequestExplanation>
+  <SF424_Mandatory_3_0:Version>Initial</SF424_Mandatory_3_0:Version>
+  <SF424_Mandatory_3_0:ReceivedDate>2026-11-03</SF424_Mandatory_3_0:ReceivedDate>
+  <SF424_Mandatory_3_0:ApplicantID>APPLICANT-01</SF424_Mandatory_3_0:ApplicantID>
+  <SF424_Mandatory_3_0:FederalEntityID>ENTITY-01</SF424_Mandatory_3_0:FederalEntityID>
+  <SF424_Mandatory_3_0:FederalAwardID>AWARD-01</SF424_Mandatory_3_0:FederalAwardID>
+  <SF424_Mandatory_3_0:StateReceivedDate>2026-10-29</SF424_Mandatory_3_0:StateReceivedDate>
+  <SF424_Mandatory_3_0:StateApplicationID>STATE-01</SF424_Mandatory_3_0:StateApplicationID>
+  <SF424_Mandatory_3_0:Organization>
+    <globLib:OrganizationName>Example Community Organization</globLib:OrganizationName>
+    <globLib:SAMUEI>AAAAAAAAAAAA</globLib:SAMUEI>
+    <globLib:DepartmentName>Community Programs</globLib:DepartmentName>
+    <globLib:DivisionName>Education</globLib:DivisionName>
+    <globLib:Address>
+      <globLib:Street1>100 Grant Avenue</globLib:Street1>
+      <globLib:Street2>Suite 400</globLib:Street2>
+      <globLib:City>Baltimore</globLib:City>
+      <globLib:County>Baltimore City</globLib:County>
+      <globLib:State>MD: Maryland</globLib:State>
+      <globLib:ZipPostalCode>21218-1234</globLib:ZipPostalCode>
+      <globLib:Country>USA: UNITED STATES</globLib:Country>
+    </globLib:Address>
+    <globLib:EIN>12-3456789</globLib:EIN>
+  </SF424_Mandatory_3_0:Organization>
+  <SF424_Mandatory_3_0:ContactName>
+    <globLib:PrefixName>Dr.</globLib:PrefixName>
+    <globLib:FirstName>Alicia</globLib:FirstName>
+    <globLib:LastName>Reyes</globLib:LastName>
+  </SF424_Mandatory_3_0:ContactName>
+  <SF424_Mandatory_3_0:ContactTitle>Program Director</SF424_Mandatory_3_0:ContactTitle>
+  <SF424_Mandatory_3_0:ContactOrganizationalAffiliation>Example Community Organization</SF424_Mandatory_3_0:ContactOrganizationalAffiliation>
+  <SF424_Mandatory_3_0:ContactPhoneNumber>4105550100</SF424_Mandatory_3_0:ContactPhoneNumber>
+  <SF424_Mandatory_3_0:ContactFax>4105550199</SF424_Mandatory_3_0:ContactFax>
+  <SF424_Mandatory_3_0:ContactEmail>alicia.reyes@example.org</SF424_Mandatory_3_0:ContactEmail>
+  <SF424_Mandatory_3_0:ApplicantType>X: Other (specify)</SF424_Mandatory_3_0:ApplicantType>
+  <SF424_Mandatory_3_0:OtherTypeApplicant>Community partnership</SF424_Mandatory_3_0:OtherTypeApplicant>
+  <SF424_Mandatory_3_0:AdditionalApplicantTypeDescription>Educational community organization</SF424_Mandatory_3_0:AdditionalApplicantTypeDescription>
+  <SF424_Mandatory_3_0:AgencyName>Department of Education</SF424_Mandatory_3_0:AgencyName>
+  <SF424_Mandatory_3_0:CFDANumber>84.027</SF424_Mandatory_3_0:CFDANumber>
+  <SF424_Mandatory_3_0:CFDATitle>Synthetic Education Program</SF424_Mandatory_3_0:CFDATitle>
+  <SF424_Mandatory_3_0:DescriptiveProjectTitle>Community Learning Program</SF424_Mandatory_3_0:DescriptiveProjectTitle>
+  <SF424_Mandatory_3_0:AreasAffectedByFunding>Baltimore City</SF424_Mandatory_3_0:AreasAffectedByFunding>
+  <SF424_Mandatory_3_0:CongressionalDistrictApplicant>MD-007</SF424_Mandatory_3_0:CongressionalDistrictApplicant>
+  <SF424_Mandatory_3_0:CongressionalDistrictProject>MD-007</SF424_Mandatory_3_0:CongressionalDistrictProject>
+  <SF424_Mandatory_3_0:AdditionalCongressionalDistricts>
+    <att:FileName>districts.pdf</att:FileName>
+    <att:MimeType>application/pdf</att:MimeType>
+    <att:FileLocation att:href="districts.pdf"/>
+    <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+  </SF424_Mandatory_3_0:AdditionalCongressionalDistricts>
+  <SF424_Mandatory_3_0:FundingPeriodStartDate>2027-01-01</SF424_Mandatory_3_0:FundingPeriodStartDate>
+  <SF424_Mandatory_3_0:FundingPeriodEndDate>2027-12-31</SF424_Mandatory_3_0:FundingPeriodEndDate>
+  <SF424_Mandatory_3_0:EstimatedFundingFederal>12345.67</SF424_Mandatory_3_0:EstimatedFundingFederal>
+  <SF424_Mandatory_3_0:EstimatedFundingMatch>0.00</SF424_Mandatory_3_0:EstimatedFundingMatch>
+  <SF424_Mandatory_3_0:SubmissionUnderReview>StateReviewAvailable</SF424_Mandatory_3_0:SubmissionUnderReview>
+  <SF424_Mandatory_3_0:StateReviewAvailableDate>2026-10-28</SF424_Mandatory_3_0:StateReviewAvailableDate>
+  <SF424_Mandatory_3_0:DelinquentOnFederalDebt>Y: Yes</SF424_Mandatory_3_0:DelinquentOnFederalDebt>
+  <SF424_Mandatory_3_0:DelinquentFederalDebtExplanation>Payment plan in place.</SF424_Mandatory_3_0:DelinquentFederalDebtExplanation>
+  <SF424_Mandatory_3_0:ApplicationCertification>Y: Yes</SF424_Mandatory_3_0:ApplicationCertification>
+  <SF424_Mandatory_3_0:AuthorizedRepresentativeName>
+    <globLib:PrefixName>Ms.</globLib:PrefixName>
+    <globLib:FirstName>Priya</globLib:FirstName>
+    <globLib:MiddleName>K</globLib:MiddleName>
+    <globLib:LastName>Patel</globLib:LastName>
+    <globLib:SuffixName>Jr.</globLib:SuffixName>
+  </SF424_Mandatory_3_0:AuthorizedRepresentativeName>
+  <SF424_Mandatory_3_0:AuthorizedRepresentativeTitle>Executive Director</SF424_Mandatory_3_0:AuthorizedRepresentativeTitle>
+  <SF424_Mandatory_3_0:AuthorizedRepresentativeOrganizationalAffiliation>Example Community Organization</SF424_Mandatory_3_0:AuthorizedRepresentativeOrganizationalAffiliation>
+  <SF424_Mandatory_3_0:AuthorizedRepresentativePhoneNumber>4105550101</SF424_Mandatory_3_0:AuthorizedRepresentativePhoneNumber>
+  <SF424_Mandatory_3_0:AuthorizedRepresentativeFax>4105550198</SF424_Mandatory_3_0:AuthorizedRepresentativeFax>
+  <SF424_Mandatory_3_0:AuthorizedRepresentativeEmail>priya.patel@example.org</SF424_Mandatory_3_0:AuthorizedRepresentativeEmail>
+  <SF424_Mandatory_3_0:AuthorizedRepresentativeSignature>Priya Patel</SF424_Mandatory_3_0:AuthorizedRepresentativeSignature>
+  <SF424_Mandatory_3_0:AuthorizedRepresentativeSignatureDate>2026-11-03</SF424_Mandatory_3_0:AuthorizedRepresentativeSignatureDate>
+  <SF424_Mandatory_3_0:attachments>
+    <att:AttachedFile>
+      <att:FileName>support-1.pdf</att:FileName>
+      <att:MimeType>application/pdf</att:MimeType>
+      <att:FileLocation att:href="support-1.pdf"/>
+      <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+    </att:AttachedFile>
+    <att:AttachedFile>
+      <att:FileName>support-2.pdf</att:FileName>
+      <att:MimeType>application/pdf</att:MimeType>
+      <att:FileLocation att:href="support-2.pdf"/>
+      <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+    </att:AttachedFile>
+  </SF424_Mandatory_3_0:attachments>
+</SF424_Mandatory_3_0:SF424_Mandatory_3_0>

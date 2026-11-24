@@ -1,0 +1,63 @@
+{
+  "opportunity": {
+    "agency_name": {
+      "gg_pre_population": {
+        "rule": "agency_name"
+      }
+    },
+    "assistance_listing": {
+      "number": {
+        "gg_pre_population": {
+          "rule": "assistance_listing_number"
+        }
+      },
+      "title": {
+        "gg_pre_population": {
+          "rule": "assistance_listing_program_title"
+        }
+      }
+    }
+  },
+  "application": {
+    "date_received": {
+      "gg_post_population": {
+        "rule": "current_date"
+      }
+    }
+  },
+  "applicant": {
+    "organization": {
+      "uei": {
+        "gg_pre_population": {
+          "rule": "uei"
+        }
+      }
+    }
+  },
+  "project": {
+    "additional_congressional_districts": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    }
+  },
+  "certification": {
+    "signature": {
+      "gg_post_population": {
+        "rule": "signature"
+      }
+    },
+    "date_signed": {
+      "gg_post_population": {
+        "rule": "current_date"
+      }
+    }
+  },
+  "attachments": {
+    "additional": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    }
+  }
+}

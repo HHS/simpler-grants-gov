@@ -62,6 +62,7 @@ from src.form_schema.forms import (
     SF424c_v2_0,
     SF424d_v1_1,
     SF424IndividualGenerated_v2_0,
+    SF424MandatoryGenerated_v3_0,
     SF424Short_v3_0,
     SF424ShortGenerated_v3_0,
     SFLLL_v2_0,
@@ -802,6 +803,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "SF-424 Short Organizational (Generated)",
                 SF424ShortGenerated_v3_0.form_id,
                 "349938c3-85b2-44ab-bd38-2c6ffc3d9b91",
+            ),
+            (
+                "E2E-SF424MANDATORYG",
+                "SF424 Mandatory Form (Generated)",
+                SF424MandatoryGenerated_v3_0.form_id,
+                "a8350acc-77b5-448e-b78b-2fc0002a9c88",
             ),
             (
                 "E2E-SF424A",

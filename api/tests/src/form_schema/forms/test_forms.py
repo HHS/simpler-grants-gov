@@ -128,6 +128,11 @@ EXPECTED_FORM_DATA = {
         "omb_number": "4040-0005",
         "expiration_date": "01/31/2029",
     },
+    712: {
+        "form_name": "SF424 Mandatory Form",
+        "omb_number": "4040-0020",
+        "expiration_date": "03/31/2029",
+    },
     308: {
         "form_name": "NSF Suggested Reviewers",
         "omb_number": "3145-0058",
@@ -399,6 +404,19 @@ def test_nasa_pi_and_aor_generated_v1_0(nasa_pi_and_aor_generated_v1_0):
 
 def test_sf424_individual_generated_v2_0(sf424_individual_generated_v2_0):
     form = sf424_individual_generated_v2_0
+    expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.form_name == expected_values["form_name"]
+    assert form.omb_number == expected_values["omb_number"]
+    assert (
+        form.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert form.sgg_version == "1.0"
+    assert form.form_instruction_id is not None
+
+
+def test_sf424_mandatory_generated_v3_0(sf424_mandatory_generated_v3_0):
+    form = sf424_mandatory_generated_v3_0
     expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
     assert form.form_name == expected_values["form_name"]
     assert form.omb_number == expected_values["omb_number"]
