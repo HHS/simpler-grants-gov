@@ -1,4 +1,4 @@
-name: Check CI/CD AWS authentication
+name: Check SSL Certificates for ones expiring soon
 
 on:
   workflow_dispatch:
