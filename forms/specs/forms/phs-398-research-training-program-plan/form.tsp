@@ -42,39 +42,52 @@ namespace Forms.Phs398ResearchTrainingProgramPlan;
   }
 )
 model Phs398ResearchTrainingProgramPlan {
+  @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
   introductionToApplication?: Questions.Research.IntroductionToApplication;
 
   /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Program Plan")
+  @UI.label("2. Program Plan")
   programPlan: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Plan for Instruction in the Responsible Conduct of Research")
+  @UI.label("3. Plan for Instruction in the Responsible Conduct of Research")
   responsibleConductOfResearch?: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Plan for Instruction in Methods for Enhancing Reproducibility")
+  @UI.label("4. Plan for Instruction in Methods for Enhancing Reproducibility")
   methodsForEnhancingReproducibility?: Questions.Types.Attachment;
 
+  @UI.label("5. Multiple PD/PI Leadership Plan")
   multiplePdPiLeadershipPlan?: Questions.Research.MultiplePdPiLeadershipPlan;
 
   /** Attach PDF formatted file. Required if you selected "Renewal" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Progress Report (for Renewal applications)")
+  @UI.label("6. Progress Report (for Renewal applications)")
   progressReport?: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Participating Faculty Biosketches")
+  @UI.label("7. Participating Faculty Biosketches")
   participatingFacultyBiosketches?: Questions.Types.Attachment;
 
+  @UI.label("8. Letters of Support")
   lettersOfSupport?: Questions.Research.LettersOfSupport;
 
   /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Data Tables")
+  @UI.label("9. Data Tables")
   dataTables?: Questions.Types.Attachment;
 
+  @UI.label("10. Vertebrate Animals")
   vertebrateAnimals?: Questions.Research.VertebrateAnimals;
+
+  @UI.label("11. Select Agent Research")
   selectAgentResearch?: Questions.Research.SelectAgentResearch;
+
+  @UI.label("12. Consortium/Contractual Arrangements")
   consortiumContractualArrangements?: Questions.Research.ConsortiumContractualArrangements;
+
+  @UI.label("13. Other Plan(s)")
   otherPlans?: Questions.Research.OtherPlans;
+
   ...Questions.Research.Appendix;
 }
+
+@@UI.label(Phs398ResearchTrainingProgramPlan.appendix, "14. Appendix");

@@ -35,53 +35,71 @@ namespace Forms.Phs398CareerDevelopmentAwardSupplemental;
   }
 )
 model Form {
+  @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
   introductionToApplication?: Questions.Research.IntroductionToApplication;
 
   /** Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies. */
-  @UI.label("Candidate Information and Goals for Career Development")
+  @UI.label("2. Candidate Information and Goals for Career Development")
   candidateInformationAndGoals?: Questions.Types.Attachment;
 
+  @UI.label("3. Specific Aims")
   specificAims?: Questions.Research.SpecificAims;
+
+  @UI.label("4. Research Strategy")
   researchStrategy: Questions.Research.ResearchStrategy;
+
+  @UI.label("5. Progress Report Publication List (for Renewal applications)")
   progressReportPublicationList?: Questions.Research.ProgressReportPublicationList;
 
   /** Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Training in the Responsible Conduct of Research")
+  @UI.label("6. Training in the Responsible Conduct of Research")
   responsibleConductOfResearch?: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Candidate's Plan to Provide Mentoring")
+  @UI.label("7. Candidate's Plan to Provide Mentoring")
   mentoringPlan?: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Plans and Statements of Mentor and Co-Mentor(s)")
+  @UI.label("8. Plans and Statements of Mentor and Co-Mentor(s)")
   statementsOfSupport?: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Letters of Support from Collaborators, Contributors, and Consultants")
+  @UI.label("9. Letters of Support from Collaborators, Contributors, and Consultants")
   lettersOfSupport?: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Description of Institutional Environment")
+  @UI.label("10. Description of Institutional Environment")
   institutionalEnvironment?: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Institutional Commitment to Candidate’s Research Career Development")
+  @UI.label("11. Institutional Commitment to Candidate’s Research Career Development")
   institutionalCommitment?: Questions.Types.Attachment;
 
   /** Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("Description of Candidate's Contribution to Program Goals")
+  @UI.label("12. Description of Candidate's Contribution to Program Goals")
   candidatesContribution?: Questions.Types.Attachment;
 
+  @UI.label("13. Vertebrate Animals")
   vertebrateAnimals?: Questions.Research.VertebrateAnimals;
+
+  @UI.label("14. Select Agent Research")
   selectAgentResearch?: Questions.Research.SelectAgentResearch;
+
+  @UI.label("15. Consortium/Contractual Arrangements")
   consortiumContractualArrangements?: Questions.Research.ConsortiumContractualArrangements;
+
+  @UI.label("16. Resource Sharing Plan(s)")
   resourceSharingPlans?: Questions.Research.ResourceSharingPlans;
+
+  @UI.label("17. Other Plan(s)")
   otherPlans?: Questions.Research.OtherPlans;
+
+  @UI.label("18. Authentication of Key Biological and/or Chemical Resources")
   keyBiologicalAndOrChemicalResources?: Questions.Research.KeyBiologicalAndOrChemicalResources;
+
   ...Questions.Research.Appendix;
 
-  @UI.label("U.S. Citizen or Non-Citizen National?")
+  @UI.label("20. U.S. Citizen or Non-Citizen National?")
   @UI.widget(Rendering.Widget.Radio)
   isUsCitizenOrNational: boolean;
 
@@ -105,3 +123,5 @@ enum NonUsCitizenshipStatus {
   temporaryVisa: "Temporary U.S. Visa",
   notResidingInUs: "Not Residing in the U.S.",
 }
+
+@@UI.label(Form.appendix, "19. Appendix");

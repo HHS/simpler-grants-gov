@@ -38,17 +38,43 @@ namespace Forms.Phs398ResearchPlan;
   }
 )
 model Phs398ResearchPlan {
+  @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
   introductionToApplication?: Questions.Research.IntroductionToApplication;
+
+  @UI.label("2. Specific Aims")
   specificAims?: Questions.Research.SpecificAims;
+
+  @UI.label("3. Research Strategy")
   researchStrategy: Questions.Research.ResearchStrategy;
+
+  @UI.label("4. Progress Report Publication List (for Renewal applications)")
   progressReportPublicationList?: Questions.Research.ProgressReportPublicationList;
+
+  @UI.label("5. Vertebrate Animals")
   vertebrateAnimals?: Questions.Research.VertebrateAnimals;
+
+  @UI.label("6. Select Agent Research")
   selectAgentResearch?: Questions.Research.SelectAgentResearch;
+
+  @UI.label("7. Multiple PD/PI Leadership Plan")
   multiplePdPiLeadershipPlan?: Questions.Research.MultiplePdPiLeadershipPlan;
+
+  @UI.label("8. Consortium/Contractual Arrangements")
   consortiumContractualArrangements?: Questions.Research.ConsortiumContractualArrangements;
+
+  @UI.label("9. Letters of Support")
   lettersOfSupport?: Questions.Research.LettersOfSupport;
+
+  @UI.label("10. Resource Sharing Plan(s)")
   resourceSharingPlans?: Questions.Research.ResourceSharingPlans;
+
+  @UI.label("11. Other Plan(s)")
   otherPlans?: Questions.Research.OtherPlans;
+
+  @UI.label("12. Authentication of Key Biological and/or Chemical Resources")
   keyBiologicalAndOrChemicalResources?: Questions.Research.KeyBiologicalAndOrChemicalResources;
+
   ...Questions.Research.Appendix;
 }
+
+@@UI.label(Phs398ResearchPlan.appendix, "13. Appendix");
