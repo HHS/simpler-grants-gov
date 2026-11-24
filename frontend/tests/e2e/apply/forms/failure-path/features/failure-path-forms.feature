@@ -64,3 +64,13 @@ Feature: Apply - Application Form Failure Path
 
 	# Expected failure path form status on the application landing page:
 	# "incomplete" -> displays "Some issues found. Check your entries."
+
+	Scenario Outline: Empty optional Attachments form saves as complete
+		Given an applicant opens the <variant> Attachments form
+		When the applicant saves without uploading any files
+		Then the form and the application page show the form as complete
+
+		Examples:
+			| variant     |
+			| handwritten |
+			| generated   |

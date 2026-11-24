@@ -97,11 +97,6 @@ for (const {
       for (const [index, form] of opportunityConfig.forms.entries()) {
         const testData = buildHappyPathTestData(form, baseSuffix + index);
 
-        // This form can be completed with all fifteen slots empty.
-        await fillForm(testInfo, page, form.formConfig, {}, false);
-        await verifyFormStatusAfterSave(page, "complete");
-        await page.goto(applicationUrl);
-
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
         // Verify save succeeded while still on the form page
