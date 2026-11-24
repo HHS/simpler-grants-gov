@@ -89,7 +89,7 @@ model Phs398ResearchTrainingProgramPlan {
   @UI.label("13. Other Plan(s)")
   otherPlans?: Questions.Research.OtherPlans;
 
-  ...Questions.Research.Appendix;
+  @UI.label("14. Appendix")
+  @UI.widget(Rendering.Widget.AttachmentArray)
+  appendix?: Questions.Research.Appendix;
 }
-
-@@UI.label(Phs398ResearchTrainingProgramPlan.appendix, "14. Appendix");
