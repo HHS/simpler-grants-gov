@@ -35,6 +35,7 @@ from tests.src.form_schema.parity.xml.diffs import (
     project_narrative_generated,
     project_performance_site_location,
     research_and_related_other_project_information_generated,
+    sbir_sttr_information_generated,
     research_related_personal_data_generated,
     rr_key_person_expanded_generated,
     rr_key_person_generated,
@@ -71,6 +72,7 @@ DIFFS = [
     ed_abstract_form_generated.DIFF,
     nasa_pi_and_aor_generated.DIFF,
     research_and_related_other_project_information_generated.DIFF,
+    sbir_sttr_information_generated.DIFF,
     research_related_personal_data_generated.DIFF,
 ]
 

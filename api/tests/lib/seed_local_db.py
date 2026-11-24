@@ -741,6 +741,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "623f1425-f5b4-5a35-974a-920ee4f5b7da",
         ),
         (
+            "SBIR_STTR_Information_3_0_Generated",
+            "E2E-SBIR",
+            "SBIR/STTR Information (Generated)",
+            "d6310a13-d725-5af5-82b6-c1a3853b1a43",
+            "79405b17-2a5c-51b2-933e-59dd6f93986b",
+        ),
+        (
             "RR_PersonalData_1_2_Generated",
             "E2E-RRPD",
             "Research & Related Personal Data (Generated)",

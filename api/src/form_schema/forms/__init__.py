@@ -83,6 +83,7 @@ _ALL_FORMS: list[Form] = [
     EDAbstractGenerated_v1_1,
     NasaPIAndAORGenerated_v1_0,
     RROtherProjectInformationGenerated_v1_4,
+    SbirSttrInformationGenerated_v3_0,
     RRPersonalDataGenerated_v1_2,
 ]
 
@@ -108,6 +109,7 @@ GENERATED_FORMS: list[Form] = [
     EDAbstractGenerated_v1_1,
     NasaPIAndAORGenerated_v1_0,
     RROtherProjectInformationGenerated_v1_4,
+    SbirSttrInformationGenerated_v3_0,
     RRPersonalDataGenerated_v1_2,
 ]
 

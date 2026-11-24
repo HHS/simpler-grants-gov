@@ -60,6 +60,8 @@ import { RR_OTHER_PROJECT_INFO_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/appl
 import { RR_OTHER_PROJECT_INFO_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-other-project-information-field-definitions";
 import { RR_PERSONAL_DATA_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/rr-personal-data-data";
 import { RR_PERSONAL_DATA_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-personal-data-field-definitions";
+import { SBIR_STTR_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sbir-sttr-information-data";
+import { SBIR_STTR_FORM_CONFIG } from "tests/e2e/apply/fixtures/sbir-sttr-information-field-definitions";
 import { SF424_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424-data";
 import { SF424_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-field-definitions";
 import { SF424A_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424a-data";
@@ -96,6 +98,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   NASA_PI_AND_AOR_GENERATED_OPPORTUNITY_DATA,
   RR_PERSONAL_DATA_GENERATED_OPPORTUNITY_DATA,
   RR_OTHER_PROJECT_INFO_GENERATED_OPPORTUNITY_DATA,
+  SBIR_STTR_GENERATED_OPPORTUNITY_DATA,
   PPSL_OPPORTUNITY_DATA,
   PPSL_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
@@ -137,6 +140,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   nasaPIAndAORGenerated: NASA_PI_AND_AOR_FORM_CONFIG,
   rrPersonalDataGenerated: RR_PERSONAL_DATA_FORM_CONFIG,
   rrOtherInfoGenerated: RR_OTHER_PROJECT_INFO_FORM_CONFIG,
+  sbirSttrGenerated: SBIR_STTR_FORM_CONFIG,
   ppsl: PPSL_FORM_CONFIG,
   ppslGenerated: PPSL_FORM_CONFIG,
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
