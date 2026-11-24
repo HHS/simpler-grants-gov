@@ -3,6 +3,7 @@ import type { fieldDefinitionsSF424 } from "tests/e2e/apply/fixtures/sf424-field
 import playwrightEnv from "tests/e2e/playwright-env";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
+import type { FormUnderTest } from "tests/e2e/utils/submission/scenarios-for-each-form";
 import {
   xmlCurrency,
   xmlYesNo,
@@ -283,3 +284,56 @@ export const SF424_OPPORTUNITY_DATA: PrintViewFormData = {
     date_signed: { xmlElement: "SF424_4_0:DateSigned" },
   },
 };
+
+/**
+ * Happy-path test data for the SF-424 generated from forms/specs. It fills the same answers
+ * as the hand-written form, except the State Review date: the generated form enables it
+ * only for answer a, and the test data answers c.
+ */
+export const buildSF424GeneratedHappyPathTestData = (
+  suffix: number,
+): Record<string, string> => {
+  const { state_review_available_date: _date, ...data } =
+    buildSF424HappyPathTestData(suffix);
+  return data;
+};
+
+/**
+ * Opportunity data for the SF-424 generated from forms/specs. Seeded as E2E-SF424G by
+ * build_automatic_opportunities.py and seed_local_db.py. Its field ids nest each answer
+ * under its section, so its print view test ids differ from the hand-written form's.
+ */
+export const SF424_GENERATED_OPPORTUNITY_DATA: PrintViewFormData = {
+  opportunityId: "0e79ba36-1deb-4806-aef5-9c99d4514310",
+  opportunityNumber: "E2E-SF424G-ORG-IND-01",
+  formKey: "sf424Generated",
+  expectedPrepopulatedFields: {
+    "opportunity--number": "E2E-SF424G-ORG-IND-01",
+    "opportunity--title":
+      "E2E Application for Federal Assistance (SF-424) (Generated) ORG IND OT01",
+    "opportunity--assistance_listing--number": "10.960",
+    "opportunity--agency_name": "Simpler Grants.gov",
+    "opportunity--assistance_listing--title":
+      "Technical Agricultural Assistance",
+    "opportunity--competition--title":
+      "E2E Application for Federal Assistance (SF-424) (Generated) ORG IND CT01",
+    "certification--agree": "Yes",
+  },
+  buildTestData: buildSF424GeneratedHappyPathTestData,
+};
+
+/**
+ * Each SF-424 form the SF-424 specs run against.
+ */
+export const SF424_OPPORTUNITIES: FormUnderTest[] = [
+  {
+    formLabel: "SF-424",
+    opportunityNumber: SF424_OPPORTUNITY_DATA.opportunityNumber,
+    formKey: SF424_OPPORTUNITY_DATA.formKey,
+  },
+  {
+    formLabel: "SF-424 (Generated)",
+    opportunityNumber: SF424_GENERATED_OPPORTUNITY_DATA.opportunityNumber,
+    formKey: SF424_GENERATED_OPPORTUNITY_DATA.formKey,
+  },
+];
