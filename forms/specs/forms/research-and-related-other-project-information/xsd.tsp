@@ -11,11 +11,6 @@ namespace XSD.RROtherProjectInformation14;
 alias target = Mappings.Target.grantsGovXml;
 alias Transform = Mappings.Transforms.Transformation;
 alias Form = Forms.ResearchAndRelatedOtherProjectInformation.ResearchAndRelatedOtherProjectInformation;
-alias HumanSubjectsAnswers = Forms.ResearchAndRelatedOtherProjectInformation.HumanSubjects;
-alias ProjectAnimalOversightAnswers = Forms.ResearchAndRelatedOtherProjectInformation.ProjectAnimalOversight;
-alias EnvironmentalImpactAnswers = Forms.ResearchAndRelatedOtherProjectInformation.EnvironmentalImpact;
-alias HistoricPlaceAnswers = Forms.ResearchAndRelatedOtherProjectInformation.HistoricPlace;
-alias InternationalActivitiesAnswers = Forms.ResearchAndRelatedOtherProjectInformation.InternationalActivities;
 
 @nsDeclarations
 enum Namespaces {
@@ -38,7 +33,7 @@ enum ExemptionCategory {
 
 @ns(Namespaces.RR_OtherProjectInfo_1_4)
 model ExemptionNumbers {
-  @Mapping.from(target, HumanSubjectsAnswers.exemptionNumbers)
+  @Mapping.from(target, Form.exemptionNumbers)
   @name("ExemptionNumber")
   @minItems(1)
   @maxItems(8)
@@ -47,40 +42,28 @@ model ExemptionNumbers {
 
 @ns(Namespaces.RR_OtherProjectInfo_1_4)
 model HumanSubjectsSupplement {
-  @Mapping.from(target, HumanSubjectsAnswers.exemptFromFederalRegulations)
+  @Mapping.from(target, Form.exemptFromFederalRegulations)
   @Mapping.transform(Transform.booleanToYesNo)
   @name("ExemptFedReg")
   exemptFedReg?: string;
 
-  @Mapping.when(
-    HumanSubjectsAnswers.exemptFromFederalRegulations,
-    Operator.equals,
-    true
-  )
+  @Mapping.when(Form.exemptFromFederalRegulations, Operator.equals, true)
   @name("ExemptionNumbers")
   exemptionNumbers?: ExemptionNumbers;
 
-  @Mapping.from(target, HumanSubjectsAnswers.irbReviewPending)
+  @Mapping.from(target, Form.irbReviewPending)
   @Mapping.transform(Transform.booleanToYesNo)
-  @Mapping.when(
-    HumanSubjectsAnswers.exemptFromFederalRegulations,
-    Operator.equals,
-    false
-  )
+  @Mapping.when(Form.exemptFromFederalRegulations, Operator.equals, false)
   @name("HumanSubjectIRBReviewIndicator")
   humanSubjectIRBReviewIndicator?: string;
 
-  @Mapping.from(target, HumanSubjectsAnswers.irbApprovalDate)
-  @Mapping.when(HumanSubjectsAnswers.irbReviewPending, Operator.equals, false)
-  @Mapping.when(
-    HumanSubjectsAnswers.exemptFromFederalRegulations,
-    Operator.equals,
-    false
-  )
+  @Mapping.from(target, Form.irbApprovalDate)
+  @Mapping.when(Form.irbReviewPending, Operator.equals, false)
+  @Mapping.when(Form.exemptFromFederalRegulations, Operator.equals, false)
   @name("HumanSubjectIRBReviewDate")
   humanSubjectIRBReviewDate?: plainDate;
 
-  @Mapping.from(target, HumanSubjectsAnswers.assuranceNumber)
+  @Mapping.from(target, Form.humanSubjectAssuranceNumber)
   @name("HumanSubjectAssuranceNumber")
   @minLength(1)
   @maxLength(10)
@@ -89,21 +72,17 @@ model HumanSubjectsSupplement {
 
 @ns(Namespaces.RR_OtherProjectInfo_1_4)
 model VertebrateAnimalsSupplement {
-  @Mapping.from(target, ProjectAnimalOversightAnswers.iacucReviewPending)
+  @Mapping.from(target, Form.iacucReviewPending)
   @Mapping.transform(Transform.booleanToYesNo)
   @name("VertebrateAnimalsIACUCReviewIndicator")
   vertebrateAnimalsIACUCReviewIndicator?: string;
 
-  @Mapping.from(target, ProjectAnimalOversightAnswers.iacucApprovalDate)
-  @Mapping.when(
-    ProjectAnimalOversightAnswers.iacucReviewPending,
-    Operator.equals,
-    false
-  )
+  @Mapping.from(target, Form.iacucApprovalDate)
+  @Mapping.when(Form.iacucReviewPending, Operator.equals, false)
   @name("VertebrateAnimalsIACUCApprovalDateReviewDate")
   vertebrateAnimalsIACUCApprovalDateReviewDate?: plainDate;
 
-  @Mapping.from(target, ProjectAnimalOversightAnswers.assuranceNumber)
+  @Mapping.from(target, Form.animalWelfareAssuranceNumber)
   @name("AssuranceNumber")
   @minLength(1)
   @maxLength(9)
@@ -112,23 +91,13 @@ model VertebrateAnimalsSupplement {
 
 @ns(Namespaces.RR_OtherProjectInfo_1_4)
 model EnvironmentalExemption {
-  @Mapping.from(
-    target,
-    EnvironmentalImpactAnswers.assessmentOrExemptionPerformed
-  )
+  @Mapping.from(target, Form.assessmentOrExemptionPerformed)
   @Mapping.transform(Transform.booleanToYesNo)
   @name("EnvironmentalExemptionIndicator")
   environmentalExemptionIndicator: string;
 
-  @Mapping.from(
-    target,
-    EnvironmentalImpactAnswers.assessmentOrExemptionExplanation
-  )
-  @Mapping.when(
-    EnvironmentalImpactAnswers.assessmentOrExemptionPerformed,
-    Operator.equals,
-    true
-  )
+  @Mapping.from(target, Form.assessmentOrExemptionExplanation)
+  @Mapping.when(Form.assessmentOrExemptionPerformed, Operator.equals, true)
   @name("EnvironmentalExemptionExplanation")
   @minLength(1)
   @maxLength(55)
@@ -137,38 +106,38 @@ model EnvironmentalExemption {
 
 @ns(Namespaces.RR_OtherProjectInfo_1_4)
 model EnvironmentalImpact {
-  @Mapping.from(target, EnvironmentalImpactAnswers.hasImpact)
+  @Mapping.from(target, Form.environmentalImpact)
   @Mapping.transform(Transform.booleanToYesNo)
   @name("EnvironmentalImpactIndicator")
   environmentalImpactIndicator: string;
 
-  @Mapping.from(target, EnvironmentalImpactAnswers.impactExplanation)
-  @Mapping.when(EnvironmentalImpactAnswers.hasImpact, Operator.equals, true)
+  @Mapping.from(target, Form.environmentalImpactExplanation)
+  @Mapping.when(Form.environmentalImpact, Operator.equals, true)
   @name("EnvironmentalImpactExplanation")
   @minLength(1)
   @maxLength(55)
   environmentalImpactExplanation?: string;
 
-  @Mapping.when(EnvironmentalImpactAnswers.hasImpact, Operator.equals, true)
+  @Mapping.when(Form.environmentalImpact, Operator.equals, true)
   @name("EnvironmentalExemption")
   environmentalExemption?: EnvironmentalExemption;
 }
 
 @ns(Namespaces.RR_OtherProjectInfo_1_4)
 model InternationalActivities {
-  @Mapping.from(target, InternationalActivitiesAnswers.involved)
+  @Mapping.from(target, Form.internationalActivitiesInvolved)
   @Mapping.transform(Transform.booleanToYesNo)
   @name("InternationalActivitiesIndicator")
   internationalActivitiesIndicator: string;
 
-  @Mapping.from(target, InternationalActivitiesAnswers.countries)
-  @Mapping.when(InternationalActivitiesAnswers.involved, Operator.equals, true)
+  @Mapping.from(target, Form.internationalCountries)
+  @Mapping.when(Form.internationalActivitiesInvolved, Operator.equals, true)
   @name("ActivitiesPartnershipsCountries")
   @minLength(1)
   @maxLength(55)
   activitiesPartnershipsCountries?: string;
 
-  @Mapping.from(target, InternationalActivitiesAnswers.explanation)
+  @Mapping.from(target, Form.internationalActivitiesExplanation)
   @name("InternationalActivitiesExplanation")
   @minLength(1)
   @maxLength(55)
@@ -223,21 +192,21 @@ model OtherAttachments {
 @GrantsGov.xsd("https://apply07.grants.gov/apply/forms/schemas/RR_OtherProjectInfo_1_4-V1.4.xsd")
 @Mapping.from(target, Form)
 model Root {
-  @Mapping.from(target, HumanSubjectsAnswers.involved)
+  @Mapping.from(target, Form.humanSubjectsInvolved)
   @Mapping.transform(Transform.booleanToYesNo)
   @name("HumanSubjectsIndicator")
   humanSubjectsIndicator: string;
 
-  @Mapping.when(HumanSubjectsAnswers.involved, Operator.equals, true)
+  @Mapping.when(Form.humanSubjectsInvolved, Operator.equals, true)
   @name("HumanSubjectsSupplement")
   humanSubjectsSupplement?: HumanSubjectsSupplement;
 
-  @Mapping.from(target, ProjectAnimalOversightAnswers.used)
+  @Mapping.from(target, Form.vertebrateAnimalsUsed)
   @Mapping.transform(Transform.booleanToYesNo)
   @name("VertebrateAnimalsIndicator")
   vertebrateAnimalsIndicator: string;
 
-  @Mapping.when(ProjectAnimalOversightAnswers.used, Operator.equals, true)
+  @Mapping.when(Form.vertebrateAnimalsUsed, Operator.equals, true)
   @name("VertebrateAnimalsSupplement")
   vertebrateAnimalsSupplement?: VertebrateAnimalsSupplement;
 
@@ -249,17 +218,13 @@ model Root {
   @name("EnvironmentalImpact")
   environmentalImpact: EnvironmentalImpact;
 
-  @Mapping.from(target, HistoricPlaceAnswers.designatedOrEligible)
+  @Mapping.from(target, Form.historicSiteDesignatedOrEligible)
   @Mapping.transform(Transform.booleanToYesNo)
   @name("HistoricDesignation")
   historicDesignation: string;
 
-  @Mapping.from(target, HistoricPlaceAnswers.explanation)
-  @Mapping.when(
-    HistoricPlaceAnswers.designatedOrEligible,
-    Operator.equals,
-    true
-  )
+  @Mapping.from(target, Form.historicSiteExplanation)
+  @Mapping.when(Form.historicSiteDesignatedOrEligible, Operator.equals, true)
   @name("HistoricDesignationExplanation")
   @minLength(1)
   @maxLength(55)

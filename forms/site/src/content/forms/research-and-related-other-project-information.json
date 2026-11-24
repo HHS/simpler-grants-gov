@@ -24,7 +24,8 @@
   "description": "Records human and animal oversight, environmental and historic impact, international activity and supporting files.",
   "notes": [
     "Grant applications require an abstract and a narrative unless the cover identifies a pre-application. The cover supplies that answer.",
-    "The form stores Yes/No answers as booleans. Grants.gov receives Y: Yes or N: No. Each exemption code and each additional attachment has its own XML element."
+    "The form stores Yes/No answers as booleans. Grants.gov receives Y: Yes or N: No. Each exemption code and each additional attachment has its own XML element.",
+    "Oversight and project circumstances are layout sections. Each question is saved separately. This preserves a No answer when it is the only answer in a section."
   ],
   "risks": [
     "The DAT makes the IRB or IACUC approval date required when review is complete. Its help also says “if available.” The local definition follows the required rule.",
@@ -36,35 +37,25 @@
       "label": "Review completed",
       "description": "Approval dates and supporting files.",
       "data": {
-        "human_subjects": {
-          "involved": true,
-          "exempt_from_federal_regulations": false,
-          "irb_review_pending": false,
-          "irb_approval_date": "2026-09-16",
-          "assurance_number": "00012345"
-        },
-        "vertebrate_animals": {
-          "used": true,
-          "iacuc_review_pending": false,
-          "iacuc_approval_date": "2026-09-17",
-          "assurance_number": "D12345678"
-        },
+        "human_subjects_involved": true,
+        "exempt_from_federal_regulations": false,
+        "irb_review_pending": false,
+        "irb_approval_date": "2026-09-16",
+        "human_subject_assurance_number": "00012345",
+        "vertebrate_animals_used": true,
+        "iacuc_review_pending": false,
+        "iacuc_approval_date": "2026-09-17",
+        "animal_welfare_assurance_number": "D12345678",
         "proprietary_information_included": false,
-        "environmental_impact": {
-          "has_impact": true,
-          "impact_explanation": "Field sampling at existing research sites.",
-          "assessment_or_exemption_performed": true,
-          "assessment_or_exemption_explanation": "EA completed; see applicable agency instructions."
-        },
-        "historic_place": {
-          "designated_or_eligible": true,
-          "explanation": "Sampling near an eligible historic research building."
-        },
-        "international_activities": {
-          "involved": true,
-          "countries": "Canada; United Kingdom",
-          "explanation": "Collaborator field observations."
-        },
+        "environmental_impact": true,
+        "environmental_impact_explanation": "Field sampling at existing research sites.",
+        "assessment_or_exemption_performed": true,
+        "assessment_or_exemption_explanation": "EA completed; see applicable agency instructions.",
+        "historic_site_designated_or_eligible": true,
+        "historic_site_explanation": "Sampling near an eligible historic research building.",
+        "international_activities_involved": true,
+        "international_countries": "Canada; United Kingdom",
+        "international_activities_explanation": "Collaborator field observations.",
         "project_summary_abstract": "00000000-0000-4000-8000-000000006191",
         "project_narrative": "00000000-0000-4000-8000-000000006192",
         "bibliography_references_cited": "00000000-0000-4000-8000-000000006193",
@@ -80,28 +71,18 @@
       "label": "Exempt research",
       "description": "Two exemption numbers and seven sample files.",
       "data": {
-        "human_subjects": {
-          "involved": true,
-          "exempt_from_federal_regulations": true,
-          "exemption_numbers": ["E1", "E4"],
-          "assurance_number": "00012345"
-        },
-        "vertebrate_animals": {
-          "used": true,
-          "iacuc_review_pending": true
-        },
+        "human_subjects_involved": true,
+        "exempt_from_federal_regulations": true,
+        "exemption_numbers": ["E1", "E4"],
+        "human_subject_assurance_number": "00012345",
+        "vertebrate_animals_used": true,
+        "iacuc_review_pending": true,
         "proprietary_information_included": false,
-        "environmental_impact": {
-          "has_impact": false
-        },
-        "historic_place": {
-          "designated_or_eligible": false
-        },
-        "international_activities": {
-          "involved": true,
-          "countries": "Canada; United Kingdom",
-          "explanation": "Collaborator field observations."
-        },
+        "environmental_impact": false,
+        "historic_site_designated_or_eligible": false,
+        "international_activities_involved": true,
+        "international_countries": "Canada; United Kingdom",
+        "international_activities_explanation": "Collaborator field observations.",
         "project_summary_abstract": "00000000-0000-4000-8000-000000006191",
         "project_narrative": "00000000-0000-4000-8000-000000006192",
         "bibliography_references_cited": "00000000-0000-4000-8000-000000006193",
@@ -117,22 +98,12 @@
       "label": "Pre-application",
       "description": "Six required questions, with no attachments.",
       "data": {
-        "human_subjects": {
-          "involved": false
-        },
-        "vertebrate_animals": {
-          "used": false
-        },
+        "human_subjects_involved": false,
+        "vertebrate_animals_used": false,
         "proprietary_information_included": false,
-        "environmental_impact": {
-          "has_impact": false
-        },
-        "historic_place": {
-          "designated_or_eligible": false
-        },
-        "international_activities": {
-          "involved": false
-        }
+        "environmental_impact": false,
+        "historic_site_designated_or_eligible": false,
+        "international_activities_involved": false
       }
     }
   ],
@@ -155,7 +126,7 @@
               "required": true,
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "human_subjects.involved",
+              "json_path": "human_subjects_involved",
               "xml_path": "HumanSubjectsIndicator",
               "dat_field": "01-0",
               "constraints": "YesNoDataType"
@@ -167,7 +138,7 @@
               "required": "Conditional: human involvement is Yes",
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "human_subjects.exempt_from_federal_regulations",
+              "json_path": "exempt_from_federal_regulations",
               "xml_path": "HumanSubjectsSupplement/ExemptFedReg",
               "dat_field": "01-a-1",
               "constraints": "YesNoDataType"
@@ -179,7 +150,7 @@
               "required": "Conditional: human involvement and exemption are Yes; require at least one category",
               "type": "Exemption category list (E1 through E8)",
               "widget": "MultiSelectWidget",
-              "json_path": "human_subjects.exemption_numbers[]",
+              "json_path": "exemption_numbers[]",
               "xml_path": "HumanSubjectsSupplement/ExemptionNumbers/ExemptionNumber",
               "min_items": 0,
               "max_items": 8,
@@ -235,7 +206,7 @@
               "required": "Conditional: active nonexempt human research",
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "human_subjects.irb_review_pending",
+              "json_path": "irb_review_pending",
               "xml_path": "HumanSubjectsSupplement/HumanSubjectIRBReviewIndicator",
               "dat_field": "01-a-2a",
               "constraints": "YesNoDataType"
@@ -247,7 +218,7 @@
               "required": "Conditional: active nonexempt human review is not pending; source K25/Q25 if-available tension retained",
               "type": "Date",
               "widget": "TextWidget",
-              "json_path": "human_subjects.irb_approval_date",
+              "json_path": "irb_approval_date",
               "xml_path": "HumanSubjectsSupplement/HumanSubjectIRBReviewDate",
               "dat_field": "01-a-3",
               "constraints": "format date"
@@ -259,7 +230,7 @@
               "required": false,
               "type": "Text",
               "widget": "TextWidget",
-              "json_path": "human_subjects.assurance_number",
+              "json_path": "human_subject_assurance_number",
               "xml_path": "HumanSubjectsSupplement/HumanSubjectAssuranceNumber",
               "dat_field": "01-a-4",
               "constraints": "minLength 1, maxLength 10"
@@ -278,7 +249,7 @@
               "required": true,
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "vertebrate_animals.used",
+              "json_path": "vertebrate_animals_used",
               "xml_path": "VertebrateAnimalsIndicator",
               "dat_field": "02-0",
               "constraints": "YesNoDataType"
@@ -290,7 +261,7 @@
               "required": "Conditional: animals used Yes",
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "vertebrate_animals.iacuc_review_pending",
+              "json_path": "iacuc_review_pending",
               "xml_path": "VertebrateAnimalsSupplement/VertebrateAnimalsIACUCReviewIndicator",
               "dat_field": "02-a-2a",
               "constraints": "YesNoDataType"
@@ -302,7 +273,7 @@
               "required": "Conditional: active animal review not pending; K34/Q34 IACUC/IRB and if-available wording tension retained",
               "type": "Date",
               "widget": "TextWidget",
-              "json_path": "vertebrate_animals.iacuc_approval_date",
+              "json_path": "iacuc_approval_date",
               "xml_path": "VertebrateAnimalsSupplement/VertebrateAnimalsIACUCApprovalDateReviewDate",
               "dat_field": "02-a-3",
               "constraints": "format date"
@@ -314,7 +285,7 @@
               "required": "Conditional: animal review not pending; K35/Q35 if-available tension retained",
               "type": "Text",
               "widget": "TextWidget",
-              "json_path": "vertebrate_animals.assurance_number",
+              "json_path": "animal_welfare_assurance_number",
               "xml_path": "VertebrateAnimalsSupplement/AssuranceNumber",
               "dat_field": "02-a-4",
               "constraints": "minLength 1, maxLength 9"
@@ -352,7 +323,7 @@
               "required": true,
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "environmental_impact.has_impact",
+              "json_path": "environmental_impact",
               "xml_path": "EnvironmentalImpact/EnvironmentalImpactIndicator",
               "dat_field": "04-a",
               "constraints": "YesNoDataType"
@@ -364,7 +335,7 @@
               "required": "Conditional: environmental impact Yes",
               "type": "Text",
               "widget": "TextWidget",
-              "json_path": "environmental_impact.impact_explanation",
+              "json_path": "environmental_impact_explanation",
               "xml_path": "EnvironmentalImpact/EnvironmentalImpactExplanation",
               "dat_field": "04-b",
               "constraints": "minLength 1, maxLength 55"
@@ -376,7 +347,7 @@
               "required": false,
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "environmental_impact.assessment_or_exemption_performed",
+              "json_path": "assessment_or_exemption_performed",
               "xml_path": "EnvironmentalImpact/EnvironmentalExemption/EnvironmentalExemptionIndicator",
               "dat_field": "04-c",
               "constraints": "YesNoDataType"
@@ -388,7 +359,7 @@
               "required": "Conditional: active assessment-or-exemption Yes",
               "type": "Text",
               "widget": "TextWidget",
-              "json_path": "environmental_impact.assessment_or_exemption_explanation",
+              "json_path": "assessment_or_exemption_explanation",
               "xml_path": "EnvironmentalImpact/EnvironmentalExemption/EnvironmentalExemptionExplanation",
               "dat_field": "04-d",
               "constraints": "minLength 1, maxLength 55"
@@ -407,7 +378,7 @@
               "required": true,
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "historic_place.designated_or_eligible",
+              "json_path": "historic_site_designated_or_eligible",
               "xml_path": "HistoricDesignation",
               "dat_field": "05-0",
               "constraints": "YesNoDataType"
@@ -419,7 +390,7 @@
               "required": "Conditional: historic site designated or eligible Yes",
               "type": "Text",
               "widget": "TextWidget",
-              "json_path": "historic_place.explanation",
+              "json_path": "historic_site_explanation",
               "xml_path": "HistoricDesignationExplanation",
               "dat_field": "05-a",
               "constraints": "minLength 1, maxLength 55"
@@ -438,7 +409,7 @@
               "required": true,
               "type": "Yes/No choice (source XML Y: Yes / N: No)",
               "widget": "RadioWidget",
-              "json_path": "international_activities.involved",
+              "json_path": "international_activities_involved",
               "xml_path": "InternationalActivities/InternationalActivitiesIndicator",
               "dat_field": "06-0",
               "constraints": "YesNoDataType"
@@ -450,7 +421,7 @@
               "required": "Conditional: international involvement Yes",
               "type": "Text",
               "widget": "TextWidget",
-              "json_path": "international_activities.countries",
+              "json_path": "international_countries",
               "xml_path": "InternationalActivities/ActivitiesPartnershipsCountries",
               "dat_field": "06-a",
               "constraints": "minLength 1, maxLength 55"
@@ -462,7 +433,7 @@
               "required": false,
               "type": "Text",
               "widget": "TextWidget",
-              "json_path": "international_activities.explanation",
+              "json_path": "international_activities_explanation",
               "xml_path": "InternationalActivities/InternationalActivitiesExplanation",
               "dat_field": "06-b",
               "constraints": "minLength 1, maxLength 55"
