@@ -2,6 +2,20 @@ name: Check CI/CD AWS authentication
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy to
+        required: true
+        default: "infra-dev"
+        type: choice
+        options:
+          - dev
+          - infra-dev
+          - staging
+          - infra-staging
+          - training
+          - infra-training
+          - prod
   push:
     branches: mdragon/13582-ssl-checker
 
@@ -13,6 +27,12 @@ jobs:
   check-ssl-certificates:
     name: Check SSL Certificates
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        # Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -20,6 +40,7 @@ jobs:
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: "api"
+          environment: ${{ matrix.envs }}
       - name: Dump the certificate metadata
         run: |
           pwd
