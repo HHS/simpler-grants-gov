@@ -84,7 +84,7 @@ export const DIFF: FormDiff = {
         source: "* Agency Topic/Subtopic",
         category: "intentional",
         reason:
-          "The plan retains the field wording and shows required markers according to the selected program or agency.",
+          "The plan keeps the question wording. Validation checks whether the selected answers make it required.",
       },
       "F-02-4": {
         plan: "If yes, insert the names of the Federal laboratories/agencies:",
@@ -92,7 +92,7 @@ export const DIFF: FormDiff = {
           "* If yes, insert the names of the Federal laboratories/agencies",
         category: "intentional",
         reason:
-          "The plan retains the field wording and shows required markers according to the selected program or agency.",
+          "The plan keeps the question wording. Validation checks whether the selected answers make it required.",
       },
       "F-03-1": {
         plan: "* 3. Are you located in a HUBZone?",
@@ -114,7 +114,7 @@ export const DIFF: FormDiff = {
         source: "* If yes, insert the names of the other Federal agencies",
         category: "intentional",
         reason:
-          "The plan retains the field wording and shows required markers according to the selected program or agency.",
+          "The plan keeps the question wording. Validation checks whether the selected answers make it required.",
       },
       "F-08-1": {
         plan: "8. Commercialization Plan",
@@ -130,7 +130,7 @@ export const DIFF: FormDiff = {
           "* 9. Have you received SBIR Phase II awards from the Federal Government? If yes, provide a company commercialization history in accordance with agency-specific instructions using this attachment.",
         category: "intentional",
         reason:
-          "The plan retains the field wording and shows required markers according to the selected program or agency.",
+          "The plan keeps the question wording. Validation checks whether the selected answers make it required.",
       },
       "F-09-4": {
         plan: "SBIR commercialization history",
@@ -144,7 +144,7 @@ export const DIFF: FormDiff = {
           "* 10. Will the Project Director/Principal Investigator have his/her primary employment with the small business at the time of award?",
         category: "intentional",
         reason:
-          "The plan retains the field wording and shows required markers according to the selected program or agency.",
+          "The plan keeps the question wording. Validation checks whether the selected answers make it required.",
       },
       "F-11-1": {
         plan: "11. Please indicate whether the answer to BOTH of the following questions is TRUE: (1) Does the Project Director/Principal Investigator have a formal appointment or commitment either with the small business directly (as an employee or a contractor) OR as an employee of the Research Institution, which in turn has made a commitment to the small business through the STTR application process; AND (2) Will the Project Director/Principal Investigator devote at least 10% effort to the proposed project?",
@@ -152,7 +152,7 @@ export const DIFF: FormDiff = {
           "* 11. Please indicate whether the answer to BOTH of the following questions is TRUE: (1) Does the Project Director/Principal Investigator have a formal appointment or commitment either with the small business directly (as an employee or a contractor) OR as an employee of the Research Institution, which in turn has made a commitment to the small business through the STTR application process; AND (2) Will the Project Director/Principal Investigator devote at least 10% effort to the proposed project?",
         category: "intentional",
         reason:
-          "The plan retains the field wording and shows required markers according to the selected program or agency.",
+          "The plan keeps the question wording. Validation checks whether the selected answers make it required.",
       },
       "F-12-1": {
         plan: "12. In the joint research and development proposed in this project, does the small business perform at least 40% of the work and the research institution named in the application perform at least 30% of the work?",
@@ -160,14 +160,40 @@ export const DIFF: FormDiff = {
           "* 12. In the joint research and development proposed in this project, does the small business perform at least 40% of the work and the research institution named in the application perform at least 30% of the work?",
         category: "intentional",
         reason:
-          "The plan retains the field wording and shows required markers according to the selected program or agency.",
+          "The plan keeps the question wording. Validation checks whether the selected answers make it required.",
       },
       "F-13": {
         plan: "13. Provide UEI of non-profit research partner for STTR.",
         source: "* 13. Provide UEI of non-profit research partner for STTR.",
         category: "intentional",
         reason:
-          "The plan retains the field wording and shows required markers according to the selected program or agency.",
+          "The plan keeps the question wording. Validation checks whether the selected answers make it required.",
+      },
+    },
+    differingHelp: {
+      "F-04-4": {
+        plan: "Attach an explanation of the research and development that will take place outside the United States.",
+        source:
+          'If you have answered "no" to question 4 above, please prepare an explanation of the research and development that is being performed outside the United States, in a separate file. Then use the Add Attachment button to attach the file and complete this entry. When you click Add Attachment, browse to where you saved the file, select the appropriate file and then click Open to complete the action.',
+        category: "intentional",
+        reason:
+          "Describe the file to upload using the form’s existing upload control.",
+      },
+      "F-08-1": {
+        plan: "Attach a commercialization plan that follows the agency’s instructions. DOE requires it for Phase I. All agencies require it for Phase II and Fast-Track.",
+        source:
+          "The following applications require a Commercialization Plan: Phase I (DOE only), Phase II (all agencies), Phase I/II Fast-Track (all agencies). Include a Commercialization Plan in accordance with the agency announcement and/or agency-specific instructions. To attach a Commercialization Plan file, click the Add Attachment button, browse to where you saved the file, select the file, and then click Open.",
+        category: "intentional",
+        reason:
+          "Describe the file to upload using the form’s existing upload control.",
+      },
+      "F-09-4": {
+        plan: "Attach the company’s SBIR commercialization history. Follow the agency’s instructions.",
+        source:
+          'If you have answered "Yes" to question 9 above, please prepare a commercialization history in accordance with agency specific instructions, in a separate file. Then use the Add Attachment button to attach the file and complete this entry. When you click Add Attachment, browse to where you saved the file, select the appropriate file and then click Open to complete the action.',
+        category: "intentional",
+        reason:
+          "Describe the file to upload using the form’s existing upload control.",
       },
     },
     differingRules: {

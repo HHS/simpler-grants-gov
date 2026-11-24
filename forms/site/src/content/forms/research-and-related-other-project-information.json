@@ -30,7 +30,7 @@
   "risks": [
     "The DAT makes the IRB or IACUC approval date required when review is complete. Its help also says “if available.” The local definition follows the required rule.",
     "The current form cannot use the cover’s submission type to enforce the two conditional attachments.",
-    "Switching a parent answer can leave an inactive child value in the draft. Check both validation and XML for these switches."
+    "Switching a parent answer can leave an earlier value in the draft. Inactive follow-up questions are hidden, do not require answers and are omitted from XML."
   ],
   "examples": [
     {
@@ -536,7 +536,7 @@
           "kind": "field",
           "id": "other-attachments",
           "label": "12. Other Attachments",
-          "help_text": "Attach a file to provide any other project information not provided above or in accordance with the announcement and/or agency-specific instruction. \n\nOptional Other Attachment Check Box. Indicates whether an Optional Other Attachment is attached.",
+          "help_text": "Attach any other project information the opportunity or agency asks for.",
           "required": false,
           "type": "Ordered list of uploaded attachment IDs (UUID strings)",
           "widget": "ApplicationMultipleAttachmentWidget",

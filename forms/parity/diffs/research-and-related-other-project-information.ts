@@ -214,11 +214,11 @@ export const DIFF: FormDiff = {
       },
       "12-0": {
         category: "intentional",
-        plan: "Attach a file to provide any other project information not provided above or in accordance with the announcement and/or agency-specific instruction. Optional Other Attachment Check Box. Indicates whether an Optional Other Attachment is attached.",
+        plan: "Attach any other project information the opportunity or agency asks for.",
         source:
           "Attach a file to provide any other project information not provided above or in accordance with the announcement and/or agency-specific instruction.",
         reason:
-          "The upload instructions include the source’s file-presence indicator.",
+          "The upload list shows which files were attached. The instructions describe what to upload.",
       },
     },
     absentFromPlan: {

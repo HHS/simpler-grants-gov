@@ -13,10 +13,21 @@
   "xsd_root": "SBIR_STTR_Information_3_0",
   "omb_number": "4040-0001",
   "expiration_date": "2029-01-31",
+  "widgets": [
+    "SelectWidget",
+    "RadioWidget",
+    "TextWidget",
+    "ApplicationAttachmentWidget"
+  ],
+  "new_concepts": [],
   "description": "Small businesses applying for SBIR or STTR funding report eligibility, ownership, project details and program-specific certifications.",
   "notes": [
+    "Uses existing dropdowns, Yes/No radios, text inputs, a numeric personnel field and single-file uploads.",
     "A DOE applicant must provide a topic. A commercialization plan is required for DOE Phase I and for all Phase II and Fast-Track applications.",
     "If an applicant leaves Other and returns before saving, the earlier agency name can reappear. The DAT calls for clearing the name. Submitted XML omits the name for a named agency."
+  ],
+  "risks": [
+    "The DAT removes the outside-U.S. explanation when the applicant changes the answer to Yes. The form disables the uploader and the XML omits the file. Before-Save clearing still needs the shared conditional behavior."
   ],
   "children": [
     {
@@ -40,7 +51,7 @@
           "id": "other-agency",
           "label": "Other Agency",
           "help_text": "If \"Other\" is selected, enter agency name.",
-          "required": "Conditional: Required if Other is checked, otherwise cleared and disabled.",
+          "required": "Conditional: Required for Other. Disabled for a named agency.",
           "type": "string",
           "json_path": "other_agency",
           "xml_path": "OtherAgency",
@@ -219,7 +230,7 @@
           "kind": "field",
           "id": "outside-united-states-explanation",
           "label": "Explanation for work outside the United States",
-          "help_text": "If you have answered \"no\" to question 4 above, please prepare an explanation of the research and development that is being performed outside the United States, in a separate file. Then use the Add Attachment button to attach the file and complete this entry. When you click Add Attachment, browse to where you saved the file, select the appropriate file and then click Open to complete the action.",
+          "help_text": "Attach an explanation of the research and development that will take place outside the United States.",
           "required": "Conditional: Enabled and required only if Question 4 (field #F-04-1 above) is answered \"No\". If the answer to Question 4 is \"Yes\", then this field is disabled.",
           "type": "Uploaded attachment ID (UUID string)",
           "json_path": "outside_united_states_explanation",
@@ -279,7 +290,7 @@
           "kind": "field",
           "id": "commercialization-plan",
           "label": "8. Commercialization Plan",
-          "help_text": "The following applications require a Commercialization Plan: Phase I (DOE only), Phase II (all agencies), Phase I/II Fast-Track (all agencies). Include a Commercialization Plan in accordance with the agency announcement and/or agency-specific instructions. To attach a Commercialization Plan file, click the Add Attachment button, browse to where you saved the file, select the file, and then click Open.",
+          "help_text": "Attach a commercialization plan that follows the agency’s instructions. DOE requires it for Phase I. All agencies require it for Phase II and Fast-Track.",
           "required": "Conditional: Required, ONLY if the answer to the Application Type field (field #D-1) is Phase I and DOE is checked for \"Agency to which you are applying\" (field #A-1 above), or if Phase II or Fast-Track is selected for Application Type field (field #D-1 above). Otherwise this field is optional.",
           "type": "Uploaded attachment ID (UUID string)",
           "json_path": "commercialization_plan",
@@ -309,7 +320,7 @@
           "kind": "field",
           "id": "commercialization-history",
           "label": "SBIR commercialization history",
-          "help_text": "If you have answered \"Yes\" to question 9 above, please prepare a commercialization history in accordance with agency specific instructions, in a separate file. Then use the Add Attachment button to attach the file and complete this entry. When you click Add Attachment, browse to where you saved the file, select the appropriate file and then click Open to complete the action.",
+          "help_text": "Attach the company’s SBIR commercialization history. Follow the agency’s instructions.",
           "required": "Conditional: Enabled and required ONLY if the answer to Question 9 above (field #F-09-1)  is \"Yes.\" Otherwise this field is disabled.",
           "type": "Uploaded attachment ID (UUID string)",
           "json_path": "commercialization_history",
