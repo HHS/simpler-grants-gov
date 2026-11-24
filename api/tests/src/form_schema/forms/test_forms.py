@@ -154,6 +154,22 @@ def test_sf424_short_v3_0(sf424_short_v3_0):
     )
 
 
+def test_sf424_short_generated_v3_0(sf424_short_generated_v3_0):
+    form = sf424_short_generated_v3_0
+    expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.omb_number == expected_values["omb_number"]
+    assert (
+        form.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert form.sgg_version == "1.0"
+    assert form.form_instruction_id is not None
+
+
+def test_sf424_short_forms_have_distinct_instructions(sf424_short_v3_0, sf424_short_generated_v3_0):
+    assert sf424_short_v3_0.form_instruction_id != sf424_short_generated_v3_0.form_instruction_id
+
+
 def test_sf424a_v1_0(sf424a_v1_0):
     expected_values = EXPECTED_FORM_DATA.get(sf424a_v1_0.legacy_form_id)
     assert sf424a_v1_0.omb_number == expected_values["omb_number"]

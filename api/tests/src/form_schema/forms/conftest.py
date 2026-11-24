@@ -36,6 +36,7 @@ from src.form_schema.forms import (
     SF424d_v1_1,
     SF424IndividualGenerated_v2_0,
     SF424Short_v3_0,
+    SF424ShortGenerated_v3_0,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
 )
@@ -87,6 +88,11 @@ def sf424_v4_0():
 @pytest.fixture(scope="session")
 def sf424_short_v3_0():
     return setup_resolved_form(SF424Short_v3_0)
+
+
+@pytest.fixture(scope="session")
+def sf424_short_generated_v3_0():
+    return setup_resolved_form(SF424ShortGenerated_v3_0)
 
 
 @pytest.fixture(scope="session")

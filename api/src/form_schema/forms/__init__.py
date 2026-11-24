@@ -33,6 +33,7 @@ from .rr_key_person_generated import FORM as RRKeyPersonGenerated_v3_0
 from .sf424 import SF424_v4_0
 from .sf424_individual_generated import FORM as SF424IndividualGenerated_v2_0
 from .sf424_short import SF424Short_v3_0
+from .sf424_short_generated import FORM as SF424ShortGenerated_v3_0
 from .sf424a import SF424a_v1_0
 from .sf424b import SF424b_v1_1
 from .sf424c import SF424c_v2_0
@@ -79,6 +80,7 @@ _ALL_FORMS: list[Form] = [
     EDAbstractGenerated_v1_1,
     NasaPIAndAORGenerated_v1_0,
     SF424IndividualGenerated_v2_0,
+    SF424ShortGenerated_v3_0,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -103,6 +105,7 @@ GENERATED_FORMS: list[Form] = [
     EDAbstractGenerated_v1_1,
     NasaPIAndAORGenerated_v1_0,
     SF424IndividualGenerated_v2_0,
+    SF424ShortGenerated_v3_0,
 ]
 
 

@@ -1,0 +1,594 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/agency_name",
+          "label": "Name of Federal Agency",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/assistance_listing/properties/number",
+          "label": "Assistance Listing Number",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/assistance_listing/properties/title",
+          "label": "Assistance Listing Title",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/number",
+          "label": "Funding Opportunity Number",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/title",
+          "label": "Funding Opportunity Title",
+          "options": {
+            "readonly": true
+          }
+        }
+      ],
+      "label": "Opportunity information"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/application/properties/date_received",
+          "label": "Date Received",
+          "options": {
+            "readonly": true
+          }
+        }
+      ],
+      "label": "Application information"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/organization/properties/name",
+          "label": "Legal Name"
+        },
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/applicant/properties/organization/properties/address/properties/street1",
+              "label": "Street 1"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/applicant/properties/organization/properties/address/properties/street2",
+              "label": "Street 2"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/applicant/properties/organization/properties/address/properties/city",
+              "label": "City"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/applicant/properties/organization/properties/address/properties/county",
+              "label": "County/Parish"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/applicant/properties/organization/properties/address/properties/state",
+              "label": "State"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/applicant/properties/organization/properties/address/properties/province",
+              "label": "Province",
+              "rule": {
+                "effect": "SHOW",
+                "condition": {
+                  "scope": "#/properties/applicant/properties/organization/properties/address/properties/country",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "not": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "const": ""
+                            },
+                            {
+                              "type": "array",
+                              "maxItems": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "const": "USA: UNITED STATES"
+                        }
+                      }
+                    ]
+                  },
+                  "failWhenUndefined": true
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/applicant/properties/organization/properties/address/properties/country",
+              "label": "Country"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/applicant/properties/organization/properties/address/properties/zip_code",
+              "label": "Zip / Postal Code"
+            }
+          ],
+          "label": "Applicant address"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/organization/properties/web_address",
+          "label": "Web Address"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/type/properties/codes",
+          "options": {
+            "widget": "MultiSelect"
+          },
+          "label": "Type of Applicant"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/type/properties/other_specify",
+          "label": "Type of Applicant Other Explanation"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/organization/properties/ein",
+          "label": "EIN/TIN"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/organization/properties/uei",
+          "label": "UEI",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/congressional_district",
+          "label": "Congressional District of Applicant"
+        }
+      ],
+      "label": "Applicant organization"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/project/properties/title",
+          "label": "Project Title"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project/properties/description",
+          "label": "Project Description",
+          "options": {
+            "widget": "TextArea"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project/properties/timeline/properties/start_date",
+          "label": "Start Date"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project/properties/timeline/properties/end_date",
+          "label": "End Date"
+        }
+      ],
+      "label": "Project information"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/name/properties/prefix",
+              "label": "Prefix"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/name/properties/first_name",
+              "label": "First Name"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/name/properties/middle_name",
+              "label": "Middle Name"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/name/properties/last_name",
+              "label": "Last Name"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/name/properties/suffix",
+              "label": "Suffix"
+            }
+          ],
+          "label": "Name",
+          "options": {
+            "description": "Enter the person's name. First and last name are required."
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/project_director/properties/title",
+          "label": "Title"
+        },
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/address/properties/street1",
+              "label": "Street 1"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/address/properties/street2",
+              "label": "Street 2"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/address/properties/city",
+              "label": "City"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/address/properties/county",
+              "label": "County/Parish"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/address/properties/state",
+              "label": "State"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/address/properties/province",
+              "label": "Province",
+              "rule": {
+                "effect": "SHOW",
+                "condition": {
+                  "scope": "#/properties/contacts/properties/project_director/properties/address/properties/country",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "not": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "const": ""
+                            },
+                            {
+                              "type": "array",
+                              "maxItems": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "const": "USA: UNITED STATES"
+                        }
+                      }
+                    ]
+                  },
+                  "failWhenUndefined": true
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/address/properties/country",
+              "label": "Country"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/project_director/properties/address/properties/zip_code",
+              "label": "Zip / Postal Code"
+            }
+          ],
+          "label": "Address",
+          "options": {
+            "description": "Enter the person's complete address."
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/project_director/properties/phone",
+          "label": "Phone Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/project_director/properties/fax",
+          "label": "Fax Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/project_director/properties/email",
+          "label": "Email"
+        }
+      ],
+      "label": "Project Director"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/same_as_project_director",
+          "label": "Same as Project Director (if checked, fill in information same as Project Director above)",
+          "options": {
+            "widget": "Checkbox"
+          }
+        },
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/prefix",
+              "label": "Prefix"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/first_name",
+              "label": "First Name"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/middle_name",
+              "label": "Middle Name"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/last_name",
+              "label": "Last Name"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/suffix",
+              "label": "Suffix"
+            }
+          ],
+          "label": "Name",
+          "options": {
+            "description": "Enter the person's name. First and last name are required."
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/title",
+          "label": "Title"
+        },
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/street1",
+              "label": "Street 1"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/street2",
+              "label": "Street 2"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/city",
+              "label": "City"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/county",
+              "label": "County/Parish"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/state",
+              "label": "State"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/province",
+              "label": "Province",
+              "rule": {
+                "effect": "SHOW",
+                "condition": {
+                  "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/country",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "not": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "const": ""
+                            },
+                            {
+                              "type": "array",
+                              "maxItems": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "const": "USA: UNITED STATES"
+                        }
+                      }
+                    ]
+                  },
+                  "failWhenUndefined": true
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/country",
+              "label": "Country"
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/zip_code",
+              "label": "Zip / Postal Code"
+            }
+          ],
+          "label": "Address",
+          "options": {
+            "description": "Enter the person's complete address."
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/phone",
+          "label": "Phone Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/fax",
+          "label": "Fax Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/email",
+          "label": "Email"
+        }
+      ],
+      "label": "Primary Contact / Grants Administrator"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/certification/properties/agree",
+          "label": "I Agree",
+          "options": {
+            "widget": "Checkbox"
+          }
+        }
+      ],
+      "label": "Certification",
+      "options": {
+        "description": "9. * By signing this application, I certify (1) to the statements contained in the list of certifications** and (2) that the statements herein are true, complete and accurate to the best of my knowledge.  I also provide the required assurances** and agree to comply with any resulting terms if I accept an award.  I am aware that any false, fictitious, or fradulent statements or claims may subject me to criminal, civil, or administrative penalties (U.S. Code, Title 18, Section 1001)\n\n** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/name/properties/prefix",
+          "label": "Prefix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/name/properties/first_name",
+          "label": "First Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/name/properties/middle_name",
+          "label": "Middle Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/name/properties/last_name",
+          "label": "Last Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/name/properties/suffix",
+          "label": "Suffix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/title",
+          "label": "Title"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/email",
+          "label": "Email"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/phone",
+          "label": "Phone Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/authorized_representative/properties/fax",
+          "label": "Fax Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/certification/properties/signature",
+          "label": "Signature",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/certification/properties/date_signed",
+          "label": "Date Signed",
+          "options": {
+            "readonly": true
+          }
+        }
+      ],
+      "label": "Authorized Representative"
+    }
+  ],
+  "label": "Application for Federal Domestic Assistance - Short Organizational."
+}

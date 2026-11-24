@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SF424_Short_3_0:SF424_Short_3_0 xmlns:SF424_Short_3_0="http://apply.grants.gov/forms/SF424_Short_3_0-V3.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" SF424_Short_3_0:FormVersion="3.0">
+  <SF424_Short_3_0:AgencyName>Department of Community Programs</SF424_Short_3_0:AgencyName>
+  <SF424_Short_3_0:CFDANumber>99.999</SF424_Short_3_0:CFDANumber>
+  <SF424_Short_3_0:CFDAProgramTitle>Community Research Demonstration</SF424_Short_3_0:CFDAProgramTitle>
+  <SF424_Short_3_0:DateReceived>2027-01-02</SF424_Short_3_0:DateReceived>
+  <SF424_Short_3_0:FundingOpportunityNumber>DEMO-2027-001</SF424_Short_3_0:FundingOpportunityNumber>
+  <SF424_Short_3_0:FundingOpportunityTitle>Community Research Demonstration</SF424_Short_3_0:FundingOpportunityTitle>
+  <SF424_Short_3_0:OrganizationName>Prairie Community Research Center</SF424_Short_3_0:OrganizationName>
+  <SF424_Short_3_0:Address>
+    <globLib:Street1>128 Oak Avenue</globLib:Street1>
+    <globLib:Street2>Suite 200</globLib:Street2>
+    <globLib:City>Springfield</globLib:City>
+    <globLib:County>Sangamon</globLib:County>
+    <globLib:State>IL: Illinois</globLib:State>
+    <globLib:ZipPostalCode>62701-1234</globLib:ZipPostalCode>
+    <globLib:Country>USA: UNITED STATES</globLib:Country>
+  </SF424_Short_3_0:Address>
+  <SF424_Short_3_0:ApplicantWebAddress>https://prairie.example.org</SF424_Short_3_0:ApplicantWebAddress>
+  <SF424_Short_3_0:ApplicantTypeCode1>H: Public/State Controlled Institution of Higher Education</SF424_Short_3_0:ApplicantTypeCode1>
+  <SF424_Short_3_0:ApplicantTypeCode2>M: Nonprofit with 501C3 IRS Status (Other than Institution of Higher Education)</SF424_Short_3_0:ApplicantTypeCode2>
+  <SF424_Short_3_0:ApplicantTypeCode3>X: Other (specify)</SF424_Short_3_0:ApplicantTypeCode3>
+  <SF424_Short_3_0:ApplicantTypeOtherSpecify>Community research partnership</SF424_Short_3_0:ApplicantTypeOtherSpecify>
+  <SF424_Short_3_0:EmployerTaxpayerIdentificationNumber>12-3456789</SF424_Short_3_0:EmployerTaxpayerIdentificationNumber>
+  <SF424_Short_3_0:SAMUEI>PCRA12345678</SF424_Short_3_0:SAMUEI>
+  <SF424_Short_3_0:CongressionalDistrictApplicant>IL-013</SF424_Short_3_0:CongressionalDistrictApplicant>
+  <SF424_Short_3_0:ProjectTitle>Neighborhood Heat Resilience Study</SF424_Short_3_0:ProjectTitle>
+  <SF424_Short_3_0:ProjectDescription>Survey residents and map shaded gathering spaces.</SF424_Short_3_0:ProjectDescription>
+  <SF424_Short_3_0:ProjectStartDate>2027-01-01</SF424_Short_3_0:ProjectStartDate>
+  <SF424_Short_3_0:ProjectEndDate>2027-12-31</SF424_Short_3_0:ProjectEndDate>
+  <SF424_Short_3_0:ProjectDirectorGroup>
+    <globLib:Name>
+      <globLib:PrefixName>Dr.</globLib:PrefixName>
+      <globLib:FirstName>Avery</globLib:FirstName>
+      <globLib:LastName>Patel</globLib:LastName>
+    </globLib:Name>
+    <globLib:Title>Research Director</globLib:Title>
+    <globLib:Address>
+      <globLib:Street1>128 Oak Avenue</globLib:Street1>
+      <globLib:Street2>Suite 200</globLib:Street2>
+      <globLib:City>Springfield</globLib:City>
+      <globLib:County>Sangamon</globLib:County>
+      <globLib:State>IL: Illinois</globLib:State>
+      <globLib:ZipPostalCode>62701-1234</globLib:ZipPostalCode>
+      <globLib:Country>USA: UNITED STATES</globLib:Country>
+    </globLib:Address>
+    <globLib:Phone>217-555-0101</globLib:Phone>
+    <globLib:Fax>217-555-0199</globLib:Fax>
+    <globLib:Email>avery.patel@example.org</globLib:Email>
+  </SF424_Short_3_0:ProjectDirectorGroup>
+  <SF424_Short_3_0:SameAsProjectDirector>Y: Yes</SF424_Short_3_0:SameAsProjectDirector>
+  <SF424_Short_3_0:ContactPersonGroup>
+    <globLib:Name>
+      <globLib:PrefixName>Dr.</globLib:PrefixName>
+      <globLib:FirstName>Avery</globLib:FirstName>
+      <globLib:LastName>Patel</globLib:LastName>
+    </globLib:Name>
+    <globLib:Title>Research Director</globLib:Title>
+    <globLib:Address>
+      <globLib:Street1>128 Oak Avenue</globLib:Street1>
+      <globLib:Street2>Suite 200</globLib:Street2>
+      <globLib:City>Springfield</globLib:City>
+      <globLib:County>Sangamon</globLib:County>
+      <globLib:State>IL: Illinois</globLib:State>
+      <globLib:ZipPostalCode>62701-1234</globLib:ZipPostalCode>
+      <globLib:Country>USA: UNITED STATES</globLib:Country>
+    </globLib:Address>
+    <globLib:Phone>217-555-0101</globLib:Phone>
+    <globLib:Fax>217-555-0199</globLib:Fax>
+    <globLib:Email>avery.patel@example.org</globLib:Email>
+  </SF424_Short_3_0:ContactPersonGroup>
+  <SF424_Short_3_0:ApplicationCertification>Y: Yes</SF424_Short_3_0:ApplicationCertification>
+  <SF424_Short_3_0:AuthorizedRepresentative>
+    <globLib:PrefixName>Ms.</globLib:PrefixName>
+    <globLib:FirstName>Morgan</globLib:FirstName>
+    <globLib:MiddleName>A</globLib:MiddleName>
+    <globLib:LastName>Chen</globLib:LastName>
+    <globLib:SuffixName>Jr.</globLib:SuffixName>
+  </SF424_Short_3_0:AuthorizedRepresentative>
+  <SF424_Short_3_0:AuthorizedRepresentativeTitle>Executive Director</SF424_Short_3_0:AuthorizedRepresentativeTitle>
+  <SF424_Short_3_0:AuthorizedRepresentativeEmail>morgan.chen@example.org</SF424_Short_3_0:AuthorizedRepresentativeEmail>
+  <SF424_Short_3_0:AuthorizedRepresentativePhoneNumber>217-555-0103</SF424_Short_3_0:AuthorizedRepresentativePhoneNumber>
+  <SF424_Short_3_0:AuthorizedRepresentativeFaxNumber>217-555-0198</SF424_Short_3_0:AuthorizedRepresentativeFaxNumber>
+  <SF424_Short_3_0:AuthorizedRepresentativeSignature>Morgan Chen</SF424_Short_3_0:AuthorizedRepresentativeSignature>
+  <SF424_Short_3_0:AuthorizedRepresentativeDateSigned>2027-01-02</SF424_Short_3_0:AuthorizedRepresentativeDateSigned>
+</SF424_Short_3_0:SF424_Short_3_0>
