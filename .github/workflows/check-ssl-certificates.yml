@@ -1,0 +1,34 @@
+name: Check CI/CD AWS authentication
+
+on:
+  workflow_dispatch:
+  push:
+    branches: mdragon/13582-ssl-checker
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  check-ssl-certificates:
+    name: Check SSL Certificates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: "api"
+      - name: Dump the certificate metadata
+        run: |
+          pwd
+          aws acm list-certificates --max-items 1000 --no-paginate --includes "keyTypes=RSA_1024,RSA_2048,RSA_3072,RSA_4096,EC_prime256v1,EC_secp384r1,EC_secp521r1" > certificates.json
+          ls -l
+      - name: Parse the results
+        uses: ./.github/actions/ssl-checker
+  send-slack-notification:
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    needs: [check-ssl-certificates]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit
