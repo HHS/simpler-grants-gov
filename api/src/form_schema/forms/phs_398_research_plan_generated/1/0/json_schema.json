@@ -3,40 +3,100 @@
   "type": "object",
   "properties": {
     "introduction_to_application": {
-      "$ref": "#/$defs/research.introduction-to-application"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.introduction-to-application"
+        }
+      ],
+      "title": "1. Introduction to Application (for Resubmission and Revision applications)"
     },
     "specific_aims": {
-      "$ref": "#/$defs/research.specific-aims"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.specific-aims"
+        }
+      ],
+      "title": "2. Specific Aims"
     },
     "research_strategy": {
-      "$ref": "#/$defs/research.research-strategy"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.research-strategy"
+        }
+      ],
+      "title": "3. Research Strategy"
     },
     "progress_report_publication_list": {
-      "$ref": "#/$defs/research.progress-report-publication-list"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.progress-report-publication-list"
+        }
+      ],
+      "title": "4. Progress Report Publication List (for Renewal applications)"
     },
     "vertebrate_animals": {
-      "$ref": "#/$defs/research.vertebrate-animals"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.vertebrate-animals"
+        }
+      ],
+      "title": "5. Vertebrate Animals"
     },
     "select_agent_research": {
-      "$ref": "#/$defs/research.select-agent-research"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.select-agent-research"
+        }
+      ],
+      "title": "6. Select Agent Research"
     },
     "multiple_pd_pi_leadership_plan": {
-      "$ref": "#/$defs/research.multiple-pd-pi-leadership-plan"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.multiple-pd-pi-leadership-plan"
+        }
+      ],
+      "title": "7. Multiple PD/PI Leadership Plan"
     },
     "consortium_contractual_arrangements": {
-      "$ref": "#/$defs/research.consortium-contractual-arrangements"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.consortium-contractual-arrangements"
+        }
+      ],
+      "title": "8. Consortium/Contractual Arrangements"
     },
     "letters_of_support": {
-      "$ref": "#/$defs/research.letters-of-support"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.letters-of-support"
+        }
+      ],
+      "title": "9. Letters of Support"
     },
     "resource_sharing_plans": {
-      "$ref": "#/$defs/research.resource-sharing-plans"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.resource-sharing-plans"
+        }
+      ],
+      "title": "10. Resource Sharing Plan(s)"
     },
     "other_plans": {
-      "$ref": "#/$defs/research.other-plans"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.other-plans"
+        }
+      ],
+      "title": "11. Other Plan(s)"
     },
     "key_biological_and_or_chemical_resources": {
-      "$ref": "#/$defs/research.key-biological-and-or-chemical-resources"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.key-biological-and-or-chemical-resources"
+        }
+      ],
+      "title": "12. Authentication of Key Biological and/or Chemical Resources"
     },
     "appendix": {
       "type": "array",
@@ -44,7 +104,8 @@
         "$ref": "#/$defs/types.attachment"
       },
       "maxItems": 10,
-      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance."
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "13. Appendix"
     }
   },
   "required": [

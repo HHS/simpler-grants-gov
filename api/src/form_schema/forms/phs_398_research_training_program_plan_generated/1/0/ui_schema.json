@@ -147,10 +147,10 @@
         {
           "type": "Control",
           "scope": "#/properties/appendix",
+          "label": "14. Appendix",
           "options": {
             "widget": "AttachmentArray"
-          },
-          "label": "14. Appendix"
+          }
         }
       ],
       "label": "Appendix",

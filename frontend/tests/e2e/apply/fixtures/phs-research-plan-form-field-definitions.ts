@@ -18,6 +18,6 @@ export const PHS_RESEARCH_PLAN_FORM_CONFIG = {
 export const PHS_RESEARCH_PLAN_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
     fieldId: "research_strategy-visible",
-    message: "Research Strategy is required",
+    message: "3. Research Strategy is required",
   },
 ];
