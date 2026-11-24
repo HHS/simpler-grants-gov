@@ -25,10 +25,10 @@ export const PHS_CAREER_DEVELOPMENT_FORM_CONFIG = {
 export const PHS_CAREER_DEVELOPMENT_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
     fieldId: "is_us_citizen_or_national",
-    message: "U.S. Citizen or Non-Citizen National is required",
+    message: "20. U.S. Citizen or Non-Citizen National is required",
   },
   {
     fieldId: "research_strategy-visible",
-    message: "Research Strategy is required",
+    message: "4. Research Strategy is required",
   },
 ];
