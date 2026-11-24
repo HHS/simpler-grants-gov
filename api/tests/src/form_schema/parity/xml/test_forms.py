@@ -39,6 +39,7 @@ from tests.src.form_schema.parity.xml.diffs import (
     sf424_generated,
     sf424_individual_generated,
     sf424_mandatory_generated,
+    sf424_r_r_generated,
     sf424_short_generated,
 )
 from tests.src.form_schema.parity.xml.harness import flatten_form
@@ -76,6 +77,7 @@ DIFFS = [
     sf424_short_generated.DIFF,
     sf424_mandatory_generated.DIFF,
     sf424_generated.DIFF,
+    sf424_r_r_generated.DIFF,
 ]
 
 

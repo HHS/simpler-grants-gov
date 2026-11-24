@@ -64,6 +64,7 @@ from src.form_schema.forms import (
     SF424Generated_v4_0,
     SF424IndividualGenerated_v2_0,
     SF424MandatoryGenerated_v3_0,
+    SF424RRGenerated_v5_0,
     SF424Short_v3_0,
     SF424ShortGenerated_v3_0,
     SFLLL_v2_0,
@@ -786,6 +787,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Application for Federal Domestic Assistance - Individual (Generated)",
                 SF424IndividualGenerated_v2_0.form_id,
                 "9b289ebf-b283-4f99-8e52-2f5574b5d998",
+            ),
+            (
+                "E2E-SF424RRG",
+                "Application for Federal Assistance (SF 424 R&R) (Generated)",
+                SF424RRGenerated_v5_0.form_id,
+                "1000d30f-4679-4f47-851a-fb044fa63bd9",
             ),
             (
                 "E2E-SF424",
