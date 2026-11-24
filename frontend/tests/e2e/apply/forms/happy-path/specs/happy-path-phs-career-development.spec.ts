@@ -4,7 +4,7 @@
  * @scenario Application form completion happy path - PHS 398 Career Development Award Supplemental Form
  */
 
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { PHS_CAREER_DEVELOPMENT_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/phs-career-development-data";
 import { PHS_CAREER_DEVELOPMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/phs-career-development-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
@@ -44,6 +44,9 @@ test(
       opportunity.buildTestData(Date.now()),
       false,
     );
+    await expect(
+      page.locator('input[type="file"]#appendix-visible'),
+    ).toBeEnabled();
     await verifyFormStatusAfterSave(page, "complete");
     await verifyFormStatusOnApplication(
       page,

@@ -169,7 +169,7 @@
         {
           "type": "Control",
           "scope": "#/properties/resource_sharing_plans",
-          "label": "16. Resource Sharing",
+          "label": "16. Resource Sharing Plan(s)",
           "options": {
             "widget": "Attachment"
           }
@@ -202,10 +202,10 @@
         {
           "type": "Control",
           "scope": "#/properties/appendix",
-          "label": "19. Appendix",
           "options": {
             "widget": "AttachmentArray"
-          }
+          },
+          "label": "19. Appendix"
         }
       ],
       "label": "Appendix"
