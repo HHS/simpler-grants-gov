@@ -16,6 +16,7 @@ import { DIFF as projectNarrative } from "./project-narrative-attachment-form.ts
 import { DIFF as performanceSites } from "./project-performance-site-location-s.ts";
 import { DIFF as rrKeyPersonExpanded } from "./research-and-related-senior-key-person-profile-expanded.ts";
 import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profile.ts";
+import { DIFF as researchMultiProjectCover } from "./sf-424-r-r-multi-project-cover.ts";
 import { DIFF as mandatory } from "./sf424-mandatory-form.ts";
 import { DIFF as researchCover } from "./sf424-r-r.ts";
 import { DIFF as regular } from "./sf424.ts";
@@ -42,4 +43,5 @@ export const DIFFS: FormDiff[] = [
   regular,
   short,
   researchCover,
+  researchMultiProjectCover,
 ];

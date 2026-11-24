@@ -19,3 +19,4 @@ import "./forms/sf424-mandatory/index.tsp";
 import "./forms/sf424-short/index.tsp";
 import "./forms/sf424/index.tsp";
 import "./forms/sf424-r-r/index.tsp";
+import "./forms/sf424-r-r-multi-project-cover/index.tsp";
