@@ -23,9 +23,12 @@ model Root {
   @Mapping.from(target, Form.projectDirector)
   @name("ProjectDirector")
   projectDirector: DirectorType;
+
   @Mapping.from(target, Form.coProjectDirector)
   @name("Co-ProjectDirector")
+  @maxItems(4)
   coProjectDirector?: DirectorType[];
+
   @attribute @name("FormVersion") formVersion: "1.2";
 }
 @ns(Namespaces.personal)
@@ -33,14 +36,19 @@ model DirectorType {
   @Mapping.from(target, Director.name)
   @name("Name")
   name: XSD.GlobLib.HumanNameDataType;
+
   @Mapping.from(target, Director.gender) @name("Gender") gender?: string;
   @Mapping.from(target, Director.race) @name("Race") race?: string[];
+
   @Mapping.from(target, Director.ethnicity)
   @name("Ethnicity")
   ethnicity?: string;
+
   @Mapping.from(target, Director.disabilityStatus)
   @name("DisabilityStatus")
+  @maxItems(4)
   disabilityStatus?: string[];
+
   @Mapping.from(target, Director.citizenship)
   @name("Citizenship")
   citizenship?: string;
