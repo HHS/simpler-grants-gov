@@ -22,7 +22,7 @@ export const DIFF: FormDiff = {
         plan: "* 1. Are Human Subjects Involved?",
         source: "1. Are Human Subjects Involved?",
         reason:
-          "Observed source DAT marks this field required in D but does not print an asterisk in B. The parity presentation adds its required marker to the plan label. Field text and requiredness are unchanged; this is assessed formatting, not human acceptance.",
+          "The plan marks required questions with an asterisk. The DAT marks them in its required-field column.",
       },
       "01-a-3": {
         category: "intentional",
@@ -41,7 +41,7 @@ export const DIFF: FormDiff = {
         plan: "* 2. Are Vertebrate Animals Used?",
         source: "2. Are Vertebrate Animals Used?",
         reason:
-          "Observed source DAT marks this field required in D but does not print an asterisk in B. The parity presentation adds its required marker to the plan label. Field text and requiredness are unchanged; this is assessed formatting, not human acceptance.",
+          "The plan marks required questions with an asterisk. The DAT marks them in its required-field column.",
       },
       "02-a-3": {
         category: "intentional",
@@ -61,7 +61,7 @@ export const DIFF: FormDiff = {
         source:
           "3. Is proprietary/privileged information included in the application?",
         reason:
-          "Observed source DAT marks this field required in D but does not print an asterisk in B. The parity presentation adds its required marker to the plan label. Field text and requiredness are unchanged; this is assessed formatting, not human acceptance.",
+          "The plan marks required questions with an asterisk. The DAT marks them in its required-field column.",
       },
       "04-a": {
         category: "intentional",
@@ -69,7 +69,7 @@ export const DIFF: FormDiff = {
         source:
           "4.a. Does this Project Have an Actual or Potential Impact - positive or negative - on the environment?",
         reason:
-          "Observed source DAT marks this field required in D but does not print an asterisk in B. The parity presentation adds its required marker to the plan label. Field text and requiredness are unchanged; this is assessed formatting, not human acceptance.",
+          "The plan marks required questions with an asterisk. The DAT marks them in its required-field column.",
       },
       "04-b": {
         category: "intentional",
@@ -89,7 +89,7 @@ export const DIFF: FormDiff = {
         source:
           "5. Is the research performance site designated, or eligible to be designated, as a historic place?",
         reason:
-          "Observed source DAT marks this field required in D but does not print an asterisk in B. The parity presentation adds its required marker to the plan label. Field text and requiredness are unchanged; this is assessed formatting, not human acceptance.",
+          "The plan marks required questions with an asterisk. The DAT marks them in its required-field column.",
       },
       "05-a": {
         category: "intentional",
@@ -103,7 +103,7 @@ export const DIFF: FormDiff = {
         source:
           "6. Does this project involve activities outside of the United States or partnerships with international collaborators?",
         reason:
-          "Observed source DAT marks this field required in D but does not print an asterisk in B. The parity presentation adds its required marker to the plan label. Field text and requiredness are unchanged; this is assessed formatting, not human acceptance.",
+          "The plan marks required questions with an asterisk. The DAT marks them in its required-field column.",
       },
       "06-a": {
         category: "intentional",
@@ -131,7 +131,7 @@ export const DIFF: FormDiff = {
         plan: "Is the Project Exempt from Federal regulations is required. Yes, this project is exempt from Federal regulations. No, this project is not exempt from Federal regulations.",
         source: "Is the Project Exempt from Federal regulations is required.",
         reason:
-          "Observed displayed help preserves parent Q10 and option Q11/Q12. Source option tips are aggregated onto their single enum control where applicable; the exact original Q text is retained, with source-review ambiguity explained visibly rather than silently rewritten. This records the actual compared strings and does not accept source policy, waive validation or claim runtime behavior.",
+          "The radio group shows the parent instructions and the help for both options together.",
       },
       "01-a-2a": {
         category: "intentional",
@@ -262,7 +262,7 @@ export const DIFF: FormDiff = {
         plan: 100,
         source: 1,
         reason:
-          "Observed DAT F61 counts one Multi_file control, while I61 names AttachmentGroupMin0Max100DataType. The plan addresses the repeated file leaf and applies the DAT type cap100. All source file answers remain ordered in one otherAttachments array; one upload control does not mean one file. Raw RR XSD OtherAttachment is unbounded and is separately value-pinned below. This is assessed source-layer cardinality, not an invented default, waiver or accepted policy.",
+          "The DAT describes one upload control that accepts up to 100 files. The plan records the file limit. The XSD allows any number.",
       },
     },
   },
