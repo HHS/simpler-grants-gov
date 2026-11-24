@@ -25,6 +25,7 @@ output "service_config" {
     cpu                      = var.service_cpu
     memory                   = var.service_memory
     desired_instance_count   = var.service_desired_instance_count
+    scaling_max_capacity     = var.service_scaling_max_capacity
     enable_command_execution = var.enable_command_execution
     extra_environment_variables = merge(
       local.default_extra_environment_variables,
