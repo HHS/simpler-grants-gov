@@ -5,6 +5,13 @@ export const DIFF: FormDiff = {
   xml: "xml-mapping",
   dat: {
     differingLabels: {
+      "2-3": {
+        plan: "4. Progress Report Publication List (for Renewal applications)",
+        source: "4. Progress Report Publication List",
+        category: "intentional",
+        reason:
+          "The shared label makes the renewal condition in the DAT instructions visible.",
+      },
       "2-2": {
         plan: "* 3. Research Strategy",
         source: "3. *Research Strategy",
