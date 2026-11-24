@@ -130,8 +130,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // --- Confirmation Page Validation ---
       await verifySubmissionConfirmation(page);
 
-      // --- Print View Validation (one print url per form) ---
-      await validateAllPrintViews(page, filledForms);
+      // Open print in a separate tab from the refreshing submission page.
+      const printPage = await context.newPage();
+      await validateAllPrintViews(printPage, filledForms);
     },
   );
 }
