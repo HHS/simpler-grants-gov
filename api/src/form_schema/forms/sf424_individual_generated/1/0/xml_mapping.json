@@ -1,0 +1,136 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/SF424_Individual_2_0-V2.0",
+    "SF424_Individual_2_0": "http://apply.grants.gov/forms/SF424_Individual_2_0-V2.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Individual_2_0-V2.0.xsd",
+  "root": {
+    "SF424_Individual_2_0": {
+      "@SF424_Individual_2_0:FormVersion": {
+        "$const": "2.0"
+      },
+      "FederalAgency": {
+        "$field": "opportunity.agency_name"
+      },
+      "CFDANumber": {
+        "$field": "opportunity.assistance_listing.number"
+      },
+      "CFDATitle": {
+        "$field": "opportunity.assistance_listing.title"
+      },
+      "Date_Received": {
+        "$field": "application.date_received"
+      },
+      "OpportunityID": {
+        "$field": "opportunity.number"
+      },
+      "OpportunityTitle": {
+        "$field": "opportunity.title"
+      },
+      "AuthorizedRepresentativeName": {
+        "globLib:PrefixName": {
+          "$field": "contacts.point_of_contact.name.prefix"
+        },
+        "globLib:FirstName": {
+          "$field": "contacts.point_of_contact.name.first_name"
+        },
+        "globLib:MiddleName": {
+          "$field": "contacts.point_of_contact.name.middle_name"
+        },
+        "globLib:LastName": {
+          "$field": "contacts.point_of_contact.name.last_name"
+        },
+        "globLib:SuffixName": {
+          "$field": "contacts.point_of_contact.name.suffix"
+        }
+      },
+      "AuthorizedRepresentativeFax": {
+        "$field": "contacts.point_of_contact.fax"
+      },
+      "AuthorizedRepresentativeEmail": {
+        "$field": "contacts.point_of_contact.email"
+      },
+      "AuthorizedRepresentativePhoneNumber": {
+        "$field": "contacts.point_of_contact.phone"
+      },
+      "EveningPhone": {
+        "$field": "contacts.point_of_contact.evening_phone"
+      },
+      "AuthorizedRepresentativeAddress": {
+        "globLib:Street1": {
+          "$field": "contacts.point_of_contact.address.street1"
+        },
+        "globLib:Street2": {
+          "$field": "contacts.point_of_contact.address.street2"
+        },
+        "globLib:City": {
+          "$field": "contacts.point_of_contact.address.city"
+        },
+        "globLib:County": {
+          "$field": "contacts.point_of_contact.address.county"
+        },
+        "globLib:State": {
+          "$field": "contacts.point_of_contact.address.state"
+        },
+        "globLib:Province": {
+          "$field": "contacts.point_of_contact.address.province"
+        },
+        "globLib:ZipPostalCode": {
+          "$field": "contacts.point_of_contact.address.zip_code"
+        },
+        "globLib:Country": {
+          "$field": "contacts.point_of_contact.address.country"
+        }
+      },
+      "citizenship": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "applicant.person.citizenship.is_us_citizen"
+          }
+        }
+      },
+      "AlienRegistrationNumber": {
+        "$field": "applicant.person.citizenship.alien_registration_number"
+      },
+      "CountryofOrigin": {
+        "$field": "applicant.person.citizenship.country"
+      },
+      "VisitDate": {
+        "$field": "applicant.person.citizenship.residency_start_date"
+      },
+      "CongressionalDistrictApplicant": {
+        "$field": "applicant.congressional_district"
+      },
+      "ProjectTitle": {
+        "$field": "project.title"
+      },
+      "ProjectDescription": {
+        "$field": "project.description"
+      },
+      "FundingPeriodStartDate": {
+        "$field": "project.timeline.start_date"
+      },
+      "FundingPeriodEndDate": {
+        "$field": "project.timeline.end_date"
+      },
+      "ApplicationCertification": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "certification.agree"
+          }
+        }
+      },
+      "AORSignature": {
+        "$field": "certification.signature"
+      },
+      "AORDate": {
+        "$field": "certification.date_signed"
+      }
+    }
+  }
+}

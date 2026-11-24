@@ -123,6 +123,11 @@ EXPECTED_FORM_DATA = {
         "omb_number": "2700-0092",
         "expiration_date": "11/30/2029",
     },
+    668: {
+        "form_name": "Application for Federal Domestic Assistance - Individual",
+        "omb_number": "4040-0005",
+        "expiration_date": "01/31/2029",
+    },
     308: {
         "form_name": "NSF Suggested Reviewers",
         "omb_number": "3145-0058",
@@ -367,6 +372,19 @@ def test_nsf_key_person_expanded_generated_v3_3(nsf_key_person_expanded_generate
 def test_nasa_pi_and_aor_generated_v1_0(nasa_pi_and_aor_generated_v1_0):
     form = nasa_pi_and_aor_generated_v1_0
     expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.omb_number == expected_values["omb_number"]
+    assert (
+        form.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert form.sgg_version == "1.0"
+    assert form.form_instruction_id is not None
+
+
+def test_sf424_individual_generated_v2_0(sf424_individual_generated_v2_0):
+    form = sf424_individual_generated_v2_0
+    expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.form_name == expected_values["form_name"]
     assert form.omb_number == expected_values["omb_number"]
     assert (
         form.expiration_date

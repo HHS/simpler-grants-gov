@@ -1,0 +1,50 @@
+{
+  "opportunity": {
+    "agency_name": {
+      "gg_pre_population": {
+        "rule": "agency_name"
+      }
+    },
+    "number": {
+      "gg_pre_population": {
+        "rule": "opportunity_number"
+      }
+    },
+    "title": {
+      "gg_pre_population": {
+        "rule": "opportunity_title"
+      }
+    },
+    "assistance_listing": {
+      "number": {
+        "gg_pre_population": {
+          "rule": "assistance_listing_number"
+        }
+      },
+      "title": {
+        "gg_pre_population": {
+          "rule": "assistance_listing_program_title"
+        }
+      }
+    }
+  },
+  "application": {
+    "date_received": {
+      "gg_post_population": {
+        "rule": "current_date"
+      }
+    }
+  },
+  "certification": {
+    "signature": {
+      "gg_post_population": {
+        "rule": "signature"
+      }
+    },
+    "date_signed": {
+      "gg_post_population": {
+        "rule": "current_date"
+      }
+    }
+  }
+}

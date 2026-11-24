@@ -1,0 +1,309 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/agency_name",
+          "label": "Name of Federal Agency",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/assistance_listing/properties/number",
+          "label": "Assistance Listing Number",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/assistance_listing/properties/title",
+          "label": "Assistance Listing Title",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/number",
+          "label": "Funding Opportunity Number",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/opportunity/properties/title",
+          "label": "Funding Opportunity Title",
+          "options": {
+            "readonly": true
+          }
+        }
+      ],
+      "label": "Opportunity Information",
+      "options": {
+        "description": "These values come from the funding opportunity."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/application/properties/date_received",
+          "label": "Date Received",
+          "options": {
+            "readonly": true
+          }
+        }
+      ],
+      "label": "Application Information"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/prefix",
+          "label": "Prefix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/first_name",
+          "label": "First Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/middle_name",
+          "label": "Middle Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/last_name",
+          "label": "Last Name"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/name/properties/suffix",
+          "label": "Suffix"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/phone",
+          "label": "Phone Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/evening_phone",
+          "label": "Phone Number (Evening)"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/fax",
+          "label": "Fax Number"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/email",
+          "label": "Email"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/street1",
+          "label": "Street 1"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/street2",
+          "label": "Street 2"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/city",
+          "label": "City"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/county",
+          "label": "County/Parish"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/state",
+          "label": "State"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/province",
+          "label": "Province",
+          "rule": {
+            "effect": "SHOW",
+            "condition": {
+              "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/country",
+              "schema": {
+                "allOf": [
+                  {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "const": ""
+                        },
+                        {
+                          "type": "array",
+                          "maxItems": 0
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "const": "USA: UNITED STATES"
+                    }
+                  }
+                ]
+              },
+              "failWhenUndefined": true
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/country",
+          "label": "Country"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/contacts/properties/point_of_contact/properties/address/properties/zip_code",
+          "label": "Zip / Postal Code"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/person/properties/citizenship/properties/is_us_citizen",
+          "label": "U.S. Citizenship",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/person/properties/citizenship/properties/alien_registration_number",
+          "label": "If permanent resident of U.S., enter the Alien Registration #",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/applicant/properties/person/properties/citizenship/properties/is_us_citizen",
+              "schema": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/person/properties/citizenship/properties/country",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/applicant/properties/person/properties/citizenship/properties/is_us_citizen",
+              "schema": {
+                "const": false
+              }
+            }
+          },
+          "label": "If foreign national, enter country of citizenship"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/person/properties/citizenship/properties/residency_start_date",
+          "label": "If foreign national, enter start date of most recent residency in U.S.",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/applicant/properties/person/properties/citizenship/properties/is_us_citizen",
+              "schema": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/applicant/properties/congressional_district",
+          "label": "Congressional District of Applicant"
+        }
+      ],
+      "label": "Applicant Information"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/project/properties/title",
+          "label": "Project Title"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project/properties/description",
+          "label": "Project Description",
+          "options": {
+            "widget": "TextArea"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project/properties/timeline/properties/start_date",
+          "label": "Start Date"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project/properties/timeline/properties/end_date",
+          "label": "End Date"
+        }
+      ],
+      "label": "Project Information"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/certification/properties/agree",
+          "label": "I Agree",
+          "options": {
+            "widget": "Checkbox"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/certification/properties/signature",
+          "label": "Signature",
+          "options": {
+            "readonly": true
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/certification/properties/date_signed",
+          "label": "Date Signed",
+          "options": {
+            "readonly": true
+          }
+        }
+      ],
+      "label": "Certification",
+      "options": {
+        "description": "By signing this application, I certify (1) to the statements contained in the list of certifications** and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances** and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fradulent statements or claims may subject me to criminal, civil, or administrative penalties (U.S. Code, Title 18, Section 1001)\n\n** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions."
+      }
+    }
+  ],
+  "label": "Application for Federal Domestic Assistance — Individual, Grants.gov version2.0."
+}

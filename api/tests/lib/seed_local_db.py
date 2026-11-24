@@ -741,6 +741,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "6e013478-113e-468c-9069-de18e2c42437",
         ),
         (
+            "SF424_Individual_Generated",
+            "E2E-SF424INDG",
+            "Application for Federal Domestic Assistance - Individual (Generated)",
+            "9b289ebf-b283-4f99-8e52-2f5574b5d998",
+            "f6727e55-70f7-416c-9da1-b6c4af0f8c76",
+        ),
+        (
             "SF424_4_0",
             "E2E-SF424",
             "Application for Federal Assistance (SF-424)",
