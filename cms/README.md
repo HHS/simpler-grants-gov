@@ -42,4 +42,4 @@ The CMS runs at http://localhost:8090 and its database is on port 5433.
 | `make check`                                | Lint, static analysis, unit tests and dependency audit          |
 | `make release-smoke-test`                   | Run the release image with ECS restrictions and check `/health` |
 
-See [CMS development](../documentation/cms/development.md) for the configuration workflow, seed content and the release image.
+See [CMS development](../documentation/cms/development.md) for the configuration workflow, seed content, the release image and troubleshooting.

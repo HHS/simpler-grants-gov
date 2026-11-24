@@ -1,6 +1,6 @@
 # CMS development
 
-The CMS is a headless Drupal 11 site in [`cms/`](../../cms). This page covers local setup, how configuration moves between environments, and how the release image is built. For the decision to use Drupal, see the [CMS ADR](../wiki/product/decisions/adr/2026-01-content-management-system.md).
+The CMS is a headless Drupal 11 site in [`cms/`](../../cms). This page covers local setup, how configuration moves between environments, how the release image is built and how to fix common problems. For the decision to use Drupal, see the [CMS ADR](../wiki/product/decisions/adr/2026-01-content-management-system.md).
 
 ## Local setup
 
@@ -35,7 +35,7 @@ To change configuration:
 2. Run `make config-export` to write it to `config/sync`.
 3. Commit the changed YAML files with the code that uses them.
 
-On deploy, `cms/bin/db-migrate` runs `drush deploy`, which applies database updates and imports `config/sync`. CI fails if the installed site differs from `config/sync` (`make config-check`).
+On deploy, `cms/bin/db-migrate` runs `drush deploy`, which applies database updates and imports `config/sync`. `make config-check` fails if the installed site differs from `config/sync`.
 
 `make site-install` reinstalls from `config/sync`, which is the quickest way to confirm a fresh environment comes up correctly.
 
@@ -71,6 +71,12 @@ To add seed content:
 | `make test`                   | PHPUnit unit tests in `web/modules/custom/*/tests/src/Unit`  |
 | `make composer-audit`         | Composer security advisories                                 |
 
+### Dependency updates
+
+Renovate groups updates to `cms/composer.json`, `cms/Dockerfile` and `cms/docker-compose.yml` into one "CMS" pull request. It doesn't upgrade PHP or the local Postgres image. Upgrade PHP by hand, and keep Postgres at the version the AWS database runs.
+
+No CI runs for `cms/` yet. Before approving a CMS update, check out its branch and run `make build composer-install check` and `make release-smoke-test`.
+
 ## Release image
 
 The `release` stage of `cms/Dockerfile` is the image deployed to ECS. It:
@@ -83,3 +89,17 @@ The `release` stage of `cms/Dockerfile` is the image deployed to ECS. It:
 `make release-smoke-test` starts the release image locally with a read-only filesystem and no Linux capabilities, then checks `/health`. From the repository root, `make release-build APP_NAME=cms` builds the linux/amd64 image the same way the deploy pipeline does.
 
 Public file storage moves to S3 when the CMS is deployed to AWS. Until then, the release image has no writable public files directory.
+
+## Troubleshooting
+
+**A port is already in use.** The CMS uses port 8090, its database 5433 and the release smoke test 8091. Stop whatever else is using the port. `docker ps` shows whether it's another container.
+
+**`/health` returns 503 `{"status":"unavailable"}`.** Drupal is running but can't query its database. Check that `docker compose ps` shows `cms-db` as healthy and that the `DB_*` values in `cms/.env.development` match it.
+
+**A request returns 400 "The provided host name is not valid for this server."** Drupal only answers host names that match `DRUPAL_TRUSTED_HOST_PATTERNS`, a comma-separated list of regular expressions in `cms/.env.development`. Add a pattern for any new host name, then run `make start` to apply it. If you run the image with `docker run --env-file`, pass this variable with `-e` instead: Docker Compose strips the single quotes around the value, but `docker run` keeps them as part of it.
+
+**Your site's configuration differs from `config/sync`.** This shows up as `make config-check` failing, or as something a teammate committed missing from your admin UI. `make config-status` lists what differs. Export your own changes with `make config-export` and commit them. Apply a teammate's changes with `make config-import`, which overwrites any local change you haven't exported.
+
+**`make release-smoke-test` fails.** It prints the release container's logs. "Read-only file system" errors mean code is writing outside `/tmp`, the only writable path in the release image and on ECS. Point that path at `/tmp`, as `settings.php` does for temporary files and compiled PHP.
+
+**Nothing else works.** `make clean` deletes the local database, and `make init` installs a fresh site. You lose local content and any configuration you haven't exported.
