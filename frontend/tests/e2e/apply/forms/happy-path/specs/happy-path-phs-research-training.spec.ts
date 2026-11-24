@@ -4,7 +4,7 @@
  * @scenario Application form completion happy path - PHS 398 Research Training Program Plan
  */
 
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { PHS_RESEARCH_TRAINING_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/phs-research-training-data";
 import { PHS_RESEARCH_TRAINING_FORM_CONFIG } from "tests/e2e/apply/fixtures/phs-research-training-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
@@ -44,6 +44,9 @@ test(
       opportunity.buildTestData(Date.now()),
       false,
     );
+    await expect(
+      page.locator('input[type="file"]#appendix-visible'),
+    ).toBeEnabled();
     await verifyFormStatusAfterSave(page, "complete");
     await verifyFormStatusOnApplication(
       page,

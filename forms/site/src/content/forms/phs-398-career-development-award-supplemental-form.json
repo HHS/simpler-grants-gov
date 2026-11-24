@@ -90,7 +90,7 @@
           "dat_field": "3-1",
           "json_path": "specific_aims",
           "xml_path": "CareerDevelopmentAwardAttachments/SpecificAims/attFile",
-          "help_text": "Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies.",
+          "help_text": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
           "type": "Uploaded attachment ID (UUID string)",
           "widget": "ApplicationAttachmentWidget",
           "constraints": "format uuid"
@@ -103,7 +103,7 @@
           "dat_field": "3-2",
           "json_path": "research_strategy",
           "xml_path": "CareerDevelopmentAwardAttachments/ResearchStrategy/attFile",
-          "help_text": "Attach PDF formatted file. This attachment is required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+          "help_text": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
           "type": "Uploaded attachment ID (UUID string)",
           "widget": "ApplicationAttachmentWidget",
           "constraints": "format uuid"
@@ -283,7 +283,7 @@
         {
           "kind": "field",
           "id": "resource-sharing-plans",
-          "label": "16. Resource Sharing",
+          "label": "16. Resource Sharing Plan(s)",
           "required": false,
           "dat_field": "7-4",
           "json_path": "resource_sharing_plans",

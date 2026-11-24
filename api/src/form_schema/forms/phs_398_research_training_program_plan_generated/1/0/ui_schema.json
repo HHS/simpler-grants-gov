@@ -48,7 +48,7 @@
         {
           "type": "Control",
           "scope": "#/properties/multiple_pd_pi_leadership_plan",
-          "label": "5. Multiple PD/PI Leadership Plan (if applicable)",
+          "label": "5. Multiple PD/PI Leadership Plan",
           "options": {
             "widget": "Attachment"
           }
@@ -147,10 +147,10 @@
         {
           "type": "Control",
           "scope": "#/properties/appendix",
-          "label": "14. Appendix",
           "options": {
             "widget": "AttachmentArray"
-          }
+          },
+          "label": "14. Appendix"
         }
       ],
       "label": "Appendix",

@@ -19,6 +19,6 @@ export const PHS_RESEARCH_TRAINING_FORM_CONFIG = {
 export const PHS_RESEARCH_TRAINING_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
     fieldId: "program_plan-visible",
-    message: "2. Program Plan is required",
+    message: "Program Plan is required",
   },
 ];
