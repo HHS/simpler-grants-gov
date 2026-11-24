@@ -71,7 +71,7 @@
         },
         "KeyBiologicalAndOrChemicalResources": {
           "attFile": {
-            "$attachment": "authentication_of_key_biological_and_or_chemical_resources"
+            "$attachment": "key_biological_and_or_chemical_resources"
           }
         },
         "Appendix": {

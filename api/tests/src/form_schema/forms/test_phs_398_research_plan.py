@@ -32,7 +32,7 @@ SINGLE_DOCUMENTS = (
     "letters_of_support",
     "resource_sharing_plans",
     "other_plans",
-    "authentication_of_key_biological_and_or_chemical_resources",
+    "key_biological_and_or_chemical_resources",
 )
 FILE_ID = "83cd24d4-e319-4c61-982c-b216299f5eb4"
 

@@ -87,7 +87,7 @@
         },
         {
           "kind": "field",
-          "label": "5. Multiple PD/PI Leadership Plan (if applicable)",
+          "label": "5. Multiple PD/PI Leadership Plan",
           "help_text": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
           "required": false,
           "type": "Uploaded attachment ID (UUID string)",
