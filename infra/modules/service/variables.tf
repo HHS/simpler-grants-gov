@@ -450,6 +450,16 @@ variable "waf_metric_name" {
   description = "Optional unique WebACL CloudWatch metric name; null preserves the existing name."
 }
 
+variable "bot_protection_waf" {
+  description = "Opt-in scraper/bot controls for page traffic; null preserves existing WAF rules."
+  type = object({
+    action                  = optional(string, "count")
+    page_rate_limit_per_ip  = optional(number, 600)
+    opportunity_surge_limit = optional(number, 2000)
+  })
+  default = null
+}
+
 variable "pdf_readability_waf" {
   description = "Opt-in NOFO PDF pilot controls. Null preserves existing WAF rules; Count observes without blocking."
   type = object({

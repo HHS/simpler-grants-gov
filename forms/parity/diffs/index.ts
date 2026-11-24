@@ -3,6 +3,7 @@ import { DIFF as budgetNarrative } from "./budget-narrative-attachment-form.ts";
 import { DIFF as edAbstract } from "./ed-abstract-form.ts";
 import { DIFF as epaKeyContacts } from "./epa-key-contacts.ts";
 import { DIFF as keyContacts } from "./key-contacts.ts";
+import { DIFF as nasaPiAndAor } from "./nasa-pi-and-aor.ts";
 import { DIFF as nsfDeviation } from "./nsf-deviation-authorization.ts";
 import { DIFF as nsfKeyPersonExpanded } from "./nsf-senior-key-person-profile-expanded.ts";
 import { DIFF as nsfReviewers } from "./nsf-suggested-reviewers.ts";
@@ -30,4 +31,5 @@ export const DIFFS: FormDiff[] = [
   nsfDeviation,
   nsfReviewers,
   projectAbstractSummary,
+  nasaPiAndAor,
 ];

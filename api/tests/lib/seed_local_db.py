@@ -664,6 +664,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "cb1415b3-e90c-5076-93f9-95f68c013935",
         ),
         (
+            "NSF_SuggestedReviewers_Generated",
+            "E2E-NSFSR",
+            "NSF Suggested Reviewers",
+            "97621d95-418a-4c00-96ab-3817c7dc7fe2",
+            "5c51d2ad-d5ee-4d45-8811-f18b495e7bed",
+        ),
+        (
             "Project_AbstractSummary_2_0",
             "E2E-PABSS",
             "Project Abstract Summary",
@@ -725,6 +732,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "NSF Senior/Key Person Profile (Expanded) (Generated)",
             "7b0b7e69-0943-429e-b380-ebaf69985400",
             "9607f84f-ab9b-4d23-a5aa-d055318a5660",
+        ),
+        (
+            "Nasa_PIandAORSupplementalDataSheet_Generated",
+            "E2E-NASAPIAORG",
+            "NASA - PI and AOR Supplemental Data Sheet (Generated)",
+            "17281277-7149-4a77-b13e-89fe7e2f344a",
+            "6e013478-113e-468c-9069-de18e2c42437",
         ),
         (
             "SF424_4_0",

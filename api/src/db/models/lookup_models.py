@@ -6,8 +6,6 @@ from src.constants.lookup_constants import (
     ApplicantType,
     ApplicationAuditEvent,
     ApplicationStatus,
-    ApprovalResponseType,
-    ApprovalType,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -29,7 +27,6 @@ from src.constants.lookup_constants import (
     SamGovImportType,
     SamGovProcessingStatus,
     UserType,
-    WorkflowType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.base import TimestampMixin
@@ -248,12 +245,8 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.READ_TEST_USER_TOKEN, 17),
         LookupStr(Privilege.VIEW_OPPORTUNITY, 18),
         LookupStr(Privilege.UPDATE_OPPORTUNITY, 20),
-        LookupStr(Privilege.INTERNAL_WORKFLOW_ACCESS, 22),
-        LookupStr(Privilege.PROGRAM_OFFICER_APPROVAL, 23),
-        LookupStr(Privilege.BUDGET_OFFICER_APPROVAL, 24),
         LookupStr(Privilege.VIEW_ORG_SAVED_OPPORTUNITIES, 25),
         LookupStr(Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES, 26),
-        LookupStr(Privilege.INTERNAL_WORKFLOW_EVENT_SEND, 27),
         LookupStr(Privilege.INTERNAL_S3_SCAN, 32),
         LookupStr(Privilege.MANAGE_TEST_USER_TOKEN, 33),
     ]
@@ -291,33 +284,6 @@ USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
         LookupStr(UserType.INTERNAL_FRONTEND, 2),
         LookupStr(UserType.LEGACY_CERTIFICATE, 3),
         LookupStr(UserType.INTERNAL_SYSTEM_USER, 4),
-    ]
-)
-
-WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
-    [
-        LookupStr(WorkflowType.OPPORTUNITY_PUBLISH, 1),
-        LookupStr(WorkflowType.APPLICATION_SUBMISSION, 2),
-        LookupStr(WorkflowType.INITIAL_PROTOTYPE, 3),
-        LookupStr(WorkflowType.BASIC_TEST_WORKFLOW, 4),
-        LookupStr(WorkflowType.NO_CONCURRENT_TEST_WORKFLOW, 5),
-        LookupStr(WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW, 6),
-    ]
-)
-
-APPROVAL_TYPE_CONFIG: LookupConfig[ApprovalType] = LookupConfig(
-    [
-        LookupStr(ApprovalType.INITIAL_PROTOTYPE_APPROVAL, 1),
-        LookupStr(ApprovalType.PROGRAM_OFFICER_APPROVAL, 2),
-        LookupStr(ApprovalType.BUDGET_OFFICER_APPROVAL, 3),
-    ]
-)
-
-APPROVAL_RESPONSE_TYPE_CONFIG: LookupConfig[ApprovalResponseType] = LookupConfig(
-    [
-        LookupStr(ApprovalResponseType.APPROVED, 1),
-        LookupStr(ApprovalResponseType.DECLINED, 2),
-        LookupStr(ApprovalResponseType.REQUIRES_MODIFICATION, 3),
     ]
 )
 
@@ -682,48 +648,6 @@ class LkOrganizationAuditEvent(ApiLookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> LkOrganizationAuditEvent:
         return LkOrganizationAuditEvent(
             organization_audit_event_id=lookup.lookup_val, description=lookup.get_description()
-        )
-
-
-@LookupRegistry.register_lookup(WORKFLOW_TYPE_CONFIG)
-class LkWorkflowType(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_workflow_type"
-
-    workflow_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkWorkflowType:
-        return LkWorkflowType(
-            workflow_type_id=lookup.lookup_val, description=lookup.get_description()
-        )
-
-
-@LookupRegistry.register_lookup(APPROVAL_TYPE_CONFIG)
-class LkApprovalType(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_approval_type"
-
-    approval_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkApprovalType:
-        return LkApprovalType(
-            approval_type_id=lookup.lookup_val, description=lookup.get_description()
-        )
-
-
-@LookupRegistry.register_lookup(APPROVAL_RESPONSE_TYPE_CONFIG)
-class LkApprovalResponseType(ApiLookupTable, TimestampMixin):
-    __tablename__ = "lk_approval_response_type"
-
-    approval_response_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkApprovalResponseType:
-        return LkApprovalResponseType(
-            approval_response_type_id=lookup.lookup_val, description=lookup.get_description()
         )
 
 
