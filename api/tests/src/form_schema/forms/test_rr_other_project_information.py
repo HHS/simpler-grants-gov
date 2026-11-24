@@ -29,3 +29,10 @@ def test_check_the_selected_exemption_codes(codes, valid):
         "exemption_numbers": codes,
     }
     assert (validate_json_schema_for_form(answers, FORM) == []) is valid
+
+
+@pytest.mark.parametrize("count,valid", [(100, True), (101, False)])
+def test_other_attachment_limit(count, valid):
+    files = [f"00000000-0000-4000-8000-{index:012d}" for index in range(count)]
+    answers = {**REQUIRED, "other_attachments": files}
+    assert (validate_json_schema_for_form(answers, FORM) == []) is valid
