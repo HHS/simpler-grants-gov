@@ -54,7 +54,7 @@ The equivalent Compose command is `docker compose up --detach mailpit`.
 Open [http://localhost:8025](http://localhost:8025) to inspect message content,
 recipients, sender, headers, timestamps, and raw MIME source. The local API and
 notification tasks use the same inbox; for example, a locally generated organization
-invitation appears there immediately. Scheduled notifications
+invitation message appears there immediately. Scheduled notifications
 can be generated with `make run-email-notifications` after seeding suitable local data.
 
 `local.env` uses the Docker service name `mailpit` by default. For commands running

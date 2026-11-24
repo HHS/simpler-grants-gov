@@ -81,12 +81,17 @@ variable "project_name" {
 
 variable "service_cpu" {
   type    = number
-  default = 1024
+  default = 2048
 }
 
 variable "service_desired_instance_count" {
   type    = number
   default = 1
+}
+
+variable "service_scaling_max_capacity" {
+  type    = number
+  default = 2
 }
 
 variable "service_memory" {

@@ -65,6 +65,18 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`${"name"} installs its XML as transform rules, which leave out ${"elements"}. Use @Sgg.sync(#{ xml: "mapping" }), which writes them.`,
       },
     },
+    "unsupported-formula": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"name"} isn't calculated by the API: ${"reason"}.`,
+      },
+    },
+    "conflicting-formula": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"name"} has both @Formula.${"formula"} and @Sgg.${"phase"}Populate. Use one or the other.`,
+      },
+    },
   },
   state: {
     sync: {},

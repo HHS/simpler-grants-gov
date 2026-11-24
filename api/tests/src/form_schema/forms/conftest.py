@@ -14,13 +14,16 @@ from src.form_schema.forms import (
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
+    NasaPIAndAORGenerated_v1_0,
     NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
     OtherNarrativeAttachment_v1_2,
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
     ProjectAbstract_v1_2,
     ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
+    ProjectAbstractSummaryGenerated_v2_0,
     ProjectNarrativeAttachment_v1_2,
     ProjectNarrativeGenerated_v1_2,
     ProjectPerformanceSiteLocation_v4_0,
@@ -121,9 +124,15 @@ def project_abstract_v1_2(request):
     return setup_resolved_form(request.param)
 
 
-@pytest.fixture(scope="session")
-def project_abstract_summary_v2_0():
-    return setup_resolved_form(ProjectAbstractSummary_v2_0)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(ProjectAbstractSummary_v2_0, id="handwritten"),
+        pytest.param(ProjectAbstractSummaryGenerated_v2_0, id="generated"),
+    ],
+)
+def project_abstract_summary_v2_0(request):
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(
@@ -259,3 +268,13 @@ def rr_key_person_expanded_generated_v4_0():
 @pytest.fixture(scope="session")
 def nsf_key_person_expanded_generated_v3_3():
     return setup_resolved_form(NSFKeyPersonExpandedGenerated_v3_3)
+
+
+@pytest.fixture(scope="session")
+def nasa_pi_and_aor_generated_v1_0():
+    return setup_resolved_form(NasaPIAndAORGenerated_v1_0)
+
+
+@pytest.fixture(scope="session")
+def nsf_suggested_reviewers_v1_1():
+    return setup_resolved_form(NSFSuggestedReviewers_v1_1)

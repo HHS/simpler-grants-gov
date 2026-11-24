@@ -111,9 +111,12 @@ export async function verifyInlineErrors(
 
   for (const { fieldId, message } of expectedErrors) {
     const normalizedFieldId = normalizeFieldId(fieldId);
-    const baseErrorLocator = page.locator(`#error-for-${normalizedFieldId}`);
+    // Match by attribute, since a field list entry's id has brackets, e.g. key_contacts[0]--phone.
+    const baseErrorLocator = page.locator(
+      `[id="error-for-${normalizedFieldId}"]`,
+    );
     const visibleErrorLocator = page.locator(
-      `#error-for-${normalizedFieldId}-visible`,
+      `[id="error-for-${normalizedFieldId}-visible"]`,
     );
     const errorLocator = (await baseErrorLocator.count())
       ? baseErrorLocator

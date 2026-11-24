@@ -8,14 +8,15 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSu
 
 from datetime import date
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 from lxml import etree as lxml_etree
 
+from src.form_schema.forms import ProjectAbstractSummary_v2_0, ProjectAbstractSummaryGenerated_v2_0
 from src.form_schema.forms.project_abstract_summary import (
     FORM_XML_TRANSFORM_RULES as PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
 )
-from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -30,6 +31,40 @@ from tests.src.db.models.factories import (
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(ProjectAbstractSummary_v2_0, id="handwritten"),
+        pytest.param(ProjectAbstractSummaryGenerated_v2_0, id="generated"),
+    ],
+)
+def project_abstract_summary_form(request):
+    return request.param
+
+
+@pytest.mark.parametrize("listing", [None, "47.070"])
+def test_generated_project_abstract_summary_xml_matches_handwritten(listing):
+    answers = {
+        "funding_opportunity_number": "TEST-PAS-XML-001",
+        "applicant_name": "Test & Example Research",
+        "project_title": "Research <and> evaluation",
+        "project_abstract": "é" * 4000,
+    }
+    if listing is not None:
+        answers["assistance_listing_number"] = listing
+
+    service = XMLGenerationService()
+
+    def render(form):
+        response = service.generate_xml(
+            XMLGenerationRequest(application_data=answers, transform_config=form.json_to_xml_schema)
+        )
+        assert response.success, response.error_message
+        assert response.xml_data is not None
+        return ElementTree.canonicalize(response.xml_data, rewrite_prefixes=True)
+
+    assert render(ProjectAbstractSummaryGenerated_v2_0) == render(ProjectAbstractSummary_v2_0)
 
 
 class TestProjectAbstractSummaryXMLGeneration:
@@ -282,7 +317,9 @@ class TestProjectAbstractSummaryXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def project_abstract_summary_application(self, enable_factory_create, seed_form_registry):
+    def project_abstract_summary_application(
+        self, enable_factory_create, seed_form_registry, project_abstract_summary_form
+    ):
         """Create an application with Project Abstract Summary form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -305,7 +342,7 @@ class TestProjectAbstractSummaryXSDValidation:
             competition_forms=[],
         )
 
-        pas_form = ProjectAbstractSummary_v2_0
+        pas_form = project_abstract_summary_form
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Project Abstract Summary Test Application"
@@ -386,7 +423,11 @@ class TestProjectAbstractSummaryXSDValidation:
         )
 
     def test_project_abstract_summary_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, seed_form_registry
+        self,
+        enable_factory_create,
+        xsd_validator,
+        seed_form_registry,
+        project_abstract_summary_form,
     ):
         """Test that Project Abstract Summary with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -410,7 +451,7 @@ class TestProjectAbstractSummaryXSDValidation:
             competition_forms=[],
         )
 
-        pas_form = ProjectAbstractSummary_v2_0
+        pas_form = project_abstract_summary_form
 
         application = ApplicationFactory.create(
             competition=competition,

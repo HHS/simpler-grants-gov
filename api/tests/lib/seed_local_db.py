@@ -657,11 +657,32 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "951d1fed-700b-4aae-b7da-40e0dc41b1a0",
         ),
         (
+            "NSF_DeviationAuthorization_Generated",
+            "E2E-NSFDA",
+            "NSF Deviation Authorization",
+            "6d58e0cb-9b08-5732-b4a5-4df7f8cedfa7",
+            "cb1415b3-e90c-5076-93f9-95f68c013935",
+        ),
+        (
+            "NSF_SuggestedReviewers_Generated",
+            "E2E-NSFSR",
+            "NSF Suggested Reviewers",
+            "97621d95-418a-4c00-96ab-3817c7dc7fe2",
+            "5c51d2ad-d5ee-4d45-8811-f18b495e7bed",
+        ),
+        (
             "Project_AbstractSummary_2_0",
             "E2E-PABSS",
             "Project Abstract Summary",
             "e3bfbd7b-2205-46a8-9aa3-714f7e130958",
             "c6e468de-2911-494e-aa14-91b527a1f53e",
+        ),
+        (
+            "Project_AbstractSummary_2_0_Generated",
+            "E2E-PABSSG",
+            "Project Abstract Summary (Generated)",
+            "e7b1eeb7-968e-5ad7-a682-92bf4f6fe478",
+            "3fdad41f-abbd-5b59-ad1e-54316e8637d2",
         ),
         (
             "ProjectNarrativeAttachments_1_2",
@@ -711,6 +732,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "NSF Senior/Key Person Profile (Expanded) (Generated)",
             "7b0b7e69-0943-429e-b380-ebaf69985400",
             "9607f84f-ab9b-4d23-a5aa-d055318a5660",
+        ),
+        (
+            "Nasa_PIandAORSupplementalDataSheet_Generated",
+            "E2E-NASAPIAORG",
+            "NASA - PI and AOR Supplemental Data Sheet (Generated)",
+            "17281277-7149-4a77-b13e-89fe7e2f344a",
+            "6e013478-113e-468c-9069-de18e2c42437",
         ),
         (
             "SF424_4_0",

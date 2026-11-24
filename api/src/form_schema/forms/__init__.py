@@ -14,13 +14,17 @@ from .epa_key_contacts_generated import FORM as EPAKeyContactsGenerated_v2_0
 from .gg_lobbying_form import GG_LobbyingForm_v1_1
 from .key_contacts import KeyContacts_v2_0
 from .key_contacts_generated import FORM as KeyContactsGenerated_v2_0
+from .nasa_pi_and_aor_generated import FORM as NasaPIAndAORGenerated_v1_0
+from .nsf_deviation_authorization_generated import FORM as NSFDeviationAuthorization_v1_1
 from .nsf_key_person_expanded_generated import FORM as NSFKeyPersonExpandedGenerated_v3_3
+from .nsf_suggested_reviewers_generated import FORM as NSFSuggestedReviewers_v1_1
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
 from .other_narrative_generated import FORM as OtherNarrativeGenerated_v1_2
 from .performance_sites_generated import FORM as PerformanceSitesGenerated_v4_0
 from .project_abstract import ProjectAbstract_v1_2
 from .project_abstract_generated import FORM as ProjectAbstractGenerated_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
+from .project_abstract_summary_generated import FORM as ProjectAbstractSummaryGenerated_v2_0
 from .project_narrative_attachment import ProjectNarrativeAttachment_v1_2
 from .project_narrative_generated import FORM as ProjectNarrativeGenerated_v1_2
 from .project_performance_site_location import ProjectPerformanceSiteLocation_v4_0
@@ -63,12 +67,16 @@ _ALL_FORMS: list[Form] = [
     PerformanceSitesGenerated_v4_0,
     RRKeyPersonGenerated_v3_0,
     RRKeyPersonExpandedGenerated_v4_0,
+    ProjectAbstractSummaryGenerated_v2_0,
+    NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
     ProjectNarrativeGenerated_v1_2,
     BudgetNarrativeGenerated_v1_2,
     OtherNarrativeGenerated_v1_2,
     ProjectAbstractGenerated_v1_2,
     EDAbstractGenerated_v1_1,
+    NasaPIAndAORGenerated_v1_0,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -82,12 +90,16 @@ GENERATED_FORMS: list[Form] = [
     PerformanceSitesGenerated_v4_0,
     RRKeyPersonGenerated_v3_0,
     RRKeyPersonExpandedGenerated_v4_0,
+    ProjectAbstractSummaryGenerated_v2_0,
+    NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
     ProjectNarrativeGenerated_v1_2,
     BudgetNarrativeGenerated_v1_2,
     OtherNarrativeGenerated_v1_2,
     ProjectAbstractGenerated_v1_2,
     EDAbstractGenerated_v1_1,
+    NasaPIAndAORGenerated_v1_0,
 ]
 
 

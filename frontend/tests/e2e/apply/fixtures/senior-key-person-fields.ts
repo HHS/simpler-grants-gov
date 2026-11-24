@@ -3,6 +3,7 @@ import type {
   FieldType,
   FormFillFieldDefinitions,
 } from "tests/e2e/utils/common/types";
+import type { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 // Shared by the Senior/Key Person forms generated from forms/specs. Each person's answers
 // sit under the same paths, e.g. principal_investigator--name--first_name or
@@ -69,19 +70,23 @@ export function personFields(
   return definitions;
 }
 
-/** Answers for one person's profile, with a file for each of `documents`. */
+/**
+ * Answers for one person's profile, with a file for each of `documents`. `suffix` makes
+ * the person's name unique to the run.
+ */
 export function personAnswers(
   person: string,
   initials: string,
   projectRole: string,
   extraAnswers: Record<string, string>,
   documents: Record<string, string>,
+  suffix: number,
 ): Record<string, string> {
   const answers: Record<string, string> = {
     "name--prefix": "Dr.",
-    "name--first_name": `${initials} FIRST NAME`,
+    "name--first_name": `${initials} FIRST ${suffix}`,
     "name--middle_name": `${initials} MIDDLE NAME`,
-    "name--last_name": `${initials} LAST NAME`,
+    "name--last_name": `${initials} LAST ${suffix}`,
     "name--suffix": "Jr.",
     title: `${initials} TITLE`,
     department: `${initials} DEPARTMENT`,
@@ -108,4 +113,28 @@ export function personAnswers(
       value,
     ]),
   );
+}
+
+/**
+ * Errors from saving a profile empty. The frontend drops the PD/PI's empty name and
+ * address, so the API reports each one missing and their errors start with "Name" or
+ * "Address". `requiredDocuments` maps each required attachment to its title.
+ */
+export function principalInvestigatorRequiredErrors(
+  requiredDocuments: Record<string, string>,
+): FieldError[] {
+  return Object.entries({
+    "name--first_name": "Name First Name",
+    "name--last_name": "Name Last Name",
+    project_role: "Project Role",
+    "address--street1": "Address Street 1",
+    "address--city": "Address City",
+    "address--country": "Address Country",
+    phone: "Phone Number",
+    email: "Email",
+    ...requiredDocuments,
+  }).map(([field, title]) => ({
+    fieldId: `principal_investigator--${field}`,
+    message: `${title} is required`,
+  }));
 }
