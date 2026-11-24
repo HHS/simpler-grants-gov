@@ -17,6 +17,7 @@ import * as os from "os";
 import * as path from "path";
 import { expect, type Page } from "@playwright/test";
 import * as zip from "@zip.js/zip.js";
+import type { ExpectedXmlField } from "tests/e2e/utils/submission/submission-field-utils";
 import { extractText } from "unpdf";
 
 // zip.js defaults to Web Workers, which aren't available in a plain Node
@@ -138,13 +139,6 @@ export async function downloadAndUnzipSubmission(
       // Non-fatal cleanup failure.
     });
   }
-}
-
-export interface ExpectedXmlField {
-  element: string;
-  value: string;
-  /** Allow attributes on the opening tag, e.g. `<glob:HashValue glob:hashAlgorithm="SHA-1">`. */
-  allowAttributes?: boolean;
 }
 
 const escapeRegExp = (text: string): string =>

@@ -111,7 +111,6 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   nsfSuggestedReviewers: NSF_SUGGESTED_REVIEWERS_FORM_CONFIG,
   ppsl: PPSL_FORM_CONFIG,
   ppslGenerated: PPSL_FORM_CONFIG,
-  projectNarrativeAttachment: PROJECT_NARRATIVE_ATTACHMENT_FORM_CONFIG,
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
   projectNarrative: PROJECT_NARRATIVE_ATTACHMENT_FORM_CONFIG,
   projectNarrativeGenerated: PROJECT_NARRATIVE_ATTACHMENT_FORM_CONFIG,

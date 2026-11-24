@@ -30,6 +30,14 @@ export interface SubmissionFieldMapping {
 /** Keyed by form field key (same keys as the fill data / expectedPrepopulatedFields). */
 export type SubmissionFieldMap = Record<string, SubmissionFieldMapping>;
 
+/** One expected element/value pair in GrantApplication.xml. */
+export interface ExpectedXmlField {
+  element: string;
+  value: string;
+  /** Allow attributes on the opening tag, e.g. `<glob:HashValue glob:hashAlgorithm="SHA-1">`. */
+  allowAttributes?: boolean;
+}
+
 /**
  * Today's date as YYYY-MM-DD in US Eastern time. The API's post-population
  * `current_date` rule uses the US Eastern date (get_now_us_eastern_date), which
@@ -82,10 +90,7 @@ export function buildExpectedXmlFields(
   },
   testData: Record<string, string>,
   systemValues: Record<string, string> = {},
-): Record<
-  string,
-  { element: string; value: string; allowAttributes?: boolean }
-> {
+): Record<string, ExpectedXmlField> {
   if (!form.submissionFields) {
     throw new Error("Form has no submissionFields mapping defined");
   }
