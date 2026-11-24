@@ -36,18 +36,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: "api"
           environment: ${{ matrix.envs }}
+
       - name: Dump the certificate metadata
         run: |
           pwd
           aws acm list-certificates --max-items 1000 --no-paginate --includes "keyTypes=RSA_1024,RSA_2048,RSA_3072,RSA_4096,EC_prime256v1,EC_secp384r1,EC_secp521r1" > certificates.json
           ls -l
+
       - name: Parse the results
         uses: ./.github/actions/ssl-checker
+
   send-slack-notification:
     if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     needs: [check-ssl-certificates]
