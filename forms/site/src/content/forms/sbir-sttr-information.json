@@ -25,6 +25,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "agency",
           "label": "Agency to which you are applying (select only one)",
           "help_text": "This field is required.",
           "required": true,
@@ -36,6 +37,7 @@
         },
         {
           "kind": "field",
+          "id": "other-agency",
           "label": "Other Agency",
           "help_text": "If \"Other\" is selected, enter agency name.",
           "required": "Conditional: Required if Other is checked, otherwise cleared and disabled.",
@@ -47,6 +49,7 @@
         },
         {
           "kind": "field",
+          "id": "sbc-control-id",
           "label": "SBC Control ID:",
           "help_text": "Enter the SBC Control ID. This field is required.",
           "required": true,
@@ -58,6 +61,7 @@
         },
         {
           "kind": "field",
+          "id": "program-type",
           "label": "Program Type (select only one)",
           "help_text": "This field is required.",
           "required": true,
@@ -69,6 +73,7 @@
         },
         {
           "kind": "field",
+          "id": "application-type",
           "label": "Application Type (select only one)",
           "help_text": "See agency-specific instructions to determine application type participation. This field is required.",
           "required": true,
@@ -80,6 +85,7 @@
         },
         {
           "kind": "field",
+          "id": "phase-i-letter-of-intent-number",
           "label": "Phase I Letter of Intent Number:",
           "help_text": "Enter Phase I Letter of Intent Number.",
           "required": false,
@@ -91,6 +97,7 @@
         },
         {
           "kind": "field",
+          "id": "agency-topic-subtopic",
           "label": "Agency Topic/Subtopic:",
           "help_text": "Enter Agency Topic/Subtopic.",
           "required": "Conditional: Required if DOE is checked for \"Agency you are applying to\". Otherwise, optional.",
@@ -108,6 +115,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "eligibility-certification",
           "label": "1a. Do you certify that at the time of award your organization will meet the eligibility criteria for a small business as defined in the funding opportunity announcement?",
           "help_text": "This field is required.",
           "required": true,
@@ -119,6 +127,7 @@
         },
         {
           "kind": "field",
+          "id": "anticipated-personnel",
           "label": "1b. Anticipated Number of personnel to be employed at your organization at the time of award.",
           "help_text": "Enter the number of personnel anticipated to be employed by the small business at the time of award. This field is required.",
           "required": true,
@@ -130,6 +139,7 @@
         },
         {
           "kind": "field",
+          "id": "majority-venture-capital-owned",
           "label": "1c. Is your small business majority owned by venture capital operating companies, hedge funds, or private equity firms?",
           "help_text": "This field is required.",
           "required": true,
@@ -141,6 +151,7 @@
         },
         {
           "kind": "field",
+          "id": "faculty-or-student-owned",
           "label": "1d. Is your small business a Faculty or Student-Owned entity?",
           "help_text": "This field is required.",
           "required": true,
@@ -158,6 +169,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "federal-subcontracts-included",
           "label": "2. Does this application include subcontracts with Federal laboratories or any other Federal Government agencies?",
           "help_text": "This field is required.",
           "required": true,
@@ -169,6 +181,7 @@
         },
         {
           "kind": "field",
+          "id": "laboratory-or-agency-names",
           "label": "If yes, insert the names of the Federal laboratories/agencies:",
           "help_text": "If you have answered \"yes\" to the question above, then please indicate the names of the applicable Federal laboratories or agencies, in the space provided.",
           "required": "Conditional: Enabled and required only if the answer to the Question 2 field (field #F-02-1 above) is \"Yes.\" If the answer to Question 2 (field #F-02-1) is \"No,\" then this field is disabled.",
@@ -180,6 +193,7 @@
         },
         {
           "kind": "field",
+          "id": "hub-zone-located",
           "label": "3. Are you located in a HUBZone?",
           "help_text": "This field is required.",
           "required": true,
@@ -191,6 +205,7 @@
         },
         {
           "kind": "field",
+          "id": "research-entirely-in-united-states",
           "label": "4. Will all research and development on the project be performed in its entirety in the United States?",
           "help_text": "This field is required.",
           "required": true,
@@ -202,6 +217,7 @@
         },
         {
           "kind": "field",
+          "id": "outside-united-states-explanation",
           "label": "Explanation for work outside the United States",
           "help_text": "If you have answered \"no\" to question 4 above, please prepare an explanation of the research and development that is being performed outside the United States, in a separate file. Then use the Add Attachment button to attach the file and complete this entry. When you click Add Attachment, browse to where you saved the file, select the appropriate file and then click Open to complete the action.",
           "required": "Conditional: Enabled and required only if Question 4 (field #F-04-1 above) is answered \"No\". If the answer to Question 4 is \"Yes\", then this field is disabled.",
@@ -213,6 +229,7 @@
         },
         {
           "kind": "field",
+          "id": "equivalent-federal-work",
           "label": "5. Has the applicant and/or Program Director/Principal Investigator submitted proposals for essentially equivalent work under other Federal program solicitations or received other Federal awards for essentially equivalent work?",
           "help_text": "This field is required.",
           "required": true,
@@ -224,6 +241,7 @@
         },
         {
           "kind": "field",
+          "id": "equivalent-work-agencies",
           "label": "If yes, insert the names of the other Federal agencies:",
           "help_text": "If you have answered \"yes\" to question 5 above, then please indicate the names of the applicable Federal agencies, in the space provided.",
           "required": "Conditional: Enabled and required only if the answer to Question 5 (field #F-05-1 above)  is \"Yes.\" If the answer to Question 5 is \"No,\" then this field is disabled.",
@@ -235,6 +253,7 @@
         },
         {
           "kind": "field",
+          "id": "disclosure-permitted",
           "label": "6. Disclosure Permission Statement: If this application does not result in an award, is the Government permitted to disclose the title of your proposed project, and the name, address, telephone number and email address of the official signing for the applicant organization to state-level economic development organizations that may be interested in contacting you for further information (e.g., possible collaborations, investment)?",
           "help_text": "This field is required.",
           "required": true,
@@ -246,6 +265,7 @@
         },
         {
           "kind": "field",
+          "id": "taba-funds-requested",
           "label": "7. Does the application include a request of SBIR or STTR funds for Technical and Business Assistance (TABA)? If yes, please follow the agency specific instructions to provide the budget request and justification. (Please answer no if you plan to use the agency TABA vendor, which does not require you to include a request for TABA funds in your application.)",
           "help_text": "This field is required.",
           "required": true,
@@ -257,6 +277,7 @@
         },
         {
           "kind": "field",
+          "id": "commercialization-plan",
           "label": "8. Commercialization Plan",
           "help_text": "The following applications require a Commercialization Plan: Phase I (DOE only), Phase II (all agencies), Phase I/II Fast-Track (all agencies). Include a Commercialization Plan in accordance with the agency announcement and/or agency-specific instructions. To attach a Commercialization Plan file, click the Add Attachment button, browse to where you saved the file, select the file, and then click Open.",
           "required": "Conditional: Required, ONLY if the answer to the Application Type field (field #D-1) is Phase I and DOE is checked for \"Agency to which you are applying\" (field #A-1 above), or if Phase II or Fast-Track is selected for Application Type field (field #D-1 above). Otherwise this field is optional.",
@@ -274,6 +295,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "phase-ii-awards-received",
           "label": "9. Have you received SBIR Phase II awards from the Federal Government? If yes, provide a company commercialization history in accordance with agency-specific instructions using this attachment.",
           "help_text": "This field is required for Program Type SBIR or Both.",
           "required": "Conditional: Enabled and required, ONLY if the Program Type field (field #C-1 above) is either \"SBIR\" or \"Both\". Otherwise, this field is disabled.",
@@ -285,6 +307,7 @@
         },
         {
           "kind": "field",
+          "id": "commercialization-history",
           "label": "SBIR commercialization history",
           "help_text": "If you have answered \"Yes\" to question 9 above, please prepare a commercialization history in accordance with agency specific instructions, in a separate file. Then use the Add Attachment button to attach the file and complete this entry. When you click Add Attachment, browse to where you saved the file, select the appropriate file and then click Open to complete the action.",
           "required": "Conditional: Enabled and required ONLY if the answer to Question 9 above (field #F-09-1)  is \"Yes.\" Otherwise this field is disabled.",
@@ -296,6 +319,7 @@
         },
         {
           "kind": "field",
+          "id": "principal-investigator-primary-employment",
           "label": "10. Will the Project Director/Principal Investigator have his/her primary employment with the small business at the time of award?",
           "help_text": "This field is required for Program Type SBIR or Both.",
           "required": "Conditional: Enabled and required, ONLY if the Program Type field (field #C-1 above) is either \"SBIR\" or \"Both\". Otherwise, this field is disabled.",
@@ -313,6 +337,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "appointment-and-minimum-effort-certified",
           "label": "11. Please indicate whether the answer to BOTH of the following questions is TRUE: (1) Does the Project Director/Principal Investigator have a formal appointment or commitment either with the small business directly (as an employee or a contractor) OR as an employee of the Research Institution, which in turn has made a commitment to the small business through the STTR application process; AND (2) Will the Project Director/Principal Investigator devote at least 10% effort to the proposed project?",
           "help_text": "This field is required for Program Type STTR or Both.",
           "required": "Conditional: Enabled and required, ONLY if the Program Type field (field #C-1 above) is either \"STTR\" or \"Both\". Otherwise, this field is disabled.",
@@ -324,6 +349,7 @@
         },
         {
           "kind": "field",
+          "id": "small-business-and-institution-work-shares-certified",
           "label": "12. In the joint research and development proposed in this project, does the small business perform at least 40% of the work and the research institution named in the application perform at least 30% of the work?",
           "help_text": "This field is required for Program Type STTR or Both.",
           "required": "Conditional: Enabled and required, ONLY if the Program Type field (field #C-1 above) is either \"STTR\" or \"Both\". Otherwise, this field is disabled.",
@@ -335,6 +361,7 @@
         },
         {
           "kind": "field",
+          "id": "research-partner-uei",
           "label": "13. Provide UEI of non-profit research partner for STTR.",
           "help_text": "Enter the UEI of the non-profit research partner for STTR. This field is required for Program Type STTR or Both.",
           "required": "Conditional: Enabled and required, ONLY if the Program Type field (field #C-1 above) is either \"STTR\" or \"Both\". Otherwise, this field is disabled. Must be 12 characters.",

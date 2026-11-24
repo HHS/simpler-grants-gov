@@ -121,6 +121,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "human-subjects-involved",
               "label": "1. Are Human Subjects Involved?",
               "help_text": "If activities involving human subjects are planned at any time during the proposed project at any performance site, check yes.  Check yes, even if the proposed project is exempt from Regulations for the Protection of Human Subjects.  If no, skip the rest of block 1.  This field is required.\n\nIf activities involving human subjects are not planned at any time during the proposed project at any performance site, click here for no.  Skip the rest of block 1.  This field is required. ",
               "required": true,
@@ -133,6 +134,7 @@
             },
             {
               "kind": "field",
+              "id": "exempt-from-federal-regulations",
               "label": "Is the Project Exempt from Federal regulations?",
               "help_text": "Is the Project Exempt from Federal regulations is required.\n\nYes, this project is exempt from Federal regulations.\n\nNo, this project is not exempt from Federal regulations.",
               "required": "Conditional: human involvement is Yes",
@@ -145,6 +147,7 @@
             },
             {
               "kind": "field",
+              "id": "exemption-numbers",
               "label": "If yes, check appropriate exemption number.",
               "help_text": "If human subject activities are exempt from Federal regulations, provide the exemption numbers corresponding to one or more of the exemption categories.  The eight categories of research that qualify for exemption from coverage by the regulations are defined in the Common Rule for the Protection of Human Subjects.",
               "required": "Conditional: human involvement and exemption are Yes; require at least one category",
@@ -201,6 +204,7 @@
             },
             {
               "kind": "field",
+              "id": "irb-review-pending",
               "label": "If no, is the IRB review Pending?",
               "help_text": "If IRB review is pending, check Yes.\n\nIf IRB review is not pending, check No.",
               "required": "Conditional: active nonexempt human research",
@@ -213,6 +217,7 @@
             },
             {
               "kind": "field",
+              "id": "irb-approval-date",
               "label": "IRB Approval Date:",
               "help_text": "Enter the latest IRB approval date. Leave this blank if review is pending.",
               "required": "Conditional: active nonexempt human review is not pending; source K25/Q25 if-available tension retained",
@@ -225,6 +230,7 @@
             },
             {
               "kind": "field",
+              "id": "human-subject-assurance-number",
               "label": "Human Subject Assurance Number: ",
               "help_text": "Enter the approved Federal Wide Assurance (FWA), Multiple Project Assurance (MPA), Single Project Assurance (SPA) Number or Cooperative Project Assurance Number that the applicant has on file with the Office for Human Research Protections, if available.  If the applicant has a FWA number, enter the 8-digit number.  Do not enter the FWA before the number.",
               "required": false,
@@ -244,6 +250,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "vertebrate-animals-used",
               "label": "2. Are Vertebrate Animals Used?",
               "help_text": "If activities involving vertebrate animals are planned at any time during the proposed project at any performance site, check yes.  If no, skip the rest of block 2.  This field is required. ",
               "required": true,
@@ -256,6 +263,7 @@
             },
             {
               "kind": "field",
+              "id": "iacuc-review-pending",
               "label": "Is the IACUC review Pending?",
               "help_text": "Indicate if an Institutional Animal Care and Use Committee (IACUC) review is pending.\n\nIndicate if an Institutional Animal Care and Use Committee (IACUC) review is pending. Click here if No.",
               "required": "Conditional: animals used Yes",
@@ -268,6 +276,7 @@
             },
             {
               "kind": "field",
+              "id": "iacuc-approval-date",
               "label": "IACUC Approval Date:",
               "help_text": "Enter the latest IACUC approval date. Leave this blank if review is pending.",
               "required": "Conditional: active animal review not pending; K34/Q34 IACUC/IRB and if-available wording tension retained",
@@ -280,6 +289,7 @@
             },
             {
               "kind": "field",
+              "id": "animal-welfare-assurance-number",
               "label": "Animal Welfare Assurance Number:",
               "help_text": "Enter the federally approved animal welfare assurance number.",
               "required": "Conditional: animal review not pending; K35/Q35 if-available tension retained",
@@ -301,6 +311,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "proprietary-information-included",
           "label": "3. Is proprietary/privileged information included in the application?",
           "help_text": "Patentable ideas, trade secrets, privileged or confidential commercial or financial information, disclosure of which may harm the applicant, should be included in applications only when such information is necessary to convey an understanding of the proposed project.  If the application includes such information, check yes and clearly mark each line or paragraph on the pages containing the proprietary/privileged information with a legend similar to: \"The following contains proprietary/privileged information that (name of applicant) requests not be released to persons outside the Government, except for purposes of review and evaluation.\"  This field is required.",
           "required": true,
@@ -318,6 +329,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "environmental-impact",
               "label": "4.a. Does this Project Have an Actual or Potential Impact - positive or negative - on the environment?",
               "help_text": "Indicate if this project has an actual or potential impact - positive or negative - on the environment. This field is required.\n\nIndicate if this project has an actual or potential impact - positive or negative - on the environment. Click no here if this is not the case.  This field is required.",
               "required": true,
@@ -330,6 +342,7 @@
             },
             {
               "kind": "field",
+              "id": "environmental-impact-explanation",
               "label": "4.b. If yes, please explain:",
               "help_text": "Enter explanation of the actual or potential impact on the environment.",
               "required": "Conditional: environmental impact Yes",
@@ -342,6 +355,7 @@
             },
             {
               "kind": "field",
+              "id": "assessment-or-exemption-performed",
               "label": "4.c. If this project has an actual or potential impact on the environment, has an exemption been authorized or an environmental assessment (EA) or environmental impact statement (EIS) been performed?",
               "help_text": "Check yes or no.",
               "required": false,
@@ -354,6 +368,7 @@
             },
             {
               "kind": "field",
+              "id": "assessment-or-exemption-explanation",
               "label": "4.d. If yes, please explain:",
               "help_text": "Enter additional details about the EA or EIS.",
               "required": "Conditional: active assessment-or-exemption Yes",
@@ -373,6 +388,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "historic-site-designated-or-eligible",
               "label": "5.  Is the research performance site designated, or eligible to be designated, as a historic place?",
               "help_text": "If any research performance site is designated or eligible to be designated as a historic place, if Yes, check the Yes box and then provide an explanation in the box provided in 5.a.  Otherwise, check the No box.  This field is required.",
               "required": true,
@@ -385,6 +401,7 @@
             },
             {
               "kind": "field",
+              "id": "historic-site-explanation",
               "label": "5.a. If yes, please explain:",
               "help_text": "If you checked the Yes box indicating any performance site is designated, or eligible to be designated, as a historic place, provide the explanation here.",
               "required": "Conditional: historic site designated or eligible Yes",
@@ -404,6 +421,7 @@
           "children": [
             {
               "kind": "field",
+              "id": "international-activities-involved",
               "label": "6. Does this project involve activities outside of the United States or partnerships with international collaborators?",
               "help_text": "Indicate whether this project involves activities outside of the United States or partnerships with international collaborators.  This field is required.\n\nIndicate whether this project involves activities outside of the United States or partnerships with international collaborators.  Click here for no.  This field is required.",
               "required": true,
@@ -416,6 +434,7 @@
             },
             {
               "kind": "field",
+              "id": "international-countries",
               "label": "6.a. If yes, identify countries:",
               "help_text": "Enter the countries with which international cooperative activities are involved.",
               "required": "Conditional: international involvement Yes",
@@ -428,6 +447,7 @@
             },
             {
               "kind": "field",
+              "id": "international-activities-explanation",
               "label": "6.b. Optional Explanation:",
               "help_text": "Enter an explanation for involvement with outside entities (optional).",
               "required": false,
@@ -449,6 +469,7 @@
       "children": [
         {
           "kind": "field",
+          "id": "project-summary-abstract",
           "label": "7. Project Summary/Abstract",
           "help_text": "The Project Summary must contain a summary of the proposed activity suitable for dissemination to the public.  It should be a self-contained description of the project and should contain a statement of objectives and methods to be employed.  It should be informative to other persons working in the same or related fields and insofar as possible understandable to a scientifically or technically literate lay reader.  This Summary must not include any proprietary/confidential information.",
           "required": "Conditional: external separate cover SubmissionTypeCode is not Pre-application; context not supplied",
@@ -461,6 +482,7 @@
         },
         {
           "kind": "field",
+          "id": "project-narrative",
           "label": "8. Project Narrative",
           "help_text": "Provide Project Narrative in accordance with the announcement and/or agency-specific instructions.",
           "required": "Conditional: external separate cover SubmissionTypeCode is not Pre-application; context not supplied",
@@ -473,6 +495,7 @@
         },
         {
           "kind": "field",
+          "id": "bibliography-references-cited",
           "label": "9. Bibliography & References Cited",
           "help_text": "Provide a bibliography of any references cited in the Project Narrative.  Each reference must include the names of all authors (in the same sequence in which they appear in the publication), the article and journal title, book title, volume number, page numbers, and year of publication.  Include only bibliographic citations.  Applicants should be especially careful to follow scholarly practices in providing citations for source materials relied upon when preparing any section of the application.",
           "required": false,
@@ -485,6 +508,7 @@
         },
         {
           "kind": "field",
+          "id": "facilities-other-resources",
           "label": "10.  Facilities & Other Resources",
           "help_text": "This information is used to assess the capability of the organizational resources available to perform the effort proposed.  Identify the facilities to be used (Laboratory, Animal, Computer, Office, Clinical and Other).  If appropriate, indicate their capacities, pertinent capabilities, relative proximity and extent of availability to the project.  Describe only those resources that are directly applicable to the proposed work.  Provide any information describing the Other Resources available to the project (e.g., machine shop, electronic shop) and the extent to which they would be available to the project.",
           "required": false,
@@ -497,6 +521,7 @@
         },
         {
           "kind": "field",
+          "id": "equipment",
           "label": "11. Equipment",
           "help_text": "List major items of equipment already available for this project and, if appropriate identify location and pertinent capabilities.",
           "required": false,
@@ -509,6 +534,7 @@
         },
         {
           "kind": "field",
+          "id": "other-attachments",
           "label": "12. Other Attachments",
           "help_text": "Attach a file to provide any other project information not provided above or in accordance with the announcement and/or agency-specific instruction. \n\nOptional Other Attachment Check Box. Indicates whether an Optional Other Attachment is attached.",
           "required": false,
