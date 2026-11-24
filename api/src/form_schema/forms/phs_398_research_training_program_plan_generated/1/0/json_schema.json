@@ -3,7 +3,12 @@
   "type": "object",
   "properties": {
     "introduction_to_application": {
-      "$ref": "#/$defs/research.introduction-to-application"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.introduction-to-application"
+        }
+      ],
+      "title": "1. Introduction to Application (for Resubmission and Revision applications)"
     },
     "program_plan": {
       "allOf": [
@@ -12,7 +17,7 @@
         }
       ],
       "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "Program Plan"
+      "title": "2. Program Plan"
     },
     "responsible_conduct_of_research": {
       "allOf": [
@@ -21,7 +26,7 @@
         }
       ],
       "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "Plan for Instruction in the Responsible Conduct of Research"
+      "title": "3. Plan for Instruction in the Responsible Conduct of Research"
     },
     "methods_for_enhancing_reproducibility": {
       "allOf": [
@@ -30,10 +35,15 @@
         }
       ],
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "Plan for Instruction in Methods for Enhancing Reproducibility"
+      "title": "4. Plan for Instruction in Methods for Enhancing Reproducibility"
     },
     "multiple_pd_pi_leadership_plan": {
-      "$ref": "#/$defs/research.multiple-pd-pi-leadership-plan"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.multiple-pd-pi-leadership-plan"
+        }
+      ],
+      "title": "5. Multiple PD/PI Leadership Plan"
     },
     "progress_report": {
       "allOf": [
@@ -42,7 +52,7 @@
         }
       ],
       "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "Progress Report (for Renewal applications)"
+      "title": "6. Progress Report (for Renewal applications)"
     },
     "participating_faculty_biosketches": {
       "allOf": [
@@ -51,10 +61,15 @@
         }
       ],
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "Participating Faculty Biosketches"
+      "title": "7. Participating Faculty Biosketches"
     },
     "letters_of_support": {
-      "$ref": "#/$defs/research.letters-of-support"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.letters-of-support"
+        }
+      ],
+      "title": "8. Letters of Support"
     },
     "data_tables": {
       "allOf": [
@@ -63,19 +78,39 @@
         }
       ],
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "Data Tables"
+      "title": "9. Data Tables"
     },
     "vertebrate_animals": {
-      "$ref": "#/$defs/research.vertebrate-animals"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.vertebrate-animals"
+        }
+      ],
+      "title": "10. Vertebrate Animals"
     },
     "select_agent_research": {
-      "$ref": "#/$defs/research.select-agent-research"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.select-agent-research"
+        }
+      ],
+      "title": "11. Select Agent Research"
     },
     "consortium_contractual_arrangements": {
-      "$ref": "#/$defs/research.consortium-contractual-arrangements"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.consortium-contractual-arrangements"
+        }
+      ],
+      "title": "12. Consortium/Contractual Arrangements"
     },
     "other_plans": {
-      "$ref": "#/$defs/research.other-plans"
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.other-plans"
+        }
+      ],
+      "title": "13. Other Plan(s)"
     },
     "appendix": {
       "type": "array",
@@ -83,7 +118,8 @@
         "$ref": "#/$defs/types.attachment"
       },
       "maxItems": 10,
-      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance."
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "14. Appendix"
     }
   },
   "required": [
