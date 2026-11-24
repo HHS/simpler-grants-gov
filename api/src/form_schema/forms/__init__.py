@@ -31,6 +31,7 @@ from .project_performance_site_location import ProjectPerformanceSiteLocation_v4
 from .rr_key_person_expanded_generated import FORM as RRKeyPersonExpandedGenerated_v4_0
 from .rr_key_person_generated import FORM as RRKeyPersonGenerated_v3_0
 from .sf424 import SF424_v4_0
+from .sf424_generated import FORM as SF424Generated_v4_0
 from .sf424_individual_generated import FORM as SF424IndividualGenerated_v2_0
 from .sf424_mandatory_generated import FORM as SF424MandatoryGenerated_v3_0
 from .sf424_short import SF424Short_v3_0
@@ -83,6 +84,7 @@ _ALL_FORMS: list[Form] = [
     SF424IndividualGenerated_v2_0,
     SF424ShortGenerated_v3_0,
     SF424MandatoryGenerated_v3_0,
+    SF424Generated_v4_0,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -109,6 +111,7 @@ GENERATED_FORMS: list[Form] = [
     SF424IndividualGenerated_v2_0,
     SF424ShortGenerated_v3_0,
     SF424MandatoryGenerated_v3_0,
+    SF424Generated_v4_0,
 ]
 
 

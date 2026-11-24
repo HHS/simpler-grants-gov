@@ -36,6 +36,7 @@ from tests.src.form_schema.parity.xml.diffs import (
     project_performance_site_location,
     rr_key_person_expanded_generated,
     rr_key_person_generated,
+    sf424_generated,
     sf424_individual_generated,
     sf424_mandatory_generated,
     sf424_short_generated,
@@ -74,6 +75,7 @@ DIFFS = [
     sf424_individual_generated.DIFF,
     sf424_short_generated.DIFF,
     sf424_mandatory_generated.DIFF,
+    sf424_generated.DIFF,
 ]
 
 

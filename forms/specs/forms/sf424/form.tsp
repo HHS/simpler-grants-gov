@@ -12,6 +12,10 @@ using SimplerForms;
 namespace Forms.SF424Regular;
 
 // The data only: how an applicant is shown it is in layout.tsp.
+@Sgg.sync(#{
+  instructions: "a8fbf8db-a605-49dc-81d8-1faaad40da26",
+  xml: "mapping",
+})
 @Meta.form(#{
   id: "sf424",
   formName: "Application for Federal Assistance (SF-424)",

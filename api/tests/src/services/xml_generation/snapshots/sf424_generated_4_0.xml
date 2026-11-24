@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SF424_4_0:SF424_4_0 xmlns:SF424_4_0="http://apply.grants.gov/forms/SF424_4_0-V4.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" SF424_4_0:FormVersion="4.0">
+  <SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>
+  <SF424_4_0:ApplicationType>Revision</SF424_4_0:ApplicationType>
+  <SF424_4_0:RevisionType>E: Other (specify)</SF424_4_0:RevisionType>
+  <SF424_4_0:RevisionOtherSpecify>Scope change</SF424_4_0:RevisionOtherSpecify>
+  <SF424_4_0:DateReceived>2026-11-05</SF424_4_0:DateReceived>
+  <SF424_4_0:ApplicantID>APP-1</SF424_4_0:ApplicantID>
+  <SF424_4_0:FederalEntityIdentifier>FED-1</SF424_4_0:FederalEntityIdentifier>
+  <SF424_4_0:FederalAwardIdentifier>AWARD-1</SF424_4_0:FederalAwardIdentifier>
+  <SF424_4_0:StateReceiveDate>2026-11-06</SF424_4_0:StateReceiveDate>
+  <SF424_4_0:StateApplicationID>STATE-1</SF424_4_0:StateApplicationID>
+  <SF424_4_0:OrganizationName>Prairie Community Research Center</SF424_4_0:OrganizationName>
+  <SF424_4_0:EmployerTaxpayerIdentificationNumber>12-3456789</SF424_4_0:EmployerTaxpayerIdentificationNumber>
+  <SF424_4_0:SAMUEI>PCRA12345678</SF424_4_0:SAMUEI>
+  <SF424_4_0:Applicant>
+    <globLib:Street1>128 Oak Avenue</globLib:Street1>
+    <globLib:Street2>Suite 4</globLib:Street2>
+    <globLib:City>Springfield</globLib:City>
+    <globLib:County>Sangamon</globLib:County>
+    <globLib:State>IL: Illinois</globLib:State>
+    <globLib:ZipPostalCode>62701-1234</globLib:ZipPostalCode>
+    <globLib:Country>USA: UNITED STATES</globLib:Country>
+  </SF424_4_0:Applicant>
+  <SF424_4_0:DepartmentName>Research</SF424_4_0:DepartmentName>
+  <SF424_4_0:DivisionName>Climate</SF424_4_0:DivisionName>
+  <SF424_4_0:ContactPerson>
+    <globLib:PrefixName>Mx.</globLib:PrefixName>
+    <globLib:FirstName>Jordan</globLib:FirstName>
+    <globLib:MiddleName>A</globLib:MiddleName>
+    <globLib:LastName>Reyes</globLib:LastName>
+    <globLib:SuffixName>Jr.</globLib:SuffixName>
+  </SF424_4_0:ContactPerson>
+  <SF424_4_0:Title>Grants Administrator</SF424_4_0:Title>
+  <SF424_4_0:OrganizationAffiliation>Prairie Partners</SF424_4_0:OrganizationAffiliation>
+  <SF424_4_0:PhoneNumber>2175550102</SF424_4_0:PhoneNumber>
+  <SF424_4_0:Fax>2175550109</SF424_4_0:Fax>
+  <SF424_4_0:Email>jordan.reyes@example.org</SF424_4_0:Email>
+  <SF424_4_0:ApplicantTypeCode1>H: Public/State Controlled Institution of Higher Education</SF424_4_0:ApplicantTypeCode1>
+  <SF424_4_0:ApplicantTypeCode2>M: Nonprofit with 501C3 IRS Status (Other than Institution of Higher Education)</SF424_4_0:ApplicantTypeCode2>
+  <SF424_4_0:ApplicantTypeCode3>X: Other (specify)</SF424_4_0:ApplicantTypeCode3>
+  <SF424_4_0:ApplicantTypeOtherSpecify>Consortium</SF424_4_0:ApplicantTypeOtherSpecify>
+  <SF424_4_0:AgencyName>Department of Community Programs</SF424_4_0:AgencyName>
+  <SF424_4_0:CFDANumber>99.999</SF424_4_0:CFDANumber>
+  <SF424_4_0:CFDAProgramTitle>Community Research Demonstration</SF424_4_0:CFDAProgramTitle>
+  <SF424_4_0:FundingOpportunityNumber>DEMO-2027-001</SF424_4_0:FundingOpportunityNumber>
+  <SF424_4_0:FundingOpportunityTitle>Community Research Demonstration</SF424_4_0:FundingOpportunityTitle>
+  <SF424_4_0:CompetitionIdentificationNumber>COMP-01</SF424_4_0:CompetitionIdentificationNumber>
+  <SF424_4_0:CompetitionIdentificationTitle>Main Competition</SF424_4_0:CompetitionIdentificationTitle>
+  <SF424_4_0:AreasAffected>
+    <att:FileName>areas-affected.pdf</att:FileName>
+    <att:MimeType>application/pdf</att:MimeType>
+    <att:FileLocation att:href="areas-affected.pdf"/>
+    <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+  </SF424_4_0:AreasAffected>
+  <SF424_4_0:ProjectTitle>Neighborhood Heat Resilience Study</SF424_4_0:ProjectTitle>
+  <SF424_4_0:AdditionalProjectTitle>
+    <att:AttachedFile>
+      <att:FileName>title-1.pdf</att:FileName>
+      <att:MimeType>application/pdf</att:MimeType>
+      <att:FileLocation att:href="title-1.pdf"/>
+      <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+    </att:AttachedFile>
+    <att:AttachedFile>
+      <att:FileName>title-2.pdf</att:FileName>
+      <att:MimeType>application/pdf</att:MimeType>
+      <att:FileLocation att:href="title-2.pdf"/>
+      <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+    </att:AttachedFile>
+  </SF424_4_0:AdditionalProjectTitle>
+  <SF424_4_0:CongressionalDistrictApplicant>IL-013</SF424_4_0:CongressionalDistrictApplicant>
+  <SF424_4_0:CongressionalDistrictProgramProject>IL-013</SF424_4_0:CongressionalDistrictProgramProject>
+  <SF424_4_0:AdditionalCongressionalDistricts>
+    <att:FileName>districts.pdf</att:FileName>
+    <att:MimeType>application/pdf</att:MimeType>
+    <att:FileLocation att:href="districts.pdf"/>
+    <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+  </SF424_4_0:AdditionalCongressionalDistricts>
+  <SF424_4_0:ProjectStartDate>2027-01-01</SF424_4_0:ProjectStartDate>
+  <SF424_4_0:ProjectEndDate>2027-12-31</SF424_4_0:ProjectEndDate>
+  <SF424_4_0:FederalEstimatedFunding>25000.00</SF424_4_0:FederalEstimatedFunding>
+  <SF424_4_0:ApplicantEstimatedFunding>5000.00</SF424_4_0:ApplicantEstimatedFunding>
+  <SF424_4_0:StateEstimatedFunding>0.00</SF424_4_0:StateEstimatedFunding>
+  <SF424_4_0:LocalEstimatedFunding>0.00</SF424_4_0:LocalEstimatedFunding>
+  <SF424_4_0:OtherEstimatedFunding>0.00</SF424_4_0:OtherEstimatedFunding>
+  <SF424_4_0:ProgramIncomeEstimatedFunding>0.00</SF424_4_0:ProgramIncomeEstimatedFunding>
+  <SF424_4_0:TotalEstimatedFunding>30000.00</SF424_4_0:TotalEstimatedFunding>
+  <SF424_4_0:StateReview>a. This application was made available to the State under the Executive Order 12372 Process for review on</SF424_4_0:StateReview>
+  <SF424_4_0:StateReviewAvailableDate>2026-10-01</SF424_4_0:StateReviewAvailableDate>
+  <SF424_4_0:DelinquentFederalDebt>Y: Yes</SF424_4_0:DelinquentFederalDebt>
+  <SF424_4_0:DebtExplanation>
+    <att:FileName>debt-explanation.pdf</att:FileName>
+    <att:MimeType>application/pdf</att:MimeType>
+    <att:FileLocation att:href="debt-explanation.pdf"/>
+    <glob:HashValue glob:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</glob:HashValue>
+  </SF424_4_0:DebtExplanation>
+  <SF424_4_0:CertificationAgree>Y: Yes</SF424_4_0:CertificationAgree>
+  <SF424_4_0:AuthorizedRepresentative>
+    <globLib:FirstName>Morgan</globLib:FirstName>
+    <globLib:LastName>Chen</globLib:LastName>
+  </SF424_4_0:AuthorizedRepresentative>
+  <SF424_4_0:AuthorizedRepresentativeTitle>Executive Director</SF424_4_0:AuthorizedRepresentativeTitle>
+  <SF424_4_0:AuthorizedRepresentativePhoneNumber>2175550103</SF424_4_0:AuthorizedRepresentativePhoneNumber>
+  <SF424_4_0:AuthorizedRepresentativeEmail>morgan.chen@example.org</SF424_4_0:AuthorizedRepresentativeEmail>
+  <SF424_4_0:AuthorizedRepresentativeFax>2175550110</SF424_4_0:AuthorizedRepresentativeFax>
+  <SF424_4_0:AORSignature>Morgan Chen</SF424_4_0:AORSignature>
+  <SF424_4_0:DateSigned>2026-11-05</SF424_4_0:DateSigned>
+</SF424_4_0:SF424_4_0>
