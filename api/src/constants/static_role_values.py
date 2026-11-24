@@ -217,38 +217,6 @@ LEGACY_AGENCY_S2S_ROLE = Role(
 )
 
 ############################
-# Core Opportunity Roles
-############################
-
-GRANTOR_PROGRAM_OFFICER_ID = uuid.UUID("66b4238b-8f22-4996-b6ba-712958fd5631")
-GRANTOR_PROGRAM_OFFICER = Role(
-    role_id=GRANTOR_PROGRAM_OFFICER_ID,
-    role_name="Grantor Program Officer",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        GRANTOR_PROGRAM_OFFICER_ID,
-        [Privilege.PROGRAM_OFFICER_APPROVAL],
-    ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=GRANTOR_PROGRAM_OFFICER_ID, role_type=RoleType.AGENCY)
-    ],
-)
-
-GRANTOR_BUDGET_OFFICER_ID = uuid.UUID("4d00cb3c-0cc5-4876-8e09-7067ae0530a2")
-GRANTOR_BUDGET_OFFICER = Role(
-    role_id=GRANTOR_BUDGET_OFFICER_ID,
-    role_name="Grantor Budget Officer",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        GRANTOR_BUDGET_OFFICER_ID,
-        [Privilege.BUDGET_OFFICER_APPROVAL],
-    ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=GRANTOR_BUDGET_OFFICER_ID, role_type=RoleType.AGENCY)
-    ],
-)
-
-############################
 # Core Internal Roles
 ############################
 
@@ -276,34 +244,6 @@ E2E_TEST_USER_ROLE = Role(
         ],
     ),
     link_role_types=[LinkRoleRoleType(role_id=E2E_TEST_USER_ROLE_ID, role_type=RoleType.INTERNAL)],
-)
-
-SYSTEM_WORKFLOW_USER_ROLE_ID = uuid.UUID("18258804-a281-41cd-9afb-06061fa7593c")
-SYSTEM_WORKFLOW_USER_ROLE = Role(
-    role_id=SYSTEM_WORKFLOW_USER_ROLE_ID,
-    role_name="System Workflow Role",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        SYSTEM_WORKFLOW_USER_ROLE_ID, [Privilege.INTERNAL_WORKFLOW_ACCESS]
-    ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=SYSTEM_WORKFLOW_USER_ROLE_ID, role_type=RoleType.INTERNAL),
-    ],
-)
-
-# Role for us to give our own users for testing workflows
-# Allowed to send any event to the event API
-INTERNAL_WORKFLOW_USER_ROLE_ID = uuid.UUID("df17eaaf-701b-4b9f-9a88-0406beabc68e")
-INTERNAL_WORKFLOW_USER_ROLE = Role(
-    role_id=INTERNAL_WORKFLOW_USER_ROLE_ID,
-    role_name="Internal Workflow User",
-    is_core=True,
-    link_privileges=get_link_privileges(
-        INTERNAL_WORKFLOW_USER_ROLE_ID, [Privilege.INTERNAL_WORKFLOW_EVENT_SEND]
-    ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=INTERNAL_WORKFLOW_USER_ROLE_ID, role_type=RoleType.INTERNAL),
-    ],
 )
 
 INTERNAL_S3_SCANNER_ROLE_ID = uuid.UUID("49388bd7-c36a-4977-b8e7-bac32c7a8f77")
@@ -339,10 +279,6 @@ CORE_ROLES = [
     E2E_TEST_USER_ROLE,
     LEGACY_AGENCY_S2S_ROLE,
     NAVA_INTERNAL_ROLE,
-    SYSTEM_WORKFLOW_USER_ROLE,
-    INTERNAL_WORKFLOW_USER_ROLE,
-    GRANTOR_PROGRAM_OFFICER,
-    GRANTOR_BUDGET_OFFICER,
     INTERNAL_S3_SCANNER_ROLE,
     E2E_TEST_USER_MANAGER_ROLE,
 ]

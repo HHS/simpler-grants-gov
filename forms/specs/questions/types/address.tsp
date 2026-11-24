@@ -114,3 +114,8 @@ model AddressZipPlusFour is Questions.Types.Address;
   Questions.Types.CountryCode.USA,
   #{ minLength: 9 }
 );
+
+@@doc(
+  AddressZipPlusFour.zipCode,
+  "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required."
+);

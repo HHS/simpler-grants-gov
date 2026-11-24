@@ -40,8 +40,10 @@ from src.form_schema.forms import (
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
+    NasaPIAndAORGenerated_v1_0,
     NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
+    NSFSuggestedReviewers_v1_1,
     OtherNarrativeAttachment_v1_2,
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
@@ -710,6 +712,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "6d58e0cb-9b08-5732-b4a5-4df7f8cedfa7",
             ),
             (
+                "E2E-NSFSR",
+                "NSF Suggested Reviewers",
+                NSFSuggestedReviewers_v1_1.form_id,
+                "97621d95-418a-4c00-96ab-3817c7dc7fe2",
+            ),
+            (
                 "E2E-PABSS",
                 "Project Abstract Summary",
                 ProjectAbstractSummary_v2_0.form_id,
@@ -762,6 +770,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "NSF Senior/Key Person Profile (Expanded) (Generated)",
                 NSFKeyPersonExpandedGenerated_v3_3.form_id,
                 "7b0b7e69-0943-429e-b380-ebaf69985400",
+            ),
+            (
+                "E2E-NASAPIAORG",
+                "NASA - PI and AOR Supplemental Data Sheet (Generated)",
+                NasaPIAndAORGenerated_v1_0.form_id,
+                "17281277-7149-4a77-b13e-89fe7e2f344a",
             ),
             (
                 "E2E-SF424",

@@ -15,11 +15,9 @@ from src.constants.lookup_constants import (
 )
 from src.constants.static_role_values import (
     INTERNAL_S3_SCANNER_ROLE,
-    INTERNAL_WORKFLOW_USER_ROLE,
     NAVA_INTERNAL_ROLE,
     ORG_ADMIN,
     ORG_MEMBER,
-    SYSTEM_WORKFLOW_USER_ROLE,
 )
 from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization
@@ -98,41 +96,6 @@ def create_internal_users(db_session: db.Session) -> None:
 
     user_scenarios.append("admin_user - Internal NAVA admin user")
     logger.info("Internal admin user created. Key: 'admin_key'")
-
-    ###############################
-    # Workflow management user
-    ###############################
-    (
-        UserBuilder(
-            uuid.UUID("aed2ad32-8427-41bd-aee7-199310292941"),
-            db_session,
-            "Workflow Management System User",
-        )
-        .with_api_key("local-workflow-user-api-key")
-        .with_profile(first_name="System", last_name="User")
-        .with_internal_role(SYSTEM_WORKFLOW_USER_ROLE)
-        .build()
-    )
-
-    user_scenarios.append("Workflow management user - Needed for certain workflow related tasks")
-
-    ###############################
-    # Internal workflow user that can send events
-    ###############################
-    (
-        UserBuilder(
-            uuid.UUID("13f0e322-66b9-4e28-80de-9429fc1c0449"),
-            db_session,
-            "Internal workflow user that can send events",
-        )
-        .with_api_key("internal_workflow_user_key")
-        .with_internal_role(INTERNAL_WORKFLOW_USER_ROLE)
-        .build()
-    )
-
-    user_scenarios.append(
-        "Internal workflow user that can send events - capable of sending events at the workflow API"
-    )
 
     ###############################
     # Local file-scanner user
