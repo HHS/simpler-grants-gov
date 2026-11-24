@@ -1,5 +1,7 @@
 from pathlib import Path
+
 from lxml import etree
+
 from src.form_schema.forms.research_and_related_other_project_information_generated import (
     FORM_XML_TRANSFORM_RULES,
 )
