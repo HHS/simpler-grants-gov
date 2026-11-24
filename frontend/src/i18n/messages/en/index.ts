@@ -1754,9 +1754,9 @@ export const messages = {
     breadcrumbWorkspace: "Workspace",
     breadcrumbOrganizations: "Organizations",
     pageHeading: "Manage users",
-    activeUsersHeading: "Active Users Roster",
+    activeUsersHeading: "User roster",
     activeUsersTableDescription:
-      "Adjust permissions for active users so they have the right access for their role.",
+      "Manage user status, roles, and permissions for members of your organization.",
     activeUsersFetchError:
       "We have encountered an error retrieving the Active Users roster, please try again later.",
     activeUsersTableZeroState: "There are no active users.",
