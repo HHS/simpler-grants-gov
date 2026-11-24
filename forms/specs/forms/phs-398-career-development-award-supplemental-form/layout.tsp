@@ -5,7 +5,7 @@ namespace Forms.Phs398CareerDevelopmentAwardSupplemental;
 
 @UI.layout(Form)
 model FormLayout {
-  @doc("Attach an Introduction to Application for Resubmission and Revision applications.")
+  /** Attach an Introduction to Application for Resubmission and Revision applications. */
   @UI.label("Introduction")
   section1: {
     introductionToApplication: Form.introductionToApplication;
@@ -16,7 +16,7 @@ model FormLayout {
     candidateInformationAndGoals: Form.candidateInformationAndGoals;
   };
 
-  @doc("Research Strategy is required. Include the Progress Report Publication List for Renewal applications. It is optional for Resubmission.")
+  /** Research Strategy is required. Include the Progress Report Publication List for Renewal applications. It is optional for Resubmission. */
   @UI.label("Research Plan Section")
   section3: {
     specificAims: Form.specificAims;
@@ -43,7 +43,7 @@ model FormLayout {
     candidatesContribution: Form.candidatesContribution;
   };
 
-  @doc("Include Vertebrate Animals if you answered Yes to the animals-used question on R&R Other Project Information.")
+  /** Include Vertebrate Animals if you answered Yes to the animals-used question on R&R Other Project Information. */
   @UI.label("Other Research Plan Section")
   section7: {
     vertebrateAnimals: Form.vertebrateAnimals;
