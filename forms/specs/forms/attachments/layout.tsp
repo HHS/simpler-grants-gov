@@ -5,7 +5,9 @@ namespace Forms.ApplicationAttachments;
 
 @UI.layout(ApplicationAttachments)
 model ApplicationAttachmentsLayout {
-  @doc("Instructions:  On this form, you will attach the various files that make up your grant application. Please consult with the appropriate Agency Guidelines for more information about each needed file. Please remember that any files you attach must be in the document format and named as specified in the Guidelines.\n\nImportant:  Please attach your files in the proper sequence. See the appropriate Agency Guidelines for details.")
+  /** Instructions:  On this form, you will attach the various files that make up your grant application. Please consult with the appropriate Agency Guidelines for more information about each needed file. Please remember that any files you attach must be in the document format and named as specified in the Guidelines.
+
+Important:  Please attach your files in the proper sequence. See the appropriate Agency Guidelines for details. */
   @UI.label("Application files")
   section1: {
     att1: ApplicationAttachments.att1;
