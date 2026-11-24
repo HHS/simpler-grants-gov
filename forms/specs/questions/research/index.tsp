@@ -74,6 +74,21 @@ scalar AdditionalSynergisticActivities extends Questions.Types.Attachment;
 @UI.label("Introduction to Application (for Resubmission and Revision applications)")
 scalar IntroductionToApplication extends Questions.Types.Attachment;
 
+/** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/specific-aims" })
+@UI.label("Specific Aims")
+scalar SpecificAims extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/research-strategy" })
+@UI.label("Research Strategy")
+scalar ResearchStrategy extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. Required if you selected "Renewal" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/progress-report-publication-list" })
+@UI.label("Progress Report Publication List (for Renewal applications)")
+scalar ProgressReportPublicationList extends Questions.Types.Attachment;
+
 /** Attach PDF formatted file. Required if you checked "Yes" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
 @Meta.question(#{ id: "research/vertebrate-animals" })
 @UI.label("Vertebrate Animals")
@@ -85,16 +100,40 @@ scalar VertebrateAnimals extends Questions.Types.Attachment;
 scalar SelectAgentResearch extends Questions.Types.Attachment;
 
 /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/multiple-pd-pi-leadership-plan" })
+@UI.label("Multiple PD/PI Leadership Plan")
+scalar MultiplePdPiLeadershipPlan extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
 @Meta.question(#{ id: "research/consortium-contractual-arrangements" })
 @UI.label("Consortium/Contractual Arrangements")
 scalar ConsortiumContractualArrangements extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/letters-of-support" })
+@UI.label("Letters of Support")
+scalar LettersOfSupport extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/resource-sharing-plans" })
+@UI.label("Resource Sharing Plan(s)")
+scalar ResourceSharingPlans extends Questions.Types.Attachment;
 
 /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
 @Meta.question(#{ id: "research/other-plans" })
 @UI.label("Other Plan(s)")
 scalar OtherPlans extends Questions.Types.Attachment;
 
-/** Attach an appendix PDF. */
-@Meta.question(#{ id: "research/appendix-attachment" })
-@UI.label("Appendix attachment")
-scalar AppendixAttachment extends Questions.Types.Attachment;
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/key-biological-and-or-chemical-resources" })
+@UI.label("Authentication of Key Biological and/or Chemical Resources")
+scalar KeyBiologicalAndOrChemicalResources extends Questions.Types.Attachment;
+
+@Meta.question(#{ id: "research/appendix" })
+@UI.label("Appendix")
+model Appendix {
+  /** Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+  @UI.widget(Rendering.Widget.AttachmentArray)
+  @maxItems(10)
+  appendix?: Questions.Types.Attachment[];
+}

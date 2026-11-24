@@ -3,7 +3,6 @@ import "form-library-xml";
 import "simpler-forms";
 import "simpler-forms-sgg";
 import "#forms/index.tsp";
-import "#questions/types/attachment.tsp";
 import "#questions/research/index.tsp";
 using SimplerForms;
 namespace Forms.Phs398ResearchPlan;
@@ -41,52 +40,17 @@ namespace Forms.Phs398ResearchPlan;
   }
 )
 model Phs398ResearchPlan {
-  @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
   introductionToApplication?: Questions.Research.IntroductionToApplication;
-
-  /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("2. Specific Aims")
-  specificAims?: Questions.Types.Attachment;
-
-  /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("3. Research Strategy")
-  researchStrategy: Questions.Types.Attachment;
-
-  /** Attach PDF formatted file. Required if you selected "Renewal" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("4. Progress Report Publication List")
-  progressReportPublicationList?: Questions.Types.Attachment;
-
-  @UI.label("5. Vertebrate Animals")
+  specificAims?: Questions.Research.SpecificAims;
+  researchStrategy: Questions.Research.ResearchStrategy;
+  progressReportPublicationList?: Questions.Research.ProgressReportPublicationList;
   vertebrateAnimals?: Questions.Research.VertebrateAnimals;
-
-  @UI.label("6. Select Agent Research")
   selectAgentResearch?: Questions.Research.SelectAgentResearch;
-
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("7. Multiple PD/PI Leadership Plan")
-  multiplePdPiLeadershipPlan?: Questions.Types.Attachment;
-
-  @UI.label("8. Consortium/Contractual Arrangements")
+  multiplePdPiLeadershipPlan?: Questions.Research.MultiplePdPiLeadershipPlan;
   consortiumContractualArrangements?: Questions.Research.ConsortiumContractualArrangements;
-
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("9. Letters of Support")
-  lettersOfSupport?: Questions.Types.Attachment;
-
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("10. Resource Sharing Plan(s)")
-  resourceSharingPlans?: Questions.Types.Attachment;
-
-  @UI.label("11. Other Plan(s)")
+  lettersOfSupport?: Questions.Research.LettersOfSupport;
+  resourceSharingPlans?: Questions.Research.ResourceSharingPlans;
   otherPlans?: Questions.Research.OtherPlans;
-
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("12. Authentication of Key Biological and/or Chemical Resources")
-  authenticationOfKeyBiologicalAndOrChemicalResources?: Questions.Types.Attachment;
-
-  /** Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.label("13. Appendix")
-  @UI.widget(Rendering.Widget.AttachmentArray)
-  @maxItems(10)
-  appendix?: Questions.Research.AppendixAttachment[];
+  keyBiologicalAndOrChemicalResources?: Questions.Research.KeyBiologicalAndOrChemicalResources;
+  ...Questions.Research.Appendix;
 }

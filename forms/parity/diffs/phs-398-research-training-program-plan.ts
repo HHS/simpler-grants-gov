@@ -5,6 +5,13 @@ export const DIFF: FormDiff = {
   xml: "xml-mapping",
   dat: {
     differingLabels: {
+      "2-4": {
+        plan: "5. Multiple PD/PI Leadership Plan",
+        source: "5. Multiple PD/PI Leadership Plan (if applicable)",
+        category: "intentional",
+        reason:
+          "The shared label omits the optional qualifier. The upload remains optional.",
+      },
       "2-1": {
         plan: "* 2. Program Plan",
         source: "2. * Program Plan",
