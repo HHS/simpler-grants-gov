@@ -113,12 +113,11 @@
       "title": "13. Other Plan(s)"
     },
     "appendix": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/types.attachment"
-      },
-      "maxItems": 10,
-      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.appendix"
+        }
+      ],
       "title": "14. Appendix"
     }
   },
@@ -213,6 +212,15 @@
       "format": "uuid",
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "Other Plan(s)"
+    },
+    "research.appendix": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/types.attachment"
+      },
+      "maxItems": 10,
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Appendix"
     }
   }
 }

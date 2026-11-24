@@ -129,11 +129,8 @@ scalar OtherPlans extends Questions.Types.Attachment;
 @UI.label("Authentication of Key Biological and/or Chemical Resources")
 scalar KeyBiologicalAndOrChemicalResources extends Questions.Types.Attachment;
 
+/** Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance. */
 @Meta.question(#{ id: "research/appendix" })
 @UI.label("Appendix")
-model Appendix {
-  /** Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance. */
-  @UI.widget(Rendering.Widget.AttachmentArray)
-  @maxItems(10)
-  appendix?: Questions.Types.Attachment[];
-}
+@maxItems(10)
+model Appendix is Questions.Types.Attachment[];
