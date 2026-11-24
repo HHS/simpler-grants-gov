@@ -21,6 +21,9 @@ const optionalDocumentHelp: Pinned = {
     "The DAT marks this attachment optional, the PDF shows no required marker, and the XSD permits omission. The help refers applicants to the opportunity requirements.",
 };
 
+const sharedResearchHelp =
+  "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.";
+
 const yesNoTransform: Pinned = {
   plan: null,
   source: ["Y: Yes", "N: No"],
@@ -41,6 +44,13 @@ export const DIFF: FormDiff = {
       "9-2-1c": optionRow,
     },
     differingLabels: {
+      "7-4": {
+        plan: "16. Resource Sharing Plan(s)",
+        source: "16. Resource Sharing",
+        category: "intentional",
+        reason:
+          "The label names the plans an applicant uploads, as it does on the Research Plan.",
+      },
       "3-2": {
         ...requiredMarker,
         plan: "* 4. Research Strategy",
@@ -62,7 +72,19 @@ export const DIFF: FormDiff = {
     },
     differingHelp: {
       "2-1": optionalDocumentHelp,
-      "3-1": optionalDocumentHelp,
+      "3-1": {
+        ...optionalDocumentHelp,
+        plan: sharedResearchHelp,
+        reason:
+          "The DAT flag, PDF and XSD allow Specific Aims to be omitted. The shared instructions refer applicants to their funding opportunity.",
+      },
+      "3-2": {
+        plan: sharedResearchHelp,
+        source: optionalDocumentHelp.source,
+        category: "intentional",
+        reason:
+          "The required marker and validation already tell applicants Research Strategy is required.",
+      },
     },
     differingRules: {
       "8-1/maxOccurs": {

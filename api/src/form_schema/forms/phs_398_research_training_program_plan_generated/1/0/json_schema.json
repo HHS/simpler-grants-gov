@@ -3,12 +3,7 @@
   "type": "object",
   "properties": {
     "introduction_to_application": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.introduction-to-application"
-        }
-      ],
-      "title": "1. Introduction to Application (for Resubmission and Revision applications)"
+      "$ref": "#/$defs/research.introduction-to-application"
     },
     "program_plan": {
       "allOf": [
@@ -17,7 +12,7 @@
         }
       ],
       "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "2. Program Plan"
+      "title": "Program Plan"
     },
     "responsible_conduct_of_research": {
       "allOf": [
@@ -26,7 +21,7 @@
         }
       ],
       "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "3. Plan for Instruction in the Responsible Conduct of Research"
+      "title": "Plan for Instruction in the Responsible Conduct of Research"
     },
     "methods_for_enhancing_reproducibility": {
       "allOf": [
@@ -35,16 +30,10 @@
         }
       ],
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "4. Plan for Instruction in Methods for Enhancing Reproducibility"
+      "title": "Plan for Instruction in Methods for Enhancing Reproducibility"
     },
     "multiple_pd_pi_leadership_plan": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "5. Multiple PD/PI Leadership Plan (if applicable)"
+      "$ref": "#/$defs/research.multiple-pd-pi-leadership-plan"
     },
     "progress_report": {
       "allOf": [
@@ -53,7 +42,7 @@
         }
       ],
       "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "6. Progress Report (for Renewal applications)"
+      "title": "Progress Report (for Renewal applications)"
     },
     "participating_faculty_biosketches": {
       "allOf": [
@@ -62,16 +51,10 @@
         }
       ],
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "7. Participating Faculty Biosketches"
+      "title": "Participating Faculty Biosketches"
     },
     "letters_of_support": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "8. Letters of Support"
+      "$ref": "#/$defs/research.letters-of-support"
     },
     "data_tables": {
       "allOf": [
@@ -80,48 +63,27 @@
         }
       ],
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "9. Data Tables"
+      "title": "Data Tables"
     },
     "vertebrate_animals": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.vertebrate-animals"
-        }
-      ],
-      "title": "10. Vertebrate Animals"
+      "$ref": "#/$defs/research.vertebrate-animals"
     },
     "select_agent_research": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.select-agent-research"
-        }
-      ],
-      "title": "11. Select Agent Research"
+      "$ref": "#/$defs/research.select-agent-research"
     },
     "consortium_contractual_arrangements": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.consortium-contractual-arrangements"
-        }
-      ],
-      "title": "12. Consortium/Contractual Arrangements"
+      "$ref": "#/$defs/research.consortium-contractual-arrangements"
     },
     "other_plans": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.other-plans"
-        }
-      ],
-      "title": "13. Other Plan(s)"
+      "$ref": "#/$defs/research.other-plans"
     },
     "appendix": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/research.appendix-attachment"
+        "$ref": "#/$defs/types.attachment"
       },
       "maxItems": 10,
-      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "14. Appendix"
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance."
     }
   },
   "required": [
@@ -180,6 +142,18 @@
       "description": "Attach a file.",
       "title": "Attachment"
     },
+    "research.multiple-pd-pi-leadership-plan": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Multiple PD/PI Leadership Plan"
+    },
+    "research.letters-of-support": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Letters of Support"
+    },
     "research.vertebrate-animals": {
       "type": "string",
       "format": "uuid",
@@ -203,12 +177,6 @@
       "format": "uuid",
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "Other Plan(s)"
-    },
-    "research.appendix-attachment": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Attach an appendix PDF.",
-      "title": "Appendix attachment"
     }
   }
 }

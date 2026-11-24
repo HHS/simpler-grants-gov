@@ -117,13 +117,10 @@ model ResearchPlanAttachments {
   };
 
   @name("KeyBiologicalAndOrChemicalResources")
-  authenticationOfKeyBiologicalAndOrChemicalResources?: {
+  keyBiologicalAndOrChemicalResources?: {
     @ns(Namespaces.PHS398_ResearchPlan_5_0)
     @name("attFile")
-    @Mapping.from(
-      grantsGovXml,
-      Form.authenticationOfKeyBiologicalAndOrChemicalResources
-    )
+    @Mapping.from(grantsGovXml, Form.keyBiologicalAndOrChemicalResources)
     file: XSD.Att.AttachedFileDataType;
   };
 

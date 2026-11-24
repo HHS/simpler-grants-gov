@@ -3,116 +3,48 @@
   "type": "object",
   "properties": {
     "introduction_to_application": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.introduction-to-application"
-        }
-      ],
-      "title": "1. Introduction to Application (for Resubmission and Revision applications)"
+      "$ref": "#/$defs/research.introduction-to-application"
     },
     "specific_aims": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "2. Specific Aims"
+      "$ref": "#/$defs/research.specific-aims"
     },
     "research_strategy": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "3. Research Strategy"
+      "$ref": "#/$defs/research.research-strategy"
     },
     "progress_report_publication_list": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "4. Progress Report Publication List"
+      "$ref": "#/$defs/research.progress-report-publication-list"
     },
     "vertebrate_animals": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.vertebrate-animals"
-        }
-      ],
-      "title": "5. Vertebrate Animals"
+      "$ref": "#/$defs/research.vertebrate-animals"
     },
     "select_agent_research": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.select-agent-research"
-        }
-      ],
-      "title": "6. Select Agent Research"
+      "$ref": "#/$defs/research.select-agent-research"
     },
     "multiple_pd_pi_leadership_plan": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "7. Multiple PD/PI Leadership Plan"
+      "$ref": "#/$defs/research.multiple-pd-pi-leadership-plan"
     },
     "consortium_contractual_arrangements": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.consortium-contractual-arrangements"
-        }
-      ],
-      "title": "8. Consortium/Contractual Arrangements"
+      "$ref": "#/$defs/research.consortium-contractual-arrangements"
     },
     "letters_of_support": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "9. Letters of Support"
+      "$ref": "#/$defs/research.letters-of-support"
     },
     "resource_sharing_plans": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "10. Resource Sharing Plan(s)"
+      "$ref": "#/$defs/research.resource-sharing-plans"
     },
     "other_plans": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.other-plans"
-        }
-      ],
-      "title": "11. Other Plan(s)"
+      "$ref": "#/$defs/research.other-plans"
     },
-    "authentication_of_key_biological_and_or_chemical_resources": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "12. Authentication of Key Biological and/or Chemical Resources"
+    "key_biological_and_or_chemical_resources": {
+      "$ref": "#/$defs/research.key-biological-and-or-chemical-resources"
     },
     "appendix": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/research.appendix-attachment"
+        "$ref": "#/$defs/types.attachment"
       },
       "maxItems": 10,
-      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "13. Appendix"
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance."
     }
   },
   "required": [
@@ -146,7 +78,7 @@
       "letters_of_support": "00000000-0000-4000-8000-000000007979",
       "resource_sharing_plans": "00000000-0000-4000-8000-000000007980",
       "other_plans": "00000000-0000-4000-8000-000000007981",
-      "authentication_of_key_biological_and_or_chemical_resources": "00000000-0000-4000-8000-000000007982",
+      "key_biological_and_or_chemical_resources": "00000000-0000-4000-8000-000000007982",
       "appendix": [
         "00000000-0000-4000-8000-000000079713",
         "00000000-0000-4000-8000-000000079714"
@@ -164,11 +96,23 @@
       "description": "Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "Introduction to Application (for Resubmission and Revision applications)"
     },
-    "types.attachment": {
+    "research.specific-aims": {
       "type": "string",
       "format": "uuid",
-      "description": "Attach a file.",
-      "title": "Attachment"
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Specific Aims"
+    },
+    "research.research-strategy": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Research Strategy"
+    },
+    "research.progress-report-publication-list": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Progress Report Publication List (for Renewal applications)"
     },
     "research.vertebrate-animals": {
       "type": "string",
@@ -182,11 +126,29 @@
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "Select Agent Research"
     },
+    "research.multiple-pd-pi-leadership-plan": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Multiple PD/PI Leadership Plan"
+    },
     "research.consortium-contractual-arrangements": {
       "type": "string",
       "format": "uuid",
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "Consortium/Contractual Arrangements"
+    },
+    "research.letters-of-support": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Letters of Support"
+    },
+    "research.resource-sharing-plans": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Resource Sharing Plan(s)"
     },
     "research.other-plans": {
       "type": "string",
@@ -194,11 +156,17 @@
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "Other Plan(s)"
     },
-    "research.appendix-attachment": {
+    "research.key-biological-and-or-chemical-resources": {
       "type": "string",
       "format": "uuid",
-      "description": "Attach an appendix PDF.",
-      "title": "Appendix attachment"
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Authentication of Key Biological and/or Chemical Resources"
+    },
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
     }
   }
 }

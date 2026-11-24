@@ -3,12 +3,7 @@
   "type": "object",
   "properties": {
     "introduction_to_application": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.introduction-to-application"
-        }
-      ],
-      "title": "1. Introduction to Application (for Resubmission and Revision applications)"
+      "$ref": "#/$defs/research.introduction-to-application"
     },
     "candidate_information_and_goals": {
       "allOf": [
@@ -17,34 +12,16 @@
         }
       ],
       "description": "Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies.",
-      "title": "2. Candidate Information and Goals for Career Development"
+      "title": "Candidate Information and Goals for Career Development"
     },
     "specific_aims": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies.",
-      "title": "3. Specific Aims"
+      "$ref": "#/$defs/research.specific-aims"
     },
     "research_strategy": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. This attachment is required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "4. Research Strategy"
+      "$ref": "#/$defs/research.research-strategy"
     },
     "progress_report_publication_list": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "5. Progress Report Publication List (for Renewal applications)"
+      "$ref": "#/$defs/research.progress-report-publication-list"
     },
     "responsible_conduct_of_research": {
       "allOf": [
@@ -53,7 +30,7 @@
         }
       ],
       "description": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "6. Training in the Responsible Conduct of Research"
+      "title": "Training in the Responsible Conduct of Research"
     },
     "mentoring_plan": {
       "allOf": [
@@ -62,7 +39,7 @@
         }
       ],
       "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "7. Candidate's Plan to Provide Mentoring"
+      "title": "Candidate's Plan to Provide Mentoring"
     },
     "statements_of_support": {
       "allOf": [
@@ -71,7 +48,7 @@
         }
       ],
       "description": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "8. Plans and Statements of Mentor and Co-Mentor(s)"
+      "title": "Plans and Statements of Mentor and Co-Mentor(s)"
     },
     "letters_of_support": {
       "allOf": [
@@ -80,7 +57,7 @@
         }
       ],
       "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "9. Letters of Support from Collaborators, Contributors, and Consultants"
+      "title": "Letters of Support from Collaborators, Contributors, and Consultants"
     },
     "institutional_environment": {
       "allOf": [
@@ -89,7 +66,7 @@
         }
       ],
       "description": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "10. Description of Institutional Environment"
+      "title": "Description of Institutional Environment"
     },
     "institutional_commitment": {
       "allOf": [
@@ -98,7 +75,7 @@
         }
       ],
       "description": "Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "11. Institutional Commitment to Candidate’s Research Career Development"
+      "title": "Institutional Commitment to Candidate’s Research Career Development"
     },
     "candidates_contribution": {
       "allOf": [
@@ -107,70 +84,37 @@
         }
       ],
       "description": "Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "12. Description of Candidate's Contribution to Program Goals"
+      "title": "Description of Candidate's Contribution to Program Goals"
     },
     "vertebrate_animals": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.vertebrate-animals"
-        }
-      ],
-      "title": "13. Vertebrate Animals"
+      "$ref": "#/$defs/research.vertebrate-animals"
     },
     "select_agent_research": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.select-agent-research"
-        }
-      ],
-      "title": "14. Select Agent Research"
+      "$ref": "#/$defs/research.select-agent-research"
     },
     "consortium_contractual_arrangements": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.consortium-contractual-arrangements"
-        }
-      ],
-      "title": "15. Consortium/Contractual Arrangements"
+      "$ref": "#/$defs/research.consortium-contractual-arrangements"
     },
     "resource_sharing_plans": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "16. Resource Sharing"
+      "$ref": "#/$defs/research.resource-sharing-plans"
     },
     "other_plans": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/research.other-plans"
-        }
-      ],
-      "title": "17. Other Plan(s)"
+      "$ref": "#/$defs/research.other-plans"
     },
     "key_biological_and_or_chemical_resources": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/types.attachment"
-        }
-      ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "18. Authentication of Key Biological and/or Chemical Resources"
+      "$ref": "#/$defs/research.key-biological-and-or-chemical-resources"
     },
     "appendix": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/research.appendix-attachment"
+        "$ref": "#/$defs/types.attachment"
       },
       "maxItems": 10,
-      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
-      "title": "19. Appendix"
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance."
     },
     "is_us_citizen_or_national": {
       "type": "boolean",
-      "title": "20. U.S. Citizen or Non-Citizen National?"
+      "title": "U.S. Citizen or Non-Citizen National?"
     },
     "non_us_citizenship_status": {
       "allOf": [
@@ -246,6 +190,24 @@
       "description": "Attach a file.",
       "title": "Attachment"
     },
+    "research.specific-aims": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Specific Aims"
+    },
+    "research.research-strategy": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Research Strategy"
+    },
+    "research.progress-report-publication-list": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Progress Report Publication List (for Renewal applications)"
+    },
     "research.vertebrate-animals": {
       "type": "string",
       "format": "uuid",
@@ -264,17 +226,23 @@
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "Consortium/Contractual Arrangements"
     },
+    "research.resource-sharing-plans": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Resource Sharing Plan(s)"
+    },
     "research.other-plans": {
       "type": "string",
       "format": "uuid",
       "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "Other Plan(s)"
     },
-    "research.appendix-attachment": {
+    "research.key-biological-and-or-chemical-resources": {
       "type": "string",
       "format": "uuid",
-      "description": "Attach an appendix PDF.",
-      "title": "Appendix attachment"
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Authentication of Key Biological and/or Chemical Resources"
     }
   }
 }
