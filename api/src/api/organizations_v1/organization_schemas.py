@@ -153,7 +153,7 @@ class ApplicationRoleGrantSchema(Schema):
         validate=Length(min=1),
         metadata={"description": "Granular application role IDs for this application"},
     )
-    
+
 
 class OrganizationUpdateUserRolesRequestSchema(Schema):
     role_ids = fields.List(
