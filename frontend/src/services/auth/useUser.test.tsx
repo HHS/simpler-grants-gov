@@ -1,4 +1,10 @@
-import { render, renderHook, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import UserProvider from "src/services/auth/UserProvider";
 import { useUser } from "src/services/auth/useUser";
 
@@ -371,6 +377,71 @@ describe("useUser", () => {
       await result.current.refreshUser();
 
       expect(mockPostUserEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("session auto logout", () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    const autoLogoutWrapper = ({ children }: PropsWithChildren) => (
+      <UserProvider
+        featureFlagDefaults={{ enableSessionExpirationAlerts: true }}
+      >
+        {children}
+      </UserProvider>
+    );
+
+    const renderSignedIn = async (
+      expiresAt: number,
+      providerWrapper = autoLogoutWrapper,
+    ) => {
+      debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: true, expiresAt });
+      const { result } = renderHook(() => useUser(), {
+        wrapper: providerWrapper,
+      });
+      await waitFor(() => {
+        expect(result.current.user?.isLoggedIn).toEqual(true);
+      });
+      debouncedUserFetcherMock.mockReturnValue({ isLoggedIn: false });
+      return { result };
+    };
+
+    const advance = (ms: number) =>
+      act(() => jest.advanceTimersByTimeAsync(ms));
+
+    it("logs the user out in place once the session expires without activity", async () => {
+      const { result } = await renderSignedIn(Date.now() + 60 * 1000);
+
+      await advance(60 * 1000);
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+
+      await advance(1000);
+      expect(result.current.user?.isLoggedIn).toEqual(false);
+      expect(result.current.hasBeenLoggedOut).toEqual(true);
+      expect(routerRefreshMock).toHaveBeenCalledTimes(1);
+      expect(mockPostUserEvent).toHaveBeenCalledWith({
+        name: "session_expired",
+      });
+    });
+
+    it("does not check the session when the flag is off", async () => {
+      const { result } = await renderSignedIn(Date.now() + 60 * 1000, wrapper);
+
+      await advance(5 * 60 * 1000);
+
+      expect(debouncedUserFetcherMock).toHaveBeenCalledTimes(1);
+      expect(result.current.user?.isLoggedIn).toEqual(true);
+    });
+
+    it("does not schedule a check past the setTimeout limit", async () => {
+      const setTimeoutSpy = jest.spyOn(window, "setTimeout");
+
+      await renderSignedIn(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+      const delays = setTimeoutSpy.mock.calls.map(([, delay]) => delay ?? 0);
+      expect(Math.max(...delays, 0)).toBeLessThanOrEqual(2 ** 31 - 1);
+      setTimeoutSpy.mockRestore();
     });
   });
 });

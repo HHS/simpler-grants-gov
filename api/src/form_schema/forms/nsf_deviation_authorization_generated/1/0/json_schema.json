@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "deviation_authorization": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "description": "Type the Deviation Authorization information in this box (if applicable).",
+      "title": "Deviation authorization information"
+    }
+  },
+  "examples": [
+    {
+      "deviation_authorization": "NSF authorized the specified deviation in correspondence dated October 20, 2026. Contact: the cognizant program officer."
+    },
+    {}
+  ]
+}

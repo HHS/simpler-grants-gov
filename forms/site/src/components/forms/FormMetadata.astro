@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
-import { TOTAL_APPS } from "../../content.config";
+import { TOTAL_APPS, TOTAL_FORM_SUBMISSIONS } from "../../content.config";
 import { NO_FAMILY } from "../../lib/families";
 import { countFields } from "../../lib/planTree";
 
@@ -13,6 +13,9 @@ const { form } = Astro.props;
 const d = form.data;
 const pct = d.apps_count
   ? ((d.apps_count / TOTAL_APPS) * 100).toFixed(2)
+  : "0.00";
+const submissionsPct = d.apps_count
+  ? ((d.apps_count / TOTAL_FORM_SUBMISSIONS) * 100).toFixed(2)
   : "0.00";
 const fieldCount = countFields(d.children);
 const hasLinks = d.fid_url || d.pdf_url || d.xsd_url || d.dat_url;
@@ -55,8 +58,10 @@ const hasLinks = d.fid_url || d.pdf_url || d.xsd_url || d.dat_url;
     <dl>
       <dt>Apps count</dt>
       <dd>
-        {d.apps_count ? d.apps_count.toLocaleString() : "—"} ({pct}%)
+        {d.apps_count ? d.apps_count.toLocaleString() : "—"} ({pct}% of apps)
       </dd>
+      <dt>Share of form submissions</dt>
+      <dd>{submissionsPct}%</dd>
       {fieldCount > 0 && (
         <>
           <dt>Fields</dt>

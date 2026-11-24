@@ -77,7 +77,7 @@ _MINIMAL_PROFILE = {
         "street1": "1 Main Street",
         "city": "Madison",
         "state": "WI: Wisconsin",
-        "zip_code": "53706",
+        "zip_code": "537061380",
         "country": "USA: UNITED STATES",
     },
     "phone": "6085550101",
@@ -182,6 +182,15 @@ def test_us_address_requires_state_and_zip_code(person, nsf_key_person_expanded_
     expected = field_paths(person, ["address.state", "address.zip_code"])
     data = with_person(_full_form(), person, profile)
     validate_required(data, expected, nsf_key_person_expanded_generated_v3_3)
+
+
+@pytest.mark.parametrize("person", PEOPLE)
+def test_us_zip_code_needs_nine_digits(person, nsf_key_person_expanded_generated_v3_3):
+    profile = with_values(_MINIMAL_PROFILE, {"address.zip_code": "53706"})
+    data = with_person(_full_form(), person, profile)
+    validate_min_length(
+        data, field_paths(person, ["address.zip_code"]), nsf_key_person_expanded_generated_v3_3
+    )
 
 
 @pytest.mark.parametrize("person", PEOPLE)

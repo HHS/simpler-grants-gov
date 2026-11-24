@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import React from "react";
 
@@ -90,6 +90,13 @@ jest.mock(
   }),
 );
 
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/InvitedUsersSection",
+  () => ({
+    InvitedUsersSection: () => <div data-testid="invited-users-section" />,
+  }),
+);
+
 const authorizedDataStub: AuthorizedData = {
   fetchedResources: {
     activeUsersList: {
@@ -168,6 +175,28 @@ describe("ManageUsersPageContent", () => {
     const pageHeaderProps = PageHeaderMock.mock.calls[0][0];
     expect(pageHeaderProps.organizationName).toBeUndefined();
   });
+
+  it("renders the roster, then invited users, then the invite section", async () => {
+    const component = await ManageUsersPageContent({
+      organizationId,
+      authorizedData: authorizedDataStub,
+    });
+    render(component);
+
+    const sectionOrder = screen
+      .getAllByTestId(
+        /^(page-header|active-users-section|invited-users-section|user-org-invite)$/,
+      )
+      .map((element) => element.getAttribute("data-testid"));
+
+    expect(sectionOrder).toEqual([
+      "page-header",
+      "active-users-section",
+      "invited-users-section",
+      "user-org-invite",
+    ]);
+  });
+
   describe("manage permissions links", () => {
     const withManageMembers = (
       privilege: Partial<AuthorizedData["confirmedPrivileges"][number]> = {},

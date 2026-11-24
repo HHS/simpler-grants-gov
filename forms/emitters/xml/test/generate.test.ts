@@ -11,6 +11,7 @@ import {
   type AttachmentInfo,
   type XmlMapping,
 } from "../src/runtime/index.js";
+import { steps } from "../src/runtime/paths.js";
 
 const FORMS_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 
@@ -446,6 +447,48 @@ describe("generateXml", () => {
     );
   });
 
+  describe("Paths with indices or slices (e.g. [0], [:2], [1:3])", () => {
+    it("writes the entries an index or slice selects", async () => {
+      const mapping: XmlMapping = {
+        format: "xml-mapping",
+        namespaces: { default: "urn:f", f: "urn:f" },
+        root: {
+          Root: {
+            First: { $field: "sites[0].name" },
+            Last: { $field: "codes[-1]" },
+            Missing: { $field: "codes[5]" },
+            Code: { $field: "codes[1:3]" },
+            Other: {
+              $each: {
+                items: { $field: "sites[1:]" },
+                map: { Name: { $field: "name" } },
+              },
+            },
+          },
+        },
+      };
+      await expectValid(mapping);
+      const data = {
+        sites: [{ name: "HQ" }, { name: "Lab" }, { name: "Field" }],
+        codes: ["A", "C", "F", "K"],
+      };
+      expect(generateXml(mapping, data)).toEqual(
+        `<?xml version='1.0' encoding='utf-8'?>\n<f:Root xmlns:f="urn:f">\n  <f:First>HQ</f:First>\n  <f:Last>K</f:Last>\n  <f:Code>C</f:Code>\n  <f:Code>F</f:Code>\n  <f:Other>\n    <f:Name>Lab</f:Name>\n  </f:Other>\n  <f:Other>\n    <f:Name>Field</f:Name>\n  </f:Other>\n</f:Root>`,
+      );
+    });
+
+    it("throws when a slice isn't the path's last step", () => {
+      const mapping: XmlMapping = {
+        format: "xml-mapping",
+        namespaces: { default: "urn:f", f: "urn:f" },
+        root: { Root: { Name: { $field: "sites[1:].name" } } },
+      };
+      expect(() => generateXml(mapping, { sites: [] })).toThrow(
+        "a range must be a path's last step: sites[1:].name",
+      );
+    });
+  });
+
   it("writes a $required element empty when it has nothing to write", async () => {
     const mapping: XmlMapping = {
       format: "xml-mapping",
@@ -646,6 +689,54 @@ describe("$transform", () => {
     const generate = () => generateXml(mapping, { v: value });
     if (expected === Error) expect(generate).toThrow();
     else expect(generate()).toContain(`<f:V>${expected}</f:V>`);
+  });
+});
+
+describe("xml-mapping.schema.json path pattern", () => {
+  const pattern = async () =>
+    new RegExp(
+      (
+        JSON.parse(
+          await readFile(
+            fileURLToPath(
+              new URL("../schema/xml-mapping.schema.json", import.meta.url),
+            ),
+            "utf8",
+          ),
+        ) as { $defs: { path: { pattern: string } } }
+      ).$defs.path.pattern,
+    );
+
+  // Check the pattern against the runtime's parser, so the two can't drift apart.
+  it.each([
+    ".",
+    "name",
+    "contact.email",
+    "types.0",
+    "types[0]",
+    "types[-1]",
+    "sites[0].name",
+    "grid[0][1]",
+    "sites[1:]",
+    "codes[:2]",
+    "codes[1:3]",
+    "codes[-2:]",
+  ])("accepts a path the runtime can parse (%s)", async (value) => {
+    expect((await pattern()).test(value)).toBe(true);
+    expect(() => steps(value)).not.toThrow();
+  });
+
+  it.each([
+    "",
+    "sites..name",
+    "sites.",
+    "sites[a]",
+    "sites[1:].name",
+    "sites[1:2:3]",
+    "sites[0",
+  ])("rejects a path the runtime can't parse (%s)", async (value) => {
+    expect((await pattern()).test(value)).toBe(false);
+    expect(() => steps(value)).toThrow();
   });
 });
 

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytest
 from freezegun import freeze_time
 
 from src.auth.api_jwt_auth import create_jwt_for_user
@@ -13,6 +14,24 @@ def test_post_user_route_token_refresh_200(enable_factory_create, client, db_ses
     db_session.commit()
 
     resp = client.post("v1/users/token/refresh", headers={"X-SGG-Token": token})
+
+    db_session.refresh(user_token_session)
+
+    assert resp.status_code == 200
+    assert user_token_session.expires_at == datetime.fromisoformat("2024-11-22 12:30:00+00:00")
+
+
+@freeze_time("2024-11-22 12:00:00", tz_offset=0)
+def test_post_user_route_token_refresh_empty_json_body(enable_factory_create, client, db_session):
+    """Matches the frontend refresh call, which sends a JSON content type without a body"""
+    user = UserFactory.create()
+    token, user_token_session = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
+    resp = client.post(
+        "v1/users/token/refresh",
+        headers={"X-SGG-Token": token, "Content-Type": "application/json"},
+    )
 
     db_session.refresh(user_token_session)
 
@@ -57,3 +76,49 @@ def test_post_user_route_token_logout_invalid(enable_factory_create, client, db_
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token is no longer valid"
+
+
+@freeze_time("2024-11-22 12:00:00", tz_offset=0)
+def test_post_user_route_token_refresh_session_duration_override(
+    enable_factory_create, client, db_session, monkeypatch
+):
+    monkeypatch.setenv("ENVIRONMENT", "staging")
+    user = UserFactory.create()
+    token, user_token_session = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
+    resp = client.post(
+        "v1/users/token/refresh",
+        headers={"X-SGG-Token": token},
+        json={"session_duration_seconds": 60},
+    )
+
+    db_session.refresh(user_token_session)
+
+    assert resp.status_code == 200
+    assert user_token_session.expires_at == datetime.fromisoformat("2024-11-22 12:01:00+00:00")
+
+
+@pytest.mark.parametrize(
+    "environment,session_duration_seconds",
+    [("prod", 60), ("training", 60), ("staging", 10), ("staging", 3600)],
+)
+@freeze_time("2024-11-22 12:00:00", tz_offset=0)
+def test_post_user_route_token_refresh_session_duration_override_ignored(
+    enable_factory_create, client, db_session, monkeypatch, environment, session_duration_seconds
+):
+    monkeypatch.setenv("ENVIRONMENT", environment)
+    user = UserFactory.create()
+    token, user_token_session = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
+    resp = client.post(
+        "v1/users/token/refresh",
+        headers={"X-SGG-Token": token},
+        json={"session_duration_seconds": session_duration_seconds},
+    )
+
+    db_session.refresh(user_token_session)
+
+    assert resp.status_code == 200
+    assert user_token_session.expires_at == datetime.fromisoformat("2024-11-22 12:30:00+00:00")

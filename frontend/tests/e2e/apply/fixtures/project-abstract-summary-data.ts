@@ -32,3 +32,14 @@ export const PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA: PrintViewFormData = {
   },
   buildTestData: buildProjectAbstractSummaryHappyPathTestData,
 };
+
+export const PROJECT_ABSTRACT_SUMMARY_GENERATED_OPPORTUNITY_DATA: PrintViewFormData =
+  {
+    ...PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
+    opportunityId: "e7b1eeb7-968e-5ad7-a682-92bf4f6fe478",
+    opportunityNumber: "E2E-PABSSG-ORG-IND-01",
+    expectedPrepopulatedFields: {
+      ...PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA.expectedPrepopulatedFields,
+      funding_opportunity_number: "E2E-PABSSG-ORG-IND-01",
+    },
+  };

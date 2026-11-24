@@ -1,7 +1,7 @@
 {
   "title": "Project Narrative Attachment Form",
   "slug": "project-narrative-attachment-form",
-  "status": "in_progress",
+  "status": "migrated",
   "family": [
     "SF-424",
     "R&R",
@@ -20,13 +20,13 @@
   "omb_number": "",
   "expiration_date": "",
   "widgets": ["ApplicationMultipleAttachmentWidget"],
-  "description": "Project narrative files supplied as an ordered list of uploaded attachment references.",
+  "description": "Upload files describing the proposed project.",
   "notes": [
     "The first attachment is mandatory; additional attachments follow it in the same list, as in the existing SGG form.",
     "Examples use synthetic attachment IDs. File ownership and metadata are resolved by the existing application service.",
-    "Not installed in the API yet. That and the file upload flow are tracked in the migration issue.",
+    "The generated form installs alongside the existing SGG form. Deployed upload and submission evidence is tracked in #12995.",
     "No applicant answers are pre- or post-populated. The upload service assigns attachment references when files are uploaded.",
-    "Open follow-ups on the existing SGG form: #12954 (XML E2E) and #11181 (print E2E)."
+    "The paired submission and print-view test covers #11181. Automated checks of the downloaded XML and PDF remain tracked in #12954."
   ],
   "children": [
     {

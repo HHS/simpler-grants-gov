@@ -1,0 +1,22 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/deviation_authorization",
+          "label": "Deviation authorization information",
+          "options": {
+            "widget": "TextArea"
+          }
+        }
+      ],
+      "label": "Deviation authorization (if applicable)",
+      "options": {
+        "description": "Enter text for the Deviation Authorization information in the box below (if applicable):"
+      }
+    }
+  ]
+}

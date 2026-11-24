@@ -93,7 +93,7 @@ def service_transaction(name: str, group: str) -> Generator[None]:
 
     The group and name are used to define a transaction type.
 
-    The group serves as the prefix (eg. a group of "WorkflowMain" will prefix every transaction)
+    The group serves as the prefix (eg. a group of "SubmissionConsumer" will prefix every transaction)
     and the name serves as the end of the transaction.
 
     Usage:

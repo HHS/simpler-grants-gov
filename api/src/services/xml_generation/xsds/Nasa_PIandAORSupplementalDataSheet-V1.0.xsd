@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--*******************************************************************************************************************-->
+<!-- TITLE: Nasa_PI and AOR Supplemental Data Sheet-->
+<!-- DESCRIPTION: -->
+<!-- FORM VERSION: 1.0-->
+<!-- SCHEMA VERSION: 1.0-->
+<!-- OMB NUMBER: 2700-0085  and 2700-0087 -->
+<!-- FORM EXPIRATION DATE:  -->
+<!-- REVISION HISTORY:-->
+<!-- TO DO:-->
+<!--*******************************************************************************************************************-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:Nasa_PIandAORSupplementalDataSheet="http://apply.grants.gov/forms/Nasa_PIandAORSupplementalDataSheet-V1.0" targetNamespace="http://apply.grants.gov/forms/Nasa_PIandAORSupplementalDataSheet-V1.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.0">
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:element name="Nasa_PIandAORSupplementalDataSheet">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AuthorizedRepresentativeName">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="AORName" type="globLib:HumanNameDataType"/>
+							<xs:element name="UserName" minOccurs="0">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="0"/>
+										<xs:maxLength value="99"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="PrincipalInvestigatorName">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="PDPIName" type="globLib:HumanNameDataType"/>
+							<xs:element name="USGovernmentParticipation" type="globLib:YesNoDataType"/>
+							<xs:element name="FederalAgency" type="Nasa_PIandAORSupplementalDataSheet:FederalAgencyDataType" minOccurs="0"/>
+							<xs:element name="FederalAgencyDollar" type="globLib:BudgetAmountDataType" minOccurs="0"/>
+							<xs:element name="InternationalParticipation" type="globLib:YesNoDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="1.0"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="FederalAgencyDataType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="101: Agency for International Development"/>
+			<xs:enumeration value="102: Air Force Research Laboratory"/>
+			<xs:enumeration value="103: Army Research Laboratory"/>
+			<xs:enumeration value="104: Center for Disease Control and Prevention"/>
+			<xs:enumeration value="105: Coast Guard"/>
+			<xs:enumeration value="106: Customs Service"/>
+			<xs:enumeration value="107: Defense Advanced Research Projects Agency"/>
+			<xs:enumeration value="108: Department of Agriculture (USDA)"/>
+			<xs:enumeration value="109: Department of Commerce (DOC)"/>
+			<xs:enumeration value="110: Department of Defense (DOD)"/>
+			<xs:enumeration value="111: Department of Education (ED)"/>
+			<xs:enumeration value="112: Department of Energy (DOE)"/>
+			<xs:enumeration value="113: Department of Health and Human Services (HHS)"/>
+			<xs:enumeration value="114: Department of Homeland Security (DHS)"/>
+			<xs:enumeration value="115: Department of Justice (DOJ)"/>
+			<xs:enumeration value="116: Department of State (DOS)"/>
+			<xs:enumeration value="117: Department of the Air Force"/>
+			<xs:enumeration value="118: Department of the Army"/>
+			<xs:enumeration value="119: Department of the Interior (DOI)"/>
+			<xs:enumeration value="120: Department of the Navy"/>
+			<xs:enumeration value="121: Department of Transportation (DOT)"/>
+			<xs:enumeration value="122: Department of Veterans Affairs (VA)"/>
+			<xs:enumeration value="123: Environmental Protection Agency (EPA)"/>
+			<xs:enumeration value="124: Federal Aviation Administration (FAA)"/>
+			<xs:enumeration value="125: Federal Emergency Management Agency (FEMA)"/>
+			<xs:enumeration value="126: Federal Maritime Commission"/>
+			<xs:enumeration value="127: Fish and Wildlife Service"/>
+			<xs:enumeration value="128: Forest Service"/>
+			<xs:enumeration value="129: NASA Ames Research Center"/>
+			<xs:enumeration value="130: NASA Dryden Flight Research Center"/>
+			<xs:enumeration value="131: NASA Glenn Research Center"/>
+			<xs:enumeration value="132: NASA Goddard Space Flight Center"/>
+			<xs:enumeration value="133: NASA Headquarters"/>
+			<xs:enumeration value="134: NASA Johnson Space Center"/>
+			<xs:enumeration value="135: NASA Kennedy Space Center"/>
+			<xs:enumeration value="136: NASA Langley Research Center"/>
+			<xs:enumeration value="137: NASA Marshall Space Flight Center"/>
+			<xs:enumeration value="138: NASA Stennis Space Center"/>
+			<xs:enumeration value="139: National Institute of Standards &amp; Technology (NIST)"/>
+			<xs:enumeration value="140: National Institutes of Health (NIH)"/>
+			<xs:enumeration value="141: National Oceanic and Atmospheric Administration (NOAA)"/>
+			<xs:enumeration value="142: National Park Service"/>
+			<xs:enumeration value="143: National Science Foundation (NSF)"/>
+			<xs:enumeration value="144: Naval Observatory"/>
+			<xs:enumeration value="145: Naval Research Laboratory"/>
+			<xs:enumeration value="146: Other"/>
+			<xs:enumeration value="147: Smithsonian Institution"/>
+			<xs:enumeration value="148: United States Geological Survey (USGS)"/>
+			<xs:enumeration value="149: United States Marine Corps"/>
+			<xs:enumeration value="150: Walter Reed Army Institute Research"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

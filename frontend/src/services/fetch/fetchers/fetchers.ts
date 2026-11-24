@@ -147,6 +147,11 @@ export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT" | "GET") =>
 
 export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);
 
+export const postTokenRefreshWithToken = requesterForEndpoint({
+  ...userRefreshEndpoint,
+  requiresAuth: false,
+});
+
 export const searchAgencies = requesterForEndpoint(searchAgenciesEndpoint);
 
 export const fetchOrganizationWithMethod = (

@@ -33,9 +33,9 @@
   },
   "$defs": {
     "path": {
-      "description": "A dotted path, relative to the response or, inside $each, to the item. `.` is the item itself, and a whole-number step reads a list's entry by index.",
+      "description": "Steps separated by `.`, relative to the response or, inside $each, to the item. `.` is the item itself. A name can be followed by `[i]`, one entry of a list (`types[0]`, or `types[-1]` for the last), or, as the last step only, `[start:stop]`, a range of entries with stop excluded (`sites[1:]`). A whole-number step (`types.0`) also reads an entry.",
       "type": "string",
-      "pattern": "^(\\.|[^.]+(\\.[^.]+)*)$"
+      "pattern": "^(\\.|(?:(?:[^.\\[\\]]+(?:\\[-?[0-9]+\\])*|(?:\\[-?[0-9]+\\])+)\\.)*(?:[^.\\[\\]]+(?:\\[-?[0-9]+\\])*(?:\\[(-?[0-9]+)?:(-?[0-9]+)?\\])?|(?:\\[-?[0-9]+\\])*\\[(-?[0-9]+)?:(-?[0-9]+)?\\]|(?:\\[-?[0-9]+\\])+))$"
     },
     "literal": {
       "type": ["string", "number", "boolean"]

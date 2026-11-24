@@ -3,6 +3,7 @@ import {
   createSession,
   getSession,
   refreshSession,
+  setApiSessionDuration,
 } from "src/services/auth/session";
 
 const getCookiesMock = jest.fn(() => ({
@@ -18,6 +19,8 @@ const decryptMock = jest.fn();
 const encryptMock = jest.fn();
 
 const mockPostTokenRefresh = jest.fn();
+const mockPostTokenRefreshWithToken = jest.fn();
+const newExpirationDateMock = jest.fn((_seconds?: number) => new Date(0));
 
 const cookiesMock = () => {
   return {
@@ -32,7 +35,7 @@ jest.mock("src/services/auth/sessionUtils", () => ({
   encrypt: (...args: unknown[]) => encryptMock(args) as unknown,
   CLIENT_JWT_ENCRYPTION_ALGORITHM: "algo one",
   API_JWT_ENCRYPTION_ALGORITHM: "algo two",
-  newExpirationDate: () => new Date(0),
+  newExpirationDate: (seconds?: number) => newExpirationDateMock(seconds),
 }));
 
 jest.mock("next/headers", () => ({
@@ -43,6 +46,7 @@ jest.mock("src/constants/environments", () => ({
   environment: {
     SESSION_SECRET: "session secret",
     API_JWT_PUBLIC_KEY: "api secret",
+    ENVIRONMENT: "staging",
   },
 }));
 
@@ -56,6 +60,8 @@ jest.mock("crypto", () => ({
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   postTokenRefresh: (arg: unknown): unknown => mockPostTokenRefresh(arg),
+  postTokenRefreshWithToken: (arg: unknown): unknown =>
+    mockPostTokenRefreshWithToken(arg),
 }));
 
 describe("getSession", () => {
@@ -90,6 +96,26 @@ describe("getSession", () => {
       arbitrary: "stuff",
       expiresAt: 123000,
     });
+  });
+  it("returns a session duration override from the client token", async () => {
+    decryptMock.mockReturnValueOnce({
+      token: "some decrypted token",
+      exp: 123,
+      session_duration_seconds: 60,
+    });
+    decryptMock.mockReturnValueOnce({ arbitrary: "stuff" });
+    const session = await getSession();
+    expect(session?.sessionDurationSeconds).toEqual(60);
+  });
+  it("drops an out of range session duration override", async () => {
+    decryptMock.mockReturnValueOnce({
+      token: "some decrypted token",
+      exp: 123,
+      session_duration_seconds: 60 * 60,
+    });
+    decryptMock.mockReturnValueOnce({ arbitrary: "stuff" });
+    const session = await getSession();
+    expect(session?.sessionDurationSeconds).toBeUndefined();
   });
   it("returns null without decrypting if there is no session cookie", async () => {
     getCookiesMock.mockReturnValueOnce(
@@ -131,6 +157,7 @@ describe("createSession", () => {
       "nothingSpecial",
       new Date(1),
       "session secret",
+      undefined,
     ]);
     expect(setCookiesMock).toHaveBeenCalledTimes(1);
     expect(setCookiesMock).toHaveBeenCalledWith(
@@ -158,6 +185,7 @@ describe("createAndReturnSession", () => {
       "nothingSpecial",
       new Date(1),
       "session secret",
+      undefined,
     ]);
     expect(setCookiesMock).toHaveBeenCalledTimes(1);
     expect(setCookiesMock).toHaveBeenCalledWith(
@@ -199,6 +227,7 @@ describe("refreshSession", () => {
   it("calls refresh fetch function correctly", async () => {
     await refreshSession("a token");
     expect(mockPostTokenRefresh).toHaveBeenCalledTimes(1);
+    expect(mockPostTokenRefresh).toHaveBeenCalledWith(undefined);
   });
   it("calls cookie.set with expected values", async () => {
     encryptMock.mockReturnValue("encrypted session");
@@ -207,6 +236,7 @@ describe("refreshSession", () => {
       "nothingSpecial",
       new Date(1),
       "session secret",
+      undefined,
     ]);
     expect(setCookiesMock).toHaveBeenCalledTimes(1);
     expect(setCookiesMock).toHaveBeenCalledWith(
@@ -237,6 +267,40 @@ describe("refreshSession", () => {
       token: "nothingSpecial",
       arbitrary: "stuff",
       expiresAt: new Date(1).getTime(),
+    });
+  });
+  it("keeps the session duration override when refreshing", async () => {
+    encryptMock.mockReturnValue("encrypted session");
+    newExpirationDateMock.mockReturnValue(new Date(60000));
+    decryptMock.mockReturnValueOnce({ arbitrary: "stuff" });
+
+    const session = await refreshSession("a token", 60);
+
+    expect(mockPostTokenRefresh).toHaveBeenCalledWith({
+      body: { session_duration_seconds: 60 },
+    });
+    expect(newExpirationDateMock).toHaveBeenCalledWith(60);
+    expect(encryptMock).toHaveBeenCalledWith([
+      "a token",
+      new Date(60000),
+      "session secret",
+      60,
+    ]);
+    expect(session).toEqual({
+      token: "a token",
+      arbitrary: "stuff",
+      expiresAt: 60000,
+      sessionDurationSeconds: 60,
+    });
+  });
+});
+
+describe("setApiSessionDuration", () => {
+  it("refreshes the API session with the given token and duration", async () => {
+    await setApiSessionDuration("a token", 60);
+    expect(mockPostTokenRefreshWithToken).toHaveBeenCalledWith({
+      body: { session_duration_seconds: 60 },
+      additionalHeaders: { "X-SGG-Token": "a token" },
     });
   });
 });

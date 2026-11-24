@@ -12,8 +12,8 @@ module "grantor1_config" {
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
-  database_engine_version           = "17.7"
-  database_newrelic_entity_guid     = "" # Populate once the New Relic entity for the grantor1 RDS cluster exists
+  database_engine_version           = "17.9" # Matches the live cluster (auto minor upgrade)
+  database_newrelic_entity_guid     = ""     # Populate once the New Relic entity for the grantor1 RDS cluster exists
   database_deletion_protection      = false
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
@@ -33,16 +33,10 @@ module "grantor1_config" {
   # this is so that we can see some scaling behavior in dev without burning $$$ for no reason.
   instance_scaling_max_capacity = 4
 
-  # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
-  # https://us-east-1.console.aws.amazon.com/rds/home?region=us-east-1#database:id=api-dev;is-cluster=true;tab=monitoring
-  # database_min_capacity is a reasonable default given a low load environment,
-  # It is 2 specifically so that we can get performance insights (see the 1st link above)
-  database_min_capacity = 2
-  # database_max_capacity is 2x the database_min_capacity
-  # this is so that we can observe some scaling behavior without burning $$$ for no reason.
-  database_max_capacity = 4
-  # always at least 2, for redundancy and availability
-  database_instance_count = 2
+  # Single writer, no reader: low-traffic team env.
+  database_min_capacity   = 0.5
+  database_max_capacity   = 4
+  database_instance_count = 1
 
   has_search = true
   # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version

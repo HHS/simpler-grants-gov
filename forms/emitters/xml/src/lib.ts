@@ -64,16 +64,22 @@ export const $lib = createTypeSpecLibrary({
         default: paramMessage`The XML mapping can't write ${"element"} yet: it holds ${"reason"}.`,
       },
     },
+    "xml-mapping-object-into-value": {
+      severity: "error",
+      messages: {
+        default: paramMessage`${"element"} is a single value, but its @Mapping.from reads ${"field"}, which is a ${"model"} object. Name a field of ${"model"} instead.`,
+      },
+    },
+    "xml-mapping-field-out-of-scope": {
+      severity: "error",
+      messages: {
+        default: paramMessage`A @Mapping.when or @Mapping.match on ${"element"} names ${"field"}, which isn't in ${"scope"}: the model that ${"element"} reads its fields from. Name a field of ${"scope"}, or of an object property of it. Inside a list, that's the list item.`,
+      },
+    },
     "xml-transform-unsupported": {
       severity: "warning",
       messages: {
         default: paramMessage`The XML transform rules leave out ${"element"}: it holds ${"reason"}, and the API writes an attachment only as a single file at the root.`,
-      },
-    },
-    "mapping-transform-unknown": {
-      severity: "error",
-      messages: {
-        default: paramMessage`@Mapping.transform names ${"name"}, which is not a member of an enum declared with @Mapping.transforms.`,
       },
     },
   },
@@ -82,9 +88,6 @@ export const $lib = createTypeSpecLibrary({
     xsd: {},
     form: {},
     attachment: {},
-    transforms: {},
-    transform: {},
-    transformParams: {},
   },
 } as const);
 

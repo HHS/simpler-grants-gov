@@ -68,6 +68,13 @@ class E2ETokenRequestSchema(Schema):
             "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
         },
     )
+    session_duration_seconds = fields.Integer(
+        allow_none=True,
+        metadata={
+            "description": "Shorten the token session to this many seconds (30-900)",
+            "example": 60,
+        },
+    )
 
 
 class E2ETokenResponseSchema(AbstractResponseSchema):
