@@ -56,7 +56,7 @@ const mainACM = async () => {
       const domainResult = domainResults[cert.DomainName];
       domainResult.allResults.push(result);
 
-      if (result.startDate < 0) {
+      if (result.startDaysAgo < 0) {
         core.warning(
           `Future start date, skipping, ${result.domainName}, ${result.startDate}`,
         );
