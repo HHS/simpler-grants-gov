@@ -1,5 +1,6 @@
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "./fragments.tsp";
 import "./examples.tsp";
@@ -7,6 +8,7 @@ using SimplerForms;
 namespace Forms.RRPersonalData;
 
 /** Voluntary demographic information for the project director and up to four co-directors. */
+@Sgg.sync(#{ xml: "mapping" })
 @Meta.form(#{
   id: "research-related-personal-data",
   formName: "Research & Related Personal Data",
