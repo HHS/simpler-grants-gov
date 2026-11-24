@@ -19,7 +19,7 @@ from src.db.models.user_models import (
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.organization_audit import add_audit_event
 from src.services.organizations_v1.organization_user_utils import (
-    replace_individual_application_roles,
+    get_organization_application_users,
     validate_organization_user_exists,
 )
 
@@ -107,8 +107,9 @@ def remove_user_from_organization(
     # Check last admin protection
     check_last_admin_protection(db_session, target_user_id, organization)
 
-    # Delete the user's roles on the organization's applications
-    replace_individual_application_roles(db_session, org_user, {})
+    # Delete the user's access to the organization's applications
+    for app_user in get_organization_application_users(db_session, org_user):
+        db_session.delete(app_user)
 
     # Perform the deletion - cascade delete will handle OrganizationUserRole records
     db_session.delete(org_user)

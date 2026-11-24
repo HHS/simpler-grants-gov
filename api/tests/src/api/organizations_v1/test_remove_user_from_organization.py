@@ -140,7 +140,7 @@ class TestRemoveUserFromOrganization:
     def test_remove_user_deletes_application_roles(
         self, enable_factory_create, seed_form_registry, client, db_session
     ):
-        """Test that removing a Collaborator deletes their roles on the organization's applications"""
+        """Test that removing a user deletes all their roles on the organization's applications"""
         _, organization, admin_token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
@@ -178,10 +178,7 @@ class TestRemoveUserFromOrganization:
         assert {
             app_user.application_id: {role.role_id for role in app_user.roles}
             for app_user in app_users
-        } == {
-            org_applications[1].application_id: {APPLICATION_OWNER_ID},
-            other_org_application.application_id: {VIEW_APPLICATIONS_ID},
-        }
+        } == {other_org_application.application_id: {VIEW_APPLICATIONS_ID}}
 
     def test_remove_user_403_insufficient_privileges(
         self, enable_factory_create, client, db_session

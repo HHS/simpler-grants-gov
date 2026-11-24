@@ -7,6 +7,7 @@ from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import OrganizationAuditEvent
 from src.constants.static_role_values import (
     APPLICATION_OWNER_ID,
+    GRANULAR_APPLICATION_ROLE_IDS,
     MODIFY_APPLICATIONS_ID,
     ORG_ADMIN_ID,
     ORG_COLLABORATOR_ID,
@@ -24,8 +25,6 @@ from tests.src.db.models.factories import (
     OrganizationUserFactory,
     OrganizationUserRoleFactory,
 )
-
-GRANULAR_ROLE_IDS = [VIEW_APPLICATIONS_ID, MODIFY_APPLICATIONS_ID, SUBMIT_APPLICATIONS_ID]
 
 
 def to_str(ids):
@@ -102,7 +101,7 @@ class TestUpdateUserOrganizationRoles:
         """Should replace organization-wide Collaborator access with a new base role"""
         _, org, token = admin
         org_user = create_org_user_with_roles(
-            db_session, org, [ORG_COLLABORATOR_ID, *GRANULAR_ROLE_IDS]
+            db_session, org, [ORG_COLLABORATOR_ID, *GRANULAR_APPLICATION_ROLE_IDS]
         )
 
         resp = self.put_roles(
@@ -122,7 +121,7 @@ class TestUpdateUserOrganizationRoles:
         """Should grant organization-wide access with granular roles in role_ids"""
         _, org, token = admin
         org_user = create_org_user_with_roles(db_session, org, [ORG_MEMBER_ID])
-        role_ids = [ORG_COLLABORATOR_ID, *GRANULAR_ROLE_IDS]
+        role_ids = [ORG_COLLABORATOR_ID, *GRANULAR_APPLICATION_ROLE_IDS]
 
         resp = self.put_roles(client, token, org, org_user.user_id, {"role_ids": to_str(role_ids)})
         data = resp.get_json()["data"]
@@ -152,7 +151,7 @@ class TestUpdateUserOrganizationRoles:
                 "individual_application_roles": [
                     {
                         "application_id": str(application_a.application_id),
-                        "role_ids": to_str(GRANULAR_ROLE_IDS),
+                        "role_ids": to_str(GRANULAR_APPLICATION_ROLE_IDS),
                     },
                     {
                         "application_id": str(application_b.application_id),
@@ -171,11 +170,11 @@ class TestUpdateUserOrganizationRoles:
             }
             for application_role in data["individual_application_roles"]
         } == {
-            str(application_a.application_id): set(to_str(GRANULAR_ROLE_IDS)),
+            str(application_a.application_id): set(to_str(GRANULAR_APPLICATION_ROLE_IDS)),
             str(application_b.application_id): {str(VIEW_APPLICATIONS_ID)},
         }
         assert get_application_roles(db_session, org_user.user_id) == {
-            application_a.application_id: set(GRANULAR_ROLE_IDS),
+            application_a.application_id: set(GRANULAR_APPLICATION_ROLE_IDS),
             application_b.application_id: {VIEW_APPLICATIONS_ID},
         }
 
@@ -190,7 +189,9 @@ class TestUpdateUserOrganizationRoles:
         create_application_roles(
             db_session, removed_application, org_user.user, [VIEW_APPLICATIONS_ID]
         )
-        create_application_roles(db_session, changed_application, org_user.user, GRANULAR_ROLE_IDS)
+        create_application_roles(
+            db_session, changed_application, org_user.user, GRANULAR_APPLICATION_ROLE_IDS
+        )
 
         resp = self.put_roles(
             client,
@@ -220,14 +221,16 @@ class TestUpdateUserOrganizationRoles:
         _, org, token = admin
         org_user = create_org_user_with_roles(db_session, org, [ORG_COLLABORATOR_ID])
         application = ApplicationFactory.create(organization=org)
-        create_application_roles(db_session, application, org_user.user, GRANULAR_ROLE_IDS)
+        create_application_roles(
+            db_session, application, org_user.user, GRANULAR_APPLICATION_ROLE_IDS
+        )
 
         resp = self.put_roles(
             client,
             token,
             org,
             org_user.user_id,
-            {"role_ids": to_str([ORG_COLLABORATOR_ID, *GRANULAR_ROLE_IDS])},
+            {"role_ids": to_str([ORG_COLLABORATOR_ID, *GRANULAR_APPLICATION_ROLE_IDS])},
         )
 
         assert resp.status_code == 200
@@ -385,7 +388,7 @@ class TestUpdateUserOrganizationRoles:
         [
             [VIEW_APPLICATIONS_ID],
             [ORG_ADMIN_ID, ORG_MEMBER_ID],
-            [ORG_COLLABORATOR_ID, ORG_MEMBER_ID, *GRANULAR_ROLE_IDS],
+            [ORG_COLLABORATOR_ID, ORG_MEMBER_ID, *GRANULAR_APPLICATION_ROLE_IDS],
         ],
     )
     def test_update_user_organization_roles_422_base_roles(
@@ -541,7 +544,7 @@ class TestUpdateUserOrganizationRoles:
             token,
             org,
             request_user.user_id,
-            {"role_ids": to_str([ORG_COLLABORATOR_ID, *GRANULAR_ROLE_IDS])},
+            {"role_ids": to_str([ORG_COLLABORATOR_ID, *GRANULAR_APPLICATION_ROLE_IDS])},
         )
 
         assert resp.status_code == 403

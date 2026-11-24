@@ -101,6 +101,7 @@ def validate_individual_application_roles(
             )
 
         application_role_ids = set(application_role["role_ids"])
+        # Only View, Modify, and Submit Applications can be granted per application
         if not application_role_ids <= GRANULAR_APPLICATION_ROLE_IDS:
             raise_flask_error(422, message="Application roles must be granular application roles")
         if application_role_ids & role_ids:
