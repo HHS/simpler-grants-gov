@@ -1,4 +1,5 @@
-import type { FormDiff, Recorded, Pinned } from "../harness/model.ts";
+import type { FormDiff, Pinned, Recorded } from "../harness/model.ts";
+
 const radioChoice: Recorded = {
   category: "intentional",
   reason:
