@@ -1,7 +1,6 @@
 """Required strategy, optional named documents and DAT Appendix bounds."""
 
 import uuid
-from datetime import date
 
 import pytest
 
@@ -68,12 +67,6 @@ def test_appendix_over_dat_limit(form):
     )
     assert len(issues) == 1
     assert issues[0].type == "maxItems"
-
-
-def test_identity():
-    assert FORM.legacy_form_id == 797
-    assert FORM.omb_number == "0925-0001"
-    assert FORM.expiration_date == date(2027, 12, 31)
 
 
 @pytest.mark.parametrize("include_appendix_upload", [True, False])

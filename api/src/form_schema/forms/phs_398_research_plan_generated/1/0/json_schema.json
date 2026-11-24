@@ -5,10 +5,9 @@
     "introduction_to_application": {
       "allOf": [
         {
-          "$ref": "#/$defs/types.attachment"
+          "$ref": "#/$defs/research.introduction-to-application"
         }
       ],
-      "description": "Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "1. Introduction to Application (for Resubmission and Revision applications)"
     },
     "specific_aims": {
@@ -41,19 +40,17 @@
     "vertebrate_animals": {
       "allOf": [
         {
-          "$ref": "#/$defs/types.attachment"
+          "$ref": "#/$defs/research.vertebrate-animals"
         }
       ],
-      "description": "Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "5. Vertebrate Animals"
     },
     "select_agent_research": {
       "allOf": [
         {
-          "$ref": "#/$defs/types.attachment"
+          "$ref": "#/$defs/research.select-agent-research"
         }
       ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "6. Select Agent Research"
     },
     "multiple_pd_pi_leadership_plan": {
@@ -68,10 +65,9 @@
     "consortium_contractual_arrangements": {
       "allOf": [
         {
-          "$ref": "#/$defs/types.attachment"
+          "$ref": "#/$defs/research.consortium-contractual-arrangements"
         }
       ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "8. Consortium/Contractual Arrangements"
     },
     "letters_of_support": {
@@ -95,10 +91,9 @@
     "other_plans": {
       "allOf": [
         {
-          "$ref": "#/$defs/types.attachment"
+          "$ref": "#/$defs/research.other-plans"
         }
       ],
-      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
       "title": "11. Other Plan(s)"
     },
     "authentication_of_key_biological_and_or_chemical_resources": {
@@ -113,7 +108,7 @@
     "appendix": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/types.attachment"
+        "$ref": "#/$defs/research.appendix-attachment"
       },
       "maxItems": 10,
       "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
@@ -163,11 +158,47 @@
   ],
   "description": "PHS 398 Research Plan, Grants.gov version 5.0.",
   "$defs": {
+    "research.introduction-to-application": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Introduction to Application (for Resubmission and Revision applications)"
+    },
     "types.attachment": {
       "type": "string",
       "format": "uuid",
       "description": "Attach a file.",
       "title": "Attachment"
+    },
+    "research.vertebrate-animals": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Vertebrate Animals"
+    },
+    "research.select-agent-research": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Select Agent Research"
+    },
+    "research.consortium-contractual-arrangements": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Consortium/Contractual Arrangements"
+    },
+    "research.other-plans": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Other Plan(s)"
+    },
+    "research.appendix-attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach an appendix PDF.",
+      "title": "Appendix attachment"
     }
   }
 }
