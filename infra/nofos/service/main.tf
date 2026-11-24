@@ -182,7 +182,7 @@ module "service" {
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
   enable_autoscaling       = true
-  max_capacity             = local.service_config.desired_instance_count
+  max_capacity             = local.service_config.scaling_max_capacity
   min_capacity             = local.service_config.desired_instance_count
 
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
