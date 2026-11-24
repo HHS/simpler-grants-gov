@@ -141,7 +141,7 @@
           "$ref": "#/$defs/types.attachment"
         }
       ],
-      "description": "If you have answered \"no\" to question 4 above, please prepare an explanation of the research and development that is being performed outside the United States, in a separate file. Then use the Add Attachment button to attach the file and complete this entry. When you click Add Attachment, browse to where you saved the file, select the appropriate file and then click Open to complete the action.",
+      "description": "Attach an explanation of the research and development that will take place outside the United States.",
       "title": "Explanation for work outside the United States"
     },
     "equivalent_federal_work": {
@@ -184,7 +184,7 @@
           "$ref": "#/$defs/types.attachment"
         }
       ],
-      "description": "The following applications require a Commercialization Plan: Phase I (DOE only), Phase II (all agencies), Phase I/II Fast-Track (all agencies). Include a Commercialization Plan in accordance with the agency announcement and/or agency-specific instructions. To attach a Commercialization Plan file, click the Add Attachment button, browse to where you saved the file, select the file, and then click Open.",
+      "description": "Attach a commercialization plan that follows the agency’s instructions. DOE requires it for Phase I. All agencies require it for Phase II and Fast-Track.",
       "title": "8. Commercialization Plan"
     },
     "phase_ii_awards_received": {
@@ -202,7 +202,7 @@
           "$ref": "#/$defs/types.attachment"
         }
       ],
-      "description": "If you have answered \"Yes\" to question 9 above, please prepare a commercialization history in accordance with agency specific instructions, in a separate file. Then use the Add Attachment button to attach the file and complete this entry. When you click Add Attachment, browse to where you saved the file, select the appropriate file and then click Open to complete the action.",
+      "description": "Attach the company’s SBIR commercialization history. Follow the agency’s instructions.",
       "title": "SBIR commercialization history"
     },
     "principal_investigator_primary_employment": {
