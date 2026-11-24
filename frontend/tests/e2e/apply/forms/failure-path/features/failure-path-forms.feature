@@ -55,6 +55,7 @@ Feature: Apply - Application Form Failure Path
 			| sf424                                | Application for Federal Assistance (SF-424) | required fields left empty                        |
 			| sf424-individual                     | SF-424 Individual                           | required fields left empty                        |
 			| sf424-mandatory                      | SF424 Mandatory Form                        | required fields left empty                        |
+			| sf424-r-r                            | SF-424 (R&R)                                | required fields left empty                        |
 			| sf424a                               | SF-424A                                     | required fields left empty                        |
 			| sf424b                               | SF-424B                                     | required fields left empty                        |
 			| sf424d                               | SF-424D                                     | required fields left empty                        |
