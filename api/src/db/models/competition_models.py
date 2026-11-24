@@ -274,7 +274,7 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
 
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey(Organization.organization_id)
+        UUID, ForeignKey(Organization.organization_id), index=True
     )
     organization: Mapped[Organization | None] = relationship(
         Organization, uselist=False, back_populates="applications"
@@ -331,6 +331,11 @@ class Application(ApiSchemaTable, TimestampMixin):
     def users(self) -> list[User]:
         """Return the list of User objects associated with this application"""
         return [app_user.user for app_user in self.application_users]
+
+    @property
+    def application_display_name(self) -> str:
+        """Application name, falling back to the competition title, then a default label"""
+        return self.application_name or self.competition.competition_title or "Untitled Application"
 
 
 class ApplicationForm(ApiSchemaTable, TimestampMixin):
