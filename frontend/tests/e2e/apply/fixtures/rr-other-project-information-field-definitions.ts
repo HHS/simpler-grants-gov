@@ -15,28 +15,28 @@ export const RR_OTHER_PROJECT_INFO_FORM_CONFIG = {
   ...FORM_DEFAULTS,
   formName: RR_OTHER_PROJECT_INFO_FORM_MATCHER,
   fields: {
-    "human_subjects--involved": no(
-      "human_subjects--involved",
+    human_subjects_involved: no(
+      "human_subjects_involved",
       "1. Are Human Subjects Involved?",
     ),
-    "vertebrate_animals--used": no(
-      "vertebrate_animals--used",
+    vertebrate_animals_used: no(
+      "vertebrate_animals_used",
       "2. Are Vertebrate Animals Used?",
     ),
     proprietary_information_included: no(
       "proprietary_information_included",
       "3. Is proprietary/privileged information included in the application?",
     ),
-    "environmental_impact--has_impact": no(
-      "environmental_impact--has_impact",
+    environmental_impact: no(
+      "environmental_impact",
       "4.a. Does this Project Have an Actual or Potential Impact - positive or negative - on the environment?",
     ),
-    "historic_place--designated_or_eligible": no(
-      "historic_place--designated_or_eligible",
+    historic_site_designated_or_eligible: no(
+      "historic_site_designated_or_eligible",
       "5.  Is the research performance site designated, or eligible to be designated, as a historic place?",
     ),
-    "international_activities--involved": no(
-      "international_activities--involved",
+    international_activities_involved: no(
+      "international_activities_involved",
       "6. Does this project involve activities outside of the United States or partnerships with international collaborators?",
     ),
   },
@@ -44,11 +44,11 @@ export const RR_OTHER_PROJECT_INFO_FORM_CONFIG = {
 
 export const RR_OTHER_PROJECT_INFO_REQUIRED_FIELD_ERRORS = [
   {
-    fieldId: "human_subjects--involved",
+    fieldId: "human_subjects_involved",
     message: "1. Are Human Subjects Involved is required",
   },
   {
-    fieldId: "vertebrate_animals--used",
+    fieldId: "vertebrate_animals_used",
     message: "2. Are Vertebrate Animals Used is required",
   },
   {
@@ -57,17 +57,17 @@ export const RR_OTHER_PROJECT_INFO_REQUIRED_FIELD_ERRORS = [
       "3. Is proprietary/privileged information included in the application is required",
   },
   {
-    fieldId: "environmental_impact--has_impact",
+    fieldId: "environmental_impact",
     message:
       "4.a. Does this Project Have an Actual or Potential Impact - positive or negative - on the environment is required",
   },
   {
-    fieldId: "historic_place--designated_or_eligible",
+    fieldId: "historic_site_designated_or_eligible",
     message:
       "5.  Is the research performance site designated, or eligible to be designated, as a historic place is required",
   },
   {
-    fieldId: "international_activities--involved",
+    fieldId: "international_activities_involved",
     message:
       "6. Does this project involve activities outside of the United States or partnerships with international collaborators is required",
   },

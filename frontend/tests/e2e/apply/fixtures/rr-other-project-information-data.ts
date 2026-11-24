@@ -7,11 +7,11 @@ export const RR_OTHER_PROJECT_INFO_GENERATED_OPPORTUNITY_DATA: PrintViewFormData
     formKey: "rrOtherInfoGenerated",
     expectedPrepopulatedFields: {},
     buildTestData: () => ({
-      "human_subjects--involved": "No",
-      "vertebrate_animals--used": "No",
+      human_subjects_involved: "No",
+      vertebrate_animals_used: "No",
       proprietary_information_included: "No",
-      "environmental_impact--has_impact": "No",
-      "historic_place--designated_or_eligible": "No",
-      "international_activities--involved": "No",
+      environmental_impact: "No",
+      historic_site_designated_or_eligible: "No",
+      international_activities_involved: "No",
     }),
   };

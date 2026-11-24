@@ -1,7 +1,5 @@
 from pathlib import Path
-
 from lxml import etree
-
 from src.form_schema.forms.research_and_related_other_project_information_generated import (
     FORM_XML_TRANSFORM_RULES,
 )
@@ -12,18 +10,16 @@ from src.services.xml_generation.validation.xsd_validator import XSDValidator
 
 def test_exempt_project_preserves_each_code_and_omits_previous_approval_date():
     answers = {
-        "human_subjects": {
-            "involved": True,
-            "exempt_from_federal_regulations": True,
-            "exemption_numbers": ["E1", "E4"],
-            "irb_review_pending": False,
-            "irb_approval_date": "2026-01-12",
-        },
-        "vertebrate_animals": {"used": False},
+        "human_subjects_involved": True,
+        "exempt_from_federal_regulations": True,
+        "exemption_numbers": ["E1", "E4"],
+        "irb_review_pending": False,
+        "irb_approval_date": "2026-01-12",
+        "vertebrate_animals_used": False,
         "proprietary_information_included": False,
-        "environmental_impact": {"has_impact": False},
-        "historic_place": {"designated_or_eligible": False},
-        "international_activities": {"involved": False},
+        "environmental_impact": False,
+        "historic_site_designated_or_eligible": False,
+        "international_activities_involved": False,
     }
     response = XMLGenerationService().generate_xml(
         XMLGenerationRequest(application_data=answers, transform_config=FORM_XML_TRANSFORM_RULES)

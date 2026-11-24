@@ -9,7 +9,7 @@
           "elements": [
             {
               "type": "Control",
-              "scope": "#/properties/human_subjects/properties/involved",
+              "scope": "#/properties/human_subjects_involved",
               "label": "1. Are Human Subjects Involved?",
               "options": {
                 "widget": "Radio"
@@ -17,7 +17,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/human_subjects/properties/exempt_from_federal_regulations",
+              "scope": "#/properties/exempt_from_federal_regulations",
               "label": "Is the Project Exempt from Federal regulations?",
               "options": {
                 "widget": "Radio"
@@ -25,7 +25,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/human_subjects/properties/involved",
+                  "scope": "#/properties/human_subjects_involved",
                   "schema": {
                     "const": true
                   }
@@ -34,7 +34,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/human_subjects/properties/exemption_numbers",
+              "scope": "#/properties/exemption_numbers",
               "label": "If yes, check appropriate exemption number.",
               "options": {
                 "widget": "MultiSelect"
@@ -42,7 +42,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/human_subjects/properties/exempt_from_federal_regulations",
+                  "scope": "#/properties/exempt_from_federal_regulations",
                   "schema": {
                     "const": true
                   }
@@ -51,7 +51,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/human_subjects/properties/irb_review_pending",
+              "scope": "#/properties/irb_review_pending",
               "label": "If no, is the IRB review Pending?",
               "options": {
                 "widget": "Radio"
@@ -59,7 +59,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/human_subjects/properties/exempt_from_federal_regulations",
+                  "scope": "#/properties/exempt_from_federal_regulations",
                   "schema": {
                     "const": false
                   }
@@ -68,12 +68,12 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/human_subjects/properties/irb_approval_date",
+              "scope": "#/properties/irb_approval_date",
               "label": "IRB Approval Date:",
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/human_subjects/properties/irb_review_pending",
+                  "scope": "#/properties/irb_review_pending",
                   "schema": {
                     "const": false
                   }
@@ -82,7 +82,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/human_subjects/properties/assurance_number",
+              "scope": "#/properties/human_subject_assurance_number",
               "label": "Human Subject Assurance Number: ",
               "options": {
                 "widget": "Text"
@@ -90,7 +90,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/human_subjects/properties/involved",
+                  "scope": "#/properties/human_subjects_involved",
                   "schema": {
                     "const": true
                   }
@@ -105,7 +105,7 @@
           "elements": [
             {
               "type": "Control",
-              "scope": "#/properties/vertebrate_animals/properties/used",
+              "scope": "#/properties/vertebrate_animals_used",
               "label": "2. Are Vertebrate Animals Used?",
               "options": {
                 "widget": "Radio"
@@ -113,7 +113,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/vertebrate_animals/properties/iacuc_review_pending",
+              "scope": "#/properties/iacuc_review_pending",
               "label": "Is the IACUC review Pending?",
               "options": {
                 "widget": "Radio"
@@ -121,7 +121,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/vertebrate_animals/properties/used",
+                  "scope": "#/properties/vertebrate_animals_used",
                   "schema": {
                     "const": true
                   }
@@ -130,12 +130,12 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/vertebrate_animals/properties/iacuc_approval_date",
+              "scope": "#/properties/iacuc_approval_date",
               "label": "IACUC Approval Date:",
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/vertebrate_animals/properties/iacuc_review_pending",
+                  "scope": "#/properties/iacuc_review_pending",
                   "schema": {
                     "const": false
                   }
@@ -144,7 +144,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/vertebrate_animals/properties/assurance_number",
+              "scope": "#/properties/animal_welfare_assurance_number",
               "label": "Animal Welfare Assurance Number:",
               "options": {
                 "widget": "Text"
@@ -152,7 +152,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/vertebrate_animals/properties/used",
+                  "scope": "#/properties/vertebrate_animals_used",
                   "schema": {
                     "const": true
                   }
@@ -184,7 +184,7 @@
           "elements": [
             {
               "type": "Control",
-              "scope": "#/properties/environmental_impact/properties/has_impact",
+              "scope": "#/properties/environmental_impact",
               "label": "4.a. Does this Project Have an Actual or Potential Impact - positive or negative - on the environment?",
               "options": {
                 "widget": "Radio"
@@ -192,7 +192,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/environmental_impact/properties/impact_explanation",
+              "scope": "#/properties/environmental_impact_explanation",
               "label": "4.b. If yes, please explain:",
               "options": {
                 "widget": "Text"
@@ -200,7 +200,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/environmental_impact/properties/has_impact",
+                  "scope": "#/properties/environmental_impact",
                   "schema": {
                     "const": true
                   }
@@ -209,7 +209,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/environmental_impact/properties/assessment_or_exemption_performed",
+              "scope": "#/properties/assessment_or_exemption_performed",
               "label": "4.c. If this project has an actual or potential impact on the environment, has an exemption been authorized or an environmental assessment (EA) or environmental impact statement (EIS) been performed?",
               "options": {
                 "widget": "Radio"
@@ -217,7 +217,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/environmental_impact/properties/has_impact",
+                  "scope": "#/properties/environmental_impact",
                   "schema": {
                     "const": true
                   }
@@ -226,7 +226,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/environmental_impact/properties/assessment_or_exemption_explanation",
+              "scope": "#/properties/assessment_or_exemption_explanation",
               "label": "4.d. If yes, please explain:",
               "options": {
                 "widget": "Text"
@@ -234,7 +234,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/environmental_impact/properties/assessment_or_exemption_performed",
+                  "scope": "#/properties/assessment_or_exemption_performed",
                   "schema": {
                     "const": true
                   }
@@ -249,7 +249,7 @@
           "elements": [
             {
               "type": "Control",
-              "scope": "#/properties/historic_place/properties/designated_or_eligible",
+              "scope": "#/properties/historic_site_designated_or_eligible",
               "label": "5.  Is the research performance site designated, or eligible to be designated, as a historic place?",
               "options": {
                 "widget": "Radio"
@@ -257,7 +257,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/historic_place/properties/explanation",
+              "scope": "#/properties/historic_site_explanation",
               "label": "5.a. If yes, please explain:",
               "options": {
                 "widget": "Text"
@@ -265,7 +265,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/historic_place/properties/designated_or_eligible",
+                  "scope": "#/properties/historic_site_designated_or_eligible",
                   "schema": {
                     "const": true
                   }
@@ -280,7 +280,7 @@
           "elements": [
             {
               "type": "Control",
-              "scope": "#/properties/international_activities/properties/involved",
+              "scope": "#/properties/international_activities_involved",
               "label": "6. Does this project involve activities outside of the United States or partnerships with international collaborators?",
               "options": {
                 "widget": "Radio"
@@ -288,7 +288,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/international_activities/properties/countries",
+              "scope": "#/properties/international_countries",
               "label": "6.a. If yes, identify countries:",
               "options": {
                 "widget": "Text"
@@ -296,7 +296,7 @@
               "rule": {
                 "effect": "ENABLE",
                 "condition": {
-                  "scope": "#/properties/international_activities/properties/involved",
+                  "scope": "#/properties/international_activities_involved",
                   "schema": {
                     "const": true
                   }
@@ -305,7 +305,7 @@
             },
             {
               "type": "Control",
-              "scope": "#/properties/international_activities/properties/explanation",
+              "scope": "#/properties/international_activities_explanation",
               "label": "6.b. Optional Explanation:",
               "options": {
                 "widget": "Text"
@@ -374,6 +374,5 @@
         "description": "Project Summary/Abstract and Project Narrative are required unless the cover submission type is Pre-application. Prepare each document for its named purpose and follow the announcement and agency instructions. Up to 100 other project files may be provided. OMB Number: 4040-0001. Expiration Date: 01/31/2029."
       }
     }
-  ],
-  "label": "Describe human and animal involvement, other project circumstances and each distinct supporting document. OMB Number: 4040-0001. Expiration Date: 01/31/2029."
+  ]
 }
