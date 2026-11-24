@@ -36,79 +36,79 @@ namespace Forms.Phs398CareerDevelopmentAwardSupplemental;
   }
 )
 model Form {
-  @doc("Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. Required if you selected "Resubmission" or "Revision" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
   introductionToApplication?: Questions.Types.Attachment;
 
-  @doc("Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies.")
+  /** Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies. */
   @UI.label("2. Candidate Information and Goals for Career Development")
   candidateInformationAndGoals?: Questions.Types.Attachment;
 
-  @doc("Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies.")
+  /** Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies. */
   @UI.label("3. Specific Aims")
   specificAims?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. This attachment is required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. This attachment is required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("4. Research Strategy")
   researchStrategy: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. Required if you selected "Renewal" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("5. Progress Report Publication List (for Renewal applications)")
   progressReportPublicationList?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("6. Training in the Responsible Conduct of Research")
   responsibleConductOfResearch?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("7. Candidate's Plan to Provide Mentoring")
   mentoringPlan?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("8. Plans and Statements of Mentor and Co-Mentor(s)")
   statementsOfSupport?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("9. Letters of Support from Collaborators, Contributors, and Consultants")
   lettersOfSupport?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("10. Description of Institutional Environment")
   institutionalEnvironment?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("11. Institutional Commitment to Candidate’s Research Career Development")
   institutionalCommitment?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("12. Description of Candidate's Contribution to Program Goals")
   candidatesContribution?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. Required if you checked "Yes" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("13. Vertebrate Animals")
   vertebrateAnimals?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("14. Select Agent Research")
   selectAgentResearch?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("15. Consortium/Contractual Arrangements")
   consortiumContractualArrangements?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("16. Resource Sharing")
   resourceSharingPlans?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("17. Other Plan(s)")
   otherPlans?: Questions.Types.Attachment;
 
-  @doc("Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("18. Authentication of Key Biological and/or Chemical Resources")
   keyBiologicalAndOrChemicalResources?: Questions.Types.Attachment;
 
-  @doc("Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.")
+  /** Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("19. Appendix")
   @UI.widget(Rendering.Widget.AttachmentArray)
   @maxItems(10)
@@ -124,7 +124,7 @@ model Form {
   @Validation.requiredWhen(Form.isUsCitizenOrNational, false)
   nonUsCitizenshipStatus?: NonUsCitizenshipStatus;
 
-  @doc("Check if candidate is a non-U.S. citizen with a temporary visa applying for an award that requires permanent residency status, and expect to be granted a permanent resident visa by the start date of the award.")
+  /** Check if candidate is a non-U.S. citizen with a temporary visa applying for an award that requires permanent residency status, and expect to be granted a permanent resident visa by the start date of the award. */
   @UI.label("Expect permanent resident status by the award start date")
   @UI.widget(Rendering.Widget.Checkbox)
   @UI.enabledWhen(
