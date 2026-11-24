@@ -1,6 +1,15 @@
 from datetime import datetime
 
+import pytest
+
+from src.form_schema.forms.research_related_personal_data_generated import FORM as PERSONAL_DATA
+
 EXPECTED_FORM_DATA = {
+    357: {
+        "form_name": "Research & Related Personal Data",
+        "omb_number": "4040-0001",
+        "expiration_date": "01/31/2029",
+    },
     713: {
         "form_name": "Application for Federal Assistance (SF-424)",
         "omb_number": "4040-0004",
@@ -385,5 +394,16 @@ def test_nsf_suggested_reviewers_v1_1(nsf_suggested_reviewers_v1_1):
         form.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
+    assert form.sgg_version == "1.0"
+    assert form.form_renderer == "jsonforms"
+
+
+@pytest.mark.parametrize("form,legacy_id", [(PERSONAL_DATA, 357)])
+def test_research_questionnaire_identity(form, legacy_id):
+    expected = EXPECTED_FORM_DATA[legacy_id]
+    assert form.legacy_form_id == legacy_id
+    assert form.form_name == expected["form_name"]
+    assert form.omb_number == expected["omb_number"]
+    assert form.expiration_date == datetime.strptime(expected["expiration_date"], "%m/%d/%Y").date()
     assert form.sgg_version == "1.0"
     assert form.form_renderer == "jsonforms"

@@ -57,6 +57,7 @@ Feature: Apply - Application Form Failure Path
 			| sf424b                               | SF-424B                                     | required fields left empty                        |
 			| sf424d                               | SF-424D                                     | required fields left empty                        |
 			| sflll                                | SF-LLL                                      | required fields left empty                        |
+			| rr-personal-data | Research & Related Personal Data | required fields left empty |
 			| suppcoversheet-neh-grantsprogram     | Supplementary Cover Sheet                   | required fields left empty                        |
 
 	# Expected failure path form status on the application landing page:
