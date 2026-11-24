@@ -1,4 +1,5 @@
 import type { FormDiff } from "../harness/model.ts";
+import { DIFF as individual } from "./application-for-federal-domestic-assistance-individual.ts";
 import { DIFF as short } from "./application-for-federal-domestic-assistance-short-organizational.ts";
 import { DIFF as budgetNarrative } from "./budget-narrative-attachment-form.ts";
 import { DIFF as edAbstract } from "./ed-abstract-form.ts";
@@ -34,6 +35,7 @@ export const DIFFS: FormDiff[] = [
   nsfReviewers,
   projectAbstractSummary,
   nasaPiAndAor,
+  individual,
   regular,
   short,
 ];
