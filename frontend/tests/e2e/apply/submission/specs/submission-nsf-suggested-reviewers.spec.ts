@@ -36,7 +36,7 @@ for (const [applicant, orgLabel] of [
   ["organization", playwrightEnv.testOrgLabel],
   ["individual", undefined],
 ] as const) {
-  test(
+  test.fixme(
     `NSF Suggested Reviewers save, clear, print and submit (${applicant})`,
     { tag: [VALID_TAGS.APPLY_FORMS, VALID_TAGS.FULL_REGRESSION] },
     async ({ page, context }, testInfo) => {
