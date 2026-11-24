@@ -1,0 +1,333 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/agency",
+          "label": "Agency to which you are applying (select only one)",
+          "options": {
+            "widget": "Select"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/other_agency",
+          "label": "Other Agency",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/agency",
+              "schema": {
+                "const": "Other"
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/sbc_control_id",
+          "label": "SBC Control ID:"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/program_type",
+          "label": "Program Type (select only one)",
+          "options": {
+            "widget": "Select"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/application_type",
+          "label": "Application Type (select only one)",
+          "options": {
+            "widget": "Select"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/phase_i_letter_of_intent_number",
+          "label": "Phase I Letter of Intent Number:"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/agency_topic_subtopic",
+          "label": "Agency Topic/Subtopic:"
+        }
+      ],
+      "label": "Agency and small business identification"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/eligibility_certification",
+          "label": "1a. Do you certify that at the time of award your organization will meet the eligibility criteria for a small business as defined in the funding opportunity announcement?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/anticipated_personnel",
+          "label": "1b. Anticipated Number of personnel to be employed at your organization at the time of award."
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/majority_venture_capital_owned",
+          "label": "1c. Is your small business majority owned by venture capital operating companies, hedge funds, or private equity firms?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/faculty_or_student_owned",
+          "label": "1d. Is your small business a Faculty or Student-Owned entity?",
+          "options": {
+            "widget": "Radio"
+          }
+        }
+      ],
+      "label": "Small business eligibility and ownership"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/federal_subcontracts_included",
+          "label": "2. Does this application include subcontracts with Federal laboratories or any other Federal Government agencies?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/laboratory_or_agency_names",
+          "label": "If yes, insert the names of the Federal laboratories/agencies:",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/federal_subcontracts_included",
+              "schema": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/hub_zone_located",
+          "label": "3. Are you located in a HUBZone?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/research_entirely_in_united_states",
+          "label": "4. Will all research and development on the project be performed in its entirety in the United States?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/outside_united_states_explanation",
+          "label": "Explanation for work outside the United States",
+          "options": {
+            "widget": "Attachment"
+          },
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/research_entirely_in_united_states",
+              "schema": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/equivalent_federal_work",
+          "label": "5. Has the applicant and/or Program Director/Principal Investigator submitted proposals for essentially equivalent work under other Federal program solicitations or received other Federal awards for essentially equivalent work?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/equivalent_work_agencies",
+          "label": "If yes, insert the names of the other Federal agencies:",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/equivalent_federal_work",
+              "schema": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/disclosure_permitted",
+          "label": "6. Disclosure Permission Statement: If this application does not result in an award, is the Government permitted to disclose the title of your proposed project, and the name, address, telephone number and email address of the official signing for the applicant organization to state-level economic development organizations that may be interested in contacting you for further information (e.g., possible collaborations, investment)?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/taba_funds_requested",
+          "label": "7. Does the application include a request of SBIR or STTR funds for Technical and Business Assistance (TABA)? If yes, please follow the agency specific instructions to provide the budget request and justification. (Please answer no if you plan to use the agency TABA vendor, which does not require you to include a request for TABA funds in your application.)",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/commercialization_plan",
+          "label": "8. Commercialization Plan",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Project and federal assistance questions"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/phase_ii_awards_received",
+          "label": "9. Have you received SBIR Phase II awards from the Federal Government? If yes, provide a company commercialization history in accordance with agency-specific instructions using this attachment.",
+          "options": {
+            "widget": "Radio"
+          },
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/program_type",
+              "schema": {
+                "enum": [
+                  "SBIR",
+                  "Both"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/commercialization_history",
+          "label": "SBIR commercialization history",
+          "options": {
+            "widget": "Attachment"
+          },
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/phase_ii_awards_received",
+              "schema": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/principal_investigator_primary_employment",
+          "label": "10. Will the Project Director/Principal Investigator have his/her primary employment with the small business at the time of award?",
+          "options": {
+            "widget": "Radio"
+          },
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/program_type",
+              "schema": {
+                "enum": [
+                  "SBIR",
+                  "Both"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "label": "SBIR questions"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/appointment_and_minimum_effort_certified",
+          "label": "11. Please indicate whether the answer to BOTH of the following questions is TRUE: (1) Does the Project Director/Principal Investigator have a formal appointment or commitment either with the small business directly (as an employee or a contractor) OR as an employee of the Research Institution, which in turn has made a commitment to the small business through the STTR application process; AND (2) Will the Project Director/Principal Investigator devote at least 10% effort to the proposed project?",
+          "options": {
+            "widget": "Radio"
+          },
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/program_type",
+              "schema": {
+                "enum": [
+                  "STTR",
+                  "Both"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/small_business_and_institution_work_shares_certified",
+          "label": "12. In the joint research and development proposed in this project, does the small business perform at least 40% of the work and the research institution named in the application perform at least 30% of the work?",
+          "options": {
+            "widget": "Radio"
+          },
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/program_type",
+              "schema": {
+                "enum": [
+                  "STTR",
+                  "Both"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/research_partner_uei",
+          "label": "13. Provide UEI of non-profit research partner for STTR.",
+          "rule": {
+            "effect": "ENABLE",
+            "condition": {
+              "scope": "#/properties/program_type",
+              "schema": {
+                "enum": [
+                  "STTR",
+                  "Both"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "label": "STTR questions"
+    }
+  ],
+  "label": "SBIR/STTR Information"
+}

@@ -8,6 +8,7 @@ import "./examples.tsp";
 using SimplerForms;
 namespace Forms.SbirSttrInformation;
 
+@Sgg.sync(#{ xml: "mapping" })
 @Meta.form(#{ id: "sbir-sttr-information", formName: "SBIR/STTR Information" })
 @GrantsGov.form(#{
   legacyFormId: 787,
