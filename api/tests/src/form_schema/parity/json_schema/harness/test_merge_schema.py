@@ -35,6 +35,22 @@ class TestMergeAllof:
         assert merge_allof(schema) == {"type": "object", "allOf": [conditional]}
 
     def test_raises_on_conflicting_validation_keywords(self):
-        schema = {"allOf": [{"maxLength": 60}, {"maxLength": 200}]}
-        with pytest.raises(ConflictingKeywordsError, match="`maxLength` is declared as"):
+        schema = {"allOf": [{"pattern": "^a$"}, {"pattern": "^b$"}]}
+        with pytest.raises(ConflictingKeywordsError, match="`pattern` is declared as"):
             merge_allof(schema)
+
+    @pytest.mark.parametrize(
+        ("branches", "expected"),
+        [
+            ([{"maxLength": 100}, {"maxLength": 30}], {"maxLength": 30}),
+            ([{"minLength": 1}, {"minLength": 6}], {"minLength": 6}),
+            ([{"minimum": 0}, {"minimum": 1}], {"minimum": 1}),
+            ([{"maxItems": 3}, {"maxItems": 1}], {"maxItems": 1}),
+        ],
+    )
+    def test_keeps_the_strictest_bound_when_branches_set_different_bounds(self, branches, expected):
+        assert merge_allof({"allOf": branches}) == expected
+
+    def test_keeps_the_strictest_bound_when_a_node_narrows_its_branch(self):
+        schema = {"allOf": [{"$ref": "#/$defs/x", "maxLength": 100}], "maxLength": 30}
+        assert merge_allof(schema) == {"$ref": "#/$defs/x", "maxLength": 30}

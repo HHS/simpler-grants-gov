@@ -4,6 +4,9 @@
     -> {"type": "string", "maxLength": 60}
 
     {"allOf": [{"maxLength": 60}, {"maxLength": 200}]}
+    -> {"maxLength": 60}
+
+    {"allOf": [{"pattern": "^a$"}, {"pattern": "^b$"}]}
     -> raises ConflictingKeywordsError
 
 Conditional branches (`if`/`then`/`else`) are left in `allOf`, since which one applies
@@ -32,6 +35,11 @@ ANNOTATION = frozenset(
     }
 )
 
+# Every branch applies, so the combined bound is the strictest one. A form can narrow a
+# shared question this way, e.g. a 30-character department on a 100-character question.
+LOWER_BOUNDS = frozenset({"minLength", "minimum", "minItems"})
+UPPER_BOUNDS = frozenset({"maxLength", "maximum", "maxItems"})
+
 
 class ConflictingKeywordsError(Exception):
     """Two `allOf` branches give the same validation keyword different values."""
@@ -47,8 +55,9 @@ def merge_allof(schema: Any, path: str = "") -> Any:
 
     `path` locates a conflict in the error message.
 
-    Raises `ConflictingKeywordsError` if two branches, or a branch and the node itself,
-    give the same validation keyword different values.
+    Keeps the strictest of several length, range or item-count bounds. Raises
+    `ConflictingKeywordsError` if two branches, or a branch and the node itself, give any
+    other validation keyword different values.
     """
     if isinstance(schema, list):
         return [merge_allof(item, path) for item in schema]
@@ -93,6 +102,10 @@ def merge_allof(schema: Any, path: str = "") -> Any:
                 pass  # the node's own value is already in `merged`
             elif key in COMBINING:
                 merged[key] = {**value, **merged[key]}
+            elif key in LOWER_BOUNDS and _are_numbers(merged[key], value):
+                merged[key] = max(merged[key], value)
+            elif key in UPPER_BOUNDS and _are_numbers(merged[key], value):
+                merged[key] = min(merged[key], value)
             elif merged[key] != value:
                 raise ConflictingKeywordsError(
                     f"{path or '<root>'}: `{key}` is declared as {merged[key]!r} and {value!r}"
@@ -110,3 +123,7 @@ def merge_allof(schema: Any, path: str = "") -> Any:
 
 def _is_conditional(branch: Any) -> bool:
     return isinstance(branch, dict) and bool(CONDITIONAL & set(branch))
+
+
+def _are_numbers(*values: Any) -> bool:
+    return all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in values)
