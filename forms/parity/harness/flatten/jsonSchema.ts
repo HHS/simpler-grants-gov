@@ -19,6 +19,10 @@ export class AmbiguousComposition extends Error {}
 
 const ANNOTATIONS = new Set(["title", "description", "examples", "$comment"]);
 
+// Every allOf branch applies, so the combined bound is the strictest one.
+const LOWER_BOUNDS = new Set(["minLength", "minimum", "minItems"]);
+const UPPER_BOUNDS = new Set(["maxLength", "maximum", "maxItems"]);
+
 /**
  * Folds unconditional `allOf` branches into the node: `properties` merge per property and
  * `required` lists union. A branch with `if` is conditional and is left alone.
@@ -39,6 +43,10 @@ export function mergeAllOf(node: Json, at: Path = ""): Json {
         merged.required = [...new Set([...(merged.required ?? []), ...value])];
       } else if (!(key in merged)) {
         merged[key] = value;
+      } else if (LOWER_BOUNDS.has(key) && typeof value === "number") {
+        merged[key] = Math.max(merged[key] as number, value);
+      } else if (UPPER_BOUNDS.has(key) && typeof value === "number") {
+        merged[key] = Math.min(merged[key] as number, value);
       } else if (
         !ANNOTATIONS.has(key) &&
         JSON.stringify(merged[key]) !== JSON.stringify(value)

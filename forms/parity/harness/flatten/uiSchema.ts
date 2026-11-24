@@ -3,8 +3,8 @@ import { ARRAY, fromScope, render, type Fields, type Json } from "../model.ts";
 /**
  * The controls a JSON Forms UI schema lays out, keyed by `json_path`, in the order a reader
  * meets them. A control with `options.detail` lays out an array's items, whose scopes are
- * relative to the item. Help text is the controlled property's `description` in `schema`,
- * which is what the renderer shows; the UI schema has none of its own.
+ * relative to the item. Help text is the control's own `options.description` when it has one,
+ * else the controlled property's `description` in `schema`, as the renderer shows it.
  */
 export function uiSchemaFields(ui: Json, schema: Fields): Fields {
   const fields: Fields = new Map();
@@ -21,7 +21,9 @@ export function uiSchemaFields(ui: Json, schema: Fields): Fields {
       fields.set(key, {
         order: fields.size,
         label: node.label,
-        help: schema.get(key)?.help,
+        help:
+          (node.options?.description as string | undefined) ??
+          schema.get(key)?.help,
         rules: {},
       });
       return;

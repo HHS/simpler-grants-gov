@@ -30,8 +30,19 @@ describe("mergeAllOf", () => {
 
   it("refuses branches that disagree", () => {
     expect(() =>
-      mergeAllOf({ allOf: [{ maxLength: 1 }, { maxLength: 2 }] }),
+      mergeAllOf({ allOf: [{ pattern: "^a$" }, { pattern: "^b$" }] }),
     ).toThrow(AmbiguousComposition);
+  });
+
+  it("keeps the strictest bound when branches set different bounds", () => {
+    expect(
+      mergeAllOf({
+        allOf: [
+          { minLength: 1, maxLength: 100 },
+          { minLength: 2, maxLength: 30 },
+        ],
+      }),
+    ).toEqual({ minLength: 2, maxLength: 30 });
   });
 });
 
