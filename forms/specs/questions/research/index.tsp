@@ -68,3 +68,33 @@ scalar AdditionalCollaborators extends Questions.Types.Attachment;
 @Meta.question(#{ id: "research/additional-synergistic-activities" })
 @UI.label("Additional Synergistic Activities")
 scalar AdditionalSynergisticActivities extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. Required if you selected "Resubmission" or "Revision" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/introduction-to-application" })
+@UI.label("Introduction to Application (for Resubmission and Revision applications)")
+scalar IntroductionToApplication extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. Required if you checked "Yes" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/vertebrate-animals" })
+@UI.label("Vertebrate Animals")
+scalar VertebrateAnimals extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/select-agent-research" })
+@UI.label("Select Agent Research")
+scalar SelectAgentResearch extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/consortium-contractual-arrangements" })
+@UI.label("Consortium/Contractual Arrangements")
+scalar ConsortiumContractualArrangements extends Questions.Types.Attachment;
+
+/** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
+@Meta.question(#{ id: "research/other-plans" })
+@UI.label("Other Plan(s)")
+scalar OtherPlans extends Questions.Types.Attachment;
+
+/** Attach an appendix PDF. */
+@Meta.question(#{ id: "research/appendix-attachment" })
+@UI.label("Appendix attachment")
+scalar AppendixAttachment extends Questions.Types.Attachment;
