@@ -369,7 +369,7 @@
               "$ref": "#/$defs/types.address.zip-code"
             }
           ],
-          "description": "Enter the zip / postal code. This field is required if the country is the United States.",
+          "description": "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required.",
           "title": "Zip / Postal Code"
         }
       },

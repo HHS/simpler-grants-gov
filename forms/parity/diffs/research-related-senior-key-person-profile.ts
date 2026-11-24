@@ -1,24 +1,14 @@
-import type { FormDiff, Recorded } from "../harness/model.ts";
+import type { FormDiff } from "../harness/model.ts";
 import {
   ADDRESS_HEADING,
   BANK_WORDING,
+  conditionalStar,
+  EACH_ENTRY_REQUIRED,
   emailMinLength,
+  ENTRY_OCCURRENCES,
+  entryStar,
   PROFILE_GROUPS,
 } from "./common.ts";
-
-/** Key-person fields the DAT allows once, though the XSD allows 7 key persons. */
-const ONCE: Recorded = {
-  category: "upstream",
-  reason:
-    "The DAT gives the key person's name and address fields 1 occurrence. The XSD allows 7 key persons, as the DAT's other key-person fields do.",
-};
-
-/** Fields required within each key person, in a section the form can leave empty. */
-const EACH_KEY_PERSON: Recorded = {
-  category: "upstream",
-  reason:
-    "The DAT marks these required. The XSD requires them only for each key person entered, and key persons are optional.",
-};
 
 export const DIFF: FormDiff = {
   slug: "research-related-senior-key-person-profile",
@@ -26,6 +16,21 @@ export const DIFF: FormDiff = {
   wording: BANK_WORDING,
   dat: {
     absentFromPlan: { "1-10": ADDRESS_HEADING, "2-10": ADDRESS_HEADING },
+    differingLabels: {
+      "1-15": conditionalStar("State"),
+      "1-17": conditionalStar("Zip / Postal Code"),
+      "2-02": entryStar("First Name"),
+      "2-04": entryStar("Last Name"),
+      "2-11": entryStar("Street 1", "Street1"),
+      "2-13": entryStar("City"),
+      "2-15": conditionalStar("State"),
+      "2-16": entryStar("Country"),
+      "2-17": conditionalStar("Zip / Postal Code"),
+      "2-18": entryStar("Phone Number"),
+      "2-20": entryStar("Email", "E-Mail"),
+      "2-22": entryStar("Project Role"),
+      "2-24": entryStar("Biographical Sketch", "Attach Biographical Sketch"),
+    },
     outOfOrder: {
       "1-07": PROFILE_GROUPS,
       "1-22": PROFILE_GROUPS,
@@ -35,43 +40,43 @@ export const DIFF: FormDiff = {
       "2-23": PROFILE_GROUPS,
     },
     differingRules: {
-      "2-01/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-02/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-03/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-04/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-05/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-11/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-12/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-13/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-14/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-15/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-15a/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-16/maxOccurs": { plan: 7, source: 1, ...ONCE },
-      "2-17/maxOccurs": { plan: 7, source: 1, ...ONCE },
+      "2-01/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-02/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-03/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-04/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-05/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-11/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-12/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-13/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-14/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-15/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-15a/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-16/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
+      "2-17/maxOccurs": { plan: 7, source: 1, ...ENTRY_OCCURRENCES },
       "2-02/required": {
         plan: "conditional",
         source: "yes",
-        ...EACH_KEY_PERSON,
+        ...EACH_ENTRY_REQUIRED,
       },
       "2-04/required": {
         plan: "conditional",
         source: "yes",
-        ...EACH_KEY_PERSON,
+        ...EACH_ENTRY_REQUIRED,
       },
       "2-11/required": {
         plan: "conditional",
         source: "yes",
-        ...EACH_KEY_PERSON,
+        ...EACH_ENTRY_REQUIRED,
       },
       "2-13/required": {
         plan: "conditional",
         source: "yes",
-        ...EACH_KEY_PERSON,
+        ...EACH_ENTRY_REQUIRED,
       },
       "2-16/required": {
         plan: "conditional",
         source: "yes",
-        ...EACH_KEY_PERSON,
+        ...EACH_ENTRY_REQUIRED,
       },
     },
   },

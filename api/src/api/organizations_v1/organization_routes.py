@@ -16,6 +16,7 @@ from src.api.organizations_v1.organization_schemas import (
     OrganizationIgnoreLegacyUserResponseSchema,
     OrganizationInvitationListRequestSchema,
     OrganizationInvitationListResponseSchema,
+    OrganizationListApplicationsResponseSchema,
     OrganizationListRolesResponseSchema,
     OrganizationRemoveUserResponseSchema,
     OrganizationSaveOpportunityRequestSchema,
@@ -42,6 +43,9 @@ from src.services.organizations_v1.ignore_legacy_user_organization import (
     ignore_legacy_user_organization,
 )
 from src.services.organizations_v1.list_legacy_users import list_legacy_users_and_verify_access
+from src.services.organizations_v1.list_organization_applications import (
+    get_organization_applications_and_verify_access,
+)
 from src.services.organizations_v1.list_organization_invitations import (
     list_organization_invitations_and_verify_access,
 )
@@ -135,6 +139,30 @@ def organization_list_roles(db_session: db.Session, organization_id: UUID) -> re
         )
 
     return response.ApiResponse(message="Success", data=roles)
+
+
+@organization_blueprint.post("/<uuid:organization_id>/applications/list")
+@organization_blueprint.output(OrganizationListApplicationsResponseSchema)
+@organization_blueprint.doc(responses=[200, 401, 403, 404])
+@organization_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def organization_list_applications(
+    db_session: db.Session, organization_id: UUID
+) -> response.ApiResponse:
+    """List organization applications"""
+    add_extra_data_to_current_request_logs({"organization_id": organization_id})
+    logger.info("POST /v1/organizations/:organization_id/applications/list")
+
+    # Get authenticated user
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    with db_session.begin():
+        db_session.add(user_token_session)
+        applications = get_organization_applications_and_verify_access(
+            db_session, user_token_session.user, organization_id
+        )
+
+    return response.ApiResponse(message="Success", data=applications)
 
 
 @organization_blueprint.delete("/<uuid:organization_id>/users/<uuid:user_id>")
