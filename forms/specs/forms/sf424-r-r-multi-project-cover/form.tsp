@@ -13,6 +13,10 @@ using SimplerForms;
 namespace Forms.SF424ResearchMultiProject;
 
 // The data only: how an applicant is shown it is in layout.tsp. Every element is optional.
+@Sgg.sync(#{
+  instructions: "6f7a32ac-c55f-4746-8f53-bf6503dc6c01",
+  xml: "mapping",
+})
 @Meta.form(#{
   id: "sf424-r-r-multi-project-cover",
   formName: "SF-424 R&R Multi-Project Cover",

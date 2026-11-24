@@ -138,6 +138,11 @@ EXPECTED_FORM_DATA = {
         "omb_number": "4040-0001",
         "expiration_date": "01/31/2029",
     },
+    769: {
+        "form_name": "SF-424 R&R Multi-Project Cover",
+        "omb_number": "4040-0001",
+        "expiration_date": "01/31/2029",
+    },
     308: {
         "form_name": "NSF Suggested Reviewers",
         "omb_number": "3145-0058",
@@ -451,6 +456,21 @@ def test_sf424_mandatory_generated_v3_0(sf424_mandatory_generated_v3_0):
 
 def test_sf424_r_r_generated_v5_0(sf424_r_r_generated_v5_0):
     form = sf424_r_r_generated_v5_0
+    expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
+    assert form.form_name == expected_values["form_name"]
+    assert form.omb_number == expected_values["omb_number"]
+    assert (
+        form.expiration_date
+        == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
+    )
+    assert form.sgg_version == "1.0"
+    assert form.form_instruction_id is not None
+
+
+def test_sf424_r_r_multi_project_cover_generated_v4_0(
+    sf424_r_r_multi_project_cover_generated_v4_0,
+):
+    form = sf424_r_r_multi_project_cover_generated_v4_0
     expected_values = EXPECTED_FORM_DATA.get(form.legacy_form_id)
     assert form.form_name == expected_values["form_name"]
     assert form.omb_number == expected_values["omb_number"]
