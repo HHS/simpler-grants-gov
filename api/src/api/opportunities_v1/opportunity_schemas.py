@@ -26,6 +26,8 @@ from src.constants.lookup_constants import (
 from src.pagination.pagination_schema import generate_pagination_schema
 from src.services.opportunities_v1.experimental_constant import ScoringRule
 
+SEARCH_QUERY_MAX_LENGTH = 350
+
 
 class SearchResponseFormat(StrEnum):
     JSON = "json"
@@ -515,7 +517,7 @@ class OpportunitySearchRequestV1Schema(Schema):
             "description": "Query string which searches against several text fields",
             "example": "research",
         },
-        validate=[validators.Length(min=1, max=100)],
+        validate=[validators.Length(min=1, max=SEARCH_QUERY_MAX_LENGTH)],
     )
     query_operator = fields.Enum(
         SearchQueryOperator,
@@ -571,7 +573,7 @@ class OpportunitySearchCSVRequestV1Schema(Schema):
             "description": "Query string which searches against several text fields",
             "example": "research",
         },
-        validate=[validators.Length(min=1, max=100)],
+        validate=[validators.Length(min=1, max=SEARCH_QUERY_MAX_LENGTH)],
     )
     query_operator = fields.Enum(
         SearchQueryOperator,
