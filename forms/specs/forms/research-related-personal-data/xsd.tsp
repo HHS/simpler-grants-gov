@@ -38,7 +38,11 @@ model DirectorType {
   name: XSD.GlobLib.HumanNameDataType;
 
   @Mapping.from(target, Director.gender) @name("Gender") gender?: string;
-  @Mapping.from(target, Director.race) @name("Race") race?: string[];
+
+  @Mapping.from(target, Director.race)
+  @name("Race")
+  @maxItems(5)
+  race?: string[];
 
   @Mapping.from(target, Director.ethnicity)
   @name("Ethnicity")
