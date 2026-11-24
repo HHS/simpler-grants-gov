@@ -263,7 +263,39 @@
           }
         }
       ],
-      "label": "SBIR questions"
+      "label": "SBIR questions",
+      "rule": {
+        "effect": "SHOW",
+        "condition": {
+          "scope": "#/properties/program_type",
+          "schema": {
+            "allOf": [
+              {
+                "not": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "const": ""
+                    },
+                    {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "const": "STTR"
+                }
+              }
+            ]
+          },
+          "failWhenUndefined": true
+        }
+      }
     },
     {
       "type": "Group",

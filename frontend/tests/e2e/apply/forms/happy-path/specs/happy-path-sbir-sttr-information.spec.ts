@@ -74,5 +74,28 @@ test(
     await expect(
       page.locator('input[name="faculty_or_student_owned"][value="false"]'),
     ).toBeChecked();
+
+    const program = page.locator("#program_type");
+    const receivedAwards = page.locator(
+      'input[name="phase_ii_awards_received"][value="true"]',
+    );
+    if (!(await receivedAwards.isVisible())) {
+      await page
+        .getByRole("button", { name: "SBIR questions", exact: true })
+        .click();
+    }
+    await receivedAwards.check();
+    const history = page.locator("#commercialization_history-visible");
+    await expect(history).toBeEnabled();
+    if (!(await program.isVisible())) {
+      await page
+        .getByRole("button", {
+          name: "Agency and small business identification",
+          exact: true,
+        })
+        .click();
+    }
+    await program.selectOption("STTR");
+    await expect(history).toHaveCount(0);
   },
 );
