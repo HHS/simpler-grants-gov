@@ -13,6 +13,7 @@ import { DIFF as projectAbstract } from "./project-abstract.ts";
 import { DIFF as projectNarrative } from "./project-narrative-attachment-form.ts";
 import { DIFF as performanceSites } from "./project-performance-site-location-s.ts";
 import { DIFF as rrKeyPersonExpanded } from "./research-and-related-senior-key-person-profile-expanded.ts";
+import { DIFF as rrPersonalData } from "./research-related-personal-data.ts";
 import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profile.ts";
 
 /** Every form the suite checks. A plan with a `spec_id` must be listed here. */
@@ -32,4 +33,5 @@ export const DIFFS: FormDiff[] = [
   nsfReviewers,
   projectAbstractSummary,
   nasaPiAndAor,
+  rrPersonalData,
 ];
