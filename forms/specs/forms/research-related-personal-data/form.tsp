@@ -1,5 +1,6 @@
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/person/name.tsp";
 import "./examples.tsp";
@@ -7,6 +8,7 @@ using SimplerForms;
 namespace Forms.RRPersonalData;
 
 /** Voluntary demographic information for the project director and up to four co-directors. */
+@Sgg.sync(#{ xml: "mapping" })
 @Meta.form(#{
   id: "research-related-personal-data",
   formName: "Research & Related Personal Data",
@@ -40,7 +42,7 @@ model Director {
   @UI.label("Sex")
   gender?: Gender;
 
-  @doc("Choose one or more.\n\nAmerican Indian or Alaska Native:  A person having origins in any of the original peoples of North, Central, or South America, and who maintains tribal affiliation or community attachment.\n\nAsian: A person having origins in any of the original peoples of the Far East, Southeast Asia, or the Indian subcontinent, including, for example, Cambodia, China, India, Japan, Korea, Malaysia, Pakistan, The Philippine Islands, Thailand, and Vietnam.  (Note, individuals from the Philippine Islands have been recorded as Pacific Islanders in previous data collection strategies.)\n\nBlack or African American:  A person having origins in any of the black racial groups of Africa.\n\nNative Hawaiian or Other Pacific Islander:  A person having origins in any of the original peoples of Hawaii, Guam, Samoa, or other Pacific Islands.\n\nWhite:  A person having origins in any of the original peoples of Europe, the Middle East or North Africa.")
+  @doc("Choose one or more. Select “Do Not Wish to Provide” by itself.\n\nAmerican Indian or Alaska Native:  A person having origins in any of the original peoples of North, Central, or South America, and who maintains tribal affiliation or community attachment.\n\nAsian: A person having origins in any of the original peoples of the Far East, Southeast Asia, or the Indian subcontinent, including, for example, Cambodia, China, India, Japan, Korea, Malaysia, Pakistan, The Philippine Islands, Thailand, and Vietnam.  (Note, individuals from the Philippine Islands have been recorded as Pacific Islanders in previous data collection strategies.)\n\nBlack or African American:  A person having origins in any of the black racial groups of Africa.\n\nNative Hawaiian or Other Pacific Islander:  A person having origins in any of the original peoples of Hawaii, Guam, Samoa, or other Pacific Islands.\n\nWhite:  A person having origins in any of the original peoples of Europe, the Middle East or North Africa.")
   @UI.label("Race (check all that apply)")
   @UI.widget(Rendering.Widget.MultiSelect)
   @maxItems(5)
@@ -60,7 +62,7 @@ model Director {
   @UI.label("Ethnicity")
   ethnicity?: Ethnicity;
 
-  @doc("Select one or more.")
+  @doc("Select one or more. Select “None” or “Do Not Wish to Provide” by itself.")
   @UI.label("Disability Status (check all that apply)")
   @UI.widget(Rendering.Widget.MultiSelect)
   @maxItems(4)
