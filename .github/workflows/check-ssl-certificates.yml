@@ -18,6 +18,9 @@ on:
           - prod
   push:
     branches: mdragon/13582-ssl-checker
+  schedule:
+    # Run every day at (8am ET, 5am PT) before the start of the workday
+    - cron: "0 12 * * *"
 
 permissions:
   contents: read
@@ -32,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         # Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]') }}
+        envs: ${{ github.event_name == 'schedule' && 'prod' || fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
