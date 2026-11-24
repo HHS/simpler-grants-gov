@@ -14,4 +14,5 @@ import "./forms/nsf-deviation-authorization/index.tsp";
 import "./forms/nsf-suggested-reviewers/index.tsp";
 import "./forms/project-abstract-summary/index.tsp";
 import "./forms/nasa-pi-and-aor/index.tsp";
+import "./forms/sf424-short/index.tsp";
 import "./forms/sf424/index.tsp";
