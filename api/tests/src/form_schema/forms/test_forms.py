@@ -6,7 +6,6 @@ from src.form_schema.forms.research_and_related_other_project_information_genera
     FORM as OTHER_PROJECT_INFO,
 )
 from src.form_schema.forms.research_related_personal_data_generated import FORM as PERSONAL_DATA
-
 from src.form_schema.forms.sbir_sttr_information_generated import FORM as SBIR_STTR
 
 EXPECTED_FORM_DATA = {

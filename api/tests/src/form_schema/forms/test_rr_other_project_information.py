@@ -1,4 +1,5 @@
 import pytest
+
 from src.form_schema.forms.research_and_related_other_project_information_generated import FORM
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 

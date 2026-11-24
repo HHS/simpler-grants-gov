@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from lxml import etree
 import pytest
+from lxml import etree
 
 from src.form_schema.forms.sbir_sttr_information_generated import (
     FORM_JSON_SCHEMA,

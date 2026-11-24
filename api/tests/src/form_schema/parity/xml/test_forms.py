@@ -35,10 +35,10 @@ from tests.src.form_schema.parity.xml.diffs import (
     project_narrative_generated,
     project_performance_site_location,
     research_and_related_other_project_information_generated,
-    sbir_sttr_information_generated,
     research_related_personal_data_generated,
     rr_key_person_expanded_generated,
     rr_key_person_generated,
+    sbir_sttr_information_generated,
 )
 from tests.src.form_schema.parity.xml.harness import flatten_form
 from tests.src.form_schema.parity.xml.harness.compare import (
