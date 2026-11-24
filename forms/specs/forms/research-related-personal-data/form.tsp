@@ -21,6 +21,7 @@ namespace Forms.RRPersonalData;
 })
 @example(Examples.threeDirectors)
 model PersonalData {
+  @doc("Providing demographic information is voluntary and is not a condition of award. You may choose “Do Not Wish to Provide” for any question.")
   @UI.label("Project Director/Principal Investigator")
   projectDirector: Director;
 
