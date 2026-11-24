@@ -40,6 +40,7 @@ from src.form_schema.forms import (
     GG_LobbyingForm_v1_1,
     KeyContacts_v2_0,
     KeyContactsGenerated_v2_0,
+    RRPersonalDataGenerated_v1_2,
     NasaPIAndAORGenerated_v1_0,
     NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
@@ -770,6 +771,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "NSF Senior/Key Person Profile (Expanded) (Generated)",
                 NSFKeyPersonExpandedGenerated_v3_3.form_id,
                 "7b0b7e69-0943-429e-b380-ebaf69985400",
+            ),
+            (
+                "E2E-RRPD",
+                "Research & Related Personal Data (Generated)",
+                RRPersonalDataGenerated_v1_2.form_id,
+                "34f51b1c-f338-569e-8df0-db9121de06b5",
             ),
             (
                 "E2E-NASAPIAORG",

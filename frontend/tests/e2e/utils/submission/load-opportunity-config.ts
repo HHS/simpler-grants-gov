@@ -56,6 +56,8 @@ import { RR_KEY_PERSON_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtur
 import { RR_KEY_PERSON_EXPANDED_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/rr-key-person-expanded-data";
 import { RR_KEY_PERSON_EXPANDED_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-key-person-expanded-field-definitions";
 import { RR_KEY_PERSON_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-key-person-field-definitions";
+import { RR_PERSONAL_DATA_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/rr-personal-data-data";
+import { RR_PERSONAL_DATA_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-personal-data-field-definitions";
 import { SF424_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424-data";
 import { SF424_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-field-definitions";
 import { SF424A_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424a-data";
@@ -90,6 +92,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   NSF_DEVIATION_AUTHORIZATION_OPPORTUNITY_DATA,
   NSF_SUGGESTED_REVIEWERS_OPPORTUNITY_DATA,
   NASA_PI_AND_AOR_GENERATED_OPPORTUNITY_DATA,
+  RR_PERSONAL_DATA_GENERATED_OPPORTUNITY_DATA,
   PPSL_OPPORTUNITY_DATA,
   PPSL_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
@@ -129,6 +132,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   nsfDeviationAuthorization: NSF_DEVIATION_AUTHORIZATION_FORM_CONFIG,
   nsfSuggestedReviewers: NSF_SUGGESTED_REVIEWERS_FORM_CONFIG,
   nasaPIAndAORGenerated: NASA_PI_AND_AOR_FORM_CONFIG,
+  rrPersonalDataGenerated: RR_PERSONAL_DATA_FORM_CONFIG,
   ppsl: PPSL_FORM_CONFIG,
   ppslGenerated: PPSL_FORM_CONFIG,
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,

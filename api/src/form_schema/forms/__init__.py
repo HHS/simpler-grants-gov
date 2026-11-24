@@ -28,6 +28,7 @@ from .project_abstract_summary_generated import FORM as ProjectAbstractSummaryGe
 from .project_narrative_attachment import ProjectNarrativeAttachment_v1_2
 from .project_narrative_generated import FORM as ProjectNarrativeGenerated_v1_2
 from .project_performance_site_location import ProjectPerformanceSiteLocation_v4_0
+from .research_related_personal_data_generated import FORM as RRPersonalDataGenerated_v1_2
 from .rr_key_person_expanded_generated import FORM as RRKeyPersonExpandedGenerated_v4_0
 from .rr_key_person_generated import FORM as RRKeyPersonGenerated_v3_0
 from .sf424 import SF424_v4_0
@@ -77,6 +78,7 @@ _ALL_FORMS: list[Form] = [
     ProjectAbstractGenerated_v1_2,
     EDAbstractGenerated_v1_1,
     NasaPIAndAORGenerated_v1_0,
+    RRPersonalDataGenerated_v1_2,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -100,6 +102,7 @@ GENERATED_FORMS: list[Form] = [
     ProjectAbstractGenerated_v1_2,
     EDAbstractGenerated_v1_1,
     NasaPIAndAORGenerated_v1_0,
+    RRPersonalDataGenerated_v1_2,
 ]
 
 
