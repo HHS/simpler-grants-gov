@@ -47,6 +47,7 @@ test(
     await expect(
       page.locator('input[type="file"]#appendix-visible'),
     ).toBeEnabled();
+    await expect(page.getByText("13. Appendix", { exact: true })).toBeVisible();
     await verifyFormStatusAfterSave(page, "complete");
     await verifyFormStatusOnApplication(
       page,
