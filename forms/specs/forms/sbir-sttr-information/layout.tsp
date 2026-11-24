@@ -38,6 +38,7 @@ model Layout {
     commercializationPlan: Form.commercializationPlan;
   };
 
+  @UI.hiddenWhen(Form.programType, "STTR")
   @UI.label("SBIR questions")
   sbir: {
     phaseIIAwardsReceived: Form.phaseIIAwardsReceived;
