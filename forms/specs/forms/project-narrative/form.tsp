@@ -23,7 +23,7 @@ namespace Forms.ProjectNarrative;
 @example(Examples.oneFile, #{ title: "One project narrative file" })
 @example(Examples.twoFiles, #{ title: "Two ordered project narrative files" })
 model ProjectNarrative {
-  @doc("At least one file must be attached")
+  /** At least one file must be attached */
   @UI.label("Project Narrative Files")
   @UI.widget(Rendering.Widget.AttachmentArray)
   @minItems(1)

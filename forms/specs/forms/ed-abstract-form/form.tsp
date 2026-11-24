@@ -21,6 +21,8 @@ namespace Forms.EDAbstract;
 })
 @example(Examples.oneFile, #{ title: "One abstract attachment" })
 model EDAbstract {
+  // Blank out the bank Attachment help: the layout shows the abstract instructions instead.
+  // An empty doc comment emits nothing, so this needs `@doc("")`.
   @doc("")
   attachment: Questions.Types.Attachment;
 }

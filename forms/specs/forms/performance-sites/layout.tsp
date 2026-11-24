@@ -8,8 +8,8 @@ namespace Forms.PerformanceSites;
 
 @UI.layout(PerformanceSites)
 model PerformanceSitesLayout {
+  /** Identify the primary location where the work will be performed. */
   @UI.label("Project/Performance Site Primary Location")
-  @doc("Identify the primary location where the work will be performed.")
   primary: {
     @UI.field(PerformanceSites.primarySite)
     @UI.flatten
@@ -22,8 +22,8 @@ model PerformanceSitesLayout {
     };
   };
 
+  /** Add each additional site separately. If there are more than 299, attach a file listing the rest. */
   @UI.label("Additional Project/Performance Site Location(s)")
-  @doc("Add each additional site separately. If there are more than 299, attach a file listing the rest.")
   additional: {
     @UI.field(PerformanceSites.additionalSites)
     additionalSites: {

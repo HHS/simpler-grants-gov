@@ -15,22 +15,22 @@ namespace Forms.PerformanceSites;
 // A site is a domain object, not a heading added to the answer model. Primary and
 // additional occurrences share the body while retaining their different obligations.
 model Site {
-  @doc("Select if submitting application as an individual and not on behalf of or representing any organization.")
+  /** Select if submitting application as an individual and not on behalf of or representing any organization. */
   @UI.label("I am submitting an application as an individual, and not on behalf of a company, state, local or tribal government, academia, or other type of organization.")
   @UI.widget(Rendering.Widget.Checkbox)
   submittingAsIndividual?: boolean;
 
-  @doc("Indicate the organization name of the site where the work will be performed.")
+  /** Indicate the organization name of the site where the work will be performed. */
   @UI.label("Organization Name")
   organizationName?: Questions.Organizations.OrgName;
 
-  @doc("Enter the UEI associated with the organization where the project will be performed. This field is optional.")
+  /** Enter the UEI associated with the organization where the project will be performed. This field is optional. */
   @UI.label("UEI")
   uei?: Questions.Organizations.OrgUei;
 
   address: Questions.Types.AddressZipPlusFour;
 
-  @doc("Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005, MD-all, US-all, 00-000. Required if the site is in the United States.")
+  /** Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005, MD-all, US-all, 00-000. Required if the site is in the United States. */
   @UI.label("Project/Performance Site Congressional District")
   @Validation.requiredWhenPath(
     "address.country",

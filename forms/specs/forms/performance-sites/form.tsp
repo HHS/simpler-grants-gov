@@ -35,13 +35,13 @@ model PerformanceSites {
   @UI.label("Primary site")
   primarySite: PrimarySite;
 
-  @doc("Add up to 299 additional project/performance site locations. Each entry has independent answers.")
+  /** Add up to 299 additional project/performance site locations. Each entry has independent answers. */
   @UI.label("Additional site")
   @UI.widget(Rendering.Widget.CollapsibleFieldList)
   @maxItems(299)
   additionalSites?: Site[];
 
-  @doc("Attach a file listing additional locations if more than 299 additional sites are needed.")
+  /** Attach a file listing additional locations if more than 299 additional sites are needed. */
   @UI.label("Additional Location(s)")
   @UI.widget(Rendering.Widget.Attachment)
   additionalLocationsAttachment?: Questions.Types.Attachment;
