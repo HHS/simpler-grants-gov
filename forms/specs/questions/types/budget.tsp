@@ -15,3 +15,13 @@ namespace Questions.Types;
 @pattern("^\\d{1,12}([.]\\d{2})?$")
 @maxLength(15)
 scalar BudgetAmount extends string;
+
+// `globLib:BudgetTotalAmountDataType`: a decimal from 0 to 9999999999999.99, one digit wider
+// than `BudgetAmount`.
+/** Enter the total in dollars, with cents if any. */
+@Meta.question(#{ id: "types/budget-total-amount" })
+@Meta.tag(Catalogue.Tag.money)
+@UI.label("Total")
+@pattern("^\\d{1,13}([.]\\d{2})?$")
+@maxLength(16)
+scalar BudgetTotalAmount extends string;
