@@ -220,6 +220,16 @@ for (const {
         await submitApplicationAndVerify(page, "success");
         await verifySubmissionConfirmation(page);
 
+        // Navigate back to the application page to ensure fresh history data is fetched
+        // from the backend (the submission audit event must be persisted and visible)
+        await page.goto(applicationUrl);
+        await page.waitForLoadState("domcontentloaded");
+
+        // Wait for the application page to be fully loaded with updated history
+        await expect(
+          page.locator(".simpler-application-forms-table").first(),
+        ).toBeVisible({ timeout: 30000 });
+
         // Third history checkpoint: confirm submission itself was recorded, and that
         // the attachment activity from the previous test is still present alongside it.
         const postSubmitActivities =
