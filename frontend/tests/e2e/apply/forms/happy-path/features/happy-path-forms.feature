@@ -66,6 +66,7 @@ Feature: Apply - Application Form Happy Path
       | SF-424 Short                       |
       | SF424 Mandatory (Generated)        |
       | SF-424 (R&R) (Generated)           |
+      | SF-424 R&R Multi-Project Cover (Generated)|
  
   # Expected happy path form status on the application landing page:
   # "complete"   -> displays "No issues detected"
