@@ -3,6 +3,7 @@ import "form-library-xml";
 import "simpler-forms";
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
+import "#questions/research/index.tsp";
 using SimplerForms;
 namespace Forms.Phs398ResearchTrainingProgramPlan;
 
@@ -41,9 +42,8 @@ namespace Forms.Phs398ResearchTrainingProgramPlan;
   }
 )
 model Phs398ResearchTrainingProgramPlan {
-  /** Attach PDF formatted file. Required if you selected "Resubmission" or "Revision" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("1. Introduction to Application (for Resubmission and Revision applications)")
-  introductionToApplication?: Questions.Types.Attachment;
+  introductionToApplication?: Questions.Research.IntroductionToApplication;
 
   /** Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("2. Program Plan")
@@ -77,25 +77,21 @@ model Phs398ResearchTrainingProgramPlan {
   @UI.label("9. Data Tables")
   dataTables?: Questions.Types.Attachment;
 
-  /** Attach PDF formatted file. Required if you checked "Yes" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("10. Vertebrate Animals")
-  vertebrateAnimals?: Questions.Types.Attachment;
+  vertebrateAnimals?: Questions.Research.VertebrateAnimals;
 
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("11. Select Agent Research")
-  selectAgentResearch?: Questions.Types.Attachment;
+  selectAgentResearch?: Questions.Research.SelectAgentResearch;
 
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("12. Consortium/Contractual Arrangements")
-  consortiumContractualArrangements?: Questions.Types.Attachment;
+  consortiumContractualArrangements?: Questions.Research.ConsortiumContractualArrangements;
 
-  /** Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("13. Other Plan(s)")
-  otherPlans?: Questions.Types.Attachment;
+  otherPlans?: Questions.Research.OtherPlans;
 
   /** Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance. */
   @UI.label("14. Appendix")
   @UI.widget(Rendering.Widget.AttachmentArray)
   @maxItems(10)
-  appendix?: Questions.Types.Attachment[];
+  appendix?: Questions.Research.AppendixAttachment[];
 }
