@@ -97,7 +97,9 @@ model Form {
   @UI.label("18. Authentication of Key Biological and/or Chemical Resources")
   keyBiologicalAndOrChemicalResources?: Questions.Research.KeyBiologicalAndOrChemicalResources;
 
-  ...Questions.Research.Appendix;
+  @UI.label("19. Appendix")
+  @UI.widget(Rendering.Widget.AttachmentArray)
+  appendix?: Questions.Research.Appendix;
 
   @UI.label("20. U.S. Citizen or Non-Citizen National?")
   @UI.widget(Rendering.Widget.Radio)
@@ -123,5 +125,3 @@ enum NonUsCitizenshipStatus {
   temporaryVisa: "Temporary U.S. Visa",
   notResidingInUs: "Not Residing in the U.S.",
 }
-
-@@UI.label(Form.appendix, "19. Appendix");

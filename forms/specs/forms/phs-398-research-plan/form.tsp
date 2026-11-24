@@ -76,7 +76,7 @@ model Phs398ResearchPlan {
   @UI.label("12. Authentication of Key Biological and/or Chemical Resources")
   keyBiologicalAndOrChemicalResources?: Questions.Research.KeyBiologicalAndOrChemicalResources;
 
-  ...Questions.Research.Appendix;
+  @UI.label("13. Appendix")
+  @UI.widget(Rendering.Widget.AttachmentArray)
+  appendix?: Questions.Research.Appendix;
 }
-
-@@UI.label(Phs398ResearchPlan.appendix, "13. Appendix");
