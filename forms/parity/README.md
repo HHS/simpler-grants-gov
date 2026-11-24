@@ -172,4 +172,5 @@ harness/
   flatten/            one pure flattener per artifact, each with its own *.test.ts
   compare.ts          comparePair(): the six checks, with recorded differences applied
   model.ts            paths, fields, discrepancies, recorded differences (+ model.test.ts)
+  validate.ts         loadFormValidator(): an ajv validator for a compiled form schema
 ```

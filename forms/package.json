@@ -33,7 +33,7 @@
     "format:check": "cd site && prettier --check --ignore-path ../.prettierignore ..",
     "format:typespec": "tsp format \"specs/**/*.tsp\" \"emitters/*/lib/*.tsp\"",
     "format:typespec:check": "tsp format --check \"specs/**/*.tsp\" \"emitters/*/lib/*.tsp\"",
-    "lint": "node site/node_modules/eslint/bin/eslint.js emitters scripts parity",
+    "lint": "node site/node_modules/eslint/bin/eslint.js emitters scripts parity specs",
     "check:emitters": "npm run check:types --workspaces",
     "check:scripts": "tsc -p tsconfig.scripts.json"
   },
@@ -43,6 +43,8 @@
     "@typespec/compiler": "^1.16.0",
     "@typespec/json-schema": "^1.16.0",
     "@typespec/xml": "^0.86.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "fast-xml-parser": "^5.11.2",
     "simpler-forms": "^0.3.2",
     "typescript": "^5.9.3",
