@@ -29,7 +29,7 @@ The opportunity search endpoint accepts the following parameters:
 
 * **`query`** (string, optional): Free-text search across multiple fields
   * Example: `"research"`, `"education funding"`
-  * Maximum length: 100 characters
+  * Maximum length: 350 characters
 * **`query_operator`** (string, optional): How to combine search terms
   * Values: `"AND"` (default), `"OR"`
 

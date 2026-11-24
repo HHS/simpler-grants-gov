@@ -7,7 +7,10 @@ from unittest.mock import patch
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.opportunities_v1.opportunity_schemas import (
+    SEARCH_QUERY_MAX_LENGTH,
+    OpportunityV1Schema,
+)
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -1686,6 +1689,49 @@ class TestOpportunityRouteSearch(BaseTestClass):
         # This test isn't looking to validate opensearch behavior, just that we've connected fields properly and
         # results being returned are as expected.
         call_search_and_validate(client, user_api_key_id, search_request, expected_results)
+
+    @pytest.mark.parametrize(
+        "endpoint", ["/v1/opportunities/search", "/v1/opportunities/search/csv"]
+    )
+    @pytest.mark.parametrize(
+        "query",
+        [
+            "a" * SEARCH_QUERY_MAX_LENGTH,
+            " | ".join(["research"] * 30),
+        ],
+        ids=["max_length", "or_concatenated_keywords"],
+    )
+    def test_search_query_max_length_200(self, client, user_api_key_id, endpoint, query):
+        """Queries up to the max length are accepted."""
+        search_request = {"query": query}
+        if endpoint == "/v1/opportunities/search":
+            search_request = get_search_request(query=query)
+
+        resp = client.post(endpoint, json=search_request, headers={"X-API-Key": user_api_key_id})
+        assert resp.status_code == 200
+
+    @pytest.mark.parametrize(
+        "endpoint", ["/v1/opportunities/search", "/v1/opportunities/search/csv"]
+    )
+    def test_search_query_too_long_422(self, client, user_api_key_id, endpoint):
+        """Queries longer than the max length are rejected."""
+        query = "a" * (SEARCH_QUERY_MAX_LENGTH + 1)
+        search_request = {"query": query}
+        if endpoint == "/v1/opportunities/search":
+            search_request = get_search_request(query=query)
+
+        resp = client.post(endpoint, json=search_request, headers={"X-API-Key": user_api_key_id})
+        assert resp.status_code == 422
+
+        errors = resp.get_json()["errors"]
+        assert errors == [
+            {
+                "field": "query",
+                "message": f"Length must be between 1 and {SEARCH_QUERY_MAX_LENGTH}.",
+                "type": "min_or_max_length",
+                "value": None,
+            }
+        ]
 
     def test_search_query_facets_200(self, client, user_api_key_id):
         search_response = client.post(
