@@ -537,3 +537,208 @@ export const SF424_SHORT_REQUIRED_FIELD_ERRORS: FieldError[] = [
     message: "Telephone Number is required",
   },
 ];
+
+// The SF-424 Short generated from forms/specs nests its fields by concept, so each test ID
+// joins the field's path with "--".
+// maxLength values sourced from:
+// api/src/form_schema/forms/sf424_short_generated/1/0/json_schema.json
+const APPLICANT = "Applicant organization";
+const PROJECT = "Project information";
+const PROJECT_DIRECTOR = "Project Director";
+const POINT_OF_CONTACT = "Primary Contact / Grants Administrator";
+const AUTHORIZED_REPRESENTATIVE = "Authorized Representative";
+
+const text = (
+  testId: string,
+  section: string,
+  field: string,
+  maxLength?: number,
+) => ({ testId, type: "text" as const, section, field, maxLength });
+
+const dropdown = (id: string, section: string, field: string) => ({
+  selector: `#${id}`,
+  printTestId: id,
+  type: "dropdown" as const,
+  section,
+  field,
+});
+
+const name = (key: string, base: string, section: string) => ({
+  [`${key}Prefix`]: text(`${base}--name--prefix`, section, "Prefix", 10),
+  [`${key}FirstName`]: text(
+    `${base}--name--first_name`,
+    section,
+    "First Name",
+    35,
+  ),
+  [`${key}MiddleName`]: text(
+    `${base}--name--middle_name`,
+    section,
+    "Middle Name",
+    25,
+  ),
+  [`${key}LastName`]: text(
+    `${base}--name--last_name`,
+    section,
+    "Last Name",
+    60,
+  ),
+  [`${key}Suffix`]: text(`${base}--name--suffix`, section, "Suffix", 10),
+});
+
+const address = (key: string, base: string, section: string) => ({
+  [`${key}Street1`]: text(`${base}--street1`, section, "Street 1", 55),
+  [`${key}Street2`]: text(`${base}--street2`, section, "Street 2", 55),
+  [`${key}City`]: text(`${base}--city`, section, "City", 35),
+  [`${key}State`]: dropdown(`${base}--state`, section, "State"),
+  [`${key}Country`]: dropdown(`${base}--country`, section, "Country"),
+  [`${key}ZipCode`]: text(
+    `${base}--zip_code`,
+    section,
+    "Zip / Postal Code",
+    30,
+  ),
+});
+
+const contact = (key: string, base: string, section: string) => ({
+  ...name(key, base, section),
+  [`${key}Title`]: text(`${base}--title`, section, "Title", 45),
+  ...address(key, `${base}--address`, section),
+  [`${key}Phone`]: text(`${base}--phone`, section, "Phone Number", 25),
+  [`${key}Fax`]: text(`${base}--fax`, section, "Fax Number", 25),
+  [`${key}Email`]: text(`${base}--email`, section, "Email", 60),
+});
+
+export const fieldDefinitionsSF424ShortGenerated: FormFillFieldDefinitions = {
+  organizationName: text(
+    "applicant--organization--name",
+    APPLICANT,
+    "Legal Name",
+    60,
+  ),
+  ...address("applicant", "applicant--organization--address", APPLICANT),
+  webAddress: text(
+    "applicant--organization--web_address",
+    APPLICANT,
+    "Web Address",
+    250,
+  ),
+  applicantTypeCodes: {
+    testId: "applicant--type--codes__combobox",
+    printTestId: "applicant--type--codes",
+    type: "combo-box-input",
+    section: APPLICANT,
+    field: "Type of Applicant",
+  },
+  ein: text("applicant--organization--ein", APPLICANT, "EIN/TIN", 30),
+  congressionalDistrict: text(
+    "applicant--congressional_district",
+    APPLICANT,
+    "Congressional District of Applicant",
+    6,
+  ),
+  projectTitle: text("project--title", PROJECT, "Project Title", 200),
+  projectDescription: {
+    selector: "#project--description",
+    printTestId: "project--description",
+    type: "textarea",
+    maxLength: 1000,
+    section: PROJECT,
+    field: "Project Description",
+  },
+  projectStartDate: text(
+    "project--timeline--start_date",
+    PROJECT,
+    "Start Date",
+  ),
+  projectEndDate: text("project--timeline--end_date", PROJECT, "End Date"),
+  ...contact("projectDirector", "contacts--project_director", PROJECT_DIRECTOR),
+  // Leave Same as Project Director unchecked: the applicant fills in the contact either way.
+  ...contact("pointOfContact", "contacts--point_of_contact", POINT_OF_CONTACT),
+  agree: {
+    selector: "#certification--agree",
+    printTestId: "certification--agree",
+    type: "checkbox",
+    section: "Certification",
+    field: "I Agree",
+  },
+  ...name(
+    "authorizedRepresentative",
+    "contacts--authorized_representative",
+    AUTHORIZED_REPRESENTATIVE,
+  ),
+  authorizedRepresentativeTitle: text(
+    "contacts--authorized_representative--title",
+    AUTHORIZED_REPRESENTATIVE,
+    "Title",
+    45,
+  ),
+  authorizedRepresentativeEmail: text(
+    "contacts--authorized_representative--email",
+    AUTHORIZED_REPRESENTATIVE,
+    "Email",
+    60,
+  ),
+  authorizedRepresentativePhone: text(
+    "contacts--authorized_representative--phone",
+    AUTHORIZED_REPRESENTATIVE,
+    "Phone Number",
+    25,
+  ),
+  authorizedRepresentativeFax: text(
+    "contacts--authorized_representative--fax",
+    AUTHORIZED_REPRESENTATIVE,
+    "Fax Number",
+    25,
+  ),
+};
+
+export const SF424_SHORT_GENERATED_FORM_CONFIG = {
+  ...FORM_DEFAULTS,
+  formName:
+    "Application for Federal Domestic Assistance-Short Organizational (SF-424)",
+  fields: fieldDefinitionsSF424ShortGenerated,
+} as const;
+
+// An error names the field's parent group first when the group has a title, as "Address"
+// and "Name" do. Grants.gov pre-populates the opportunity and UEI, so they're left out.
+const required = (fieldId: string, title: string): FieldError => ({
+  fieldId,
+  message: `${title} is required`,
+});
+
+const requiredContact = (base: string, withAddress: boolean): FieldError[] => [
+  required(`${base}--name--first_name`, "Name First Name"),
+  required(`${base}--name--last_name`, "Name Last Name"),
+  required(`${base}--title`, "Title"),
+  ...(withAddress
+    ? [
+        required(`${base}--address--street1`, "Address Street 1"),
+        required(`${base}--address--city`, "Address City"),
+        required(`${base}--address--country`, "Address Country"),
+      ]
+    : []),
+  required(`${base}--phone`, "Phone Number"),
+  required(`${base}--email`, "Email"),
+];
+
+export const SF424_SHORT_GENERATED_REQUIRED_FIELD_ERRORS: FieldError[] = [
+  required("applicant--organization--name", "Legal Name"),
+  required("applicant--organization--address--street1", "Address Street 1"),
+  required("applicant--organization--address--city", "Address City"),
+  required("applicant--organization--address--country", "Address Country"),
+  required("applicant--organization--ein", "EIN/TIN"),
+  required("applicant--type--codes", "Type of Applicant"),
+  required(
+    "applicant--congressional_district",
+    "Congressional District of Applicant",
+  ),
+  required("project--title", "Project Title"),
+  required("project--description", "Project Description"),
+  required("project--timeline--start_date", "Start Date"),
+  required("project--timeline--end_date", "End Date"),
+  ...requiredContact("contacts--project_director", true),
+  ...requiredContact("contacts--point_of_contact", true),
+  required("certification--agree", "Certification I Agree"),
+  ...requiredContact("contacts--authorized_representative", false),
+];
