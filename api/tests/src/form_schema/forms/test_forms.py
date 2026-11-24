@@ -413,7 +413,9 @@ def test_nsf_suggested_reviewers_v1_1(nsf_suggested_reviewers_v1_1):
     assert form.form_renderer == "jsonforms"
 
 
-@pytest.mark.parametrize("form,legacy_id", [(PERSONAL_DATA, 357), (OTHER_PROJECT_INFO, 619), (SBIR_STTR, 787)])
+@pytest.mark.parametrize(
+    "form,legacy_id", [(PERSONAL_DATA, 357), (OTHER_PROJECT_INFO, 619), (SBIR_STTR, 787)]
+)
 def test_research_questionnaire_identity(form, legacy_id):
     expected = EXPECTED_FORM_DATA[legacy_id]
     assert form.legacy_form_id == legacy_id

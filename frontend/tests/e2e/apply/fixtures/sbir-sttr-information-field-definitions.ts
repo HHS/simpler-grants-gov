@@ -123,7 +123,7 @@ export const SBIR_STTR_REQUIRED_FIELD_ERRORS = [
   },
   {
     fieldId: "sbc_control_id",
-    message: "SBC Control ID is required",
+    message: "SBC Control ID: is required",
   },
   {
     fieldId: "program_type",
@@ -141,7 +141,7 @@ export const SBIR_STTR_REQUIRED_FIELD_ERRORS = [
   {
     fieldId: "anticipated_personnel",
     message:
-      "1b. Anticipated Number of personnel to be employed at your organization at the time of award is required",
+      "1b. Anticipated Number of personnel to be employed at your organization at the time of award. is required",
   },
   {
     fieldId: "majority_venture_capital_owned",
@@ -180,6 +180,6 @@ export const SBIR_STTR_REQUIRED_FIELD_ERRORS = [
   {
     fieldId: "taba_funds_requested",
     message:
-      "7. Does the application include a request of SBIR or STTR funds for Technical and Business Assistance (TABA)? If yes, please follow the agency specific instructions to provide the budget request and justification. (Please answer no if you plan to use the agency TABA vendor, which does not require you to include a request for TABA funds in your application.) is required",
+      "7. Does the application include a request of SBIR or STTR funds for Technical and Business Assistance (TABA) If yes, please follow the agency specific instructions to provide the budget request and justification. (Please answer no if you plan to use the agency TABA vendor, which does not require you to include a request for TABA funds in your application.) is required",
   },
 ];

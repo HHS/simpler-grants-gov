@@ -5,6 +5,7 @@
  */
 
 import {
+  expect,
   test,
   type BrowserContext,
   type Page,
@@ -67,5 +68,11 @@ test(
      * which includes verification of the status in form and application landing page after saving a completed form.
      */
     await verifyFormStatusAfterSave(page, "complete");
+    await page.reload();
+    await expect(page.locator("#sbc_control_id")).toHaveValue("001234567");
+    await expect(page.locator("#program_type")).toHaveValue("SBIR");
+    await expect(
+      page.locator('input[name="faculty_or_student_owned"][value="false"]'),
+    ).toBeChecked();
   },
 );
