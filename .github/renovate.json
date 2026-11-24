@@ -85,6 +85,16 @@
       ]
     },
     {
+      "description": "Group all dependencies from the cms directory",
+      "matchFileNames": [
+        "cms/**"
+      ],
+      "groupName": "CMS",
+      "reviewers": [
+        "mqwebster-nava"
+      ]
+    },
+    {
       "description": "Group all dependencies from the .github directory",
       "matchFileNames": [
         ".github/**"
@@ -200,7 +210,8 @@
       "description": "Leave Postgres Docker version alone - we want it to match our AWS version",
       "enabled": false,
       "matchFileNames": [
-        "backend/docker-compose.db.yml"
+        "backend/docker-compose.db.yml",
+        "cms/docker-compose.yml"
       ],
       "matchPackagePatterns": ["postgres"]
     },
@@ -222,6 +233,14 @@
         "api/docker-python-base"
       ],
       "matchPackagePatterns": ["python"]
+    },
+    {
+      "description": "Don't upgrade PHP itself as annual releases reflect as minor version bumps",
+      "enabled": false,
+      "matchFileNames": [
+        "cms/Dockerfile"
+      ],
+      "matchPackagePatterns": ["php"]
     }
   ]
 }
