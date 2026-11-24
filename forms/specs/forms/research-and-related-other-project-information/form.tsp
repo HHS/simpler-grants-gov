@@ -1,5 +1,6 @@
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
 import "#questions/types/yes-no.tsp";
@@ -14,6 +15,7 @@ alias Form = ResearchAndRelatedOtherProjectInformation;
   id: "research-and-related-other-project-information",
   formName: "Research And Related Other Project Information",
 })
+@Sgg.sync(#{ xml: "mapping" })
 @GrantsGov.form(#{
   legacyFormId: 619,
   shortFormName: "RR_OtherProjectInfo_1_4",

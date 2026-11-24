@@ -1,0 +1,379 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/human_subjects/properties/involved",
+              "label": "1. Are Human Subjects Involved?",
+              "options": {
+                "widget": "Radio"
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/human_subjects/properties/exempt_from_federal_regulations",
+              "label": "Is the Project Exempt from Federal regulations?",
+              "options": {
+                "widget": "Radio"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/human_subjects/properties/involved",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/human_subjects/properties/exemption_numbers",
+              "label": "If yes, check appropriate exemption number.",
+              "options": {
+                "widget": "MultiSelect"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/human_subjects/properties/exempt_from_federal_regulations",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/human_subjects/properties/irb_review_pending",
+              "label": "If no, is the IRB review Pending?",
+              "options": {
+                "widget": "Radio"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/human_subjects/properties/exempt_from_federal_regulations",
+                  "schema": {
+                    "const": false
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/human_subjects/properties/irb_approval_date",
+              "label": "IRB Approval Date:",
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/human_subjects/properties/irb_review_pending",
+                  "schema": {
+                    "const": false
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/human_subjects/properties/assurance_number",
+              "label": "Human Subject Assurance Number: ",
+              "options": {
+                "widget": "Text"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/human_subjects/properties/involved",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ],
+          "label": "Human subjects"
+        },
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/vertebrate_animals/properties/used",
+              "label": "2. Are Vertebrate Animals Used?",
+              "options": {
+                "widget": "Radio"
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/vertebrate_animals/properties/iacuc_review_pending",
+              "label": "Is the IACUC review Pending?",
+              "options": {
+                "widget": "Radio"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/vertebrate_animals/properties/used",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/vertebrate_animals/properties/iacuc_approval_date",
+              "label": "IACUC Approval Date:",
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/vertebrate_animals/properties/iacuc_review_pending",
+                  "schema": {
+                    "const": false
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/vertebrate_animals/properties/assurance_number",
+              "label": "Animal Welfare Assurance Number:",
+              "options": {
+                "widget": "Text"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/vertebrate_animals/properties/used",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ],
+          "label": "Vertebrate animals"
+        }
+      ],
+      "label": "Human and animal oversight",
+      "options": {
+        "description": "1.a. If YES to Human Subjects. 2.a. If YES to Vertebrate Animals. If human subjects are not involved, skip the rest of block 1. If vertebrate animals are not used, skip the rest of block 2. Review the date and assurance instructions before answering."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/proprietary_information_included",
+          "label": "3. Is proprietary/privileged information included in the application?",
+          "options": {
+            "widget": "Radio"
+          }
+        },
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/environmental_impact/properties/has_impact",
+              "label": "4.a. Does this Project Have an Actual or Potential Impact - positive or negative - on the environment?",
+              "options": {
+                "widget": "Radio"
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/environmental_impact/properties/impact_explanation",
+              "label": "4.b. If yes, please explain:",
+              "options": {
+                "widget": "Text"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/environmental_impact/properties/has_impact",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/environmental_impact/properties/assessment_or_exemption_performed",
+              "label": "4.c. If this project has an actual or potential impact on the environment, has an exemption been authorized or an environmental assessment (EA) or environmental impact statement (EIS) been performed?",
+              "options": {
+                "widget": "Radio"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/environmental_impact/properties/has_impact",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/environmental_impact/properties/assessment_or_exemption_explanation",
+              "label": "4.d. If yes, please explain:",
+              "options": {
+                "widget": "Text"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/environmental_impact/properties/assessment_or_exemption_performed",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ],
+          "label": "Environmental impact"
+        },
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/historic_place/properties/designated_or_eligible",
+              "label": "5.  Is the research performance site designated, or eligible to be designated, as a historic place?",
+              "options": {
+                "widget": "Radio"
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/historic_place/properties/explanation",
+              "label": "5.a. If yes, please explain:",
+              "options": {
+                "widget": "Text"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/historic_place/properties/designated_or_eligible",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ],
+          "label": "Historic performance site"
+        },
+        {
+          "type": "Group",
+          "elements": [
+            {
+              "type": "Control",
+              "scope": "#/properties/international_activities/properties/involved",
+              "label": "6. Does this project involve activities outside of the United States or partnerships with international collaborators?",
+              "options": {
+                "widget": "Radio"
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/international_activities/properties/countries",
+              "label": "6.a. If yes, identify countries:",
+              "options": {
+                "widget": "Text"
+              },
+              "rule": {
+                "effect": "ENABLE",
+                "condition": {
+                  "scope": "#/properties/international_activities/properties/involved",
+                  "schema": {
+                    "const": true
+                  }
+                }
+              }
+            },
+            {
+              "type": "Control",
+              "scope": "#/properties/international_activities/properties/explanation",
+              "label": "6.b. Optional Explanation:",
+              "options": {
+                "widget": "Text"
+              }
+            }
+          ],
+          "label": "International activities"
+        }
+      ],
+      "label": "Other project circumstances"
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/project_summary_abstract",
+          "label": "7. Project Summary/Abstract",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/project_narrative",
+          "label": "8. Project Narrative",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/bibliography_references_cited",
+          "label": "9. Bibliography & References Cited",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/facilities_other_resources",
+          "label": "10.  Facilities & Other Resources",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/equipment",
+          "label": "11. Equipment",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/other_attachments",
+          "label": "12. Other Attachments",
+          "options": {
+            "widget": "AttachmentArray"
+          }
+        }
+      ],
+      "label": "Project documents",
+      "options": {
+        "description": "Project Summary/Abstract and Project Narrative are required unless the cover submission type is Pre-application. Prepare each document for its named purpose and follow the announcement and agency instructions. Up to 100 other project files may be provided. OMB Number: 4040-0001. Expiration Date: 01/31/2029."
+      }
+    }
+  ],
+  "label": "Describe human and animal involvement, other project circumstances and each distinct supporting document. OMB Number: 4040-0001. Expiration Date: 01/31/2029."
+}

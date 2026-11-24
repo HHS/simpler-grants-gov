@@ -1,0 +1,292 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/RR_OtherProjectInfo_1_4-V1.4",
+    "RR_OtherProjectInfo_1_4": "http://apply.grants.gov/forms/RR_OtherProjectInfo_1_4-V1.4",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/RR_OtherProjectInfo_1_4-V1.4.xsd",
+  "root": {
+    "RR_OtherProjectInfo_1_4": {
+      "@RR_OtherProjectInfo_1_4:FormVersion": {
+        "$const": "1.4"
+      },
+      "HumanSubjectsIndicator": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "human_subjects.involved"
+          }
+        }
+      },
+      "HumanSubjectsSupplement": {
+        "$when": {
+          "condition": {
+            "field": "human_subjects.involved",
+            "operator": "equals",
+            "value": true
+          },
+          "then": {
+            "ExemptFedReg": {
+              "$transform": {
+                "name": "boolean_to_yes_no",
+                "value": {
+                  "$field": "human_subjects.exempt_from_federal_regulations"
+                }
+              }
+            },
+            "ExemptionNumbers": {
+              "$when": {
+                "condition": {
+                  "field": "human_subjects.exempt_from_federal_regulations",
+                  "operator": "equals",
+                  "value": true
+                },
+                "then": {
+                  "ExemptionNumber": {
+                    "$each": {
+                      "items": {
+                        "$field": "human_subjects.exemption_numbers"
+                      },
+                      "map": {
+                        "$field": "."
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "HumanSubjectIRBReviewIndicator": {
+              "$when": {
+                "condition": {
+                  "field": "human_subjects.exempt_from_federal_regulations",
+                  "operator": "equals",
+                  "value": false
+                },
+                "then": {
+                  "$transform": {
+                    "name": "boolean_to_yes_no",
+                    "value": {
+                      "$field": "human_subjects.irb_review_pending"
+                    }
+                  }
+                }
+              }
+            },
+            "HumanSubjectIRBReviewDate": {
+              "$when": {
+                "condition": {
+                  "all": [
+                    {
+                      "field": "human_subjects.irb_review_pending",
+                      "operator": "equals",
+                      "value": false
+                    },
+                    {
+                      "field": "human_subjects.exempt_from_federal_regulations",
+                      "operator": "equals",
+                      "value": false
+                    }
+                  ]
+                },
+                "then": {
+                  "$field": "human_subjects.irb_approval_date"
+                }
+              }
+            },
+            "HumanSubjectAssuranceNumber": {
+              "$field": "human_subjects.assurance_number"
+            }
+          }
+        }
+      },
+      "VertebrateAnimalsIndicator": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "vertebrate_animals.used"
+          }
+        }
+      },
+      "VertebrateAnimalsSupplement": {
+        "$when": {
+          "condition": {
+            "field": "vertebrate_animals.used",
+            "operator": "equals",
+            "value": true
+          },
+          "then": {
+            "VertebrateAnimalsIACUCReviewIndicator": {
+              "$transform": {
+                "name": "boolean_to_yes_no",
+                "value": {
+                  "$field": "vertebrate_animals.iacuc_review_pending"
+                }
+              }
+            },
+            "VertebrateAnimalsIACUCApprovalDateReviewDate": {
+              "$when": {
+                "condition": {
+                  "field": "vertebrate_animals.iacuc_review_pending",
+                  "operator": "equals",
+                  "value": false
+                },
+                "then": {
+                  "$field": "vertebrate_animals.iacuc_approval_date"
+                }
+              }
+            },
+            "AssuranceNumber": {
+              "$field": "vertebrate_animals.assurance_number"
+            }
+          }
+        }
+      },
+      "ProprietaryInformationIndicator": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "proprietary_information_included"
+          }
+        }
+      },
+      "EnvironmentalImpact": {
+        "EnvironmentalImpactIndicator": {
+          "$transform": {
+            "name": "boolean_to_yes_no",
+            "value": {
+              "$field": "environmental_impact.has_impact"
+            }
+          }
+        },
+        "EnvironmentalImpactExplanation": {
+          "$when": {
+            "condition": {
+              "field": "environmental_impact.has_impact",
+              "operator": "equals",
+              "value": true
+            },
+            "then": {
+              "$field": "environmental_impact.impact_explanation"
+            }
+          }
+        },
+        "EnvironmentalExemption": {
+          "$when": {
+            "condition": {
+              "field": "environmental_impact.has_impact",
+              "operator": "equals",
+              "value": true
+            },
+            "then": {
+              "EnvironmentalExemptionIndicator": {
+                "$transform": {
+                  "name": "boolean_to_yes_no",
+                  "value": {
+                    "$field": "environmental_impact.assessment_or_exemption_performed"
+                  }
+                }
+              },
+              "EnvironmentalExemptionExplanation": {
+                "$when": {
+                  "condition": {
+                    "field": "environmental_impact.assessment_or_exemption_performed",
+                    "operator": "equals",
+                    "value": true
+                  },
+                  "then": {
+                    "$field": "environmental_impact.assessment_or_exemption_explanation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "HistoricDesignation": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "historic_place.designated_or_eligible"
+          }
+        }
+      },
+      "HistoricDesignationExplanation": {
+        "$when": {
+          "condition": {
+            "field": "historic_place.designated_or_eligible",
+            "operator": "equals",
+            "value": true
+          },
+          "then": {
+            "$field": "historic_place.explanation"
+          }
+        }
+      },
+      "InternationalActivities": {
+        "InternationalActivitiesIndicator": {
+          "$transform": {
+            "name": "boolean_to_yes_no",
+            "value": {
+              "$field": "international_activities.involved"
+            }
+          }
+        },
+        "ActivitiesPartnershipsCountries": {
+          "$when": {
+            "condition": {
+              "field": "international_activities.involved",
+              "operator": "equals",
+              "value": true
+            },
+            "then": {
+              "$field": "international_activities.countries"
+            }
+          }
+        },
+        "InternationalActivitiesExplanation": {
+          "$field": "international_activities.explanation"
+        }
+      },
+      "AbstractAttachments": {
+        "AbstractAttachment": {
+          "$attachment": "project_summary_abstract"
+        }
+      },
+      "ProjectNarrativeAttachments": {
+        "ProjectNarrativeAttachment": {
+          "$attachment": "project_narrative"
+        }
+      },
+      "BibliographyAttachments": {
+        "BibliographyAttachment": {
+          "$attachment": "bibliography_references_cited"
+        }
+      },
+      "FacilitiesAttachments": {
+        "FacilitiesAttachment": {
+          "$attachment": "facilities_other_resources"
+        }
+      },
+      "EquipmentAttachments": {
+        "EquipmentAttachment": {
+          "$attachment": "equipment"
+        }
+      },
+      "OtherAttachments": {
+        "OtherAttachment": {
+          "$each": {
+            "items": {
+              "$field": "other_attachments"
+            },
+            "map": {
+              "$attachment": "."
+            }
+          }
+        }
+      }
+    }
+  }
+}
