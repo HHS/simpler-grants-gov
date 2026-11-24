@@ -14,6 +14,7 @@ import pytest
 
 from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
 from tests.src.form_schema.parity.json_schema.diffs import (
+    attachments,
     budget_narrative,
     epa_key_contacts,
     key_contacts,
@@ -33,6 +34,7 @@ from tests.src.form_schema.parity.json_schema.harness.form_diff import FormDiff
 
 # One `FormDiff` per generated form, from `diffs/`.
 DIFFS: list[FormDiff] = [
+    attachments.DIFF,
     key_contacts.DIFF,
     epa_key_contacts.DIFF,
     performance_sites.DIFF,

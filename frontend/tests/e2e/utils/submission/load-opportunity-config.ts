@@ -1,5 +1,11 @@
-import { ATTACHMENT_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/attachment-data";
-import { ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/attachment-field-definitions";
+import {
+  ATTACHMENT_GENERATED_OPPORTUNITY_DATA,
+  ATTACHMENT_OPPORTUNITY_DATA,
+} from "tests/e2e/apply/fixtures/attachment-data";
+import {
+  ATTACHMENT_FORM_CONFIG,
+  ATTACHMENT_GENERATED_FORM_CONFIG,
+} from "tests/e2e/apply/fixtures/attachment-field-definitions";
 import {
   BUDGET_NARRATIVE_GENERATED_OPPORTUNITY_DATA,
   BUDGET_NARRATIVE_OPPORTUNITY_DATA,
@@ -32,6 +38,12 @@ import {
   OTHER_NARRATIVE_OPPORTUNITY_DATA,
 } from "tests/e2e/apply/fixtures/other-narrative-attachment-data";
 import { OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/other-narrative-attachment-field-definitions";
+import { PHS_CAREER_DEVELOPMENT_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/phs-career-development-data";
+import { PHS_CAREER_DEVELOPMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/phs-career-development-field-definitions";
+import { PHS_RESEARCH_PLAN_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/phs-research-plan-form-data";
+import { PHS_RESEARCH_PLAN_FORM_CONFIG } from "tests/e2e/apply/fixtures/phs-research-plan-form-field-definitions";
+import { PHS_RESEARCH_TRAINING_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/phs-research-training-data";
+import { PHS_RESEARCH_TRAINING_FORM_CONFIG } from "tests/e2e/apply/fixtures/phs-research-training-field-definitions";
 import {
   PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_OPPORTUNITY_DATA,
@@ -84,6 +96,7 @@ import type {
  */
 const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   ATTACHMENT_OPPORTUNITY_DATA,
+  ATTACHMENT_GENERATED_OPPORTUNITY_DATA,
   GRANTSGOV_LOBBYING_OPPORTUNITY_DATA,
   KEY_CONTACTS_OPPORTUNITY_DATA,
   KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
@@ -102,6 +115,9 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   PROJECT_ABSTRACT_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
   ED_ABSTRACT_GENERATED_OPPORTUNITY_DATA,
+  PHS_RESEARCH_PLAN_GENERATED_OPPORTUNITY_DATA,
+  PHS_CAREER_DEVELOPMENT_GENERATED_OPPORTUNITY_DATA,
+  PHS_RESEARCH_TRAINING_GENERATED_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_GENERATED_OPPORTUNITY_DATA,
   EPA_KEY_CONTACTS_OPPORTUNITY_DATA,
   EPA_KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
@@ -123,6 +139,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
  */
 const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   attachment: ATTACHMENT_FORM_CONFIG,
+  attachmentGenerated: ATTACHMENT_GENERATED_FORM_CONFIG,
   grantsGovLobbying: GRANTSGOV_LOBBYING_FORM_CONFIG,
   keyContacts: KEY_CONTACTS_FORM_CONFIG,
   keyContactsGenerated: KEY_CONTACTS_FORM_CONFIG,
@@ -141,6 +158,9 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   projectAbstract: PROJECT_ABSTRACT_FORM_CONFIG,
   projectAbstractGenerated: PROJECT_ABSTRACT_FORM_CONFIG,
   edAbstractGenerated: ED_ABSTRACT_FORM_CONFIG,
+  phsResearchPlanGenerated: PHS_RESEARCH_PLAN_FORM_CONFIG,
+  phsCareerDevelopmentGenerated: PHS_CAREER_DEVELOPMENT_FORM_CONFIG,
+  phsResearchTrainingGenerated: PHS_RESEARCH_TRAINING_FORM_CONFIG,
   epaKeyContacts: EPA_KEY_CONTACTS_FORM_CONFIG,
   epaKeyContactsGenerated: EPA_KEY_CONTACTS_FORM_CONFIG,
   rrKeyPersonGenerated: RR_KEY_PERSON_FORM_CONFIG,

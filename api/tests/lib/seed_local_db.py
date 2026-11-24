@@ -552,6 +552,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     isolated_form_competitions = [
         # form names are abbreviated in opportunity number to be under the 40 char limit
         (
+            "AttachmentForm_1_2_Generated",
+            "E2E-ATTG",
+            "Attachments (Generated)",
+            "84fd9552-81fa-4765-a6f0-13ece83d68ab",
+            "6a9a7a23-fb53-4660-9344-a071ce05ae84",
+        ),
+        (
             "AttachmentForm_1_2",
             "E2E-ATT",
             "ATTACHMENTFORM",
@@ -669,6 +676,27 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "NSF Suggested Reviewers",
             "97621d95-418a-4c00-96ab-3817c7dc7fe2",
             "5c51d2ad-d5ee-4d45-8811-f18b495e7bed",
+        ),
+        (
+            "PHS398_ResearchPlan_5_0_Generated",
+            "E2E-PHSRP",
+            "PHS 398 Research Plan",
+            "42e83601-97ac-5980-9fb1-577d2e1735f5",
+            "ae3fb60e-5b11-4efd-bd16-147af489c769",
+        ),
+        (
+            "PHS398_ResearchTrainingProgramPlan_5_0_Generated",
+            "E2E-PRTG",
+            "PHS 398 Research Training Program Plan",
+            "1809b683-2b2f-4419-878f-ade5be1b9334",
+            "c3494df9-130b-4e37-bd95-f172eaad3478",
+        ),
+        (
+            "PHS398_CareerDevelopmentAwardSup_6_0_Generated",
+            "E2E-PCDG",
+            "PHS 398 Career Development Award Supplemental Form",
+            "a0338d21-e63b-4b66-a40a-cc5a95a1e055",
+            "ac033fd6-8d97-4823-858f-6fff5703926a",
         ),
         (
             "Project_AbstractSummary_2_0",

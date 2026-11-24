@@ -1,0 +1,146 @@
+{
+  "type": "Group",
+  "elements": [
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/introduction_to_application",
+          "label": "1. Introduction to Application (for Resubmission and Revision applications)",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Introduction",
+      "options": {
+        "description": "Include an Introduction to Application for Resubmission or Revision applications."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/specific_aims",
+          "label": "2. Specific Aims",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/research_strategy",
+          "label": "3. Research Strategy",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/progress_report_publication_list",
+          "label": "4. Progress Report Publication List (for Renewal applications)",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Research Plan Section",
+      "options": {
+        "description": "Research Strategy is required: Follow the instructions provided in the Application Guide and the FOA regarding the content of the Research Strategy attachment. Unless specified otherwise in the FOA, follow the page limits for the Research Strategy in the table of page limits found in the Application Guide.  Save the information in a single file and click the Add Attachment button to complete this entry. Include a Progress Report Publication List for Renewal applications. Numeric page limits depend on the applicable Application Guide, FOA and agency instructions."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/vertebrate_animals",
+          "label": "5. Vertebrate Animals",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/select_agent_research",
+          "label": "6. Select Agent Research",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/multiple_pd_pi_leadership_plan",
+          "label": "7. Multiple PD/PI Leadership Plan",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/consortium_contractual_arrangements",
+          "label": "8. Consortium/Contractual Arrangements",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/letters_of_support",
+          "label": "9. Letters of Support",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/resource_sharing_plans",
+          "label": "10. Resource Sharing Plan(s)",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/other_plans",
+          "label": "11. Other Plan(s)",
+          "options": {
+            "widget": "Attachment"
+          }
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/key_biological_and_or_chemical_resources",
+          "label": "12. Authentication of Key Biological and/or Chemical Resources",
+          "options": {
+            "widget": "Attachment"
+          }
+        }
+      ],
+      "label": "Other Research Plan Section",
+      "options": {
+        "description": "Include Vertebrate Animals when you selected Yes to animals used on R&R Other Project Information. Prepare each supporting document for its named purpose and follow agency instructions."
+      }
+    },
+    {
+      "type": "Group",
+      "elements": [
+        {
+          "type": "Control",
+          "scope": "#/properties/appendix",
+          "label": "13. Appendix",
+          "options": {
+            "widget": "AttachmentArray"
+          }
+        }
+      ],
+      "label": "Appendix",
+      "options": {
+        "description": "Attach up to ten PDF files in the order required by the funding opportunity and agency instructions."
+      }
+    }
+  ],
+  "label": "PHS 398 Research Plan, Grants.gov version 5.0."
+}

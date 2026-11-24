@@ -1,5 +1,13 @@
 from datetime import datetime
 
+import pytest
+
+from src.form_schema.forms import (
+    PHS398ResearchPlan_v5_0,
+    PHSCareerDevelopmentGenerated_v6_0,
+    PHSResearchTrainingGenerated_v5_0,
+)
+
 EXPECTED_FORM_DATA = {
     713: {
         "form_name": "Application for Federal Assistance (SF-424)",
@@ -127,6 +135,21 @@ EXPECTED_FORM_DATA = {
         "form_name": "NSF Suggested Reviewers",
         "omb_number": "3145-0058",
         "expiration_date": "11/30/2026",
+    },
+    797: {
+        "form_name": "PHS 398 Research Plan",
+        "omb_number": "0925-0001",
+        "expiration_date": "12/31/2027",
+    },
+    798: {
+        "form_name": "PHS 398 Research Training Program Plan",
+        "omb_number": "0925-0001",
+        "expiration_date": "12/31/2027",
+    },
+    799: {
+        "form_name": "PHS 398 Career Development Award Supplemental Form",
+        "omb_number": "0925-0001",
+        "expiration_date": "12/31/2027",
     },
 }
 
@@ -385,5 +408,23 @@ def test_nsf_suggested_reviewers_v1_1(nsf_suggested_reviewers_v1_1):
         form.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
+    assert form.sgg_version == "1.0"
+    assert form.form_renderer == "jsonforms"
+
+
+@pytest.mark.parametrize(
+    ("form", "legacy_id"),
+    [
+        (PHS398ResearchPlan_v5_0, 797),
+        (PHSCareerDevelopmentGenerated_v6_0, 799),
+        (PHSResearchTrainingGenerated_v5_0, 798),
+    ],
+)
+def test_phs_form_identity(form, legacy_id):
+    expected = EXPECTED_FORM_DATA[legacy_id]
+    assert form.legacy_form_id == legacy_id
+    assert form.form_name == expected["form_name"]
+    assert form.omb_number == expected["omb_number"]
+    assert form.expiration_date == datetime.strptime(expected["expiration_date"], "%m/%d/%Y").date()
     assert form.sgg_version == "1.0"
     assert form.form_renderer == "jsonforms"

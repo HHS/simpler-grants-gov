@@ -64,7 +64,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 56
+    assert len(opportunities) == 60
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -81,7 +81,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 56
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 60
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
 
@@ -111,7 +111,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 56
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 60
     # Nothing is missing, so nothing is backfilled or changed
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
     assert [c.public_competition_id for c in competitions] == public_competition_ids
@@ -291,6 +291,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
         "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
         "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
+        "E2E-ATTG-ORG-IND-01": uuid.UUID("84fd9552-81fa-4765-a6f0-13ece83d68ab"),
         "E2E-ATT-ORG-IND-01": uuid.UUID("97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
         "E2E-BNA-ORG-IND-01": uuid.UUID("caea0f33-b356-4fcd-aae3-c0244e11da1e"),
         "E2E-CD511-ORG-IND-01": uuid.UUID("5b890089-2bb2-4123-82cd-3d321ca62efe"),
@@ -306,12 +307,15 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "E2E-BNAG-ORG-IND-01": uuid.UUID("c45674bf-a5e8-4f90-b098-ff5158f08c5e"),
         "E2E-ONAG-ORG-IND-01": uuid.UUID("3675dfde-0c28-44aa-a733-b3ce88b29b3a"),
         "E2E-PABSG-ORG-IND-01": uuid.UUID("2e5d8bcd-bf18-449e-809c-15d21de7a22f"),
+        "E2E-PRTG-ORG-IND-01": uuid.UUID("1809b683-2b2f-4419-878f-ade5be1b9334"),
+        "E2E-PCDG-ORG-IND-01": uuid.UUID("a0338d21-e63b-4b66-a40a-cc5a95a1e055"),
         "E2E-EDAG-ORG-IND-01": uuid.UUID("ea981400-e64a-4d17-a337-5b26b15f43cd"),
         "E2E-PABS-ORG-IND-01": uuid.UUID("d3081452-2cf8-4817-9abf-812e5d794485"),
         "E2E-NSFDA-ORG-IND-01": uuid.UUID("6d58e0cb-9b08-5732-b4a5-4df7f8cedfa7"),
         "E2E-NSFSR-ORG-IND-01": uuid.UUID("97621d95-418a-4c00-96ab-3817c7dc7fe2"),
         "E2E-PABSS-ORG-IND-01": uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
         "E2E-PABSSG-ORG-IND-01": uuid.UUID("e7b1eeb7-968e-5ad7-a682-92bf4f6fe478"),
+        "E2E-PHSRP-ORG-IND-01": uuid.UUID("42e83601-97ac-5980-9fb1-577d2e1735f5"),
         "E2E-PNA-ORG-IND-01": uuid.UUID("6bdc2df3-6e51-4aea-89af-bade326feba1"),
         "E2E-PNAG-ORG-IND-01": uuid.UUID("3b41ad38-a4eb-43e2-b124-7ebf56b05b1a"),
         "E2E-PPSL-ORG-IND-01": uuid.UUID("8a30cbe2-f297-49b7-b996-fc22982a3eb5"),

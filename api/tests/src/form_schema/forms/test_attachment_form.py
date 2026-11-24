@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
@@ -79,16 +81,17 @@ def test_attachment_form_v1_2_all_attachments(attachment_form_v1_2):
 def test_attachment_form_v1_2_with_valid_attachments(
     enable_factory_create, attachment_form_v1_2, verify_no_warning_error_logs
 ):
+    first_id, second_id = str(uuid.uuid4()), str(uuid.uuid4())
     application_form = setup_application_for_form_validation(
         {
-            "att1": "a1111111-1111-1111-1111-111111111111",
-            "att2": "a2222222-2222-2222-2222-222222222222",
+            "att1": first_id,
+            "att2": second_id,
         },
         json_schema=attachment_form_v1_2.form_json_schema,
         rule_schema=attachment_form_v1_2.form_rule_schema,
         attachment_ids=[
-            "a1111111-1111-1111-1111-111111111111",
-            "a2222222-2222-2222-2222-222222222222",
+            first_id,
+            second_id,
         ],
     )
 
@@ -104,7 +107,7 @@ def test_attachment_form_v1_2_with_invalid_attachment(
         {"att1": "a3333333-3333-3333-3333-333333333333"},
         json_schema=attachment_form_v1_2.form_json_schema,
         rule_schema=attachment_form_v1_2.form_rule_schema,
-        attachment_ids=["a4444444-4444-4444-4444-444444444444"],
+        attachment_ids=[str(uuid.uuid4())],
     )
 
     issues = validate_application_form(application_form, ApplicationAction.MODIFY)

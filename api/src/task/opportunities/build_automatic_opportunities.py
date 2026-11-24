@@ -30,6 +30,7 @@ from src.db.models.opportunity_models import (
 )
 from src.form_schema.forms import (
     AttachmentForm_v1_2,
+    AttachmentsGenerated_v1_2,
     BudgetNarrativeAttachment_v1_2,
     BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
@@ -47,6 +48,9 @@ from src.form_schema.forms import (
     OtherNarrativeAttachment_v1_2,
     OtherNarrativeGenerated_v1_2,
     PerformanceSitesGenerated_v4_0,
+    PHS398ResearchPlan_v5_0,
+    PHSCareerDevelopmentGenerated_v6_0,
+    PHSResearchTrainingGenerated_v5_0,
     ProjectAbstract_v1_2,
     ProjectAbstractGenerated_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -621,6 +625,12 @@ class BuildAutomaticOpportunitiesTask(Task):
         ISOLATED_FORM_OPPORTUNITIES = [
             # form names are abbreviated in opportunity number to be under the 40 char limit
             (
+                "E2E-ATTG",
+                "Attachments (Generated)",
+                AttachmentsGenerated_v1_2.form_id,
+                "84fd9552-81fa-4765-a6f0-13ece83d68ab",
+            ),
+            (
                 "E2E-ATT",
                 "Attachment Form",
                 AttachmentForm_v1_2.form_id,
@@ -640,10 +650,28 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "c45674bf-a5e8-4f90-b098-ff5158f08c5e",
             ),
             (
+                "E2E-PRTG",
+                "PHS 398 Research Training Program Plan",
+                PHSResearchTrainingGenerated_v5_0.form_id,
+                "1809b683-2b2f-4419-878f-ade5be1b9334",
+            ),
+            (
+                "E2E-PCDG",
+                "PHS 398 Career Development Award Supplemental Form",
+                PHSCareerDevelopmentGenerated_v6_0.form_id,
+                "a0338d21-e63b-4b66-a40a-cc5a95a1e055",
+            ),
+            (
                 "E2E-EDAG",
                 "ED Abstract Form",
                 EDAbstractGenerated_v1_1.form_id,
                 "ea981400-e64a-4d17-a337-5b26b15f43cd",
+            ),
+            (
+                "E2E-PHSRP",
+                "PHS 398 Research Plan",
+                PHS398ResearchPlan_v5_0.form_id,
+                "42e83601-97ac-5980-9fb1-577d2e1735f5",
             ),
             (
                 "E2E-EPA4700",

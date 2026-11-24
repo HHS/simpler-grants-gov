@@ -4,6 +4,7 @@ from src.db.models.competition_models import Form
 
 from ..registry.form_template_registry import form_template_registry
 from .attachment_form import AttachmentForm_v1_2
+from .attachments_generated import FORM as AttachmentsGenerated_v1_2
 from .budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from .budget_narrative_generated import FORM as BudgetNarrativeGenerated_v1_2
 from .cd511 import CD511_v1_1
@@ -21,6 +22,13 @@ from .nsf_suggested_reviewers_generated import FORM as NSFSuggestedReviewers_v1_
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
 from .other_narrative_generated import FORM as OtherNarrativeGenerated_v1_2
 from .performance_sites_generated import FORM as PerformanceSitesGenerated_v4_0
+from .phs_398_career_development_award_supplemental_form_generated import (
+    FORM as PHSCareerDevelopmentGenerated_v6_0,
+)
+from .phs_398_research_plan_generated import FORM as PHS398ResearchPlan_v5_0
+from .phs_398_research_training_program_plan_generated import (
+    FORM as PHSResearchTrainingGenerated_v5_0,
+)
 from .project_abstract import ProjectAbstract_v1_2
 from .project_abstract_generated import FORM as ProjectAbstractGenerated_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
@@ -71,11 +79,15 @@ _ALL_FORMS: list[Form] = [
     NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
     NSFSuggestedReviewers_v1_1,
+    AttachmentsGenerated_v1_2,
     ProjectNarrativeGenerated_v1_2,
     BudgetNarrativeGenerated_v1_2,
     OtherNarrativeGenerated_v1_2,
     ProjectAbstractGenerated_v1_2,
+    PHS398ResearchPlan_v5_0,
     EDAbstractGenerated_v1_1,
+    PHSCareerDevelopmentGenerated_v6_0,
+    PHSResearchTrainingGenerated_v5_0,
     NasaPIAndAORGenerated_v1_0,
 ]
 
@@ -94,11 +106,15 @@ GENERATED_FORMS: list[Form] = [
     NSFDeviationAuthorization_v1_1,
     NSFKeyPersonExpandedGenerated_v3_3,
     NSFSuggestedReviewers_v1_1,
+    AttachmentsGenerated_v1_2,
     ProjectNarrativeGenerated_v1_2,
     BudgetNarrativeGenerated_v1_2,
     OtherNarrativeGenerated_v1_2,
     ProjectAbstractGenerated_v1_2,
+    PHS398ResearchPlan_v5_0,
     EDAbstractGenerated_v1_1,
+    PHSCareerDevelopmentGenerated_v6_0,
+    PHSResearchTrainingGenerated_v5_0,
     NasaPIAndAORGenerated_v1_0,
 ]
 

@@ -47,6 +47,9 @@ Feature: Apply - Application Form Failure Path
 			| key-contacts                         | Key Contacts                                | required fields left empty                        |
 			| nasa-pi-and-aor                      | NASA PI and AOR                             | required fields left empty                        |
 			| other-narrative-attachment           | Other Narrative Attachments                 | no file uploaded for required attachment fields   |
+			| phs-research-plan                    | PHS 398 Research Plan                       | Research Strategy attachment missing              |
+			| phs-research-training | PHS 398 Research Training Program Plan | required fields left empty |
+			| phs-career-development | PHS 398 Career Development Award Supplemental Form | required fields left empty |
 			| project-abstract-summary             | Project Abstract Summary                    | required fields left empty                        |
 			| project-abstract                     | Project Abstract                            | required fields left empty                        |
 			| project-narrative-attachment         | Project Narrative Attachment                | no file uploaded for required attachment fields   |
@@ -61,3 +64,13 @@ Feature: Apply - Application Form Failure Path
 
 	# Expected failure path form status on the application landing page:
 	# "incomplete" -> displays "Some issues found. Check your entries."
+
+	Scenario Outline: Empty optional Attachments form saves as complete
+		Given an applicant opens the <variant> Attachments form
+		When the applicant saves without uploading any files
+		Then the form and the application page show the form as complete
+
+		Examples:
+			| variant     |
+			| handwritten |
+			| generated   |
