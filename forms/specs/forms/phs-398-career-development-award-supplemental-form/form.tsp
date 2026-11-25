@@ -1,5 +1,6 @@
 import "form-library-xml";
 import "simpler-forms";
+import "simpler-forms-sgg";
 import "#forms/index.tsp";
 import "#questions/types/attachment.tsp";
 import "#questions/research/index.tsp";
@@ -12,6 +13,7 @@ namespace Forms.Phs398CareerDevelopmentAwardSupplemental;
   id: "phs-398-career-development-award-supplemental-form",
   formName: "PHS 398 Career Development Award Supplemental Form",
 })
+@Sgg.sync(#{ xml: "mapping" })
 @GrantsGov.form(#{
   legacyFormId: 799,
   shortFormName: "PHS398_CareerDevelopmentAwardSup_6_0",

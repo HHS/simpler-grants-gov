@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "introduction_to_application": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.introduction-to-application"
+        }
+      ],
+      "title": "1. Introduction to Application (for Resubmission and Revision applications)"
+    },
+    "candidate_information_and_goals": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach a PDF. Check the funding opportunity and agency instructions for whether this attachment is required and what page limit applies.",
+      "title": "2. Candidate Information and Goals for Career Development"
+    },
+    "specific_aims": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.specific-aims"
+        }
+      ],
+      "title": "3. Specific Aims"
+    },
+    "research_strategy": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.research-strategy"
+        }
+      ],
+      "title": "4. Research Strategy"
+    },
+    "progress_report_publication_list": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.progress-report-publication-list"
+        }
+      ],
+      "title": "5. Progress Report Publication List (for Renewal applications)"
+    },
+    "responsible_conduct_of_research": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "6. Training in the Responsible Conduct of Research"
+    },
+    "mentoring_plan": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "7. Candidate's Plan to Provide Mentoring"
+    },
+    "statements_of_support": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "8. Plans and Statements of Mentor and Co-Mentor(s)"
+    },
+    "letters_of_support": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "9. Letters of Support from Collaborators, Contributors, and Consultants"
+    },
+    "institutional_environment": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. This attachment is typically required. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "10. Description of Institutional Environment"
+    },
+    "institutional_commitment": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "11. Institutional Commitment to Candidate’s Research Career Development"
+    },
+    "candidates_contribution": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach PDF formatted file. This attachment is typically required. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "12. Description of Candidate's Contribution to Program Goals"
+    },
+    "vertebrate_animals": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.vertebrate-animals"
+        }
+      ],
+      "title": "13. Vertebrate Animals"
+    },
+    "select_agent_research": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.select-agent-research"
+        }
+      ],
+      "title": "14. Select Agent Research"
+    },
+    "consortium_contractual_arrangements": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.consortium-contractual-arrangements"
+        }
+      ],
+      "title": "15. Consortium/Contractual Arrangements"
+    },
+    "resource_sharing_plans": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.resource-sharing-plans"
+        }
+      ],
+      "title": "16. Resource Sharing Plan(s)"
+    },
+    "other_plans": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.other-plans"
+        }
+      ],
+      "title": "17. Other Plan(s)"
+    },
+    "key_biological_and_or_chemical_resources": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.key-biological-and-or-chemical-resources"
+        }
+      ],
+      "title": "18. Authentication of Key Biological and/or Chemical Resources"
+    },
+    "appendix": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.appendix"
+        }
+      ],
+      "title": "19. Appendix"
+    },
+    "is_us_citizen_or_national": {
+      "type": "boolean",
+      "title": "20. U.S. Citizen or Non-Citizen National?"
+    },
+    "non_us_citizenship_status": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NonUsCitizenshipStatus"
+        }
+      ],
+      "title": "If no, select most appropriate Non-U.S. Citizen option"
+    },
+    "permanent_resident_by_award": {
+      "type": "boolean",
+      "description": "Check if candidate is a non-U.S. citizen with a temporary visa applying for an award that requires permanent residency status, and expect to be granted a permanent resident visa by the start date of the award.",
+      "title": "Expect permanent resident status by the award start date"
+    }
+  },
+  "required": [
+    "research_strategy",
+    "is_us_citizen_or_national"
+  ],
+  "examples": [
+    {
+      "research_strategy": "00000000-0000-4000-8000-000000079901",
+      "is_us_citizen_or_national": true
+    },
+    {
+      "research_strategy": "00000000-0000-4000-8000-000000079901",
+      "appendix": [
+        "00000000-0000-4000-8000-000000079902",
+        "00000000-0000-4000-8000-000000079903"
+      ],
+      "is_us_citizen_or_national": false,
+      "non_us_citizenship_status": "Temporary U.S. Visa",
+      "permanent_resident_by_award": true
+    }
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "is_us_citizen_or_national": {
+            "const": false
+          }
+        },
+        "required": [
+          "is_us_citizen_or_national"
+        ]
+      },
+      "then": {
+        "required": [
+          "non_us_citizenship_status"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "NonUsCitizenshipStatus": {
+      "type": "string",
+      "enum": [
+        "Permanent U.S. Resident Visa",
+        "Temporary U.S. Visa",
+        "Not Residing in the U.S."
+      ]
+    },
+    "research.introduction-to-application": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Introduction to Application (for Resubmission and Revision applications)"
+    },
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
+    },
+    "research.specific-aims": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Specific Aims"
+    },
+    "research.research-strategy": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Research Strategy"
+    },
+    "research.progress-report-publication-list": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Progress Report Publication List (for Renewal applications)"
+    },
+    "research.vertebrate-animals": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Vertebrate Animals"
+    },
+    "research.select-agent-research": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Select Agent Research"
+    },
+    "research.consortium-contractual-arrangements": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Consortium/Contractual Arrangements"
+    },
+    "research.resource-sharing-plans": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Resource Sharing Plan(s)"
+    },
+    "research.other-plans": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Other Plan(s)"
+    },
+    "research.key-biological-and-or-chemical-resources": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Authentication of Key Biological and/or Chemical Resources"
+    },
+    "research.appendix": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/types.attachment"
+      },
+      "maxItems": 10,
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Appendix"
+    }
+  }
+}

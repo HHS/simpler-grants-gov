@@ -28,6 +28,7 @@ from tests.src.form_schema.parity.xml.diffs import (
     other_narrative_attachment,
     other_narrative_generated,
     performance_sites_generated,
+    phs_398_career_development_award_supplemental_form_generated,
     phs_398_research_plan_generated,
     phs_398_research_training_program_plan_generated,
     project_abstract,
@@ -70,6 +71,7 @@ DIFFS = [
     project_abstract_generated.DIFF,
     ed_abstract_form_generated.DIFF,
     phs_398_research_plan_generated.DIFF,
+    phs_398_career_development_award_supplemental_form_generated.DIFF,
     phs_398_research_training_program_plan_generated.DIFF,
     nasa_pi_and_aor_generated.DIFF,
 ]

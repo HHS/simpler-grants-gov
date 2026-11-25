@@ -2,7 +2,11 @@ from datetime import datetime
 
 import pytest
 
-from src.form_schema.forms import PHS398ResearchPlan_v5_0, PHSResearchTrainingGenerated_v5_0
+from src.form_schema.forms import (
+    PHS398ResearchPlan_v5_0,
+    PHSCareerDevelopmentGenerated_v6_0,
+    PHSResearchTrainingGenerated_v5_0,
+)
 
 EXPECTED_FORM_DATA = {
     713: {
@@ -139,6 +143,11 @@ EXPECTED_FORM_DATA = {
     },
     798: {
         "form_name": "PHS 398 Research Training Program Plan",
+        "omb_number": "0925-0001",
+        "expiration_date": "12/31/2027",
+    },
+    799: {
+        "form_name": "PHS 398 Career Development Award Supplemental Form",
         "omb_number": "0925-0001",
         "expiration_date": "12/31/2027",
     },
@@ -407,6 +416,7 @@ def test_nsf_suggested_reviewers_v1_1(nsf_suggested_reviewers_v1_1):
     ("form", "legacy_id"),
     [
         (PHS398ResearchPlan_v5_0, 797),
+        (PHSCareerDevelopmentGenerated_v6_0, 799),
         (PHSResearchTrainingGenerated_v5_0, 798),
     ],
 )

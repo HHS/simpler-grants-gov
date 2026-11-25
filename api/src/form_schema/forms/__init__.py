@@ -21,6 +21,9 @@ from .nsf_suggested_reviewers_generated import FORM as NSFSuggestedReviewers_v1_
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
 from .other_narrative_generated import FORM as OtherNarrativeGenerated_v1_2
 from .performance_sites_generated import FORM as PerformanceSitesGenerated_v4_0
+from .phs_398_career_development_award_supplemental_form_generated import (
+    FORM as PHSCareerDevelopmentGenerated_v6_0,
+)
 from .phs_398_research_plan_generated import FORM as PHS398ResearchPlan_v5_0
 from .phs_398_research_training_program_plan_generated import (
     FORM as PHSResearchTrainingGenerated_v5_0,
@@ -81,6 +84,7 @@ _ALL_FORMS: list[Form] = [
     ProjectAbstractGenerated_v1_2,
     PHS398ResearchPlan_v5_0,
     EDAbstractGenerated_v1_1,
+    PHSCareerDevelopmentGenerated_v6_0,
     PHSResearchTrainingGenerated_v5_0,
     NasaPIAndAORGenerated_v1_0,
 ]
@@ -106,6 +110,7 @@ GENERATED_FORMS: list[Form] = [
     ProjectAbstractGenerated_v1_2,
     PHS398ResearchPlan_v5_0,
     EDAbstractGenerated_v1_1,
+    PHSCareerDevelopmentGenerated_v6_0,
     PHSResearchTrainingGenerated_v5_0,
     NasaPIAndAORGenerated_v1_0,
 ]

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:PHS398_CareerDevelopmentAwardSup_6_0="http://apply.grants.gov/forms/PHS398_CareerDevelopmentAwardSup_6_0-V6.0" targetNamespace="http://apply.grants.gov/forms/PHS398_CareerDevelopmentAwardSup_6_0-V6.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="6.0">
+	<xs:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:element name="PHS398_CareerDevelopmentAwardSup_6_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CareerDevelopmentAwardAttachments" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="IntroductionToApplication" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="CandidateInformationAndGoals" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="SpecificAims" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ResearchStrategy">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ProgressReportPublicationList" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ResponsibleConductOfResearch" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="MentoringPlan" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="StatementsOfSupport" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="LettersOfSupport" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="InsitutionalEnvironment" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="InstitutionalCommitment" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="CandidatesContribution" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="VertebrateAnimals" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="SelectAgentResearch" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ConsortiumContractualArrangements" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ResourceSharingPlans" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="OtherPlans" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="KeyBiologicalAndOrChemicalResources" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="attFile" type="att:AttachedFileDataType"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Appendix" type="att:AttachmentGroupMin0Max100DataType" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="CitizenshipIndicator" type="globLib:YesNoDataType"/>
+				<xs:element name="isNonUSCitizenship" type="PHS398_CareerDevelopmentAwardSup_6_0:NonUSCitizenshipDataType" minOccurs="0"/>
+				<xs:element name="PermanentResidentByAwardIndicator" type="globLib:YesNoDataType" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="6.0"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="NonUSCitizenshipDataType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Permanent U.S. Resident Visa"/>
+			<xs:enumeration value="Temporary U.S. Visa"/>
+			<xs:enumeration value="Not Residing in the U.S."/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
