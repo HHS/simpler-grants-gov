@@ -94,6 +94,8 @@ export type RenderFieldNodeProps = {
   formContext?: RootBudgetFormContext;
   isFormLocked?: boolean;
   disabled?: boolean;
+  /** The field's JSON Forms data path, needed for a field in a list entry (`people.1.name`). */
+  dataPath?: string;
 };
 
 /**
@@ -109,6 +111,7 @@ export const renderFieldNode = ({
   formContext,
   isFormLocked,
   disabled,
+  dataPath,
 }: RenderFieldNodeProps) => {
   // Some renderable UiSchema nodes are definition-based and do not include an
   // inline `schema` object. Use optional chaining here so required-field checks
@@ -130,6 +133,7 @@ export const renderFieldNode = ({
     errors: errors ?? null,
     formData,
     requiredField,
+    dataPath,
   });
 
   /*
