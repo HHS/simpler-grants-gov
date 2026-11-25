@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:RR_PersonalData_1_2="http://apply.grants.gov/forms/RR_PersonalData_1_2-V1.2" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://apply.grants.gov/forms/RR_PersonalData_1_2-V1.2" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.0">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en"/>
+	</xsd:annotation>
+	<xsd:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xsd:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xsd:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<!-- ============================== -->
+	<!-- ROOT -->
+	<!-- ============================== -->
+	<xsd:element name="RR_PersonalData_1_2">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="ProjectDirector" type="RR_PersonalData_1_2:DirectorType"/>
+				<xsd:element name="Co-ProjectDirector" type="RR_PersonalData_1_2:DirectorType" minOccurs="0" maxOccurs="4"/>
+			</xsd:sequence>
+			<xsd:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="1.2"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:complexType name="DirectorType">
+		<xsd:sequence>
+			<xsd:element name="Name" type="globLib:HumanNameDataType"/>
+			<xsd:element name="Gender" type="RR_PersonalData_1_2:GenderType" minOccurs="0"/>
+			<xsd:element name="Race" type="RR_PersonalData_1_2:RaceType" minOccurs="0" maxOccurs="5"/>
+			<xsd:element name="Ethnicity" type="RR_PersonalData_1_2:EthnicityType" minOccurs="0"/>
+			<xsd:element name="DisabilityStatus" type="RR_PersonalData_1_2:DisablilityStatusType" minOccurs="0" maxOccurs="4"/>
+			<xsd:element name="Citizenship" type="RR_PersonalData_1_2:CitizenshipType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="GenderType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Male"/>
+			<xsd:enumeration value="Female"/>
+			<xsd:enumeration value="Do Not Wish to Provide"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="RaceType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="American Indian or Alaska Native"/>
+			<xsd:enumeration value="Asian"/>
+			<xsd:enumeration value="Black or African American"/>
+			<xsd:enumeration value="Native Hawaiian or Other Pacific Islander"/>
+			<xsd:enumeration value="White"/>
+			<xsd:enumeration value="Do Not Wish to Provide"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="EthnicityType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Hispanic or Latino"/>
+			<xsd:enumeration value="Not Hispanic or Latino"/>
+			<xsd:enumeration value="Do Not Wish To Provide"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="DisablilityStatusType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Hearing"/>
+			<xsd:enumeration value="Visual"/>
+			<xsd:enumeration value="Mobility/Orthopedic Impairment"/>
+			<xsd:enumeration value="Other"/>
+			<xsd:enumeration value="None"/>
+			<xsd:enumeration value="Do Not Wish to Provide"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="CitizenshipType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="US Citizen"/>
+			<xsd:enumeration value="Permanent Resident"/>
+			<xsd:enumeration value="Other non-US Citizen"/>
+			<xsd:enumeration value="Do Not Wish to Provide"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+</xsd:schema>

@@ -734,6 +734,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "9607f84f-ab9b-4d23-a5aa-d055318a5660",
         ),
         (
+            "RR_PersonalData_1_2_Generated",
+            "E2E-RRPD",
+            "Research & Related Personal Data (Generated)",
+            "34f51b1c-f338-569e-8df0-db9121de06b5",
+            "48ca2c11-7d9a-5b25-9269-8d3eed3fe254",
+        ),
+        (
             "Nasa_PIandAORSupplementalDataSheet_Generated",
             "E2E-NASAPIAORG",
             "NASA - PI and AOR Supplemental Data Sheet (Generated)",

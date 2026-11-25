@@ -1,0 +1,119 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/RR_PersonalData_1_2-V1.2",
+    "personal": "http://apply.grants.gov/forms/RR_PersonalData_1_2-V1.2",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/RR_PersonalData_1_2-V1.2.xsd",
+  "root": {
+    "RR_PersonalData_1_2": {
+      "@personal:FormVersion": {
+        "$const": "1.2"
+      },
+      "ProjectDirector": {
+        "Name": {
+          "globLib:PrefixName": {
+            "$field": "project_director.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "project_director.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "project_director.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "project_director.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "project_director.name.suffix"
+          }
+        },
+        "Gender": {
+          "$field": "project_director.gender"
+        },
+        "Race": {
+          "$each": {
+            "items": {
+              "$field": "project_director.race"
+            },
+            "map": {
+              "$field": "."
+            }
+          }
+        },
+        "Ethnicity": {
+          "$field": "project_director.ethnicity"
+        },
+        "DisabilityStatus": {
+          "$each": {
+            "items": {
+              "$field": "project_director.disability_status"
+            },
+            "map": {
+              "$field": "."
+            }
+          }
+        },
+        "Citizenship": {
+          "$field": "project_director.citizenship"
+        }
+      },
+      "Co-ProjectDirector": {
+        "$each": {
+          "items": {
+            "$field": "co_project_director"
+          },
+          "map": {
+            "Name": {
+              "globLib:PrefixName": {
+                "$field": "name.prefix"
+              },
+              "globLib:FirstName": {
+                "$field": "name.first_name"
+              },
+              "globLib:MiddleName": {
+                "$field": "name.middle_name"
+              },
+              "globLib:LastName": {
+                "$field": "name.last_name"
+              },
+              "globLib:SuffixName": {
+                "$field": "name.suffix"
+              }
+            },
+            "Gender": {
+              "$field": "gender"
+            },
+            "Race": {
+              "$each": {
+                "items": {
+                  "$field": "race"
+                },
+                "map": {
+                  "$field": "."
+                }
+              }
+            },
+            "Ethnicity": {
+              "$field": "ethnicity"
+            },
+            "DisabilityStatus": {
+              "$each": {
+                "items": {
+                  "$field": "disability_status"
+                },
+                "map": {
+                  "$field": "."
+                }
+              }
+            },
+            "Citizenship": {
+              "$field": "citizenship"
+            }
+          }
+        }
+      }
+    }
+  }
+}

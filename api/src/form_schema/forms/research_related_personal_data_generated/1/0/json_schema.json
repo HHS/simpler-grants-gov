@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "project_director": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Director"
+        }
+      ],
+      "description": "Providing demographic information is voluntary and is not a condition of award. You may choose “Do Not Wish to Provide” for any question.",
+      "title": "Project Director/Principal Investigator"
+    },
+    "co_project_director": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Director"
+      },
+      "maxItems": 4,
+      "title": "Co-Project Directors/Co-Principal Investigators"
+    }
+  },
+  "required": [
+    "project_director"
+  ],
+  "examples": [
+    {
+      "project_director": {
+        "name": {
+          "first_name": "Casey",
+          "last_name": "Example"
+        },
+        "race": [
+          "Asian"
+        ]
+      },
+      "co_project_director": [
+        {
+          "name": {
+            "first_name": "Alex",
+            "last_name": "Example"
+          },
+          "race": [
+            "White"
+          ]
+        },
+        {
+          "name": {
+            "first_name": "Robin",
+            "last_name": "Example"
+          },
+          "race": [
+            "Do Not Wish to Provide"
+          ]
+        }
+      ]
+    }
+  ],
+  "description": "Voluntary demographic information for the project director and up to four co-directors.",
+  "$defs": {
+    "Gender": {
+      "type": "string",
+      "enum": [
+        "Male",
+        "Female",
+        "Do Not Wish to Provide"
+      ]
+    },
+    "Race": {
+      "type": "string",
+      "enum": [
+        "American Indian or Alaska Native",
+        "Asian",
+        "Black or African American",
+        "Native Hawaiian or Other Pacific Islander",
+        "White",
+        "Do Not Wish to Provide"
+      ]
+    },
+    "Ethnicity": {
+      "type": "string",
+      "enum": [
+        "Hispanic or Latino",
+        "Not Hispanic or Latino",
+        "Do Not Wish To Provide"
+      ]
+    },
+    "DisabilityStatus": {
+      "type": "string",
+      "enum": [
+        "Hearing",
+        "Visual",
+        "Mobility/Orthopedic Impairment",
+        "Other",
+        "None",
+        "Do Not Wish to Provide"
+      ]
+    },
+    "Citizenship": {
+      "type": "string",
+      "enum": [
+        "US Citizen",
+        "Permanent Resident",
+        "Other non-US Citizen",
+        "Do Not Wish to Provide"
+      ]
+    },
+    "Director": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name"
+            }
+          ],
+          "title": "Name"
+        },
+        "gender": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/Gender"
+            }
+          ],
+          "description": "Select one.",
+          "title": "Sex"
+        },
+        "race": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Race"
+          },
+          "maxItems": 5,
+          "description": "Choose one or more. Select “Do Not Wish to Provide” by itself.\n\nAmerican Indian or Alaska Native:  A person having origins in any of the original peoples of North, Central, or South America, and who maintains tribal affiliation or community attachment.\n\nAsian: A person having origins in any of the original peoples of the Far East, Southeast Asia, or the Indian subcontinent, including, for example, Cambodia, China, India, Japan, Korea, Malaysia, Pakistan, The Philippine Islands, Thailand, and Vietnam.  (Note, individuals from the Philippine Islands have been recorded as Pacific Islanders in previous data collection strategies.)\n\nBlack or African American:  A person having origins in any of the black racial groups of Africa.\n\nNative Hawaiian or Other Pacific Islander:  A person having origins in any of the original peoples of Hawaii, Guam, Samoa, or other Pacific Islands.\n\nWhite:  A person having origins in any of the original peoples of Europe, the Middle East or North Africa.",
+          "title": "Race (check all that apply)",
+          "allOf": [
+            {
+              "if": {
+                "contains": {
+                  "enum": [
+                    "Do Not Wish to Provide"
+                  ]
+                }
+              },
+              "then": {
+                "maxItems": 1
+              }
+            }
+          ],
+          "uniqueItems": true
+        },
+        "ethnicity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/Ethnicity"
+            }
+          ],
+          "description": "Choose one.\n\nHispanic or Latino:  A person of Mexican, Puerto Rican, Cuban, South or Central American, or other Spanish culture or origin, regardless of race.",
+          "title": "Ethnicity"
+        },
+        "disability_status": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DisabilityStatus"
+          },
+          "maxItems": 4,
+          "description": "Select one or more. Select “None” or “Do Not Wish to Provide” by itself.",
+          "title": "Disability Status (check all that apply)",
+          "allOf": [
+            {
+              "if": {
+                "contains": {
+                  "enum": [
+                    "None",
+                    "Do Not Wish to Provide"
+                  ]
+                }
+              },
+              "then": {
+                "maxItems": 1
+              }
+            }
+          ],
+          "uniqueItems": true
+        },
+        "citizenship": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/Citizenship"
+            }
+          ],
+          "description": "Select one.",
+          "title": "Citizenship"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "description": "The same questions are asked of each person. A refusal is a single answer."
+    },
+    "person.name": {
+      "type": "object",
+      "properties": {
+        "prefix": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.prefix"
+            }
+          ],
+          "title": "Prefix"
+        },
+        "first_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.first-name"
+            }
+          ],
+          "title": "First Name"
+        },
+        "middle_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.middle-name"
+            }
+          ],
+          "title": "Middle Name"
+        },
+        "last_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.last-name"
+            }
+          ],
+          "title": "Last Name"
+        },
+        "suffix": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.suffix"
+            }
+          ],
+          "title": "Suffix"
+        }
+      },
+      "required": [
+        "first_name",
+        "last_name"
+      ],
+      "description": "A person's name, in five parts. First and last name are required.",
+      "title": "Name"
+    },
+    "person.name.prefix": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the prefix."
+    },
+    "person.name.first-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 35,
+      "description": "Enter the first name."
+    },
+    "person.name.middle-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25,
+      "description": "Enter the middle name."
+    },
+    "person.name.last-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Enter the last name."
+    },
+    "person.name.suffix": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the suffix."
+    }
+  }
+}
