@@ -11,7 +11,7 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
-import { PROJECT_NARRATIVE_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
+import { PROJECT_NARRATIVE_ATTACHMENT_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
 import {
   PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER,
   PROJECT_NARRATIVE_ATTACHMENT_REQUIRED_FIELD_ERRORS,
@@ -35,7 +35,7 @@ const opportunities = [
   ["handwritten", `/opportunity/${OPPORTUNITY_ID}`],
   [
     "generated",
-    `/opportunity/${PROJECT_NARRATIVE_GENERATED_OPPORTUNITY_DATA.opportunityId}`,
+    `/opportunity/${PROJECT_NARRATIVE_ATTACHMENT_GENERATED_OPPORTUNITY_DATA.opportunityId}`,
   ],
 ] as const;
 

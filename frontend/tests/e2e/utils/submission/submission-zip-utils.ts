@@ -17,6 +17,7 @@ import * as os from "os";
 import * as path from "path";
 import { expect, type Page } from "@playwright/test";
 import * as zip from "@zip.js/zip.js";
+import type { ExpectedXmlField } from "tests/e2e/utils/submission/submission-field-utils";
 import { extractText } from "unpdf";
 
 // zip.js defaults to Web Workers, which aren't available in a plain Node
@@ -140,6 +141,34 @@ export async function downloadAndUnzipSubmission(
   }
 }
 
+const escapeRegExp = (text: string): string =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Returns the expected fields that are not present in the XML text, formatted for
+ * the failure message. Pure function (no Playwright), so it can be unit-checked.
+ */
+export function findMissingXmlFields(
+  xmlText: string,
+  expectedFields: Record<string, ExpectedXmlField>,
+): string[] {
+  return Object.values(expectedFields)
+    .filter(({ element, value, allowAttributes }) => {
+      if (!allowAttributes) {
+        return !xmlText.includes(`<${element}>${value}</${element}>`);
+      }
+      const pattern = new RegExp(
+        `<${escapeRegExp(element)}(?:\\s[^>]*)?>${escapeRegExp(value)}</${escapeRegExp(element)}>`,
+      );
+      return !pattern.test(xmlText);
+    })
+    .map(({ element, value, allowAttributes }) =>
+      allowAttributes
+        ? `<${element} …>${value}</${element}>`
+        : `<${element}>${value}</${element}>`,
+    );
+}
+
 /**
  * Asserts that GrantApplication.xml exists in the zip and that its raw text
  * contains each of the provided expected element/value pairs.
@@ -149,7 +178,7 @@ export async function downloadAndUnzipSubmission(
  */
 export function assertXmlContainsFields(
   contents: ZipContents,
-  expectedFields: Record<string, { element: string; value: string }>,
+  expectedFields: Record<string, ExpectedXmlField>,
 ): void {
   const xmlBytes = contents.files.get("GrantApplication.xml");
 
@@ -162,15 +191,44 @@ export function assertXmlContainsFields(
   }
 
   const xmlText = Buffer.from(xmlBytes).toString("utf-8");
-
-  const missing = Object.values(expectedFields)
-    .map(({ element, value }) => `<${element}>${value}</${element}>`)
-    .filter((expected) => !xmlText.includes(expected));
+  const missing = findMissingXmlFields(xmlText, expectedFields);
 
   // Failure here is reported without hiding later checks in the test.
   expect
     .soft(missing, "GrantApplication.xml is missing expected elements")
     .toEqual([]);
+}
+
+/**
+ * Asserts that a file exists in the zip (by name) with exactly the expected bytes,
+ * for example an uploaded attachment compared with the local test file.
+ *
+ * @param contents ZipContents returned by downloadAndUnzipSubmission
+ * @param fileName Entry name in the zip, e.g. "sample-upload-kb.pdf"
+ * @param expectedBytes The original file's bytes
+ */
+export function assertFileInZip(
+  contents: ZipContents,
+  fileName: string,
+  expectedBytes: Uint8Array,
+): void {
+  const actual = contents.files.get(fileName);
+
+  expect
+    .soft(
+      actual,
+      `${fileName} not found in zip. Available files: ${[...contents.files.keys()].join(", ")}`,
+    )
+    .toBeDefined();
+
+  if (actual) {
+    expect
+      .soft(
+        Buffer.compare(Buffer.from(actual), Buffer.from(expectedBytes)),
+        `${fileName} in the zip differs from the uploaded file`,
+      )
+      .toBe(0);
+  }
 }
 
 /**

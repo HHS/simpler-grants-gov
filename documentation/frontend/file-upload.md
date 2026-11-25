@@ -129,7 +129,7 @@ A successful file upload and virus scan will result in:
 
 In order to support actually doing something with the file after upload, the SimplerFileInput allows for a "post upload action". What the post upload action does will be different for each form but in most cases it will associate the file with a given entity and move the file into a permanent S3 bucket.
 
-For example, in the case of uploading a file to be attached to another entity (ex. application form, opportunity, award recommendation), this function would make a request to attach the given file id as an attachment to that entity. For an opportunity attachment, this could likely look like an API request to add a DB record on an `opportunity_attachment` table and move the file to an `opportunity_attachments` S3 bucket.
+For example, in the case of uploading a file to be attached to another entity (ex. application form), this function would make a request to attach the given file id as an attachment to that entity. For an application attachment, this looks like an API request that adds a DB record to the `application_attachment` table and moves the file into permanent S3 storage.
 
 On a technical level, once the file upload and virus scan have completed successfully, the component will call the postUploadAction function provided via prop with the temporary file id returned from the file upload request.
 

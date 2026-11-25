@@ -58,7 +58,7 @@ Domain specific components are any components which are not core components - as
 
 Domain specific components can be shared on any number of levels and used to support a variety of contexts. For example, a domain specific component may be designed to be shared by:
 
-- all components related a feature such as Apply or Award Recommendation
+- all components related a feature such as Apply or Organizations
 - all components used by a more complex, higher level component
 
 ### Location

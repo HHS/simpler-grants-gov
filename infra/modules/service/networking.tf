@@ -27,8 +27,13 @@ resource "aws_security_group" "alb" {
 
 }
 
+# In secure mode the public ALB stays up but its ingress is closed.
+locals {
+  public_alb_ingress_closed = var.load_balancer_mode == "secure"
+}
+
 resource "aws_security_group" "alb_restricted" {
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.public_alb_ingress_closed ? 1 : 0
 
   name_prefix = "${var.service_name}-alb-restricted"
   description = "Public ALB with ingress closed; traffic is served by the internal ALB"
@@ -41,7 +46,7 @@ resource "aws_security_group" "alb_restricted" {
 }
 
 resource "aws_security_group_rule" "alb_restricted_app_egress" {
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.public_alb_ingress_closed ? 1 : 0
 
   depends_on = [aws_security_group.app]
 
@@ -84,7 +89,7 @@ resource "aws_security_group_rule" "alb_app_local_health_check" {
 }
 
 resource "aws_security_group_rule" "https_ingress" {
-  count             = var.certificate_arn != null ? 1 : 0
+  count             = local.has_public_alb && var.certificate_arn != null ? 1 : 0
   security_group_id = aws_security_group.alb.id
 
   description = "Allow HTTPS traffic from public internet"
@@ -110,7 +115,7 @@ resource "aws_security_group_rule" "http_ingress_ipv6" {
 }
 
 resource "aws_security_group_rule" "https_ingress_ipv6" {
-  count             = var.certificate_arn != null ? 1 : 0
+  count             = local.has_public_alb && var.certificate_arn != null ? 1 : 0
   security_group_id = aws_security_group.alb.id
 
   description      = "Allow HTTPS traffic from public internet"
@@ -122,7 +127,7 @@ resource "aws_security_group_rule" "https_ingress_ipv6" {
 }
 
 resource "aws_security_group" "api_gateway_vpc_link" {
-  count = var.enable_api_gateway && var.enable_secure_alb ? 1 : 0
+  count = local.api_gateway_uses_vpc_link ? 1 : 0
 
   name_prefix = "${var.service_name}-apigw-link"
   description = "API Gateway VPC Link V2 ENIs"
@@ -135,7 +140,7 @@ resource "aws_security_group" "api_gateway_vpc_link" {
 }
 
 resource "aws_security_group_rule" "api_gateway_vpc_link_egress_to_alb" {
-  count = var.enable_api_gateway && local.enable_internal_alb ? 1 : 0
+  count = local.api_gateway_uses_vpc_link ? 1 : 0
 
   security_group_id        = aws_security_group.api_gateway_vpc_link[0].id
   description              = "Allow HTTPS to the internal application load balancer"
@@ -170,10 +175,8 @@ resource "aws_security_group" "app" {
     to_port     = var.container_port
     security_groups = concat(
       [aws_security_group.alb.id],
-      local.enable_internal_alb ? [
-        aws_security_group.internal_alb[0].id,
-        aws_security_group.alb_restricted[0].id,
-      ] : [],
+      local.has_internal_alb ? [aws_security_group.internal_alb[0].id] : [],
+      local.public_alb_ingress_closed ? [aws_security_group.alb_restricted[0].id] : [],
     )
   }
 

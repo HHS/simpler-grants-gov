@@ -14,14 +14,29 @@ export interface SubmissionFieldMapping {
   /** Converts the fill/print value to the XML value (e.g. "No" → "N: No"). Default: as-is. */
   xmlTransform?: (value: string) => string;
   /**
-   * Assert the raw value appears in the form's PDF. This is an existence check on
+   * Match the element even when its opening tag carries attributes (for example
+   * `<glob:HashValue glob:hashAlgorithm="SHA-1">…`). Default: exact `<element>value</element>`.
+   */
+  xmlAllowAttributes?: boolean;
+  /**
+   * Assert the value appears in the form's PDF. This is an existence check on
    * the text (not tied to a field id), so only enable it for fields rendered as-is.
    */
   verifyInPdf?: boolean;
+  /** Converts the fill value to the text shown in the PDF (for example a file path to its file name). Default: as-is. */
+  pdfTransform?: (value: string) => string;
 }
 
 /** Keyed by form field key (same keys as the fill data / expectedPrepopulatedFields). */
 export type SubmissionFieldMap = Record<string, SubmissionFieldMapping>;
+
+/** One expected element/value pair in GrantApplication.xml. */
+export interface ExpectedXmlField {
+  element: string;
+  value: string;
+  /** Allow attributes on the opening tag, e.g. `<glob:HashValue glob:hashAlgorithm="SHA-1">`. */
+  allowAttributes?: boolean;
+}
 
 /**
  * Today's date as YYYY-MM-DD in US Eastern time. The API's post-population
@@ -75,7 +90,7 @@ export function buildExpectedXmlFields(
   },
   testData: Record<string, string>,
   systemValues: Record<string, string> = {},
-): Record<string, { element: string; value: string }> {
+): Record<string, ExpectedXmlField> {
   if (!form.submissionFields) {
     throw new Error("Form has no submissionFields mapping defined");
   }
@@ -84,7 +99,7 @@ export function buildExpectedXmlFields(
 
   return Object.fromEntries(
     Object.entries(form.submissionFields).flatMap(
-      ([key, { xmlElement, xmlTransform }]) => {
+      ([key, { xmlElement, xmlTransform, xmlAllowAttributes }]) => {
         if (!xmlElement) return [];
         const raw = values[key];
         if (raw === undefined) {
@@ -96,6 +111,7 @@ export function buildExpectedXmlFields(
             {
               element: xmlElement,
               value: xmlTransform ? xmlTransform(raw) : raw,
+              ...(xmlAllowAttributes ? { allowAttributes: true } : {}),
             },
           ],
         ];
@@ -125,11 +141,11 @@ export function buildExpectedPdfText(
 
   return Object.entries(form.submissionFields)
     .filter(([, { verifyInPdf }]) => verifyInPdf)
-    .map(([key]) => {
+    .map(([key, { pdfTransform }]) => {
       const raw = values[key];
       if (raw === undefined) {
         throw new Error(`No value available for PDF field "${key}"`);
       }
-      return raw;
+      return pdfTransform ? pdfTransform(raw) : raw;
     });
 }

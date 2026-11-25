@@ -27,6 +27,14 @@ jest.mock("src/hooks/useClientFetch", () => ({
   }),
 }));
 
+const routerRefreshMock = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    refresh: routerRefreshMock,
+  }),
+}));
+
 interface RoleOption {
   value: string;
   label: string;
@@ -107,9 +115,10 @@ describe("RoleManager", () => {
     lastModalProps.onCancel();
 
     expect(clientFetchMock).not.toHaveBeenCalled();
+    expect(routerRefreshMock).not.toHaveBeenCalled();
   });
 
-  it("calls clientFetch and updates the selected value when the modal confirm handler is called", async () => {
+  it("calls clientFetch, updates the selected value, and refreshes the page when the modal confirm handler is called", async () => {
     clientFetchMock.mockResolvedValueOnce({});
 
     render(
@@ -147,6 +156,9 @@ describe("RoleManager", () => {
     });
 
     expect((select as HTMLSelectElement).value).toBe("role-2");
+    await waitFor(() => {
+      expect(routerRefreshMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("sets errorMessage on the modal when clientFetch rejects", async () => {
@@ -180,5 +192,6 @@ describe("RoleManager", () => {
     expect(lastModalProps.errorMessage).toBe("errorState");
     // backend message - should not be surfaced
     expect(lastModalProps.errorMessage).not.toBe("Server said no");
+    expect(routerRefreshMock).not.toHaveBeenCalled();
   });
 });
