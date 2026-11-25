@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "introduction_to_application": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.introduction-to-application"
+        }
+      ],
+      "title": "1. Introduction to Application (for Resubmission and Revision applications)"
+    },
+    "specific_aims": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.specific-aims"
+        }
+      ],
+      "title": "2. Specific Aims"
+    },
+    "research_strategy": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.research-strategy"
+        }
+      ],
+      "title": "3. Research Strategy"
+    },
+    "progress_report_publication_list": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.progress-report-publication-list"
+        }
+      ],
+      "title": "4. Progress Report Publication List (for Renewal applications)"
+    },
+    "vertebrate_animals": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.vertebrate-animals"
+        }
+      ],
+      "title": "5. Vertebrate Animals"
+    },
+    "select_agent_research": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.select-agent-research"
+        }
+      ],
+      "title": "6. Select Agent Research"
+    },
+    "multiple_pd_pi_leadership_plan": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.multiple-pd-pi-leadership-plan"
+        }
+      ],
+      "title": "7. Multiple PD/PI Leadership Plan"
+    },
+    "consortium_contractual_arrangements": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.consortium-contractual-arrangements"
+        }
+      ],
+      "title": "8. Consortium/Contractual Arrangements"
+    },
+    "letters_of_support": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.letters-of-support"
+        }
+      ],
+      "title": "9. Letters of Support"
+    },
+    "resource_sharing_plans": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.resource-sharing-plans"
+        }
+      ],
+      "title": "10. Resource Sharing Plan(s)"
+    },
+    "other_plans": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.other-plans"
+        }
+      ],
+      "title": "11. Other Plan(s)"
+    },
+    "key_biological_and_or_chemical_resources": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.key-biological-and-or-chemical-resources"
+        }
+      ],
+      "title": "12. Authentication of Key Biological and/or Chemical Resources"
+    },
+    "appendix": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/research.appendix"
+        }
+      ],
+      "title": "13. Appendix"
+    }
+  },
+  "required": [
+    "research_strategy"
+  ],
+  "examples": [
+    {
+      "research_strategy": "00000000-0000-4000-8000-000000007971",
+      "appendix": [
+        "00000000-0000-4000-8000-000000079720",
+        "00000000-0000-4000-8000-000000079721",
+        "00000000-0000-4000-8000-000000079722",
+        "00000000-0000-4000-8000-000000079723",
+        "00000000-0000-4000-8000-000000079724",
+        "00000000-0000-4000-8000-000000079725",
+        "00000000-0000-4000-8000-000000079726",
+        "00000000-0000-4000-8000-000000079727",
+        "00000000-0000-4000-8000-000000079728",
+        "00000000-0000-4000-8000-000000079729"
+      ]
+    },
+    {
+      "introduction_to_application": "00000000-0000-4000-8000-000000007971",
+      "specific_aims": "00000000-0000-4000-8000-000000007972",
+      "research_strategy": "00000000-0000-4000-8000-000000007973",
+      "progress_report_publication_list": "00000000-0000-4000-8000-000000007974",
+      "vertebrate_animals": "00000000-0000-4000-8000-000000007975",
+      "select_agent_research": "00000000-0000-4000-8000-000000007976",
+      "multiple_pd_pi_leadership_plan": "00000000-0000-4000-8000-000000007977",
+      "consortium_contractual_arrangements": "00000000-0000-4000-8000-000000007978",
+      "letters_of_support": "00000000-0000-4000-8000-000000007979",
+      "resource_sharing_plans": "00000000-0000-4000-8000-000000007980",
+      "other_plans": "00000000-0000-4000-8000-000000007981",
+      "key_biological_and_or_chemical_resources": "00000000-0000-4000-8000-000000007982",
+      "appendix": [
+        "00000000-0000-4000-8000-000000079713",
+        "00000000-0000-4000-8000-000000079714"
+      ]
+    },
+    {
+      "research_strategy": "00000000-0000-4000-8000-000000007971"
+    }
+  ],
+  "description": "PHS 398 Research Plan, Grants.gov version 5.0.",
+  "$defs": {
+    "research.introduction-to-application": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you selected \"Resubmission\" or \"Revision\" for the Type of Application field on the SF424 (R&R) form. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Introduction to Application (for Resubmission and Revision applications)"
+    },
+    "research.specific-aims": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Specific Aims"
+    },
+    "research.research-strategy": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. A page limit is typically enforced for this attachment. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Research Strategy"
+    },
+    "research.progress-report-publication-list": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you selected \"Renewal\" for the Type of Application field on the SF424 (R&R) form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Progress Report Publication List (for Renewal applications)"
+    },
+    "research.vertebrate-animals": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. Required if you checked \"Yes\" for the “Are Vertebrate Animals Used?” question on the R&R Other Project Information form. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Vertebrate Animals"
+    },
+    "research.select-agent-research": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Select Agent Research"
+    },
+    "research.multiple-pd-pi-leadership-plan": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Multiple PD/PI Leadership Plan"
+    },
+    "research.consortium-contractual-arrangements": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Consortium/Contractual Arrangements"
+    },
+    "research.letters-of-support": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Letters of Support"
+    },
+    "research.resource-sharing-plans": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Resource Sharing Plan(s)"
+    },
+    "research.other-plans": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Other Plan(s)"
+    },
+    "research.key-biological-and-or-chemical-resources": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach PDF formatted file. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Authentication of Key Biological and/or Chemical Resources"
+    },
+    "research.appendix": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/types.attachment"
+      },
+      "maxItems": 10,
+      "description": "Attach up to 10 PDF formatted files. See funding opportunity announcement and agency-specific instructions for additional guidance.",
+      "title": "Appendix"
+    },
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
+    }
+  }
+}
