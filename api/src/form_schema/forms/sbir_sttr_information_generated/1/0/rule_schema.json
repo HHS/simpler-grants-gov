@@ -1,0 +1,17 @@
+{
+  "outside_united_states_explanation": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "commercialization_plan": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "commercialization_history": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  }
+}

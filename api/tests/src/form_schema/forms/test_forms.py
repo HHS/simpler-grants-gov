@@ -6,8 +6,14 @@ from src.form_schema.forms.research_and_related_other_project_information_genera
     FORM as OTHER_PROJECT_INFO,
 )
 from src.form_schema.forms.research_related_personal_data_generated import FORM as PERSONAL_DATA
+from src.form_schema.forms.sbir_sttr_information_generated import FORM as SBIR_STTR
 
 EXPECTED_FORM_DATA = {
+    787: {
+        "form_name": "SBIR/STTR Information",
+        "omb_number": "4040-0001",
+        "expiration_date": "01/31/2029",
+    },
     619: {
         "form_name": "Research And Related Other Project Information",
         "omb_number": "4040-0001",
@@ -406,7 +412,9 @@ def test_nsf_suggested_reviewers_v1_1(nsf_suggested_reviewers_v1_1):
     assert form.form_renderer == "jsonforms"
 
 
-@pytest.mark.parametrize("form,legacy_id", [(PERSONAL_DATA, 357), (OTHER_PROJECT_INFO, 619)])
+@pytest.mark.parametrize(
+    "form,legacy_id", [(PERSONAL_DATA, 357), (OTHER_PROJECT_INFO, 619), (SBIR_STTR, 787)]
+)
 def test_research_questionnaire_identity(form, legacy_id):
     expected = EXPECTED_FORM_DATA[legacy_id]
     assert form.legacy_form_id == legacy_id

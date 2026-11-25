@@ -59,6 +59,7 @@ Feature: Apply - Application Form Failure Path
 			| sflll                                | SF-LLL                                      | required fields left empty                        |
 			| rr-personal-data | Research & Related Personal Data | required fields left empty |
 			| rr-other-project-information | Research And Related Other Project Information | required fields left empty |
+			| sbir-sttr-information | SBIR/STTR Information | required fields left empty |
 			| suppcoversheet-neh-grantsprogram     | Supplementary Cover Sheet                   | required fields left empty                        |
 
 	# Expected failure path form status on the application landing page:

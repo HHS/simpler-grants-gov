@@ -1,0 +1,522 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "agency": {
+      "type": "string",
+      "description": "This field is required.",
+      "title": "Agency to which you are applying (select only one)",
+      "enum": [
+        "DOE",
+        "HHS",
+        "USDA",
+        "Other"
+      ]
+    },
+    "other_agency": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 20,
+      "description": "If \"Other\" is selected, enter agency name.",
+      "title": "Other Agency"
+    },
+    "sbc_control_id": {
+      "type": "string",
+      "minLength": 9,
+      "maxLength": 9,
+      "pattern": "^[0-9]{9}$",
+      "description": "Enter the SBC Control ID. This field is required.",
+      "title": "SBC Control ID:"
+    },
+    "program_type": {
+      "type": "string",
+      "description": "This field is required.",
+      "title": "Program Type (select only one)",
+      "enum": [
+        "SBIR",
+        "STTR",
+        "Both"
+      ]
+    },
+    "application_type": {
+      "type": "string",
+      "description": "See agency-specific instructions to determine application type participation. This field is required.",
+      "title": "Application Type (select only one)",
+      "enum": [
+        "Phase I",
+        "Phase II",
+        "Fast-Track",
+        "Direct Phase II",
+        "Phase IIA",
+        "Phase IIB",
+        "Phase IIC",
+        "Commercialization Readiness Program"
+      ]
+    },
+    "phase_i_letter_of_intent_number": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 20,
+      "description": "Enter Phase I Letter of Intent Number.",
+      "title": "Phase I Letter of Intent Number:"
+    },
+    "agency_topic_subtopic": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10,
+      "description": "Enter Agency Topic/Subtopic.",
+      "title": "Agency Topic/Subtopic:"
+    },
+    "eligibility_certification": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "1a. Do you certify that at the time of award your organization will meet the eligibility criteria for a small business as defined in the funding opportunity announcement?"
+    },
+    "anticipated_personnel": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 999,
+      "description": "Enter the number of personnel anticipated to be employed by the small business at the time of award. This field is required.",
+      "title": "1b. Anticipated Number of personnel to be employed at your organization at the time of award."
+    },
+    "majority_venture_capital_owned": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "1c. Is your small business majority owned by venture capital operating companies, hedge funds, or private equity firms?"
+    },
+    "faculty_or_student_owned": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "1d. Is your small business a Faculty or Student-Owned entity?"
+    },
+    "federal_subcontracts_included": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "2. Does this application include subcontracts with Federal laboratories or any other Federal Government agencies?"
+    },
+    "laboratory_or_agency_names": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 250,
+      "description": "If you have answered \"yes\" to the question above, then please indicate the names of the applicable Federal laboratories or agencies, in the space provided.",
+      "title": "If yes, insert the names of the Federal laboratories/agencies:"
+    },
+    "hub_zone_located": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "3. Are you located in a HUBZone?"
+    },
+    "research_entirely_in_united_states": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "4. Will all research and development on the project be performed in its entirety in the United States?"
+    },
+    "outside_united_states_explanation": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach an explanation of the research and development that will take place outside the United States.",
+      "title": "Explanation for work outside the United States"
+    },
+    "equivalent_federal_work": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "5. Has the applicant and/or Program Director/Principal Investigator submitted proposals for essentially equivalent work under other Federal program solicitations or received other Federal awards for essentially equivalent work?"
+    },
+    "equivalent_work_agencies": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 250,
+      "description": "If you have answered \"yes\" to question 5 above, then please indicate the names of the applicable Federal agencies, in the space provided.",
+      "title": "If yes, insert the names of the other Federal agencies:"
+    },
+    "disclosure_permitted": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "6. Disclosure Permission Statement: If this application does not result in an award, is the Government permitted to disclose the title of your proposed project, and the name, address, telephone number and email address of the official signing for the applicant organization to state-level economic development organizations that may be interested in contacting you for further information (e.g., possible collaborations, investment)?"
+    },
+    "taba_funds_requested": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required.",
+      "title": "7. Does the application include a request of SBIR or STTR funds for Technical and Business Assistance (TABA)? If yes, please follow the agency specific instructions to provide the budget request and justification. (Please answer no if you plan to use the agency TABA vendor, which does not require you to include a request for TABA funds in your application.)"
+    },
+    "commercialization_plan": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach a commercialization plan that follows the agency’s instructions. DOE requires it for Phase I. All agencies require it for Phase II and Fast-Track.",
+      "title": "8. Commercialization Plan"
+    },
+    "phase_ii_awards_received": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required for Program Type SBIR or Both.",
+      "title": "9. Have you received SBIR Phase II awards from the Federal Government? If yes, provide a company commercialization history in accordance with agency-specific instructions using this attachment."
+    },
+    "commercialization_history": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Attach the company’s SBIR commercialization history. Follow the agency’s instructions.",
+      "title": "SBIR commercialization history"
+    },
+    "principal_investigator_primary_employment": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required for Program Type SBIR or Both.",
+      "title": "10. Will the Project Director/Principal Investigator have his/her primary employment with the small business at the time of award?"
+    },
+    "appointment_and_minimum_effort_certified": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required for Program Type STTR or Both.",
+      "title": "11. Please indicate whether the answer to BOTH of the following questions is TRUE: (1) Does the Project Director/Principal Investigator have a formal appointment or commitment either with the small business directly (as an employee or a contractor) OR as an employee of the Research Institution, which in turn has made a commitment to the small business through the STTR application process; AND (2) Will the Project Director/Principal Investigator devote at least 10% effort to the proposed project?"
+    },
+    "small_business_and_institution_work_shares_certified": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "This field is required for Program Type STTR or Both.",
+      "title": "12. In the joint research and development proposed in this project, does the small business perform at least 40% of the work and the research institution named in the application perform at least 30% of the work?"
+    },
+    "research_partner_uei": {
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 12,
+      "description": "Enter the UEI of the non-profit research partner for STTR. This field is required for Program Type STTR or Both.",
+      "title": "13. Provide UEI of non-profit research partner for STTR."
+    }
+  },
+  "required": [
+    "agency",
+    "sbc_control_id",
+    "program_type",
+    "application_type",
+    "eligibility_certification",
+    "anticipated_personnel",
+    "majority_venture_capital_owned",
+    "faculty_or_student_owned",
+    "federal_subcontracts_included",
+    "hub_zone_located",
+    "research_entirely_in_united_states",
+    "equivalent_federal_work",
+    "disclosure_permitted",
+    "taba_funds_requested"
+  ],
+  "examples": [
+    {
+      "agency": "HHS",
+      "sbc_control_id": "001234567",
+      "program_type": "SBIR",
+      "application_type": "Phase I",
+      "eligibility_certification": true,
+      "anticipated_personnel": 2,
+      "majority_venture_capital_owned": false,
+      "faculty_or_student_owned": false,
+      "federal_subcontracts_included": false,
+      "hub_zone_located": false,
+      "research_entirely_in_united_states": true,
+      "equivalent_federal_work": false,
+      "disclosure_permitted": false,
+      "taba_funds_requested": false,
+      "phase_ii_awards_received": false,
+      "principal_investigator_primary_employment": false
+    }
+  ],
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "program_type",
+          "phase_ii_awards_received"
+        ],
+        "properties": {
+          "program_type": {
+            "enum": [
+              "SBIR",
+              "Both"
+            ]
+          },
+          "phase_ii_awards_received": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "commercialization_history"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "application_type"
+        ],
+        "properties": {
+          "application_type": {
+            "enum": [
+              "Phase II",
+              "Fast-Track"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "commercialization_plan"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "agency",
+          "application_type"
+        ],
+        "properties": {
+          "agency": {
+            "const": "DOE"
+          },
+          "application_type": {
+            "const": "Phase I"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "commercialization_plan"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "agency": {
+            "const": "Other"
+          }
+        },
+        "required": [
+          "agency"
+        ]
+      },
+      "then": {
+        "required": [
+          "other_agency"
+        ],
+        "properties": {
+          "other_agency": {
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "agency": {
+            "const": "DOE"
+          }
+        },
+        "required": [
+          "agency"
+        ]
+      },
+      "then": {
+        "required": [
+          "agency_topic_subtopic"
+        ],
+        "properties": {
+          "agency_topic_subtopic": {
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "federal_subcontracts_included": {
+            "const": true
+          }
+        },
+        "required": [
+          "federal_subcontracts_included"
+        ]
+      },
+      "then": {
+        "required": [
+          "laboratory_or_agency_names"
+        ],
+        "properties": {
+          "laboratory_or_agency_names": {
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "research_entirely_in_united_states": {
+            "const": false
+          }
+        },
+        "required": [
+          "research_entirely_in_united_states"
+        ]
+      },
+      "then": {
+        "required": [
+          "outside_united_states_explanation"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "equivalent_federal_work": {
+            "const": true
+          }
+        },
+        "required": [
+          "equivalent_federal_work"
+        ]
+      },
+      "then": {
+        "required": [
+          "equivalent_work_agencies"
+        ],
+        "properties": {
+          "equivalent_work_agencies": {
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "program_type": {
+            "const": "Both"
+          }
+        },
+        "required": [
+          "program_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "phase_ii_awards_received",
+          "principal_investigator_primary_employment",
+          "appointment_and_minimum_effort_certified",
+          "small_business_and_institution_work_shares_certified",
+          "research_partner_uei"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "program_type": {
+            "const": "SBIR"
+          }
+        },
+        "required": [
+          "program_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "phase_ii_awards_received",
+          "principal_investigator_primary_employment"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "program_type": {
+            "const": "STTR"
+          }
+        },
+        "required": [
+          "program_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "appointment_and_minimum_effort_certified",
+          "small_business_and_institution_work_shares_certified",
+          "research_partner_uei"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "types.yes-no": {
+      "type": "boolean",
+      "description": "Select Yes or No.",
+      "title": "Yes or No"
+    },
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
+    }
+  }
+}

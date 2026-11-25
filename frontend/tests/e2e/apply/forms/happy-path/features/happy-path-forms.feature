@@ -63,6 +63,7 @@ Feature: Apply - Application Form Happy Path
       | Supplemental Cover Sheet NEH       |
       | Research & Related Personal Data |
       | Research And Related Other Project Information |
+      | SBIR/STTR Information |
       | Attachments                        |
  
   # Expected happy path form status on the application landing page:

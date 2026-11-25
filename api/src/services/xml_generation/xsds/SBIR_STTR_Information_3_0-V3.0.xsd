@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:SBIR_STTR_Information_3_0="http://apply.grants.gov/forms/SBIR_STTR_Information_3_0-V3.0" targetNamespace="http://apply.grants.gov/forms/SBIR_STTR_Information_3_0-V3.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="3.0">
+	<xs:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:element name="SBIR_STTR_Information_3_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Agency">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="DOE"/>
+							<xs:enumeration value="HHS"/>
+							<xs:enumeration value="USDA"/>
+							<xs:enumeration value="Other"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="OtherAgency" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="20"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="SBCControlID">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="9"/>
+							<xs:maxLength value="9"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ProgramType">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="SBIR"/>
+							<xs:enumeration value="STTR"/>
+							<xs:enumeration value="Both"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ApplicationType">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="Phase I"/>
+							<xs:enumeration value="Phase II"/>
+							<xs:enumeration value="Fast-Track"/>
+							<xs:enumeration value="Direct Phase II"/>
+							<xs:enumeration value="Phase IIA"/>
+							<xs:enumeration value="Phase IIB"/>
+							<xs:enumeration value="Phase IIC"/>
+							<xs:enumeration value="Commercialization Readiness Program"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="PhaseILetterofIntentNumber" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="20"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="AgencyTopicSubtopic" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="10"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="SmallBusinessEligibility" type="globLib:YesNoDataType"/>
+				<xs:element name="NumberOfEmployees">
+					<xs:simpleType>
+						<xs:restriction base="xs:integer">
+							<xs:minInclusive value="1"/>
+							<xs:maxInclusive value="999"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="VCOC" type="globLib:YesNoDataType"/>
+				<xs:element name="FacultyStudentOwned" type="globLib:YesNoDataType"/>
+				<xs:element name="SubcontractsIncluded" type="globLib:YesNoDataType"/>
+				<xs:element name="SubcontractorNames" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="250"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="LocatedInHUBZone" type="globLib:YesNoDataType"/>
+				<xs:element name="DomesticPerformance" type="globLib:YesNoDataType"/>
+				<xs:element name="NonDomesticPerformanceExplanation" type="att:AttachedFileDataType" minOccurs="0"/>
+				<xs:element name="EquivalentProposalsSubmitted" type="globLib:YesNoDataType"/>
+				<xs:element name="EquivalentProposalRecipients" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="250"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="DisclosurePermission" type="globLib:YesNoDataType"/>
+				<xs:element name="TABARequest" type="globLib:YesNoDataType"/>
+				<xs:element name="CommercializationPlan" type="att:AttachedFileDataType" minOccurs="0"/>
+				<xs:element name="SBIR_PhaseIIAwardsReceived" type="globLib:YesNoDataType" minOccurs="0"/>
+				<xs:element name="SBIR_CommercializationHistory" type="att:AttachedFileDataType" minOccurs="0"/>
+				<xs:element name="SBIR_PDPIPrimarilyEmployed" type="globLib:YesNoDataType" minOccurs="0"/>
+				<xs:element name="STTR_PDPICommitment" type="globLib:YesNoDataType" minOccurs="0"/>
+				<xs:element name="STTR_JointPerformancePercentage" type="globLib:YesNoDataType" minOccurs="0"/>
+				<xs:element name="SAMUEI" type="globLib:SAMUEIDataType" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="3.0"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

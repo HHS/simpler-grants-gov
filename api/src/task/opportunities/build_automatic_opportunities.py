@@ -58,6 +58,7 @@ from src.form_schema.forms import (
     RRKeyPersonGenerated_v3_0,
     RROtherProjectInformationGenerated_v1_4,
     RRPersonalDataGenerated_v1_2,
+    SbirSttrInformationGenerated_v3_0,
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
@@ -778,6 +779,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Research And Related Other Project Information (Generated)",
                 RROtherProjectInformationGenerated_v1_4.form_id,
                 "a1da3b62-046e-5a6c-9125-eb9bfff1d65f",
+            ),
+            (
+                "E2E-SBIR",
+                "SBIR/STTR Information (Generated)",
+                SbirSttrInformationGenerated_v3_0.form_id,
+                "d6310a13-d725-5af5-82b6-c1a3853b1a43",
             ),
             (
                 "E2E-RRPD",

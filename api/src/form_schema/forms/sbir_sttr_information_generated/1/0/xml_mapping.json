@@ -1,0 +1,279 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/SBIR_STTR_Information_3_0-V3.0",
+    "sbir": "http://apply.grants.gov/forms/SBIR_STTR_Information_3_0-V3.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SBIR_STTR_Information_3_0-V3.0.xsd",
+  "root": {
+    "SBIR_STTR_Information_3_0": {
+      "@sbir:FormVersion": {
+        "$const": "3.0"
+      },
+      "Agency": {
+        "$field": "agency"
+      },
+      "OtherAgency": {
+        "$when": {
+          "condition": {
+            "field": "agency",
+            "operator": "equals",
+            "value": "Other"
+          },
+          "then": {
+            "$field": "other_agency"
+          }
+        }
+      },
+      "SBCControlID": {
+        "$field": "sbc_control_id"
+      },
+      "ProgramType": {
+        "$field": "program_type"
+      },
+      "ApplicationType": {
+        "$field": "application_type"
+      },
+      "PhaseILetterofIntentNumber": {
+        "$field": "phase_i_letter_of_intent_number"
+      },
+      "AgencyTopicSubtopic": {
+        "$field": "agency_topic_subtopic"
+      },
+      "SmallBusinessEligibility": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "eligibility_certification"
+          }
+        }
+      },
+      "NumberOfEmployees": {
+        "$field": "anticipated_personnel"
+      },
+      "VCOC": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "majority_venture_capital_owned"
+          }
+        }
+      },
+      "FacultyStudentOwned": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "faculty_or_student_owned"
+          }
+        }
+      },
+      "SubcontractsIncluded": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "federal_subcontracts_included"
+          }
+        }
+      },
+      "SubcontractorNames": {
+        "$when": {
+          "condition": {
+            "field": "federal_subcontracts_included",
+            "operator": "equals",
+            "value": true
+          },
+          "then": {
+            "$field": "laboratory_or_agency_names"
+          }
+        }
+      },
+      "LocatedInHUBZone": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "hub_zone_located"
+          }
+        }
+      },
+      "DomesticPerformance": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "research_entirely_in_united_states"
+          }
+        }
+      },
+      "NonDomesticPerformanceExplanation": {
+        "$when": {
+          "condition": {
+            "field": "research_entirely_in_united_states",
+            "operator": "equals",
+            "value": false
+          },
+          "then": {
+            "$attachment": "outside_united_states_explanation"
+          }
+        }
+      },
+      "EquivalentProposalsSubmitted": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "equivalent_federal_work"
+          }
+        }
+      },
+      "EquivalentProposalRecipients": {
+        "$when": {
+          "condition": {
+            "field": "equivalent_federal_work",
+            "operator": "equals",
+            "value": true
+          },
+          "then": {
+            "$field": "equivalent_work_agencies"
+          }
+        }
+      },
+      "DisclosurePermission": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "disclosure_permitted"
+          }
+        }
+      },
+      "TABARequest": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "taba_funds_requested"
+          }
+        }
+      },
+      "CommercializationPlan": {
+        "$attachment": "commercialization_plan"
+      },
+      "SBIR_PhaseIIAwardsReceived": {
+        "$when": {
+          "condition": {
+            "field": "program_type",
+            "operator": "in",
+            "value": [
+              "SBIR",
+              "Both"
+            ]
+          },
+          "then": {
+            "$transform": {
+              "name": "boolean_to_yes_no",
+              "value": {
+                "$field": "phase_ii_awards_received"
+              }
+            }
+          }
+        }
+      },
+      "SBIR_CommercializationHistory": {
+        "$when": {
+          "condition": {
+            "all": [
+              {
+                "field": "phase_ii_awards_received",
+                "operator": "equals",
+                "value": true
+              },
+              {
+                "field": "program_type",
+                "operator": "in",
+                "value": [
+                  "SBIR",
+                  "Both"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "$attachment": "commercialization_history"
+          }
+        }
+      },
+      "SBIR_PDPIPrimarilyEmployed": {
+        "$when": {
+          "condition": {
+            "field": "program_type",
+            "operator": "in",
+            "value": [
+              "SBIR",
+              "Both"
+            ]
+          },
+          "then": {
+            "$transform": {
+              "name": "boolean_to_yes_no",
+              "value": {
+                "$field": "principal_investigator_primary_employment"
+              }
+            }
+          }
+        }
+      },
+      "STTR_PDPICommitment": {
+        "$when": {
+          "condition": {
+            "field": "program_type",
+            "operator": "in",
+            "value": [
+              "STTR",
+              "Both"
+            ]
+          },
+          "then": {
+            "$transform": {
+              "name": "boolean_to_yes_no",
+              "value": {
+                "$field": "appointment_and_minimum_effort_certified"
+              }
+            }
+          }
+        }
+      },
+      "STTR_JointPerformancePercentage": {
+        "$when": {
+          "condition": {
+            "field": "program_type",
+            "operator": "in",
+            "value": [
+              "STTR",
+              "Both"
+            ]
+          },
+          "then": {
+            "$transform": {
+              "name": "boolean_to_yes_no",
+              "value": {
+                "$field": "small_business_and_institution_work_shares_certified"
+              }
+            }
+          }
+        }
+      },
+      "SAMUEI": {
+        "$when": {
+          "condition": {
+            "field": "program_type",
+            "operator": "in",
+            "value": [
+              "STTR",
+              "Both"
+            ]
+          },
+          "then": {
+            "$field": "research_partner_uei"
+          }
+        }
+      }
+    }
+  }
+}
