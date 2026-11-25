@@ -5,13 +5,18 @@ import React from "react";
 import "@testing-library/jest-dom";
 
 import { ActiveUsersSection } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ActiveUsersSection";
+import { ORG_COLLABORATOR_ROLE_ID } from "src/constants/roles";
 import type { FetchedResource } from "src/types/authTypes";
 import type { UserDetail, UserRole } from "src/types/userTypes";
 
-type TranslationFn = (key: string) => string;
+type TranslationFn = (key: string, values?: Record<string, string>) => string;
 
+// Returns the key, plus any values, so tests can check what was passed in
 const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_namespace: string) => Promise.resolve((key: string) => key),
+  (_namespace: string) =>
+    Promise.resolve((key: string, values?: Record<string, string>) =>
+      values ? `${key} ${Object.values(values).join(" ")}` : key,
+    ),
 );
 
 jest.mock("next-intl/server", () => ({
@@ -250,5 +255,97 @@ describe("ActiveUsersSection", () => {
 
     expect(actionsCellElement).toBeTruthy();
     expect(actionsCellElement.props.disabled).toBe(true);
+  });
+  describe("manage permissions column", () => {
+    const adminRole: UserRole = {
+      role_id: "admin-role",
+      role_name: "Organization Admin",
+      privileges: [],
+    };
+    const collaboratorRole: UserRole = {
+      role_id: ORG_COLLABORATOR_ROLE_ID,
+      role_name: "Collaborator",
+      privileges: [],
+    };
+    const users: UserDetail[] = [
+      {
+        user_id: "admin-1",
+        email: "admin@example.com",
+        first_name: "Ada",
+        last_name: "Admin",
+        roles: [adminRole],
+      },
+      {
+        user_id: "collab-1",
+        email: "collab@example.com",
+        first_name: "Cole",
+        last_name: "Collab",
+        roles: [collaboratorRole],
+      },
+    ];
+
+    type TableProps = {
+      headerContent: { cellData: string }[];
+      tableRowData: { cellData: React.ReactNode }[][];
+    };
+
+    const getTableProps = async (showManagePermissions?: boolean) => {
+      render(
+        await ActiveUsersSection({
+          organizationId: "org-123",
+          activeUsers: makeResource({ data: users }),
+          roles: makeResource({ data: [adminRole] }),
+          showManagePermissions,
+        }),
+      );
+      return tableWithResponsiveHeaderMock.mock.calls[0][0] as TableProps;
+    };
+
+    it("is hidden by default", async () => {
+      const tableProps = await getTableProps();
+
+      expect(
+        tableProps.headerContent.map((header) => header.cellData),
+      ).not.toContain("usersTable.managePermissionsHeading");
+      expect(tableProps.tableRowData[1]).toHaveLength(4);
+    });
+
+    it("adds the column before Actions when enabled", async () => {
+      const tableProps = await getTableProps(true);
+
+      expect(tableProps.headerContent.map((header) => header.cellData)).toEqual(
+        [
+          "usersTable.nameHeading",
+          "usersTable.emailHeading",
+          "usersTable.roleHeading",
+          "usersTable.managePermissionsHeading",
+          "usersTable.actionsHeading",
+        ],
+      );
+      expect(tableProps.tableRowData[0]).toHaveLength(5);
+      expect(tableProps.tableRowData[1]).toHaveLength(5);
+    });
+
+    it("links Collaborator rows to their manage-permissions page", async () => {
+      const tableProps = await getTableProps(true);
+
+      render(<>{tableProps.tableRowData[1][3].cellData}</>);
+
+      const link = screen.getByTestId("manage-permissions-link-collab-1");
+      expect(link).toHaveAttribute(
+        "href",
+        "/workspace/organizations/org-123/manage-users/collab-1/manage-permissions",
+      );
+      // the visible label is the same on every row, so the user is named for screen readers
+      expect(link).toHaveAccessibleName(
+        "usersTable.editPermissions usersTable.editPermissionsFor Cole Collab",
+      );
+    });
+
+    it("doesn't add a link to Admin rows", async () => {
+      const tableProps = await getTableProps(true);
+
+      expect(tableProps.tableRowData[0][3].cellData).toBe("");
+    });
   });
 });
