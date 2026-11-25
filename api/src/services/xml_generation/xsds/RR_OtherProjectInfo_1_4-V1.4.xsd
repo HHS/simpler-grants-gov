@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:RR_OtherProjectInfo_1_4="http://apply.grants.gov/forms/RR_OtherProjectInfo_1_4-V1.4" targetNamespace="http://apply.grants.gov/forms/RR_OtherProjectInfo_1_4-V1.4" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.0">
+	<xs:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:element name="RR_OtherProjectInfo_1_4">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="HumanSubjectsIndicator" type="globLib:YesNoDataType"/>
+				<xs:element name="HumanSubjectsSupplement" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ExemptFedReg" type="globLib:YesNoDataType" minOccurs="0"/>
+							<xs:element name="ExemptionNumbers" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ExemptionNumber" maxOccurs="8">
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="E1"/>
+													<xs:enumeration value="E2"/>
+													<xs:enumeration value="E3"/>
+													<xs:enumeration value="E4"/>
+													<xs:enumeration value="E5"/>
+													<xs:enumeration value="E6"/>
+													<xs:enumeration value="E7"/>
+													<xs:enumeration value="E8"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="HumanSubjectIRBReviewIndicator" type="globLib:YesNoDataType" minOccurs="0"/>
+							<xs:element name="HumanSubjectIRBReviewDate" type="xs:date" minOccurs="0"/>
+							<xs:element name="HumanSubjectAssuranceNumber" type="glob:StringMin1Max10Type" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="VertebrateAnimalsIndicator" type="globLib:YesNoDataType"/>
+				<xs:element name="VertebrateAnimalsSupplement" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="VertebrateAnimalsIACUCReviewIndicator" type="globLib:YesNoDataType" minOccurs="0"/>
+							<xs:element name="VertebrateAnimalsIACUCApprovalDateReviewDate"  type="xs:date" minOccurs="0"/>
+							<xs:element name="AssuranceNumber" minOccurs="0">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="9"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="ProprietaryInformationIndicator" type="globLib:YesNoDataType"/>
+				<xs:element name="EnvironmentalImpact">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="EnvironmentalImpactIndicator" type="globLib:YesNoDataType"/>
+							<xs:element name="EnvironmentalImpactExplanation" minOccurs="0" type="glob:StringMin1Max55Type"/>
+							<xs:element name="EnvironmentalExemption" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="EnvironmentalExemptionIndicator" type="globLib:YesNoDataType"/>
+										<xs:element name="EnvironmentalExemptionExplanation" minOccurs="0" type="glob:StringMin1Max55Type"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="HistoricDesignation" type="globLib:YesNoDataType"/>
+				<xs:element name="HistoricDesignationExplanation" minOccurs="0" type="glob:StringMin1Max55Type"/>
+				<xs:element name="InternationalActivities">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="InternationalActivitiesIndicator" type="globLib:YesNoDataType"/>
+							<xs:element name="ActivitiesPartnershipsCountries" minOccurs="0" type="glob:StringMin1Max55Type"/>
+							<xs:element name="InternationalActivitiesExplanation" type="glob:StringMin1Max55Type" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="AbstractAttachments" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="AbstractAttachment" type="att:AttachedFileDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="ProjectNarrativeAttachments" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ProjectNarrativeAttachment" type="att:AttachedFileDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="BibliographyAttachments" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="BibliographyAttachment" type="att:AttachedFileDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="FacilitiesAttachments" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="FacilitiesAttachment" type="att:AttachedFileDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="EquipmentAttachments" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="EquipmentAttachment" type="att:AttachedFileDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="OtherAttachments" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="OtherAttachment" type="att:AttachedFileDataType" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="1.4"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

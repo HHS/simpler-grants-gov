@@ -62,6 +62,7 @@ Feature: Apply - Application Form Happy Path
       | Budget Narrative Attachment        |
       | Supplemental Cover Sheet NEH       |
       | Research & Related Personal Data |
+      | Research And Related Other Project Information |
       | Attachments                        |
  
   # Expected happy path form status on the application landing page:

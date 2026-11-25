@@ -734,6 +734,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "9607f84f-ab9b-4d23-a5aa-d055318a5660",
         ),
         (
+            "RR_OtherProjectInfo_1_4_Generated",
+            "E2E-RROPI",
+            "Research And Related Other Project Information (Generated)",
+            "a1da3b62-046e-5a6c-9125-eb9bfff1d65f",
+            "623f1425-f5b4-5a35-974a-920ee4f5b7da",
+        ),
+        (
             "RR_PersonalData_1_2_Generated",
             "E2E-RRPD",
             "Research & Related Personal Data (Generated)",

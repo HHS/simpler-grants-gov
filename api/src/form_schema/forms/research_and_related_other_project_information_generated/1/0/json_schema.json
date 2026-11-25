@@ -1,0 +1,512 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "human_subjects_involved": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "If activities involving human subjects are planned at any time during the proposed project at any performance site, check yes.  Check yes, even if the proposed project is exempt from Regulations for the Protection of Human Subjects.  If no, skip the rest of block 1.  This field is required.\n\nIf activities involving human subjects are not planned at any time during the proposed project at any performance site, click here for no.  Skip the rest of block 1.  This field is required.",
+      "title": "1. Are Human Subjects Involved?"
+    },
+    "exempt_from_federal_regulations": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "Is the Project Exempt from Federal regulations is required.\n\nYes, this project is exempt from Federal regulations.\n\nNo, this project is not exempt from Federal regulations.",
+      "title": "Is the Project Exempt from Federal regulations?"
+    },
+    "exemption_numbers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ExemptionNumber"
+      },
+      "maxItems": 8,
+      "description": "If human subject activities are exempt from Federal regulations, provide the exemption numbers corresponding to one or more of the exemption categories.  The eight categories of research that qualify for exemption from coverage by the regulations are defined in the Common Rule for the Protection of Human Subjects.",
+      "title": "If yes, check appropriate exemption number."
+    },
+    "irb_review_pending": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "If IRB review is pending, check Yes.\n\nIf IRB review is not pending, check No.",
+      "title": "If no, is the IRB review Pending?"
+    },
+    "irb_approval_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Enter the latest IRB approval date. Leave this blank if review is pending.",
+      "title": "IRB Approval Date:"
+    },
+    "human_subject_assurance_number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the approved Federal Wide Assurance (FWA), Multiple Project Assurance (MPA), Single Project Assurance (SPA) Number or Cooperative Project Assurance Number that the applicant has on file with the Office for Human Research Protections, if available.  If the applicant has a FWA number, enter the 8-digit number.  Do not enter the FWA before the number.",
+      "title": "Human Subject Assurance Number: "
+    },
+    "vertebrate_animals_used": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "If activities involving vertebrate animals are planned at any time during the proposed project at any performance site, check yes.  If no, skip the rest of block 2.  This field is required.",
+      "title": "2. Are Vertebrate Animals Used?"
+    },
+    "iacuc_review_pending": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "Indicate if an Institutional Animal Care and Use Committee (IACUC) review is pending.\n\nIndicate if an Institutional Animal Care and Use Committee (IACUC) review is pending. Click here if No.",
+      "title": "Is the IACUC review Pending?"
+    },
+    "iacuc_approval_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Enter the latest IACUC approval date. Leave this blank if review is pending.",
+      "title": "IACUC Approval Date:"
+    },
+    "animal_welfare_assurance_number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 9,
+      "description": "Enter the federally approved animal welfare assurance number.",
+      "title": "Animal Welfare Assurance Number:"
+    },
+    "proprietary_information_included": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "Patentable ideas, trade secrets, privileged or confidential commercial or financial information, disclosure of which may harm the applicant, should be included in applications only when such information is necessary to convey an understanding of the proposed project.  If the application includes such information, check yes and clearly mark each line or paragraph on the pages containing the proprietary/privileged information with a legend similar to: \"The following contains proprietary/privileged information that (name of applicant) requests not be released to persons outside the Government, except for purposes of review and evaluation.\"  This field is required.",
+      "title": "3. Is proprietary/privileged information included in the application?"
+    },
+    "environmental_impact": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "Indicate if this project has an actual or potential impact - positive or negative - on the environment. This field is required.\n\nIndicate if this project has an actual or potential impact - positive or negative - on the environment. Click no here if this is not the case.  This field is required.",
+      "title": "4.a. Does this Project Have an Actual or Potential Impact - positive or negative - on the environment?"
+    },
+    "environmental_impact_explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "Enter explanation of the actual or potential impact on the environment.",
+      "title": "4.b. If yes, please explain:"
+    },
+    "assessment_or_exemption_performed": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "Check yes or no.",
+      "title": "4.c. If this project has an actual or potential impact on the environment, has an exemption been authorized or an environmental assessment (EA) or environmental impact statement (EIS) been performed?"
+    },
+    "assessment_or_exemption_explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "Enter additional details about the EA or EIS.",
+      "title": "4.d. If yes, please explain:"
+    },
+    "historic_site_designated_or_eligible": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "If any research performance site is designated or eligible to be designated as a historic place, if Yes, check the Yes box and then provide an explanation in the box provided in 5.a.  Otherwise, check the No box.  This field is required.",
+      "title": "5.  Is the research performance site designated, or eligible to be designated, as a historic place?"
+    },
+    "historic_site_explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "If you checked the Yes box indicating any performance site is designated, or eligible to be designated, as a historic place, provide the explanation here.",
+      "title": "5.a. If yes, please explain:"
+    },
+    "international_activities_involved": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.yes-no"
+        }
+      ],
+      "description": "Indicate whether this project involves activities outside of the United States or partnerships with international collaborators.  This field is required.\n\nIndicate whether this project involves activities outside of the United States or partnerships with international collaborators.  Click here for no.  This field is required.",
+      "title": "6. Does this project involve activities outside of the United States or partnerships with international collaborators?"
+    },
+    "international_countries": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "Enter the countries with which international cooperative activities are involved.",
+      "title": "6.a. If yes, identify countries:"
+    },
+    "international_activities_explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "Enter an explanation for involvement with outside entities (optional).",
+      "title": "6.b. Optional Explanation:"
+    },
+    "project_summary_abstract": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "The Project Summary must contain a summary of the proposed activity suitable for dissemination to the public.  It should be a self-contained description of the project and should contain a statement of objectives and methods to be employed.  It should be informative to other persons working in the same or related fields and insofar as possible understandable to a scientifically or technically literate lay reader.  This Summary must not include any proprietary/confidential information.",
+      "title": "7. Project Summary/Abstract"
+    },
+    "project_narrative": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Provide Project Narrative in accordance with the announcement and/or agency-specific instructions.",
+      "title": "8. Project Narrative"
+    },
+    "bibliography_references_cited": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Provide a bibliography of any references cited in the Project Narrative.  Each reference must include the names of all authors (in the same sequence in which they appear in the publication), the article and journal title, book title, volume number, page numbers, and year of publication.  Include only bibliographic citations.  Applicants should be especially careful to follow scholarly practices in providing citations for source materials relied upon when preparing any section of the application.",
+      "title": "9. Bibliography & References Cited"
+    },
+    "facilities_other_resources": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "This information is used to assess the capability of the organizational resources available to perform the effort proposed.  Identify the facilities to be used (Laboratory, Animal, Computer, Office, Clinical and Other).  If appropriate, indicate their capacities, pertinent capabilities, relative proximity and extent of availability to the project.  Describe only those resources that are directly applicable to the proposed work.  Provide any information describing the Other Resources available to the project (e.g., machine shop, electronic shop) and the extent to which they would be available to the project.",
+      "title": "10.  Facilities & Other Resources"
+    },
+    "equipment": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "List major items of equipment already available for this project and, if appropriate identify location and pertinent capabilities.",
+      "title": "11. Equipment"
+    },
+    "other_attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/types.attachment"
+      },
+      "maxItems": 100,
+      "description": "Attach any other project information the opportunity or agency asks for.",
+      "title": "12. Other Attachments"
+    }
+  },
+  "required": [
+    "human_subjects_involved",
+    "vertebrate_animals_used",
+    "proprietary_information_included",
+    "environmental_impact",
+    "historic_site_designated_or_eligible",
+    "international_activities_involved"
+  ],
+  "examples": [
+    {
+      "human_subjects_involved": false,
+      "vertebrate_animals_used": false,
+      "proprietary_information_included": false,
+      "environmental_impact": false,
+      "historic_site_designated_or_eligible": false,
+      "international_activities_involved": false
+    },
+    {
+      "human_subjects_involved": true,
+      "exempt_from_federal_regulations": true,
+      "exemption_numbers": [
+        "E1",
+        "E4"
+      ],
+      "human_subject_assurance_number": "00012345",
+      "vertebrate_animals_used": true,
+      "iacuc_review_pending": true,
+      "proprietary_information_included": false,
+      "environmental_impact": false,
+      "historic_site_designated_or_eligible": false,
+      "international_activities_involved": true,
+      "international_countries": "Canada; United Kingdom",
+      "international_activities_explanation": "Collaborator field observations.",
+      "project_summary_abstract": "00000000-0000-4000-8000-000000006191",
+      "project_narrative": "00000000-0000-4000-8000-000000006192",
+      "bibliography_references_cited": "00000000-0000-4000-8000-000000006193",
+      "facilities_other_resources": "00000000-0000-4000-8000-000000006194",
+      "equipment": "00000000-0000-4000-8000-000000006195",
+      "other_attachments": [
+        "00000000-0000-4000-8000-000000006196",
+        "00000000-0000-4000-8000-000000006197"
+      ]
+    },
+    {
+      "human_subjects_involved": true,
+      "exempt_from_federal_regulations": false,
+      "irb_review_pending": false,
+      "irb_approval_date": "2026-09-16",
+      "human_subject_assurance_number": "00012345",
+      "vertebrate_animals_used": true,
+      "iacuc_review_pending": false,
+      "iacuc_approval_date": "2026-09-17",
+      "animal_welfare_assurance_number": "D12345678",
+      "proprietary_information_included": false,
+      "environmental_impact": true,
+      "environmental_impact_explanation": "Field sampling at existing research sites.",
+      "assessment_or_exemption_performed": true,
+      "assessment_or_exemption_explanation": "EA completed; see applicable agency instructions.",
+      "historic_site_designated_or_eligible": true,
+      "historic_site_explanation": "Sampling near an eligible historic research building.",
+      "international_activities_involved": true,
+      "international_countries": "Canada; United Kingdom",
+      "international_activities_explanation": "Collaborator field observations.",
+      "project_summary_abstract": "00000000-0000-4000-8000-000000006191",
+      "project_narrative": "00000000-0000-4000-8000-000000006192",
+      "bibliography_references_cited": "00000000-0000-4000-8000-000000006193",
+      "facilities_other_resources": "00000000-0000-4000-8000-000000006194",
+      "equipment": "00000000-0000-4000-8000-000000006195",
+      "other_attachments": [
+        "00000000-0000-4000-8000-000000006196",
+        "00000000-0000-4000-8000-000000006197"
+      ]
+    }
+  ],
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "human_subjects_involved",
+          "exempt_from_federal_regulations"
+        ],
+        "properties": {
+          "human_subjects_involved": {
+            "const": true
+          },
+          "exempt_from_federal_regulations": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "exemption_numbers"
+        ],
+        "properties": {
+          "exemption_numbers": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "human_subjects_involved",
+          "exempt_from_federal_regulations"
+        ],
+        "properties": {
+          "human_subjects_involved": {
+            "const": true
+          },
+          "exempt_from_federal_regulations": {
+            "const": false
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "irb_review_pending"
+        ],
+        "if": {
+          "required": [
+            "irb_review_pending"
+          ],
+          "properties": {
+            "irb_review_pending": {
+              "const": false
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "irb_approval_date"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "vertebrate_animals_used",
+          "iacuc_review_pending"
+        ],
+        "properties": {
+          "vertebrate_animals_used": {
+            "const": true
+          },
+          "iacuc_review_pending": {
+            "const": false
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "iacuc_approval_date",
+          "animal_welfare_assurance_number"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "environmental_impact",
+          "assessment_or_exemption_performed"
+        ],
+        "properties": {
+          "environmental_impact": {
+            "const": true
+          },
+          "assessment_or_exemption_performed": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "assessment_or_exemption_explanation"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "human_subjects_involved": {
+            "const": true
+          }
+        },
+        "required": [
+          "human_subjects_involved"
+        ]
+      },
+      "then": {
+        "required": [
+          "exempt_from_federal_regulations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "vertebrate_animals_used": {
+            "const": true
+          }
+        },
+        "required": [
+          "vertebrate_animals_used"
+        ]
+      },
+      "then": {
+        "required": [
+          "iacuc_review_pending"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "environmental_impact": {
+            "const": true
+          }
+        },
+        "required": [
+          "environmental_impact"
+        ]
+      },
+      "then": {
+        "required": [
+          "environmental_impact_explanation"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "historic_site_designated_or_eligible": {
+            "const": true
+          }
+        },
+        "required": [
+          "historic_site_designated_or_eligible"
+        ]
+      },
+      "then": {
+        "required": [
+          "historic_site_explanation"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "international_activities_involved": {
+            "const": true
+          }
+        },
+        "required": [
+          "international_activities_involved"
+        ]
+      },
+      "then": {
+        "required": [
+          "international_countries"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "ExemptionNumber": {
+      "type": "string",
+      "enum": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5",
+        "E6",
+        "E7",
+        "E8"
+      ]
+    },
+    "types.yes-no": {
+      "type": "boolean",
+      "description": "Select Yes or No.",
+      "title": "Yes or No"
+    },
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
+    }
+  }
+}
