@@ -16,37 +16,16 @@ from src.constants.static_role_values import (
     VIEW_APPLICATIONS_ID,
 )
 from src.db.models.user_models import ApplicationUser, OrganizationUserRole, Role
-from tests.lib.organization_test_utils import create_user_in_org
-from tests.src.db.models.factories import (
-    ApplicationFactory,
-    ApplicationUserFactory,
-    ApplicationUserRoleFactory,
-    OrganizationFactory,
-    OrganizationUserFactory,
-    OrganizationUserRoleFactory,
+from tests.lib.organization_test_utils import (
+    create_application_roles,
+    create_org_user_with_roles,
+    create_user_in_org,
 )
+from tests.src.db.models.factories import ApplicationFactory, OrganizationFactory
 
 
 def to_str(ids):
     return [str(value) for value in ids]
-
-
-def create_org_user_with_roles(db_session, organization, role_ids):
-    org_user = OrganizationUserFactory.create(organization=organization)
-    for role_id in role_ids:
-        OrganizationUserRoleFactory.create(
-            organization_user=org_user, role=db_session.get(Role, role_id)
-        )
-    return org_user
-
-
-def create_application_roles(db_session, application, user, role_ids):
-    app_user = ApplicationUserFactory.create(application=application, user=user)
-    for role_id in role_ids:
-        ApplicationUserRoleFactory.create(
-            application_user=app_user, role=db_session.get(Role, role_id)
-        )
-    return app_user
 
 
 def get_application_roles(db_session, user_id):

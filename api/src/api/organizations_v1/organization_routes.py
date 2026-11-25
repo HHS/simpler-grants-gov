@@ -39,6 +39,7 @@ from src.services.organizations_v1.delete_organization_saved_opportunity import 
     delete_organization_saved_opportunity,
 )
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+from src.services.organizations_v1.get_organization_user_roles import get_organization_user_roles
 from src.services.organizations_v1.ignore_legacy_user_organization import (
     ignore_legacy_user_organization,
 )
@@ -190,6 +191,32 @@ def organization_remove_user(
         remove_user_from_organization(db_session, user_token_session.user, user_id, organization_id)
 
     return response.ApiResponse(message="Success", data=None)
+
+
+@organization_blueprint.get("/<uuid:organization_id>/users/<uuid:user_id>")
+@organization_blueprint.output(OrganizationUpdateUserRolesResponseSchema)
+@organization_blueprint.doc(responses=[200, 401, 403, 404])
+@organization_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def organization_get_user_roles(
+    db_session: db.Session, organization_id: UUID, user_id: UUID
+) -> response.ApiResponse:
+    """Get roles for an organization user"""
+    add_extra_data_to_current_request_logs(
+        {"organization_id": organization_id, "target_user_id": user_id}
+    )
+    logger.info("GET /v1/organizations/:organization_id/users/:user_id")
+
+    # Get authenticated user
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    with db_session.begin():
+        db_session.add(user_token_session)
+        user_roles = get_organization_user_roles(
+            db_session, user_token_session.user, user_id, organization_id
+        )
+
+    return response.ApiResponse(message="Success", data=user_roles)
 
 
 @organization_blueprint.put("/<uuid:organization_id>/users/<uuid:user_id>")

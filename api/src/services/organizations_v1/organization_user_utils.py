@@ -1,6 +1,7 @@
 """Shared utilities for organization user operations."""
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from uuid import UUID
 
 from sqlalchemy import select
@@ -11,6 +12,19 @@ from src.constants.static_role_values import GRANULAR_APPLICATION_ROLE_IDS
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, ApplicationUserRole, OrganizationUser, Role
+
+
+@dataclass
+class IndividualApplicationRoles:
+    application_id: UUID
+    roles: list[Role]
+
+
+@dataclass
+class OrganizationUserRoles:
+    roles: list[Role]
+    individual_application_roles: list[IndividualApplicationRoles]
+    is_external: bool
 
 
 def validate_organization_user_exists(
@@ -108,3 +122,19 @@ def replace_individual_application_roles(
 
         if not app_user.application_user_roles:
             db_session.delete(app_user)
+
+
+def build_organization_user_roles(
+    db_session: db.Session, org_user: OrganizationUser
+) -> OrganizationUserRoles:
+    """Get the user's organization roles, per-application roles, and External label."""
+    return OrganizationUserRoles(
+        roles=org_user.roles,
+        individual_application_roles=[
+            IndividualApplicationRoles(application_id=application_id, roles=roles)
+            for application_id, roles in get_individual_application_roles(
+                db_session, org_user
+            ).items()
+        ],
+        is_external=org_user.is_external,
+    )

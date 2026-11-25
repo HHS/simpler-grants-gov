@@ -1,6 +1,5 @@
 import logging
 from collections.abc import Sequence
-from dataclasses import dataclass
 from uuid import UUID
 
 from sqlalchemy import select
@@ -20,26 +19,14 @@ from src.db.models.user_models import LinkRoleRoleType, OrganizationUserRole, Ro
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.organization_audit import add_audit_event
 from src.services.organizations_v1.organization_user_utils import (
-    get_individual_application_roles,
+    OrganizationUserRoles,
+    build_organization_user_roles,
     replace_individual_application_roles,
     validate_organization_user_exists,
 )
 from src.services.organizations_v1.remove_user_from_organization import is_last_admin
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class IndividualApplicationRoles:
-    application_id: UUID
-    roles: list[Role]
-
-
-@dataclass
-class OrganizationUserRoles:
-    roles: list[Role]
-    individual_application_roles: list[IndividualApplicationRoles]
-    is_external: bool
 
 
 def validate_roles(db_session: db.Session, role_ids: set[UUID]) -> Sequence[Role]:
@@ -187,13 +174,4 @@ def update_user_organization_roles(
     db_session.flush()
     db_session.refresh(org_user)
 
-    return OrganizationUserRoles(
-        roles=org_user.roles,
-        individual_application_roles=[
-            IndividualApplicationRoles(application_id=application_id, roles=roles)
-            for application_id, roles in get_individual_application_roles(
-                db_session, org_user
-            ).items()
-        ],
-        is_external=org_user.is_external,
-    )
+    return build_organization_user_roles(db_session, org_user)

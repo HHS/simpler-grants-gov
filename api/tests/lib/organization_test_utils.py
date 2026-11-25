@@ -2,7 +2,10 @@
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege
+from src.db.models.user_models import Role
 from tests.src.db.models.factories import (
+    ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     LinkExternalUserFactory,
     OrganizationFactory,
     OrganizationUserFactory,
@@ -108,3 +111,23 @@ def create_user_not_in_org(db_session) -> tuple:
     db_session.commit()
 
     return user, token
+
+
+def create_org_user_with_roles(db_session, organization, role_ids):
+    """Create an organization user with the given static roles."""
+    org_user = OrganizationUserFactory.create(organization=organization)
+    for role_id in role_ids:
+        OrganizationUserRoleFactory.create(
+            organization_user=org_user, role=db_session.get(Role, role_id)
+        )
+    return org_user
+
+
+def create_application_roles(db_session, application, user, role_ids):
+    """Give the user the given static roles on an application."""
+    app_user = ApplicationUserFactory.create(application=application, user=user)
+    for role_id in role_ids:
+        ApplicationUserRoleFactory.create(
+            application_user=app_user, role=db_session.get(Role, role_id)
+        )
+    return app_user
