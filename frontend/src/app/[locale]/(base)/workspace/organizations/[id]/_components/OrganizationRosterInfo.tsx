@@ -22,20 +22,19 @@ export const OrganizationRosterInfo = ({
   );
 
   return (
-    <div className="margin-y-5">
-      <h3>{t("title")}</h3>
-      <div>
-        {t("explanation")} {t("manageUsersExplanation")}{" "}
-        {canManageMembers && (
-          <Link
-            href={`/workspace/organizations/${organizationId}/manage-users`}
-            className="usa-button usa-button--secondary float-right"
-          >
-            <USWDSIcon name="people" />
-            {t("manageUsersCTA")}
-          </Link>
-        )}
-      </div>
+    <div className="margin-y-5 tablet:display-flex flex-justify flex-align-center">
+      <h3 className="margin-top-0 margin-bottom-2 tablet:margin-bottom-0">
+        {t("title")}
+      </h3>
+      {canManageMembers && (
+        <Link
+          href={`/workspace/organizations/${organizationId}/manage-users`}
+          className="usa-button usa-button--secondary margin-right-0"
+        >
+          <USWDSIcon name="people" />
+          {t("manageUsersCTA")}
+        </Link>
+      )}
     </div>
   );
 };

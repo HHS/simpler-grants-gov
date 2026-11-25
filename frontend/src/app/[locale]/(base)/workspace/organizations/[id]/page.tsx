@@ -1,10 +1,13 @@
 import { Metadata } from "next";
 import { OrganizationDetail } from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationDetail";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 import { logger } from "src/services/logger/simplerLogger";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { AuthorizationGate } from "src/components/core/AuthorizationGate";
@@ -12,7 +15,7 @@ import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ id: string }>;
-};
+} & WithFeatureFlagProps;
 
 export async function generateMetadata({
   params,
@@ -40,8 +43,17 @@ export async function generateMetadata({
   };
 }
 
-async function OrganizationDetailPage({ params }: OrganizationDetailPageProps) {
+async function OrganizationDetailPage({
+  params,
+  searchParams,
+}: OrganizationDetailPageProps) {
   const { id } = await params;
+  // Search params are passed so a flag set with ?_ff= applies on the first load
+  const externalCollaboratorsEnabled = featureFlagsManager.isFeatureEnabled(
+    "enableExternalCollaborators",
+    await cookies(),
+    searchParams ? await searchParams : undefined,
+  );
 
   return (
     <AuthorizationGate
@@ -57,7 +69,10 @@ async function OrganizationDetailPage({ params }: OrganizationDetailPageProps) {
       ]}
       onUnauthorized={() => <UnauthorizedMessage />}
     >
-      <OrganizationDetail organizationId={id} />
+      <OrganizationDetail
+        organizationId={id}
+        externalCollaboratorsEnabled={externalCollaboratorsEnabled}
+      />
     </AuthorizationGate>
   );
 }

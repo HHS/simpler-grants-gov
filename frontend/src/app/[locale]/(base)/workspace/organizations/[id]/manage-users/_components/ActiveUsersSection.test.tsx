@@ -348,4 +348,97 @@ describe("ActiveUsersSection", () => {
       expect(tableProps.tableRowData[0][3].cellData).toBe("");
     });
   });
+
+  describe("external collaborator column", () => {
+    const roles: UserRole[] = [
+      { role_id: "role-1", role_name: "Admin", privileges: [] },
+    ];
+
+    const users: UserDetail[] = [
+      {
+        user_id: "user-1",
+        email: "external@example.com",
+        first_name: "Ext",
+        last_name: "Ernal",
+        roles,
+        is_external: true,
+      },
+      {
+        user_id: "user-2",
+        email: "staff@example.com",
+        first_name: "Staff",
+        last_name: "Person",
+        roles,
+        is_external: false,
+      },
+    ];
+
+    const loadTableProps = async (
+      showExternal?: boolean,
+      showManagePermissions?: boolean,
+    ) => {
+      const component = await ActiveUsersSection({
+        organizationId: "org-123",
+        activeUsers: makeResource({ data: users }),
+        roles: makeResource({ data: roles }),
+        showExternal,
+        showManagePermissions,
+      });
+      render(component);
+      await screen.findByTestId("active-users-table");
+      return tableWithResponsiveHeaderMock.mock.calls[0][0] as {
+        headerContent: { cellData: string }[];
+        tableRowData: { cellData: unknown }[][];
+      };
+    };
+
+    it("does not render the External column by default", async () => {
+      const tableProps = await loadTableProps();
+
+      expect(
+        tableProps.headerContent.map((header) => header.cellData),
+      ).not.toContain("usersTable.externalHeading");
+      expect(tableProps.tableRowData[0]).toHaveLength(4);
+    });
+
+    it("renders the External column as plain text when enabled", async () => {
+      const tableProps = await loadTableProps(true);
+
+      expect(tableProps.headerContent.map((header) => header.cellData)).toEqual(
+        [
+          "usersTable.nameHeading",
+          "usersTable.emailHeading",
+          "usersTable.roleHeading",
+          "usersTable.externalHeading",
+          "usersTable.actionsHeading",
+        ],
+      );
+
+      const [externalRow, staffRow] = tableProps.tableRowData;
+      expect(externalRow).toHaveLength(5);
+
+      expect(externalRow[3].cellData).toBe("usersTable.externalLabel");
+
+      expect(staffRow[3].cellData).toBe("");
+    });
+
+    it("places Label before Manage permissions and Actions", async () => {
+      const tableProps = await loadTableProps(true, true);
+
+      expect(tableProps.headerContent.map((header) => header.cellData)).toEqual(
+        [
+          "usersTable.nameHeading",
+          "usersTable.emailHeading",
+          "usersTable.roleHeading",
+          "usersTable.externalHeading",
+          "usersTable.managePermissionsHeading",
+          "usersTable.actionsHeading",
+        ],
+      );
+      expect(tableProps.tableRowData[0]).toHaveLength(6);
+      expect(tableProps.tableRowData[0][3].cellData).toBe(
+        "usersTable.externalLabel",
+      );
+    });
+  });
 });

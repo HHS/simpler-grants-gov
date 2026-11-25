@@ -12,8 +12,10 @@ import { OrganizationRosterInfo } from "./OrganizationRosterInfo";
 
 export const OrganizationRosterSkeleton = ({
   organizationId,
+  showExternal = false,
 }: {
   organizationId: string;
+  showExternal?: boolean;
 }) => {
   const t = useTranslations("OrganizationDetail.rosterTable");
   return (
@@ -31,6 +33,11 @@ export const OrganizationRosterSkeleton = ({
             <th scope="col" className="bg-base-lightest padding-y-205">
               {t("headings.roles")}
             </th>
+            {showExternal && (
+              <th scope="col" className="bg-base-lightest padding-y-205">
+                {t("headings.external")}
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -40,6 +47,7 @@ export const OrganizationRosterSkeleton = ({
             first_name="Loading"
             last_name="Loading"
             key="suspended"
+            showExternal={showExternal}
           />
         </tbody>
       </Table>
@@ -47,12 +55,20 @@ export const OrganizationRosterSkeleton = ({
   );
 };
 
+type OrganizationUserRowProps = UserDetail & {
+  showExternal?: boolean;
+  externalLabel?: string;
+};
+
 const OrganizationUserRow = ({
   email,
   first_name,
   last_name,
   roles,
-}: UserDetail) => {
+  is_external,
+  showExternal = false,
+  externalLabel,
+}: OrganizationUserRowProps) => {
   const fullName = first_name && last_name ? `${first_name} ${last_name}` : "";
   const roleNames = roles?.reduce(
     (joined, { role_name }, index) =>
@@ -64,14 +80,17 @@ const OrganizationUserRow = ({
       <td>{email}</td>
       <td>{fullName}</td>
       <td>{roleNames}</td>
+      {showExternal && <td>{is_external && externalLabel}</td>}
     </tr>
   );
 };
 
 export const OrganizationRoster = async ({
   organizationId,
+  showExternal = false,
 }: {
   organizationId: string;
+  showExternal?: boolean;
 }) => {
   const t = await getTranslations("OrganizationDetail.rosterTable");
 
@@ -109,11 +128,21 @@ export const OrganizationRoster = async ({
               <th scope="col" className="bg-base-lightest padding-y-205">
                 {t("headings.roles")}
               </th>
+              {showExternal && (
+                <th scope="col" className="bg-base-lightest padding-y-205">
+                  {t("headings.external")}
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {organizationUsers.map((props: UserDetail) => (
-              <OrganizationUserRow {...props} key={props.email} />
+              <OrganizationUserRow
+                {...props}
+                key={props.email}
+                showExternal={showExternal}
+                externalLabel={t("externalLabel")}
+              />
             ))}
           </tbody>
         </Table>

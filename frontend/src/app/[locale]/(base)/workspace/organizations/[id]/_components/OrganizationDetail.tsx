@@ -15,9 +15,11 @@ import Breadcrumbs from "src/components/core/Breadcrumbs";
 export const OrganizationDetail = ({
   organizationId,
   authorizedData,
+  externalCollaboratorsEnabled = false,
 }: {
   organizationId: string;
   authorizedData?: AuthorizedData;
+  externalCollaboratorsEnabled?: boolean;
 }) => {
   const t = useTranslations("OrganizationDetail");
   if (!authorizedData) {
@@ -57,10 +59,16 @@ export const OrganizationDetail = ({
       <OrganizationInfo organizationDetails={sam_gov_entity} />
       <Suspense
         fallback={
-          <OrganizationRosterSkeleton organizationId={organizationId} />
+          <OrganizationRosterSkeleton
+            organizationId={organizationId}
+            showExternal={externalCollaboratorsEnabled}
+          />
         }
       >
-        <OrganizationRoster organizationId={organizationId} />
+        <OrganizationRoster
+          organizationId={organizationId}
+          showExternal={externalCollaboratorsEnabled}
+        />
       </Suspense>
     </GridContainer>
   );

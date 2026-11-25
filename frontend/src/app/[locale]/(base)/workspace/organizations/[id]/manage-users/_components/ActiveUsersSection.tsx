@@ -21,6 +21,8 @@ interface ActiveUsersSectionProps {
   roles: FetchedResource;
   // Feature flag is on and the current user can manage organization members
   showManagePermissions?: boolean;
+  // Feature flag is on
+  showExternal?: boolean;
 }
 
 export async function ActiveUsersSection({
@@ -28,6 +30,7 @@ export async function ActiveUsersSection({
   activeUsers,
   roles,
   showManagePermissions = false,
+  showExternal = false,
 }: ActiveUsersSectionProps) {
   const t = await getTranslations("ManageUsers");
 
@@ -60,6 +63,7 @@ export async function ActiveUsersSection({
     { cellData: t("usersTable.nameHeading") },
     { cellData: t("usersTable.emailHeading") },
     { cellData: t("usersTable.roleHeading") },
+    ...(showExternal ? [{ cellData: t("usersTable.externalHeading") }] : []),
     ...(showManagePermissions
       ? [{ cellData: t("usersTable.managePermissionsHeading") }]
       : []),
@@ -141,6 +145,14 @@ export async function ActiveUsersSection({
           ),
           className: rowClassName,
         },
+        ...(showExternal
+          ? [
+              {
+                cellData: user.is_external ? t("usersTable.externalLabel") : "",
+                className: rowClassName,
+              },
+            ]
+          : []),
         ...(showManagePermissions ? [managePermissionsCell] : []),
         {
           cellData: (

@@ -96,6 +96,7 @@ export async function ManageUsersPageContent({
         activeUsers={activeUsersList}
         roles={organizationRolesList}
         showManagePermissions={externalCollaboratorsEnabled && canManageMembers}
+        showExternal={externalCollaboratorsEnabled}
       />
       <InvitedUsersSection invitedUsers={invitedUsersList} />
       <UserOrganizationInvite organizationId={organizationId} />

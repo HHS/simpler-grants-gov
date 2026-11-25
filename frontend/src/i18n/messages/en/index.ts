@@ -1744,15 +1744,14 @@ export const messages = {
       "Visit <link>sam.gov</link> to make changes to your organization's details.",
     rosterTable: {
       title: "Organization roster",
-      explanation: "Your organization's active members are listed below.",
-      manageUsersExplanation:
-        "Manage Users to add or update roles and permissions.",
       manageUsersCTA: "Manage Users",
       headings: {
         email: "Email",
         name: "Name",
         roles: "Roles",
+        external: "Label",
       },
+      externalLabel: "External",
     },
   },
   ManageUsers: {
@@ -1760,9 +1759,9 @@ export const messages = {
     breadcrumbWorkspace: "Workspace",
     breadcrumbOrganizations: "Organizations",
     pageHeading: "Manage users",
-    activeUsersHeading: "Active Users Roster",
+    activeUsersHeading: "User roster",
     activeUsersTableDescription:
-      "Adjust permissions for active users so they have the right access for their role.",
+      "Manage user status, roles, and permissions for members of your organization.",
     activeUsersFetchError:
       "We have encountered an error retrieving the Active Users roster, please try again later.",
     activeUsersTableZeroState: "There are no active users.",
@@ -1797,6 +1796,8 @@ export const messages = {
       editPermissions: "Edit",
       editPermissionsFor: "permissions for {name}",
       emailHeading: "Email",
+      externalHeading: "Label",
+      externalLabel: "External",
       managePermissionsHeading: "Manage permissions",
       member: "Member",
       nameHeading: "Name",
