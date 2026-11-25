@@ -1,5 +1,5 @@
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
-import { formatCurrency } from "src/utils/formatCurrencyUtil";
+import { formatDollars } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
@@ -59,21 +59,19 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
     }
   };
 
-  // formatCurrency returns an empty string for 0, which is a real amount
-  const formatAmount = (amount: number | null) =>
-    amount === 0 ? "$0" : formatCurrency(amount);
-
   const fundingSummaryInfo = {
     programFunding:
-      formatAmount(opportunityData.summary.estimated_total_program_funding) ||
+      formatDollars(opportunityData.summary.estimated_total_program_funding) ||
       t("notSpecified"),
     expectedAwards:
       opportunityData.summary.expected_number_of_awards ?? t("notSpecified"),
   };
 
   const awardGridInfo = {
-    awardFloor: formatAmount(opportunityData.summary.award_floor),
-    awardCeiling: formatAmount(opportunityData.summary.award_ceiling),
+    awardFloor:
+      formatDollars(opportunityData.summary.award_floor) || t("notSpecified"),
+    awardCeiling:
+      formatDollars(opportunityData.summary.award_ceiling) || t("notSpecified"),
   };
 
   const awardSubInfo = {

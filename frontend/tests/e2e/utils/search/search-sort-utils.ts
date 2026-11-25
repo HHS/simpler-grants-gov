@@ -329,7 +329,7 @@ export type ResultRow = {
   rawTitle: string; // exactly as rendered, untrimmed: this is what the index sorts on
   closeDate: string; // "MMM D, YYYY" or "TBD"
   postedDate: string; // "MMM D, YYYY" or ""
-  awardMin: string; // "$1,234", "$--" (none) or "" ($0)
+  awardMin: string; // "$1,234", "$0", or "Not specified"
   awardMax: string;
 };
 
@@ -403,8 +403,7 @@ function parseDate(text: string): number | null {
 }
 
 function parseAward(text: string): number | null {
-  if (text.includes("--")) return null;
-  if (text === "") return 0; // formatCurrency(0) renders an empty string
+  if (text === "" || text.includes("Not specified")) return null;
   const amount = Number(text.replace(/[$,\s]/g, ""));
   return Number.isNaN(amount) ? null : amount;
 }
@@ -497,7 +496,7 @@ const describeRow = (row: ResultRow) =>
 
 /**
  * Asserts rows are ordered for the sort option: non-strict ordering on the sorted
- * column, with rows that have no value (TBD close date, "$--" award) after all rows
+ * column, with rows that have no value (TBD close date, "Not specified" award) after all rows
  * that do. Relevancy is skipped (no visible score). Pass rows from consecutive pages
  * concatenated to also verify the page boundary.
  *

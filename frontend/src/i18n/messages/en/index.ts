@@ -364,6 +364,7 @@ export const messages = {
       expectedAward: "Expected award",
       awardMaximum: "Award maximum",
       awardMinimum: "Award minimum",
+      notSpecified: "Not specified",
       estimatedAwardDate: "Estimated award date",
       estimatedProjectStartDate: "Estimated project start date",
     },
@@ -852,6 +853,7 @@ export const messages = {
         ],
       },
     },
+    notSpecified: "Not specified",
     table: {
       headings: {
         closeDate: "Close date",

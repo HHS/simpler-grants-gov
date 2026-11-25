@@ -4,6 +4,7 @@ import { SavedOpportunityTags } from "src/app/[locale]/(base)/workspace/saved-op
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { SavedOpportunityTag } from "src/utils/buildSavedOpportunityTags";
 import { formatDate } from "src/utils/dateUtil";
+import { formatDollars } from "src/utils/formatCurrencyUtil";
 import { getAgencyDisplayName } from "src/utils/search/filterUtils";
 
 import { useTranslations } from "next-intl";
@@ -111,7 +112,8 @@ export default function SearchResultsListItem({
             {t("resultsListItem.awardCeiling")}
           </dt>
           <dd className="saved-opportunity-card__award-description saved-opportunity-card__award-description--maximum">
-            ${opportunity.summary?.award_ceiling?.toLocaleString() || "--"}
+            {formatDollars(opportunity.summary?.award_ceiling) ||
+              t("notSpecified")}
           </dd>
         </div>
         <div className="saved-opportunity-card__award-item">
@@ -119,7 +121,8 @@ export default function SearchResultsListItem({
             {t("resultsListItem.floor")}
           </dt>
           <dd className="saved-opportunity-card__award-description">
-            ${opportunity.summary?.award_floor?.toLocaleString() || "--"}
+            {formatDollars(opportunity.summary?.award_floor) ||
+              t("notSpecified")}
           </dd>
         </div>
       </dl>

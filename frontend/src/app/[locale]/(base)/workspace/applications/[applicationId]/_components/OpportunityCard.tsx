@@ -3,7 +3,7 @@ import {
   OpportunityOverview as OpportunityOverviewType,
 } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
-import { formatCurrency } from "src/utils/formatCurrencyUtil";
+import { formatDollars } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
 import { Grid, GridContainer, Link } from "@trussworks/react-uswds";
@@ -136,7 +136,7 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
         <dl className="margin-top-0">
           <OpportunityItem
             opKey={t("programFunding")}
-            opValue={formatCurrency(summary.estimated_total_program_funding)}
+            opValue={formatDollars(summary.estimated_total_program_funding)}
           />
           <OpportunityItem
             opKey={t("expectedAward")}
@@ -148,11 +148,11 @@ const OpportunityOverview = ({ opportunity }: OpportunityOverviewProps) => {
           />
           <OpportunityItem
             opKey={t("awardMaximum")}
-            opValue={formatCurrency(summary.award_ceiling)}
+            opValue={formatDollars(summary.award_ceiling) || t("notSpecified")}
           />
           <OpportunityItem
             opKey={t("awardMinimum")}
-            opValue={formatCurrency(summary.award_floor)}
+            opValue={formatDollars(summary.award_floor) || t("notSpecified")}
           />
           <OpportunityItem
             opKey={t("estimatedAwardDate")}

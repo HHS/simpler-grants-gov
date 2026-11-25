@@ -230,12 +230,12 @@ describe("SearchResultsTable", () => {
     ).toBeInTheDocument();
     expect(
       within(results[1]).getByRole("cell", {
-        name: "headings.awardMin $--",
+        name: "headings.awardMin notSpecified",
       }),
     ).toBeInTheDocument();
     expect(
       within(results[1]).getByRole("cell", {
-        name: "headings.awardMax $--",
+        name: "headings.awardMax notSpecified",
       }),
     ).toBeInTheDocument();
   });
@@ -372,12 +372,12 @@ describe("SearchResultsTable", () => {
 describe("AwardValue", () => {
   it("renders placeholder when awardValue is undefined", () => {
     render(<AwardValue awardValue={undefined} />);
-    expect(screen.getByText("$--")).toBeInTheDocument();
+    expect(screen.getByText("notSpecified")).toBeInTheDocument();
   });
 
   it("renders placeholder when awardValue is null", () => {
     render(<AwardValue awardValue={null} />);
-    expect(screen.getByText("$--")).toBeInTheDocument();
+    expect(screen.getByText("notSpecified")).toBeInTheDocument();
   });
 
   it("renders formatted currency when awardValue is a number", () => {

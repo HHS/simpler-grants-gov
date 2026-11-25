@@ -7,7 +7,7 @@ import {
 } from "src/types/opportunity/opportunityResponseTypes";
 import { SearchResponseData } from "src/types/search/searchRequestTypes";
 import { toShortMonthDate } from "src/utils/dateUtil";
-import { formatCurrency } from "src/utils/formatCurrencyUtil";
+import { formatDollars } from "src/utils/formatCurrencyUtil";
 import { getOpportunityUrl } from "src/utils/opportunity/opportunityUtils";
 
 import { useTranslations } from "next-intl";
@@ -168,13 +168,14 @@ export const AwardValue = ({
   awardValue,
 }: {
   awardValue: undefined | null | number;
-}) => (
-  <p className={"font-sans-xs text-no-wrap"}>
-    {awardValue === undefined || awardValue === null
-      ? "$--"
-      : formatCurrency(awardValue)}
-  </p>
-);
+}) => {
+  const t = useTranslations("Search");
+  return (
+    <p className={"font-sans-xs text-no-wrap"}>
+      {formatDollars(awardValue) || t("notSpecified")}
+    </p>
+  );
+};
 
 export const SearchResultsTable = ({
   searchResults,

@@ -1,5 +1,5 @@
 import { UiSchemaTableNumberFormat } from "src/types/applyForm/types";
-import { formatCurrency } from "src/utils/formatCurrencyUtil";
+import { formatDollars } from "src/utils/formatCurrencyUtil";
 
 type TableCellValue = number | string | null | undefined;
 
@@ -42,16 +42,8 @@ export const formatTableCellValue = (
         maximumFractionDigits: 2,
       }).format(numericValue);
 
-    case "dollar": {
-      const formatted = formatCurrency(numericValue);
-
-      if (!formatted.includes(".")) {
-        return `${formatted}.00`;
-      }
-
-      const [, fraction] = formatted.split(".");
-      return fraction.length === 1 ? `${formatted}0` : formatted;
-    }
+    case "dollar":
+      return formatDollars(numericValue, true);
 
     case "percentage":
       return new Intl.NumberFormat("en-US", {
