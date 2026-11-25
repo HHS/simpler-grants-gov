@@ -26,8 +26,7 @@ Some Python packages are installed both places, so they will both flag in the JS
 ### Upgrading the Base Image
 Upgrading the base image involves going to a newer (or the `latest`) tagged base image on the [Package/Container Repository page](https://github.com/HHS/simpler-grants-gov/pkgs/container/python-base-image).
 1. Find the version/tag you want to upgrade to (almost always just the top one tagged latest among other things) and click it
-2. Click into the "OS / Arch" tab to get the "linux/amd64" Commit SHA and validation hash, like `a586e45@sha256:22d2ff70c08fdd1ae7e029e7212a5ba29e377232995205f24dc7c64f6b6e66b0`
-   <img width="726" height="405" alt="image" src="https://github.com/user-attachments/assets/1b00831b-123d-428e-9c60-7f99b4f98f80" />
+2. Get the short commit SHA tag and the multi-arch index digest, like `a586e45@sha256:22d2ff70c08fdd1ae7e029e7212a5ba29e377232995205f24dc7c64f6b6e66b0`. The base image is published for both `linux/amd64` and `linux/arm64`, so pin the index digest, not a single platform's digest. Docker picks the right platform per host (native arm64 on Apple Silicon), and release builds still force `linux/amd64`. Verify with `docker buildx imagetools inspect ghcr.io/hhs/python-base-image:<short-sha>`: the top-level `Digest` is the one to pin, and both platforms should be listed under `Manifests`.
 3. Go to the Dockerfiles for API and Analytics and replace the first line commit hash and sha section with those values from the latest verison
    <img width="953" height="166" alt="image" src="https://github.com/user-attachments/assets/28ac1967-112e-4323-9169-e615701f19f7" />
 4. Run `make build` in the `api` folder to ensure the build runs without any failures about the base image that was just changed.
