@@ -7,12 +7,12 @@ locals {
 }
 
 data "aws_ssm_parameter" "newrelic_license_key" {
-  count = var.enable_load_balancer ? 1 : 0
+  count = local.has_public_alb ? 1 : 0
   name  = "/new-relic-license-key"
 }
 
 data "archive_file" "nr_alb_log_forwarder" {
-  count       = var.enable_load_balancer ? 1 : 0
+  count       = local.has_public_alb ? 1 : 0
   type        = "zip"
   output_path = "${path.module}/lambda/newrelic_alb_log_forwarder.zip"
 
@@ -30,7 +30,7 @@ resource "aws_lambda_function" "nr_alb_log_forwarder" {
   # checkov:skip=CKV_AWS_115:Reserved concurrency not needed for log forwarding Lambda
   # checkov:skip=CKV_AWS_50:X-Ray tracing not required for log forwarding Lambda
 
-  count = var.enable_load_balancer ? 1 : 0
+  count = local.has_public_alb ? 1 : 0
 
   function_name = local.nr_alb_log_forwarder_name
   description   = "Forwards ALB access logs from S3 to New Relic"
@@ -64,7 +64,7 @@ resource "aws_lambda_function" "nr_alb_log_forwarder" {
 }
 
 resource "aws_kms_key" "nr_alb_log_forwarder" {
-  count               = var.enable_load_balancer ? 1 : 0
+  count               = local.has_public_alb ? 1 : 0
   description         = "Key for Lambda function ${local.nr_alb_log_forwarder_name}"
   enable_key_rotation = true
   # checkov:skip=CKV2_AWS_64:Key policy grants CloudWatch Logs access below
@@ -107,7 +107,7 @@ resource "aws_kms_key" "nr_alb_log_forwarder" {
 
 resource "aws_cloudwatch_log_group" "nr_alb_log_forwarder" {
   # checkov:skip=CKV_AWS_338:Forwarding Lambda logs don't need long retention — actual ALB logs are in New Relic
-  count             = var.enable_load_balancer ? 1 : 0
+  count             = local.has_public_alb ? 1 : 0
   name              = "/aws/lambda/${local.nr_alb_log_forwarder_name}"
   retention_in_days = 30
   kms_key_id        = aws_kms_key.nr_alb_log_forwarder[0].arn
@@ -116,7 +116,7 @@ resource "aws_cloudwatch_log_group" "nr_alb_log_forwarder" {
 # --- IAM ---
 
 resource "aws_iam_role" "nr_alb_log_forwarder" {
-  count = var.enable_load_balancer ? 1 : 0
+  count = local.has_public_alb ? 1 : 0
   name  = "${local.nr_alb_log_forwarder_name}-role"
 
   assume_role_policy = jsonencode({
@@ -134,13 +134,13 @@ resource "aws_iam_role" "nr_alb_log_forwarder" {
 }
 
 resource "aws_iam_role_policy_attachment" "nr_alb_log_forwarder_basic" {
-  count      = var.enable_load_balancer ? 1 : 0
+  count      = local.has_public_alb ? 1 : 0
   role       = aws_iam_role.nr_alb_log_forwarder[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy" "nr_alb_log_forwarder_ssm" {
-  count = var.enable_load_balancer ? 1 : 0
+  count = local.has_public_alb ? 1 : 0
   name  = "${local.nr_alb_log_forwarder_name}-ssm"
   role  = aws_iam_role.nr_alb_log_forwarder[0].id
 
@@ -155,7 +155,7 @@ resource "aws_iam_role_policy" "nr_alb_log_forwarder_ssm" {
 }
 
 resource "aws_iam_role_policy" "nr_alb_log_forwarder_s3" {
-  count = var.enable_load_balancer ? 1 : 0
+  count = local.has_public_alb ? 1 : 0
   name  = "${local.nr_alb_log_forwarder_name}-s3"
   role  = aws_iam_role.nr_alb_log_forwarder[0].id
 
@@ -172,7 +172,7 @@ resource "aws_iam_role_policy" "nr_alb_log_forwarder_s3" {
 # --- S3 event notification ---
 
 resource "aws_lambda_permission" "allow_s3_alb_logs" {
-  count         = var.enable_load_balancer ? 1 : 0
+  count         = local.has_public_alb ? 1 : 0
   statement_id  = "AllowS3AlbLogs"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.nr_alb_log_forwarder[0].function_name
@@ -181,7 +181,7 @@ resource "aws_lambda_permission" "allow_s3_alb_logs" {
 }
 
 resource "aws_s3_bucket_notification" "alb_logs_to_lambda" {
-  count  = var.enable_load_balancer ? 1 : 0
+  count  = local.has_public_alb ? 1 : 0
   bucket = aws_s3_bucket.access_logs.id
 
   lambda_function {

@@ -260,7 +260,7 @@ module "service" {
   # API Gateway variables
   enable_api_gateway             = true
   enable_api_gateway_domain_name = local.service_config.enable_api_gateway_domain_name
-  enable_secure_alb              = local.service_config.enable_secure_alb
+  load_balancer_mode             = local.service_config.enable_secure_alb ? "secure" : "public"
   optional_extra_alb_domains     = toset(lookup(local.service_config, "secondary_domain_names", []))
   optional_extra_alb_certs       = local.service_config.enable_https == true ? [for cert in data.aws_acm_certificate.secondary_certs : cert.arn] : []
 
