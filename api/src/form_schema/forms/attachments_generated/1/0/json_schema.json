@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "att1": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "1) Please attach Attachment 1"
+    },
+    "att2": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "2) Please attach Attachment 2"
+    },
+    "att3": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "3) Please attach Attachment 3"
+    },
+    "att4": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "4) Please attach Attachment 4"
+    },
+    "att5": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "5) Please attach Attachment 5"
+    },
+    "att6": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "6) Please attach Attachment 6"
+    },
+    "att7": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "7) Please attach Attachment 7"
+    },
+    "att8": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "8) Please attach Attachment 8"
+    },
+    "att9": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "9) Please attach Attachment 9"
+    },
+    "att10": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "10) Please attach Attachment 10"
+    },
+    "att11": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "11) Please attach Attachment 11"
+    },
+    "att12": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "12) Please attach Attachment 12"
+    },
+    "att13": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "13) Please attach Attachment 13"
+    },
+    "att14": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "14) Please attach Attachment 14"
+    },
+    "att15": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/types.attachment"
+        }
+      ],
+      "description": "Click to add this attachment.",
+      "title": "15) Please attach Attachment 15"
+    }
+  },
+  "examples": [
+    {
+      "att1": "00000000-0000-0000-0000-000000000002",
+      "att2": "00000000-0000-0000-0000-000000000003",
+      "att3": "00000000-0000-0000-0000-000000000004",
+      "att4": "00000000-0000-0000-0000-000000000005",
+      "att5": "00000000-0000-0000-0000-000000000006",
+      "att6": "00000000-0000-0000-0000-000000000007",
+      "att7": "00000000-0000-0000-0000-000000000008",
+      "att8": "00000000-0000-0000-0000-000000000009",
+      "att9": "00000000-0000-0000-0000-00000000000a",
+      "att10": "00000000-0000-0000-0000-00000000000b",
+      "att11": "00000000-0000-0000-0000-00000000000c",
+      "att12": "00000000-0000-0000-0000-00000000000d",
+      "att13": "00000000-0000-0000-0000-00000000000e",
+      "att14": "00000000-0000-0000-0000-00000000000f",
+      "att15": "00000000-0000-0000-0000-000000000010"
+    },
+    {
+      "att1": "00000000-0000-0000-0000-000000000002",
+      "att15": "00000000-0000-0000-0000-000000000010"
+    },
+    {}
+  ],
+  "$defs": {
+    "types.attachment": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Attach a file.",
+      "title": "Attachment"
+    }
+  }
+}

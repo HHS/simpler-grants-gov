@@ -23,3 +23,14 @@ export const ATTACHMENT_FORM_CONFIG = {
   formName: "Attachment Form",
   fields: fieldDefinitionsAttachment,
 } as const;
+
+export const ATTACHMENT_GENERATED_FORM_CONFIG = {
+  ...ATTACHMENT_FORM_CONFIG,
+  formName: "Attachments",
+  fields: {
+    att1: {
+      ...ATTACHMENT_FORM_CONFIG.fields.att1,
+      field: "1) Please attach Attachment 1",
+    },
+  },
+} as const;

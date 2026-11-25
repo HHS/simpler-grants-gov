@@ -1,0 +1,72 @@
+{
+  "introduction_to_application": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "program_plan": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "responsible_conduct_of_research": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "methods_for_enhancing_reproducibility": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "multiple_pd_pi_leadership_plan": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "progress_report": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "participating_faculty_biosketches": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "letters_of_support": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "data_tables": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "vertebrate_animals": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "select_agent_research": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "consortium_contractual_arrangements": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "other_plans": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  },
+  "appendix": {
+    "gg_validation": {
+      "rule": "attachment"
+    }
+  }
+}

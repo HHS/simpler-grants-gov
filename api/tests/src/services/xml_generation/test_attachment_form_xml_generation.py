@@ -21,10 +21,7 @@ from pathlib import Path
 import pytest
 from lxml import etree as lxml_etree
 
-from src.form_schema.forms.attachment_form import (
-    FORM_XML_TRANSFORM_RULES as ATTACHMENT_FORM_TRANSFORM_RULES,
-)
-from src.form_schema.forms.attachment_form import AttachmentForm_v1_2
+from src.form_schema.forms import AttachmentForm_v1_2, AttachmentsGenerated_v1_2
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.models.attachment import AttachmentFile
 from src.services.xml_generation.service import XMLGenerationService
@@ -74,18 +71,25 @@ OUT_OF_ORDER_DATA = {
 }
 
 
-def _generate_response(data: dict):
+@pytest.fixture(
+    params=[AttachmentForm_v1_2, AttachmentsGenerated_v1_2], ids=["handwritten", "generated"]
+)
+def attachment_form(request):
+    return request.param
+
+
+def _generate_response(form, data: dict):
     return XMLGenerationService().generate_xml(
         XMLGenerationRequest(
             application_data=data,
-            transform_config=ATTACHMENT_FORM_TRANSFORM_RULES,
+            transform_config=form.json_to_xml_schema,
             attachment_mapping=ATTACHMENT_MAPPING,
         )
     )
 
 
-def _generate(data: dict) -> str:
-    response = _generate_response(data)
+def _generate(form, data: dict) -> str:
+    response = _generate_response(form, data)
     assert response.success, response.error_message
     return response.xml_data
 
@@ -121,11 +125,11 @@ def _file_names(root) -> list[str]:
 class TestAttachmentFormXMLGeneration:
     """XML generation tests for the Attachment Form."""
 
-    def test_generate_single_attachment_writes_file_metadata(self):
+    def test_generate_single_attachment_writes_file_metadata(self, attachment_form):
         """One attachment is written as ATTn > ATTnFile with the file details in XSD order."""
         attachment = ATTACHMENT_MAPPING[UUIDS[0]]
 
-        root = _parse(_generate({"att1": UUIDS[0]}))
+        root = _parse(_generate(attachment_form, {"att1": UUIDS[0]}))
 
         assert _local_names(root) == ["ATT1"]
         att1_file = root.find(f"{{{FORM_NS}}}ATT1/{{{FORM_NS}}}ATT1File")
@@ -146,9 +150,9 @@ class TestAttachmentFormXMLGeneration:
         assert hash_value.text == attachment.hash_value
         assert hash_value.get(f"{{{GLOB_NS}}}hashAlgorithm") == "SHA-1"
 
-    def test_generate_xml_root_and_attachment_structure(self):
+    def test_generate_xml_root_and_attachment_structure(self, attachment_form):
         """Root element, namespaces and FormVersion, with a field from the middle of the form."""
-        root = _parse(_generate({"att3": UUIDS[2]}))
+        root = _parse(_generate(attachment_form, {"att3": UUIDS[2]}))
 
         assert root.tag == f"{{{FORM_NS}}}AttachmentForm_1_2"
         # attributeFormDefault is qualified, so FormVersion has to be in the form namespace
@@ -160,9 +164,9 @@ class TestAttachmentFormXMLGeneration:
         assert _local_names(root.find(f"{{{FORM_NS}}}ATT3")) == ["ATT3File"]
         assert _file_names(root) == [ATTACHMENT_MAPPING[UUIDS[2]].filename]
 
-    def test_generate_all_fifteen_attachments(self):
+    def test_generate_all_fifteen_attachments(self, attachment_form):
         """Every attachment field is written, each with its own file, in XSD order."""
-        root = _parse(_generate(ALL_FIELDS_DATA))
+        root = _parse(_generate(attachment_form, ALL_FIELDS_DATA))
 
         assert _local_names(root) == _xsd_sequence()
         for i in range(1, FIELD_COUNT + 1):
@@ -173,9 +177,9 @@ class TestAttachmentFormXMLGeneration:
                 == ATTACHMENT_MAPPING[UUIDS[i - 1]].filename
             )
 
-    def test_generate_out_of_order_population_follows_xsd_sequence(self):
+    def test_generate_out_of_order_population_follows_xsd_sequence(self, attachment_form):
         """Fields saved as att15, att3, att9, att1 still come out as ATT1, ATT3, ATT9, ATT15."""
-        root = _parse(_generate(OUT_OF_ORDER_DATA))
+        root = _parse(_generate(attachment_form, OUT_OF_ORDER_DATA))
 
         assert _local_names(root) == ["ATT1", "ATT3", "ATT9", "ATT15"]
         # Each element still carries its own field's file
@@ -183,40 +187,40 @@ class TestAttachmentFormXMLGeneration:
             ATTACHMENT_MAPPING[UUIDS[i - 1]].filename for i in (1, 3, 9, 15)
         ]
 
-    def test_generate_empty_form_writes_only_the_root(self):
+    def test_generate_empty_form_writes_only_the_root(self, attachment_form):
         """With no attachments, the form is just the root element with its FormVersion."""
-        root = _parse(_generate({}))
+        root = _parse(_generate(attachment_form, {}))
 
         assert root.tag == f"{{{FORM_NS}}}AttachmentForm_1_2"
         assert root.attrib == {f"{{{FORM_NS}}}FormVersion": "1.2"}
         assert len(root) == 0
 
-    def test_generate_null_attachment_field_is_excluded(self):
+    def test_generate_null_attachment_field_is_excluded(self, attachment_form):
         """A field saved as null is left out rather than written empty."""
-        root = _parse(_generate({"att1": None, "att2": UUIDS[1]}))
+        root = _parse(_generate(attachment_form, {"att1": None, "att2": UUIDS[1]}))
 
         assert _local_names(root) == ["ATT2"]
 
     @pytest.mark.parametrize("field", ["att1", "att15"])
-    def test_generate_missing_uuid_in_mapping_fails(self, field):
+    def test_generate_missing_uuid_in_mapping_fails(self, attachment_form, field):
         """An attachment UUID that isn't in the attachment mapping fails generation."""
         missing_uuid = "99999999-aaaa-4bbb-8ccc-dddddddddddd"
         data = {"att2": UUIDS[1], field: missing_uuid}
 
-        response = _generate_response(data)
+        response = _generate_response(attachment_form, data)
 
         assert response.success is False
         assert response.xml_data is None
         assert f"Attachment UUID {missing_uuid} for field '{field}'" in response.error_message
         assert "not found in attachment mapping" in response.error_message
 
-    def test_generate_attachment_form_snapshot(self):
+    def test_generate_attachment_form_snapshot(self, attachment_form):
         """Regression snapshot test pinning the full generated XML output.
 
         To regenerate after an intentional change, delete
         snapshots/attachment_form_1_2.xml and re-run the test, which recreates it.
         """
-        xml_data = _generate(ALL_FIELDS_DATA)
+        xml_data = _generate(attachment_form, ALL_FIELDS_DATA)
 
         if not _SNAPSHOT_PATH.exists():
             _SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -243,8 +247,8 @@ class TestAttachmentFormXSDValidation:
         [{}, {"att1": UUIDS[0]}, ALL_FIELDS_DATA, OUT_OF_ORDER_DATA],
         ids=["empty", "single", "all_fields", "out_of_order"],
     )
-    def test_attachment_form_xml_validates_against_xsd(self, xsd_validator, data):
-        xml_data = _generate(data)
+    def test_attachment_form_xml_validates_against_xsd(self, attachment_form, xsd_validator, data):
+        xml_data = _generate(attachment_form, data)
 
         validation_result = self._validate(xsd_validator, xml_data)
 
@@ -254,10 +258,12 @@ class TestAttachmentFormXSDValidation:
             f"Generated XML:\n{xml_data}"
         )
 
-    def test_attachment_elements_out_of_xsd_order_fail_validation(self, xsd_validator):
+    def test_attachment_elements_out_of_xsd_order_fail_validation(
+        self, attachment_form, xsd_validator
+    ):
         """The XSD rejects ATT elements out of sequence, so the validation above would catch
         a regression in ordering, not just in content."""
-        root = _parse(_generate({"att1": UUIDS[0], "att2": UUIDS[1]}))
+        root = _parse(_generate(attachment_form, {"att1": UUIDS[0], "att2": UUIDS[1]}))
         root.append(root[0])  # move ATT1 after ATT2
 
         assert _local_names(root) == ["ATT2", "ATT1"]
@@ -269,12 +275,12 @@ class TestAttachmentFormXSDValidation:
         assert "ATT1" in validation_result["error_message"]
 
     def test_attachment_form_submission_xml_validates_against_xsd(
-        self, enable_factory_create, seed_form_registry, xsd_validator
+        self, attachment_form, enable_factory_create, seed_form_registry, xsd_validator
     ):
         """The form inside a complete submission, as the submission task produces it."""
         competition = CompetitionFactory.create(competition_forms=[])
         competition_form = CompetitionFormFactory.create(
-            competition=competition, form=AttachmentForm_v1_2
+            competition=competition, form=attachment_form
         )
         application = ApplicationFactory.create(competition=competition)
         ApplicationFormFactory.create(

@@ -46,7 +46,7 @@ locals {
     { name : "IMAGE_TAG", value : var.image_tag },
   ], local.hostname)
 
-  alb_environment_variables = var.enable_load_balancer ? [
+  alb_environment_variables = local.has_public_alb ? [
     { name : "LOAD_BALANCER_DNS_NAME", value : aws_lb.alb[0].dns_name },
   ] : []
 
@@ -111,7 +111,7 @@ resource "aws_ecs_service" "app" {
   }
 
   dynamic "load_balancer" {
-    for_each = var.enable_load_balancer ? [1] : []
+    for_each = local.has_public_alb ? [1] : []
     content {
       target_group_arn = aws_lb_target_group.app_tg[0].arn
       container_name   = var.service_name
@@ -121,7 +121,7 @@ resource "aws_ecs_service" "app" {
 
   # add a connection to the mtls target group since these same containers power both
   dynamic "load_balancer" {
-    for_each = local.enable_internal_alb ? [1] : []
+    for_each = local.has_internal_alb ? [1] : []
     content {
       target_group_arn = aws_lb_target_group.internal_tg[0].arn
       container_name   = var.service_name

@@ -13,4 +13,8 @@ import "./forms/ed-abstract-form/index.tsp";
 import "./forms/nsf-deviation-authorization/index.tsp";
 import "./forms/nsf-suggested-reviewers/index.tsp";
 import "./forms/project-abstract-summary/index.tsp";
+import "./forms/phs-398-research-plan/index.tsp";
+import "./forms/phs-398-research-training-program-plan/index.tsp";
+import "./forms/phs-398-career-development-award-supplemental-form/index.tsp";
+import "./forms/attachments/index.tsp";
 import "./forms/nasa-pi-and-aor/index.tsp";

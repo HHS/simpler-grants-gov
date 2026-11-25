@@ -69,7 +69,7 @@ def set_competition_forms(
     # Check user access
     verify_access(
         user,
-        {Privilege.UPDATE_OPPORTUNITY, Privilege.MANAGE_COMPETITION},
+        {Privilege.MANAGE_COMPETITION},
         competition.opportunity.agency_record,
     )
 

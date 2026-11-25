@@ -4,6 +4,7 @@ import { useClientFetch } from "src/hooks/useClientFetch";
 import { LabelValueOption } from "src/types/generalTypes";
 
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useRef, useState, type ChangeEvent } from "react";
 import {
   FormGroup,
@@ -30,6 +31,7 @@ export function RoleManager({
   disabled = false,
 }: RoleManagerProps) {
   const t = useTranslations("ManageUsers.roleManager");
+  const router = useRouter();
   const [selectedRoleId, setSelectedRoleId] = useState(currentRoleId);
   const [pendingRoleId, setPendingRoleId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,6 +91,7 @@ export function RoleManager({
       setSelectedRoleId(pendingRoleId);
       setPendingRoleId(null);
       closeModal();
+      router.refresh();
     } catch (error) {
       console.error("Failed to update user role", error);
       setErrorMessage(t("errorState"));

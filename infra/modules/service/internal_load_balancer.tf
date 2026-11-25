@@ -2,14 +2,12 @@
 # API Gateway's VPC Link private integration only reaches an internal load balancer
 
 locals {
-  enable_internal_alb = var.enable_load_balancer && var.enable_secure_alb
-
   # ALB names are capped at 32 characters.
   internal_alb_name = substr("${var.service_name}-internal", 0, 32)
 }
 
 resource "aws_security_group" "internal_alb" {
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.has_internal_alb ? 1 : 0
 
   name_prefix = "${var.service_name}-internal-alb"
   description = "Allow TCP traffic to the internal application load balancer"
@@ -22,7 +20,7 @@ resource "aws_security_group" "internal_alb" {
 }
 
 resource "aws_security_group_rule" "internal_alb_ingress_from_api_gateway_vpc_link" {
-  count = local.enable_internal_alb && var.enable_api_gateway ? 1 : 0
+  count = local.has_internal_alb && var.enable_api_gateway ? 1 : 0
 
   security_group_id        = aws_security_group.internal_alb[0].id
   description              = "Allow HTTPS from the API Gateway VPC Link"
@@ -35,12 +33,14 @@ resource "aws_security_group_rule" "internal_alb_ingress_from_api_gateway_vpc_li
 
 # The private hosted zone below points alb.<env> at this ALB for everything inside the VPC, so in-VPC callers (ClamAV scanner, ECS tasks) need ingress
 data "aws_vpc" "internal_alb" {
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.has_internal_alb ? 1 : 0
   id    = module.network.vpc_id
 }
 
 resource "aws_security_group_rule" "internal_alb_ingress_from_vpc" {
-  count = local.enable_internal_alb ? 1 : 0
+  # Secure mode serves alb.<env> to in-VPC callers. Private mode allows only
+  # internal_alb_ingress_security_group_ids.
+  count = var.load_balancer_mode == "secure" ? 1 : 0
 
   security_group_id = aws_security_group.internal_alb[0].id
   description       = "Allow HTTPS from in-VPC callers"
@@ -51,8 +51,20 @@ resource "aws_security_group_rule" "internal_alb_ingress_from_vpc" {
   cidr_blocks       = [data.aws_vpc.internal_alb[0].cidr_block]
 }
 
+resource "aws_security_group_rule" "internal_alb_ingress_from_security_groups" {
+  for_each = var.load_balancer_mode == "private" ? var.internal_alb_ingress_security_group_ids : {}
+
+  security_group_id        = aws_security_group.internal_alb[0].id
+  description              = "Allow HTTPS from ${each.key}"
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = each.value
+}
+
 resource "aws_security_group_rule" "internal_alb_app_egress" {
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.has_internal_alb ? 1 : 0
 
   depends_on = [aws_security_group.app]
 
@@ -69,7 +81,7 @@ resource "aws_security_group_rule" "internal_alb_app_egress" {
 resource "aws_lb" "internal" {
   # checkov:skip=CKV2_AWS_76:Matches the public ALB; WAF is not part of this stack
   # checkov:skip=CKV_AWS_150:Allow deletion for automated tests, matching the public ALB
-  count = local.enable_internal_alb ? 1 : 0
+  count = local.has_internal_alb ? 1 : 0
 
   name            = local.internal_alb_name
   internal        = true
@@ -91,7 +103,7 @@ resource "aws_lb" "internal" {
 
 resource "aws_lb_target_group" "internal_tg" {
   # checkov:skip=CKV_AWS_378:TLS terminates at the ALB, same as the public target group
-  count                = local.enable_internal_alb ? 1 : 0
+  count                = local.has_internal_alb ? 1 : 0
   name_prefix          = "int-"
   port                 = var.container_port
   protocol             = "HTTP"
@@ -115,7 +127,7 @@ resource "aws_lb_target_group" "internal_tg" {
 }
 
 resource "aws_lb_listener" "internal_https" {
-  count = local.enable_internal_alb && var.certificate_arn != null ? 1 : 0
+  count = local.has_internal_alb && var.certificate_arn != null ? 1 : 0
 
   load_balancer_arn = aws_lb.internal[0].arn
   port              = 443
@@ -132,16 +144,21 @@ resource "aws_lb_listener" "internal_https" {
 # The VPC Link integration's uri sets the Host header and is validated against the certificate
 # presented here, so the alb.<env> certificate has to be attached to this listener too.
 resource "aws_lb_listener_certificate" "internal_https_extra_certs" {
-  for_each = local.enable_internal_alb && var.certificate_arn != null ? toset(var.optional_extra_alb_certs) : toset([])
+  for_each = local.has_internal_alb && var.certificate_arn != null ? toset(var.optional_extra_alb_certs) : toset([])
 
   listener_arn    = aws_lb_listener.internal_https[0].arn
   certificate_arn = each.value
 }
 
-# Private hosted zone overriding alb.<env> inside the VPC so it resolves to the internal ALB.
+# Private hosted zone so a name resolves to the internal ALB inside the VPC: alb.<env>
+# (optional_extra_alb_domains) for the API, or domain_name for a private-only service.
 
 locals {
-  enable_internal_alb_zone = local.enable_internal_alb && length(var.optional_extra_alb_domains) > 0
+  internal_alb_zone_domain = (
+    var.load_balancer_mode == "private" ? var.domain_name :
+    length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : null
+  )
+  enable_internal_alb_zone = local.has_internal_alb && local.internal_alb_zone_domain != null
 }
 
 resource "aws_route53_zone" "internal_alb" {
@@ -149,7 +166,7 @@ resource "aws_route53_zone" "internal_alb" {
   # checkov:skip=CKV2_AWS_39:Query logging is not available for private hosted zones
   count = local.enable_internal_alb_zone ? 1 : 0
 
-  name    = var.optional_extra_alb_domains[0]
+  name    = local.internal_alb_zone_domain
   comment = "Private resolution for the internal ${var.service_name} ALB"
 
   vpc {
@@ -161,7 +178,7 @@ resource "aws_route53_record" "internal_alb" {
   count = local.enable_internal_alb_zone ? 1 : 0
 
   zone_id = aws_route53_zone.internal_alb[0].zone_id
-  name    = var.optional_extra_alb_domains[0]
+  name    = local.internal_alb_zone_domain
   type    = "A"
 
   alias {

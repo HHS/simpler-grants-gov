@@ -12,6 +12,7 @@ resource "random_password" "secret" {
 }
 
 resource "aws_ssm_parameter" "secret" {
+  # checkov:skip=CKV_AWS_337:SSM SecureString uses default AWS managed KMS key, matching modules/secrets
   count = var.manage_method == "generated" ? 1 : 0
 
   name  = var.secret_store_name

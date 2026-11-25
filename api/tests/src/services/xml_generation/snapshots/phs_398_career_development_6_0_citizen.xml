@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<PHS398_CareerDevelopmentAwardSup_6_0:PHS398_CareerDevelopmentAwardSup_6_0 xmlns:PHS398_CareerDevelopmentAwardSup_6_0="http://apply.grants.gov/forms/PHS398_CareerDevelopmentAwardSup_6_0-V6.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" PHS398_CareerDevelopmentAwardSup_6_0:FormVersion="6.0">
+  <PHS398_CareerDevelopmentAwardSup_6_0:CareerDevelopmentAwardAttachments>
+    <PHS398_CareerDevelopmentAwardSup_6_0:ResearchStrategy>
+      <PHS398_CareerDevelopmentAwardSup_6_0:attFile>
+        <att:FileName>primary.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="primary.pdf"/>
+        <ns0:HashValue xmlns:ns0="http://apply.grants.gov/system/Global-V1.0" ns0:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</ns0:HashValue>
+      </PHS398_CareerDevelopmentAwardSup_6_0:attFile>
+    </PHS398_CareerDevelopmentAwardSup_6_0:ResearchStrategy>
+    <PHS398_CareerDevelopmentAwardSup_6_0:Appendix>
+      <att:AttachedFile>
+        <att:FileName>appendix-a.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="appendix-a.pdf"/>
+        <ns1:HashValue xmlns:ns1="http://apply.grants.gov/system/Global-V1.0" ns1:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</ns1:HashValue>
+      </att:AttachedFile>
+      <att:AttachedFile>
+        <att:FileName>appendix-b.pdf</att:FileName>
+        <att:MimeType>application/pdf</att:MimeType>
+        <att:FileLocation att:href="appendix-b.pdf"/>
+        <ns2:HashValue xmlns:ns2="http://apply.grants.gov/system/Global-V1.0" ns2:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</ns2:HashValue>
+      </att:AttachedFile>
+    </PHS398_CareerDevelopmentAwardSup_6_0:Appendix>
+  </PHS398_CareerDevelopmentAwardSup_6_0:CareerDevelopmentAwardAttachments>
+  <PHS398_CareerDevelopmentAwardSup_6_0:CitizenshipIndicator>Y: Yes</PHS398_CareerDevelopmentAwardSup_6_0:CitizenshipIndicator>
+</PHS398_CareerDevelopmentAwardSup_6_0:PHS398_CareerDevelopmentAwardSup_6_0>

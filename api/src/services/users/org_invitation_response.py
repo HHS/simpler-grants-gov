@@ -6,6 +6,12 @@ from sqlalchemy.orm import selectinload
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import OrganizationAuditEvent, OrganizationInvitationStatus
+from src.constants.static_role_values import (
+    MODIFY_APPLICATIONS_ID,
+    ORG_COLLABORATOR_ID,
+    SUBMIT_APPLICATIONS_ID,
+    VIEW_APPLICATIONS_ID,
+)
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
     Organization,
@@ -72,8 +78,22 @@ def org_invitation_response(
             user=user,
         )
         db_session.add(org_user)
-        for role in invitation.linked_roles:
-            org_user_role = OrganizationUserRole(organization_user=org_user, role_id=role.role_id)
+
+        # A Collaborator invitation also implicitly grants the granular
+        # application roles. Skip any the invitation already carries so we
+        # don't insert duplicate (organization_user_id, role_id) rows.
+        role_ids_to_add = {r.role_id for r in invitation.linked_roles}
+        is_collaborator = ORG_COLLABORATOR_ID in role_ids_to_add
+        if is_collaborator:
+            role_ids_to_add.update(
+                [
+                    VIEW_APPLICATIONS_ID,
+                    MODIFY_APPLICATIONS_ID,
+                    SUBMIT_APPLICATIONS_ID,
+                ]
+            )
+        for role_id in set(role_ids_to_add):
+            org_user_role = OrganizationUserRole(organization_user=org_user, role_id=role_id)
             db_session.add(org_user_role)
 
         # Update response time

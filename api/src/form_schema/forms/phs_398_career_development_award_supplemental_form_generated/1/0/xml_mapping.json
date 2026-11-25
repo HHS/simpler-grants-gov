@@ -1,0 +1,166 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/PHS398_CareerDevelopmentAwardSup_6_0-V6.0",
+    "PHS398_CareerDevelopmentAwardSup_6_0": "http://apply.grants.gov/forms/PHS398_CareerDevelopmentAwardSup_6_0-V6.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PHS398_CareerDevelopmentAwardSup_6_0-V6.0.xsd",
+  "root": {
+    "PHS398_CareerDevelopmentAwardSup_6_0": {
+      "@PHS398_CareerDevelopmentAwardSup_6_0:FormVersion": {
+        "$const": "6.0"
+      },
+      "CareerDevelopmentAwardAttachments": {
+        "IntroductionToApplication": {
+          "attFile": {
+            "$attachment": "introduction_to_application"
+          }
+        },
+        "CandidateInformationAndGoals": {
+          "attFile": {
+            "$attachment": "candidate_information_and_goals"
+          }
+        },
+        "SpecificAims": {
+          "attFile": {
+            "$attachment": "specific_aims"
+          }
+        },
+        "ResearchStrategy": {
+          "attFile": {
+            "$attachment": "research_strategy"
+          }
+        },
+        "ProgressReportPublicationList": {
+          "attFile": {
+            "$attachment": "progress_report_publication_list"
+          }
+        },
+        "ResponsibleConductOfResearch": {
+          "attFile": {
+            "$attachment": "responsible_conduct_of_research"
+          }
+        },
+        "MentoringPlan": {
+          "attFile": {
+            "$attachment": "mentoring_plan"
+          }
+        },
+        "StatementsOfSupport": {
+          "attFile": {
+            "$attachment": "statements_of_support"
+          }
+        },
+        "LettersOfSupport": {
+          "attFile": {
+            "$attachment": "letters_of_support"
+          }
+        },
+        "InsitutionalEnvironment": {
+          "attFile": {
+            "$attachment": "institutional_environment"
+          }
+        },
+        "InstitutionalCommitment": {
+          "attFile": {
+            "$attachment": "institutional_commitment"
+          }
+        },
+        "CandidatesContribution": {
+          "attFile": {
+            "$attachment": "candidates_contribution"
+          }
+        },
+        "VertebrateAnimals": {
+          "attFile": {
+            "$attachment": "vertebrate_animals"
+          }
+        },
+        "SelectAgentResearch": {
+          "attFile": {
+            "$attachment": "select_agent_research"
+          }
+        },
+        "ConsortiumContractualArrangements": {
+          "attFile": {
+            "$attachment": "consortium_contractual_arrangements"
+          }
+        },
+        "ResourceSharingPlans": {
+          "attFile": {
+            "$attachment": "resource_sharing_plans"
+          }
+        },
+        "OtherPlans": {
+          "attFile": {
+            "$attachment": "other_plans"
+          }
+        },
+        "KeyBiologicalAndOrChemicalResources": {
+          "attFile": {
+            "$attachment": "key_biological_and_or_chemical_resources"
+          }
+        },
+        "Appendix": {
+          "att:AttachedFile": {
+            "$each": {
+              "items": {
+                "$field": "appendix"
+              },
+              "map": {
+                "$attachment": "."
+              }
+            }
+          }
+        }
+      },
+      "CitizenshipIndicator": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "is_us_citizen_or_national"
+          }
+        }
+      },
+      "isNonUSCitizenship": {
+        "$when": {
+          "condition": {
+            "field": "is_us_citizen_or_national",
+            "operator": "equals",
+            "value": false
+          },
+          "then": {
+            "$field": "non_us_citizenship_status"
+          }
+        }
+      },
+      "PermanentResidentByAwardIndicator": {
+        "$when": {
+          "condition": {
+            "all": [
+              {
+                "field": "is_us_citizen_or_national",
+                "operator": "equals",
+                "value": false
+              },
+              {
+                "field": "non_us_citizenship_status",
+                "operator": "equals",
+                "value": "Temporary U.S. Visa"
+              }
+            ]
+          },
+          "then": {
+            "$transform": {
+              "name": "boolean_to_yes_no",
+              "value": {
+                "$field": "permanent_resident_by_award"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -14,6 +14,8 @@ import pytest
 
 from tests.src.form_schema.parity.discrepancy import DiscrepancyKind
 from tests.src.form_schema.parity.xml.diffs import (
+    attachment_form,
+    attachments_generated,
     budget_narrative_attachment,
     budget_narrative_generated,
     ed_abstract_form_generated,
@@ -28,6 +30,9 @@ from tests.src.form_schema.parity.xml.diffs import (
     other_narrative_attachment,
     other_narrative_generated,
     performance_sites_generated,
+    phs_398_career_development_award_supplemental_form_generated,
+    phs_398_research_plan_generated,
+    phs_398_research_training_program_plan_generated,
     project_abstract,
     project_abstract_generated,
     project_abstract_summary_generated,
@@ -46,6 +51,8 @@ from tests.src.form_schema.parity.xml.harness.compare import (
 )
 
 DIFFS = [
+    attachment_form.DIFF,
+    attachments_generated.DIFF,
     key_contacts.DIFF,
     key_contacts_generated.DIFF,
     epa_key_contacts.DIFF,
@@ -67,6 +74,9 @@ DIFFS = [
     project_abstract.DIFF,
     project_abstract_generated.DIFF,
     ed_abstract_form_generated.DIFF,
+    phs_398_research_plan_generated.DIFF,
+    phs_398_career_development_award_supplemental_form_generated.DIFF,
+    phs_398_research_training_program_plan_generated.DIFF,
     nasa_pi_and_aor_generated.DIFF,
 ]
 

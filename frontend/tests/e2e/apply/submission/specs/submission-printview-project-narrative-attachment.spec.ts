@@ -9,7 +9,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { PROJECT_NARRATIVE_OPPORTUNITIES } from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
+import { PROJECT_NARRATIVE_ATTACHMENT_OPPORTUNITIES } from "tests/e2e/apply/fixtures/project-narrative-attachment-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -38,7 +38,7 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-const applicantScenarios = PROJECT_NARRATIVE_OPPORTUNITIES.flatMap(
+const applicantScenarios = PROJECT_NARRATIVE_ATTACHMENT_OPPORTUNITIES.flatMap(
   ({ formLabel, opportunityNumber, attachmentSectionId }) => {
     const opportunityConfig = loadOpportunityConfig(opportunityNumber);
     return [
