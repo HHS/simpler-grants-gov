@@ -127,10 +127,20 @@ jobs:
       - name: Create and push manifest list
         working-directory: ${{ runner.temp }}/digests
         run: |
+          tag_args=()
+          while read -r tag; do
+            tag_args+=(-t "$tag")
+          done < <(jq -r '.tags | unique | .[]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+
+          sources=()
+          for digest in *; do
+            sources+=("${IMAGE}@sha256:${digest}")
+          done
+
           docker buildx imagetools create \
-            $(jq -cr '.tags | unique | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            "${tag_args[@]}" \
             --annotation "index:org.opencontainers.image.source=https://github.com/HHS/simpler-grants-gov" \
-            $(printf "${IMAGE}@sha256:%s " *)
+            "${sources[@]}"
 
       - name: Inspect image
         run: docker buildx imagetools inspect "${IMAGE}:${{ steps.meta.outputs.version }}"
