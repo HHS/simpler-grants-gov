@@ -256,8 +256,6 @@ class Privilege(StrEnum):
     MANAGE_INTERNAL_ROLES = "manage_internal_roles"
     MANAGE_COMPETITION = "manage_competition"
     READ_TEST_USER_TOKEN = "read_test_user_token"
-    VIEW_OPPORTUNITY = "view_opportunity"
-    UPDATE_OPPORTUNITY = "update_opportunity"
     VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
 

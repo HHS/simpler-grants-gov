@@ -14,6 +14,10 @@ module "infra_training_config" {
   domain_name            = "api.training.simpler.grants.gov"
   secondary_domain_names = ["alb.training.simpler.grants.gov"]
   enable_https           = true
+  # Route API Gateway to an internal ALB over a VPC link, like infra-dev. Without
+  # it, API Gateway forwards to alb.training as the Host header, and the API builds
+  # its Login.gov redirect URIs from that host (see modules/service/api_gateway.tf).
+  enable_secure_alb = true
 
   enable_api_gateway_domain_name = true
   s3_cdn_domain_name             = "files.training.simpler.grants.gov"
