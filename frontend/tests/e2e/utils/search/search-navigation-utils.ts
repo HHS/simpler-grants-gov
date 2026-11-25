@@ -9,6 +9,7 @@ import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 import {
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
+  expectCheckboxIDIsChecked,
   getFilterDrawer,
   toggleFilterDrawer,
 } from "tests/e2e/utils/search/search-filter-utils";
@@ -363,10 +364,11 @@ export async function expectSearchStatePreserved(
   // The keyword
   await expect(getSearchInput(page)).toHaveValue(before.query ?? "");
 
-  // Filters: only "posted" remains selected
+  // Filters: only "Open" (posted) remains selected
   await ensureFilterDrawerOpen(page);
   await ensureAccordionExpanded(page, "Opportunity status");
-  await expect(page.locator('input[id="status-posted"]').first()).toBeChecked();
+  // The "Open" status checkbox has the id status-open and the value "posted"
+  await expectCheckboxIDIsChecked(page, "status-open");
   await expect(
     page.locator('input[id="status-forecasted"]').first(),
   ).not.toBeChecked();
