@@ -84,6 +84,40 @@ describe("JsonFormsFields", () => {
     expect(screen.queryByText("The Form")).not.toBeInTheDocument();
   });
 
+  it("renders a section with no fields as its formatted description", () => {
+    render(
+      <form>
+        <JsonFormsFields
+          errors={null}
+          formData={{}}
+          schema={schema}
+          uiSchema={{
+            type: "Group",
+            label: "The Form",
+            elements: [
+              {
+                type: "Group",
+                label: "Assurances",
+                elements: [],
+                options: {
+                  description:
+                    "I certify that the applicant:\n\n1. Has the legal authority to apply.\n\n2. Will give the agency access.",
+                },
+              },
+            ],
+          }}
+        />
+      </form>,
+    );
+
+    const section = screen.getByRole("group");
+    expect(section).toHaveAttribute("id", "form-section-assurances");
+    expect(
+      within(section).getByText("I certify that the applicant:"),
+    ).toBeInTheDocument();
+    expect(within(section).getAllByRole("listitem")).toHaveLength(2);
+  });
+
   it("evaluates rules against the saved data", () => {
     renderFields({ has_partner: "yes" });
 
