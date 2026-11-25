@@ -6,8 +6,8 @@ import "#questions/index.tsp";
 
 namespace Questions.Types;
 
+/** US State or Territory Code */
 @summary("State")
-@doc("US State or Territory Code")
 enum StateCode {
   AL: "AL: Alabama",
   AK: "AK: Alaska",
@@ -82,8 +82,8 @@ enum StateCode {
   AP: "AP: Armed Forces Pacific",
 }
 
+/** Country Code */
 @summary("Country")
-@doc("Country Code")
 enum CountryCode {
   AFG: "AFG: AFGHANISTAN",
   XQZ: "XQZ: AKROTIRI",

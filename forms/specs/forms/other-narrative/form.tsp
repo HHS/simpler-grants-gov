@@ -20,7 +20,7 @@ namespace Forms.OtherNarrative;
 @example(Examples.oneFile, #{ title: "One other narrative file" })
 @example(Examples.twoFiles, #{ title: "Two ordered other narrative files" })
 model OtherNarrative {
-  @doc("At least one file must be attached")
+  /** At least one file must be attached */
   @UI.label("Other Narrative Files")
   @UI.widget(Rendering.Widget.AttachmentArray)
   @minItems(1)

@@ -23,7 +23,7 @@ namespace Forms.ProjectAbstract;
 })
 @example(Examples.oneFile, #{ title: "One project abstract file" })
 model ProjectAbstract {
-  @doc("A file must be attached.")
+  /** A file must be attached. */
   @UI.label("Project Abstract File")
   attachment: Questions.Types.Attachment;
 }
