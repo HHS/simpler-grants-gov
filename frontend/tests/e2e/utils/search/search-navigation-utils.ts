@@ -5,7 +5,6 @@
 import { expect, Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
-import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 import {
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
@@ -23,7 +22,7 @@ import {
   type SortCase,
 } from "tests/e2e/utils/search/search-sort-utils";
 import {
-  clickPaginationPageIfPresent,
+  clickPaginationPageNumber,
   fillSearchInputAndSubmit,
   getNumberOfOpportunitySearchResults,
   getSearchInput,
@@ -61,6 +60,30 @@ export function getNavigationSortCase(): SortCase {
   return sortCase;
 }
 
+const PAGE_2_BUTTON =
+  'button[data-testid="pagination-page-number"][aria-label="Page 2"]';
+
+/**
+ * Goes to page 2 of the current results. Expects the results to have more than one page, and
+ * says how many there were if not.
+ *
+ * Not clickPaginationPageIfPresent: it checks once, without waiting, and the pagination can be
+ * missing for a moment while results re-render after a keyword, filter or sort change.
+ */
+async function goToPage2(page: Page): Promise<void> {
+  const total = await getNumberOfOpportunitySearchResults(page);
+  expect(
+    total,
+    `Expected more than one page of results (over ${SEARCH_PAGE_SIZE}) but found ${total} ` +
+      `at ${page.url()}. If this starts failing, the data no longer has enough opportunities`,
+  ).toBeGreaterThan(SEARCH_PAGE_SIZE);
+  await expect(
+    page.locator(PAGE_2_BUTTON).first(),
+    `Expected a page 2 button for ${total} results at ${page.url()}`,
+  ).toBeVisible({ timeout: 15000 });
+  await clickPaginationPageNumber(page, 2);
+}
+
 /**
  * Applies one kind of result state through the UI, leaving the browser on search results:
  * - filters: unchecks the Forecasted status
@@ -85,19 +108,9 @@ export async function applyResultState(
         projectName,
       );
       break;
-    case "pagination": {
-      const wentToPage2 = await clickPaginationPageIfPresent(
-        page,
-        2,
-        "searchresults-v2-navigation.spec",
-      );
-      expect(
-        wentToPage2,
-        "Expected more than one page of results in the default catalog. " +
-          "If this starts failing, the seed data no longer has enough opportunities",
-      ).toBe(true);
+    case "pagination":
+      await goToPage2(page);
       break;
-    }
   }
   await getNumberOfOpportunitySearchResults(page);
 }
@@ -241,6 +254,18 @@ export async function expectOpportunityDetailLoaded(page: Page): Promise<void> {
 }
 
 /**
+ * Asserts the status tag in the Opportunity Detail header shows a status. Its visible label is
+ * aria-hidden, with a screen reader label beside it, so the check targets the visible label.
+ */
+export async function expectOpportunityStatusTag(page: Page): Promise<void> {
+  await expect(
+    page
+      .getByTestId("opportunity-header-status")
+      .locator('[aria-hidden="true"]'),
+  ).toHaveText(/^(Open|Forecasted|Closed|Archived)$/);
+}
+
+/**
  * Navigates straight to a detail URL (a link copied from the results table) and checks the
  * server answered without an error.
  */
@@ -273,42 +298,10 @@ export async function goBackToSearchResults(page: Page): Promise<void> {
 // Search state preserved after returning from a detail page
 // ---------------------------------------------------------------------------
 
-// Probed in order. The state test needs a keyword that still has more than one page of results
-// once filtered, and seed data differs between environments.
+// Tried in order, through the search box itself. The state test needs a keyword that still has
+// more than one page of results once the status filter is applied, and seed data differs between
+// environments.
 const KEYWORD_CANDIDATES = ["education", "research", "health", "community"];
-
-/**
- * Finds a keyword with more than one page of posted results on this environment's data, and
- * returns to an unfiltered search page.
- */
-export async function findKeywordWithMultiplePages(
-  page: Page,
-  candidates: string[] = KEYWORD_CANDIDATES,
-): Promise<string> {
-  const attempted: string[] = [];
-  for (const term of candidates) {
-    await gotoWithRetry(
-      page,
-      `${baseUrl}/search?query=${encodeURIComponent(term)}&status=posted`,
-      { timeout: NAVIGATION_TIMEOUT },
-    );
-    await waitForSearchResultsInitialLoad(page);
-    const count = await getNumberOfOpportunitySearchResults(page);
-    attempted.push(`"${term}" -> ${count}`);
-    if (count > SEARCH_PAGE_SIZE) {
-      // Start the user flow from a clean search page
-      await gotoWithRetry(page, `${baseUrl}/search`, {
-        timeout: NAVIGATION_TIMEOUT,
-      });
-      await waitForSearchResultsInitialLoad(page);
-      return term;
-    }
-  }
-  throw new Error(
-    `No keyword returned more than ${SEARCH_PAGE_SIZE} posted results. ` +
-      `Tried: ${attempted.join("; ")}`,
-  );
-}
 
 export type SearchState = {
   query: string | null;
@@ -320,23 +313,46 @@ export type SearchState = {
 };
 
 /**
- * Applies a keyword, the status filter, a sort option and then page 2, through the UI.
- * Page 2 comes last because changing the keyword, filter or sort goes back to page 1.
+ * Applies the status filter, a keyword, a sort option and then page 2, through the UI, and
+ * returns the keyword used. Page 2 comes last because changing the keyword, filter or sort goes
+ * back to page 1.
+ *
+ * The keyword is chosen in this same flow, by trying candidates until one has more than one page
+ * of results for the filtered search, so the count matches what the user flow ends up with.
  */
 export async function applyKeywordFilterSortAndPage2(
   page: Page,
-  term: string,
   sortCase: SortCase,
   isMobile: boolean,
   projectName: string,
-): Promise<void> {
-  await fillSearchInputAndSubmit(term, page, projectName);
-  await waitForURLContainsQueryParamValue(page, "query", term);
-  await waitForSearchResultsInitialLoad(page);
-
+): Promise<string> {
+  // The filter first, so the keyword counts below are for the filtered results
   await applyStatusNarrowingFilter(page);
+
+  const attempted: string[] = [];
+  let term: string | undefined;
+  for (const candidate of KEYWORD_CANDIDATES) {
+    await fillSearchInputAndSubmit(candidate, page, projectName);
+    await waitForURLContainsQueryParamValue(page, "query", candidate);
+    await waitForSearchResultsInitialLoad(page);
+    const count = await getNumberOfOpportunitySearchResults(page);
+    attempted.push(`"${candidate}" -> ${count}`);
+    if (count > SEARCH_PAGE_SIZE) {
+      term = candidate;
+      break;
+    }
+  }
+  if (!term) {
+    throw new Error(
+      `No keyword returned more than ${SEARCH_PAGE_SIZE} posted results. ` +
+        `Tried: ${attempted.join("; ")}`,
+    );
+  }
+
   await selectSortCase(page, sortCase, isMobile, projectName);
-  await applyResultState(page, "pagination", isMobile, projectName);
+  await goToPage2(page);
+  await getNumberOfOpportunitySearchResults(page);
+  return term;
 }
 
 export async function captureSearchState(page: Page): Promise<SearchState> {

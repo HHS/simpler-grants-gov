@@ -29,8 +29,8 @@ import {
   clickResultTitle,
   expectOpportunityDetailLoaded,
   expectOpportunityDetailPage,
+  expectOpportunityStatusTag,
   expectSearchStatePreserved,
-  findKeywordWithMultiplePages,
   getNavigationSortCase,
   goBackToSearchResults,
   gotoOpportunityDetailByLink,
@@ -138,10 +138,12 @@ test.describe("Opportunity detail navigation from search results", () => {
            * @and a loading indicator should appear while data is being fetched
            * @and the loading indicator should disappear once data loads
            * @and the opportunity title and identifier should be displayed
+           * @and the opportunity status should be displayed
            */
           recordMissingLoadingIndicator(testInfo);
           await expectOpportunityDetailLoaded(page);
           await expectOpportunityDetailPage(page, selected);
+          await expectOpportunityStatusTag(page);
         },
       );
 
@@ -198,10 +200,8 @@ test.describe("Opportunity detail navigation from search results", () => {
           /**
            * @given I have applied search keywords, filters, sorting, and navigated to page 2
            */
-          const term = await findKeywordWithMultiplePages(page);
-          await applyKeywordFilterSortAndPage2(
+          const term = await applyKeywordFilterSortAndPage2(
             page,
-            term,
             sortCase,
             isMobile,
             projectName,
