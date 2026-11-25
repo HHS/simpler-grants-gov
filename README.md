@@ -52,7 +52,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md#paid-contributions) to learn more.
 
 | Size | Amount | Name | Status | Age |
 | ---- | ------ | ---- | ------ | --- |
-| M | $200 | [Pagination on saved searches](https://github.com/HHS/simpler-grants-gov/issues/12569) | open, unclaimed! | New |
+| XL | $500 | [Standardized Pagination](https://github.com/HHS/simpler-grants-gov/issues/8011) | open, unclaimed! | New |
+| M | $200 | [Pagination on application list](https://github.com/HHS/simpler-grants-gov/issues/6832) | open, unclaimed! | New |
 
 [See a list of all open bounties.](https://github.com/HHS/simpler-grants-gov/issues?q=state%3Aopen%20label%3A%22status%3A%20open%20bounty%22)
 
