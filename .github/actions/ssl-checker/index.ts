@@ -98,13 +98,6 @@ const mainACM = async () => {
     const domainResult = domainResults[domain];
     const latest = domainResult.latestResult;
 
-    if (domain === "api.simpler.grants.gov") {
-      console.dir({ domainResult });
-      domainResult.allResults.forEach((result) => {
-        console.dir({ result });
-      });
-    }
-
     if (domainResult.warning) {
       core.setFailed(`${domain}, ${domainResult.warning}`);
     }

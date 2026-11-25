@@ -1,4 +1,4 @@
-name: Check SSL Certificates for ones expiring soon
+name: Check SSL Certificates expiring soon
 
 on:
   workflow_dispatch:
@@ -34,8 +34,8 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        # Running off the cron schedule runs against Prod. Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment
-        envs: ${{ github.event_name == 'schedule' && fromJSON('["prod"]') || fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]') }}
+        # Running off the cron schedule runs against Prod, Training, Staging, Dev. Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment
+        envs: ${{ github.event_name == 'schedule' && fromJSON('["prod","infra-training","infra-staging", "infra-dev"]') || fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -49,6 +49,7 @@ jobs:
           app_name: "api"
           environment: ${{ matrix.envs }}
 
+      # unfortunately there's no option to say "include all types" so a new type would evade this monitoring
       - name: Dump the certificate metadata
         run: |
           pwd
