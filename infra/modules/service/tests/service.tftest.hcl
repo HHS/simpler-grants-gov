@@ -302,3 +302,34 @@ run "secure_alb_keeps_restricted_public_alb_and_vpc_ingress" {
     error_message = "Named ingress applies only in private mode"
   }
 }
+
+run "usage_plan_id_env_var_set_when_api_gateway_enabled" {
+  command = plan
+
+  variables {
+    load_balancer_mode = "secure"
+    enable_api_gateway = true
+    domain_name        = "api.staging.example.gov"
+  }
+
+  override_data {
+    target = data.aws_vpc.internal_alb[0]
+    values = {
+      cidr_block = "10.0.0.0/20"
+    }
+  }
+
+  assert {
+    condition     = contains([for env_var in output.environment_variables : env_var.name], "API_GATEWAY_DEFAULT_USAGE_PLAN_ID")
+    error_message = "API_GATEWAY_DEFAULT_USAGE_PLAN_ID must be set from the public usage plan when API Gateway is enabled"
+  }
+}
+
+run "no_usage_plan_id_env_var_when_api_gateway_disabled" {
+  command = plan
+
+  assert {
+    condition     = !contains([for env_var in output.environment_variables : env_var.name], "API_GATEWAY_DEFAULT_USAGE_PLAN_ID")
+    error_message = "API_GATEWAY_DEFAULT_USAGE_PLAN_ID must not be set when API Gateway is disabled"
+  }
+}

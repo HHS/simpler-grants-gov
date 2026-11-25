@@ -162,10 +162,5 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/docraptor-api-key"
     }
-
-    API_GATEWAY_DEFAULT_USAGE_PLAN_ID = {
-      manage_method     = "manual"
-      secret_store_name = "/api/${var.environment}/api-gateway-default-usage-plan-id"
-    }
   }
 }
