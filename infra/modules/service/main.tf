@@ -61,11 +61,18 @@ locals {
   cdn_environment_variables = local.enable_cdn ? [
     { name : "CDN_URL", value : "https://${local.cdn_domain_name_env_var}" },
   ] : []
+
+  # Read from the usage plan itself so it can't drift or be copied in from another environment
+  api_gateway_environment_variables = var.enable_api_gateway ? [
+    { name : "API_GATEWAY_DEFAULT_USAGE_PLAN_ID", value : aws_api_gateway_usage_plan.api_public_usage_plan[0].id },
+  ] : []
+
   environment_variables = concat(
     local.base_environment_variables,
     local.alb_environment_variables,
     local.db_environment_variables,
     local.cdn_environment_variables,
+    local.api_gateway_environment_variables,
     [
       for name, value in var.extra_environment_variables :
       { name : name, value : value }
