@@ -14,3 +14,6 @@ import "./forms/nsf-deviation-authorization/index.tsp";
 import "./forms/nsf-suggested-reviewers/index.tsp";
 import "./forms/project-abstract-summary/index.tsp";
 import "./forms/nasa-pi-and-aor/index.tsp";
+import "./forms/research-related-personal-data/index.tsp";
+import "./forms/research-and-related-other-project-information/index.tsp";
+import "./forms/sbir-sttr-information/index.tsp";
