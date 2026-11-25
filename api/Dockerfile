@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:prasnava-multi-platform-base-image-184be25@sha256:aa88c54db4989876e2ecca6bddc9d06d58870d5422e8c1b76d12938f3ab0a953 AS base
+FROM ghcr.io/hhs/python-base-image:184be25@sha256:cbfcb8d3cb2084daee6731cb7a561e3d692d1d3dcf5f249acf63ef2ada39c96d AS base
 ARG RUN_UID
 ARG RUN_USER
 
