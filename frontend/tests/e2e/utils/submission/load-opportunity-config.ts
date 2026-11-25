@@ -1,5 +1,11 @@
-import { ATTACHMENT_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/attachment-data";
-import { ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/attachment-field-definitions";
+import {
+  ATTACHMENT_GENERATED_OPPORTUNITY_DATA,
+  ATTACHMENT_OPPORTUNITY_DATA,
+} from "tests/e2e/apply/fixtures/attachment-data";
+import {
+  ATTACHMENT_FORM_CONFIG,
+  ATTACHMENT_GENERATED_FORM_CONFIG,
+} from "tests/e2e/apply/fixtures/attachment-field-definitions";
 import {
   BUDGET_NARRATIVE_GENERATED_OPPORTUNITY_DATA,
   BUDGET_NARRATIVE_OPPORTUNITY_DATA,
@@ -90,6 +96,7 @@ import type {
  */
 const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   ATTACHMENT_OPPORTUNITY_DATA,
+  ATTACHMENT_GENERATED_OPPORTUNITY_DATA,
   GRANTSGOV_LOBBYING_OPPORTUNITY_DATA,
   KEY_CONTACTS_OPPORTUNITY_DATA,
   KEY_CONTACTS_GENERATED_OPPORTUNITY_DATA,
@@ -132,6 +139,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
  */
 const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   attachment: ATTACHMENT_FORM_CONFIG,
+  attachmentGenerated: ATTACHMENT_GENERATED_FORM_CONFIG,
   grantsGovLobbying: GRANTSGOV_LOBBYING_FORM_CONFIG,
   keyContacts: KEY_CONTACTS_FORM_CONFIG,
   keyContactsGenerated: KEY_CONTACTS_FORM_CONFIG,

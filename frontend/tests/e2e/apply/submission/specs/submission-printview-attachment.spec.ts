@@ -9,6 +9,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { ATTACHMENT_OPPORTUNITIES } from "tests/e2e/apply/fixtures/attachment-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -37,31 +38,37 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-// Only the opportunity number is declared here.
-// All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-// Unified opportunity for both local and staging environments.
-const OPPORTUNITY_NUMBER = "E2E-ATT-ORG-IND-01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-
-const applicantScenarios = [
-  {
-    testName: `Complete the Attachment Form Submission and Print View workflow for an Organization user`,
-    orgLabel: testOrgLabel,
-  },
-  {
-    testName: `Complete the Attachment Form Submission and Print View workflow for an Individual user`,
-    orgLabel: undefined,
-  },
-] as const;
+const applicantScenarios = ATTACHMENT_OPPORTUNITIES.flatMap(
+  (opportunity) =>
+    [
+      {
+        testName: `Complete the Attachment Form Submission and Print View workflow for an Organization user`,
+        ...opportunity,
+        orgLabel: testOrgLabel,
+      },
+      {
+        testName: `Complete the Attachment Form Submission and Print View workflow for an Individual user`,
+        ...opportunity,
+        orgLabel: undefined,
+      },
+    ] as const,
+);
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { testName, orgLabel } of applicantScenarios) {
+for (const {
+  testName,
+  orgLabel,
+  opportunityNumber,
+  variant,
+  firstSection,
+} of applicantScenarios) {
+  const opportunityConfig = loadOpportunityConfig(opportunityNumber);
   test(
-    testName,
+    `${testName} (${variant})`,
     { tag: [APPLY_FORMS, FULL_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
@@ -134,17 +141,11 @@ for (const { testName, orgLabel } of applicantScenarios) {
       for (const { testData, printUrl } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
-        const attachmentSections = [
-          { fieldKey: "att1", sectionId: "form-section-attachment1" },
-        ] as const;
-
-        for (const { fieldKey, sectionId } of attachmentSections) {
-          await validateAttachmentPrintViewSection(
-            page,
-            sectionId,
-            testData[fieldKey],
-          );
-        }
+        await validateAttachmentPrintViewSection(
+          page,
+          firstSection,
+          testData.att1,
+        );
       }
     },
   );

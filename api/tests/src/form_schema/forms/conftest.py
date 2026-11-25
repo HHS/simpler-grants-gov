@@ -5,6 +5,7 @@ import pytest
 from src.db.models.competition_models import Form
 from src.form_schema.forms import (
     AttachmentForm_v1_2,
+    AttachmentsGenerated_v1_2,
     BudgetNarrativeAttachment_v1_2,
     BudgetNarrativeGenerated_v1_2,
     CD511_v1_1,
@@ -228,9 +229,15 @@ def key_contacts_generated_v2_0():
     return setup_resolved_form(KeyContactsGenerated_v2_0)
 
 
-@pytest.fixture(scope="session")
-def attachment_form_v1_2():
-    return setup_resolved_form(AttachmentForm_v1_2)
+@pytest.fixture(
+    scope="session",
+    params=[
+        pytest.param(AttachmentForm_v1_2, id="handwritten"),
+        pytest.param(AttachmentsGenerated_v1_2, id="generated"),
+    ],
+)
+def attachment_form_v1_2(request):
+    return setup_resolved_form(request.param)
 
 
 @pytest.fixture(

@@ -552,6 +552,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     isolated_form_competitions = [
         # form names are abbreviated in opportunity number to be under the 40 char limit
         (
+            "AttachmentForm_1_2_Generated",
+            "E2E-ATTG",
+            "Attachments (Generated)",
+            "84fd9552-81fa-4765-a6f0-13ece83d68ab",
+            "6a9a7a23-fb53-4660-9344-a071ce05ae84",
+        ),
+        (
             "AttachmentForm_1_2",
             "E2E-ATT",
             "ATTACHMENTFORM",
