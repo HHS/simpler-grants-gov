@@ -48,6 +48,7 @@ Feature: Apply - Application Form Failure Path
 			| nasa-pi-and-aor                      | NASA PI and AOR                             | required fields left empty                        |
 			| other-narrative-attachment           | Other Narrative Attachments                 | no file uploaded for required attachment fields   |
 			| phs-research-plan                    | PHS 398 Research Plan                       | Research Strategy attachment missing              |
+			| phs-research-training | PHS 398 Research Training Program Plan | required fields left empty |
 			| project-abstract-summary             | Project Abstract Summary                    | required fields left empty                        |
 			| project-abstract                     | Project Abstract                            | required fields left empty                        |
 			| project-narrative-attachment         | Project Narrative Attachment                | no file uploaded for required attachment fields   |
