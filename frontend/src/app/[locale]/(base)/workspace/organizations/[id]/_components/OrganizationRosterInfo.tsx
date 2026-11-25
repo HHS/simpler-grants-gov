@@ -22,8 +22,10 @@ export const OrganizationRosterInfo = ({
   );
 
   return (
-    <div className="margin-y-5 display-flex flex-justify flex-align-center">
-      <h3 className="margin-0">{t("title")}</h3>
+    <div className="margin-y-5 tablet:display-flex flex-justify flex-align-center">
+      <h3 className="margin-top-0 margin-bottom-2 tablet:margin-bottom-0">
+        {t("title")}
+      </h3>
       {canManageMembers && (
         <Link
           href={`/workspace/organizations/${organizationId}/manage-users`}
