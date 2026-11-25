@@ -6,10 +6,10 @@ Instead of the [SGG UI schema](../README.md#ui-schema), a form can use a [JSON F
 
 A field in a JSON Forms form can be rendered by two kinds of widget:
 
-| Term                   | What it is                                                                                                                                        | Where it's used                                                                                                   |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **SGG widget**         | One of the existing USWDS widgets in `widgets/`, patterned after RJSF widgets and registered in `widgetComponents`                                | Every field in an SGG form, and every field the SGG adapter can map in a JSON Forms form                          |
-| **JSON Forms control** | A component in `controls/` written with JSON Forms' API (a tester plus `withJsonFormsControlProps` or a similar wrapper) instead of an SGG widget | The form library's sections and collapsible list. See [Adding a JSON Forms control](#adding-a-json-forms-control) |
+| Term                   | What it is                                                                                                                                        | Where it's used                                                                                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SGG widget**         | One of the existing USWDS widgets in `widgets/`, patterned after RJSF widgets and registered in `widgetComponents`                                | Every field in an SGG form, and every field the SGG adapter can map in a JSON Forms form                                                                                                            |
+| **JSON Forms control** | A component in `controls/` written with JSON Forms' API (a tester plus `withJsonFormsControlProps` or a similar wrapper) instead of an SGG widget | The apply form's sections (`FieldsetControl`) and lists (`FieldListControl`), and the form library's sections and collapsible list. See [Adding a JSON Forms control](#adding-a-json-forms-control) |
 
 The **SGG adapter** (`AdaptedControl`, `AdaptedLayout`) is what lets JSON Forms render a control with an SGG widget.
 
@@ -26,15 +26,15 @@ In these READMEs, "renderer" means the form-level renderer: the SGG renderer, or
 
 ## How controls map to SGG UI schema nodes
 
-| JSON Forms element                      | SGG UI schema node(s)                                                                             |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Control on a scalar                     | One `field`                                                                                       |
-| Control with `options.readonly: true`   | One `null` field (rendered disabled)                                                              |
-| Control with `options.widget`           | One `field` with that `widget`, if it names an SGG widget                                         |
-| Control on an object                    | One `field` per leaf of the object                                                                |
-| Control on a top-level array of objects | One `fieldList`, whose fields follow `options.detail` when it's set and the item schema otherwise |
-| `Group` with a `label`                  | A `section` named with `groupName(label)`                                                         |
-| Any other layout                        | Its children, flattened into the parent                                                           |
+| JSON Forms element                      | SGG UI schema node(s)                                                                                                                                                      |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Control on a scalar                     | One `field`                                                                                                                                                                |
+| Control with `options.readonly: true`   | One `null` field (rendered disabled)                                                                                                                                       |
+| Control with `options.widget`           | One `field` with that `widget`, if it names an SGG widget                                                                                                                  |
+| Control on an object                    | One `field` per leaf of the object                                                                                                                                         |
+| Control on a top-level array of objects | One `fieldList`, whose fields follow `options.detail` when it's set and the item schema otherwise. The list itself is rendered by `FieldListControl` (see [Lists](#lists)) |
+| `Group` with a `label`                  | A `section` named with `groupName(label)`                                                                                                                                  |
+| Any other layout                        | Its children, flattened into the parent                                                                                                                                    |
 
 ## How widgets are picked
 
@@ -48,16 +48,38 @@ In these READMEs, "renderer" means the form-level renderer: the SGG renderer, or
 
 See [Adding a new widget](../widgets/README.md#adding-a-new-widget) for an SGG widget, and [Adding a JSON Forms control](#adding-a-json-forms-control) below.
 
-## Known limitations
+## Lists
 
-These limitations come from the SGG widgets, not from JSON Forms. The SGG field-list widget renders each list entry itself, outside of JSON Forms, so JSON Forms never processes what's inside an entry:
+A control on an array of objects or plain values is rendered by `FieldListControl` (`controls/FieldListControl/`), a JSON Forms control ranked above the SGG adapter. It matches a list at any path: at the form's root, inside an object (`budget.line_items`), or inside another list's entry (`people[].phones`). The SGG field-list widget isn't used in JSON Forms forms.
 
-- **Rules on fields inside a list aren't applied.** Those fields always show.
-- **A list nested inside an object or a list entry isn't supported.** For example, a budget's line items (`budget.line_items`) or each key contact's phone numbers (`contacts[].phones`). It's skipped, so the applicant doesn't see it and no answer is collected for it.
+- **Entries:** JSON Forms stores the entries. Each entry is rendered with `JsonFormsDispatch` at its data path (`people.0`), using the control's `options.detail`, or a control per item property when there is no detail. A rule's condition is resolved against that entry, `FieldsetControl` renders a labeled group in an entry as a sub-section without a section id, and another `FieldListControl` renders a list in an entry.
+- **Plain values:** An entry of a list of strings, numbers or booleans is dispatched as a control on the entry itself (`#`), which the SGG adapter renders as one field at the entry's data path (`places.0`, named `places[0]`). The control is labeled with the item schema's title, or the list's title when the item schema has none. A list of enum values or attachments is still rendered by the multi-select or attachment widget.
+- **Labels:** A field is labeled with its control's `label` when the control has one, and with its schema's `title` otherwise, so a layout can override a question's title.
+- **Fields:** Each field in an entry is rendered by its SGG widget, named, read and matched to its warnings by its data path (see [Data paths](#how-it-works)). `shapeFormData` already reads names at any depth (`people[0]--phones[1]--number`), so saving is unchanged. A field is required when every property between it and its entry is required (`isRequiredInListEntry`), since `getRequiredProperties` stops at lists.
+- **Warnings:** A field shows the warnings whose `field` equals its path, built by `dataPathToWarningPath` (`$.people[0].phones[1].number`). Deleting an entry calls the form's `onFieldListEntryDelete`, the same callback the field-list widget calls.
+- **Headings:** The list's title is one level below the nearest heading, and each entry's heading is one level below the title (`headingLevel.tsx`). Each entry's heading also describes the fields in that entry (`aria-describedby`). Below h6, headings use `aria-level`.
+- **Add and delete:** The widget renders the same markup, classes and strings as the field-list widget, and respects the schema's `minItems` and `maxItems`.
 
-The server logs a warning when a form uses either one.
+### Known limitations
 
-JSON Forms itself supports both. Its own list components render each entry through JSON Forms at that entry's path (e.g. `contacts.0`). A rule's condition is resolved relative to that path, so rules inside an entry are evaluated against that entry. A nested list inside an entry is rendered the same way. Replacing the SGG field-list widget with a custom JSON Forms list widget would remove both limitations.
+- **The converted SGG UI schema is unchanged.** `convertUiSchema` still converts only a top-level list to a `fieldList`, and still reports a list inside an object or an entry as unsupported and a rule inside an entry as ignored. Those server logs are now wrong; the tree and the logs need the same update as the field-list approach in HHS/simpler-grants-gov#13044.
+- **The warnings summary** matches a field in a list only one level deep (`applyFormUtils`), so it doesn't link to a field in a nested list.
+- **An object control whose object contains a list** isn't supported. The UI schema has to put a control on the list itself.
+- **Minimum, maximum and delete-confirmation text** (`minItemsHeading`, `maxItemsHelperText`, etc.) from the SGG UI schema aren't supported. A JSON Forms UI schema has no equivalent options yet.
+
+### Compared with reusing the field-list widget
+
+The other approach (agilesix/simpler-grants-gov#72) reuses `FieldListWidget` for headings, add and delete, and adds a `renderEntry` prop so JSON Forms renders each entry.
+
+|                                     | `FieldListControl` (this approach)                                                                                             | `FieldListWidget` with `renderEntry`                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Lists inside an object              | Supported                                                                                                                      | Supported, with the `fieldList` named by its path                                                    |
+| Entry values                        | Read from JSON Forms' data, which is refreshed from the `<form>` on each input                                                 | A second copy in the widget's state, passed to JSON Forms through `renderEntry`                      |
+| Changes to shared SGG code          | Optional `dataPath` and `widgetProps` parameters on `getFieldConfig` and `renderFieldNode`; hand-written forms don't pass them | `FieldListWidget`, `FieldListWidgetProps`, warning matching and `rebaseFieldListWarningsAfterDelete` |
+| Duplicated code                     | The list markup, add and delete, and the min/max checks (about 130 lines, copied from `FieldListWidget`)                       | None                                                                                                 |
+| Hand-written forms                  | Unaffected                                                                                                                     | Affected only by the `formContext` fix in `FieldListWidget`                                          |
+| Behavior differences from SGG forms | Possible over time, since the list markup is a copy                                                                            | None: one widget renders both                                                                        |
+| After the SGG renderer is removed   | Already the only list widget for JSON Forms                                                                                    | `FieldListWidget` would still have two modes                                                         |
 
 ## Adding a JSON Forms control
 
@@ -71,4 +93,4 @@ A JSON Forms control is ranked above the SGG adapter (rank 10), so it renders wh
    - **Field names:** Render inputs with the HTML field name for their data path (`dataPathToHtmlName`), the name the SGG widgets use. Otherwise the answers aren't saved.
    - **Validation warnings:** Read warnings from `AdapterContext` to show them on the control's fields.
    - **Print mode:** Check `print` in the same context so the print view works.
-6. Dispatch any child elements at their data paths with `JsonFormsDispatch`. The adapter renders an SGG widget for each child control from its data path, so a control doesn't render its children's fields itself.
+6. Dispatch any child elements at their data paths with `JsonFormsDispatch`. The adapter renders an SGG widget for each child control from its data path, so a control doesn't render its children's fields itself. If the control repeats content, like a list's entries, dispatch each repetition at its own data path (`people.0`) and wrap it in `HeadingLevel` with the repetition's heading as `fieldHeadingId`, so that heading describes each field inside.

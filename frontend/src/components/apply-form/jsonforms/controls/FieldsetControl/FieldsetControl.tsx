@@ -9,6 +9,7 @@ import {
   type LayoutProps,
 } from "@jsonforms/core";
 import { JsonFormsDispatch, withJsonFormsLayoutProps } from "@jsonforms/react";
+import { hasListIndex } from "src/utils/applyForm/dataPaths";
 
 import { useId } from "react";
 import { Fieldset, FormGroup } from "@trussworks/react-uswds";
@@ -29,7 +30,8 @@ const FIELDSET_RANK = 11;
  * Render a labeled group as a form section: a fieldset with the id the form's navigation
  * links to (`form-section-<name>`), a heading one level below the nearest heading, and the
  * group's description as markdown. Use the same markup and classes as `FieldsetWidget`, so
- * JSON Forms forms and SGG forms look alike.
+ * JSON Forms forms and SGG forms look alike. Inside a list entry, render a smaller
+ * sub-section without the id, since every entry repeats it.
  */
 const FieldsetControl = ({
   uischema,
@@ -62,9 +64,11 @@ const FieldsetControl = ({
 
   const label = layout.label ?? "";
   const description = layout.options?.description as string | undefined;
+  const inEntry = hasListIndex(path);
   return (
     <Fieldset
-      id={`form-section-${groupName(label)}`}
+      id={inEntry ? undefined : `form-section-${groupName(label)}`}
+      className={inEntry ? "margin-top-3" : undefined}
       // Name the section by its heading, so assistive technology announces it.
       aria-labelledby={headingId}
     >
@@ -72,7 +76,11 @@ const FieldsetControl = ({
         <Heading
           level={level + 1}
           id={headingId}
-          className="usa-legend font-sans-lg margin-bottom-05 margin-top-5"
+          className={
+            inEntry
+              ? "text-bold font-sans-sm margin-top-0"
+              : "usa-legend font-sans-lg margin-bottom-05 margin-top-5"
+          }
         >
           {label}
         </Heading>
