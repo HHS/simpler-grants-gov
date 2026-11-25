@@ -261,8 +261,8 @@ run "reject_non_nofo_opt_in" {
 run "reject_without_load_balancer" {
   command = plan
   variables {
-    enable_load_balancer = false
-    pdf_readability_waf  = {}
+    load_balancer_mode  = "none"
+    pdf_readability_waf = {}
   }
   expect_failures = [var.pdf_readability_waf]
 }

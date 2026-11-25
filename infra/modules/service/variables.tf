@@ -166,18 +166,29 @@ variable "enable_api_gateway_domain_name" {
   default     = true
 }
 
-variable "enable_load_balancer" {
-  description = "Whether to enable a load balancer for the service"
-  type        = bool
-  default     = true
+variable "load_balancer_mode" {
+  description = <<EOT
+    How the service is exposed:
+    - "public": a public ALB (the default)
+    - "secure": a public ALB with ingress closed, plus an internal ALB that anything in
+      the VPC can reach. Used with the API Gateway VPC Link.
+    - "private": only an internal ALB, reachable from internal_alb_ingress_security_group_ids.
+      domain_name resolves to it through a private hosted zone in the VPC.
+    - "none": no load balancer
+  EOT
+  type        = string
+  default     = "public"
+
+  validation {
+    condition     = contains(["public", "secure", "private", "none"], var.load_balancer_mode)
+    error_message = "load_balancer_mode must be one of: public, secure, private, none."
+  }
 }
 
-variable "enable_secure_alb" {
-  description = <<EOT
-    Limit ALB traffic to internal vpc only
-  EOT
-  type        = bool
-  default     = false
+variable "internal_alb_ingress_security_group_ids" {
+  description = "Security groups allowed to reach the internal ALB on port 443, keyed by a static name (for example \"frontend\"). Used in private mode."
+  type        = map(string)
+  default     = {}
 }
 
 variable "enable_alb_cdn" {
@@ -471,7 +482,7 @@ variable "pdf_readability_waf" {
 
   validation {
     condition = var.pdf_readability_waf == null ? true : (
-      can(regex("(^|-)nofos-", var.service_name)) && var.enable_load_balancer
+      can(regex("(^|-)nofos-", var.service_name)) && contains(["public", "secure"], var.load_balancer_mode)
     )
     error_message = "PDF readability WAF controls require a NOFO service (nofos- or a workspace-prefixed -nofos-) with a load balancer."
   }

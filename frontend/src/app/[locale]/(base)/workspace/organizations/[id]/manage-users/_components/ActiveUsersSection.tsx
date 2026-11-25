@@ -1,35 +1,38 @@
 import { RemoveUserButton } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RemoveUserButton";
 import { RoleManager } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RoleManager";
-import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
+import { ORG_COLLABORATOR_ROLE_ID } from "src/constants/roles";
 import type { FetchedResource } from "src/types/authTypes";
 import type { UserDetail, UserRole } from "src/types/userTypes";
 import { formatFullName } from "src/utils/userNameUtils";
 
 import { getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
+import Link from "next/link";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 interface ActiveUsersSectionProps {
   organizationId: string;
   activeUsers: FetchedResource;
   roles: FetchedResource;
+  // Feature flag is on and the current user can manage organization members
+  showManagePermissions?: boolean;
+  // Feature flag is on
+  showExternal?: boolean;
 }
 
 export async function ActiveUsersSection({
   organizationId,
   activeUsers,
   roles,
+  showManagePermissions = false,
+  showExternal = false,
 }: ActiveUsersSectionProps) {
   const t = await getTranslations("ManageUsers");
-  const showExternal = featureFlagsManager.isFeatureEnabled(
-    "enableExternalCollaborators",
-    await cookies(),
-  );
 
   const usersData = activeUsers.data as UserDetail[] | undefined;
   const usersError = activeUsers.error;
@@ -61,6 +64,9 @@ export async function ActiveUsersSection({
     { cellData: t("usersTable.emailHeading") },
     { cellData: t("usersTable.roleHeading") },
     ...(showExternal ? [{ cellData: t("usersTable.externalHeading") }] : []),
+    ...(showManagePermissions
+      ? [{ cellData: t("usersTable.managePermissionsHeading") }]
+      : []),
     { cellData: t("usersTable.actionsHeading") },
   ];
 
@@ -95,6 +101,35 @@ export async function ActiveUsersSection({
 
       const rowClassName = isEbizPoc ? "text-base-dark" : undefined;
 
+      // Only Collaborator rows link to manage-permissions. Admin rows get no link.
+      const isCollaborator =
+        user.roles?.some((role) => role.role_id === ORG_COLLABORATOR_ROLE_ID) ??
+        false;
+
+      // On mobile the long column label sits right next to the link, so the
+      // link gets a small left margin there.
+      const managePermissionsCell = {
+        cellData: isCollaborator ? (
+          <Link
+            href={`/workspace/organizations/${organizationId}/manage-users/${user.user_id}/manage-permissions`}
+            className="display-inline-flex flex-align-center margin-left-1 tablet-lg:margin-left-0"
+            data-testid={`manage-permissions-link-${user.user_id}`}
+          >
+            <USWDSIcon name="edit" className="usa-icon margin-right-05" />
+            {t("usersTable.editPermissions")}{" "}
+            {/* every row has the same visible label, so name the user for screen readers */}
+            <span className="usa-sr-only">
+              {t("usersTable.editPermissionsFor", {
+                name: name || user.email,
+              })}
+            </span>
+          </Link>
+        ) : (
+          ""
+        ),
+        className: rowClassName,
+      };
+
       return [
         { cellData: name, className: rowClassName },
         { cellData: user.email, className: rowClassName },
@@ -118,6 +153,7 @@ export async function ActiveUsersSection({
               },
             ]
           : []),
+        ...(showManagePermissions ? [managePermissionsCell] : []),
         {
           cellData: (
             <RemoveUserButton

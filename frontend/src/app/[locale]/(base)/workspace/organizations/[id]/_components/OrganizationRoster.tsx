@@ -1,12 +1,10 @@
 import { MissingAuthError } from "src/errors";
-import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 import { getOrganizationUsers } from "src/services/fetch/fetchers/organizationsFetcher";
 import { logger } from "src/services/logger/simplerLogger";
 import { UserDetail } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
 import { Alert, Table } from "@trussworks/react-uswds";
 
 import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
@@ -14,8 +12,10 @@ import { OrganizationRosterInfo } from "./OrganizationRosterInfo";
 
 export const OrganizationRosterSkeleton = ({
   organizationId,
+  showExternal = false,
 }: {
   organizationId: string;
+  showExternal?: boolean;
 }) => {
   const t = useTranslations("OrganizationDetail.rosterTable");
   return (
@@ -33,6 +33,11 @@ export const OrganizationRosterSkeleton = ({
             <th scope="col" className="bg-base-lightest padding-y-205">
               {t("headings.roles")}
             </th>
+            {showExternal && (
+              <th scope="col" className="bg-base-lightest padding-y-205">
+                {t("headings.external")}
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -42,6 +47,7 @@ export const OrganizationRosterSkeleton = ({
             first_name="Loading"
             last_name="Loading"
             key="suspended"
+            showExternal={showExternal}
           />
         </tbody>
       </Table>
@@ -81,14 +87,12 @@ const OrganizationUserRow = ({
 
 export const OrganizationRoster = async ({
   organizationId,
+  showExternal = false,
 }: {
   organizationId: string;
+  showExternal?: boolean;
 }) => {
   const t = await getTranslations("OrganizationDetail.rosterTable");
-  const showExternal = featureFlagsManager.isFeatureEnabled(
-    "enableExternalCollaborators",
-    await cookies(),
-  );
 
   let organizationUsers;
   try {

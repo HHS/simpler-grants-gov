@@ -5,30 +5,22 @@ import React from "react";
 import "@testing-library/jest-dom";
 
 import { ActiveUsersSection } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ActiveUsersSection";
+import { ORG_COLLABORATOR_ROLE_ID } from "src/constants/roles";
 import type { FetchedResource } from "src/types/authTypes";
 import type { UserDetail, UserRole } from "src/types/userTypes";
 
-type TranslationFn = (key: string) => string;
+type TranslationFn = (key: string, values?: Record<string, string>) => string;
 
+// Returns the key, plus any values, so tests can check what was passed in
 const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_namespace: string) => Promise.resolve((key: string) => key),
+  (_namespace: string) =>
+    Promise.resolve((key: string, values?: Record<string, string>) =>
+      values ? `${key} ${Object.values(values).join(" ")}` : key,
+    ),
 );
 
 jest.mock("next-intl/server", () => ({
   getTranslations: (namespace: string) => getTranslationsMock(namespace),
-}));
-
-const isFeatureEnabledMock = jest.fn<boolean, [string, unknown]>(() => false);
-
-jest.mock("src/services/featureFlags/FeatureFlagManager", () => ({
-  featureFlagsManager: {
-    isFeatureEnabled: (name: string, cookies: unknown) =>
-      isFeatureEnabledMock(name, cookies),
-  },
-}));
-
-jest.mock("next/headers", () => ({
-  cookies: () => Promise.resolve({}),
 }));
 
 const tableWithResponsiveHeaderMock = jest.fn<void, [unknown]>();
@@ -51,7 +43,6 @@ const makeResource = (
 describe("ActiveUsersSection", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    isFeatureEnabledMock.mockReturnValue(false);
   });
 
   it("renders zero-state text when there are no active users", async () => {
@@ -265,6 +256,98 @@ describe("ActiveUsersSection", () => {
     expect(actionsCellElement).toBeTruthy();
     expect(actionsCellElement.props.disabled).toBe(true);
   });
+  describe("manage permissions column", () => {
+    const adminRole: UserRole = {
+      role_id: "admin-role",
+      role_name: "Organization Admin",
+      privileges: [],
+    };
+    const collaboratorRole: UserRole = {
+      role_id: ORG_COLLABORATOR_ROLE_ID,
+      role_name: "Collaborator",
+      privileges: [],
+    };
+    const users: UserDetail[] = [
+      {
+        user_id: "admin-1",
+        email: "admin@example.com",
+        first_name: "Ada",
+        last_name: "Admin",
+        roles: [adminRole],
+      },
+      {
+        user_id: "collab-1",
+        email: "collab@example.com",
+        first_name: "Cole",
+        last_name: "Collab",
+        roles: [collaboratorRole],
+      },
+    ];
+
+    type TableProps = {
+      headerContent: { cellData: string }[];
+      tableRowData: { cellData: React.ReactNode }[][];
+    };
+
+    const getTableProps = async (showManagePermissions?: boolean) => {
+      render(
+        await ActiveUsersSection({
+          organizationId: "org-123",
+          activeUsers: makeResource({ data: users }),
+          roles: makeResource({ data: [adminRole] }),
+          showManagePermissions,
+        }),
+      );
+      return tableWithResponsiveHeaderMock.mock.calls[0][0] as TableProps;
+    };
+
+    it("is hidden by default", async () => {
+      const tableProps = await getTableProps();
+
+      expect(
+        tableProps.headerContent.map((header) => header.cellData),
+      ).not.toContain("usersTable.managePermissionsHeading");
+      expect(tableProps.tableRowData[1]).toHaveLength(4);
+    });
+
+    it("adds the column before Actions when enabled", async () => {
+      const tableProps = await getTableProps(true);
+
+      expect(tableProps.headerContent.map((header) => header.cellData)).toEqual(
+        [
+          "usersTable.nameHeading",
+          "usersTable.emailHeading",
+          "usersTable.roleHeading",
+          "usersTable.managePermissionsHeading",
+          "usersTable.actionsHeading",
+        ],
+      );
+      expect(tableProps.tableRowData[0]).toHaveLength(5);
+      expect(tableProps.tableRowData[1]).toHaveLength(5);
+    });
+
+    it("links Collaborator rows to their manage-permissions page", async () => {
+      const tableProps = await getTableProps(true);
+
+      render(<>{tableProps.tableRowData[1][3].cellData}</>);
+
+      const link = screen.getByTestId("manage-permissions-link-collab-1");
+      expect(link).toHaveAttribute(
+        "href",
+        "/workspace/organizations/org-123/manage-users/collab-1/manage-permissions",
+      );
+      // the visible label is the same on every row, so the user is named for screen readers
+      expect(link).toHaveAccessibleName(
+        "usersTable.editPermissions usersTable.editPermissionsFor Cole Collab",
+      );
+    });
+
+    it("doesn't add a link to Admin rows", async () => {
+      const tableProps = await getTableProps(true);
+
+      expect(tableProps.tableRowData[0][3].cellData).toBe("");
+    });
+  });
 
   describe("external collaborator column", () => {
     const roles: UserRole[] = [
@@ -290,11 +373,16 @@ describe("ActiveUsersSection", () => {
       },
     ];
 
-    const loadTableProps = async () => {
+    const loadTableProps = async (
+      showExternal?: boolean,
+      showManagePermissions?: boolean,
+    ) => {
       const component = await ActiveUsersSection({
         organizationId: "org-123",
         activeUsers: makeResource({ data: users }),
         roles: makeResource({ data: roles }),
+        showExternal,
+        showManagePermissions,
       });
       render(component);
       await screen.findByTestId("active-users-table");
@@ -304,25 +392,17 @@ describe("ActiveUsersSection", () => {
       };
     };
 
-    it("does not render the External column when the feature flag is off", async () => {
-      isFeatureEnabledMock.mockReturnValue(false);
-
+    it("does not render the External column by default", async () => {
       const tableProps = await loadTableProps();
 
-      expect(isFeatureEnabledMock).toHaveBeenCalledWith(
-        "enableExternalCollaborators",
-        expect.anything(),
-      );
       expect(
         tableProps.headerContent.map((header) => header.cellData),
       ).not.toContain("usersTable.externalHeading");
       expect(tableProps.tableRowData[0]).toHaveLength(4);
     });
 
-    it("renders the External column as plain text when the feature flag is on", async () => {
-      isFeatureEnabledMock.mockReturnValue(true);
-
-      const tableProps = await loadTableProps();
+    it("renders the External column as plain text when enabled", async () => {
+      const tableProps = await loadTableProps(true);
 
       expect(tableProps.headerContent.map((header) => header.cellData)).toEqual(
         [
@@ -340,6 +420,25 @@ describe("ActiveUsersSection", () => {
       expect(externalRow[3].cellData).toBe("usersTable.externalLabel");
 
       expect(staffRow[3].cellData).toBe("");
+    });
+
+    it("places Label before Manage permissions and Actions", async () => {
+      const tableProps = await loadTableProps(true, true);
+
+      expect(tableProps.headerContent.map((header) => header.cellData)).toEqual(
+        [
+          "usersTable.nameHeading",
+          "usersTable.emailHeading",
+          "usersTable.roleHeading",
+          "usersTable.externalHeading",
+          "usersTable.managePermissionsHeading",
+          "usersTable.actionsHeading",
+        ],
+      );
+      expect(tableProps.tableRowData[0]).toHaveLength(6);
+      expect(tableProps.tableRowData[0][3].cellData).toBe(
+        "usersTable.externalLabel",
+      );
     });
   });
 });

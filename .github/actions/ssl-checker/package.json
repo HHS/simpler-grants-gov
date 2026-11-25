@@ -1,0 +1,23 @@
+{
+  "name": "ssl-checker",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.1",
+    "rollup": "^4.68.7"
+  },
+  "dependencies": {
+    "@actions/core": "^3.0.1",
+    "tslib": "^2.9.1",
+    "typescript": "^6.0.3"
+  }
+}

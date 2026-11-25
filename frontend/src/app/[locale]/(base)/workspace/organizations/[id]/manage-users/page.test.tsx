@@ -13,6 +13,7 @@ type Params = { locale: string; id: string };
 // Keep this type minimal so eslint doesn't treat it as propTypes
 type ManageUsersPageContentMinimalProps = {
   organizationId: string;
+  externalCollaboratorsEnabled: boolean;
 };
 
 const ManageUsersPageContentMock = jest.fn<
@@ -35,7 +36,10 @@ jest.mock(
   }),
 );
 
-type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
+type PageFn = (args: {
+  params: Promise<Params>;
+  searchParams?: Promise<Record<string, string>>;
+}) => Promise<JSX.Element>;
 
 jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
   __esModule: true,
@@ -47,6 +51,23 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
 
 jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
+}));
+
+const cookiesStub = { get: jest.fn() };
+
+jest.mock("next/headers", () => ({
+  cookies: () => Promise.resolve(cookiesStub),
+}));
+
+const isFeatureEnabledMock = jest.fn<boolean, [string, unknown, unknown]>(
+  () => false,
+);
+
+jest.mock("src/services/featureFlags/FeatureFlagManager", () => ({
+  featureFlagsManager: {
+    isFeatureEnabled: (name: string, cookies: unknown, searchParams: unknown) =>
+      isFeatureEnabledMock(name, cookies, searchParams),
+  },
 }));
 
 type TranslationFn = (key: string) => string;
@@ -174,6 +195,38 @@ describe("manage-users page", () => {
     expect(gateProps.resourcePromises).toHaveProperty("invitedUsersList");
     expect(gateProps.resourcePromises).toHaveProperty("activeUsersList");
     expect(gateProps.resourcePromises).toHaveProperty("organizationRolesList");
+  });
+
+  it("passes the enableExternalCollaborators flag to the page content", async () => {
+    isFeatureEnabledMock.mockReturnValueOnce(true);
+    const searchParams = { _ff: "enableExternalCollaborators:true" };
+
+    const element = await PageTyped({
+      params: Promise.resolve({ locale: "en", id: "org-123" }),
+      searchParams: Promise.resolve(searchParams),
+    });
+    render(element);
+
+    // search params are passed so a flag set with ?_ff= applies on first load
+    expect(isFeatureEnabledMock).toHaveBeenCalledWith(
+      "enableExternalCollaborators",
+      cookiesStub,
+      searchParams,
+    );
+    expect(
+      ManageUsersPageContentMock.mock.calls[0][0].externalCollaboratorsEnabled,
+    ).toBe(true);
+  });
+
+  it("hides the external collaborator features when the flag is off", async () => {
+    const element = await PageTyped({
+      params: Promise.resolve({ locale: "en", id: "org-123" }),
+    });
+    render(element);
+
+    expect(
+      ManageUsersPageContentMock.mock.calls[0][0].externalCollaboratorsEnabled,
+    ).toBe(false);
   });
 
   it("generateMetadata returns translated title and description", async () => {

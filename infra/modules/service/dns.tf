@@ -4,7 +4,7 @@ locals {
 
 resource "aws_route53_record" "app" {
   # Don't create DNS record for temporary environments (e.g. ones spun up by CI/)
-  count = local.domain_name != null && var.hosted_zone_id != null ? 1 : 0
+  count = local.has_public_alb && local.domain_name != null && var.hosted_zone_id != null ? 1 : 0
 
   name    = local.domain_name
   zone_id = var.hosted_zone_id

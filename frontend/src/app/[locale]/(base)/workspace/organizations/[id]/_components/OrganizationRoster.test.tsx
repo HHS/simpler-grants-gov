@@ -1,24 +1,20 @@
 import { render, screen, within } from "@testing-library/react";
-import { OrganizationRoster } from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationRoster";
+import {
+  OrganizationRoster,
+  OrganizationRosterSkeleton,
+} from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationRoster";
 import type { UserDetail } from "src/types/userTypes";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-const isFeatureEnabledMock = jest.fn<boolean, [string, unknown]>(() => false);
 const getOrganizationUsersMock = jest.fn<Promise<UserDetail[]>, [string]>();
-
-jest.mock("src/services/featureFlags/FeatureFlagManager", () => ({
-  featureFlagsManager: {
-    isFeatureEnabled: (name: string, cookies: unknown) =>
-      isFeatureEnabledMock(name, cookies),
-  },
-}));
 
 jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
   getOrganizationUsers: (organizationId: string) =>
     getOrganizationUsersMock(organizationId),
 }));
 
-jest.mock("next/headers", () => ({
-  cookies: () => Promise.resolve({}),
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("next-intl/server", () => ({
@@ -51,15 +47,17 @@ const users: UserDetail[] = [
   },
 ];
 
-const renderRoster = async () => {
-  const component = await OrganizationRoster({ organizationId: "org-123" });
+const renderRoster = async (showExternal?: boolean) => {
+  const component = await OrganizationRoster({
+    organizationId: "org-123",
+    showExternal,
+  });
   render(component);
 };
 
 describe("OrganizationRoster", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    isFeatureEnabledMock.mockReturnValue(false);
     getOrganizationUsersMock.mockResolvedValue(users);
   });
 
@@ -71,22 +69,16 @@ describe("OrganizationRoster", () => {
     expect(screen.getByText("Ext Ernal")).toBeVisible();
   });
 
-  it("does not render the External column when the feature flag is off", async () => {
+  it("does not render the External column by default", async () => {
     await renderRoster();
 
-    expect(isFeatureEnabledMock).toHaveBeenCalledWith(
-      "enableExternalCollaborators",
-      expect.anything(),
-    );
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     expect(screen.queryByText("headings.external")).not.toBeInTheDocument();
     expect(screen.queryByText("externalLabel")).not.toBeInTheDocument();
   });
 
-  it("renders the External column with plain text for external users when the feature flag is on", async () => {
-    isFeatureEnabledMock.mockReturnValue(true);
-
-    await renderRoster();
+  it("renders the External column with plain text for external users when enabled", async () => {
+    await renderRoster(true);
 
     expect(screen.getAllByRole("columnheader")).toHaveLength(4);
     expect(
@@ -98,5 +90,30 @@ describe("OrganizationRoster", () => {
     expect(
       within(staffRow).queryByText("externalLabel"),
     ).not.toBeInTheDocument();
+  });
+
+  describe("OrganizationRosterSkeleton", () => {
+    it("renders three columns by default", () => {
+      render(<OrganizationRosterSkeleton organizationId="org-123" />);
+
+      expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+      expect(
+        within(screen.getAllByRole("row")[1]).getAllByRole("cell"),
+      ).toHaveLength(3);
+    });
+
+    it("renders the External column so it matches the loaded table", () => {
+      render(
+        <OrganizationRosterSkeleton organizationId="org-123" showExternal />,
+      );
+
+      expect(screen.getAllByRole("columnheader")).toHaveLength(4);
+      expect(
+        screen.getByRole("columnheader", { name: "headings.external" }),
+      ).toBeVisible();
+      expect(
+        within(screen.getAllByRole("row")[1]).getAllByRole("cell"),
+      ).toHaveLength(4);
+    });
   });
 });

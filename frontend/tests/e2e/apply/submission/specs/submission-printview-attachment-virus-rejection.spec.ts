@@ -80,8 +80,8 @@ if (playwrightEnv.hasInfectedFileScanner) {
       // Declared at describe-scope (not test fixtures) so the SAME authenticated
       // page/context created in beforeAll carries through to the test below.
       // Previously these were closed at the end of beforeAll and the test used
-      // Playwright's fixture-provided { page, context } instead — a fresh,
-      // unauthenticated context — which is why goto(applicationUrl) timed out
+      // Playwright's fixture-provided { page, context } instead - a fresh,
+      // unauthenticated context - which is why goto(applicationUrl) timed out
       // waiting for application-form-link (redirected to an unauthenticated view).
 
       let browser: Browser;
@@ -238,6 +238,16 @@ if (playwrightEnv.hasInfectedFileScanner) {
           await submitApplicationAndVerify(page, "success");
 
           await verifySubmissionConfirmation(page);
+
+          // Navigate back to the application page to ensure fresh history data is fetched
+          // from the backend (the submission audit event must be persisted and visible)
+          await page.goto(applicationUrl);
+          await page.waitForLoadState("domcontentloaded");
+
+          // Wait for the application page to be fully loaded with updated history
+          await expect(
+            page.locator(".simpler-application-forms-table").first(),
+          ).toBeVisible({ timeout: 30000 });
 
           const postSubmitActivities =
             await getApplicationHistoryActivities(page);
