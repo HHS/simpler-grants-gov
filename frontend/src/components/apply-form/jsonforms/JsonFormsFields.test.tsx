@@ -75,6 +75,33 @@ describe("JsonFormsFields", () => {
     expect(title).toBeRequired();
   });
 
+  it("labels and describes a field with the control's label and description over the schema's", () => {
+    render(
+      <JsonFormsFields
+        errors={null}
+        formData={{}}
+        schema={schema}
+        uiSchema={{
+          type: "VerticalLayout",
+          elements: [
+            {
+              type: "Control",
+              scope: "#/properties/title",
+              label: "Title of the Project",
+              options: { description: "Use the title on the cover page." },
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Title of the Project")).toBeInTheDocument();
+    expect(screen.queryByText("Project Title")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Use the title on the cover page."),
+    ).toBeInTheDocument();
+  });
+
   it("wraps a labeled group in the section fieldset the nav links to", () => {
     renderFields();
 

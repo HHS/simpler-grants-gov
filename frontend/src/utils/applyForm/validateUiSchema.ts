@@ -197,9 +197,12 @@ export const UiJsonSchema: RJSFSchema = {
             title: {
               type: "string",
             },
+            description: {
+              type: "string",
+            },
             type: {
               type: "string",
-              enum: ["boolean", "string", "number", "integer", "null"],
+              enum: ["boolean", "string", "number", "integer", "null", "array"],
             },
             enum: {
               type: "array",

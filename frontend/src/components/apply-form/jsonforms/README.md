@@ -23,15 +23,16 @@ In these READMEs, "renderer" means the form-level renderer: the SGG renderer, or
 
 ## How controls map to SGG UI schema nodes
 
-| JSON Forms element                      | SGG UI schema node(s)                                                                             |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Control on a scalar                     | One `field`                                                                                       |
-| Control with `options.readonly: true`   | One `null` field (rendered disabled)                                                              |
-| Control with `options.widget`           | One `field` with that `widget`, if it names an SGG widget                                         |
-| Control on an object                    | One `field` per leaf of the object                                                                |
-| Control on a top-level array of objects | One `fieldList`, whose fields follow `options.detail` when it's set and the item schema otherwise |
-| `Group` with a `label`                  | A `section` named with `groupName(label)`                                                         |
-| Any other layout                        | Its children, flattened into the parent                                                           |
+| JSON Forms element                            | SGG UI schema node(s)                                                                             |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Control on a scalar                           | One `field`                                                                                       |
+| Control with `options.readonly: true`         | One `null` field (rendered disabled)                                                              |
+| Control with `options.widget`                 | One `field` with that `widget`, if it names an SGG widget                                         |
+| Control with `label` or `options.description` | One `field` whose `schema` overrides the JSON schema's `title` and `description`                  |
+| Control on an object                          | One `field` per leaf of the object                                                                |
+| Control on a top-level array of objects       | One `fieldList`, whose fields follow `options.detail` when it's set and the item schema otherwise |
+| `Group` with a `label`                        | A `section` named with `groupName(label)`                                                         |
+| Any other layout                              | Its children, flattened into the parent                                                           |
 
 ## How widgets are picked
 

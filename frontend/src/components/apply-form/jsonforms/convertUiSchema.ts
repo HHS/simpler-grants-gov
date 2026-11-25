@@ -6,6 +6,7 @@ import type {
 } from "@jsonforms/core";
 import type { RJSFSchema } from "@rjsf/utils";
 import type {
+  SchemaField,
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
@@ -154,15 +155,36 @@ export const controlToNodes = (
     }));
   }
 
-  return [
-    {
-      type,
-      definition,
-      ...(options.widget && FIELD_WIDGETS.has(options.widget)
-        ? { widget: options.widget as WidgetTypes }
-        : {}),
-    },
-  ];
+  const field: UiSchemaField = {
+    type,
+    definition,
+    ...(options.widget && FIELD_WIDGETS.has(options.widget)
+      ? { widget: options.widget as WidgetTypes }
+      : {}),
+  };
+  const override = labelOverride(control, fieldSchema);
+  return [override ? { ...field, schema: override } : field];
+};
+
+/**
+ * The control's label and help text, as the field's `schema` override, when the control
+ * sets either. A layout can word a shared question for one form, and the SGG field shows
+ * the override over the JSON schema's `title` and `description`.
+ */
+const labelOverride = (
+  control: ControlElement,
+  fieldSchema: RJSFSchema,
+): SchemaField | undefined => {
+  const label = typeof control.label === "string" ? control.label : undefined;
+  const { description } = (control.options ?? {}) as { description?: unknown };
+  if (label === undefined && typeof description !== "string") return undefined;
+  // The override replaces the schema's title and type, so it can only carry a single type.
+  if (typeof fieldSchema.type !== "string") return undefined;
+  return {
+    title: label ?? fieldSchema.title ?? "",
+    type: fieldSchema.type,
+    ...(typeof description === "string" ? { description } : {}),
+  };
 };
 
 /** A section name from a group label, shared by the fieldset id and the nav link to it. */
