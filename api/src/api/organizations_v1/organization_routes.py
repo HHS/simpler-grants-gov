@@ -195,7 +195,7 @@ def organization_remove_user(
 @organization_blueprint.put("/<uuid:organization_id>/users/<uuid:user_id>")
 @organization_blueprint.input(OrganizationUpdateUserRolesRequestSchema, location="json")
 @organization_blueprint.output(OrganizationUpdateUserRolesResponseSchema)
-@organization_blueprint.doc(responses=[200, 401, 403, 404])
+@organization_blueprint.doc(responses=[200, 401, 403, 404, 422])
 @organization_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def organization_update_user_roles(

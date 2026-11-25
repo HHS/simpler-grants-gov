@@ -18,23 +18,24 @@ from src.db.models.user_models import (
 )
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.organization_audit import add_audit_event
-from src.services.organizations_v1.organization_user_utils import validate_organization_user_exists
+from src.services.organizations_v1.organization_user_utils import (
+    get_organization_application_users,
+    validate_organization_user_exists,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def check_last_admin_protection(
-    db_session: db.Session, target_user_id: UUID, organization: Organization
-) -> None:
-    """Check if removing this user would leave the organization without any admins.
+def is_last_admin(db_session: db.Session, target_user_id: UUID, organization: Organization) -> bool:
+    """Check if the user is the only admin of the organization.
 
     Args:
         db_session: Database session
-        target_user_id: ID of user being removed
-        organization: Organization the user is being removed from
+        target_user_id: ID of user to check
+        organization: Organization to check
 
-    Raises:
-        FlaskError: 403 if this would remove the last admin
+    Returns:
+        bool: True if the user is the organization's only admin
     """
 
     # Get all user IDs in the organization who have.MANAGE_ORG_MEMBERS privilege
@@ -53,7 +54,23 @@ def check_last_admin_protection(
     admin_user_ids = set(db_session.execute(admin_user_ids_stmt).scalars().all())
 
     # Check if target user is an admin and if they're the only admin
-    if target_user_id in admin_user_ids and len(admin_user_ids) == 1:
+    return target_user_id in admin_user_ids and len(admin_user_ids) == 1
+
+
+def check_last_admin_protection(
+    db_session: db.Session, target_user_id: UUID, organization: Organization
+) -> None:
+    """Check if removing this user would leave the organization without any admins.
+
+    Args:
+        db_session: Database session
+        target_user_id: ID of user being removed
+        organization: Organization the user is being removed from
+
+    Raises:
+        FlaskError: 403 if this would remove the last admin
+    """
+    if is_last_admin(db_session, target_user_id, organization):
         raise_flask_error(403, message="Cannot remove the last administrator from organization")
 
 
@@ -89,6 +106,10 @@ def remove_user_from_organization(
 
     # Check last admin protection
     check_last_admin_protection(db_session, target_user_id, organization)
+
+    # Delete the user's access to the organization's applications
+    for app_user in get_organization_application_users(db_session, org_user):
+        db_session.delete(app_user)
 
     # Perform the deletion - cascade delete will handle OrganizationUserRole records
     db_session.delete(org_user)
