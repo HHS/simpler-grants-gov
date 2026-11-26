@@ -29,9 +29,11 @@ type FormDataToJsonOptions = {
   into proper data types based on specified type from schema definition
 
   note:
+  - string type fields keep the text as entered (or undefined/null), even when it looks like JSON,
+    with line breaks sent as \n
   - string representations of booleans are cast to booleans
   - for number type fields, cast to number as long as a value is present
-  - for string type fields that represent a number, ensure they remain strings (or undefined/null)
+  - for fields with no type that represent a number, ensure they remain strings (or undefined/null)
   - otherwise it may be an object or array, so try to cast to parse json
     - note that this will cast a number string ("1") to a number, thus the necessity of the previous case
   - if the json parse fails, just return the string (or undefined/null)
@@ -41,9 +43,15 @@ type FormDataToJsonOptions = {
 */
 const parseValue = (
   value: unknown,
-  type: string,
+  type: string | undefined,
   defaultValue: null | undefined,
 ) => {
+  if (type === "string") {
+    // browsers submit a line break as \r\n but count it as one character
+    const text =
+      typeof value === "string" ? value.replace(/\r\n?/g, "\n") : value;
+    return text || defaultValue;
+  }
   if (value === "false") return false;
   if (value === "true") return true;
   if (
@@ -52,7 +60,7 @@ const parseValue = (
     !isNaN(Number(value))
   )
     return Number(value);
-  if (type === "string" && !isNaN(Number(value))) {
+  if (type === undefined && !isNaN(Number(value))) {
     return value || defaultValue;
   }
   try {
@@ -68,7 +76,7 @@ const getFieldType = (
   formSchema: RJSFSchema,
   delimiter: string,
   parentKey: string,
-): string => {
+): string | undefined => {
   // for fields that represent array items in the form schema, we need to reference
   // the "items" property of the field's schema definition. The form data key will
   // include an index into the array - switching that out for "items" will allow us to
@@ -87,10 +95,9 @@ const getFieldType = (
     // control inputs are filtered out before we get here, so this is a schema backed field
     // whose value we are about to guess the type of
     console.error(
-      "Undefined field type shaping form data - guessing string, submitted value may be the wrong type",
+      "Undefined field type shaping form data - guessing from the submitted value, which may be the wrong type",
       { formDataKey: currentKey, schemaPath: fullPath },
     );
-    return "string"; // I mean, like, we may as well take our best guess and cross our fingers
   }
   return formFieldDefinition?.type;
 };
