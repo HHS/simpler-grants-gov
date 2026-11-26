@@ -53,14 +53,10 @@ def create_user_applications(db_session: db.Session, user: User, count: int) -> 
             application_status=status,
             application_name=f"Pagination test application {i + 1}",
         )
-        factories.ApplicationUserFactory.create(
-            user=user, application=application, as_owner=True
-        )
+        factories.ApplicationUserFactory.create(user=user, application=application, as_owner=True)
         applications.append(application)
 
-    logger.info(
-        f"Created {count} applications for user", extra={"user_id": user.user_id}
-    )
+    logger.info(f"Created {count} applications for user", extra={"user_id": user.user_id})
     return applications
 
 
