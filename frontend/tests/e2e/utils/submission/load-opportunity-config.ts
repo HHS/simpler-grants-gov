@@ -58,6 +58,8 @@ import { RR_KEY_PERSON_EXPANDED_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-
 import { RR_KEY_PERSON_FORM_CONFIG } from "tests/e2e/apply/fixtures/rr-key-person-field-definitions";
 import { SF424_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424-data";
 import { SF424_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-field-definitions";
+import { SF424_INDIVIDUAL_GENERATED_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424-individual-data";
+import { SF424_INDIVIDUAL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-individual-field-definitions";
 import { SF424A_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424a-data";
 import { SF424A_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424a-field-definitions";
 import { SF424B_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424b-data";
@@ -109,6 +111,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   RR_KEY_PERSON_EXPANDED_GENERATED_OPPORTUNITY_DATA,
   NSF_KEY_PERSON_EXPANDED_GENERATED_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
+  SF424_INDIVIDUAL_GENERATED_OPPORTUNITY_DATA,
   SF424_SHORT_OPPORTUNITY_DATA,
   SF424A_OPPORTUNITY_DATA,
   SF424B_OPPORTUNITY_DATA,
@@ -147,6 +150,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   rrKeyPersonExpandedGenerated: RR_KEY_PERSON_EXPANDED_FORM_CONFIG,
   nsfKeyPersonExpandedGenerated: NSF_KEY_PERSON_EXPANDED_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
+  sf424IndividualGenerated: SF424_INDIVIDUAL_FORM_CONFIG,
   sf424short: SF424_SHORT_FORM_CONFIG,
   sf424a: SF424A_FORM_CONFIG,
   sf424b: SF424B_FORM_CONFIG,

@@ -61,6 +61,7 @@ from src.form_schema.forms import (
     SF424b_v1_1,
     SF424c_v2_0,
     SF424d_v1_1,
+    SF424IndividualGenerated_v2_0,
     SF424Short_v3_0,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
@@ -776,6 +777,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "NASA - PI and AOR Supplemental Data Sheet (Generated)",
                 NasaPIAndAORGenerated_v1_0.form_id,
                 "17281277-7149-4a77-b13e-89fe7e2f344a",
+            ),
+            (
+                "E2E-SF424INDG",
+                "Application for Federal Domestic Assistance - Individual (Generated)",
+                SF424IndividualGenerated_v2_0.form_id,
+                "9b289ebf-b283-4f99-8e52-2f5574b5d998",
             ),
             (
                 "E2E-SF424",

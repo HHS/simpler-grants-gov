@@ -14,6 +14,10 @@ using SimplerForms;
 namespace Forms.SF424Individual;
 
 /** Application for Federal Domestic Assistance — Individual, Grants.gov version2.0. */
+@Sgg.sync(#{
+  instructions: "df13d38a-8900-4009-91bd-d1d19cfa95fe",
+  xml: "mapping",
+})
 @Meta.form(#{
   id: "sf424-individual",
   formName: "Application for Federal Domestic Assistance - Individual",

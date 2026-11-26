@@ -42,6 +42,32 @@ class TestFieldOrder:
             "organization", "contacts.[].name.first_name", "contacts.[].email"
         )
 
+    def test_reads_sgg_read_only_fields_in_place(self):
+        ui_schema = [
+            {
+                "type": "section",
+                "name": "opportunity",
+                "children": [
+                    {"type": "null", "definition": "/properties/agency_name"},
+                    {"type": "field", "definition": "/properties/project_title"},
+                ],
+            }
+        ]
+        assert flatten_ui.field_order(ui_schema) == placed("agency_name", "project_title")
+
+    def test_skips_sgg_static_text(self):
+        ui_schema = [
+            {
+                "type": "section",
+                "name": "certification",
+                "children": [
+                    {"type": "text", "name": "statement", "content": "I certify..."},
+                    {"type": "field", "definition": "/properties/agree"},
+                ],
+            }
+        ]
+        assert flatten_ui.field_order(ui_schema) == placed("agree")
+
     @pytest.mark.parametrize("node_type", ["multiField", "text"])
     def test_raises_on_unknown_sgg_node_types(self, node_type):
         ui_schema = [{"type": "section", "children": [{"type": node_type, "name": "budget"}]}]

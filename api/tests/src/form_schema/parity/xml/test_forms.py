@@ -36,6 +36,7 @@ from tests.src.form_schema.parity.xml.diffs import (
     project_performance_site_location,
     rr_key_person_expanded_generated,
     rr_key_person_generated,
+    sf424_individual_generated,
 )
 from tests.src.form_schema.parity.xml.harness import flatten_form
 from tests.src.form_schema.parity.xml.harness.compare import (
@@ -68,6 +69,7 @@ DIFFS = [
     project_abstract_generated.DIFF,
     ed_abstract_form_generated.DIFF,
     nasa_pi_and_aor_generated.DIFF,
+    sf424_individual_generated.DIFF,
 ]
 
 

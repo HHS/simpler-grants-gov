@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Revision:   1.0  $ -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:SF424_Individual_2_0="http://apply.grants.gov/forms/SF424_Individual_2_0-V2.0" targetNamespace="http://apply.grants.gov/forms/SF424_Individual_2_0-V2.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="2.0">
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<!--Root element definition-->
+	<xs:element name="SF424_Individual_2_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="FederalAgency" type="globLib:AgencyNameDataType"/>
+				<xs:element name="CFDANumber" type="globLib:CFDANumberDataType" minOccurs="0"/>
+				<xs:element name="CFDATitle" type="globLib:CFDATitleDataType" minOccurs="0"/>
+				<xs:element name="Date_Received" type="xs:date"/>
+				<xs:element name="OpportunityID" type="globLib:OpportunityIDDataType"/>
+				<xs:element name="OpportunityTitle" type="globLib:OpportunityTitleDataType"/>
+				<xs:element name="AuthorizedRepresentativeName" type="globLib:HumanNameDataType"/>
+				<xs:element name="AuthorizedRepresentativeFax" type="globLib:TelephoneNumberDataType" minOccurs="0"/>
+				<xs:element name="AuthorizedRepresentativeEmail" type="globLib:EmailDataType"/>
+				<xs:element name="AuthorizedRepresentativePhoneNumber" type="globLib:TelephoneNumberDataType"/>
+				<xs:element name="EveningPhone" type="globLib:TelephoneNumberDataType" minOccurs="0"/>
+				<xs:element name="AuthorizedRepresentativeAddress" type="globLib:AddressDataTypeV3"/>
+				<xs:element name="citizenship" type="globLib:YesNoDataType"/>
+				<xs:element name="AlienRegistrationNumber" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="1"/>
+							<xs:maxLength value="14"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="CountryofOrigin" type="codes:CountryCodeDataTypeV3" minOccurs="0"/>
+				<xs:element name="VisitDate" type="xs:date" minOccurs="0"/>
+				<xs:element name="CongressionalDistrictApplicant" type="globLib:CongressionalDistrictDataType"/>
+				<xs:element name="ProjectTitle" type="globLib:ProjectTitleDataType"/>
+				<xs:element name="ProjectDescription">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="1"/>
+							<xs:maxLength value="1000"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="FundingPeriodStartDate" type="xs:date"/>
+				<xs:element name="FundingPeriodEndDate" type="xs:date"/>
+				<xs:element name="ApplicationCertification" type="globLib:YesNoDataType"/>
+				<xs:element name="AORSignature" type="globLib:SignatureDataType"/>
+				<xs:element name="AORDate" type="xs:date"/>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="2.0"/>
+		</xs:complexType>
+	</xs:element>
+	<!-- Custom types definitions -->
+</xs:schema>

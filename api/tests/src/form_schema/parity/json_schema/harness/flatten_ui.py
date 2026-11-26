@@ -29,6 +29,10 @@ from ...paths import ARRAY, Path
 # difference.
 SGG_CONTAINERS = frozenset({"section", "fieldList"})
 
+# The SGG node types that show one field. `null` shows it read-only, as the frontend's
+# getFieldConfig renders it disabled.
+SGG_FIELDS = frozenset({"field", "null"})
+
 
 # =============================================================================
 # PUBLIC FUNCTIONS
@@ -54,14 +58,17 @@ def _sgg(nodes: list[dict[str, Any]]) -> list[Path]:
     out = []
     for node in nodes:
         kind = node.get("type")
-        if kind == "field":
+        if kind in SGG_FIELDS:
             out.append(_definition_path(node["definition"]))
         elif kind in SGG_CONTAINERS:
             out.extend(_sgg(node.get("children", [])))
+        elif kind == "text" and "content" in node:
+            # Skip a paragraph of static text: it shows no field.
+            continue
         else:
             raise ValueError(
                 f"{node.get('name', '<unnamed>')}: the {kind!r} UI node type is not read, "
-                "only section, fieldList and field"
+                "only section, fieldList, field and null"
             )
     return out
 
