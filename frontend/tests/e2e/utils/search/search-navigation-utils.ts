@@ -213,7 +213,13 @@ export async function rapidlyClickResultTitle(
       link.dispatchEvent("click", undefined, { timeout: 3000 }),
     ),
   );
-  await page.waitForURL(DETAIL_URL_PATTERN, { timeout: NAVIGATION_TIMEOUT });
+  // Not page.waitForURL: it waits for the navigation's load event, and each extra click starts
+  // another navigation that supersedes the previous one. Firefox reports the superseded
+  // navigation as NS_BINDING_ABORTED and waitForURL throws; Chromium does not. toHaveURL only
+  // polls the current URL, so it ignores aborted navigations.
+  await expect(page).toHaveURL(DETAIL_URL_PATTERN, {
+    timeout: NAVIGATION_TIMEOUT,
+  });
   await expectOpportunityDetailPage(page, selected);
 
   return {
