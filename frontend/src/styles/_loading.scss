@@ -64,3 +64,13 @@ $spinner-size: units(4);
     pointer-events: none;
   }
 }
+
+.paginated-table-loading {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 150ms ease-in-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
