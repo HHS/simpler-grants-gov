@@ -22,7 +22,6 @@ import {
   type SortCase,
 } from "tests/e2e/utils/search/search-sort-utils";
 import {
-  clickPaginationPageNumber,
   fillSearchInputAndSubmit,
   getNumberOfOpportunitySearchResults,
   getSearchInput,
@@ -60,15 +59,20 @@ export function getNavigationSortCase(): SortCase {
   return sortCase;
 }
 
-const PAGE_2_BUTTON =
-  'button[data-testid="pagination-page-number"][aria-label="Page 2"]';
+/**
+ * The page 2 button, matched on its text (the page number). Its aria-label is "Page 2", except
+ * when there are exactly 2 pages: the last page's label is "Last page, page 2". That is why this
+ * doesn't use clickPaginationPageNumber or clickPaginationPageIfPresent, which match "Page 2".
+ */
+const getPage2Button = (page: Page) =>
+  page
+    .locator('button[data-testid="pagination-page-number"]')
+    .filter({ hasText: /^2$/ })
+    .first();
 
 /**
  * Goes to page 2 of the current results. Expects the results to have more than one page, and
  * says how many there were if not.
- *
- * Not clickPaginationPageIfPresent: it checks once, without waiting, and the pagination can be
- * missing for a moment while results re-render after a keyword, filter or sort change.
  */
 async function goToPage2(page: Page): Promise<void> {
   const total = await getNumberOfOpportunitySearchResults(page);
@@ -77,11 +81,14 @@ async function goToPage2(page: Page): Promise<void> {
     `Expected more than one page of results (over ${SEARCH_PAGE_SIZE}) but found ${total} ` +
       `at ${page.url()}. If this starts failing, the data no longer has enough opportunities`,
   ).toBeGreaterThan(SEARCH_PAGE_SIZE);
+
+  const page2Button = getPage2Button(page);
   await expect(
-    page.locator(PAGE_2_BUTTON).first(),
+    page2Button,
     `Expected a page 2 button for ${total} results at ${page.url()}`,
   ).toBeVisible({ timeout: 15000 });
-  await clickPaginationPageNumber(page, 2);
+  await page2Button.click();
+  await waitForURLContainsQueryParamValue(page, "page", "2");
 }
 
 /**

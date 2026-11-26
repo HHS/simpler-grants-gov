@@ -6,6 +6,11 @@
  * variants run on desktop Chrome only: login adds little to how results link to detail pages,
  * so the other browsers and the mobile viewport cover "not logged in" only.
  *
+ * On the mobile viewport only two tests run (MOBILE_TEST_TITLES): the title link in the mobile
+ * results layout, and browser back. The rest don't depend on the viewport: the links and the
+ * Opportunity Detail page are the same, and the filter drawer and sort behavior on mobile are
+ * covered by their own specs.
+ *
  * @scenario Navigate to detail page from different clickable entry points
  * @scenario Navigate to detail page from various result states
  *    One test per state type: filters, sorting, pagination.
@@ -58,6 +63,12 @@ function recordMissingLoadingIndicator(testInfo: TestInfo): void {
   });
 }
 
+const ENTRY_POINT_TEST = "navigate to detail page from the results table";
+const BROWSER_BACK_TEST = "browser back returns user to search results page";
+
+// The only tests that run on the mobile viewport
+const MOBILE_TEST_TITLES = [ENTRY_POINT_TEST, BROWSER_BACK_TEST];
+
 test.describe("Opportunity detail navigation from search results", () => {
   for (const loginState of LOGIN_STATES) {
     test.describe(`(${loginState})`, () => {
@@ -68,6 +79,10 @@ test.describe("Opportunity detail navigation from search results", () => {
           loginState === "logged in" &&
             (isMobile || browserName !== "chromium"),
           "Logged in variants run on desktop Chrome only",
+        );
+        test.skip(
+          isMobile && !MOBILE_TEST_TITLES.includes(testInfo.title),
+          "Viewport-independent, so it runs on desktop only",
         );
         /**
          * @background
@@ -83,7 +98,7 @@ test.describe("Opportunity detail navigation from search results", () => {
       });
 
       test(
-        "navigate to detail page from the results table",
+        ENTRY_POINT_TEST,
         { tag: [DISCOVERY, FULL_REGRESSION] },
         async ({ page }) => {
           /**
@@ -168,7 +183,7 @@ test.describe("Opportunity detail navigation from search results", () => {
       );
 
       test(
-        "browser back returns user to search results page",
+        BROWSER_BACK_TEST,
         { tag: [DISCOVERY, FULL_REGRESSION] },
         async ({ page }) => {
           /**
