@@ -289,6 +289,7 @@ export async function gotoOpportunityDetailByLink(
   const response = await page.goto(new URL(href, baseUrl).toString(), {
     timeout: NAVIGATION_TIMEOUT,
   });
+  expect(response, `No response for ${href}`).not.toBeNull();
   expect(
     response?.status(),
     `Direct navigation to ${href} should not return an error`,
