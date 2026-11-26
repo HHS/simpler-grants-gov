@@ -1641,6 +1641,13 @@ export const messages = {
     "YEM: YEMEN": "Yemen",
     "ZMB: ZAMBIA": "Zambia",
     "ZWE: ZIMBABWE": "Zimbabwe",
+    // The SF424 Mandatory XSD codes its choices; label them with the DAT's wording.
+    FundingRequest: "Funding Request",
+    StateReviewAvailable:
+      "a. This submission was made available to the State under Executive Order 12372 Process for review on",
+    StateReviewNotSelected:
+      "b. Program is subject to E.O. 12372 but has not been selected by State for review.",
+    StateReviewNotNeeded: "c. Program is not covered by E.O. 12372.",
   },
   Settings: {
     pageTitle: "Settings | Simpler.Grants.gov",

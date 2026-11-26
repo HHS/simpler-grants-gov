@@ -35,6 +35,7 @@ from src.form_schema.forms import (
     SF424c_v2_0,
     SF424d_v1_1,
     SF424IndividualGenerated_v2_0,
+    SF424MandatoryGenerated_v3_0,
     SF424Short_v3_0,
     SF424ShortGenerated_v3_0,
     SFLLL_v2_0,
@@ -285,6 +286,11 @@ def nasa_pi_and_aor_generated_v1_0():
 @pytest.fixture(scope="session")
 def sf424_individual_generated_v2_0():
     return setup_resolved_form(SF424IndividualGenerated_v2_0)
+
+
+@pytest.fixture(scope="session")
+def sf424_mandatory_generated_v3_0():
+    return setup_resolved_form(SF424MandatoryGenerated_v3_0)
 
 
 @pytest.fixture(scope="session")

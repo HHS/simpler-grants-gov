@@ -13,6 +13,7 @@ import { PROJECT_ABSTRACT_SUMMARY_REQUIRED_FIELD_ERRORS } from "tests/e2e/apply/
 import { RR_KEY_PERSON_EXPANDED_REQUIRED_FIELD_ERRORS } from "tests/e2e/apply/fixtures/rr-key-person-expanded-field-definitions";
 import { RR_KEY_PERSON_REQUIRED_FIELD_ERRORS } from "tests/e2e/apply/fixtures/rr-key-person-field-definitions";
 import { SF424_INDIVIDUAL_REQUIRED_FIELD_ERRORS } from "tests/e2e/apply/fixtures/sf424-individual-field-definitions";
+import { SF424_MANDATORY_REQUIRED_FIELD_ERRORS } from "tests/e2e/apply/fixtures/sf424-mandatory-field-definitions";
 import { SF424_SHORT_GENERATED_REQUIRED_FIELD_ERRORS } from "tests/e2e/apply/fixtures/sf424short-field-definitions";
 import type { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
@@ -148,6 +149,7 @@ describe("an empty save of a generated form", () => {
     ["rr_key_person_generated", RR_KEY_PERSON_REQUIRED_FIELD_ERRORS],
     ["sf424_individual_generated", SF424_INDIVIDUAL_REQUIRED_FIELD_ERRORS],
     ["sf424_short_generated", SF424_SHORT_GENERATED_REQUIRED_FIELD_ERRORS],
+    ["sf424_mandatory_generated", SF424_MANDATORY_REQUIRED_FIELD_ERRORS],
   ])(
     "shows the required field errors its e2e fixture expects (%s)",
     (form, fixture) => {
