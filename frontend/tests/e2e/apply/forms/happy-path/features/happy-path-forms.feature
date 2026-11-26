@@ -63,6 +63,7 @@ Feature: Apply - Application Form Happy Path
       | Supplemental Cover Sheet NEH       |
       | Attachments                        |
       | SF-424 Individual (Generated)      |
+      | SF-424 Short                       |
  
   # Expected happy path form status on the application landing page:
   # "complete"   -> displays "No issues detected"

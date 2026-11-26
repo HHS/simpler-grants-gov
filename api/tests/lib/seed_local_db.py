@@ -762,6 +762,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "e5a3d7f1-9c26-4b84-9a15-6d3f827a1b4e",
         ),
         (
+            "SF424_Short_Generated",
+            "E2E-SF424SHORTG",
+            "SF-424 Short Organizational (Generated)",
+            "349938c3-85b2-44ab-bd38-2c6ffc3d9b91",
+            "eb8722d2-9581-4fe0-88d8-82d312202264",
+        ),
+        (
             "SF424A",
             "E2E-SF424A",
             "Budget Information for Non-Construction Programs (SF-424A)",

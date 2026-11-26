@@ -1,0 +1,1519 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "opportunity": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ShortOpportunity"
+        }
+      ],
+      "properties": {
+        "agency_name": {
+          "readOnly": true
+        },
+        "assistance_listing": {
+          "properties": {
+            "number": {
+              "readOnly": true
+            },
+            "title": {
+              "readOnly": true
+            }
+          }
+        },
+        "number": {
+          "readOnly": true
+        },
+        "title": {
+          "readOnly": true
+        }
+      }
+    },
+    "application": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ShortApplication"
+        }
+      ],
+      "properties": {
+        "date_received": {
+          "readOnly": true
+        }
+      }
+    },
+    "applicant": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ShortApplicant"
+        }
+      ],
+      "properties": {
+        "organization": {
+          "properties": {
+            "uei": {
+              "readOnly": true
+            }
+          }
+        }
+      }
+    },
+    "project": {
+      "$ref": "#/$defs/ShortProject"
+    },
+    "contacts": {
+      "$ref": "#/$defs/ShortContacts"
+    },
+    "certification": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/certification"
+        }
+      ],
+      "properties": {
+        "signature": {
+          "readOnly": true
+        },
+        "date_signed": {
+          "readOnly": true
+        }
+      }
+    }
+  },
+  "required": [
+    "opportunity",
+    "applicant",
+    "project",
+    "contacts",
+    "certification"
+  ],
+  "examples": [
+    {
+      "opportunity": {
+        "agency_name": "Department of Community Programs",
+        "assistance_listing": {
+          "number": "99.999",
+          "title": "Community Research Demonstration"
+        },
+        "number": "DEMO-2027-001",
+        "title": "Community Research Demonstration"
+      },
+      "applicant": {
+        "organization": {
+          "name": "Maple Community Research Centre",
+          "uei": "MCRC12345678",
+          "ein": "44-4444444",
+          "address": {
+            "street1": "240 Maple Street",
+            "street2": "Suite 210",
+            "city": "Ottawa",
+            "province": "Ontario",
+            "country": "CAN: CANADA",
+            "zip_code": "K1P 1J1"
+          },
+          "web_address": "https://maple.example.org"
+        },
+        "type": {
+          "codes": [
+            "W: Non-domestic (non-US) Entity",
+            "X: Other (specify)"
+          ],
+          "other_specify": "Community research partnership"
+        },
+        "congressional_district": "00-000"
+      },
+      "project": {
+        "title": "Neighborhood Heat Resilience Study",
+        "description": "Survey neighborhood residents and map shaded gathering spaces to guide community heat-resilience planning. The project will share findings through public workshops and a plain-language report.",
+        "timeline": {
+          "start_date": "2027-01-01",
+          "end_date": "2027-12-31"
+        }
+      },
+      "contacts": {
+        "authorized_representative": {
+          "name": {
+            "first_name": "Morgan",
+            "last_name": "Chen"
+          },
+          "title": "Executive Director",
+          "phone": "613-555-0103",
+          "email": "morgan.chen@example.org"
+        },
+        "project_director": {
+          "name": {
+            "first_name": "Avery",
+            "last_name": "Patel"
+          },
+          "title": "Research Director",
+          "address": {
+            "street1": "240 Maple Street",
+            "street2": "Suite 210",
+            "city": "Ottawa",
+            "province": "Ontario",
+            "country": "CAN: CANADA",
+            "zip_code": "K1P 1J1"
+          },
+          "phone": "613-555-0101",
+          "email": "avery.patel@example.org"
+        },
+        "point_of_contact": {
+          "same_as_project_director": false,
+          "name": {
+            "first_name": "Jordan",
+            "last_name": "Reyes"
+          },
+          "title": "Grants Administrator",
+          "address": {
+            "street1": "240 Maple Street",
+            "street2": "Suite 210",
+            "city": "Ottawa",
+            "province": "Ontario",
+            "country": "CAN: CANADA",
+            "zip_code": "K1P 1J1"
+          },
+          "phone": "613-555-0102",
+          "email": "jordan.reyes@example.org"
+        }
+      },
+      "certification": {
+        "agree": true
+      }
+    },
+    {
+      "opportunity": {
+        "agency_name": "Department of Community Programs",
+        "assistance_listing": {
+          "number": "99.999",
+          "title": "Community Research Demonstration"
+        },
+        "number": "DEMO-2027-001",
+        "title": "Community Research Demonstration"
+      },
+      "applicant": {
+        "organization": {
+          "name": "Prairie Community Research Center",
+          "uei": "PCRA12345678",
+          "ein": "12-3456789",
+          "address": {
+            "street1": "128 Oak Avenue",
+            "city": "Springfield",
+            "county": "Sangamon",
+            "state": "IL: Illinois",
+            "country": "USA: UNITED STATES",
+            "zip_code": "62701-1234",
+            "street2": "Suite 200"
+          },
+          "web_address": "https://prairie.example.org"
+        },
+        "type": {
+          "codes": [
+            "M: Nonprofit with 501C3 IRS Status (Other than Institution of Higher Education)"
+          ]
+        },
+        "congressional_district": "IL-013"
+      },
+      "project": {
+        "title": "Neighborhood Heat Resilience Study",
+        "description": "Survey neighborhood residents and map shaded gathering spaces to guide community heat-resilience planning. The project will share findings through public workshops and a plain-language report.",
+        "timeline": {
+          "start_date": "2027-01-01",
+          "end_date": "2027-12-31"
+        }
+      },
+      "contacts": {
+        "authorized_representative": {
+          "name": {
+            "first_name": "Morgan",
+            "last_name": "Chen"
+          },
+          "title": "Executive Director",
+          "phone": "217-555-0103",
+          "email": "morgan.chen@example.org"
+        },
+        "project_director": {
+          "name": {
+            "first_name": "Avery",
+            "last_name": "Patel"
+          },
+          "title": "Research Director",
+          "address": {
+            "street1": "128 Oak Avenue",
+            "city": "Springfield",
+            "county": "Sangamon",
+            "state": "IL: Illinois",
+            "country": "USA: UNITED STATES",
+            "zip_code": "62701-1234"
+          },
+          "phone": "217-555-0101",
+          "email": "avery.patel@example.org"
+        },
+        "point_of_contact": {
+          "same_as_project_director": false,
+          "name": {
+            "first_name": "Jordan",
+            "last_name": "Reyes"
+          },
+          "title": "Grants Administrator",
+          "address": {
+            "street1": "128 Oak Avenue",
+            "city": "Springfield",
+            "county": "Sangamon",
+            "state": "IL: Illinois",
+            "country": "USA: UNITED STATES",
+            "zip_code": "62701-1234"
+          },
+          "phone": "217-555-0102",
+          "email": "jordan.reyes@example.org"
+        }
+      },
+      "certification": {
+        "agree": true
+      }
+    }
+  ],
+  "description": "Application for Federal Domestic Assistance - Short Organizational.",
+  "$defs": {
+    "ShortOpportunity": {
+      "type": "object",
+      "properties": {
+        "agency_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/opportunity.agency-name"
+            }
+          ],
+          "description": "Pre-populated from the Application cover sheet.",
+          "readOnly": true
+        },
+        "assistance_listing": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/opportunity.assistance-listing"
+            }
+          ],
+          "properties": {
+            "number": {
+              "readOnly": true
+            },
+            "title": {
+              "readOnly": true
+            }
+          }
+        },
+        "number": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/opportunity.number"
+            }
+          ],
+          "description": "Pre-populated from the Application cover sheet.",
+          "readOnly": true
+        },
+        "title": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/opportunity.title"
+            }
+          ],
+          "description": "Pre-populated from the Application cover sheet.",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "agency_name",
+        "number",
+        "title"
+      ]
+    },
+    "ShortApplication": {
+      "type": "object",
+      "properties": {
+        "date_received": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/application.date-received"
+            }
+          ],
+          "description": "Completed by Grants.gov upon submission.",
+          "readOnly": true
+        }
+      }
+    },
+    "ShortOrganization": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/organization.name"
+        },
+        "uei": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/organization.uei"
+            }
+          ],
+          "description": "UEI of the applicant organization. This field is pre-populated from the Application cover sheet.",
+          "readOnly": true
+        },
+        "ein": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/organization.ein"
+            }
+          ],
+          "description": "Enter either TIN or EIN as assigned by the Internal Revenue Service.  If your organization is not in the US, enter 44-4444444."
+        },
+        "address": {
+          "$ref": "#/$defs/types.address.zip-plus-four"
+        },
+        "web_address": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 250,
+          "description": "Enter the applicant's web address, if applicable.",
+          "title": "Web Address"
+        }
+      },
+      "required": [
+        "name",
+        "uei",
+        "ein",
+        "address"
+      ]
+    },
+    "ShortApplicantType": {
+      "type": "object",
+      "properties": {
+        "codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/organization.applicant-type"
+          },
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "description": "Select a minimum of one applicant type or select up to three applicant types in accordance with agency instructions. If “Other” is selected, then specify Other Type of Applicant in text box."
+        },
+        "other_specify": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 30,
+          "description": "Enter the applicant type here if you selected \"Other (specify)\" for Type of applicant.",
+          "title": "Type of Applicant Other Explanation"
+        }
+      },
+      "required": [
+        "codes"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "codes": {
+                "contains": {
+                  "const": "X: Other (specify)"
+                }
+              }
+            },
+            "required": [
+              "codes"
+            ]
+          },
+          "then": {
+            "required": [
+              "other_specify"
+            ]
+          }
+        }
+      ]
+    },
+    "ShortApplicant": {
+      "type": "object",
+      "properties": {
+        "organization": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ShortOrganization"
+            }
+          ],
+          "properties": {
+            "uei": {
+              "readOnly": true
+            }
+          }
+        },
+        "type": {
+          "$ref": "#/$defs/ShortApplicantType"
+        },
+        "congressional_district": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.congressional-district"
+            }
+          ],
+          "description": "Congressional District of Applicant is required: Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th District, CA-012 for California's 12th District, NC-103 for North Carolina's 103rd District. If outside the U.S., enter 00-000."
+        }
+      },
+      "required": [
+        "organization",
+        "type",
+        "congressional_district"
+      ]
+    },
+    "ShortProjectTimeline": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/project.start-date"
+            }
+          ],
+          "description": "Enter the date in the format MM/DD/YYYY."
+        },
+        "end_date": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/project.end-date"
+            }
+          ],
+          "description": "Enter the date in the format MM/DD/YYYY."
+        }
+      },
+      "required": [
+        "start_date",
+        "end_date"
+      ]
+    },
+    "ShortProject": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/project.title"
+            }
+          ],
+          "description": "Enter a brief, descriptive title of the project."
+        },
+        "description": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/project.description"
+            }
+          ],
+          "description": "Enter a brief description of the project."
+        },
+        "timeline": {
+          "$ref": "#/$defs/ShortProjectTimeline"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "timeline"
+      ]
+    },
+    "ShortRepresentative": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/person.name"
+        },
+        "title": {
+          "$ref": "#/$defs/person.title"
+        },
+        "phone": {
+          "$ref": "#/$defs/person.phone-number"
+        },
+        "fax": {
+          "$ref": "#/$defs/person.fax-number"
+        },
+        "email": {
+          "$ref": "#/$defs/person.email"
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "phone",
+        "email"
+      ]
+    },
+    "ShortContact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name"
+            }
+          ],
+          "description": "Enter the person's name. First and last name are required."
+        },
+        "title": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.title"
+            }
+          ],
+          "description": "Enter the position title."
+        },
+        "address": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.zip-plus-four"
+            }
+          ],
+          "description": "Enter the person's complete address."
+        },
+        "phone": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.phone-number"
+            }
+          ],
+          "description": "Enter the phone number."
+        },
+        "fax": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.fax-number"
+            }
+          ],
+          "description": "Enter the fax number."
+        },
+        "email": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.email"
+            }
+          ],
+          "description": "Enter the email address."
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "address",
+        "phone",
+        "email"
+      ]
+    },
+    "ShortPointOfContact": {
+      "type": "object",
+      "properties": {
+        "same_as_project_director": {
+          "type": "boolean",
+          "title": "Same as Project Director (if checked, fill in information same as Project Director above)"
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name"
+            }
+          ],
+          "description": "Enter the person's name. First and last name are required."
+        },
+        "title": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.title"
+            }
+          ],
+          "description": "Enter the position title."
+        },
+        "address": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.zip-plus-four"
+            }
+          ],
+          "description": "Enter the person's complete address."
+        },
+        "phone": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.phone-number"
+            }
+          ],
+          "description": "Enter the phone number."
+        },
+        "fax": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.fax-number"
+            }
+          ],
+          "description": "Enter the fax number."
+        },
+        "email": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.email"
+            }
+          ],
+          "description": "Enter the email address."
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "address",
+        "phone",
+        "email"
+      ]
+    },
+    "ShortContacts": {
+      "type": "object",
+      "properties": {
+        "authorized_representative": {
+          "$ref": "#/$defs/ShortRepresentative"
+        },
+        "project_director": {
+          "$ref": "#/$defs/ShortContact"
+        },
+        "point_of_contact": {
+          "$ref": "#/$defs/ShortPointOfContact"
+        }
+      },
+      "required": [
+        "authorized_representative",
+        "project_director",
+        "point_of_contact"
+      ]
+    },
+    "certification": {
+      "type": "object",
+      "properties": {
+        "agree": {
+          "type": "boolean",
+          "const": true,
+          "description": "Check to select. This field is required.",
+          "title": "I Agree"
+        },
+        "signature": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/certification.signature"
+            }
+          ],
+          "description": "Completed by Grants.gov upon submission.",
+          "title": "Signature",
+          "readOnly": true
+        },
+        "date_signed": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/certification.date-signed"
+            }
+          ],
+          "description": "Completed by Grants.gov upon submission.",
+          "title": "Date Signed",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "agree"
+      ],
+      "description": "Read the certification statement and check to agree.",
+      "title": "Certification"
+    },
+    "certification.signature": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 144,
+      "description": "The signer's name, completed upon submission.",
+      "title": "Signature"
+    },
+    "certification.date-signed": {
+      "type": "string",
+      "format": "date",
+      "description": "The date signed, completed upon submission.",
+      "title": "Date Signed"
+    },
+    "opportunity.agency-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "The federal agency providing the funding opportunity.",
+      "title": "Name of Federal Agency"
+    },
+    "opportunity.assistance-listing": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/opportunity.assistance-listing-number"
+            }
+          ],
+          "description": "Pre-populated from the application cover sheet.",
+          "title": "Assistance Listing Number",
+          "readOnly": true
+        },
+        "title": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/opportunity.assistance-listing-title"
+            }
+          ],
+          "description": "Pre-populated from the application cover sheet.",
+          "title": "Assistance Listing Title",
+          "readOnly": true
+        }
+      },
+      "description": "The assistance listing for the funding opportunity.",
+      "title": "Assistance Listing"
+    },
+    "opportunity.assistance-listing-number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
+      "description": "The assistance listing number associated with this competition.",
+      "title": "Assistance Listing Number"
+    },
+    "opportunity.assistance-listing-title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "The program title associated with the assistance listing.",
+      "title": "Assistance Listing Title"
+    },
+    "opportunity.number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "The number identifying the funding opportunity.",
+      "title": "Funding Opportunity Number"
+    },
+    "opportunity.title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "The title of the funding opportunity.",
+      "title": "Funding Opportunity Title"
+    },
+    "application.date-received": {
+      "type": "string",
+      "format": "date",
+      "description": "Completed by Grants.gov upon submission.",
+      "title": "Date Received"
+    },
+    "organization.name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Enter the legal name of the organization.",
+      "title": "Organization Name"
+    },
+    "organization.uei": {
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 12,
+      "description": "Enter the organization's Unique Entity Identifier (UEI) from SAM.gov.",
+      "title": "Organization UEI"
+    },
+    "organization.ein": {
+      "type": "string",
+      "minLength": 9,
+      "maxLength": 30,
+      "description": "Enter either the TIN or EIN assigned by the Internal Revenue Service.",
+      "title": "EIN/TIN"
+    },
+    "types.address.zip-plus-four": {
+      "type": "object",
+      "properties": {
+        "street1": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.street-1"
+            }
+          ],
+          "description": "Enter the first line of the street address.",
+          "title": "Street 1"
+        },
+        "street2": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.street-2"
+            }
+          ],
+          "description": "Enter the second line of the street address.",
+          "title": "Street 2"
+        },
+        "city": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.city"
+            }
+          ],
+          "description": "Enter the city.",
+          "title": "City"
+        },
+        "county": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.county"
+            }
+          ],
+          "description": "Enter the county or parish.",
+          "title": "County/Parish"
+        },
+        "state": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/StateCode"
+            }
+          ],
+          "description": "Select the state. This field is required if the country is the United States.",
+          "title": "State"
+        },
+        "province": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.province"
+            }
+          ],
+          "description": "Enter the province.",
+          "title": "Province"
+        },
+        "country": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/CountryCode"
+            }
+          ],
+          "description": "Select the country.",
+          "title": "Country"
+        },
+        "zip_code": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/types.address.zip-code"
+            }
+          ],
+          "description": "Enter the zip / postal code. A US ZIP code needs all nine digits (ZIP+4), and is required.",
+          "title": "Zip / Postal Code"
+        }
+      },
+      "required": [
+        "street1",
+        "city",
+        "country"
+      ],
+      "description": "Enter an address. A US ZIP needs all nine digits.",
+      "title": "Address",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "USA: UNITED STATES"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "properties": {
+              "zip_code": {
+                "minLength": 9
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "USA: UNITED STATES"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "required": [
+              "zip_code"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "USA: UNITED STATES"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "required": [
+              "state"
+            ]
+          }
+        }
+      ]
+    },
+    "StateCode": {
+      "type": "string",
+      "enum": [
+        "AL: Alabama",
+        "AK: Alaska",
+        "AZ: Arizona",
+        "AR: Arkansas",
+        "CA: California",
+        "CO: Colorado",
+        "CT: Connecticut",
+        "DE: Delaware",
+        "DC: District of Columbia",
+        "FL: Florida",
+        "GA: Georgia",
+        "HI: Hawaii",
+        "ID: Idaho",
+        "IL: Illinois",
+        "IN: Indiana",
+        "IA: Iowa",
+        "KS: Kansas",
+        "KY: Kentucky",
+        "LA: Louisiana",
+        "ME: Maine",
+        "MD: Maryland",
+        "MA: Massachusetts",
+        "MI: Michigan",
+        "MN: Minnesota",
+        "MS: Mississippi",
+        "MO: Missouri",
+        "MT: Montana",
+        "NE: Nebraska",
+        "NV: Nevada",
+        "NH: New Hampshire",
+        "NJ: New Jersey",
+        "NM: New Mexico",
+        "NY: New York",
+        "NC: North Carolina",
+        "ND: North Dakota",
+        "OH: Ohio",
+        "OK: Oklahoma",
+        "OR: Oregon",
+        "PA: Pennsylvania",
+        "RI: Rhode Island",
+        "SC: South Carolina",
+        "SD: South Dakota",
+        "TN: Tennessee",
+        "TX: Texas",
+        "UT: Utah",
+        "VT: Vermont",
+        "VA: Virginia",
+        "WA: Washington",
+        "WV: West Virginia",
+        "WI: Wisconsin",
+        "WY: Wyoming",
+        "AS: American Samoa",
+        "FM: Federated States of Micronesia",
+        "GU: Guam",
+        "MH: Marshall Islands",
+        "MP: Northern Mariana Islands",
+        "PW: Palau",
+        "PR: Puerto Rico",
+        "VI: Virgin Islands",
+        "FQ: Baker Island",
+        "HQ: Howland Island",
+        "DQ: Jarvis Island",
+        "JQ: Johnston Atoll",
+        "KQ: Kingman Reef",
+        "MQ: Midway Islands",
+        "BQ: Navassa Island",
+        "LQ: Palmyra Atoll",
+        "WQ: Wake Island",
+        "AA: Armed Forces Americas (except Canada)",
+        "AE: Armed Forces Europe, the Middle East, and Canada",
+        "AP: Armed Forces Pacific"
+      ],
+      "description": "US State or Territory Code",
+      "title": "State"
+    },
+    "CountryCode": {
+      "type": "string",
+      "enum": [
+        "AFG: AFGHANISTAN",
+        "XQZ: AKROTIRI",
+        "ALB: ALBANIA",
+        "DZA: ALGERIA",
+        "AND: ANDORRA",
+        "AGO: ANGOLA",
+        "AIA: ANGUILLA",
+        "ATA: ANTARCTICA",
+        "ATG: ANTIGUA AND BARBUDA",
+        "ARG: ARGENTINA",
+        "ARM: ARMENIA",
+        "ABW: ARUBA",
+        "XAC: ASHMORE AND CARTIER ISLANDS",
+        "AUS: AUSTRALIA",
+        "AUT: AUSTRIA",
+        "AZE: AZERBAIJAN",
+        "BHS: BAHAMAS, THE",
+        "BHR: BAHRAIN",
+        "BGD: BANGLADESH",
+        "BRB: BARBADOS",
+        "XBI: BASSAS DA INDIA",
+        "BLR: BELARUS",
+        "BEL: BELGIUM",
+        "BLZ: BELIZE",
+        "BEN: BENIN",
+        "BMU: BERMUDA",
+        "BTN: BHUTAN",
+        "BOL: BOLIVIA",
+        "BES: BONAIRE, SINT EUSTATIUS, AND SABA",
+        "BIH: BOSNIA AND HERZEGOVINA",
+        "BWA: BOTSWANA",
+        "BVT: BOUVET ISLAND",
+        "BRA: BRAZIL",
+        "IOT: BRITISH INDIAN OCEAN TERRITORY",
+        "BRN: BRUNEI",
+        "BGR: BULGARIA",
+        "BFA: BURKINA FASO",
+        "MMR: BURMA",
+        "BDI: BURUNDI",
+        "CPV: CABO VERDE",
+        "KHM: CAMBODIA",
+        "CMR: CAMEROON",
+        "CAN: CANADA",
+        "CYM: CAYMAN ISLANDS",
+        "CAF: CENTRAL AFRICAN REPUBLIC",
+        "TCD: CHAD",
+        "CHL: CHILE",
+        "CHN: CHINA",
+        "CXR: CHRISTMAS ISLAND",
+        "CPT: CLIPPERTON ISLAND",
+        "CCK: COCOS (KEELING) ISLANDS",
+        "COL: COLOMBIA",
+        "COM: COMOROS",
+        "COG: CONGO (BRAZZAVILLE)",
+        "COD: CONGO (KINSHASA)",
+        "COK: COOK ISLANDS",
+        "XCS: CORAL SEA ISLANDS",
+        "CRI: COSTA RICA",
+        "CIV: CÔTE D’IVOIRE",
+        "HRV: CROATIA",
+        "CUB: CUBA",
+        "CUW: CURAÇAO",
+        "CYP: CYPRUS",
+        "CZE: CZECHIA",
+        "DNK: DENMARK",
+        "XXD: DHEKELIA",
+        "DGA: DIEGO GARCIA",
+        "DJI: DJIBOUTI",
+        "DMA: DOMINICA",
+        "DOM: DOMINICAN REPUBLIC",
+        "ECU: ECUADOR",
+        "EGY: EGYPT",
+        "SLV: EL SALVADOR",
+        "XAZ: ENTITY 1",
+        "XCR: ENTITY 2",
+        "XCY: ENTITY 3",
+        "XKM: ENTITY 4",
+        "XKN: ENTITY 5",
+        "AX3: ENTITY 6",
+        "GNQ: EQUATORIAL GUINEA",
+        "ERI: ERITREA",
+        "EST: ESTONIA",
+        "SWZ: ESWATINI",
+        "ETH: ETHIOPIA",
+        "XEU: EUROPA ISLAND",
+        "FLK: FALKLAND ISLANDS (ISLAS MALVINAS)",
+        "FRO: FAROE ISLANDS",
+        "FJI: FIJI",
+        "FIN: FINLAND",
+        "FRA: FRANCE",
+        "GUF: FRENCH GUIANA",
+        "PYF: FRENCH POLYNESIA",
+        "ATF: FRENCH SOUTHERN AND ANTARCTIC LANDS",
+        "GAB: GABON",
+        "GMB: GAMBIA, THE",
+        "XGZ: GAZA STRIP",
+        "GEO: GEORGIA",
+        "DEU: GERMANY",
+        "GHA: GHANA",
+        "GIB: GIBRALTAR",
+        "XGL: GLORIOSO ISLANDS",
+        "GRC: GREECE",
+        "GRL: GREENLAND",
+        "GRD: GRENADA",
+        "GLP: GUADELOUPE",
+        "GTM: GUATEMALA",
+        "GGY: GUERNSEY",
+        "GIN: GUINEA",
+        "GNB: GUINEA-BISSAU",
+        "GUY: GUYANA",
+        "HTI: HAITI",
+        "HMD: HEARD ISLAND AND MCDONALD ISLANDS",
+        "HND: HONDURAS",
+        "HKG: HONG KONG",
+        "HUN: HUNGARY",
+        "ISL: ICELAND",
+        "IND: INDIA",
+        "IDN: INDONESIA",
+        "IRN: IRAN",
+        "IRQ: IRAQ",
+        "IRL: IRELAND",
+        "IMN: ISLE OF MAN",
+        "ISR: ISRAEL",
+        "ITA: ITALY",
+        "JAM: JAMAICA",
+        "XJM: JAN MAYEN",
+        "JPN: JAPAN",
+        "JEY: JERSEY",
+        "JOR: JORDAN",
+        "XJN: JUAN DE NOVA ISLAND",
+        "KAZ: KAZAKHSTAN",
+        "KEN: KENYA",
+        "KIR: KIRIBATI",
+        "PRK: KOREA, NORTH",
+        "KOR: KOREA, SOUTH",
+        "XKS: KOSOVO",
+        "KWT: KUWAIT",
+        "KGZ: KYRGYZSTAN",
+        "LAO: LAOS",
+        "LVA: LATVIA",
+        "LBN: LEBANON",
+        "LSO: LESOTHO",
+        "LBR: LIBERIA",
+        "LBY: LIBYA",
+        "LIE: LIECHTENSTEIN",
+        "LTU: LITHUANIA",
+        "LUX: LUXEMBOURG",
+        "MAC: MACAU",
+        "MDG: MADAGASCAR",
+        "MWI: MALAWI",
+        "MYS: MALAYSIA",
+        "MDV: MALDIVES",
+        "MLI: MALI",
+        "MLT: MALTA",
+        "MTQ: MARTINIQUE",
+        "MRT: MAURITANIA",
+        "MUS: MAURITIUS",
+        "MYT: MAYOTTE",
+        "MEX: MEXICO",
+        "MDA: MOLDOVA",
+        "MCO: MONACO",
+        "MNG: MONGOLIA",
+        "MNE: MONTENEGRO",
+        "MSR: MONTSERRAT",
+        "MAR: MOROCCO",
+        "MOZ: MOZAMBIQUE",
+        "NAM: NAMIBIA",
+        "NRU: NAURU",
+        "NPL: NEPAL",
+        "NLD: NETHERLANDS",
+        "NCL: NEW CALEDONIA",
+        "NZL: NEW ZEALAND",
+        "NIC: NICARAGUA",
+        "NER: NIGER",
+        "NGA: NIGERIA",
+        "NIU: NIUE",
+        "NFK: NORFOLK ISLAND",
+        "MKD: NORTH MACEDONIA",
+        "NOR: NORWAY",
+        "OMN: OMAN",
+        "PAK: PAKISTAN",
+        "PAN: PANAMA",
+        "PNG: PAPUA NEW GUINEA",
+        "XPR: PARACEL ISLANDS",
+        "PRY: PARAGUAY",
+        "PER: PERU",
+        "PHL: PHILIPPINES",
+        "PCN: PITCAIRN ISLANDS",
+        "POL: POLAND",
+        "PRT: PORTUGAL",
+        "QAT: QATAR",
+        "REU: REUNION",
+        "ROU: ROMANIA",
+        "RUS: RUSSIA",
+        "RWA: RWANDA",
+        "BLM: SAINT BARTHELEMY",
+        "SHN: SAINT HELENA, ASCENSION, AND TRISTAN DA CUNHA",
+        "KNA: SAINT KITTS AND NEVIS",
+        "LCA: SAINT LUCIA",
+        "MAF: SAINT MARTIN",
+        "SPM: SAINT PIERRE AND MIQUELON",
+        "VCT: SAINT VINCENT AND THE GRENADINES",
+        "WSM: SAMOA",
+        "SMR: SAN MARINO",
+        "STP: SAO TOME AND PRINCIPE",
+        "SAU: SAUDI ARABIA",
+        "SEN: SENEGAL",
+        "SRB: SERBIA",
+        "SYC: SEYCHELLES",
+        "SLE: SIERRA LEONE",
+        "SGP: SINGAPORE",
+        "SXM: SINT MAARTEN",
+        "SVK: SLOVAKIA",
+        "SVN: SLOVENIA",
+        "SLB: SOLOMON ISLANDS",
+        "SOM: SOMALIA",
+        "ZAF: SOUTH AFRICA",
+        "SGS: SOUTH GEORGIA AND SOUTH SANDWICH ISLANDS",
+        "SSD: SOUTH SUDAN",
+        "ESP: SPAIN",
+        "XSP: SPRATLY ISLANDS",
+        "LKA: SRI LANKA",
+        "SDN: SUDAN",
+        "SUR: SURINAME",
+        "XSV: SVALBARD",
+        "SWE: SWEDEN",
+        "CHE: SWITZERLAND",
+        "SYR: SYRIA",
+        "TWN: TAIWAN",
+        "TJK: TAJIKISTAN",
+        "TZA: TANZANIA",
+        "THA: THAILAND",
+        "TLS: TIMOR-LESTE",
+        "TGO: TOGO",
+        "TKL: TOKELAU",
+        "TON: TONGA",
+        "TTO: TRINIDAD AND TOBAGO",
+        "XTR: TROMELIN ISLAND",
+        "TUN: TUNISIA",
+        "TUR: TURKEY",
+        "TKM: TURKMENISTAN",
+        "TCA: TURKS AND CAICOS ISLANDS",
+        "TUV: TUVALU",
+        "UGA: UGANDA",
+        "UKR: UKRAINE",
+        "ARE: UNITED ARAB EMIRATES",
+        "GBR: UNITED KINGDOM",
+        "USA: UNITED STATES",
+        "URY: URUGUAY",
+        "UZB: UZBEKISTAN",
+        "VUT: VANUATU",
+        "VAT: VATICAN CITY",
+        "VEN: VENEZUELA",
+        "VNM: VIETNAM",
+        "VGB: VIRGIN ISLANDS, BRITISH",
+        "WLF: WALLIS AND FUTUNA",
+        "XWB: WEST BANK",
+        "ESH: WESTERN SAHARA",
+        "YEM: YEMEN",
+        "ZMB: ZAMBIA",
+        "ZWE: ZIMBABWE"
+      ],
+      "description": "Country Code",
+      "title": "Country"
+    },
+    "types.address.street-1": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "Enter the first line of the street address."
+    },
+    "types.address.street-2": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 55,
+      "description": "Enter the second line of the street address."
+    },
+    "types.address.city": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 35,
+      "description": "Enter the city."
+    },
+    "types.address.county": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30,
+      "description": "Enter the county or parish."
+    },
+    "types.address.province": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30,
+      "description": "Enter the province."
+    },
+    "types.address.zip-code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30,
+      "description": "Enter the zip / postal code."
+    },
+    "organization.applicant-type": {
+      "type": "string",
+      "enum": [
+        "A: State Government",
+        "B: County Government",
+        "C: City or Township Government",
+        "D: Special District Government",
+        "E: Regional Organization",
+        "F: U.S. Territory or Possession",
+        "G: Independent School District",
+        "H: Public/State Controlled Institution of Higher Education",
+        "I: Indian/Native American Tribal Government (Federally Recognized)",
+        "J: Indian/Native American Tribal Government (Other than Federally Recognized)",
+        "K: Indian/Native American Tribally Designated Organization",
+        "L: Public/Indian Housing Authority",
+        "M: Nonprofit with 501C3 IRS Status (Other than Institution of Higher Education)",
+        "N: Nonprofit without 501C3 IRS Status (Other than Institution of Higher Education)",
+        "O: Private Institution of Higher Education",
+        "P: Individual",
+        "Q: For-Profit Organization (Other than Small Business)",
+        "R: Small Business",
+        "S: Hispanic-serving Institution",
+        "T: Historically Black Colleges and Universities (HBCUs)",
+        "U: Tribally Controlled Colleges and Universities (TCCUs)",
+        "V: Alaska Native and Native Hawaiian Serving Institutions",
+        "W: Non-domestic (non-US) Entity",
+        "X: Other (specify)"
+      ],
+      "description": "Select the type of applicant.",
+      "title": "Type of Applicant"
+    },
+    "types.congressional-district": {
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 6,
+      "pattern": "^[A-Z0-9]{2}-[A-Za-z0-9]{3}$",
+      "description": "Enter the congressional district as two state characters, a hyphen and three characters."
+    },
+    "project.start-date": {
+      "type": "string",
+      "format": "date",
+      "description": "Enter the start date for the proposed project.",
+      "title": "Start Date"
+    },
+    "project.end-date": {
+      "type": "string",
+      "format": "date",
+      "description": "Enter the end date for the proposed project.",
+      "title": "End Date"
+    },
+    "project.title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Enter a brief, descriptive title of the project.",
+      "title": "Project Title"
+    },
+    "project.description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "description": "Enter a brief description of the project.",
+      "title": "Project Description"
+    },
+    "person.name": {
+      "type": "object",
+      "properties": {
+        "prefix": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.prefix"
+            }
+          ],
+          "title": "Prefix"
+        },
+        "first_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.first-name"
+            }
+          ],
+          "title": "First Name"
+        },
+        "middle_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.middle-name"
+            }
+          ],
+          "title": "Middle Name"
+        },
+        "last_name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.last-name"
+            }
+          ],
+          "title": "Last Name"
+        },
+        "suffix": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/person.name.suffix"
+            }
+          ],
+          "title": "Suffix"
+        }
+      },
+      "required": [
+        "first_name",
+        "last_name"
+      ],
+      "description": "A person's name, in five parts. First and last name are required.",
+      "title": "Name"
+    },
+    "person.name.prefix": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the prefix."
+    },
+    "person.name.first-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 35,
+      "description": "Enter the first name."
+    },
+    "person.name.middle-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25,
+      "description": "Enter the middle name."
+    },
+    "person.name.last-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Enter the last name."
+    },
+    "person.name.suffix": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "description": "Enter the suffix."
+    },
+    "person.title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 45,
+      "description": "Enter the position title.",
+      "title": "Title"
+    },
+    "person.phone-number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25,
+      "description": "Enter the daytime telephone number.",
+      "title": "Phone Number"
+    },
+    "person.fax-number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25,
+      "description": "Enter the fax number.",
+      "title": "Fax Number"
+    },
+    "person.email": {
+      "type": "string",
+      "maxLength": 60,
+      "format": "email",
+      "description": "Enter a valid email address.",
+      "title": "Email"
+    }
+  }
+}

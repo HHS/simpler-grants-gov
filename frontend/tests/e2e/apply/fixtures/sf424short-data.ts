@@ -1,4 +1,7 @@
-import type { fieldDefinitionsSF424Short } from "tests/e2e/apply/fixtures/sf424short-field-definitions";
+import type {
+  fieldDefinitionsSF424Short,
+  fieldDefinitionsSF424ShortGenerated,
+} from "tests/e2e/apply/fixtures/sf424short-field-definitions";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
 
@@ -104,3 +107,117 @@ export const SF424_SHORT_OPPORTUNITY_DATA: PrintViewFormData = {
   },
   buildTestData: buildSF424ShortHappyPathTestData,
 };
+
+/**
+ * Happy-path test data builder for the SF-424 Short generated from forms/specs.
+ */
+export const buildSF424ShortGeneratedHappyPathTestData = (
+  suffix: number,
+): Record<string, string> => {
+  const shortSuffix = toHappyPathSuffix(suffix);
+
+  return {
+    organizationName: `Org ${shortSuffix}`,
+    applicantStreet1: `${shortSuffix} Main St`,
+    applicantStreet2: `Suite ${shortSuffix}`,
+    applicantCity: `City ${shortSuffix}`,
+    applicantState: "AL: Alabama",
+    applicantCountry: "USA: UNITED STATES",
+    applicantZipCode: "12345-6789",
+    webAddress: `https://example${shortSuffix}.org`,
+    applicantTypeCodes: "C: City or Township Government",
+    ein: "44-4444444",
+    congressionalDistrict: "00-000",
+    projectTitle: `Project ${shortSuffix}`,
+    projectDescription: `Project description ${shortSuffix}`,
+    projectStartDate: "2030-10-01",
+    projectEndDate: "2036-10-31",
+    projectDirectorPrefix: "Dr.",
+    projectDirectorFirstName: `PDFirst${shortSuffix}`,
+    projectDirectorMiddleName: `PDMid${shortSuffix}`,
+    projectDirectorLastName: `PDLast${shortSuffix}`,
+    projectDirectorSuffix: "Jr.",
+    projectDirectorTitle: `PDTitle${shortSuffix}`,
+    projectDirectorStreet1: `${shortSuffix} Director Ave`,
+    projectDirectorStreet2: `Suite ${shortSuffix}`,
+    projectDirectorCity: `City ${shortSuffix}`,
+    projectDirectorState: "AL: Alabama",
+    projectDirectorCountry: "USA: UNITED STATES",
+    projectDirectorZipCode: "12345-6789",
+    projectDirectorPhone: "8888888888",
+    projectDirectorFax: "8888888888",
+    projectDirectorEmail: `pd${shortSuffix}@example.com`,
+    pointOfContactPrefix: "Ms.",
+    pointOfContactFirstName: `CPFirst${shortSuffix}`,
+    pointOfContactMiddleName: `CPMid${shortSuffix}`,
+    pointOfContactLastName: `CPLast${shortSuffix}`,
+    pointOfContactSuffix: "Sr.",
+    pointOfContactTitle: `CPTitle${shortSuffix}`,
+    pointOfContactStreet1: `${shortSuffix} Contact Ave`,
+    pointOfContactStreet2: `Suite ${shortSuffix}`,
+    pointOfContactCity: `City ${shortSuffix}`,
+    pointOfContactState: "AL: Alabama",
+    pointOfContactCountry: "USA: UNITED STATES",
+    pointOfContactZipCode: "12345-6789",
+    pointOfContactPhone: "8888888888",
+    pointOfContactFax: "8888888888",
+    pointOfContactEmail: `cp${shortSuffix}@example.com`,
+    agree: "true",
+    authorizedRepresentativePrefix: "Mr.",
+    authorizedRepresentativeFirstName: `ARFirst${shortSuffix}`,
+    authorizedRepresentativeMiddleName: `ARMid${shortSuffix}`,
+    authorizedRepresentativeLastName: `ARLast${shortSuffix}`,
+    authorizedRepresentativeSuffix: "III",
+    authorizedRepresentativeTitle: `ARTitle${shortSuffix}`,
+    authorizedRepresentativeEmail: `aor${shortSuffix}@test.com`,
+    authorizedRepresentativePhone: "2222222222",
+    authorizedRepresentativeFax: "3333333333",
+  } satisfies Partial<
+    Record<keyof typeof fieldDefinitionsSF424ShortGenerated, string>
+  >;
+};
+
+/**
+ * Opportunity data for the SF-424 Short generated from forms/specs. Seeded as
+ * E2E-SF424SHORTG by build_automatic_opportunities.py and seed_local_db.py.
+ */
+export const SF424_SHORT_GENERATED_OPPORTUNITY_DATA: PrintViewFormData = {
+  opportunityId: "349938c3-85b2-44ab-bd38-2c6ffc3d9b91",
+  opportunityNumber: "E2E-SF424SHORTG-ORG-IND-01",
+  formKey: "sf424shortGenerated",
+  expectedPrepopulatedFields: {
+    "opportunity--number": "E2E-SF424SHORTG-ORG-IND-01",
+    "opportunity--title":
+      "E2E SF-424 Short Organizational (Generated) ORG IND OT01",
+    "opportunity--assistance_listing--number": "10.960",
+    "opportunity--agency_name": "Simpler Grants.gov",
+    "opportunity--assistance_listing--title":
+      "Technical Agricultural Assistance",
+  },
+  buildTestData: buildSF424ShortGeneratedHappyPathTestData,
+};
+
+/**
+ * Each SF-424 Short form the SF-424 Short specs run against, with the test IDs of the
+ * fields Grants.gov fills on submission.
+ */
+export const SF424_SHORT_OPPORTUNITIES = [
+  {
+    formLabel: "SF-424 Short",
+    opportunityNumber: SF424_SHORT_OPPORTUNITY_DATA.opportunityNumber,
+    formKey: SF424_SHORT_OPPORTUNITY_DATA.formKey,
+    postPopulatedTestIds: [
+      "aor_signature",
+      "authorized_representative_date_signed",
+    ],
+  },
+  {
+    formLabel: "SF-424 Short (Generated)",
+    opportunityNumber: SF424_SHORT_GENERATED_OPPORTUNITY_DATA.opportunityNumber,
+    formKey: SF424_SHORT_GENERATED_OPPORTUNITY_DATA.formKey,
+    postPopulatedTestIds: [
+      "certification--signature",
+      "certification--date_signed",
+    ],
+  },
+] as const;

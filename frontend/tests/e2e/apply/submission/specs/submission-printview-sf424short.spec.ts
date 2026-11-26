@@ -4,7 +4,7 @@
  *
  * Tests both Organization and Individual applicant scenarios, mirroring the SF-424 (long) spec pattern.
  * The form is titled "...Short Organizational (SF-424)" in the schema, but both applicant types can
- * access this form through the E2E-SF424SHORT-ORG-IND-01 opportunity.
+ * access it. Runs once for the hand-written form and once for the one generated from forms/specs.
  */
 
 import {
@@ -14,6 +14,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { SF424_SHORT_OPPORTUNITIES } from "tests/e2e/apply/fixtures/sf424short-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -42,29 +43,38 @@ const { APPLY_FORMS, FULL_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-// Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-const OPPORTUNITY_NUMBER = "E2E-SF424SHORT-ORG-IND-01";
-
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-
-const applicantScenarios = [
-  {
-    testName: `Complete the SF-424 Short Application Submission and Print View workflow for an Organization user`,
-    orgLabel: testOrgLabel,
+const applicantScenarios = SF424_SHORT_OPPORTUNITIES.flatMap(
+  ({ formLabel, opportunityNumber, postPopulatedTestIds }) => {
+    const opportunityConfig = loadOpportunityConfig(opportunityNumber);
+    return [
+      {
+        testName: `Complete the ${formLabel} Application Submission and Print View workflow for an Organization user`,
+        orgLabel: testOrgLabel,
+        opportunityConfig,
+        postPopulatedTestIds,
+      },
+      {
+        testName: `Complete the ${formLabel} Application Submission and Print View workflow for an Individual user`,
+        orgLabel: undefined,
+        opportunityConfig,
+        postPopulatedTestIds,
+      },
+    ];
   },
-  {
-    testName: `Complete the SF-424 Short Application Submission and Print View workflow for an Individual user`,
-    orgLabel: undefined,
-  },
-] as const;
+);
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { testName, orgLabel } of applicantScenarios) {
+for (const {
+  testName,
+  orgLabel,
+  opportunityConfig,
+  postPopulatedTestIds,
+} of applicantScenarios) {
   test(
     testName,
     { tag: [APPLY_FORMS, FULL_REGRESSION] },
@@ -141,8 +151,8 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await validateAllPrintViews(page, filledForms);
 
       // --- Post-Population Field Validation ---
-      // aor_signature and authorized_representative_date_signed are system post-populated at
-      // submission time (gg_post_population rules: "signature", "current_date")
+      // The signature and date signed are system post-populated at submission time
+      // (gg_post_population rules: "signature", "current_date")
       // First verify the print view is read-only (no editable controls), then check values exist.
       for (const { printUrl } of filledForms) {
         await navigateToPrintView(page, printUrl);
@@ -151,15 +161,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
         await assertPrintViewIsReadOnly(page);
 
         // Now verify the post-populated field values exist and are populated
-        await expect(page.getByTestId("aor_signature")).toBeVisible();
-        await expect(page.getByTestId("aor_signature")).not.toBeEmpty();
-
-        await expect(
-          page.getByTestId("authorized_representative_date_signed"),
-        ).toBeVisible();
-        await expect(
-          page.getByTestId("authorized_representative_date_signed"),
-        ).not.toBeEmpty();
+        for (const testId of postPopulatedTestIds) {
+          await expect(page.getByTestId(testId)).toBeVisible();
+          await expect(page.getByTestId(testId)).not.toBeEmpty();
+        }
       }
     },
   );

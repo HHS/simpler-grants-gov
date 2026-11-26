@@ -1,0 +1,266 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/SF424_Short_3_0-V3.0",
+    "SF424_Short_3_0": "http://apply.grants.gov/forms/SF424_Short_3_0-V3.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+  "root": {
+    "SF424_Short_3_0": {
+      "@SF424_Short_3_0:FormVersion": {
+        "$const": "3.0"
+      },
+      "AgencyName": {
+        "$field": "opportunity.agency_name"
+      },
+      "CFDANumber": {
+        "$field": "opportunity.assistance_listing.number"
+      },
+      "CFDAProgramTitle": {
+        "$field": "opportunity.assistance_listing.title"
+      },
+      "DateReceived": {
+        "$field": "application.date_received"
+      },
+      "FundingOpportunityNumber": {
+        "$field": "opportunity.number"
+      },
+      "FundingOpportunityTitle": {
+        "$field": "opportunity.title"
+      },
+      "OrganizationName": {
+        "$field": "applicant.organization.name"
+      },
+      "Address": {
+        "globLib:Street1": {
+          "$field": "applicant.organization.address.street1"
+        },
+        "globLib:Street2": {
+          "$field": "applicant.organization.address.street2"
+        },
+        "globLib:City": {
+          "$field": "applicant.organization.address.city"
+        },
+        "globLib:County": {
+          "$field": "applicant.organization.address.county"
+        },
+        "globLib:State": {
+          "$field": "applicant.organization.address.state"
+        },
+        "globLib:Province": {
+          "$field": "applicant.organization.address.province"
+        },
+        "globLib:ZipPostalCode": {
+          "$field": "applicant.organization.address.zip_code"
+        },
+        "globLib:Country": {
+          "$field": "applicant.organization.address.country"
+        }
+      },
+      "ApplicantWebAddress": {
+        "$field": "applicant.organization.web_address"
+      },
+      "ApplicantTypeCode1": {
+        "$field": "applicant.type.codes[0]"
+      },
+      "ApplicantTypeCode2": {
+        "$field": "applicant.type.codes[1]"
+      },
+      "ApplicantTypeCode3": {
+        "$field": "applicant.type.codes[2]"
+      },
+      "ApplicantTypeOtherSpecify": {
+        "$field": "applicant.type.other_specify"
+      },
+      "EmployerTaxpayerIdentificationNumber": {
+        "$field": "applicant.organization.ein"
+      },
+      "SAMUEI": {
+        "$field": "applicant.organization.uei"
+      },
+      "CongressionalDistrictApplicant": {
+        "$field": "applicant.congressional_district"
+      },
+      "ProjectTitle": {
+        "$field": "project.title"
+      },
+      "ProjectDescription": {
+        "$field": "project.description"
+      },
+      "ProjectStartDate": {
+        "$field": "project.timeline.start_date"
+      },
+      "ProjectEndDate": {
+        "$field": "project.timeline.end_date"
+      },
+      "ProjectDirectorGroup": {
+        "globLib:Name": {
+          "globLib:PrefixName": {
+            "$field": "contacts.project_director.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "contacts.project_director.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "contacts.project_director.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "contacts.project_director.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "contacts.project_director.name.suffix"
+          }
+        },
+        "globLib:Title": {
+          "$field": "contacts.project_director.title"
+        },
+        "globLib:Address": {
+          "globLib:Street1": {
+            "$field": "contacts.project_director.address.street1"
+          },
+          "globLib:Street2": {
+            "$field": "contacts.project_director.address.street2"
+          },
+          "globLib:City": {
+            "$field": "contacts.project_director.address.city"
+          },
+          "globLib:County": {
+            "$field": "contacts.project_director.address.county"
+          },
+          "globLib:State": {
+            "$field": "contacts.project_director.address.state"
+          },
+          "globLib:Province": {
+            "$field": "contacts.project_director.address.province"
+          },
+          "globLib:ZipPostalCode": {
+            "$field": "contacts.project_director.address.zip_code"
+          },
+          "globLib:Country": {
+            "$field": "contacts.project_director.address.country"
+          }
+        },
+        "globLib:Phone": {
+          "$field": "contacts.project_director.phone"
+        },
+        "globLib:Fax": {
+          "$field": "contacts.project_director.fax"
+        },
+        "globLib:Email": {
+          "$field": "contacts.project_director.email"
+        }
+      },
+      "SameAsProjectDirector": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "contacts.point_of_contact.same_as_project_director"
+          }
+        }
+      },
+      "ContactPersonGroup": {
+        "globLib:Name": {
+          "globLib:PrefixName": {
+            "$field": "contacts.point_of_contact.name.prefix"
+          },
+          "globLib:FirstName": {
+            "$field": "contacts.point_of_contact.name.first_name"
+          },
+          "globLib:MiddleName": {
+            "$field": "contacts.point_of_contact.name.middle_name"
+          },
+          "globLib:LastName": {
+            "$field": "contacts.point_of_contact.name.last_name"
+          },
+          "globLib:SuffixName": {
+            "$field": "contacts.point_of_contact.name.suffix"
+          }
+        },
+        "globLib:Title": {
+          "$field": "contacts.point_of_contact.title"
+        },
+        "globLib:Address": {
+          "globLib:Street1": {
+            "$field": "contacts.point_of_contact.address.street1"
+          },
+          "globLib:Street2": {
+            "$field": "contacts.point_of_contact.address.street2"
+          },
+          "globLib:City": {
+            "$field": "contacts.point_of_contact.address.city"
+          },
+          "globLib:County": {
+            "$field": "contacts.point_of_contact.address.county"
+          },
+          "globLib:State": {
+            "$field": "contacts.point_of_contact.address.state"
+          },
+          "globLib:Province": {
+            "$field": "contacts.point_of_contact.address.province"
+          },
+          "globLib:ZipPostalCode": {
+            "$field": "contacts.point_of_contact.address.zip_code"
+          },
+          "globLib:Country": {
+            "$field": "contacts.point_of_contact.address.country"
+          }
+        },
+        "globLib:Phone": {
+          "$field": "contacts.point_of_contact.phone"
+        },
+        "globLib:Fax": {
+          "$field": "contacts.point_of_contact.fax"
+        },
+        "globLib:Email": {
+          "$field": "contacts.point_of_contact.email"
+        }
+      },
+      "ApplicationCertification": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "certification.agree"
+          }
+        }
+      },
+      "AuthorizedRepresentative": {
+        "globLib:PrefixName": {
+          "$field": "contacts.authorized_representative.name.prefix"
+        },
+        "globLib:FirstName": {
+          "$field": "contacts.authorized_representative.name.first_name"
+        },
+        "globLib:MiddleName": {
+          "$field": "contacts.authorized_representative.name.middle_name"
+        },
+        "globLib:LastName": {
+          "$field": "contacts.authorized_representative.name.last_name"
+        },
+        "globLib:SuffixName": {
+          "$field": "contacts.authorized_representative.name.suffix"
+        }
+      },
+      "AuthorizedRepresentativeTitle": {
+        "$field": "contacts.authorized_representative.title"
+      },
+      "AuthorizedRepresentativeEmail": {
+        "$field": "contacts.authorized_representative.email"
+      },
+      "AuthorizedRepresentativePhoneNumber": {
+        "$field": "contacts.authorized_representative.phone"
+      },
+      "AuthorizedRepresentativeFaxNumber": {
+        "$field": "contacts.authorized_representative.fax"
+      },
+      "AuthorizedRepresentativeSignature": {
+        "$field": "certification.signature"
+      },
+      "AuthorizedRepresentativeDateSigned": {
+        "$field": "certification.date_signed"
+      }
+    }
+  }
+}

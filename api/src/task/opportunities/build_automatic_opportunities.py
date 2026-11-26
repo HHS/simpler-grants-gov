@@ -63,6 +63,7 @@ from src.form_schema.forms import (
     SF424d_v1_1,
     SF424IndividualGenerated_v2_0,
     SF424Short_v3_0,
+    SF424ShortGenerated_v3_0,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
     get_active_forms,
@@ -795,6 +796,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "SF-424 Short Organizational",
                 SF424Short_v3_0.form_id,
                 "425c2ffe-6fbd-4852-ab72-b64467fe3df0",
+            ),
+            (
+                "E2E-SF424SHORTG",
+                "SF-424 Short Organizational (Generated)",
+                SF424ShortGenerated_v3_0.form_id,
+                "349938c3-85b2-44ab-bd38-2c6ffc3d9b91",
             ),
             (
                 "E2E-SF424A",
