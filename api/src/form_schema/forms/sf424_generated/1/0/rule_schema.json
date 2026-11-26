@@ -1,0 +1,112 @@
+{
+  "opportunity": {
+    "agency_name": {
+      "gg_pre_population": {
+        "rule": "agency_name"
+      }
+    },
+    "assistance_listing": {
+      "number": {
+        "gg_pre_population": {
+          "rule": "assistance_listing_number"
+        }
+      },
+      "title": {
+        "gg_pre_population": {
+          "rule": "assistance_listing_program_title"
+        }
+      }
+    },
+    "number": {
+      "gg_pre_population": {
+        "rule": "opportunity_number"
+      }
+    },
+    "title": {
+      "gg_pre_population": {
+        "rule": "opportunity_title"
+      }
+    },
+    "competition": {
+      "number": {
+        "gg_pre_population": {
+          "rule": "public_competition_id"
+        }
+      },
+      "title": {
+        "gg_pre_population": {
+          "rule": "competition_title"
+        }
+      }
+    }
+  },
+  "application": {
+    "date_received": {
+      "gg_post_population": {
+        "rule": "current_date"
+      }
+    }
+  },
+  "applicant": {
+    "organization": {
+      "uei": {
+        "gg_pre_population": {
+          "rule": "uei"
+        }
+      }
+    },
+    "delinquent_federal_debt": {
+      "explanation": {
+        "gg_validation": {
+          "rule": "attachment"
+        }
+      }
+    }
+  },
+  "project": {
+    "additional_titles": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    },
+    "areas_affected": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    },
+    "additional_congressional_districts": {
+      "gg_validation": {
+        "rule": "attachment"
+      }
+    }
+  },
+  "budget": {
+    "funding_sources": {
+      "total": {
+        "gg_pre_population": {
+          "rule": "sum_monetary",
+          "fields": [
+            "@THIS.federal",
+            "@THIS.applicant",
+            "@THIS.state",
+            "@THIS.local",
+            "@THIS.other",
+            "@THIS.program_income"
+          ]
+        }
+      }
+    }
+  },
+  "certification": {
+    "signature": {
+      "gg_post_population": {
+        "rule": "signature"
+      }
+    },
+    "date_signed": {
+      "gg_post_population": {
+        "rule": "current_date"
+      }
+    }
+  }
+}

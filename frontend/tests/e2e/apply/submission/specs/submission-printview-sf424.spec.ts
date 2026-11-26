@@ -9,6 +9,10 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import {
+  SF424_GENERATED_OPPORTUNITY_DATA,
+  SF424_OPPORTUNITIES,
+} from "tests/e2e/apply/fixtures/sf424-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -19,7 +23,6 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
   buildHappyPathTestData,
@@ -28,6 +31,7 @@ import {
   validateAllPrintViews,
   validateAttachmentPrintViewSection,
 } from "tests/e2e/utils/submission/print-view-utils";
+import { scenariosForEachForm } from "tests/e2e/utils/submission/scenarios-for-each-form";
 import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
@@ -37,13 +41,8 @@ const { APPLY_FORMS, SMOKE } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-// Only the opportunity number is declared here.
-// All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-// Unified opportunity for both local and staging environments.
-const OPPORTUNITY_NUMBER = "E2E-SF424-ORG-IND-01";
-const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
-
-const applicantScenarios = [
+// The opportunities live in sf424-data.ts; load-opportunity-config.ts resolves each one.
+const applicantScenarios = scenariosForEachForm(SF424_OPPORTUNITIES, [
   {
     testName: `Complete the SF-424 Application Submission and Print View workflow for an Organization user`,
     orgLabel: testOrgLabel,
@@ -52,14 +51,14 @@ const applicantScenarios = [
     testName: `Complete the SF-424 Application Submission and Print View workflow for an Individual user`,
     orgLabel: undefined,
   },
-] as const;
+] as const);
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { testName, orgLabel } of applicantScenarios) {
+for (const { testName, orgLabel, opportunityConfig } of applicantScenarios) {
   test(
     testName,
     { tag: [APPLY_FORMS, SMOKE] },
@@ -156,6 +155,25 @@ for (const { testName, orgLabel } of applicantScenarios) {
               await validateAttachmentPrintViewSection(
                 page,
                 sectionId,
+                testData[fieldKey],
+              );
+            }
+          }
+        }
+
+        // The generated form lists all three attachments in its Project Information section
+        if (formKey === SF424_GENERATED_OPPORTUNITY_DATA.formKey) {
+          await navigateToPrintView(page, printUrl);
+
+          for (const fieldKey of [
+            "areas_affected_attachment",
+            "additional_project_title_attachment",
+            "additional_congressional_attachment",
+          ]) {
+            if (testData[fieldKey]) {
+              await validateAttachmentPrintViewSection(
+                page,
+                "form-section-project-information",
                 testData[fieldKey],
               );
             }

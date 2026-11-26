@@ -755,6 +755,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "f0a1b2c3-d4e5-6789-0abc-def123456789",
         ),
         (
+            "SF424_4_0_Generated",
+            "E2E-SF424G",
+            "Application for Federal Assistance (SF-424) (Generated)",
+            "0e79ba36-1deb-4806-aef5-9c99d4514310",
+            "4f322ebf-6c5a-4746-903a-cec4b82183b4",
+        ),
+        (
             "SF424_Short_3_0",
             "E2E-SF424SHORT",
             "SF-424 Short Organizational",

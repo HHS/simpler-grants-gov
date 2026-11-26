@@ -64,7 +64,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 59
+    assert len(opportunities) == 60
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -81,7 +81,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 59
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 60
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
 
@@ -111,7 +111,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 59
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 60
     # Nothing is missing, so nothing is backfilled or changed
     assert task.metrics[task.Metrics.COMPETITION_BACKFILLED_COUNT] == 0
     assert [c.public_competition_id for c in competitions] == public_competition_ids
@@ -320,6 +320,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "E2E-RRKPEG-ORG-IND-01": uuid.UUID("60993a94-d03a-4fcd-a97d-59608282c1c4"),
         "E2E-RRKPG-ORG-IND-01": uuid.UUID("17a8581a-779f-4199-a3f6-a2ffe7293dec"),
         "E2E-SF424-ORG-IND-01": uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+        "E2E-SF424G-ORG-IND-01": uuid.UUID("0e79ba36-1deb-4806-aef5-9c99d4514310"),
         "E2E-SF424SHORT-ORG-IND-01": uuid.UUID("425c2ffe-6fbd-4852-ab72-b64467fe3df0"),
         "E2E-SF424SHORTG-ORG-IND-01": uuid.UUID("349938c3-85b2-44ab-bd38-2c6ffc3d9b91"),
         "E2E-SF424MANDATORYG-ORG-IND-01": uuid.UUID("a8350acc-77b5-448e-b78b-2fc0002a9c88"),

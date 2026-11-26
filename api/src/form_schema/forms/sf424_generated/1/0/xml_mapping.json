@@ -1,0 +1,303 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/SF424_4_0-V4.0",
+    "SF424_4_0": "http://apply.grants.gov/forms/SF424_4_0-V4.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
+  "root": {
+    "SF424_4_0": {
+      "@SF424_4_0:FormVersion": {
+        "$const": "4.0"
+      },
+      "SubmissionType": {
+        "$field": "application.submission_type"
+      },
+      "ApplicationType": {
+        "$field": "application.application_type"
+      },
+      "RevisionType": {
+        "$field": "application.revision.type"
+      },
+      "RevisionOtherSpecify": {
+        "$field": "application.revision.other_specify"
+      },
+      "DateReceived": {
+        "$field": "application.date_received"
+      },
+      "ApplicantID": {
+        "$field": "application.applicant_id"
+      },
+      "FederalEntityIdentifier": {
+        "$field": "application.federal_entity_identifier"
+      },
+      "FederalAwardIdentifier": {
+        "$field": "application.federal_award_identifier"
+      },
+      "StateReceiveDate": {
+        "$field": "application.state.received_date"
+      },
+      "StateApplicationID": {
+        "$field": "application.state.application_id"
+      },
+      "OrganizationName": {
+        "$field": "applicant.organization.name"
+      },
+      "EmployerTaxpayerIdentificationNumber": {
+        "$field": "applicant.organization.ein"
+      },
+      "SAMUEI": {
+        "$field": "applicant.organization.uei"
+      },
+      "Applicant": {
+        "globLib:Street1": {
+          "$field": "applicant.organization.address.street1"
+        },
+        "globLib:Street2": {
+          "$field": "applicant.organization.address.street2"
+        },
+        "globLib:City": {
+          "$field": "applicant.organization.address.city"
+        },
+        "globLib:County": {
+          "$field": "applicant.organization.address.county"
+        },
+        "globLib:State": {
+          "$field": "applicant.organization.address.state"
+        },
+        "globLib:Province": {
+          "$field": "applicant.organization.address.province"
+        },
+        "globLib:ZipPostalCode": {
+          "$field": "applicant.organization.address.zip_code"
+        },
+        "globLib:Country": {
+          "$field": "applicant.organization.address.country"
+        }
+      },
+      "DepartmentName": {
+        "$field": "applicant.organization.department"
+      },
+      "DivisionName": {
+        "$field": "applicant.organization.division"
+      },
+      "ContactPerson": {
+        "globLib:PrefixName": {
+          "$field": "contacts.point_of_contact.name.prefix"
+        },
+        "globLib:FirstName": {
+          "$field": "contacts.point_of_contact.name.first_name"
+        },
+        "globLib:MiddleName": {
+          "$field": "contacts.point_of_contact.name.middle_name"
+        },
+        "globLib:LastName": {
+          "$field": "contacts.point_of_contact.name.last_name"
+        },
+        "globLib:SuffixName": {
+          "$field": "contacts.point_of_contact.name.suffix"
+        }
+      },
+      "Title": {
+        "$field": "contacts.point_of_contact.title"
+      },
+      "OrganizationAffiliation": {
+        "$field": "contacts.point_of_contact.organization.name"
+      },
+      "PhoneNumber": {
+        "$field": "contacts.point_of_contact.phone"
+      },
+      "Fax": {
+        "$field": "contacts.point_of_contact.fax"
+      },
+      "Email": {
+        "$field": "contacts.point_of_contact.email"
+      },
+      "ApplicantTypeCode1": {
+        "$field": "applicant.type.codes[0]"
+      },
+      "ApplicantTypeCode2": {
+        "$field": "applicant.type.codes[1]"
+      },
+      "ApplicantTypeCode3": {
+        "$field": "applicant.type.codes[2]"
+      },
+      "ApplicantTypeOtherSpecify": {
+        "$field": "applicant.type.other_specify"
+      },
+      "AgencyName": {
+        "$field": "opportunity.agency_name"
+      },
+      "CFDANumber": {
+        "$field": "opportunity.assistance_listing.number"
+      },
+      "CFDAProgramTitle": {
+        "$field": "opportunity.assistance_listing.title"
+      },
+      "FundingOpportunityNumber": {
+        "$field": "opportunity.number"
+      },
+      "FundingOpportunityTitle": {
+        "$field": "opportunity.title"
+      },
+      "CompetitionIdentificationNumber": {
+        "$field": "opportunity.competition.number"
+      },
+      "CompetitionIdentificationTitle": {
+        "$field": "opportunity.competition.title"
+      },
+      "AreasAffected": {
+        "$attachment": "project.areas_affected"
+      },
+      "ProjectTitle": {
+        "$field": "project.title"
+      },
+      "AdditionalProjectTitle": {
+        "att:AttachedFile": {
+          "$each": {
+            "items": {
+              "$field": "project.additional_titles"
+            },
+            "map": {
+              "$attachment": "."
+            }
+          }
+        }
+      },
+      "CongressionalDistrictApplicant": {
+        "$field": "applicant.congressional_district"
+      },
+      "CongressionalDistrictProgramProject": {
+        "$field": "project.congressional_district"
+      },
+      "AdditionalCongressionalDistricts": {
+        "$attachment": "project.additional_congressional_districts"
+      },
+      "ProjectStartDate": {
+        "$field": "project.timeline.start_date"
+      },
+      "ProjectEndDate": {
+        "$field": "project.timeline.end_date"
+      },
+      "FederalEstimatedFunding": {
+        "$transform": {
+          "name": "currency_format",
+          "value": {
+            "$field": "budget.funding_sources.federal"
+          }
+        }
+      },
+      "ApplicantEstimatedFunding": {
+        "$transform": {
+          "name": "currency_format",
+          "value": {
+            "$field": "budget.funding_sources.applicant"
+          }
+        }
+      },
+      "StateEstimatedFunding": {
+        "$transform": {
+          "name": "currency_format",
+          "value": {
+            "$field": "budget.funding_sources.state"
+          }
+        }
+      },
+      "LocalEstimatedFunding": {
+        "$transform": {
+          "name": "currency_format",
+          "value": {
+            "$field": "budget.funding_sources.local"
+          }
+        }
+      },
+      "OtherEstimatedFunding": {
+        "$transform": {
+          "name": "currency_format",
+          "value": {
+            "$field": "budget.funding_sources.other"
+          }
+        }
+      },
+      "ProgramIncomeEstimatedFunding": {
+        "$transform": {
+          "name": "currency_format",
+          "value": {
+            "$field": "budget.funding_sources.program_income"
+          }
+        }
+      },
+      "TotalEstimatedFunding": {
+        "$transform": {
+          "name": "currency_format",
+          "value": {
+            "$field": "budget.funding_sources.total"
+          }
+        }
+      },
+      "StateReview": {
+        "$field": "application.state_review.status"
+      },
+      "StateReviewAvailableDate": {
+        "$field": "application.state_review.date"
+      },
+      "DelinquentFederalDebt": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "applicant.delinquent_federal_debt.answer"
+          }
+        }
+      },
+      "DebtExplanation": {
+        "$attachment": "applicant.delinquent_federal_debt.explanation"
+      },
+      "CertificationAgree": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "certification.agree"
+          }
+        }
+      },
+      "AuthorizedRepresentative": {
+        "globLib:PrefixName": {
+          "$field": "contacts.authorized_representative.name.prefix"
+        },
+        "globLib:FirstName": {
+          "$field": "contacts.authorized_representative.name.first_name"
+        },
+        "globLib:MiddleName": {
+          "$field": "contacts.authorized_representative.name.middle_name"
+        },
+        "globLib:LastName": {
+          "$field": "contacts.authorized_representative.name.last_name"
+        },
+        "globLib:SuffixName": {
+          "$field": "contacts.authorized_representative.name.suffix"
+        }
+      },
+      "AuthorizedRepresentativeTitle": {
+        "$field": "contacts.authorized_representative.title"
+      },
+      "AuthorizedRepresentativePhoneNumber": {
+        "$field": "contacts.authorized_representative.phone"
+      },
+      "AuthorizedRepresentativeEmail": {
+        "$field": "contacts.authorized_representative.email"
+      },
+      "AuthorizedRepresentativeFax": {
+        "$field": "contacts.authorized_representative.fax"
+      },
+      "AORSignature": {
+        "$field": "certification.signature"
+      },
+      "DateSigned": {
+        "$field": "certification.date_signed"
+      }
+    }
+  }
+}

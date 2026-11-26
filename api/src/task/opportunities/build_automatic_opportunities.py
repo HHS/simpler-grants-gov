@@ -61,6 +61,7 @@ from src.form_schema.forms import (
     SF424b_v1_1,
     SF424c_v2_0,
     SF424d_v1_1,
+    SF424Generated_v4_0,
     SF424IndividualGenerated_v2_0,
     SF424MandatoryGenerated_v3_0,
     SF424Short_v3_0,
@@ -791,6 +792,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Application for Federal Assistance (SF-424)",
                 SF424_v4_0.form_id,
                 "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            ),
+            (
+                "E2E-SF424G",
+                "Application for Federal Assistance (SF-424) (Generated)",
+                SF424Generated_v4_0.form_id,
+                "0e79ba36-1deb-4806-aef5-9c99d4514310",
             ),
             (
                 "E2E-SF424SHORT",
