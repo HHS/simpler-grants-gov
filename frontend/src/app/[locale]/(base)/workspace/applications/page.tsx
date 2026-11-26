@@ -1,5 +1,4 @@
-import { UnauthorizedError } from "src/errors";
-import { fetchApplications } from "src/services/fetch/fetchers/userApplicationsFetcher";
+import { fetchApplicationsPage } from "src/services/fetch/fetchers/userApplicationsFetcher";
 import {
   ApplicationDetail,
   ApplicationStatus,
@@ -10,13 +9,12 @@ import { formatDate } from "src/utils/dateUtil";
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { PropsWithChildren } from "react";
-import { Alert, GridContainer } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
-import {
-  TableCellData,
-  TableWithResponsiveHeader,
-} from "src/components/core/TableWithResponsiveHeader";
+import { PaginatedTable } from "src/components/core/paginatedTable/PaginatedTable";
+import { parsePageParam } from "src/components/core/paginatedTable/paginatedTableUtils";
+import { TableCellData } from "src/components/core/TableWithResponsiveHeader";
 
 const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Applications");
@@ -52,71 +50,51 @@ const NoStartedApplications = () => {
   );
 };
 
-const ApplicationsErrorPage = () => {
-  const t = useTranslations("Applications");
-
-  return (
-    <ApplicationsPageWrapper>
-      <div className="margin-bottom-15">
-        <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
-          {t("errorMessage")}
-        </Alert>
-      </div>
-    </ApplicationsPageWrapper>
-  );
-};
-
-const transformTableRowData = (
-  userApplications: ApplicationDetail[],
+const transformApplicationRow = (
+  application: ApplicationDetail,
   t: TFn,
-) => {
-  return userApplications.map((application: ApplicationDetail) => {
-    return [
-      { cellData: formatDate(application.competition.closing_date) },
-      {
-        cellData:
-          application.application_status === ApplicationStatus.IN_PROGRESS
-            ? t("Applications.tableContents.draft")
-            : t("Applications.tableContents.submitted"),
-      },
-      {
-        cellData: (
-          <a href={`/workspace/applications/${application.application_id}`}>
-            {application.application_name}
+): TableCellData[] => {
+  return [
+    { cellData: formatDate(application.competition.closing_date) },
+    {
+      cellData:
+        application.application_status === ApplicationStatus.IN_PROGRESS
+          ? t("Applications.tableContents.draft")
+          : t("Applications.tableContents.submitted"),
+    },
+    {
+      cellData: (
+        <a href={`/workspace/applications/${application.application_id}`}>
+          {application.application_name}
+        </a>
+      ),
+    },
+    {
+      cellData: application.organization
+        ? application.organization.sam_gov_entity.legal_business_name
+        : t("Applications.tableContents.individual"),
+    },
+    {
+      cellData: (
+        <div>
+          <a
+            href={`/opportunity/${application.competition.opportunity.opportunity_id}`}
+          >
+            {application.competition.opportunity.opportunity_title}
           </a>
-        ),
-      },
-      {
-        cellData: application.organization
-          ? application.organization.sam_gov_entity.legal_business_name
-          : t("Applications.tableContents.individual"),
-      },
-      {
-        cellData: (
-          <div>
-            <a
-              href={`/opportunity/${application.competition.opportunity.opportunity_id}`}
-            >
-              {application.competition.opportunity.opportunity_title}
-            </a>
-            <div className="font-sans-3xs">
-              <span className="text-bold">
-                {t("Applications.tableContents.agency")}{" "}
-              </span>
-              {application.competition.opportunity.agency_name}
-            </div>
+          <div className="font-sans-3xs">
+            <span className="text-bold">
+              {t("Applications.tableContents.agency")}{" "}
+            </span>
+            {application.competition.opportunity.agency_name}
           </div>
-        ),
-      },
-    ];
-  });
+        </div>
+      ),
+    },
+  ];
 };
 
-const ApplicationsTable = ({
-  userApplications,
-}: {
-  userApplications: ApplicationDetail[];
-}) => {
+const ApplicationsTable = ({ page }: { page: number }) => {
   const t = useTranslations();
 
   const headerTitles: TableCellData[] = [
@@ -128,40 +106,38 @@ const ApplicationsTable = ({
   ];
 
   return (
-    <div>
-      <span className="font-sans-lg text-bold">
-        {t("Applications.numApplications", { num: userApplications.length })}
-      </span>
-
-      <TableWithResponsiveHeader
-        headerContent={headerTitles}
-        tableRowData={transformTableRowData(userApplications, t)}
-      />
-    </div>
+    <PaginatedTable<ApplicationDetail>
+      fetchPage={fetchApplicationsPage}
+      page={page}
+      headerContent={headerTitles}
+      mapRowData={(application) => transformApplicationRow(application, t)}
+      getRowKey={(application) => application.application_id}
+      errorMessage={t("Applications.errorMessage")}
+      emptyMessage={<NoStartedApplications />}
+      renderSummary={({ total_records }) => (
+        <span className="font-sans-lg text-bold">
+          {t("Applications.numApplications", { num: total_records })}
+        </span>
+      )}
+    />
   );
 };
 
-export default async function Applications({ params }: LocalizedPageProps) {
+type ApplicationsPageProps = LocalizedPageProps & {
+  searchParams?: Promise<{ page?: string | string[] }>;
+};
+
+export default async function Applications({
+  params,
+  searchParams,
+}: ApplicationsPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-
-  let userApplications: ApplicationDetail[];
-  try {
-    userApplications = await fetchApplications();
-  } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      throw error;
-    }
-    return <ApplicationsErrorPage />;
-  }
+  const { page } = searchParams ? await searchParams : {};
 
   return (
     <ApplicationsPageWrapper>
-      {userApplications?.length ? (
-        <ApplicationsTable userApplications={userApplications} />
-      ) : (
-        <NoStartedApplications />
-      )}
+      <ApplicationsTable page={parsePageParam(page)} />
     </ApplicationsPageWrapper>
   );
 }
