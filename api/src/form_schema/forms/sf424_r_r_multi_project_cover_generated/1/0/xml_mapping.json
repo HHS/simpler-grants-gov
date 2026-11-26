@@ -1,0 +1,423 @@
+{
+  "format": "xml-mapping",
+  "namespaces": {
+    "default": "http://apply.grants.gov/forms/RR_SF424_Multi_Project_Cover_4_0-V4.0",
+    "RR_SF424_Multi_Project_Cover_4_0": "http://apply.grants.gov/forms/RR_SF424_Multi_Project_Cover_4_0-V4.0",
+    "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+    "att": "http://apply.grants.gov/system/Attachments-V1.0",
+    "glob": "http://apply.grants.gov/system/Global-V1.0"
+  },
+  "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/RR_SF424_Multi_Project_Cover_4_0-V4.0.xsd",
+  "root": {
+    "RR_SF424_Multi_Project_Cover_4_0": {
+      "@RR_SF424_Multi_Project_Cover_4_0:FormVersion": {
+        "$const": "4.0"
+      },
+      "SubmissionTypeCode": {
+        "$field": "application.submission_type"
+      },
+      "SubmittedDate": {
+        "$field": "application.date_submitted"
+      },
+      "ApplicantID": {
+        "$field": "application.applicant_id"
+      },
+      "StateReceivedDate": {
+        "$field": "application.state.received_date"
+      },
+      "StateID": {
+        "$field": "application.state.application_id"
+      },
+      "FederalID": {
+        "$field": "application.federal_identifier"
+      },
+      "AgencyRoutingNumber": {
+        "$field": "application.agency_routing_number"
+      },
+      "GrantsTrackingNumber": {
+        "$field": "application.previous_tracking_id"
+      },
+      "ApplicantInfo": {
+        "OrganizationInfo": {
+          "OrganizationName": {
+            "$field": "applicant.organization.name"
+          },
+          "SAMUEI": {
+            "$field": "applicant.organization.uei"
+          },
+          "Department": {
+            "$field": "applicant.organization.department"
+          },
+          "Division": {
+            "$field": "applicant.organization.division"
+          },
+          "Address": {
+            "Street1": {
+              "$field": "applicant.organization.address.street1"
+            },
+            "Street2": {
+              "$field": "applicant.organization.address.street2"
+            },
+            "City": {
+              "$field": "applicant.organization.address.city"
+            },
+            "County": {
+              "$field": "applicant.organization.address.county"
+            },
+            "State": {
+              "$field": "applicant.organization.address.state"
+            },
+            "Province": {
+              "$field": "applicant.organization.address.province"
+            },
+            "ZipPostalCode": {
+              "$field": "applicant.organization.address.zip_code"
+            },
+            "Country": {
+              "$field": "applicant.organization.address.country"
+            }
+          }
+        },
+        "ContactPersonInfo": {
+          "Name": {
+            "PrefixName": {
+              "$field": "contacts.point_of_contact.name.prefix"
+            },
+            "FirstName": {
+              "$field": "contacts.point_of_contact.name.first_name"
+            },
+            "MiddleName": {
+              "$field": "contacts.point_of_contact.name.middle_name"
+            },
+            "LastName": {
+              "$field": "contacts.point_of_contact.name.last_name"
+            },
+            "SuffixName": {
+              "$field": "contacts.point_of_contact.name.suffix"
+            }
+          },
+          "Title": {
+            "$field": "contacts.point_of_contact.title"
+          },
+          "Address": {
+            "Street1": {
+              "$field": "contacts.point_of_contact.address.street1"
+            },
+            "Street2": {
+              "$field": "contacts.point_of_contact.address.street2"
+            },
+            "City": {
+              "$field": "contacts.point_of_contact.address.city"
+            },
+            "County": {
+              "$field": "contacts.point_of_contact.address.county"
+            },
+            "State": {
+              "$field": "contacts.point_of_contact.address.state"
+            },
+            "Province": {
+              "$field": "contacts.point_of_contact.address.province"
+            },
+            "ZipPostalCode": {
+              "$field": "contacts.point_of_contact.address.zip_code"
+            },
+            "Country": {
+              "$field": "contacts.point_of_contact.address.country"
+            }
+          },
+          "Phone": {
+            "$field": "contacts.point_of_contact.phone"
+          },
+          "Fax": {
+            "$field": "contacts.point_of_contact.fax"
+          },
+          "Email": {
+            "$field": "contacts.point_of_contact.email"
+          }
+        }
+      },
+      "EmployerID": {
+        "$field": "applicant.organization.ein"
+      },
+      "ApplicantType": {
+        "ApplicantTypeCode": {
+          "$field": "applicant.type.code"
+        },
+        "ApplicantTypeCodeOtherExplanation": {
+          "$field": "applicant.type.other_specify"
+        },
+        "SmallBusinessOrganizationType": {
+          "$when": {
+            "condition": {
+              "field": "applicant.type.code",
+              "operator": "equals",
+              "value": "R: Small Business"
+            },
+            "then": {
+              "isWomenOwned": {
+                "$transform": {
+                  "name": "boolean_to_yes_no",
+                  "value": {
+                    "$field": "applicant.type.small_business.women_owned"
+                  }
+                }
+              },
+              "isSociallyEconomicallyDisadvantaged": {
+                "$transform": {
+                  "name": "boolean_to_yes_no",
+                  "value": {
+                    "$field": "applicant.type.small_business.socially_disadvantaged"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ApplicationType": {
+        "ApplicationTypeCode": {
+          "$field": "application.application_type"
+        },
+        "RevisionCode": {
+          "$field": "application.revision.type"
+        },
+        "RevisionCodeOtherExplanation": {
+          "$field": "application.revision.other_specify"
+        },
+        "isOtherAgencySubmission": {
+          "$transform": {
+            "name": "boolean_to_yes_no",
+            "value": {
+              "$field": "application.other_agencies.submitted"
+            }
+          }
+        },
+        "OtherAgencySubmissionExplanation": {
+          "$field": "application.other_agencies.explanation"
+        }
+      },
+      "FederalAgencyName": {
+        "$field": "opportunity.agency_name"
+      },
+      "CFDANumber": {
+        "$field": "opportunity.assistance_listing.number"
+      },
+      "ActivityTitle": {
+        "$field": "opportunity.assistance_listing.title"
+      },
+      "ProjectTitle": {
+        "$field": "project.title"
+      },
+      "ProposedProjectPeriod": {
+        "ProposedStartDate": {
+          "$field": "project.timeline.start_date"
+        },
+        "ProposedEndDate": {
+          "$field": "project.timeline.end_date"
+        }
+      },
+      "CongressionalDistrict": {
+        "ApplicantCongressionalDistrict": {
+          "$field": "applicant.congressional_district"
+        }
+      },
+      "PDPIContactInfo": {
+        "Name": {
+          "PrefixName": {
+            "$field": "contacts.project_director.name.prefix"
+          },
+          "FirstName": {
+            "$field": "contacts.project_director.name.first_name"
+          },
+          "MiddleName": {
+            "$field": "contacts.project_director.name.middle_name"
+          },
+          "LastName": {
+            "$field": "contacts.project_director.name.last_name"
+          },
+          "SuffixName": {
+            "$field": "contacts.project_director.name.suffix"
+          }
+        },
+        "Title": {
+          "$field": "contacts.project_director.title"
+        },
+        "Address": {
+          "Street1": {
+            "$field": "contacts.project_director.address.street1"
+          },
+          "Street2": {
+            "$field": "contacts.project_director.address.street2"
+          },
+          "City": {
+            "$field": "contacts.project_director.address.city"
+          },
+          "County": {
+            "$field": "contacts.project_director.address.county"
+          },
+          "State": {
+            "$field": "contacts.project_director.address.state"
+          },
+          "Province": {
+            "$field": "contacts.project_director.address.province"
+          },
+          "ZipPostalCode": {
+            "$field": "contacts.project_director.address.zip_code"
+          },
+          "Country": {
+            "$field": "contacts.project_director.address.country"
+          }
+        },
+        "Phone": {
+          "$field": "contacts.project_director.phone"
+        },
+        "Fax": {
+          "$field": "contacts.project_director.fax"
+        },
+        "Email": {
+          "$field": "contacts.project_director.email"
+        },
+        "OrganizationName": {
+          "$field": "contacts.project_director.organization.name"
+        },
+        "Department": {
+          "$field": "contacts.project_director.organization.department"
+        },
+        "Division": {
+          "$field": "contacts.project_director.organization.division"
+        }
+      },
+      "EstimatedProjectFunding": {
+        "TotalEstimatedAmount": {
+          "$transform": {
+            "name": "currency_format",
+            "value": {
+              "$field": "budget.funding_sources.federal"
+            }
+          }
+        },
+        "TotalNonfedrequested": {
+          "$transform": {
+            "name": "currency_format",
+            "value": {
+              "$field": "budget.funding_sources.non_federal"
+            }
+          }
+        },
+        "TotalfedNonfedrequested": {
+          "$transform": {
+            "name": "currency_format",
+            "value": {
+              "$field": "budget.funding_sources.total"
+            }
+          }
+        },
+        "EstimatedProgramIncome": {
+          "$transform": {
+            "name": "currency_format",
+            "value": {
+              "$field": "budget.funding_sources.program_income"
+            }
+          }
+        }
+      },
+      "StateReview": {
+        "StateReviewCodeType": {
+          "$field": "application.state_review.status"
+        },
+        "StateReviewDate": {
+          "$field": "application.state_review.date"
+        }
+      },
+      "TrustAgree": {
+        "$transform": {
+          "name": "boolean_to_yes_no",
+          "value": {
+            "$field": "certification.agree"
+          }
+        }
+      },
+      "SFLLLAttachment": {
+        "$attachment": "attachments.lobbying_disclosure"
+      },
+      "AORInfo": {
+        "Name": {
+          "PrefixName": {
+            "$field": "contacts.authorized_representative.name.prefix"
+          },
+          "FirstName": {
+            "$field": "contacts.authorized_representative.name.first_name"
+          },
+          "MiddleName": {
+            "$field": "contacts.authorized_representative.name.middle_name"
+          },
+          "LastName": {
+            "$field": "contacts.authorized_representative.name.last_name"
+          },
+          "SuffixName": {
+            "$field": "contacts.authorized_representative.name.suffix"
+          }
+        },
+        "Title": {
+          "$field": "contacts.authorized_representative.title"
+        },
+        "Address": {
+          "Street1": {
+            "$field": "contacts.authorized_representative.address.street1"
+          },
+          "Street2": {
+            "$field": "contacts.authorized_representative.address.street2"
+          },
+          "City": {
+            "$field": "contacts.authorized_representative.address.city"
+          },
+          "County": {
+            "$field": "contacts.authorized_representative.address.county"
+          },
+          "State": {
+            "$field": "contacts.authorized_representative.address.state"
+          },
+          "Province": {
+            "$field": "contacts.authorized_representative.address.province"
+          },
+          "ZipPostalCode": {
+            "$field": "contacts.authorized_representative.address.zip_code"
+          },
+          "Country": {
+            "$field": "contacts.authorized_representative.address.country"
+          }
+        },
+        "Phone": {
+          "$field": "contacts.authorized_representative.phone"
+        },
+        "Fax": {
+          "$field": "contacts.authorized_representative.fax"
+        },
+        "Email": {
+          "$field": "contacts.authorized_representative.email"
+        },
+        "OrganizationName": {
+          "$field": "contacts.authorized_representative.organization.name"
+        },
+        "Department": {
+          "$field": "contacts.authorized_representative.organization.department"
+        },
+        "Division": {
+          "$field": "contacts.authorized_representative.organization.division"
+        }
+      },
+      "PreApplicationAttachment": {
+        "$attachment": "attachments.pre_application"
+      },
+      "CoverLetterAttachment": {
+        "$attachment": "attachments.cover_letter"
+      },
+      "AOR_Signature": {
+        "$field": "certification.signature"
+      },
+      "AOR_SignedDate": {
+        "$field": "certification.date_signed"
+      }
+    }
+  }
+}

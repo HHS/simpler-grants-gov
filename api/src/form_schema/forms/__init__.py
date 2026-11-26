@@ -35,6 +35,7 @@ from .sf424_generated import FORM as SF424Generated_v4_0
 from .sf424_individual_generated import FORM as SF424IndividualGenerated_v2_0
 from .sf424_mandatory_generated import FORM as SF424MandatoryGenerated_v3_0
 from .sf424_r_r_generated import FORM as SF424RRGenerated_v5_0
+from .sf424_r_r_multi_project_cover_generated import FORM as SF424RRMultiProjectCoverGenerated_v4_0
 from .sf424_short import SF424Short_v3_0
 from .sf424_short_generated import FORM as SF424ShortGenerated_v3_0
 from .sf424a import SF424a_v1_0
@@ -87,6 +88,7 @@ _ALL_FORMS: list[Form] = [
     SF424MandatoryGenerated_v3_0,
     SF424Generated_v4_0,
     SF424RRGenerated_v5_0,
+    SF424RRMultiProjectCoverGenerated_v4_0,
 ]
 
 # Forms generated from forms/specs that mirror a hand-written form still in _ALL_FORMS.
@@ -115,6 +117,7 @@ GENERATED_FORMS: list[Form] = [
     SF424MandatoryGenerated_v3_0,
     SF424Generated_v4_0,
     SF424RRGenerated_v5_0,
+    SF424RRMultiProjectCoverGenerated_v4_0,
 ]
 
 

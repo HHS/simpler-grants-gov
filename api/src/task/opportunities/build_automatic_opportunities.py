@@ -65,6 +65,7 @@ from src.form_schema.forms import (
     SF424IndividualGenerated_v2_0,
     SF424MandatoryGenerated_v3_0,
     SF424RRGenerated_v5_0,
+    SF424RRMultiProjectCoverGenerated_v4_0,
     SF424Short_v3_0,
     SF424ShortGenerated_v3_0,
     SFLLL_v2_0,
@@ -793,6 +794,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Application for Federal Assistance (SF 424 R&R) (Generated)",
                 SF424RRGenerated_v5_0.form_id,
                 "1000d30f-4679-4f47-851a-fb044fa63bd9",
+            ),
+            (
+                "E2E-RRMPCG",
+                "SF-424 R&R Multi-Project Cover (Generated)",
+                SF424RRMultiProjectCoverGenerated_v4_0.form_id,
+                "bcc362c8-9188-4362-b263-8b296a2a2b76",
             ),
             (
                 "E2E-SF424",

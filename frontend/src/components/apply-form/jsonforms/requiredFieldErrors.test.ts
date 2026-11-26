@@ -154,6 +154,7 @@ describe("an empty save of a generated form", () => {
     ["sf424_mandatory_generated", SF424_MANDATORY_REQUIRED_FIELD_ERRORS],
     ["sf424_generated", SF424_GENERATED_REQUIRED_FIELD_ERRORS],
     ["sf424_r_r_generated", SF424_R_R_REQUIRED_FIELD_ERRORS],
+    ["sf424_r_r_multi_project_cover_generated", []],
   ])(
     "shows the required field errors its e2e fixture expects (%s)",
     (form, fixture) => {
