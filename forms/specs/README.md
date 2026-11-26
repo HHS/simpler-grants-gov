@@ -17,16 +17,23 @@ Import another folder through its `#` alias (`#questions/*`, `#xsd/*`, ...), whi
 
 ## A form's files
 
-| File            | What it holds                                                                        |
-| --------------- | ------------------------------------------------------------------------------------ |
-| `index.tsp`     | Imports the others.                                                                  |
-| `form.tsp`      | The form model: its questions, and the decorators that identify and install it.      |
-| `layout.tsp`    | How an applicant is shown the form.                                                  |
-| `fragments.tsp` | Questions and models only this form uses, such as a person's profile. Optional.      |
-| `examples.tsp`  | The example values `@example` decorators in `form.tsp` and `fragments.tsp` refer to. |
-| `xsd.tsp`       | The form's XSD model, which maps each element from the form with `@Mapping.from`.    |
+| File                 | What it holds                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `index.tsp`          | Imports the others.                                                                  |
+| `form.tsp`           | The form model: its questions, and the decorators that identify and install it.      |
+| `layout.tsp`         | How an applicant is shown the form.                                                  |
+| `fragments.tsp`      | Questions and models only this form uses, such as a person's profile. Optional.      |
+| `examples.tsp`       | The example values `@example` decorators in `form.tsp` and `fragments.tsp` refer to. |
+| `xsd.tsp`            | The form's XSD model, which maps each element from the form with `@Mapping.from`.    |
+| `validation.test.ts` | Answers the compiled schema must accept or reject. Optional.                         |
 
 Files with several parts separate them with `// ===` banners, the main part first.
+
+`validation.test.ts` runs the form's examples and hand-edited answers through ajv
+(draft 2020-12, with formats) via `loadFormValidator()` in
+[`parity/harness/validate.ts`](../parity/harness/validate.ts). It covers the JSON schema
+only: no rendering, API rules, signing, or submission. Run `npm run compile` first, then
+`npx vitest run specs`.
 
 ## Adding a form
 

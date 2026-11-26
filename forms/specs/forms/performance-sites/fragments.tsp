@@ -3,6 +3,7 @@ import "simpler-forms";
 import "#forms/index.tsp";
 import "#questions/organization/index.tsp";
 import "#questions/types/address.tsp";
+import "#questions/types/congressional-district.tsp";
 
 using SimplerForms;
 
@@ -62,8 +63,5 @@ model PrimarySite {
 // ANSWER TYPES
 // =============================================================================
 
-/** Enter the congressional district as two state characters, a hyphen and three characters. */
-@minLength(6)
-@maxLength(6)
-@pattern("^[A-Z0-9]{2}-[A-Za-z0-9]{3}$")
-scalar CongressionalDistrict extends string;
+// Name the bank question here so the synced JSON Schema keeps its `CongressionalDistrict` def.
+scalar CongressionalDistrict extends Questions.Types.CongressionalDistrictCode;

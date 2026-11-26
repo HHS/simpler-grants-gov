@@ -1,4 +1,6 @@
 import type { FormDiff } from "../harness/model.ts";
+import { DIFF as individual } from "./application-for-federal-domestic-assistance-individual.ts";
+import { DIFF as short } from "./application-for-federal-domestic-assistance-short-organizational.ts";
 import { DIFF as budgetNarrative } from "./budget-narrative-attachment-form.ts";
 import { DIFF as edAbstract } from "./ed-abstract-form.ts";
 import { DIFF as epaKeyContacts } from "./epa-key-contacts.ts";
@@ -14,6 +16,10 @@ import { DIFF as projectNarrative } from "./project-narrative-attachment-form.ts
 import { DIFF as performanceSites } from "./project-performance-site-location-s.ts";
 import { DIFF as rrKeyPersonExpanded } from "./research-and-related-senior-key-person-profile-expanded.ts";
 import { DIFF as rrKeyPerson } from "./research-related-senior-key-person-profile.ts";
+import { DIFF as researchMultiProjectCover } from "./sf-424-r-r-multi-project-cover.ts";
+import { DIFF as mandatory } from "./sf424-mandatory-form.ts";
+import { DIFF as researchCover } from "./sf424-r-r.ts";
+import { DIFF as regular } from "./sf424.ts";
 
 /** Every form the suite checks. A plan with a `spec_id` must be listed here. */
 export const DIFFS: FormDiff[] = [
@@ -32,4 +38,10 @@ export const DIFFS: FormDiff[] = [
   nsfReviewers,
   projectAbstractSummary,
   nasaPiAndAor,
+  individual,
+  mandatory,
+  regular,
+  short,
+  researchCover,
+  researchMultiProjectCover,
 ];

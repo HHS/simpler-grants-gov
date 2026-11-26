@@ -34,4 +34,19 @@ describe("uiSchemaFields", () => {
       ],
     ]);
   });
+
+  it("prefers a control's own description to the schema's help", () => {
+    const ui = {
+      type: "Control",
+      scope: "#/properties/agree",
+      label: "I agree",
+      options: { description: "Check to agree." },
+    };
+    const schema: Fields = new Map([
+      ["agree", { help: "Check to select.", rules: {} }],
+    ]);
+    expect(uiSchemaFields(ui, schema).get("agree")?.help).toBe(
+      "Check to agree.",
+    );
+  });
 });

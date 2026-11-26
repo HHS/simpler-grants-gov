@@ -34,3 +34,12 @@ scalar PersonFaxNumber extends Questions.Types.PhoneNumber;
 @Meta.tag(Catalogue.Tag.person, Catalogue.Tag.email)
 @UI.label("Email")
 scalar PersonEmail extends Questions.Types.EmailAddress;
+
+// `globLib:OrganizationNameDataType`, asked about a person rather than the applicant.
+/** Enter the organization the person is affiliated with. */
+@Meta.question(#{ id: "person/organizational-affiliation" })
+@Meta.tag(Catalogue.Tag.person, Catalogue.Tag.organization)
+@UI.label("Organizational Affiliation")
+@minLength(1)
+@maxLength(60)
+scalar PersonOrganizationalAffiliation extends string;
