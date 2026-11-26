@@ -2073,4 +2073,9 @@ export const messages = {
     yes: "Yes",
     no: "No",
   },
+  PaginatedTable: {
+    loading: "Loading table data...",
+    lastPageNotice:
+      "The results have changed since this link was created. You’re now viewing the last available page.",
+  },
 };
