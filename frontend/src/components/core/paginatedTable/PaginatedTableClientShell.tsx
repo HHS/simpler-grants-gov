@@ -59,11 +59,17 @@ export function PaginatedTableClientShell({
   }, [syncUrlToPage, page, pathname]);
 
   // after the user moves to a new page, bring focus (and scroll) to the top of the table
-  // so keyboard and screen reader users are not left at the bottom pagination controls
+  // so keyboard and screen reader users are not left at the bottom pagination controls.
+  // focus() alone does not scroll when part of the (tall) table is already on screen,
+  // so scroll explicitly; the scroll margin keeps the top clear of the sticky header.
   useEffect(() => {
     if (userNavigatedRef.current) {
       userNavigatedRef.current = false;
-      containerRef.current?.focus();
+      const container = containerRef.current;
+      if (container) {
+        container.focus({ preventScroll: true });
+        container.scrollIntoView({ block: "start" });
+      }
     }
   }, [page]);
 
@@ -89,7 +95,7 @@ export function PaginatedTableClientShell({
     <div
       ref={containerRef}
       tabIndex={-1}
-      className="paginated-table outline-0"
+      className="paginated-table outline-0 seg-scroll-margin-top--header"
       data-testid="paginated-table"
       aria-busy={isLoading}
     >

@@ -9,6 +9,9 @@ const mockUsePathname = jest.fn();
 const mockUseSearchParams = jest.fn();
 const mockIsPending = jest.fn();
 const mockStartTransition = jest.fn((callback: () => void) => callback());
+// jsdom does not implement scrollIntoView
+const mockScrollIntoView = jest.fn();
+Element.prototype.scrollIntoView = mockScrollIntoView;
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
@@ -171,6 +174,7 @@ describe("PaginatedTableClientShell", () => {
       );
 
       expect(screen.getByTestId("paginated-table")).toHaveFocus();
+      expect(mockScrollIntoView).toHaveBeenCalledWith({ block: "start" });
     });
 
     it("does not steal focus when the page changes without user navigation", () => {
@@ -181,6 +185,7 @@ describe("PaginatedTableClientShell", () => {
         </PaginatedTableClientShell>,
       );
       expect(screen.getByTestId("paginated-table")).not.toHaveFocus();
+      expect(mockScrollIntoView).not.toHaveBeenCalled();
     });
   });
 

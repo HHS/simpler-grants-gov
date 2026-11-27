@@ -77,10 +77,19 @@ $spinner-size: units(4);
   }
 }
 
+// covers the whole table; the spinner sticks to the middle of the viewport so it stays
+// visible when the page change was started from the pagination below a long table
 .paginated-table__loading-indicator {
   position: absolute;
-  top: units(6);
-  left: 50%;
-  transform: translateX(-50%);
+  inset: 0;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  > * {
+    position: sticky;
+    top: 50vh;
+    margin-top: units(6);
+  }
 }
