@@ -48,7 +48,7 @@ import { getNumberOfOpportunitySearchResults } from "tests/e2e/utils/search/sear
 const { DISCOVERY, FULL_REGRESSION } = VALID_TAGS;
 
 // KNOWN GAP: the Opportunity Detail route is rendered on the server and has no loading state (no
-// loading.tsx or Suspense fallback), so there is no loading indicator to appear while data is
+// Suspense fallback), so there is no loading indicator to appear while data is
 // fetched. The AC "a loading indicator should appear while data is being fetched" can't be
 // asserted yet, so it is recorded as a "known-issue" annotation instead of failing the test.
 // The "disappears once data loads" part is checked by expectOpportunityDetailLoaded.
@@ -59,7 +59,7 @@ function recordMissingLoadingIndicator(testInfo: TestInfo): void {
     type: "known-issue",
     description:
       "Opportunity Detail page has no loading indicator to appear while data is fetched " +
-      "(no loading.tsx or Suspense fallback on the route)",
+      "(no Suspense fallback on the route)",
   });
 }
 
