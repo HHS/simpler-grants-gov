@@ -22,8 +22,10 @@ import {
   type SortCase,
 } from "tests/e2e/utils/search/search-sort-utils";
 import {
+  clickPaginationPageNumber,
   fillSearchInputAndSubmit,
   getNumberOfOpportunitySearchResults,
+  getPaginationPageButton,
   getSearchInput,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/search-utils";
@@ -60,17 +62,6 @@ export function getNavigationSortCase(): SortCase {
 }
 
 /**
- * The page 2 button, matched on its text (the page number). Its aria-label is "Page 2", except
- * when there are exactly 2 pages: the last page's label is "Last page, page 2". That is why this
- * doesn't use clickPaginationPageNumber or clickPaginationPageIfPresent, which match "Page 2".
- */
-const getPage2Button = (page: Page) =>
-  page
-    .locator('button[data-testid="pagination-page-number"]')
-    .filter({ hasText: /^2$/ })
-    .first();
-
-/**
  * Goes to page 2 of the current results. Expects the results to have more than one page, and
  * says how many there were if not.
  */
@@ -82,13 +73,12 @@ async function goToPage2(page: Page): Promise<void> {
       `at ${page.url()}. If this starts failing, the data no longer has enough opportunities`,
   ).toBeGreaterThan(SEARCH_PAGE_SIZE);
 
-  const page2Button = getPage2Button(page);
+  // Wait for the button rather than using clickPaginationPageIfPresent, which checks once
   await expect(
-    page2Button,
+    getPaginationPageButton(page, 2).first(),
     `Expected a page 2 button for ${total} results at ${page.url()}`,
   ).toBeVisible({ timeout: 15000 });
-  await page2Button.click();
-  await waitForURLContainsQueryParamValue(page, "page", "2");
+  await clickPaginationPageNumber(page, 2);
 }
 
 /**
@@ -213,13 +203,7 @@ export async function rapidlyClickResultTitle(
       link.dispatchEvent("click", undefined, { timeout: 3000 }),
     ),
   );
-  // Not page.waitForURL: it waits for the navigation's load event, and each extra click starts
-  // another navigation that supersedes the previous one. Firefox reports the superseded
-  // navigation as NS_BINDING_ABORTED and waitForURL throws; Chromium does not. toHaveURL only
-  // polls the current URL, so it ignores aborted navigations.
-  await expect(page).toHaveURL(DETAIL_URL_PATTERN, {
-    timeout: NAVIGATION_TIMEOUT,
-  });
+  await page.waitForURL(DETAIL_URL_PATTERN, { timeout: NAVIGATION_TIMEOUT });
   await expectOpportunityDetailPage(page, selected);
 
   return {
@@ -289,7 +273,6 @@ export async function gotoOpportunityDetailByLink(
   const response = await page.goto(new URL(href, baseUrl).toString(), {
     timeout: NAVIGATION_TIMEOUT,
   });
-  expect(response, `No response for ${href}`).not.toBeNull();
   expect(
     response?.status(),
     `Direct navigation to ${href} should not return an error`,

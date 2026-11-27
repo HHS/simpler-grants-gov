@@ -162,13 +162,22 @@ export async function verifyOpportunityInSearchByTitleAndNumber(
   await expect(matchingSearchRow).toContainText(expectedStatus);
 }
 
+/**
+ * The pagination button for a page, matched on its text (the page number). Its aria-label is
+ * "Page N", except for the last page, whose label is "Last page, page N", so matching on the
+ * label misses the last page. There are two paginations on the page, so use .first().
+ */
+export function getPaginationPageButton(page: Page, pageNumber: number) {
+  return page
+    .locator('button[data-testid="pagination-page-number"]')
+    .filter({ hasText: new RegExp(`^${pageNumber}$`) });
+}
+
 export async function clickPaginationPageNumber(
   page: Page,
   pageNumber: number,
 ) {
-  const paginationButton = page.locator(
-    `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
-  );
+  const paginationButton = getPaginationPageButton(page, pageNumber);
   await paginationButton.first().click();
   await waitForURLContainsQueryParamValue(page, "page", pageNumber.toString());
 }
@@ -199,9 +208,7 @@ export async function clickPaginationPageIfPresent(
   pageNumber: number,
   callerLabel?: string,
 ): Promise<boolean> {
-  const paginationButton = page.locator(
-    `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
-  );
+  const paginationButton = getPaginationPageButton(page, pageNumber);
   const isPresent = await paginationButton
     .first()
     .isVisible()
