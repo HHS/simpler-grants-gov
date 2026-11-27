@@ -1902,6 +1902,12 @@ export const messages = {
     wordsError:
       "{num, plural, =1 {1 word over limit} other {# words over limit}}",
   },
+  PaginatedTable: {
+    loading: "Loading...",
+    loadingPage: "Loading page {page}",
+    lastPageNotice:
+      "The results have changed since this link was created. You’re now viewing the last available page.",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:

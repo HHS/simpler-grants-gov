@@ -64,3 +64,32 @@ $spinner-size: units(4);
     pointer-events: none;
   }
 }
+
+// see src/components/core/paginatedTable
+.paginated-table__content {
+  position: relative;
+  transition: opacity 0.2s ease-in-out;
+
+  &--loading {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+// covers the whole table; the spinner sticks to the middle of the viewport so it stays
+// visible when the page change was started from the pagination below a long table
+.paginated-table__loading-indicator {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  > * {
+    position: sticky;
+    top: 50vh;
+    margin-top: units(6);
+  }
+}
