@@ -209,11 +209,11 @@ export async function rapidlyClickResultTitle(
   // rather than waitForNavigation (listening to events), as navigation events can be cancelled
   // by the browser during rapid clicks, but the page will still navigate successfully eventually.
   await page.waitForFunction(
-    (pattern: string) => {
-      const urlPattern = new RegExp(pattern);
-      return urlPattern.test(window.location.href);
+    ({ source, flags }) => {
+      const urlPattern = new RegExp(source, flags);
+      return urlPattern.test(window.location.pathname);
     },
-    DETAIL_URL_PATTERN.toString(),
+    { source: DETAIL_URL_PATTERN.source, flags: DETAIL_URL_PATTERN.flags },
     { timeout: NAVIGATION_TIMEOUT },
   );
 
