@@ -197,13 +197,25 @@ export async function rapidlyClickResultTitle(
   const link = getResultTitleLinks(page).nth(index);
   const historyBefore = await getHistoryLength(page);
 
+  // Set up navigation listener before dispatching clicks to handle rapid click race conditions.
+  // waitForNavigation fires when ANY navigation completes; most rapid clicks will be ignored
+  // by the browser or cancelled by subsequent clicks, but eventually one will succeed.
+  const navigationPromise = page.waitForNavigation({
+    waitUntil: "load",
+    timeout: NAVIGATION_TIMEOUT,
+  });
+
   // Clicks sent after the page starts navigating can fail; that is expected.
   await Promise.allSettled(
     Array.from({ length: clicks }, () =>
       link.dispatchEvent("click", undefined, { timeout: 3000 }),
     ),
   );
-  await page.waitForURL(DETAIL_URL_PATTERN, { timeout: NAVIGATION_TIMEOUT });
+
+  await navigationPromise;
+
+  // Verify the page loaded with the correct URL pattern
+  await page.waitForURL(DETAIL_URL_PATTERN, { timeout: 5000 });
   await expectOpportunityDetailPage(page, selected);
 
   return {
